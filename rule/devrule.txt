@@ -1,0 +1,102 @@
+##############################################################################
+Standar penamaan file
+##############################################################################
+
+Controller
+------------------------------------
+- Awalan huruf besar
+- contoh : Manufacturing.php, Colororder.php
+- Controller berada di dalam folder sesuai dengan main menunya
+
+Model
+------------------------------------
+- Prefix : M_
+- jika terdiri dari 1 kata huruf kecil
+- contoh : M_menu.php
+- jika terdiri dari lebih dari 1 kata, kata pertama huruf kecil selanjutnya awalanya huruf besar
+- contoh : M_colorOrder.php
+
+View
+------------------------------------
+- Prefix : v_
+- jika terdiri dari 1 kata huruf kecil
+- contoh : v_home.php
+- jika terdiri dari lebih dari 1 kata, kata pertama huruf kecil selanjutnya awalanya huruf besar
+- contoh : v_colorOrder.php
+- untuk add/new form/create/tambah penamaan menggunakan Suffix : _add
+- contoh : v_colorOrder_add.php
+- View berada di dalam folder sesuai dengan main menunya
+
+
+
+##############################################################################
+Table
+##############################################################################
+
+Table : main_menu_sub_status
+------------------------------------
+jenis status : draft -> Untuk default transaksi setelah disave dan belum ada efek apa2 ke table lain
+jenis status : ready -> Transaksi setelah di Generate dan memiliki efek thd table lain
+jenis status : done -> Untuk transaksi done selesai
+jenis status : cancel -> Untuk transaksi batal
+
+Table : log_history
+------------------------------------
+datelog : Datetime pada waktu event terjadi
+main_menu_sub_kode : Kode main menu sub
+kode : Kode transaksi
+jenis_log : create -> event pada waktu dokumen pertama kali dibuat
+			edit -> event pada waktu dokumen diedit
+			ready -> event pada waktu dokumen ready
+			done -> event pada waktu dokumen selesai
+			cancel -> event pada waktu dokumen batal
+
+Table : penerimaan_barang
+------------------------------------
+status : 	draft -> Untuk default transaksi setelah disave dan belum ada efek apa2 ke table lain
+			ready -> Status penerimaan barang jika semua barangnya ready
+ 			done -> Jika penerimaan barang sudah selesai
+ 			cancel -> Untuk transaksi batal
+
+
+
+##############################################################################
+HARDCODE
+##############################################################################
+
+Controller
+------------------------------------
+Function edit
+	- Penamaan variable untuk get data harus : $data["list"]
+	- Contoh : $data["list"]=$this->m_mo->get_data_by_code($kode);
+Function nama_departemen()
+	- Penamaan variable untuk id departemen harus : $data['id_dept']
+	- Contoh : public function Tricot()
+				{
+					$data['id_dept']='TRI';
+					$this->load->view('manufacturing/v_mo', $data);
+				}
+
+Field Table
+------------------------------------
+	- Nama field untuk id departemen di table harus : dept_id
+
+
+
+##############################################################################
+Penaaman 
+##############################################################################
+
+- JIka tidak ada record/ data pada table maka tulisan nya 'Tidak Ada Data' 
+
+
+
+
+
+##############################################################################
+Pencatatan ke tbl Histiry LOG 
+##############################################################################
+
+jika view nya sama seperti MO, warehouse penerimaan/pengiriman itu pakai $this->_module->gen_history_deptid();
+
+jika viwnya beda beda maka  seperti procurement, dll itu pakai $this->_module->gen_history();
