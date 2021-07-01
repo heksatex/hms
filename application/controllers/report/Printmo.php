@@ -31,7 +31,10 @@ class Printmo extends MY_Controller
 		$head    = $this->m_printMO->get_mrp_production_by_kode($mo)->row_array();
 
 
-        if($dept_id == 'WRD'){ // if departemen WRD
+        if($dept_id == 'TWS'){
+            
+
+        }else if($dept_id == 'WRD'){ // if departemen WRD
 
     	   	$nama_dept = strtoupper($dept['nama']);
     		$pdf = new PDF_Code128('l','mm','A4');
