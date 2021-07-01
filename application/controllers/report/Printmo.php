@@ -32,7 +32,10 @@ class Printmo extends MY_Controller
 
 
         if($dept_id == 'TWS'){
-            
+            $nama_dept = strtoupper($dept['nama']);
+    		$pdf = new PDF_Code128('l','mm','A4');
+
+            $pdf->Output();
 
         }else if($dept_id == 'WRD'){ // if departemen WRD
 
