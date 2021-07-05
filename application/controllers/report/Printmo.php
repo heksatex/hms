@@ -115,7 +115,7 @@ class Printmo extends MY_Controller
             $setx_ket = 155;
          
             $capt_no = 'No';
-            $capt_tgl= 'Tgl. Jam';
+            $capt_tgl= 'Tgl.Jam';
             $capt_lot= 'Lot';
             $capt_qty= 'Qty';
             $capt_ket= 'Keterangan';
