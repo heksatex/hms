@@ -31,9 +31,139 @@ class Printmo extends MY_Controller
 		$head    = $this->m_printMO->get_mrp_production_by_kode($mo)->row_array();
 
 
-        if($dept_id == 'TWS'){
+        if($dept_id == 'TWS'){ // if departemen TWS
+
             $nama_dept = strtoupper($dept['nama']);
-    		$pdf = new PDF_Code128('l','mm','A4');
+            $pdf = new PDF_Code128('P','mm','A4');
+
+            $pdf->SetMargins(0,0,0);
+            $pdf->SetAutoPageBreak(False);
+            $pdf->AddPage();
+
+            $pdf->setTitle($nama_dept);
+            $pdf->SetFont('Arial','B',10,'C');
+            $pdf->Cell(0,23,'LAPORAN HARIAN '.$nama_dept,0,0,'C');
+
+            $pdf->SetFont('Arial','',15,'C');
+            $pdf->setXY(10,8);
+            $pdf->Multicell(30,8,$head['nama_mesin'],1,'C');
+
+            $pdf->setXY(150,8);
+            $pdf->Multicell(50,8,$head['kode'],1,'C');
+
+            $pdf->SetFont('Arial','',8,'C');
+            $pdf->setXY(150,16);    
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(50,4, 'Tgl.Cetak : '. $tgl_now, 0,'R');
+
+
+            $pdf->SetFont('Arial','B',9,'C');
+
+            // caption kiri
+            $pdf->setXY(10,20);
+            $pdf->Multicell(15,4,'Tgl.MO ',0,'L');
+
+            $pdf->setXY(10,25);
+            $pdf->Multicell(15,4,'Origin ',0,'L');
+
+            $pdf->setXY(24, 20);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(24, 25);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            
+            // isi kiri
+            $pdf->SetFont('Arial','',8,'C');
+
+            $pdf->setXY(25,20);
+            $pdf->Multicell(40,4,tgl_indo(date('d-m-Y H:i:s',strtotime($head['tanggal']))),0,'L');
+
+            $pdf->setXY(25,25);
+            $pdf->Multicell(40,4,$head['origin'],0,'L');
+
+
+            $pdf->SetFont('Arial','B',9,'C');
+
+            // caption tengah
+            $pdf->setXY(80,20);
+            $pdf->Multicell(15,4,'Product ',0,'L');
+
+            $pdf->setXY(80,25);
+            $pdf->Multicell(15,4,'Qty ',0,'L');
+
+
+            $pdf->setXY(94, 20);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(94, 25);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+    
+            // isi tengah
+            $pdf->SetFont('Arial','',9,'C');
+
+            $pdf->setXY(95,20);
+            $pdf->Multicell(40,4,$head['nama_produk'],0,'L');
+
+            $pdf->setXY(95,25);
+            $pdf->Multicell(40,4,$head['qty'].' '.$head['uom'],0,'L');
+
+            // body
+            $pdf->SetFont('Arial','B',9,'C');
+
+            $setx_no  = 10;
+            $setx_tgl = 25;
+            $setx_lot = 70;
+            $setx_qty = 115;
+            $setx_ket = 155;
+         
+            $capt_no = 'No';
+            $capt_tgl= 'Tgl. Jam';
+            $capt_lot= 'Lot';
+            $capt_qty= 'Qty';
+            $capt_ket= 'Keterangan';
+
+
+            $sety_header = 30;
+
+            for($i=0; $i<3; $i++){
+
+                    // header table
+                    $pdf->setXY(10, $sety_header);
+                    $pdf->Multicell(60, 5, 'SHIFT OPERATOR', 1, 'L');
+                    $pdf->setXY(70, $sety_header);
+                    $pdf->Multicell(130, 5, '', 1, 'L');
+
+                    $capt_no = 'No';
+                    $capt_tgl= 'Tgl. Jam';
+                    $capt_lot= 'Lot';
+                    $capt_qty= 'Qty';
+                    $capt_ket= 'Keterangan';
+
+                    for($a=0; $a<=5; $a++){
+
+                        if($a>0){
+                            // set caption
+                            $capt_no  = '';
+                            $capt_tgl = '';
+                            $capt_lot = '';
+                            $capt_qty = '';
+                            $capt_ket = '';
+                        }
+                        $pdf->setXY($setx_no,$sety_header+5);
+                        $pdf->Multicell(15, 5, $capt_no, 1, 'L');
+                        $pdf->setXY($setx_tgl,$sety_header+5);
+                        $pdf->Multicell(45, 5, $capt_tgl, 1, 'L');
+                        $pdf->setXY($setx_lot,$sety_header+5);
+                        $pdf->Multicell(45, 5, $capt_lot, 1, 'L');
+                        $pdf->setXY($setx_qty,$sety_header+5);
+                        $pdf->Multicell(40, 5, $capt_qty, 1, 'L');
+                        $pdf->setXY($setx_ket,$sety_header+5);
+                        $pdf->Multicell(45, 5, $capt_ket, 1, 'L');
+                        $sety_header = $sety_header+5;
+                    }
+                    $sety_header = $sety_header+10;
+
+            }
+
+
 
             $pdf->Output();
 
