@@ -148,15 +148,15 @@ class Printmo extends MY_Controller
                             $capt_ket = '';
                         }
                         $pdf->setXY($setx_no,$sety_header+5);
-                        $pdf->Multicell(15, 5, $capt_no, 1, 'L');
+                        $pdf->Multicell(15, 5, $capt_no, 1, 'C');
                         $pdf->setXY($setx_tgl,$sety_header+5);
-                        $pdf->Multicell(45, 5, $capt_tgl, 1, 'L');
+                        $pdf->Multicell(45, 5, $capt_tgl, 1, 'C');
                         $pdf->setXY($setx_lot,$sety_header+5);
-                        $pdf->Multicell(45, 5, $capt_lot, 1, 'L');
+                        $pdf->Multicell(45, 5, $capt_lot, 1, 'C');
                         $pdf->setXY($setx_qty,$sety_header+5);
-                        $pdf->Multicell(40, 5, $capt_qty, 1, 'L');
+                        $pdf->Multicell(40, 5, $capt_qty, 1, 'C');
                         $pdf->setXY($setx_ket,$sety_header+5);
-                        $pdf->Multicell(45, 5, $capt_ket, 1, 'L');
+                        $pdf->Multicell(45, 5, $capt_ket, 1, 'C');
                         $sety_header = $sety_header+5;
                     }
                     $sety_header = $sety_header+10;
