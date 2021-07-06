@@ -2951,41 +2951,7 @@ class MO extends MY_Controller
         echo json_encode($callback);
     }
 
-
-    public function print_lot()
-    {
-
-        $lot   = $this->input->get('lot');    
-        $grade = $this->input->get('grade');    
-
-        $pdf=new PDF_Code128('l','mm','legal');
-        //$pdf=new PDF_Code128('l','cm',array(178,102));
-        $pdf->AddPage();
-
-        $pdf->SetFont('Arial','B',25,'C');
-        $pdf->Cell(100,5,$lot,0,0,'R');
-
-        $pdf->SetFont('Arial','B',40);
-        $pdf->Cell(0,3,$grade,0,1);//grade
-
-        $pdf->Code128(30,18,$lot,110,23,'C');//barcode 1       
-
-        $pdf->Cell(150,30,'','B',120,'C');//garis tengah
-
-        $pdf->SetFont('Arial','B',25,'C');
-        $pdf->Cell(100,30,$lot,0,0,'R');
-
-        $pdf->SetFont('Arial','B',40);
-        $pdf->Cell(0,27,$grade,0,1);//grade
-
-        $pdf->Code128(30,65,$lot,110,23,'C');//barcode 2
-
-        $pdf->Line(170,3,170,100);//vertical
-      
-        $pdf->Output();
-    }
-
-
+  
     public function print_barcode()
     {
         $data_arr  = $this->input->get('checkboxBarcode');  
