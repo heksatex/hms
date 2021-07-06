@@ -659,5 +659,16 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT origin_prod FROM pengiriman_barang_items WHERE kode = '$kode' AND kode_produk = '$kode_produk' ");
 	}
 
+	public function get_data_fg_hasil_by_kode($kode,$lot)
+	{
+		return $this->db->query("SELECT * FROM mrp_production_fg_hasil where kode = '$kode' AND lot = '$lot' ");
+	}
+
+	public function get_mesin_by_mo($kode)
+	{
+		return $this->db->query("SELECT a.mc_id, b.nama_mesin FROM mrp_production a 
+								INNER JOIN mesin b ON a.mc_id = b.mc_id
+								WHERE a.kode = '$kode' ");
+	}
 
 }

@@ -2951,45 +2951,112 @@ class MO extends MY_Controller
         echo json_encode($callback);
     }
 
-
-    public function print_lot()
+  
+    public function print_barcode()
     {
+        $data_arr  = $this->input->get('checkboxBarcode');  
+        $count     = $this->input->get('countchek'); 
+        $kode      = $this->input->get('kode');
+        $dept_id   = $this->input->get('dept_id');
 
-        $lot   = $this->input->get('lot');    
-        $grade = $this->input->get('grade');    
+        if($dept_id == 'TWS'){
+            $this->barcode_tws($kode,$data_arr,$count);
 
-        $pdf=new PDF_Code128('l','mm','legal');
-        //$pdf=new PDF_Code128('l','cm',array(178,102));
-        $pdf->AddPage();
+        }else if($dept_id == 'WRD'){
+            $this->barcode_wrd($data_arr,$count);
 
-        $pdf->SetFont('Arial','B',25,'C');
-        $pdf->Cell(100,5,$lot,0,0,'R');
+        }else if($dept_id == 'TRI'){
+            $this->barcode_tri($data_arr,$count);
 
-        $pdf->SetFont('Arial','B',40);
-        $pdf->Cell(0,3,$grade,0,1);//grade
-
-        $pdf->Code128(30,18,$lot,110,23,'C');//barcode 1       
-
-        $pdf->Cell(150,30,'','B',120,'C');//garis tengah
-
-        $pdf->SetFont('Arial','B',25,'C');
-        $pdf->Cell(100,30,$lot,0,0,'R');
-
-        $pdf->SetFont('Arial','B',40);
-        $pdf->Cell(0,27,$grade,0,1);//grade
-
-        $pdf->Code128(30,65,$lot,110,23,'C');//barcode 2
-
-        $pdf->Line(170,3,170,100);//vertical
-      
-        $pdf->Output();
+        }else{// belum ada barcode
+            $this->barcode_empty();
+        }
     }
 
 
-    public function print_barcode_beam()
+    function barcode_empty()
     {
-        $data_arr  = $this->input->get('checkboxKnitting');  
-        $count     = $this->input->get('countchek');  
+        echo 'Design Barcode Belum dibuat untuk Departemen tersebut :)';
+    }
+
+
+    function barcode_tws($kode,$data_arr,$count)
+    {
+    
+        $pdf = new PDF_Code128('L','mm',array(80,60));
+
+        $pdf->SetMargins(0,0,0);
+        $pdf->SetAutoPageBreak(False);
+        $pdf->AddPage();
+        $pdf->SetFont('Arial','B',15,'C');
+
+        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
+        $row   = explode("|^,", $data_arr2);
+
+        $loop          = 1;
+        $heightNama    = 0; 
+        $enter         = 1;
+        $enter_barcode = 13;
+
+        // get mesin by kode
+        $get_mc = $this->m_mo->get_mesin_by_mo($kode)->row_array();
+        $mesin  = $get_mc['nama_mesin'];
+
+
+        foreach ($row as $val ) {
+            //$pdf->Cell($width,$height,$val,0,0,'R');
+            //$pdf->Cell($width,$height,'tes',0,0,'R');
+
+            if($loop == 2){
+                $pdf->AddPage();
+                $loop = 1;
+                $heightNama = 0; 
+                $enter         = 1;
+                $enter_barcode = 13;
+            }
+
+            $items    = explode("^^",$val);
+            $barcode  = $items[0];
+
+            //get produk,qty by kode
+            $get = $this->m_mo->get_data_fg_hasil_by_kode($kode,$barcode)->row_array();
+
+            $nama_produk = $get['nama_produk'];
+            $qty         = $get['qty'];
+            $uom         = $get['uom'];
+            $tgl         = $get['create_date'];
+
+            $pdf->setXY(3,3+$heightNama);
+            $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
+
+            $pdf->setXY(3,5+$heightNama+10);
+            $pdf->Multicell(74,5,"Qty : ".$qty." ".$uom,0,'L');
+
+            $pdf->setXY(3,5+$heightNama+15);
+            $pdf->Multicell(74,5,"MC : ".$mesin,0,'L');// MC TWS
+
+            $pdf->setXY(3,5+$heightNama+20);
+            $pdf->Multicell(74,5,"Tgl : ".$tgl,0,'L');// Tgl buat
+
+            $pdf->Code128(5,30,$barcode,70,20,'C',0,1); // barcode
+
+             $pdf->setXY(0,5+$heightNama+45);
+            $pdf->Multicell(80,5,$barcode,0,'C');// barcode
+
+            $heightNama    = $heightNama + 40;
+            $enter_barcode = $enter_barcode + 40;
+            
+            $loop++;
+        }
+
+
+        $pdf->output();
+
+    }
+
+
+    function barcode_wrd($data_arr,$count)
+    {
         
         $pdf = new PDF_Code128('p','mm',array(60,80));
 
@@ -3049,16 +3116,12 @@ class MO extends MY_Controller
 
 
 
-    public function print_barcode_knitting()
+    function barcode_tri($data_arr,$count)
     {
 
-        $data_arr  = $this->input->get('checkboxKnitting');  
-        $count     = $this->input->get('countchek');  
 
         $lot   = $this->input->get('lot');    
         $grade = $this->input->get('grade');    
-
-        //$pdf=new PDF_Code128('l','mm','legal');
 
         $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
 
@@ -3075,7 +3138,7 @@ class MO extends MY_Controller
                 $pdf->AddPage();
                 $loop = 1;
             }
-
+            
             $items    = explode("^^",$val);
             $no_itm   = 0;
             $barcode  = '';
