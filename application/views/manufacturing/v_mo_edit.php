@@ -491,9 +491,8 @@
                         <table class="table table-condesed table-hover table-responsive rlstable" id="table_fg_hasil">
                           <label>Sudah diproduksi</label>
                           <div class="pull-right" data-toggle="tooltip" title="Disabled tooltip">
-                            <button class="btn btn-primary btn-xs"  title="Print Beam" id="btn-print-beam"><i class="fa fa-print"></i> Print
+                            <button class="btn btn-primary btn-xs"  title="Print Barcode" id="btn-print-barcode"><i class="fa fa-print"></i> Print Barcode
                             </button>
-                            <button class="btn btn-primary btn-xs"  title="Print Knitting" id="btn-print-knitting"><i class="fa fa-print"></i> Print Knitting</button>
                           </div> 
 
                           <tr>
@@ -818,54 +817,27 @@
   });
 
 
-  // klik btn print beam
-  $(document).on('click',"#btn-print-beam",function(e){
+  // klik btn print 
+  $(document).on('click',"#btn-print-barcode",function(e){
 
-    var checkboxKnitting = [];
+    var checkboxBarcode = [];
+    var dept_id = "<?php echo $list->dept_id; ?>";
+    var kode    = "<?php echo $list->kode; ?>";
 
-    // value check pust to checkboxKnitting
+    // value check pust to checkboxBarcode
     $(".checkPrint:checked").each(function() {
-        checkboxKnitting.push($(this).val());
+        checkboxBarcode.push($(this).val());
     });
-    countchek = checkboxKnitting.length;
+    countchek = checkboxBarcode.length;
 
     if(countchek == 0){
       alert_modal_warning('Silahkan Pilih Product yang akan di Print !');
     }else{
-      var url = '<?php echo base_url() ?>manufacturing/mO/print_barcode_beam';
-      window.open(url+'?countchek='+ countchek+'&&checkboxKnitting='+ checkboxKnitting,'_blank');
+      var url = '<?php echo base_url() ?>manufacturing/mO/print_barcode';
+      window.open(url+'?kode='+ kode+'&&dept_id='+ dept_id+'&&countchek='+ countchek+'&&checkboxBarcode='+ checkboxBarcode,'_blank');
     }
 
   });
-
-
-   // klik btn print knitting
-  $(document).on('click',"#btn-print-knitting",function(e){
-
-    var checkboxKnitting = [];
-
-    // value check pust to checkboxKnitting
-    $(".checkPrint:checked").each(function() {
-        checkboxKnitting.push($(this).val());
-    });
-    countchek = checkboxKnitting.length;
-
-    if(countchek == 0){
-      alert_modal_warning('Silahkan Pilih Product yang akan di Print !');
-    }else{
-      var url = '<?php echo base_url() ?>manufacturing/mO/print_barcode_knitting';
-      window.open(url+'?countchek='+ countchek+'&&checkboxKnitting='+ checkboxKnitting,'_blank');
-    }
-
-  });
-
-  function print_lot(lot,grade){ 
-    event.preventDefault();
-    var barcode = lot;
-    var url = '<?php echo base_url() ?>manufacturing/mO/print_lot';
-    window.open(url+'?lot='+ barcode +'&&grade='+ grade,'_blank');
-    ///$('#print_data').modal('hide');   
-  }
 
 
   //validasi input angka
