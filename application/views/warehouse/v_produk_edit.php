@@ -188,6 +188,12 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4">Lebar Jadi (inch)</div>
+                              <div class="col-xs-4">
+                                <input type="number" class="form-control input-sm" name="lebar" id="lebar" onkeypress="return hanyaAngka(event)" value="<?php echo $produk->lebar;?>">
+                              </div>
+                            </div>
+                            <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Type</div>
                               <div class="col-xs-4">                                
                                 <select class="form-control input-sm" name="typeproduk" id="typeproduk" />
@@ -521,11 +527,14 @@
 
 <script type="text/javascript">
 
-  window.onload = function(){//hidden button
-    $('#btn-generate').hide();
-    $('#btn-cancel').hide();
-    $('#btn-print').hide();
+   // validasi lebar jadi
+   function hanyaAngka(evt){
+    var charCode = (evt.which) ? evt.which : event.keyCode
+    if (charCode > 31 && (charCode < 48 || charCode > 57))
+    return false;
+    return true;
   }
+
   //set tgl buat
   var datenow=new Date();  
   datenow.setMonth(datenow.getMonth());
@@ -567,6 +576,7 @@
                 namaproduk      : $('#namaproduk').val(),
                 dapatdijual     : dapatdijual_value,
                 dapatdibeli     : dapatdibeli_value,
+                lebarjadi       : $('#lebar').val(),
                 typeproduk      : $('#typeproduk').val().toLowerCase(),
                 uomproduk       : $('#uomproduk').val(),
                 uomproduk2      : $('#uomproduk2').val(),
@@ -585,13 +595,13 @@
             }else if(data.status == "failed"){
               //jika ada form belum keiisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();
             }else{
              //jika berhasil disimpan/diubah
               unblockUI( function() {                
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               $("#foot").load(location.href + " #foot");
             }

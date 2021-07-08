@@ -111,9 +111,9 @@ class M_produk extends CI_Model
 		return $this->db->query("SELECT kode_produk,nama_produk FROM mst_produk where kode_produk = '$kodeproduk'");
 	}
 
-	public function update_produk($kode_produk,$nama_produk,$uom,$uom_2,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom)
+	public function update_produk($kode_produk,$nama_produk,$uom,$uom_2,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom,$lebarjadi)
 	{
-		return $this->db->query("UPDATE mst_produk set nama_produk = '$nama_produk', uom = '$uom',uom_2 = '$uom_2', route_produksi = '$route_produksi', type = '$type', dapat_dibeli = '$dapat_dibeli', dapat_dijual = '$dapat_dijual', id_category = '$id_category', note = '$note', bom = '$bom' WHERE kode_produk = '$kode_produk' ");
+		return $this->db->query("UPDATE mst_produk set nama_produk = '$nama_produk', uom = '$uom',uom_2 = '$uom_2', route_produksi = '$route_produksi', type = '$type', dapat_dibeli = '$dapat_dibeli', dapat_dijual = '$dapat_dijual', id_category = '$id_category', note = '$note', bom = '$bom', lebar = '$lebarjadi' WHERE kode_produk = '$kode_produk' ");
 	}
 
 	public function get_nama_category_by_id($id)
@@ -121,9 +121,9 @@ class M_produk extends CI_Model
 		return $this->db->query("SELECT id,nama_category FROM mst_category WHERE id = '$id'");
 	}
 
-	public function save_produk($kode_produk,$nama_produk,$uom,$uom_2,$create_date,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom)
+	public function save_produk($kode_produk,$nama_produk,$uom,$uom_2,$create_date,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom, $lebarjadi)
 	{
-		return $this->db->query("INSERT INTO mst_produk(kode_produk,nama_produk,uom,uom_2,create_date,route_produksi,type,dapat_dibeli,dapat_dijual,id_category,note,bom) VALUES ('$kode_produk','$nama_produk','$uom','$uom_2','$create_date','$route_produksi','$type','$dapat_dibeli','$dapat_dijual','$id_category','$note', '$bom')");
+		return $this->db->query("INSERT INTO mst_produk(kode_produk,nama_produk,uom,uom_2,create_date,route_produksi,type,dapat_dibeli,dapat_dijual,id_category,note,bom,lebar) VALUES ('$kode_produk','$nama_produk','$uom','$uom_2','$create_date','$route_produksi','$type','$dapat_dibeli','$dapat_dijual','$id_category','$note', '$bom','$lebarjadi')");
 	}
 
 	public function get_qty_onhand($kodeproduk)
