@@ -346,7 +346,7 @@
 			var arr = new Array();			
 			$('.qty_konsum').each(function(index,item){
 				if ($(item).val()!=="") {
-					/*
+					
 					arr.push({
 						kode 		: $("#txtkode").val(),
 						qty_konsum  : $(item).parents("tr").find('#qty_konsum').val(),
@@ -364,11 +364,7 @@
 						qty_rm      : $(item).parents("tr").find('#qty_rm').val(),
 						grade       : $(item).parents("tr").find('#grade').val(),
 					});				
-					*/
-
-					var ar = $("#txtkode").val()+',|^|'+$(item).parents("tr").find('#qty_konsum').val()+',|^|'+$(item).parents("tr").find('#quant_id').val()+',|^|'+$(item).parents("tr").find('#move_id').val()+',|^|'+$(item).parents("tr").find('#kode_produk').val()+',|^|'+$(item).parents("tr").find('#nama_produk').val()+',|^|'+$(item).parents("tr").find('#qty_smi').val()+',|^|'+$(item).parents("tr").find('#uom').val()+',|^|'+$(item).parents("tr").find('#lot').val()+',|^|'+$(item).parents("tr").find('#origin_prod').val()+',|^|'+$(item).parents("tr").find("#qty2").val()+',|^|'+$(item).parents("tr").find("#uom2").val()+',|^|'+$(item).parents("tr").find("#reff_note").val()+',|^|'+$(item).parents("tr").find('#qty_rm').val()+',|^|'+$(item).parents("tr").find("#grade").val();
-						arr.push(ar);
-
+					
 					//alert (JSON.stringify(arr));
 					konsumsi_bahan = true;
 				}
@@ -420,7 +416,7 @@
 			              if(data.double == 'yes'){
 			              	alert_modal_warning(data.message2);
 			              }
-			              alert_notify(data.icon,data.message,data.type);
+			              alert_notify(data.icon,data.message,data.type,function(){});
 			            }
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
