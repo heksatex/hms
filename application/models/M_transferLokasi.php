@@ -1,0 +1,280 @@
+<?php defined('BASEPATH') or exit ('No Direct Script Acces Allowed');
+
+/**
+ * 
+ */
+class M_transferLokasi extends CI_Model
+{
+
+	var $column_order = array(null, 'a.kode_tl','a.tanggal','d.nama', 'a.lokasi_tujuan', 'a.total_lot', 'a.note','mmss.nama_status' );
+	var $column_search= array( 'a.kode_tl','a.tanggal','d.nama', 'a.lokasi_tujuan', 'a.total_lot', 'a.note','mmss.nama_status' );
+	var $order  	  = array('a.tanggal' => 'desc');
+
+	private function _get_datatables_query()
+	{	
+
+		//add custom filter here
+        if($this->input->post('kode'))
+        {
+            $this->db->like('kode_tl', $this->input->post('kode'));
+        }
+        if($this->input->post('status'))
+        {
+            $this->db->like('status', $this->input->post('status'));
+        }
+        if($this->input->post('note'))
+        {
+            $this->db->like('note', $this->input->post('note'));
+        }
+        if($this->input->post('dept_id'))
+        {
+            $this->db->like('dept_id', $this->input->post('dept_id'));
+        }
+
+
+		$this->db->select("a.kode_tl, a.tanggal, a.lokasi_tujuan, a.note, a.status,a.total_lot, d.kode, d.nama as departemen, mmss.nama_status, count(b.kode_tl) as total_lot_item" );
+		$this->db->from("transfer_lokasi a");
+		$this->db->JOIN("transfer_lokasi_items b","a.kode_tl=b.kode_tl","LEFT");
+		$this->db->JOIN("departemen d","a.dept_id=d.kode","INNER");
+		$this->db->JOIN("main_menu_sub_status mmss", "mmss.jenis_status=a.status", "INNER");
+		$this->db->group_by("kode_tl");
+
+		$i = 0;
+	
+		foreach ($this->column_search as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order))
+		{
+			$order = $this->order;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables($mmss)
+	{
+		$this->_get_datatables_query();
+		if($_POST['length'] != -1)
+		$this->db->where("mmss.main_menu_sub_kode", $mmss);
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered($mmss)
+	{
+		$this->_get_datatables_query();
+		$this->db->where("mmss.main_menu_sub_kode", $mmss);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all($mmss)
+	{
+		$this->db->select("a.kode_tl, a.tanggal, a.lokasi_tujuan, a.note, a.status,a.total_lot, d.kode, d.nama as departemen, mmss.nama_status, count(b.kode_tl) as total_lot_item" );
+		$this->db->from("transfer_lokasi a");
+		$this->db->JOIN("transfer_lokasi_items b","a.kode_tl=b.kode_tl","LEFT");
+		$this->db->JOIN("departemen d","a.dept_id=d.kode","INNER");
+		$this->db->JOIN("main_menu_sub_status mmss", "mmss.jenis_status=a.status", "INNER");
+		$this->db->group_by("kode_tl");
+		$this->db->where("mmss.main_menu_sub_kode", $mmss);
+		return $this->db->count_all_results();
+	}
+
+	public function cek_status_aktif_lokasi_rak_by_kode($dept_id,$lokasi)
+	{	
+		$this->db->where('dept_id',$dept_id);
+		$this->db->where('kode_rak',$lokasi);
+		return $this->db->get('mst_rak');
+	}
+
+	public function valid_lokasi_tujuan_by_dept($dept_id,$lokasi_tujuan)
+	{
+		$query =  $this->db->query("SELECT * FROM mst_rak Where dept_id = '$dept_id' AND kode_rak = '$lokasi_tujuan'");
+		return $query->data_seek(0);
+	}
+
+	public function is_valid_lokasi_tujuan_by_kode($kode_tl,$lokasi_tujuan)
+	{
+		$this->db->where('kode_tl',$kode_tl);
+		$this->db->where('lokasi_tujuan',$lokasi_tujuan);
+		$query = $this->db->get('transfer_lokasi');
+		return $query->data_seek(0);
+	}
+
+	public function verified_barcode_by_dept($barcode_id)
+	{
+		$this->db->where('lot',$barcode_id);
+		$query = $this->db->get('stock_quant');
+		return $query->row();
+	}
+
+	public function is_valid_lokasi_barcode_by_dept($lokasi_stock,$barcode_id)
+	{
+		$this->db->where('lokasi',$lokasi_stock);
+		$this->db->where('lot',$barcode_id);
+		$query = $this->db->get('stock_quant');
+		return $query->data_seek(0);
+	}
+
+	public function cek_transfer_lokasi_items_by_kode($kode_tl)
+	{
+		$this->db->where('kode_tl',$kode_tl);
+		$query = $this->db->get('transfer_lokasi_items');
+		return $query->data_seek(0);
+	}
+
+	public function get_kode_tl()
+	{
+		$kode="TL".date("y") .  date("m");
+        $result=$this->db->query("SELECT kode_tl FROM transfer_lokasi WHERE month(tanggal)='" . date("m") . "' AND year(tanggal)='" . date("Y") . "' ORDER BY RIGHT(kode_tl,5) DESC LIMIT 1");
+        if ($result->num_rows()>0){
+            $row=$result->row();
+            $dgt=substr($row->kode_tl,-5)+1;
+        }else{
+            $dgt="1";
+        }
+        $dgt=substr("00000" . $dgt,-5);            
+        $kode_tl=$kode . $dgt;
+        return $kode_tl;
+	}
+
+
+	public function save_transfer_lokasi($kode,$tgl,$note,$dept_id,$lokasi_tujuan,$nama_user,$status)
+	{
+		return $this->db->query("INSERT INTO transfer_lokasi (kode_tl,tanggal,dept_id,lokasi_tujuan,note,status,nama_user) values ('$kode','$tgl','$dept_id','$lokasi_tujuan','$note','$status','$nama_user') ");
+	}
+
+	public function update_transfer_lokasi($kode_tl,$lokasi_tujuan,$note)
+	{
+		return $this->db->query("UPDATE transfer_lokasi SET lokasi_tujuan = '$lokasi_tujuan', note = '$note' WHERE kode_tl  = '$kode_tl'");
+	}
+
+	public function get_transfer_lokasi_by_kode($kode_tl)
+	{
+		
+		$this->db->select("a.kode_tl, a.tanggal,a.tanggal_generate, a.total_lot, a.lokasi_tujuan, a.note, a.status, a.dept_id, d.kode, d.nama as departemen" );
+		$this->db->from("transfer_lokasi a");		
+		$this->db->JOIN("departemen d","a.dept_id=d.kode","INNER");
+		$this->db->where("a.kode_tl", $kode_tl);
+		$query  = $this->db->get();
+		return $query->row();
+	}
+
+	public function get_transfer_lokasi_items_by_kode($kode_tl)
+	{
+		$this->db->where('kode_tl',$kode_tl);
+		$this->db->order_by('row_order','asc');
+		$query  = $this->db->get('transfer_lokasi_items');
+		return $query->result();
+	}
+
+	public function get_list_stock_quant_by_kode($lokasi,$barcode_id)
+	{
+		$this->db->where('lokasi',$lokasi);
+		$this->db->where('lot',$barcode_id);
+		$this->db->order_by('quant_id','asc');
+		$query  = $this->db->get('stock_quant');
+		return $query->result();
+	}
+
+
+	public function get_row_order_transfer_lokasi_item_by_kode($kode_tl)
+	{
+		$last_no =  $this->db->query("SELECT max(row_order) as nom FROM transfer_lokasi_items where kode_tl = '$kode_tl'");
+
+		$result = $last_no->row();
+		if(empty($result->nom)){
+			$no   = 1;
+		}else{
+     		$no   = (int)$result->nom + 1;
+		}
+		return $no;
+	}
+
+
+	public function save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$ro)
+	{
+		$data = array(
+						'kode_tl' 		=> $kode_tl,
+						'quant_id'	 	=> $quant_id,
+						'kode_produk'	=> $kode_produk,
+						'nama_produk'	=> $nama_produk,
+						'lokasi_asal'   => $lokasi_asal,
+						'lot'			=> $lot,
+						'qty'           => $qty,
+						'uom'           => $uom,
+						'row_order'     => $ro
+
+
+					);
+		return $this->db->insert('transfer_lokasi_items',$data);
+	}
+
+	public function delete_transfer_lokasi_items($kode_tl,$barcode_id,$row_order)
+	{
+		$data = array(
+						'kode_tl'   => $kode_tl,
+						'lot'		=> $barcode_id,
+						'row_order' => $row_order,
+					);
+		return $this->db->delete('transfer_lokasi_items',$data);
+
+	}
+
+	public function cek_barcode_transfer_lokasi_items_by_kode($kode_tl,$barcode_id,$row_order)
+	{
+		$this->db->where('kode_tl',$kode_tl);
+		$this->db->where('lot',$barcode_id);
+		$this->db->where('row_order', $row_order);
+		return $this->db->get('transfer_lokasi_items');
+
+	}
+
+	public function cek_transfer_lokasi_items_by_barcode($kode_tl,$barcode_id)
+	{
+		$this->db->where('kode_tl',$kode_tl);
+		$this->db->where('lot', $barcode_id);
+		return $this->db->get('transfer_lokasi_items');
+	}
+
+	public function update_status_transfer_lokasi($kode_tl,$status)
+	{
+		$this->db->set('status', $status);
+		$this->db->where('kode_tl', $kode_tl);
+		return $this->db->update('transfer_lokasi');
+
+	}
+
+	public function is_same_valid_lokasi_asal_by_quant_id($quant_id)
+	{
+		$this->db->where('quant_id', $quant_id);
+		return $this->db->get('stock_quant');
+	}
+
+
+
+
+}
