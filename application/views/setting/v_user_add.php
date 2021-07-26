@@ -96,358 +96,286 @@
                         <div class="col-md-12">
                           <p class="text-light-blue"><strong>Sales</strong></p>
                         </div>
-                        <!-- kiri -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Sales Contract</div>
-                              <div class="col-xs-4">
-                                <!--<input type="checkbox" name="chk_salescontract" id="chk_salescontract" checked="checked" value="true">-->
-                                <input type="checkbox" name="chk[]" value="mms37">
-                              </div>               
-                            </div>                            
-                          </div>
-                        </div>
-                        <!-- kanan -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Customer</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms57">
-                              </div>               
-                            </div>
-                          </div>
-                        </div>
+                          
+                            <?php 
+                              // set jml baris
+                              $jml_kolom = $count_sales/2;
+                              $jml_baris = intval($jml_kolom);
+                              $count     = 1;
+                              $tambah_kolom = TRUE; 
+                              foreach ($sales as $val) {
+
+                                if($count == 1){
+
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                }else if($count > $jml_baris AND $tambah_kolom == TRUE){
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                  $tambah_kolom = FALSE;
+                                }
+
+                                $kode    = $val->kode.',';
+                                $nama = $val->nama;
+                            ?>
+                                <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-8"><?php echo $nama; ?></div>
+                                  <div class="col-xs-4">                                                                
+                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
+                                  </div>               
+                                </div>
+                            <?php
+                                if($count == $jml_baris){
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+
+                                $count++;
+                              }
+                              // penutup div col-md-6, dan form-group
+                              echo '</div>';
+                              echo '</div>';
+                    
+                            ?>
+                        
                         
                         <!-- ppic -->
                         <div class="col-md-12">
                           <p class="text-light-blue"><strong>PPIC</strong></p>
                         </div>
-                        <!-- kiri -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Order Planning</div>
-                              <div class="col-xs-4">                                
-                                <input type="checkbox" name="chk[]" value="mms38">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Procurement Purchase</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms50">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">BoM</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms73">
-                              </div>               
-                            </div>                              
-                          </div>
-                        </div>
-                        <!-- kanan -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Procurement Order</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms39">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Production Order</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms17">
-                              </div>               
-                            </div>
-                          </div>
-                        </div>
+
+                          <?php 
+                              // set jml baris
+                              $jml_kolom = $count_ppic/2;
+                              $jml_baris = intval($jml_kolom);
+                              $count     = 1;
+                              $tambah_kolom = TRUE; 
+                              foreach ($ppic as $val) {
+
+                                if($count == 1){
+
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                }else if($count > $jml_baris AND $tambah_kolom == TRUE){
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                  $tambah_kolom = FALSE;
+                                }
+
+                                $kode    = $val->kode.',';
+                                $nama = $val->nama;
+                            ?>
+                                <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-8"><?php echo $nama; ?></div>
+                                  <div class="col-xs-4">                                                                
+                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
+                                  </div>               
+                                </div>
+                            <?php
+                                if($count == $jml_baris){
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+
+                                $count++;
+                              }
+                              // penutup div col-md-6, dan form-group
+                              echo '</div>';
+                              echo '</div>';
+                    
+                            ?>
+                        
 
                         <!-- manufacturing -->
                         <div class="col-md-12">
                           <p class="text-light-blue"><strong>Manufacturing</strong></p>
                         </div>
-                        <!-- kiri -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Cutting Shearing</div>
-                              <div class="col-xs-4">                                
-                                <input type="checkbox" name="chk[]" value="mms7">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Jacquard</div>
-                              <div class="col-xs-4">                                
-                                <input type="checkbox" name="chk[]" value="mms4">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Tricot</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms5">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Warping Dasar</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms2">
-                              </div>               
-                            </div>
-                          </div>
-                        </div>
-                        <!-- kanan -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Inspecting 1</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms8">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Raschel</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms6">
-                              </div>               
-                            </div>                            
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Twisting</div>
-                              <div class="col-xs-4">                                
-                                <input type="checkbox" name="chk[]" value="mms1">
-                              </div>               
-                            </div>                            
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">MO Warping Panjang</div>
-                              <div class="col-xs-4">                                
-                                <input type="checkbox" name="chk[]" value="mms3">
-                              </div>               
-                            </div>                            
-                          </div>
-                        </div>
+
+                          <?php 
+                              // set jml baris
+                              $jml_kolom = $count_mo/2;
+                              $jml_baris = intval($jml_kolom);
+                              $count     = 1;
+                              $tambah_kolom = TRUE; 
+                              foreach ($mo as $val) {
+
+                                if($count == 1){
+
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                }else if($count > $jml_baris AND $tambah_kolom == TRUE){
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                  $tambah_kolom = FALSE;
+                                }
+
+                                $kode    = $val->kode.',';
+                                $nama = $val->nama;
+                            ?>
+                                <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-8"><?php echo $nama; ?></div>
+                                  <div class="col-xs-4">                                                                
+                                      <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
+                                  </div>               
+                                </div>
+                            <?php
+                                if($count == $jml_baris){
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+
+                                $count++;
+                              }
+                              // penutup div col-md-6, dan form-group
+                              echo '</div>';
+                              echo '</div>';
+                          ?>
 
                         <!-- warehouse -->
                         <div class="col-md-12">
                           <p class="text-light-blue"><strong>Warehouse</strong></p>
                         </div>
-                        <!-- kiri -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Cutting Shearing</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms40,mms41">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Gudang Greige</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms33,mms42">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Jacquard</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms18,mms19">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Receiving</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms53,mms54,mms71">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Stock Quants</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms52">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Twisting</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms43,mms44">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Warping Panjang</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms47,mms48">
-                              </div>               
-                            </div>
-                          </div>
+                       
+                        <!-- lab -->
+                        <div class="col-md-12">
+                          <p class="text-light-blue"><strong>Lab</strong></p>
                         </div>
-                        <!-- kanan -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">                              
-                              <div class="col-xs-8">Gudang Benang</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms49,mms51">
-                              </div>               
-                            </div>                            
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Inspecting 1</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms23,mms24">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Produk</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms56">
-                              </div>               
-                            </div>                            
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Stock Moves</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms55">
-                              </div>               
-                            </div>                            
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Tricot</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms14,mms15">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Warping Dasar</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms45,mms46">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Adjustment</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms72">
-                              </div>               
-                            </div>
-                          </div>
-                        </div>
+
+                          <?php 
+                              // set jml baris
+                              $jml_kolom = $count_lab/2;
+                              $jml_baris = intval($jml_kolom);
+                              $count     = 1;
+                              $tambah_kolom = TRUE; 
+                              foreach ($lab as $val) {
+
+                                if($count == 1){
+
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                }else if($count > $jml_baris AND $tambah_kolom == TRUE){
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                  $tambah_kolom = FALSE;
+                                }
+
+                                $kode    = $val->kode.',';
+                                $nama = $val->nama;
+                            ?>
+                                <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-8"><?php echo $nama; ?></div>
+                                  <div class="col-xs-4">                                                                
+                                    
+                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
+                                  
+                                  </div>               
+                                </div>
+                            <?php
+                                if($count == $jml_baris){
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+
+                                $count++;
+                              }
+                              // penutup div col-md-6, dan form-group
+                              echo '</div>';
+                              echo '</div>';
+                    
+                            ?>
 
 
                         <!-- report -->
                         <div class="col-md-12">
                           <p class="text-light-blue"><strong>Report</strong></p>
                         </div>
-                        <!-- kiri -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Print MO</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms74">
-                              </div>               
-                            </div>  
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Cacat</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms75">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Efisiensi</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms80">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Rekap Cacat</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms81">
-                              </div>               
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Adjustment</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms86">
-                              </div>               
-                            </div>                            
-                          </div>
-                        </div>
 
-                        <!-- kanan -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Produksi Warping Dasar</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms76">
-                              </div>               
-                            </div>    
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">HPH Warping Dasar</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms77">
-                              </div>               
-                            </div>       
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Produksi Tricot</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms78">
-                              </div>               
-                            </div>    
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">HPH Tricot</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms79">
-                              </div>               
-                            </div>  
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Produksi Warping Panjang</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms82">
-                              </div>               
-                            </div>    
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">HPH Warping Panjang</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms83">
-                              </div>               
-                            </div> 
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Produksi Jacquard</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms84">
-                              </div>               
-                            </div>    
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">HPH Jacquard</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms85">
-                              </div>               
-                            </div>                     
-                          </div>
-                        </div>
+                          <?php 
+                              // set jml baris
+                              $jml_kolom = $count_report/2;
+                              $jml_baris = intval($jml_kolom);
+                              $count     = 1;
+                              $tambah_kolom = TRUE; 
+                              foreach ($report as $val) {
+
+                                if($count == 1){
+
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                }else if($count > $jml_baris AND $tambah_kolom == TRUE){
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                  $tambah_kolom = FALSE;
+                                }
+
+                                $kode    = $val->kode.',';
+                                $nama = $val->nama;
+                            ?>
+                                <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-8"><?php echo $nama; ?></div>
+                                  <div class="col-xs-4">                                                                
+                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
+                                  </div>               
+                                </div>
+                            <?php
+                                if($count == $jml_baris){
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+
+                                $count++;
+                              }
+                              // penutup div col-md-6, dan form-group
+                              echo '</div>';
+                              echo '</div>';
+                    
+                            ?>
+                       
 
                         <!-- setting -->
                         <div class="col-md-12">
                           <p class="text-light-blue"><strong>Setting</strong></p>
                         </div>
-                        <!-- kiri -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">User Manajemen</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms90">
-                              </div>               
-                            </div>                            
-                          </div>
-                        </div>
-                        <!-- kanan -->
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-8">Ganti Password</div>
-                              <div class="col-xs-4">
-                                <input type="checkbox" name="chk[]" value="mms91">
-                              </div>               
-                            </div>                            
-                          </div>
-                        </div>
+                        <?php 
+                              // set jml baris
+                              $jml_kolom = $count_report/2;
+                              $jml_baris = intval($jml_kolom);
+                              $count     = 1;
+                              $tambah_kolom = TRUE; 
+                              foreach ($setting as $val) {
+
+                                if($count == 1){
+
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                }else if($count > $jml_baris AND $tambah_kolom == TRUE){
+                                  echo '<div class="col-md-6">';
+                                  echo '<div class="form-group">';
+                                  $tambah_kolom = FALSE;
+                                }
+
+                                $kode    = $val->kode.',';
+                                $nama = $val->nama;
+                            ?>
+                                <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-8"><?php echo $nama; ?></div>
+                                  <div class="col-xs-4">                                                                
+                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
+                                  </div>               
+                                </div>
+                            <?php
+                                if($count == $jml_baris){
+                                    echo '</div>';
+                                    echo '</div>';
+                                }
+
+                                $count++;
+                              }
+                              // penutup div col-md-6, dan form-group
+                              echo '</div>';
+                              echo '</div>';
+                    
+                            ?>
 
                       </form>
 

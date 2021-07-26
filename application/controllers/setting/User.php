@@ -50,11 +50,27 @@ class User extends MY_Controller
 
   public function add()
   { 
-    $data['id_dept']  ='MUSR';
-    //$data['uom'] = $this->_module->get_list_uom();
-    //$data['category'] = $this->m_produk->get_list_category();
-    //$data['route']    = $this->m_produk->get_list_route();        
-    return $this->load->view('setting/v_user_add', $data);
+      $data['id_dept']  ='MUSR';
+      
+      $data['sales']       = $this->m_user->get_list_menu_by_link_menu('sales');
+      $data['count_sales'] = $this->m_user->get_jml_list_menu_by_link_menu('sales');
+
+      $data['ppic']        = $this->m_user->get_list_menu_by_link_menu('ppic');
+      $data['count_ppic']  = $this->m_user->get_jml_list_menu_by_link_menu('ppic');
+
+      $data['mo']         = $this->m_user->get_list_menu_by_link_menu('manufacturing');
+      $data['count_mo']   = $this->m_user->get_jml_list_menu_by_link_menu('manufacturing');
+
+      $data['lab']         = $this->m_user->get_list_menu_by_link_menu('lab');
+      $data['count_lab']   = $this->m_user->get_jml_list_menu_by_link_menu('lab');
+
+      $data['report']         = $this->m_user->get_list_menu_by_link_menu('report');
+      $data['count_report']   = $this->m_user->get_jml_list_menu_by_link_menu('report');
+
+      $data['setting']         = $this->m_user->get_list_menu_by_link_menu('setting');
+      $data['count_setting']   = $this->m_user->get_jml_list_menu_by_link_menu('setting');    
+      
+      return $this->load->view('setting/v_user_add', $data);
   }
 
   public function simpan()
@@ -144,8 +160,10 @@ class User extends MY_Controller
   {
     if(!isset($id)) show_404();
       $kode_decrypt       = decrypt_url($id);
-      $data['id_dept']    ='MUSR';
+      $id_dept            = 'MUSR';
       $priv_record        = $this->m_user->get_priv_by_username($kode_decrypt);
+      $data['id_dept']    = $id_dept;
+      $data['mms']        = $this->_module->get_data_mms_for_log_history($id_dept);// get mms by dept untuk menu yg beda-beda
       $list_priv          = '';
       foreach ($priv_record as $value) {
         if ($list_priv == ''){
@@ -154,46 +172,36 @@ class User extends MY_Controller
           $list_priv = $list_priv . $value->main_menu_sub_kode . ',';
         }
       }
-      $data['user']       = $this->m_user->get_user_by_username($kode_decrypt);
-      $data['priv']       = $list_priv;
-      //$data['category'] = $this->m_produk->get_list_category();
-      //$data['route']    = $this->m_produk->get_list_route();        
-      //$data['dyest']    = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'DYE');
-      //$data['aux']      = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'AUX');
+      $data['user']        = $this->m_user->get_user_by_username($kode_decrypt);
+      $data['priv']        = $list_priv;
+
+      $data['sales']        = $this->m_user->get_list_menu_by_link_menu('sales');
+      $data['count_sales']  = $this->m_user->get_jml_list_menu_by_link_menu('sales');
+
+      $data['ppic']         = $this->m_user->get_list_menu_by_link_menu('ppic');
+      $data['count_ppic']   = $this->m_user->get_jml_list_menu_by_link_menu('ppic');
+
+      $data['mo']           = $this->m_user->get_list_menu_by_link_menu('manufacturing');
+      $data['count_mo']     = $this->m_user->get_jml_list_menu_by_link_menu('manufacturing');
+
+      $data['warehouse']       = $this->m_user->get_list_menu_by_link_menu('warehouse');
+      $data['count_warehouse'] = $this->m_user->get_jml_list_menu_by_link_menu('warehouse');
+
+      $data['lab']             = $this->m_user->get_list_menu_by_link_menu('lab');
+      $data['count_lab']       = $this->m_user->get_jml_list_menu_by_link_menu('lab');
+
+      $data['report']          = $this->m_user->get_list_menu_by_link_menu('report');
+      $data['count_report']    = $this->m_user->get_jml_list_menu_by_link_menu('report');
+
+      $data['setting']         = $this->m_user->get_list_menu_by_link_menu('setting');
+      $data['count_setting']   = $this->m_user->get_jml_list_menu_by_link_menu('setting');
+
       return $this->load->view('setting/v_user_edit',$data);
   }
 
 
 
-  public function help_mo_done()
-  {
-    
-    $list = $this->m_user->get_list_mo_correction()->result();
-    foreach($list as $val){
-      $kode_mo = $val->mo;
-      $mv = $this->m_user->get_move_id_by_kode($kode_mo)->row_array();
-      $move_id =$mv['move_id'];
 
-      $dept = $this->m_user->get_dept_by_kode($kode_mo)->row_array();
-      $dept_id =$dept['dept_id'];
-      $status  = $dept['status'];
 
-      $rm = $this->m_user->cek_stock_move_items($move_id)->row_array();
-      if($rm['move_id'] == ''){
-        $bahan_baku = 'FALSE';
-      }else{
-        $bahan_baku = 'TRUE';
-      }
-      
-      $sql_updt_move = "UPDATE mo_correction SET move_id = '".$move_id."', dept_id = '".$dept_id."', rm = '".$bahan_baku."', status = '".$status."' WHERE mo = '".$kode_mo."' ";
-
-      $this->_module->update_perbatch($sql_updt_move);
-    }
-
-    $callback = array('status' => 'success', 'message' => 'Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
-
-    echo json_encode($callback);
-    
-  }
 
 }

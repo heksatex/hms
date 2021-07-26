@@ -110,26 +110,19 @@ class M_user extends CI_Model
 	{
 		return $this->db->query("SELECT main_menu_sub_kode FROM user_priv where username = '$username' ")->result();	
 	}
+	
 
-	public function get_list_mo_correction()
+	public function get_list_menu_by_link_menu($link_menu)
 	{
-		return $this->db->query("SELECT * FROM mo_correction");
+		return $this->db->query("SELECT * FROM main_menu_sub WHERE link_menu LIKE '%$link_menu%' ORDER BY row_order asc ")->result();
 	}
 
-	public function get_move_id_by_kode($mo)
+	public function get_jml_list_menu_by_link_menu($link_menu)
 	{
-		return $this->db->query("SELECT distinct move_id FROm mrp_production_rm_target WHERE kode = '$mo' ");
+		$query  =  $this->db->query("SELECT count(kode) as jml FROM main_menu_sub WHERE link_menu LIKE '%$link_menu%'  ");
+		$result = $query->row();
 
-	}
-
-	public function get_dept_by_kode($mo)
-	{
-		return $this->db->query("SELECT * FROM mrp_production WHERE kode = '$mo'");
-	}
-
-	public function cek_stock_move_items($move_id)
-	{
-		return $this->db->query("SELECT * FROM stock_move_items WHERE move_id  = '$move_id' AND status = 'ready' ");
+		return $result->jml;
 	}
 
 }
