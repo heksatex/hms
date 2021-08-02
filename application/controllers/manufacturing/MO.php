@@ -3025,6 +3025,7 @@ class MO extends MY_Controller
             $qty         = $get['qty'];
             $uom         = $get['uom'];
             $tgl         = $get['create_date'];
+            $reff_note   = $get['reff_note'];
 
             $pdf->setXY(3,3+$heightNama);
             $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
@@ -3036,9 +3037,18 @@ class MO extends MY_Controller
             $pdf->Multicell(74,5,"MC : ".$mesin,0,'L');// MC TWS
 
             $pdf->setXY(3,5+$heightNama+20);
-            $pdf->Multicell(74,5,"Tgl : ".$tgl,0,'L');// Tgl buat
+            $pdf->Multicell(30,5,"Tgl.HPH   :",0,'L');// Tgl buat/hph
 
-            $pdf->Code128(5,30,$barcode,70,20,'C',0,1); // barcode
+            $pdf->SetFont('Arial','B',13,'C');
+            $pdf->setXY(30,5+$heightNama+20);
+            $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
+
+            $pdf->SetFont('Arial','B',15,'C');
+            $pdf->setXY(3,5+$heightNama+25);
+            $pdf->Multicell(74,5,"Reff Note : ".$reff_note,0,'L');// reff note
+
+
+            $pdf->Code128(5,35,$barcode,70,15,'C',0,1); // barcode
 
              $pdf->setXY(0,5+$heightNama+45);
             $pdf->Multicell(80,5,$barcode,0,'C');// barcode
