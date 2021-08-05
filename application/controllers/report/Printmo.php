@@ -100,7 +100,7 @@ class Printmo extends MY_Controller
             $pdf->SetFont('Arial','',9,'C');
 
             $pdf->setXY(95,20);
-            $pdf->Multicell(40,4,$head['nama_produk'],0,'L');
+            $pdf->Multicell(100,4,$head['nama_produk'],0,'L');
 
             $pdf->setXY(95,25);
             $pdf->Multicell(40,4,$head['qty'].' '.$head['uom'],0,'L');
