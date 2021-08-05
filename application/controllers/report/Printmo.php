@@ -694,7 +694,7 @@ class Printmo extends MY_Controller
             $pdf->setXY(116, 25);
             $pdf->Multicell(40, 4, $head['lot_prefix'], 0, 'L');
             $pdf->setXY(116, 29);
-            $pdf->Multicell(30, 4, $benang, 0, 'L');
+            $pdf->Multicell(30, 4, '', 0, 'L');
             $pdf->setXY(116, 33);
             $pdf->Multicell(40, 4, $lbr_greige.' / '.$lbr_jadi, 0, 'L');
 
