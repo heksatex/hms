@@ -555,6 +555,8 @@ class Printmo extends MY_Controller
             $pcs            = '';
             $stitch         = '';
             $rpm            = '';
+            $benang         = '';
+            $target_per_shift = '';
 
             // explode reff note
             $ex2 = explode('|', $head['reff_note']);
@@ -564,10 +566,8 @@ class Printmo extends MY_Controller
                     $exp = explode('=', $exs2);
                     $b   = 1;
                     foreach ($exp as $exps) {
-                        if($b == 2){
-                            $mtr_gl = trim($exps);
-                            $b++;
-                        }
+                        $mtr_gl = trim($exps);
+                        $b++;
                     }
                 }
                 if($a == 7 ){// l.greige
@@ -611,6 +611,15 @@ class Printmo extends MY_Controller
                         $b++;
                     }
                 }
+                if($a == 14){ // benang
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $benang = trim($exps);
+                        $b++;
+                    }
+                }
+                
                 $a++;
             } 
 
@@ -684,6 +693,8 @@ class Printmo extends MY_Controller
             $pdf->SetFont('Arial','',7,'C');
             $pdf->setXY(116, 25);
             $pdf->Multicell(40, 4, $head['lot_prefix'], 0, 'L');
+            $pdf->setXY(116, 29);
+            $pdf->Multicell(30, 4, $benang, 0, 'L');
             $pdf->setXY(116, 33);
             $pdf->Multicell(40, 4, $lbr_greige.' / '.$lbr_jadi, 0, 'L');
 
@@ -740,6 +751,8 @@ class Printmo extends MY_Controller
             $pdf->Multicell(30, 4, $head['qty'].' '.$head['uom'], 0, 'L');
             $pdf->setXY(221, 29);
             $pdf->Multicell(30, 4, $mtr_gl, 0, 'L');
+            $pdf->setXY(221, 33);
+            $pdf->Multicell(30, 4, $head['target_efisiensi']*8, 0, 'L');
 
 
             // header tabel
@@ -785,15 +798,17 @@ class Printmo extends MY_Controller
             $pdf->setXY(159, 41);
             $pdf->Multicell(15, 3, 'Grade', 0, 'C');
 
+            /*
             $pdf->setXY(174, 38);
             $pdf->Multicell(15, 10, '', 1, 'C');
             $pdf->setXY(174, 41);
             $pdf->Multicell(15, 3, 'EFF(%)', 0, 'C');
+            */
 
-            $pdf->setXY(189, 38);
-            $pdf->Multicell(50, 10, '', 1, 'C');
-            $pdf->setXY(189, 41);
-            $pdf->Multicell(50, 3, 'Keterangan', 0, 'C');
+            $pdf->setXY(174, 38);
+            $pdf->Multicell(65, 10, '', 1, 'C');
+            $pdf->setXY(174, 41);
+            $pdf->Multicell(65, 3, 'Keterangan', 0, 'C');
 
             $pdf->setXY(239, 38);
             $pdf->Multicell(45, 10, '', 1, 'C');
@@ -815,7 +830,7 @@ class Printmo extends MY_Controller
             $width = 0;
 
             // looping ke samping
-            for($i=1; $i<= 17; $i++){
+            for($i=1; $i<= 16; $i++){
 
                 if($i == 1 ){
                     $width = 18;
@@ -823,12 +838,12 @@ class Printmo extends MY_Controller
                     $width = 19;
                 }elseif($i== 3 || $i == 4 || $i ==  5 || $i == 6 || $i == 7 || $i == 8){
                     $width = 11.83;                    
-                }elseif($i == 11 || $i == 12 || $i == 15 || $i == 16 || $i == 17){
+                }elseif($i == 11 || $i == 12 || $i == 14 || $i == 15 || $i == 16){
                     $width = 15;
                 }elseif($i == 9 || $i == 10 ){
                     $width = 13;
-                }elseif($i == 14){
-                    $width = 50;
+                }elseif($i == 13){
+                    $width = 65;
                 }
 
                 $a = 1;
