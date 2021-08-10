@@ -453,7 +453,7 @@ class Efisiensi extends MY_Controller
 											'sc'         => $sc,
 											'nama_produk'=> $row->nama_produk,
 											'efisiensi'  => ($target_efisiensi),
-											'hph_per_hari'=> round($sum_ef_per_hari,2),
+											'hph_per_hari'=> round($hph_per_hari,2),
 											'hph_pagi'   => round($get_hph_pagi,2),
 											'hph_siang'  => round($get_hph_siang,2),
 											'hph_malam'  => round($get_hph_malam,2),
