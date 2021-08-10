@@ -37,6 +37,7 @@ class Efisiensi extends MY_Controller
 
 		$dataRecord= [];
 		$mrpRecord= [];
+		$dataMesin = [];
 		$sc = '';
 		$get_hph_pagi = '';
 		$get_hph_siang = '';
@@ -52,8 +53,7 @@ class Efisiensi extends MY_Controller
 
 		while ($tgldari <= $tglsampai) {
 
-			// get mrp_production
-			$get_mrp = $this->m_efisiensi->get_list_mrp_by_tgl($id_dept,$tgldari);
+			
 			$jml_child = 0;
 			$sum_ef_per_hari = 0;
 			$sum_ef_pagi  = 0;
@@ -61,92 +61,122 @@ class Efisiensi extends MY_Controller
 			$sum_ef_malam  = 0;
 			$target_efisiensi = 0;
 
-			foreach ($get_mrp as $row) {
+			// get list mesin by id_dept
+			$get_mesin = $this->m_efisiensi->get_list_mesin($id_dept);
+
+			foreach($get_mesin as $rmc){
+
+				// get mrp_production
+				$get_mrp = $this->m_efisiensi->get_list_mrp_by_tgl($rmc->mc_id,$id_dept,$tgldari);
+										
+				// foreach MO
+				foreach ($get_mrp as $row) {
 
 
-				// epxplode origin
-				$exp = explode('|', $row->origin);
-				$no  = 1;
-				foreach ($exp as $exps) {
-					if($no == 1){
-						$sc = trim($exps);
+					// epxplode origin
+					$exp = explode('|', $row->origin);
+					$no  = 1;
+					foreach ($exp as $exps) {
+						if($no == 1){
+							$sc = trim($exps);
+						}
+						$no++;
 					}
-					$no++;
+
+					$target_efisiensi = $row->target_efisiensi*24;
+					// hph per shit
+					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'pagi');
+					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'siang');
+					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'malam');
+					$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
+
+					// efisiensi
+					if($hph_per_hari > 0 AND $target_efisiensi > 0 ){
+						$ef_per_hari  = ($hph_per_hari/$target_efisiensi)*100;
+						if($ef_per_hari > 100){
+							$ef_per_hari = 100;
+						}
+
+						if($get_hph_pagi > 0){
+							$ef_pagi      = $get_hph_pagi/($target_efisiensi/3)*100;
+							if($ef_pagi > 100){
+								$ef_pagi = 100;
+							}
+						}
+
+						if($get_hph_siang > 0){
+							$ef_siang     = $get_hph_siang/($target_efisiensi/3)*100;
+							if($ef_siang > 100){
+								$ef_siang = 100;
+							}
+						}
+
+						if($get_hph_malam > 0){
+							$ef_malam     = $get_hph_malam/($target_efisiensi/3)*100;
+							if($ef_malam > 100){
+								$ef_malam = 100;
+							}
+						}
+					}
+
+					if($hph_per_hari   > 0){
+						$jml_child++;
+
+						$sum_ef_per_hari = $sum_ef_per_hari + $ef_per_hari; 
+						$sum_ef_pagi     = $sum_ef_pagi + $ef_pagi;
+						$sum_ef_siang    = $sum_ef_siang+ $ef_siang;
+						$sum_ef_malam    = $sum_ef_malam + $ef_malam;
+
+							// $tgl = date('Y-m-d',strtotime($row->tanggal));
+						// child 
+						$mrpRecord[] = array('tgl' => $tgldari,
+											'kode'=> $row->kode,
+											'nama_mesin' => $row->nama_mesin,
+											'sc'         => $sc,
+											'nama_produk'=> $row->nama_produk,
+											'efisiensi'  => number_format($target_efisiensi,2),
+											'hph_per_hari'=> number_format($hph_per_hari,2),
+											'hph_pagi'   => number_format($get_hph_pagi,2),
+											'hph_siang'  => number_format($get_hph_siang,2),
+											'hph_malam'  => number_format($get_hph_malam,2),
+											'ef_per_hari'=> number_format($ef_per_hari,2),
+											'ef_pagi'	  => number_format($ef_pagi,2),
+											'ef_siang'	  => number_format($ef_siang,2),
+											'ef_malam'	  => number_format($ef_malam,2)
+											);
+					}
+					
+					$sc = '';
+					$hph_per_hari = 0;
+					$ef_per_hari   = 0;				
+					$ef_pagi       = 0;
+					$ef_siang      = 0;
+					$ef_malam      = 0;
+					$target_efisiensi = 0;
 				}
 
-				$target_efisiensi = $row->target_efisiensi*24;
-				// hph per shit
-				$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'pagi');
-				$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'siang');
-				$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'malam');
-				$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
-
-				// efisiensi
-				if($hph_per_hari > 0 AND $target_efisiensi > 0 ){
-					$ef_per_hari  = ($hph_per_hari/$target_efisiensi)*100;
-					if($ef_per_hari > 100){
-						$ef_per_hari = 100;
-					}
-
-					if($get_hph_pagi > 0){
-						$ef_pagi      = $get_hph_pagi/($target_efisiensi/3)*100;
-						if($ef_pagi > 100){
-							$ef_pagi = 100;
-						}
-					}
-
-					if($get_hph_siang > 0){
-						$ef_siang     = $get_hph_siang/($target_efisiensi/3)*100;
-						if($ef_siang > 100){
-							$ef_siang = 100;
-						}
-					}
-
-					if($get_hph_malam > 0){
-						$ef_malam     = $get_hph_malam/($target_efisiensi/3)*100;
-						if($ef_malam > 100){
-							$ef_malam = 100;
-						}
-					}
-				}
-
-				if($hph_per_hari   > 0){
+				$dataMesin[] =  array('tgl' => $tgldari, 
+									    'nama_mesin' => $rmc->nama_mesin,
+									    'mrp'=> $mrpRecord,
+									    'efisiensi'  => 0,
+										'hph_per_hari'=> 0,
+										'hph_pagi'   => 0,
+										'hph_siang'  => 0,
+										'hph_malam'  => 0,
+										'ef_per_hari'=> 0,
+										'ef_pagi'	 => 0,
+										'ef_siang'	 => 0,
+										'ef_malam'	 => 0
+									);
+				if(empty($mrpRecord)){
 					$jml_child++;
-
-					$sum_ef_per_hari = $sum_ef_per_hari + $ef_per_hari; 
-					$sum_ef_pagi     = $sum_ef_pagi + $ef_pagi;
-					$sum_ef_siang    = $sum_ef_siang+ $ef_siang;
-					$sum_ef_malam    = $sum_ef_malam + $ef_malam;
-
-						// $tgl = date('Y-m-d',strtotime($row->tanggal));
-					// child 
-					$mrpRecord[] = array('tgl' => $tgldari,
-										'kode'=> $row->kode,
-										'nama_mesin' => $row->nama_mesin,
-										'sc'         => $sc,
-										'nama_produk'=> $row->nama_produk,
-										'efisiensi'  => number_format($target_efisiensi,2),
-										'hph_per_hari'=> number_format($hph_per_hari,2),
-										'hph_pagi'   => number_format($get_hph_pagi,2),
-										'hph_siang'  => number_format($get_hph_siang,2),
-										'hph_malam'  => number_format($get_hph_malam,2),
-										'ef_per_hari'=> number_format($ef_per_hari,2),
-										'ef_pagi'	  => number_format($ef_pagi,2),
-										'ef_siang'	  => number_format($ef_siang,2),
-										'ef_malam'	  => number_format($ef_malam,2)
-										);
 				}
-				
-				$sc = '';
-				$hph_per_hari = 0;
-				$ef_per_hari   = 0;				
-				$ef_pagi       = 0;
-				$ef_siang      = 0;
-				$ef_malam      = 0;
-				$target_efisiensi = 0;
+
+				$mrpRecord = [];
+
 
 			}
-
+			
 			if($sum_ef_per_hari > 0){
 				$av_per_hari = $sum_ef_per_hari / $jml_child; // average hari
 				if($av_per_hari > 100){
@@ -175,14 +205,16 @@ class Efisiensi extends MY_Controller
 
 			// parents
 			$dataRecord[] = array('tgl'     => $tgldari, 
-								  'mrp'     => $mrpRecord, 
+								  'mesin'   => $dataMesin, 
 								  'av_hari' => number_format($av_per_hari,2),
 								  'av_pagi' => number_format($av_pagi,2),
 								  'av_siang' => number_format($av_siang,2),
 								  'av_malam' => number_format($av_malam,2),
 								   );
 
-			$mrpRecord = [];
+			$dataMesin = [];
+
+			
 
 			$tgldari = date('Y-m-d',strtotime('+1 days',strtotime($tgldari)));
 
@@ -216,7 +248,7 @@ class Efisiensi extends MY_Controller
 		$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
 
-    	    	// SET JUDUL
+    	// SET JUDUL
  		$object->getActiveSheet()->SetCellValue('A1', 'Laporan Efisiensi');
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
 		$object->getActiveSheet()->mergeCells('A1:L1');
@@ -247,7 +279,7 @@ class Efisiensi extends MY_Controller
 			  )
 		);	
 
-    	$table_head_columns = array('No','Tanggal','MO','Mesin','SC','Nama Produk','Target Efisiensi (Qty/Hari)', 'HPH','Hari','Pagi','Siang','Malam','Efisiensi Produksi (%)','Hari','Pagi','Siang','Malam');
+    	$table_head_columns = array('No','Tanggal','Mesin','MO','SC','Nama Produk','Target Efisiensi (Qty/Hari)', 'HPH','Hari','Pagi','Siang','Malam','Efisiensi Produksi (%)','Hari','Pagi','Siang','Malam');
 
     	$column = 0;
     	$merge  = TRUE;
@@ -296,9 +328,9 @@ class Efisiensi extends MY_Controller
             $object->getActiveSheet()->getStyle($val.'5')->applyFromArray($styleArray);
             $object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
 
-            if($loop <= 3){ // index A, B, C
+            if($loop <= 2){ // index A, B, D
                 $object->getSheet(0)->getColumnDimension($val)->setAutoSize(true);
-            }elseif($loop == 4){ // index D
+            }elseif($loop == 3){ // index C
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(38);
             }elseif($loop == 5 OR ($loop >= 8 AND $loop<= 15 )){// index E, H-O
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(9);
@@ -325,6 +357,7 @@ class Efisiensi extends MY_Controller
     	// tbody
         $rowCount = 7;
     	$mrpRecord = [];
+		$dataMesin = [];
     	$sc = '';
 		$get_hph_pagi = '';
 		$get_hph_siang = '';
@@ -341,96 +374,123 @@ class Efisiensi extends MY_Controller
 
 		while ($tgldari <= $tglsampai) {
 
-			// get mrp_production
-			$get_mrp = $this->m_efisiensi->get_list_mrp_by_tgl($id_dept,$tgldari);
+			// get list mesin by id_dept
+			$get_mesin = $this->m_efisiensi->get_list_mesin($id_dept);
 			$jml_child = 0;
 			$sum_ef_per_hari = 0;
 			$sum_ef_pagi  = 0;
 			$sum_ef_siang = 0;
 			$sum_ef_malam  = 0;
-			foreach ($get_mrp as $row) {
 
+			foreach($get_mesin as $rmc){
 
-				// epxplode origin
-				$exp = explode('|', $row->origin);
-				$no  = 1;
-				foreach ($exp as $exps) {
-					if($no == 1){
-						$sc = trim($exps);
-					}
-					$no++;
-				}
-
-				$target_efisiensi = $row->target_efisiensi*24;
-				// hph per shit
-				$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'pagi');
-				$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'siang');
-				$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'malam');
-				$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
-
-				// efisiensi
-				if($hph_per_hari > 0 AND $target_efisiensi > 0 ){
-					$ef_per_hari  = ($hph_per_hari/$target_efisiensi)*100;
-					if($ef_per_hari > 100){
-						$ef_per_hari = 100;
-					}
-
-					if($get_hph_pagi > 0){
-						$ef_pagi      = $get_hph_pagi/($target_efisiensi/3)*100;
-						if($ef_pagi > 100){
-							$ef_pagi = 100;
-						}
-					}
-
-					if($get_hph_siang > 0){
-						$ef_siang     = $get_hph_siang/($target_efisiensi/3)*100;
-						if($ef_siang > 100){
-							$ef_siang = 100;
-						}
-					}
-
-					if($get_hph_malam > 0){
-						$ef_malam     = $get_hph_malam/($target_efisiensi/3)*100;
-						if($ef_malam > 100){
-							$ef_malam = 100;
-						}
-					}
-				}
-
-
-				if($hph_per_hari   > 0){
-					$jml_child++;
-
-					$sum_ef_per_hari = $sum_ef_per_hari + $ef_per_hari; 
-					$sum_ef_pagi     = $sum_ef_pagi + $ef_pagi;
-					$sum_ef_siang    = $sum_ef_siang+ $ef_siang;
-					$sum_ef_malam    = $sum_ef_malam + $ef_malam;
-
-						// $tgl = date('Y-m-d',strtotime($row->tanggal));
-					// child 
-					$mrpRecord[] = array('tgl' => $tgldari,
-										'kode'=> $row->kode,
-										'nama_mesin' => $row->nama_mesin,
-										'sc'         => $sc,
-										'nama_produk'=> $row->nama_produk,
-										'efisiensi'  => ($target_efisiensi),
-										'hph_per_hari'=> round($hph_per_hari,2),
-										'hph_pagi'   => round($get_hph_pagi,2),
-										'hph_siang'  => round($get_hph_siang,2),
-										'hph_malam'  => round($get_hph_malam,2),
-										'ef_per_hari'=> round($ef_per_hari,2),
-										'ef_pagi'	  => round($ef_pagi,2),
-										'ef_siang'	  => round($ef_siang,2),
-										'ef_malam'	  => round($ef_malam,2)
-										);
-				}
-
-				$sc = '';
-				$ef_per_hari   = 0;				
-				$ef_pagi       = 0;
-				$ef_siang      = 0;
-				$ef_malam      = 0;
+				// get mrp_production
+				$get_mrp = $this->m_efisiensi->get_list_mrp_by_tgl($rmc->mc_id,$id_dept,$tgldari);
 				
+				foreach ($get_mrp as $row) {
+
+
+					// epxplode origin
+					$exp = explode('|', $row->origin);
+					$no  = 1;
+					foreach ($exp as $exps) {
+						if($no == 1){
+							$sc = trim($exps);
+						}
+						$no++;
+					}
+
+					$target_efisiensi = $row->target_efisiensi*24;
+					// hph per shit
+					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'pagi');
+					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'siang');
+					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'malam');
+					$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
+
+					// efisiensi
+					if($hph_per_hari > 0 AND $target_efisiensi > 0 ){
+						$ef_per_hari  = ($hph_per_hari/$target_efisiensi)*100;
+						if($ef_per_hari > 100){
+							$ef_per_hari = 100;
+						}
+
+						if($get_hph_pagi > 0){
+							$ef_pagi      = $get_hph_pagi/($target_efisiensi/3)*100;
+							if($ef_pagi > 100){
+								$ef_pagi = 100;
+							}
+						}
+
+						if($get_hph_siang > 0){
+							$ef_siang     = $get_hph_siang/($target_efisiensi/3)*100;
+							if($ef_siang > 100){
+								$ef_siang = 100;
+							}
+						}
+
+						if($get_hph_malam > 0){
+							$ef_malam     = $get_hph_malam/($target_efisiensi/3)*100;
+							if($ef_malam > 100){
+								$ef_malam = 100;
+							}
+						}
+					}
+
+
+					if($hph_per_hari   > 0){
+						$jml_child++;
+
+						$sum_ef_per_hari = $sum_ef_per_hari + $ef_per_hari; 
+						$sum_ef_pagi     = $sum_ef_pagi + $ef_pagi;
+						$sum_ef_siang    = $sum_ef_siang+ $ef_siang;
+						$sum_ef_malam    = $sum_ef_malam + $ef_malam;
+
+							// $tgl = date('Y-m-d',strtotime($row->tanggal));
+						// child 
+						$mrpRecord[] = array('tgl' => $tgldari,
+											'kode'=> $row->kode,
+											'nama_mesin' => $row->nama_mesin,
+											'sc'         => $sc,
+											'nama_produk'=> $row->nama_produk,
+											'efisiensi'  => ($target_efisiensi),
+											'hph_per_hari'=> round($sum_ef_per_hari,2),
+											'hph_pagi'   => round($get_hph_pagi,2),
+											'hph_siang'  => round($get_hph_siang,2),
+											'hph_malam'  => round($get_hph_malam,2),
+											'ef_per_hari'=> round($ef_per_hari,2),
+											'ef_pagi'	  => round($ef_pagi,2),
+											'ef_siang'	  => round($ef_siang,2),
+											'ef_malam'	  => round($ef_malam,2)
+											);
+					}
+
+					$sc = '';
+					$ef_per_hari   = 0;				
+					$ef_pagi       = 0;
+					$ef_siang      = 0;
+					$ef_malam      = 0;
+					
+
+				}
+
+				$dataMesin[] =  array('tgl' => $tgldari, 
+									'nama_mesin' => $rmc->nama_mesin,
+									'mrp'=> $mrpRecord,
+									'efisiensi'  => 0,
+									'hph_per_hari'=> 0,
+									'hph_pagi'   => 0,
+									'hph_siang'  => 0,
+									'hph_malam'  => 0,
+									'ef_per_hari'=> 0,
+									'ef_pagi'	 => 0,
+									'ef_siang'	 => 0,
+									'ef_malam'	 => 0
+								);
+				if(empty($mrpRecord)){
+					$jml_child++;
+				}
+
+				$mrpRecord = [];
 
 			}
 
@@ -474,29 +534,45 @@ class Efisiensi extends MY_Controller
             $rowCount++;
 
             // child
-            foreach ($mrpRecord as $val) {	
+            foreach ($dataMesin as $val) {	
+				
 
 				$object->getActiveSheet()->getStyle("A".$rowCount.":O".$rowCount)->getFont()->setBold(FALSE);
 
 				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val['tgl']);
-				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val['kode']);
-				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val['nama_mesin']);
-				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val['sc']);
-				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val['nama_produk']);
-				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val['efisiensi']);
-				$object->getActiveSheet()->SetCellValue('H'.$rowCount, ($val['hph_per_hari']));
-				$object->getActiveSheet()->SetCellValue('I'.$rowCount, ($val['hph_pagi']));
-				$object->getActiveSheet()->SetCellValue('J'.$rowCount, ($val['hph_siang']));
-				$object->getActiveSheet()->SetCellValue('K'.$rowCount, ($val['hph_malam']));
-				$object->getActiveSheet()->SetCellValue('L'.$rowCount, ($val['ef_per_hari']));
-				$object->getActiveSheet()->SetCellValue('M'.$rowCount, ($val['ef_pagi']));
-				$object->getActiveSheet()->SetCellValue('N'.$rowCount, ($val['ef_siang']));
-				$object->getActiveSheet()->SetCellValue('O'.$rowCount, ($val['ef_malam']));
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val['nama_mesin']);
 
-		
+				if(!empty($val['mrp'])){
+
+					foreach($val['mrp'] as $val2){
+						$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val2['kode']);
+						$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val2['sc']);
+						$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val2['nama_produk']);
+						$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val2['efisiensi']);
+						$object->getActiveSheet()->SetCellValue('H'.$rowCount, ($val2['hph_per_hari']));
+						$object->getActiveSheet()->SetCellValue('I'.$rowCount, ($val2['hph_pagi']));
+						$object->getActiveSheet()->SetCellValue('J'.$rowCount, ($val2['hph_siang']));
+						$object->getActiveSheet()->SetCellValue('K'.$rowCount, ($val2['hph_malam']));
+						$object->getActiveSheet()->SetCellValue('L'.$rowCount, ($val2['ef_per_hari']));
+						$object->getActiveSheet()->SetCellValue('M'.$rowCount, ($val2['ef_pagi']));
+						$object->getActiveSheet()->SetCellValue('N'.$rowCount, ($val2['ef_siang']));
+						$object->getActiveSheet()->SetCellValue('O'.$rowCount, ($val2['ef_malam']));
+					}
+				}else{
+						$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val['efisiensi']);
+						$object->getActiveSheet()->SetCellValue('H'.$rowCount, ($val['hph_per_hari']));
+						$object->getActiveSheet()->SetCellValue('I'.$rowCount, ($val['hph_pagi']));
+						$object->getActiveSheet()->SetCellValue('J'.$rowCount, ($val['hph_siang']));
+						$object->getActiveSheet()->SetCellValue('K'.$rowCount, ($val['hph_malam']));
+						$object->getActiveSheet()->SetCellValue('L'.$rowCount, ($val['ef_per_hari']));
+						$object->getActiveSheet()->SetCellValue('M'.$rowCount, ($val['ef_pagi']));
+						$object->getActiveSheet()->SetCellValue('N'.$rowCount, ($val['ef_siang']));
+						$object->getActiveSheet()->SetCellValue('O'.$rowCount, ($val['ef_malam']));
+				}
+
             	// set align center
 	            $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            	$object->getActiveSheet()->getStyle('C'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            	$object->getActiveSheet()->getStyle('D'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             	$object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             	$object->getActiveSheet()->getStyle('G'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
@@ -509,7 +585,7 @@ class Efisiensi extends MY_Controller
 			$av_pagi    = 0;
 			$av_siang   = 0;
 			$av_malam   = 0;
-			$mrpRecord = [];
+			$dataMesin = [];
 			$num++;
 
 		}// end looping tgldari , tglsampai

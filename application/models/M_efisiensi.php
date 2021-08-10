@@ -11,7 +11,7 @@ class M_efisiensi extends CI_Model
 		return $this->db->query("SELECT kode,nama FROM departemen  WHERE nama LIKE '%$nama%' ORDER BY nama ")->result();
 	}
 
-	public function get_list_mrp_by_tgl($id_dept, $tgl)
+	public function get_list_mrp_by_tgl($mc_id, $id_dept, $tgl)
 	{
 		$tgldari = date('Y-m-d 00:00:00', strtotime($tgl));
 		$tglsampai = date('Y-m-d 23:59:59', strtotime('+1 days', strtotime($tgl)));
@@ -26,8 +26,9 @@ class M_efisiensi extends CI_Model
 								 LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
 								 INNER JOIN mrp_production_fg_hasil mpfg ON mp.kode = mpfg.kode
 								 INNER JOIN stock_quant sq ON mpfg.quant_id = sq.quant_id
-								 WHERE mp.dept_id = '$id_dept' AND sq.create_date >= '$tgldari' AND sq.create_date <= '$tglsampai' 
-								 GROUP BY mp.kode")->result();
+								 WHERE mp.dept_id = '$id_dept' AND mp.mc_id = '$mc_id' AND sq.create_date >= '$tgldari' AND sq.create_date <= '$tglsampai' 
+								 GROUP BY mp.kode
+								 ORDER BY mp.tanggal ")->result();
 								 
 	}
 
@@ -54,5 +55,11 @@ class M_efisiensi extends CI_Model
 
 
 	}
+
+	public function get_list_mesin($dept_id)
+	{
+		return $this->db->query("SELECT * FROM mesin WHERE dept_id = '$dept_id' AND status_aktif = 't' order by row_order ")->result();
+	}
+
 
 }

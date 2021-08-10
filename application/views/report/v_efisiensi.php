@@ -105,8 +105,8 @@
                             <tr>
                               <th  class="style no"  rowspan="2">No. </th>
                               <th  class='style' rowspan="2"style="min-width: 80px">Tanggal</th>
-                              <th  class='style' rowspan="2">MO</th>
                               <th  class='style' rowspan="2">Mesin</th>
+                              <th  class='style' rowspan="2">MO</th>
                               <th  class='style' rowspan="2">SC</th>
                               <th  class='style' rowspan="2" style="min-width: 150px">Nama Produk</th>
                               <th  class='style' rowspan="2" style="min-width: 80px; word-wrap: break-word;">Target Efisiensi (Qty/Hari)</th>
@@ -244,14 +244,14 @@
 
                       empty = false;
                       let group = 'group-of-rows-'+no;
-                      if(value.mrp.length > 0){
+                      if(value.mesin.length > 0){
                         icon  = "<i class='glyphicon glyphicon-plus' ></i>";
                       }else{
                         icon = '';
                       }
 
                       // css cursor pointer
-                      if(value.mrp.length > 0 ){
+                      if(value.mesin.length > 0 ){
                         style = 'cursor:pointer';
                       }else{
                         style = '';
@@ -263,40 +263,69 @@
                                $("<td class=''>").html(icon),
                                $("<td >").text(value.tgl),
                                $("<td colspan='9'>").text(''),
-                               $("<td>").text(value.av_hari),
-                               $("<td>").text(value.av_pagi),
-                               $("<td>").text(value.av_siang),
-                               $("<td>").text(value.av_malam),
+                               $("<td align='right'>").text(value.av_hari),
+                               $("<td align='right'>").text(value.av_pagi),
+                               $("<td align='right'>").text(value.av_siang),
+                               $("<td align='right'>").text(value.av_malam),
                       );
                       no++
 
                       tbody.append(tr);
                       $("#example1").append(tbody); // append parents
+                      jml_ef_hari = 0;
 
                       // child
-                      if(value.mrp.length > 0){
+                      if(value.mesin.length > 0){
 
                         let tbody2 = $('<tbody  id="'+group+'" class="collapse child">');
-                        $.each(value.mrp, function(k, v){
+                        n = 1;
+                        $.each(value.mesin, function(k, v){
 
                           var tr2 = $('<tr style="background-color: #f2f2f2;">').append(
-                                   $("<td>").html(''),
+                                   $("<td align='center'>").html(n),
                                    $("<td>").html(v.tgl),
-                                   $("<td>").html(v.kode),
                                    $("<td>").html(v.nama_mesin),
-                                   $("<td>").html(v.sc),
-                                   $("<td>").html(v.nama_produk),
-                                   $("<td>").html(v.efisiensi),
-                                   $("<td>").html(v.hph_per_hari),
-                                   $("<td>").html(v.hph_pagi),
-                                   $("<td>").html(v.hph_siang),
-                                   $("<td>").html(v.hph_malam),
-                                   $("<td>").html(v.ef_per_hari),
-                                   $("<td>").html(v.ef_pagi),
-                                   $("<td>").html(v.ef_siang),
-                                   $("<td>").html(v.ef_malam),
+                                   $("<td colspan='3'>").text(''),
+                                   $("<td  align='right'>").html(v.efisiensi),
+                                   $("<td  align='right'>").html(v.hph_per_hari),
+                                   $("<td  align='right'>").html(v.hph_pagi),
+                                   $("<td  align='right'>").html(v.hph_siang),
+                                   $("<td  align='right'>").html(v.hph_malam),
+                                   $("<td  align='right'>").html(v.ef_per_hari),
+                                   $("<td  align='right'>").html(v.ef_pagi),
+                                   $("<td  align='right'>").html(v.ef_siang),
+                                   $("<td  align='right'>").html(v.ef_malam),
                                   );
-                          tbody2.append(tr2);
+
+                          if(v.mrp.length > 0){
+                            $.each(v.mrp, function(k, v2){
+
+                               var tr3 = $('<tr style="background-color: #f2f2f2;">').append(
+                                   $("<td align='center'>").html(n++),
+                                   $("<td>").html(v2.tgl),
+                                   $("<td>").html(v2.nama_mesin),
+                                   $("<td>").html(v2.kode),
+                                   $("<td>").html(v2.sc),
+                                   $("<td>").html(v2.nama_produk),
+                                   $("<td  align='right'>").html(v2.efisiensi),
+                                   $("<td  align='right'>").html(v2.hph_per_hari),
+                                   $("<td  align='left'>").html(v2.hph_pagi),
+                                   $("<td  align='left'>").html(v2.hph_siang),
+                                   $("<td  align='right'>").html(v2.hph_malam),
+                                   $("<td  align='right'>").html(v2.ef_per_hari),
+                                   $("<td  align='right'>").html(v2.ef_pagi),
+                                   $("<td  align='right'>").html(v2.ef_siang),
+                                   $("<td  align='right'>").html(v2.ef_malam),
+                                  );
+                                tbody2.append(tr3);
+
+
+                            });
+                          }else{
+                            tbody2.append(tr2);
+                            n++;
+                          }
+
                         });
                         $("#example1").append(tbody2); // append child
                       }
