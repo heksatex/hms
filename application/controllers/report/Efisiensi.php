@@ -539,12 +539,13 @@ class Efisiensi extends MY_Controller
 
 				$object->getActiveSheet()->getStyle("A".$rowCount.":O".$rowCount)->getFont()->setBold(FALSE);
 
-				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val['tgl']);
-				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val['nama_mesin']);
+				
 
 				if(!empty($val['mrp'])){
 
 					foreach($val['mrp'] as $val2){
+						$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val['tgl']);
+						$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val['nama_mesin']);
 						$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val2['kode']);
 						$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val2['sc']);
 						$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val2['nama_produk']);
@@ -557,8 +558,18 @@ class Efisiensi extends MY_Controller
 						$object->getActiveSheet()->SetCellValue('M'.$rowCount, ($val2['ef_pagi']));
 						$object->getActiveSheet()->SetCellValue('N'.$rowCount, ($val2['ef_siang']));
 						$object->getActiveSheet()->SetCellValue('O'.$rowCount, ($val2['ef_malam']));
+
+						// set align center
+						$object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+						$object->getActiveSheet()->getStyle('D'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+						$object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+						$object->getActiveSheet()->getStyle('G'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+						$rowCount++;
 					}
 				}else{
+						$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val['tgl']);
+						$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val['nama_mesin']);		
 						$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val['efisiensi']);
 						$object->getActiveSheet()->SetCellValue('H'.$rowCount, ($val['hph_per_hari']));
 						$object->getActiveSheet()->SetCellValue('I'.$rowCount, ($val['hph_pagi']));
@@ -568,15 +579,18 @@ class Efisiensi extends MY_Controller
 						$object->getActiveSheet()->SetCellValue('M'.$rowCount, ($val['ef_pagi']));
 						$object->getActiveSheet()->SetCellValue('N'.$rowCount, ($val['ef_siang']));
 						$object->getActiveSheet()->SetCellValue('O'.$rowCount, ($val['ef_malam']));
+
+						// set align center
+						$object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+						$object->getActiveSheet()->getStyle('D'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+						$object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+						$object->getActiveSheet()->getStyle('G'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+						$rowCount++;
 				}
 
-            	// set align center
-	            $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            	$object->getActiveSheet()->getStyle('D'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            	$object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            	$object->getActiveSheet()->getStyle('G'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+            	
 
-				$rowCount++;
             }
 
 			$tgldari = date('Y-m-d',strtotime('+1 days',strtotime($tgldari)));
