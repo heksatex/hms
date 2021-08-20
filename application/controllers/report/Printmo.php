@@ -84,26 +84,55 @@ class Printmo extends MY_Controller
             $pdf->SetFont('Arial','B',9,'C');
 
             // caption tengah
-            $pdf->setXY(80,20);
+            $pdf->setXY(65,20);
             $pdf->Multicell(15,4,'Product ',0,'L');
-
-            $pdf->setXY(80,25);
+            $pdf->setXY(65,25);
             $pdf->Multicell(15,4,'Qty ',0,'L');
 
-
-            $pdf->setXY(94, 20);
+            $pdf->setXY(79, 20);
             $pdf->Multicell(5, 4, ':', 0, 'L');
-            $pdf->setXY(94, 25);
+            $pdf->setXY(79, 25);
             $pdf->Multicell(5, 4, ':', 0, 'L');
     
             // isi tengah
             $pdf->SetFont('Arial','',9,'C');
 
-            $pdf->setXY(95,20);
-            $pdf->Multicell(100,4,$head['nama_produk'],0,'L');
+            $pdf->setXY(80,20);
+            $pdf->Multicell(61,4,$head['nama_produk'],0,'L');
 
-            $pdf->setXY(95,25);
+            $pdf->setXY(80,25);
             $pdf->Multicell(40,4,$head['qty'].' '.$head['uom'],0,'L');
+
+            $pdf->SetFont('Arial','B',9,'C');
+
+            // caption kanan
+            $pdf->setXY(140,20);
+            $pdf->Multicell(15,4,'TPM ',0,'L');
+            $pdf->setXY(140,25);
+            $pdf->Multicell(15,4,'Panjang ',0,'L');
+ 
+            $pdf->setXY(155, 20);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(155, 25);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+
+            // isi kanan
+            $pdf->SetFont('Arial','',9,'C');
+
+            // explode reff note
+            $ex2 = explode('|', $head['reff_note']);
+            $a   = 0;
+            $tpm = '';
+            foreach ($ex2 as $exs2) {
+                if($a == 1){ // tpm
+                    $tpm = trim($exs2);
+                }
+                $a++;
+            }
+
+            $pdf->setXY(156,20);
+            $pdf->Multicell(61,4,$tpm,0,'L');
+  
 
             // body
             $pdf->SetFont('Arial','B',9,'C');
