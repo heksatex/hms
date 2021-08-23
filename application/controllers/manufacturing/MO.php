@@ -3011,7 +3011,6 @@ class MO extends MY_Controller
                 $pdf->AddPage();
                 $loop = 1;
                 $heightNama = 0; 
-                $enter         = 1;
                 $enter_barcode = 13;
             }
 
@@ -3026,12 +3025,32 @@ class MO extends MY_Controller
             $uom         = $get['uom'];
             $tgl         = $get['create_date'];
             $reff_note   = $get['reff_note'];
+            $note_head   = $get['note_head'];
+
+            $nh = explode('|', $note_head);
+            $loop1 = 0;
+            $nh_mo = '';
+            $nh_dept = '';
+            foreach($nh as $nhx){
+                if($loop1 == 2){
+                    $nh_mo = trim($nhx);
+                }
+
+                if($loop1 == 3){
+                    $nh_dept = trim($nhx);
+                }
+
+                $loop1++;
+            }
+
 
             $pdf->setXY(3,3+$heightNama);
             $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
 
+            $pdf->SetFont('Arial','B',12,'C');
+
             $pdf->setXY(3,5+$heightNama+10);
-            $pdf->Multicell(74,5,"Qty : ".$qty." ".$uom,0,'L');
+            $pdf->Multicell(74,5,"Qty : ".$qty." ".$uom,0,'L'); // qty
 
             $pdf->setXY(3,5+$heightNama+15);
             $pdf->Multicell(74,5,"MC : ".$mesin,0,'L');// MC TWS
@@ -3039,18 +3058,21 @@ class MO extends MY_Controller
             $pdf->setXY(3,5+$heightNama+20);
             $pdf->Multicell(30,5,"Tgl.HPH   :",0,'L');// Tgl buat/hph
 
-            $pdf->SetFont('Arial','B',13,'C');
-            $pdf->setXY(30,5+$heightNama+20);
+            $pdf->setXY(24,5+$heightNama+20);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
-            $pdf->SetFont('Arial','B',15,'C');
             $pdf->setXY(3,5+$heightNama+25);
             $pdf->Multicell(74,5,"Reff Note : ".$reff_note,0,'L');// reff note
 
+            $pdf->setXY(3,5+$heightNama+30);
+            $pdf->Multicell(74,5,"Dept Tujuan : ".$nh_dept,0,'L');// Departemen Tujuan
 
-            $pdf->Code128(5,35,$barcode,70,15,'C',0,1); // barcode
+            $pdf->setXY(3,5+$heightNama+35);
+            $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
-             $pdf->setXY(0,5+$heightNama+45);
+            $pdf->Code128(5,45,$barcode,70,8,'C',0,1); // barcode
+
+            $pdf->setXY(0,5+$heightNama+48);
             $pdf->Multicell(80,5,$barcode,0,'C');// barcode
 
             $heightNama    = $heightNama + 40;
