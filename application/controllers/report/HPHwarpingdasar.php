@@ -68,9 +68,9 @@ class HPHwarpingdasar extends MY_Controller
 						# code...
 						if($val == 'Pagi'){
 							$jam_dari    = '07:00:00';
-							$jam_sampai  = '14:29:59';
+							$jam_sampai  = '14:59:59';
 						}else if($val == 'Siang'){
-							$jam_dari    = '14:30:00';
+							$jam_dari    = '15:00:00';
 							$jam_sampai  = '22:59:59';
 						}else if($val == 'Malam'){
 							$jam_dari    = '23:00:00';
@@ -224,9 +224,9 @@ class HPHwarpingdasar extends MY_Controller
 						# code...
 						if($val == 'Pagi'){
 							$jam_dari    = '07:00:00';
-							$jam_sampai  = '14:29:59';
+							$jam_sampai  = '14:59:59';
 						}else if($val == 'Siang'){
-							$jam_dari    = '14:30:00';
+							$jam_dari    = '15:00:00';
 							$jam_sampai  = '22:59:59';
 						}else if($val == 'Malam'){
 							$jam_dari    = '23:00:00';
