@@ -13,8 +13,8 @@ class M_efisiensi extends CI_Model
 
 	public function get_list_mrp_by_tgl($mc_id, $id_dept, $tgl)
 	{
-		$tgldari = date('Y-m-d 00:00:00', strtotime($tgl));
-		$tglsampai = date('Y-m-d 23:59:59', strtotime('+1 days', strtotime($tgl)));
+		$tgldari = date('Y-m-d 07:00:00', strtotime($tgl));
+		$tglsampai = date('Y-m-d 06:59:59', strtotime('+1 days', strtotime($tgl)));
 		/*
 		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.nama_produk,mp.reff_note, mp.status, ms.nama_mesin, mp.target_efisiensi
 								 FROM mrp_production mp 
@@ -37,13 +37,13 @@ class M_efisiensi extends CI_Model
 
 		if($shift == 'pagi'){
 			$tgldari   = date('Y-m-d 07:00:00', strtotime($tgl));
-			$tglsampai = date('Y-m-d 15:00:00', strtotime($tgl));
+			$tglsampai = date('Y-m-d 14:59:59', strtotime($tgl));
 		}else if($shift == 'siang'){
 			$tgldari   = date('Y-m-d 15:00:00', strtotime($tgl));
-			$tglsampai = date('Y-m-d 23:00:00', strtotime($tgl));
+			$tglsampai = date('Y-m-d 22:59:59', strtotime($tgl));
 		}else{
 			$tgldari   = date('Y-m-d 23:00:00', strtotime($tgl));
-			$tglsampai = date('Y-m-d 07:00:00', strtotime('+1 days', strtotime($tgl)));
+			$tglsampai = date('Y-m-d 06:59:59', strtotime('+1 days', strtotime($tgl)));
 		}
 
 		$query = $this->db->query("SELECT IFNULL(sum(mp.qty),0) as tot_qty 
