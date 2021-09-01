@@ -12,8 +12,13 @@
 
     .divListviewHead table  {
       display: block;
-      height: calc( 100vh - 250px );
+      height: calc( 90vh - 250px );
       overflow-x: auto;
+    }
+
+    .btn-setTgl{
+      height: 22px;
+      min-width:  40px;
     }
 
   </style>
@@ -78,6 +83,23 @@
                 </div>
                 <div class="form-group">
                   <div class="col-md-12">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-1 col-xs-2">
+                      <button type="button" class="btn btn-default btn-xs btn-setTgl"  name="btn_h" onclick="setTgl('h');" >H</buton>
+                    </div> 
+                    <div class="col-md-1 col-xs-2">
+                      <button type="button" class="btn btn-default btn-xs btn-setTgl"  name="btn_h1" onclick="setTgl('h1');" >H.1</buton>
+                    </div>
+                    <div class="col-md-1 col-xs-2">
+                      <button type="button" class="btn btn-default btn-xs btn-setTgl "  name="btn_h-7" onclick="setTgl('h-7');" >H-7</buton>
+                    </div>
+                    <div class="col-md-1 col-xs-2">
+                      <button type="button" class="btn btn-default btn-xs btn-setTgl "  name="btn_h-30" onclick="setTgl('h-30');" >H-30</buton>
+                    </div>
+                  </div>  
+                </div>
+                <div class="form-group">
+                  <div class="col-md-12">
                     <div class="col-md-2"><label>Departemen</label></div>
                     <div class="col-md-4">
                         <select type="text" class="form-control input-sm" name="departemen" id="departemen" required=""  >
@@ -112,7 +134,7 @@
                               <th  class='style' colspan="3" style="text-align: center;">Total Produksi</th>
                               <th  class='style' rowspan="2" style="text-align: center;">Efisensi (%)</th>
                               <th  class='style' colspan="3" style="text-align: center;">Grade</th>
-                              <th  class='style' rowspan="2" >Keterangan</th>
+                              <th  class='style' rowspan="2" >Ket</th>
 
                             </tr>
                             <tr>
@@ -152,16 +174,12 @@
 
 </div>
 
-<?php $this->load->view("admin/_partials/js.php") ?>
+<?php $this->load->view("admin/_partials/js.php"); ?>
+
+<!--script sendiri Global-->
+<script type="text/javascript" src="<?php echo site_url('dist/js/myscript.js') ?>"></script>
 
 <script type="text/javascript">
-
-   //show / hide collapse child in tabel
-    $(document).on("hide.bs.collapse show.bs.collapse", ".child", function (event) {
-        //alert('tes');
-        $(this).prev().find(".glyphicon").toggleClass("glyphicon-plus glyphicon-minus");
-        event.stopPropagation();
-    });
 
   // set date tgldari
   $('#tgldari').datetimepicker({
@@ -248,9 +266,9 @@
                                $("<td>").html(no),
                                $("<td>").text(value.nama_mesin),
                                $("<td colspan='4'>").text(''),
-                               $("<td align='right'>").text(value.hph_per_hari_mtr),
-                               $("<td align='right'>").text(value.hph_per_hari_kg),
-                               $("<td align='right'>").text(value.hph_per_hari_gl),
+                               $("<td align='right'>").text(value.hph_mtr),
+                               $("<td align='right'>").text(value.hph_kg),
+                               $("<td align='right'>").text(value.hph_gl),
                                $("<td align='right'>").text(value.efisisensi),
                                $("<td align='right'>").text(value.grade_A),
                                $("<td align='right'>").text(value.grade_B),
@@ -265,9 +283,9 @@
                                $("<td>").text(v.nama_mesin),
                                $("<td>").text(v.nama_produk),
                                $("<td colspan='3'>").text(''),
-                               $("<td align='right'>").text(v.hph_per_hari_mtr),
-                               $("<td align='right'>").text(v.hph_per_hari_kg),
-                               $("<td align='right'>").text(v.hph_per_hari_gl),
+                               $("<td align='right'>").text(v.hph_mtr),
+                               $("<td align='right'>").text(v.hph_kg),
+                               $("<td align='right'>").text(v.hph_gl),
                                $("<td align='right'>").text(v.efisisensi),
                                $("<td align='right'>").text(v.grade_A),
                                $("<td align='right'>").text(v.grade_B),
