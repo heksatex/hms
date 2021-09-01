@@ -30,8 +30,6 @@
 <script src="<?php echo base_url('dist/notify/bootstrap-notify.min.js') ?>"></script>
 <!-- Tags Input -->
 <script src="<?php echo base_url('dist/tags-input/bootstrap-tagsinput.js') ?>"></script>
-<!--script sendiri-->
-<script type="text/javascript" src="<?php echo site_url('dist/js/myscript.js') ?>"></script>
  
 
 <script type="text/javascript">
