@@ -41,9 +41,9 @@ class Qualitycontrol extends MY_Controller
 
 		$mrpRecord= [];
 		$dataMesin = [];
-		$jmlhari    = 7;
+		$jmlhari    = 0;
 		$tglawal    = date('Y-m-d 07:00:00', strtotime($tgldari));
-		$tglakhir    = date('Y-m-d 06:59:59', strtotime('+1 days', strtotime($tglsampai)));
+		$tglakhir    = date('Y-m-d 07:00:00', strtotime('+1 days', strtotime($tglsampai)));
 
 		$tgl1       = new DateTime($tglawal);
 		$tgl2       = new DateTime($tglakhir);
