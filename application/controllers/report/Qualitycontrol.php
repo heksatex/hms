@@ -224,7 +224,7 @@ class Qualitycontrol extends MY_Controller
         $rowCount = 7;
     	$num 	   = 1;
 		$tglawal   = date('Y-m-d 07:00:00', strtotime($tgldari));
-		$tglakhir  = date('Y-m-d 06:59:59', strtotime('+1 days', strtotime($tglsampai)));
+		$tglakhir  = date('Y-m-d 07:00:00', strtotime('+1 days', strtotime($tglsampai)));
 		$tgl1       = new DateTime($tglawal);
 		$tgl2       = new DateTime($tglakhir);
 		$diff_hari   = date_diff($tgl1, $tgl2);
