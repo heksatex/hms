@@ -85,9 +85,9 @@ class Efisiensi extends MY_Controller
 
 					$target_efisiensi = $row->target_efisiensi*24;
 					// hph per shit
-					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'pagi');
-					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'siang');
-					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'malam');
+					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'pagi');
+					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'siang');
+					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'malam');
 					$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
 
 					// efisiensi
@@ -402,9 +402,9 @@ class Efisiensi extends MY_Controller
 
 					$target_efisiensi = $row->target_efisiensi*24;
 					// hph per shit
-					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'pagi');
-					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'siang');
-					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,'malam');
+					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'pagi');
+					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'siang');
+					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'malam');
 					$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
 
 					// efisiensi
