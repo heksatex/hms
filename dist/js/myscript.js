@@ -22,7 +22,7 @@ function setTgl(value){
     if(value=='h-7'){ // set date H-7
       var myDate = new Date(tglsampai);
       months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-       myDate.setDate(myDate.getDate()-7);
+       myDate.setDate(myDate.getDate()-6);
       var set =(myDate.getDate()) + '-' + months[myDate.getMonth()] + '' + myDate.getFullYear();
       $("#tgldari").val(set);
     }
@@ -31,7 +31,7 @@ function setTgl(value){
       var myDate = new Date(tglsampai);
       months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
       //var set =
-      myDate.setDate(myDate.getDate()-30);
+      myDate.setDate(myDate.getDate()-29);
       var set = (myDate.getDate()) + '-' + months[myDate.getMonth()] + '' + myDate.getFullYear();
       $("#tgldari").val(set);
     }
