@@ -21,10 +21,10 @@ class M_efisiensi extends CI_Model
 								 INNER JOIN mesin ms ON mp.mc_id = ms.mc_id
 								 WHERE mp.dept_id = '$id_dept' AND mp.tanggal >= '$tgldari' AND mp.tanggal <= '$tglsampai'")->result();
 								 */
-		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.nama_produk,mp.reff_note, mp.status, ms.nama_mesin, mp.target_efisiensi
+		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.kode_produk, mp.nama_produk,mp.reff_note, mp.status, ms.nama_mesin, mp.target_efisiensi
 								 FROM mrp_production mp 
 								 LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
-								 INNER JOIN mrp_production_fg_hasil mpfg ON mp.kode = mpfg.kode
+								 INNER JOIN mrp_production_fg_hasil mpfg ON mp.kode = mpfg.kode AND mp.kode_produk = mpfg.kode_produk
 								 INNER JOIN stock_quant sq ON mpfg.quant_id = sq.quant_id
 								 WHERE mp.dept_id = '$id_dept' AND mp.mc_id = '$mc_id' AND sq.create_date >= '$tgldari' AND sq.create_date <= '$tglsampai' 
 								 GROUP BY mp.kode
@@ -32,7 +32,7 @@ class M_efisiensi extends CI_Model
 								 
 	}
 
-	public function get_list_hph_by_date($kode, $tgl, $shift)
+	public function get_list_hph_by_date($kode, $tgl, $kode_produk, $shift)
 	{	
 
 		if($shift == 'pagi'){
@@ -48,8 +48,7 @@ class M_efisiensi extends CI_Model
 
 		$query = $this->db->query("SELECT IFNULL(sum(mp.qty),0) as tot_qty 
 								FROM  mrp_production_fg_hasil mp 
-								INNER JOIN stock_quant sq ON mp.quant_id = sq.quant_id 
-								WHERE mp.kode = '$kode' AND sq.create_date >= '$tgldari' AND sq.create_date <='$tglsampai' ");
+								WHERE mp.kode = '$kode' AND mp.kode_produk = '$kode_produk' AND mp.create_date >= '$tgldari' AND mp.create_date <='$tglsampai' ");
 		$result = $query->result_array();      
       	return $result[0]['tot_qty'];
 
