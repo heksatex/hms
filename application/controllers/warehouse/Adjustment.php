@@ -93,6 +93,9 @@ class Adjustment extends MY_Controller
       if(empty($lokasi_adjustment['nama'])){
         $callback = array('status' => 'failed', 'field' => 'lokasi_adjustment', 'message' => 'Lokasi Adjustment Harus Diisi !', 'icon' =>'fa fa-warning', 
               'type' => 'danger'  );                   
+      }else if(empty($kode_lokasi)){
+        $callback = array('status' => 'failed', 'field' => 'kode_lokasi', 'message' => 'Kode Lokasi Harus Diisi !', 'icon' =>'fa fa-warning', 
+        'type' => 'danger'  );         
       }else{
         //cek kode adjustment apa sudah ada apa belum
         $cek = $this->m_adjustment->cek_adjustment_by_kode($kode_adjustment)->row_array();
@@ -196,13 +199,14 @@ class Adjustment extends MY_Controller
           $no++;
           $row = array();
           $row[] = $no.".";
+          $row[] = $field->kode_produk;
           $row[] = $field->nama_produk;
           $row[] = $field->lot;
           $row[] = number_format($field->qty,2)." ".$field->uom;
           $row[] = number_format($field->qty2,2)." ".$field->uom2;
           $row[] = $field->reff_note;
           $row[] = $field->reserve_move;
-          $row[] = $field->kode_produk."|".htmlentities($field->nama_produk)."|".$field->lot."|".$field->qty."|".$field->uom."|".$field->qty2."|".$field->uom2."|".$field->lokasi."|".$field->quant_id."|".$field->reserve_move."|";
+          $row[] = $field->quant_id;
           $data[] = $row;
       }
       $output = array(
@@ -230,7 +234,7 @@ class Adjustment extends MY_Controller
       $sql_adjustment_items_batch = "";
       
       //lock tabel
-      $this->_module->lock_tabel('adjustment WRITE, adjustment_items WRITE');
+      $this->_module->lock_tabel('adjustment WRITE, adjustment_items WRITE, stock_quant WRITE, mrp_production_fg_hasil as mpfg WRITE, mrp_production as mp WRITE');
       
       //cek status adjustment = done
       $cek1  = $this->m_adjustment->cek_status_adjustment($kode_adjustment,'done')->row_array();
@@ -246,29 +250,32 @@ class Adjustment extends MY_Controller
         $row_order  = $this->_module->get_row_order_adjustment_items_by_kode($kode_adjustment);
         $item_add   = false;
         $lot_sama   = '';
-        for($i=0; $i <= $countchek-1;$i++){
-          $dt1  =  $arr_data[$i];          
 
-          $row_data = explode("|", $dt1);
+        foreach($arr_data as $row){
 
-          $kode_produk = $row_data[0];
-          $nama_produk = $row_data[1];
-          $lot         = $row_data[2];
-          $qty         = $row_data[3];
-          $uom         = $row_data[4];
-          $qty2        = $row_data[5];
-          $uom2        = $row_data[6];
-          $lokasi      = $row_data[7];
-          $quant_id    = $row_data[8];          
-          $reserve_move= $row_data[9];
-          
+          // get data stock by quant_id
+          $row_data = $this->m_adjustment->get_stock_quant_by_quant_id($row)->row_array();
+
+          $kode_produk = $row_data['kode_produk'];
+          $lot         = $row_data['lot'];
+          $qty         = $row_data['qty'];
+          $uom         = $row_data['uom'];
+          $qty2        = $row_data['qty2'];
+          $uom2        = $row_data['uom2'];
+          $quant_id    = $row_data['quant_id'];          
+    
           //cek apakah quant_id sudah ada di dalam adjustment_items
           //jika sudah ada maka tidak usah ditambahkan lagi
           $cek_quant   = $this->m_adjustment->cek_quant_adjustment_items($kode_adjustment,$quant_id)->row_array();
           if(empty($cek_quant['kode_adjustment'])){
+
+            // get kode MO berdasarkan quant_id (syarat hanya produk yang di poduksi di lokasi adj yg telah dipilih)
+            $mo = $this->m_adjustment->get_kodeMO_by_quant_id($quant_id,$kode_adjustment)->row_array();
+
             $item_add = true;
             //insert ke adjustment_items
-            $sql_adjustment_items_batch .= "('".$kode_adjustment."', '".$quant_id."', '".addslashes($kode_produk)."','".addslashes($lot)."', '".addslashes($uom)."','".$qty."','".$qty."', '".addslashes($uom2)."','".$qty2."','".$qty2."', '".$row_order."'), ";
+            $sql_adjustment_items_batch .= "('".$kode_adjustment."', '".$quant_id."', '".addslashes($kode_produk)."','".addslashes($lot)."', '".addslashes($uom)."','".$qty."','".$qty."', '".addslashes($uom2)."','".$qty2."','".$qty2."', '".$mo['kode']."', '".$row_order."'), ";
+            
             $row_order++;            
           }else{
             $lot_sama .= $lot.', ';
@@ -276,8 +283,7 @@ class Adjustment extends MY_Controller
           }
 
         }
-
-
+    
         if(!empty($sql_adjustment_items_batch)){
           $sql_adjustment_items_batch = rtrim($sql_adjustment_items_batch, ', ');
           $this->m_adjustment->simpan_adjustment_items_batch($sql_adjustment_items_batch);
@@ -289,18 +295,17 @@ class Adjustment extends MY_Controller
         if($item_add == true){
           if(!empty($lot_sama)){
              $lot_sama = rtrim($lot_sama, ', ');
-            $callback = array('status'=>'success',  'message' => 'Adjustment Detail Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success', 'msg2'=>'Yes', 'message2'=> 'Produk ( '.$lot_sama.' )</br> Sudah Pernah Diinput !'); 
+            $callback = array('status'=>'success',  'message' => 'Adjustment Detail Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success', 'msg2'=>'Yes', 'message2'=> 'Lot ( '.$lot_sama.' )</br> Sudah Pernah Diinput !'); 
           }else{
             $callback = array('status'=>'success',  'message' => 'Adjustment Detail Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success'); 
           }
             $jenis_log   = "edit";
             $note_log    = "Tambah Data Details ".$kode_adjustment;
-            $kode_adjustment_encr = encrypt_url($kode_adjustment);
             $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
             
         }else if($item_add == false){
           $lot_sama = rtrim($lot_sama, ', ');
-          $callback = array('status'=>'failed',  'message' => 'Produk ( '.$lot_sama.' )</br> Sudah Pernah Diinput !',  'icon' =>'fa fa-check', 'type' => 'success'); 
+          $callback = array('status'=>'failed',  'message' => 'Lot ( '.$lot_sama.' )</br> Sudah Pernah Diinput !',  'icon' =>'fa fa-check', 'type' => 'success'); 
 
         }      
 
@@ -495,6 +500,7 @@ class Adjustment extends MY_Controller
         $sm_row      = 1;
         $jml_adj     = 0;
         $loop_adj    = false;
+        $qty_stok_adj_manual = false;
  
         $item =  $this->m_adjustment->get_adjustment_detail_by_code($kode_adjustment);
         foreach($item as $row){
@@ -504,7 +510,14 @@ class Adjustment extends MY_Controller
           
           // jika quant_id = 0 (save stock_quant, stock_move, stock_move_items, stock_move_produk)
           if($row->quant_id == 0){
-              $loop_adj = true;
+
+              if($row->qty_adjustment == 0 OR empty($row->qty_adjustment)){
+                $qty_stok_adj_manual = true; // tambah produk / stock manual
+                break;
+              }else{
+                $loop_adj = true;
+              }
+             
               // simpan stock_quant
               $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','','".$row->qty_adjustment."','".$row->uom."','".$row->qty_adjustment2."','".$row->uom2."','".$kode_lokasi."','','',''), ";
 
@@ -562,7 +575,6 @@ class Adjustment extends MY_Controller
 
               // << QTY 1
                
-
               /*
               // >> QTY 2
 
@@ -777,7 +789,11 @@ class Adjustment extends MY_Controller
         
         }else{// $loop_adj = false
 
-          $callback = array('status' => 'failed','message' => 'Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+          if($qty_stok_adj_manual == true){
+            $callback = array('status' => 'failed','message' => 'Qty Adjustment tidak Boleh 0 !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else{
+            $callback = array('status' => 'failed','message' => 'Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }
 
         }
 

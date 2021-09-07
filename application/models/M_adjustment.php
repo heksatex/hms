@@ -10,8 +10,8 @@ class M_adjustment extends CI_Model
 	var $order  	  = array('create_date' => 'desc');
 
 	var $table2  	    = 'stock_quant';
-	var $column_order2  = array(null, 'nama_produk', 'lot', 'qty', 'qty2', 'reff_note', 'reserve_move');
-	var $column_search2 = array('nama_produk', 'lot', 'qty', 'qty2', 'reff_note', 'reserve_move');
+	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'reff_note', 'reserve_move');
+	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'reff_note', 'reserve_move');
 	var $order2  	    = array('nama_produk' => 'asc');
 
 	private function _get_datatables_query()
@@ -203,7 +203,7 @@ class M_adjustment extends CI_Model
 
 	public function simpan_adjustment_items_batch($sql)
 	{
-		return $this->db->query("INSERT INTO adjustment_items (kode_adjustment, quant_id, kode_produk, lot, uom, qty_data, qty_adjustment, uom2, qty_data2, qty_adjustment2, row_order) values $sql ");
+		return $this->db->query("INSERT INTO adjustment_items (kode_adjustment, quant_id, kode_produk, lot, uom, qty_data, qty_adjustment, uom2, qty_data2, qty_adjustment2, mrp_kode, row_order) values $sql ");
 	}
 
 	public function cek_quant_adjustment_items($kode_adjustment, $quant_id)
@@ -240,12 +240,12 @@ class M_adjustment extends CI_Model
 	{
 		return $this->db->query("SELECT adjustment_location  FROM departemen WHERE kode = '$kode_departemen'");
 	}
-
+/*
 	public function get_qty_stock_location_by_kode($kode_produk, $kode_lokasi)
 	{
 		return $this->db->query("SELECT SUM() FROM departemen WHERE nama = '$nama'");
 	}
-
+*/
 	public function get_list_uom_select2_by_prod($name)
 	{
 		return $this->db->query("SELECT id, nama, nama, short
@@ -284,4 +284,27 @@ class M_adjustment extends CI_Model
 	{
 		return $this->db->query("UPDATE adjustment set status = '$status' where kode_adjustment = '$kode_adjustment' ");
 	}
+
+	public function get_stock_quant_by_quant_id($quant_id)
+	{
+		$this->db->where('quant_id', $quant_id);
+		return $this->db->get("stock_quant");
+	}
+
+	public function get_kodeMO_by_quant_id($quant_id, $kode_adjustment)
+	{		
+		$this->db->SELECT('kode_lokasi');
+		$this->db->FROM('adjustment');
+		$this->db->WHERE('kode_adjustment',$kode_adjustment);
+		$qry = $this->db->get();
+		$result = $qry->row_array();
+
+		$this->db->SELECT('mp.kode');
+		$this->db->FROM('mrp_production_fg_hasil mpfg');
+		$this->db->JOIN('mrp_production mp','mpfg.kode = mp.kode','INNER');
+		$this->db->WHERE('mpfg.quant_id',$quant_id);
+		$this->db->WHERE_IN('mp.destination_location',$result['kode_lokasi']);
+		return $this->db->get();
+	}
+
 }

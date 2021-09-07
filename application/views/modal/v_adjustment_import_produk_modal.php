@@ -8,6 +8,7 @@
           <thead>
             <tr>
               <th class="no">No</th>
+              <th>Kode Produk</th>
               <th>Product</th>
               <th>Lot</th>
               <th>Qty</th>
@@ -47,13 +48,13 @@
             },
             "columnDefs": [
               {
-                "targets" : 7,
+                "targets" : 8,
                 
                 'checkboxes': {
                     'selectRow': true
                  },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[7];
+                   var rowId = rowData[8];
                    if(rowId.includes('SM') == true){  
                       this.api().cell(td).checkboxes.disable();
                    }
@@ -69,7 +70,7 @@
             },
             'rowCallback': function(row, data, dataIndex){
                // Get row ID
-               var rowId = data[7];
+               var rowId = data[8];
                 // If row ID is in the list of selected row IDs
                 if (rowId.includes('SM') == true){     
                   $(row).find('input[type="checkbox"]').prop('disabled', true);
@@ -88,7 +89,7 @@
   //simpan details ketika button simpan di klik
   
   $("#btn-tambah").off("click").on("click",function(e) {
-      var rows_selected = table.column(7).checkboxes.selected();
+      var rows_selected = table.column(8).checkboxes.selected();
       var rows_selected_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
       var kode_adjustment = "<?php echo $kode_adjustment ?>";
