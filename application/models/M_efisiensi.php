@@ -46,11 +46,23 @@ class M_efisiensi extends CI_Model
 			$tglsampai = date('Y-m-d 06:59:59', strtotime('+1 days', strtotime($tgl)));
 		}
 
+		/*
 		$query = $this->db->query("SELECT IFNULL(sum(mp.qty),0) as tot_qty 
 								FROM  mrp_production_fg_hasil mp 
 								WHERE mp.kode = '$kode' AND mp.kode_produk = '$kode_produk' AND mp.create_date >= '$tgldari' AND mp.create_date <='$tglsampai' ");
-		$result = $query->result_array();      
-      	return $result[0]['tot_qty'];
+		*/
+
+		$query = $this->db->query("SELECT IFNULL(sum(mpfg.qty),0) as tot_qty, 
+											(SELECT IFNULL(sum(adji.qty_move),0) FROM adjustment_items adji 
+											INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
+											WHERE adj.status='done' AND adj.create_date >= '$tgldari' AND adj.create_date <= '$tglsampai' AND 
+													adj.kode_lokasi = mp.destination_location AND adji.kode_produk = mpfg.kode_produk AND adji.mrp_kode = mp.kode ) as tot_adj
+									FROM  mrp_production_fg_hasil mpfg 
+									INNER JOIN mrp_production mp ON mpfg.kode = mp.kode
+									WHERE mp.kode = '$kode' AND mpfg.kode_produk = '$kode_produk' AND mpfg.create_date >= '$tgldari' AND
+										 mpfg.create_date <= '$tglsampai' ");
+		$result = $query->row_array();      
+      	return $result;
 
 
 	}

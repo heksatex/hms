@@ -12,7 +12,7 @@
 
     .divListviewHead table  {
       display: block;
-      height: calc( 100vh - 250px );
+      height: calc( 96vh - 250px );
       overflow-x: auto;
     }
 
@@ -165,16 +165,18 @@
 
   // set date tgldari
   $('#tgldari').datetimepicker({
-      defaultDate : new Date(),
-      format : 'D-MMMM-YYYY',
-      ignoreReadonly: true
+      defaultDate: new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }),
+      format: 'D-MMMM-YYYY',
+      ignoreReadonly: true,
+      maxDate: new Date(),
   });
 
   // set date tglsampai
   $('#tglsampai').datetimepicker({
-      defaultDate : new Date(),
-      format : 'D-MMMM-YYYY',
-      ignoreReadonly: true
+      defaultDate: new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }),
+      format: 'D-MMMM-YYYY',
+      ignoreReadonly: true,
+      maxDate: new Date(),
   });
 
   //select 2 Departementy
@@ -210,20 +212,62 @@
       }
     });
 
+    // cek selisih saatu submit excel
+    $('#frm_periode').submit(function(){
+
+      var tgldari   = $('#tgldari').data("DateTimePicker").date();
+      var tglsampai = $('#tglsampai').data("DateTimePicker").date();
+      var id_dept   = $('#departemen').val();
+
+      var timeDiff = 0;
+      if (tglsampai) {
+          timeDiff = (tglsampai - tgldari) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+      }
+      selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
+      if (id_dept == null) {
+        alert_modal_warning('Departemen Harus diisi !');
+
+      }else  if(tglsampai < tgldari){ // cek validasi tgl sampai kurang dari tgl Dari
+        alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+        return false;
+
+      }else if(selisih > 6 ){
+        alert_modal_warning('Maaf,  Periode Tanggal tidak boleh lebih dari 7 hari !')
+        return false;
+      }
+    });
+
   // btn generate
   $("#btn-generate").on('click', function(){
 
-      tgldari   = $('#tgldari').val();
-      tglsampai = $('#tglsampai').val();
-      id_dept   = $('#departemen').val();
+      var tgldari   = $('#tgldari').val();
+      var tglsampai = $('#tglsampai').val();
+      var id_dept   = $('#departemen').val();
+
+      var tgldari_2   = $('#tgldari').data("DateTimePicker").date();
+      var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+
+      var timeDiff = 0;
+      if (tglsampai_2) {
+          timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+      }
+
+      selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
+
 
       if(tgldari == '' || tglsampai == ''){
-
         alert_modal_warning('Periode Tanggal Harus diisi !');
 
       }else if(id_dept == null){
         alert_modal_warning('Departemen Harus diisi !');
-      }else{  
+
+      }else if(tglsampai_2 < tgldari_2){
+        alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+
+      }else if(selisih > 6){ // jika periode tanggal lebih dari 7 hari
+        alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 7 hari !')
+
+      } else{  
           $("#example1_processing").css('display',''); // show loading
 
           $('#btn-generate').button('loading');

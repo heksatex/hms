@@ -56,10 +56,16 @@ class Efisiensi extends MY_Controller
 			
 			$jml_child = 0;
 			$sum_ef_per_hari = 0;
-			$sum_ef_pagi  = 0;
-			$sum_ef_siang = 0;
+			$sum_ef_pagi   = 0;
+			$sum_ef_siang  = 0;
 			$sum_ef_malam  = 0;
 			$target_efisiensi = 0;
+			$get_adj_pagi   = 0;
+			$get_adj_siang  = 0;
+			$get_adj_malam  = 0;
+			$hph_pagi       = 0;
+			$hph_siang      = 0;
+			$hph_malam      = 0;
 
 			// get list mesin by id_dept
 			$get_mesin = $this->m_efisiensi->get_list_mesin($id_dept);
@@ -85,37 +91,57 @@ class Efisiensi extends MY_Controller
 
 					$target_efisiensi = $row->target_efisiensi*24;
 					// hph per shit
-					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'pagi');
-					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'siang');
-					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'malam');
-					$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
+					$hasil_pagi   = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'pagi');
+					$get_hph_pagi = $hasil_pagi['tot_qty'];
+					$get_adj_pagi = $hasil_pagi['tot_adj'];
+					$hph_pagi     = $get_hph_pagi+($get_adj_pagi); // HPH pagi setelah dikurangi ADJ
+
+					$hasil_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'siang');
+					$get_hph_siang = $hasil_siang['tot_qty'];
+					$get_adj_siang = $hasil_siang['tot_adj'];
+					$hph_siang     = $get_hph_siang+($get_adj_siang);  // HPH siang setelah dikurangi ADJ
+
+					$hasil_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'malam');
+					$get_hph_malam = $hasil_malam['tot_qty'];
+					$get_adj_malam = $hasil_malam['tot_adj'];
+					$hph_malam     = $get_hph_malam+($get_adj_malam); /// HPH malam setelah dikurangi ADJ
+
+					$hph_per_hari  = $hph_pagi+$hph_siang+$hph_malam;
 
 					// efisiensi
 					if($hph_per_hari > 0 AND $target_efisiensi > 0 ){
 						$ef_per_hari  = ($hph_per_hari/$target_efisiensi)*100;
+						/*
 						if($ef_per_hari > 100){
 							$ef_per_hari = 100;
 						}
+						*/
 
-						if($get_hph_pagi > 0){
-							$ef_pagi      = $get_hph_pagi/($target_efisiensi/3)*100;
+						if($hph_pagi > 0){
+							$ef_pagi      = $hph_pagi/($target_efisiensi/3)*100;
+							/*
 							if($ef_pagi > 100){
 								$ef_pagi = 100;
 							}
+							*/
 						}
 
-						if($get_hph_siang > 0){
-							$ef_siang     = $get_hph_siang/($target_efisiensi/3)*100;
+						if($hph_siang > 0){
+							$ef_siang     = $hph_siang/($target_efisiensi/3)*100;
+							/*
 							if($ef_siang > 100){
 								$ef_siang = 100;
 							}
+							*/
 						}
 
-						if($get_hph_malam > 0){
-							$ef_malam     = $get_hph_malam/($target_efisiensi/3)*100;
+						if($hph_malam > 0){
+							$ef_malam     = $hph_malam/($target_efisiensi/3)*100;
+							/*
 							if($ef_malam > 100){
 								$ef_malam = 100;
 							}
+							*/
 						}
 					}
 
@@ -127,7 +153,7 @@ class Efisiensi extends MY_Controller
 						$sum_ef_siang    = $sum_ef_siang+ $ef_siang;
 						$sum_ef_malam    = $sum_ef_malam + $ef_malam;
 
-							// $tgl = date('Y-m-d',strtotime($row->tanggal));
+						// $tgl = date('Y-m-d',strtotime($row->tanggal));
 						// child 
 						$mrpRecord[] = array('tgl' => $tgldari,
 											'kode'=> $row->kode,
@@ -136,9 +162,9 @@ class Efisiensi extends MY_Controller
 											'nama_produk'=> $row->nama_produk,
 											'efisiensi'  => number_format($target_efisiensi,2),
 											'hph_per_hari'=> number_format($hph_per_hari,2),
-											'hph_pagi'   => number_format($get_hph_pagi,2),
-											'hph_siang'  => number_format($get_hph_siang,2),
-											'hph_malam'  => number_format($get_hph_malam,2),
+											'hph_pagi'   => number_format($hph_pagi,2),
+											'hph_siang'  => number_format($hph_siang,2),
+											'hph_malam'  => number_format($hph_malam,2),
 											'ef_per_hari'=> number_format($ef_per_hari,2),
 											'ef_pagi'	  => number_format($ef_pagi,2),
 											'ef_siang'	  => number_format($ef_siang,2),
@@ -179,27 +205,35 @@ class Efisiensi extends MY_Controller
 			
 			if($sum_ef_per_hari > 0){
 				$av_per_hari = $sum_ef_per_hari / $jml_child; // average hari
+				/*
 				if($av_per_hari > 100){
 					$av_per_hari = 100;
 				}
+				*/
 
 				if($sum_ef_pagi > 0 ){
+					/*
 					$av_pagi = $sum_ef_pagi / $jml_child; // average pagi
 					if($av_pagi > 100){
 						$av_pagi = 100;
 					}
+					*/
 				}
 				if($sum_ef_siang > 0 ){
 					$av_siang = $sum_ef_siang / $jml_child; // average siang
+					/*
 					if($av_siang > 100){
 						$av_siang = 100;
 					}
+					*/
 				}
 				if($sum_ef_malam > 0 ){
 					$av_malam = $sum_ef_malam / $jml_child; // average malam
+					/*
 					if($av_malam > 100){
 						$av_malam = 100;
 					}
+					*/
 				}
 			}
 
@@ -381,6 +415,12 @@ class Efisiensi extends MY_Controller
 			$sum_ef_pagi  = 0;
 			$sum_ef_siang = 0;
 			$sum_ef_malam  = 0;
+			$get_adj_pagi   = 0;
+			$get_adj_siang  = 0;
+			$get_adj_malam  = 0;
+			$hph_pagi       = 0;
+			$hph_siang      = 0;
+			$hph_malam      = 0;
 
 			foreach($get_mesin as $rmc){
 
@@ -388,7 +428,6 @@ class Efisiensi extends MY_Controller
 				$get_mrp = $this->m_efisiensi->get_list_mrp_by_tgl($rmc->mc_id,$id_dept,$tgldari);
 				
 				foreach ($get_mrp as $row) {
-
 
 					// epxplode origin
 					$exp = explode('|', $row->origin);
@@ -402,37 +441,58 @@ class Efisiensi extends MY_Controller
 
 					$target_efisiensi = $row->target_efisiensi*24;
 					// hph per shit
-					$get_hph_pagi = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'pagi');
-					$get_hph_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'siang');
-					$get_hph_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'malam');
-					$hph_per_hari  = $get_hph_pagi+$get_hph_siang+$get_hph_malam;
+					$hasil_pagi   = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'pagi');
+					$get_hph_pagi = $hasil_pagi['tot_qty'];
+					$get_adj_pagi = $hasil_pagi['tot_adj'];
+					$hph_pagi     = $get_hph_pagi+($get_adj_pagi); // HPH pagi setelah dikurangi ADJ
+
+					$hasil_siang = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'siang');
+					$get_hph_siang = $hasil_siang['tot_qty'];
+					$get_adj_siang = $hasil_siang['tot_adj'];
+					$hph_siang     = $get_hph_siang+($get_adj_siang);  // HPH siang setelah dikurangi ADJ
+
+					$hasil_malam = $this->m_efisiensi->get_list_hph_by_date($row->kode,$tgldari,$row->kode_produk,'malam');
+					$get_hph_malam = $hasil_malam['tot_qty'];
+					$get_adj_malam = $hasil_malam['tot_adj'];
+					$hph_malam     = $get_hph_malam+($get_adj_malam); /// HPH malam setelah dikurangi ADJ
+					
+					$hph_per_hari  = $hph_pagi+$hph_siang+$hph_malam;
 
 					// efisiensi
 					if($hph_per_hari > 0 AND $target_efisiensi > 0 ){
 						$ef_per_hari  = ($hph_per_hari/$target_efisiensi)*100;
+						/*
 						if($ef_per_hari > 100){
 							$ef_per_hari = 100;
 						}
+						*/
+						
 
-						if($get_hph_pagi > 0){
-							$ef_pagi      = $get_hph_pagi/($target_efisiensi/3)*100;
+						if($hph_pagi > 0){
+							$ef_pagi      = $hph_pagi/($target_efisiensi/3)*100;
+							/*
 							if($ef_pagi > 100){
 								$ef_pagi = 100;
 							}
+							*/
 						}
 
-						if($get_hph_siang > 0){
-							$ef_siang     = $get_hph_siang/($target_efisiensi/3)*100;
+						if($hph_siang > 0){
+							$ef_siang     = $hph_siang/($target_efisiensi/3)*100;
+							/*
 							if($ef_siang > 100){
 								$ef_siang = 100;
 							}
+							*/
 						}
 
-						if($get_hph_malam > 0){
-							$ef_malam     = $get_hph_malam/($target_efisiensi/3)*100;
+						if($hph_malam > 0){
+							$ef_malam     = $hph_malam/($target_efisiensi/3)*100;
+							/*
 							if($ef_malam > 100){
 								$ef_malam = 100;
 							}
+							*/
 						}
 					}
 
@@ -454,9 +514,9 @@ class Efisiensi extends MY_Controller
 											'nama_produk'=> $row->nama_produk,
 											'efisiensi'  => ($target_efisiensi),
 											'hph_per_hari'=> round($hph_per_hari,2),
-											'hph_pagi'   => round($get_hph_pagi,2),
-											'hph_siang'  => round($get_hph_siang,2),
-											'hph_malam'  => round($get_hph_malam,2),
+											'hph_pagi'   => round($hph_pagi,2),
+											'hph_siang'  => round($hph_siang,2),
+											'hph_malam'  => round($hph_malam,2),
 											'ef_per_hari'=> round($ef_per_hari,2),
 											'ef_pagi'	  => round($ef_pagi,2),
 											'ef_siang'	  => round($ef_siang,2),
@@ -496,26 +556,34 @@ class Efisiensi extends MY_Controller
 
 			if($sum_ef_per_hari > 0){
 				$av_per_hari = $sum_ef_per_hari / $jml_child; // average hari
+				/*
 				if($av_per_hari > 100){
 					$av_per_hari = 100;
 				}
+				*/
 				if($sum_ef_pagi > 0 ){
 					$av_pagi = $sum_ef_pagi / $jml_child; // average pagi
+					/*
 					if($av_pagi > 100){
 						$av_pagi = 100;
 					}
+					*/
 				}
 				if($sum_ef_siang > 0 ){
 					$av_siang = $sum_ef_siang / $jml_child; // average siang
+					/*
 					if($av_siang > 100){
 						$av_siang = 100;
 					}
+					*/
 				}
 				if($sum_ef_malam > 0 ){
 					$av_malam = $sum_ef_malam / $jml_child; // average malam
+					/*
 					if($av_malam > 100){
 						$av_malam = 100;
 					}
+					*/
 				}
 			}
 
@@ -538,8 +606,7 @@ class Efisiensi extends MY_Controller
 				
 
 				$object->getActiveSheet()->getStyle("A".$rowCount.":O".$rowCount)->getFont()->setBold(FALSE);
-
-				
+			
 
 				if(!empty($val['mrp'])){
 
@@ -588,9 +655,6 @@ class Efisiensi extends MY_Controller
 
 						$rowCount++;
 				}
-
-            	
-
             }
 
 			$tgldari = date('Y-m-d',strtotime('+1 days',strtotime($tgldari)));
