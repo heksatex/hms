@@ -490,6 +490,8 @@ class MO extends MY_Controller
             $where_move_items= "";
             $where5_move_id  = "";
             $qty2_new = "";
+            $jml_lot_fg    = 0;
+            $jml_lot_waste = 0;
 
             //lock table
             $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE');
@@ -574,59 +576,8 @@ class MO extends MY_Controller
                 }
                 */
 
-
                 //simpan fg hasil
-                foreach ($array_fg as $row2) {
-                
-                    // explode isi
-                    $ex_row2 = explode(",|^|", $row2);
-                    $loop    = 0;
-                    $row['kode']        = '';
-                    $row['kode_produk'] = '';
-                    $row['nama_produk'] = '';
-                    $row['lot']         = '';
-                    $row['qty']         = '';
-                    $row['uom']         = '';
-                    $row['qty2']        = '';
-                    $row['uom2']        = '';
-                    $row['reff_note']   = '';
-                    $row['grade']       = '';
-                    foreach ($ex_row2 as $val) {
-                       # code...
-
-                        if($loop == 0 ){
-                            $row['kode'] = $val;
-                        }
-                        if($loop == 1){
-                            $row['kode_produk'] = $val;
-                        }
-                        if($loop == 2){
-                            $row['nama_produk'] = $val;
-                        }
-                        if($loop == 3){
-                            $row['lot']         = $val;
-                        }
-                        if($loop == 4){
-                            $row['qty']         = $val;
-                        }
-                        if($loop == 5){
-                            $row['uom']         = $val;
-                        }
-                        if($loop == 6){
-                            $row['qty2']        = $val;
-                        }
-                        if($loop == 7){
-                            $row['uom2']        = $val;
-                        }
-                        if($loop == 8){
-                            $row['reff_note']   = $val;
-                        }
-                        if($loop == 9){
-                            $row['grade']       = $val;
-                        }
-
-                        $loop++;
-                    } // end loopin explode
+                foreach ($array_fg as $row) {
 
                     //simpan fg hasil
                     $sql_mrp_production_fg_hasil .= "('".$row['kode']."','".$move_id_fg."','".$start."','".$tgl."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty']."','".addslashes($row['uom'])."','".$row['qty2']."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".$nama_user['nama']."','".$row_order."'), ";
@@ -664,10 +615,12 @@ class MO extends MY_Controller
                         $lot_double .= $row['lot'].',';
                     }
 
+
                     $start++;
                     $row_order++;
                     $row_order_smi++;
                     $row_order_smi_tujuan++;
+                    $jml_lot_fg++;
                 }//foreach array_fg
                 
 
@@ -713,6 +666,7 @@ class MO extends MY_Controller
                     $start++;
                     $row_order++;
                     $row_order_smi++;
+                    $jml_lot_waste++;
                 }//foreach array_waste
 
             }//jika array_waste tidak kosong
@@ -730,81 +684,10 @@ class MO extends MY_Controller
 
                 $get_ro = $this->m_mo->get_row_order_rm_hasil($kode)->row_array();
                 $row_order_rm= $get_ro['row']+1;
-                foreach ($array_rm as $row2) {
-
-                    $ex_row2 = explode(",|^|", $row2);
-                    $loop    = 0;
-                    $row['kode']        = '';
-                    $row['qty_konsum']  = '';
-                    $row['quant_id']    = '';
-                    $row['move_id']     = '';
-                    $row['kode_produk'] = '';
-                    $row['nama_produk'] = '';
-                    $row['qty_smi']     = '';
-                    $row['uom']         = '';
-                    $row['lot']         = '';
-                    $row['origin_prod'] = '';
-                    $row['qty2']        = '';
-                    $row['uom2']        = '';
-                    $row['reff_note']   = '';
-                    $row['qty_rm']      = '';
-                    $row['grade']       = '';
-
-                    foreach ($ex_row2 as $val) {
-                       # code...
-
-                        if($loop == 0 ){
-                            $row['kode']        = $val;
-                        }
-                        if($loop == 1){
-                            $row['qty_konsum']  = $val;
-                        }
-                        if($loop == 2){
-                            $row['quant_id']     = $val;
-                        }
-                        if($loop == 3){
-                            $row['move_id']     = $val;
-                        }
-                        if($loop == 4){
-                            $row['kode_produk'] = $val;
-                        }
-                        if($loop == 5){
-                            $row['nama_produk'] = $val;
-                        }
-                        if($loop == 6){
-                            $row['qty_smi']     = $val;
-                        }
-                        if($loop == 7){
-                            $row['uom']         = $val;
-                        }
-                        if($loop == 8){
-                            $row['lot']         = $val;
-                        }
-                        if($loop == 9){
-                            $row['origin_prod'] = $val;
-                        }
-                        if($loop == 10){
-                            $row['qty2']        = $val;
-                        }
-                        if($loop == 11){
-                            $row['uom2']        = $val;
-                        }
-                        if($loop == 12){
-                            $row['reff_note']   = $val;
-                        }
-                        if($loop == 13){
-                            $row['qty_rm']      = $val;
-                        }
-                        if($loop == 14){
-                            $row['grade']       = $val;
-                        }
-
-                        $loop++;
-                    }
+                foreach ($array_rm as $row) {
 
                      if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){                       
                         
-
                         if($row['qty_konsum']<$row['qty_smi']){//jika qty_konsum kurang dari qty stock_move_items
 
                             //update qty stock_quant dan stock move items by quant_id
@@ -852,8 +735,6 @@ class MO extends MY_Controller
                   
                 }//foreach array_rm
             }
-
-
 
             if(!empty($sql_mrp_production_fg_hasil)){
                 $sql_mrp_production_fg_hasil = rtrim($sql_mrp_production_fg_hasil, ', ');
@@ -944,78 +825,7 @@ class MO extends MY_Controller
             }
 
             if(!empty($array_rm)){
-                foreach ($array_rm as $row2) {
-
-                    $ex_row2 = explode(",|^|", $row2);
-                    $loop    = 0;
-                    $row['kode']        = '';
-                    $row['qty_konsum']  = '';
-                    $row['quant_id']    = '';
-                    $row['move_id']     = '';
-                    $row['kode_produk'] = '';
-                    $row['nama_produk'] = '';
-                    $row['qty_smi']     = '';
-                    $row['uom']         = '';
-                    $row['lot']         = '';
-                    $row['origin_prod'] = '';
-                    $row['qty2']        = '';
-                    $row['uom2']        = '';
-                    $row['reff_note']   = '';
-                    $row['qty_rm']      = '';
-                    $row['grade']       = '';
-
-                    foreach ($ex_row2 as $val) {
-                       # code...
-
-                        if($loop == 0 ){
-                            $row['kode']        = $val;
-                        }
-                        if($loop == 1){
-                            $row['qty_konsum']  = $val;
-                        }
-                        if($loop == 2){
-                            $row['quant_id']     = $val;
-                        }
-                        if($loop == 3){
-                            $row['move_id']     = $val;
-                        }
-                        if($loop == 4){
-                            $row['kode_produk'] = $val;
-                        }
-                        if($loop == 5){
-                            $row['nama_produk'] = $val;
-                        }
-                        if($loop == 6){
-                            $row['qty_smi']     = $val;
-                        }
-                        if($loop == 7){
-                            $row['uom']         = $val;
-                        }
-                        if($loop == 8){
-                            $row['lot']         = $val;
-                        }
-                        if($loop == 9){
-                            $row['origin_prod'] = $val;
-                        }
-                        if($loop == 10){
-                            $row['qty2']        = $val;
-                        }
-                        if($loop == 11){
-                            $row['uom2']        = $val;
-                        }
-                        if($loop == 12){
-                            $row['reff_note']   = $val;
-                        }
-                        if($loop == 13){
-                            $row['qty_rm']      = $val;
-                        }
-                        if($loop == 14){
-                            $row['grade']       = $val;
-                        }
-
-                        $loop++;
-                    }
-
+                foreach ($array_rm as $row) {
 
                      if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){                        
                         //untuk update status
@@ -1062,12 +872,10 @@ class MO extends MY_Controller
                 $sql_update_status_stock_move_produk_fg_target = "UPDATE stock_move_produk SET status = 'done' Where move_id = '".$qty_target['move_id']."'";
                 $this->_module->update_perbatch($sql_update_status_stock_move_produk_fg_target); 
             }
-
-            
+           
                          
             //unlock table
-            $this->_module->unlock_tabel();
-                      
+            $this->_module->unlock_tabel();                  
         
             $lot_double = rtrim($lot_double,',');
 
@@ -1100,11 +908,11 @@ class MO extends MY_Controller
             if(!empty($array_fg) OR !empty($array_waste)){ 
 
                 if(!empty($array_fg) AND !empty($array_waste)){
-                    $note_log    = "Produksi Batch ". $kode.' | LOT & Waste';
+                    $note_log    = "Produksi Batch ". $kode.' | LOT : '.$jml_lot_fg.' & Waste :'.$jml_lot_waste;
                 }else if(!empty($array_fg)){
-                    $note_log    = "Produksi Batch ". $kode.' | LOT';
+                    $note_log    = "Produksi Batch ". $kode.' | LOT : '.$jml_lot_fg;
                 }else{
-                    $note_log    = "Produksi Batch ". $kode.' | Waste';
+                    $note_log    = "Produksi Batch ". $kode.' | Waste : '.$jml_lot_waste;
                 }
 
                 $jenis_log   = "edit";
@@ -1316,80 +1124,9 @@ class MO extends MY_Controller
 
                 $get_ro = $this->m_mo->get_row_order_rm_hasil($kode)->row_array();
                 $row_order_rm= $get_ro['row']+1;
-                foreach ($array_rm as $row2) {
-
-                    $ex_row2 = explode(",|^|", $row2);
-                    $loop    = 0;
-                    $row['kode']        = '';
-                    $row['qty_konsum']  = '';
-                    $row['quant_id']    = '';
-                    $row['move_id']     = '';
-                    $row['kode_produk'] = '';
-                    $row['nama_produk'] = '';
-                    $row['qty_smi']     = '';
-                    $row['uom']         = '';
-                    $row['lot']         = '';
-                    $row['origin_prod'] = '';
-                    $row['qty2']        = '';
-                    $row['uom2']        = '';
-                    $row['reff_note']   = '';
-                    $row['qty_rm']      = '';
-                    $row['grade']       = '';
-
-                    foreach ($ex_row2 as $val) {
-                       # code...
-
-                        if($loop == 0 ){
-                            $row['kode']        = $val;
-                        }
-                        if($loop == 1){
-                            $row['qty_konsum']  = $val;
-                        }
-                        if($loop == 2){
-                            $row['quant_id']     = $val;
-                        }
-                        if($loop == 3){
-                            $row['move_id']     = $val;
-                        }
-                        if($loop == 4){
-                            $row['kode_produk'] = $val;
-                        }
-                        if($loop == 5){
-                            $row['nama_produk'] = $val;
-                        }
-                        if($loop == 6){
-                            $row['qty_smi']     = $val;
-                        }
-                        if($loop == 7){
-                            $row['uom']         = $val;
-                        }
-                        if($loop == 8){
-                            $row['lot']         = $val;
-                        }
-                        if($loop == 9){
-                            $row['origin_prod'] = $val;
-                        }
-                        if($loop == 10){
-                            $row['qty2']        = $val;
-                        }
-                        if($loop == 11){
-                            $row['uom2']        = $val;
-                        }
-                        if($loop == 12){
-                            $row['reff_note']   = $val;
-                        }
-                        if($loop == 13){
-                            $row['qty_rm']      = $val;
-                        }
-                        if($loop == 14){
-                            $row['grade']       = $val;
-                        }
-
-                        $loop++;
-                    }
-
+                foreach ($array_rm as $row) {
+                 
                      if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){                       
-
                         
                         if($row['qty_konsum']<$row['qty_smi']){//jika qty_konsum kurang dari qty stock_move_items
 
@@ -1530,78 +1267,7 @@ class MO extends MY_Controller
             }
 
             if(!empty($array_rm)){
-                foreach ($array_rm as $row2) {
-
-                    $ex_row2 = explode(",|^|", $row2);
-                    $loop    = 0;
-                    $row['kode']        = '';
-                    $row['qty_konsum']  = '';
-                    $row['quant_id']    = '';
-                    $row['move_id']     = '';
-                    $row['kode_produk'] = '';
-                    $row['nama_produk'] = '';
-                    $row['qty_smi']     = '';
-                    $row['uom']         = '';
-                    $row['lot']         = '';
-                    $row['origin_prod'] = '';
-                    $row['qty2']        = '';
-                    $row['uom2']        = '';
-                    $row['reff_note']   = '';
-                    $row['qty_rm']      = '';
-                    $row['grade']       = '';
-
-                    foreach ($ex_row2 as $val) {
-                       # code...
-
-                        if($loop == 0 ){
-                            $row['kode']        = $val;
-                        }
-                        if($loop == 1){
-                            $row['qty_konsum']  = $val;
-                        }
-                        if($loop == 2){
-                            $row['quant_id']     = $val;
-                        }
-                        if($loop == 3){
-                            $row['move_id']     = $val;
-                        }
-                        if($loop == 4){
-                            $row['kode_produk'] = $val;
-                        }
-                        if($loop == 5){
-                            $row['nama_produk'] = $val;
-                        }
-                        if($loop == 6){
-                            $row['qty_smi']     = $val;
-                        }
-                        if($loop == 7){
-                            $row['uom']         = $val;
-                        }
-                        if($loop == 8){
-                            $row['lot']         = $val;
-                        }
-                        if($loop == 9){
-                            $row['origin_prod'] = $val;
-                        }
-                        if($loop == 10){
-                            $row['qty2']        = $val;
-                        }
-                        if($loop == 11){
-                            $row['uom2']        = $val;
-                        }
-                        if($loop == 12){
-                            $row['reff_note']   = $val;
-                        }
-                        if($loop == 13){
-                            $row['qty_rm']      = $val;
-                        }
-                        if($loop == 14){
-                            $row['grade']       = $val;
-                        }
-
-                        $loop++;
-                    }
-
+                foreach ($array_rm as $row) {
 
                      if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){                        
                         //untuk update status
@@ -1655,7 +1321,7 @@ class MO extends MY_Controller
 
             if($hasil_produksi == TRUE){
                 $jenis_log   = "edit";
-                $note_log    = "Produksi ". $kode.' | LOT ';
+                $note_log    = "Produksi ". $kode.' | LOT : '.$lot;
                 $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username, $deptid);          
             }
         

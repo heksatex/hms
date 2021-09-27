@@ -676,7 +676,7 @@
 			$(item).eq(0).val(qty_smi);
 		});
 		//alert ketik salin konsumsi bahan selesai
-		alert_notify('fa fa-check','Salin Konsumsi Bahan berhasil !','success');
+		alert_notify('fa fa-check','Salin Konsumsi Bahan berhasil !','success',function(){});
 
 	});
 
@@ -768,7 +768,6 @@
 
 		// < WASTE DETAILS
 
-
 		//cek apa qty dikonsumsi melebihi qty stock move items
 		var cek_qty = false;
 		var empty_qty = false;
@@ -814,35 +813,29 @@
 				
 				$(".produk").each(function(index, element) {
 					if ($(element).val()!=="") {
-						/*
-						 ar = {
-							0 : no++,
-							1 :$("#txtkode").val(),
-							2 :$(element).parents("tr").find("#txtkode_produk").val(),
-							3 :$(element).val(),
-							4 :$(element).parents("tr").find("#txtlot").val(),
-							5 :$(element).parents("tr").find("#txtqty").val(),
-							6 :$(element).parents("tr").find("#txtuom").val(),
-							7 :$(element).parents("tr").find("#txtqty2").val(),
-							8 :$(element).parents("tr").find("#txtuom2").val(),
-							9 :$(element).parents("tr").find("#reff_note").val(),
-							10:$(element).parents("tr").find("#grade").val()
-						}
-						*/
-						var ar = $("#txtkode").val()+',|^|'+$(element).parents("tr").find("#txtkode_produk").val()+',|^|'+$(element).val()+',|^|'+$(element).parents("tr").find("#txtlot").val()+',|^|'+$(element).parents("tr").find("#txtqty").val()+',|^|'+$(element).parents("tr").find("#txtuom").val()+',|^|'+$(element).parents("tr").find("#txtqty2").val()+',|^|'+$(element).parents("tr").find("#txtuom2").val()+',|^|'+$(element).parents("tr").find("#reff_note").val()+',|^|'+$(element).parents("tr").find("#grade").val();
-						
-						arr.push(ar);
+						arr.push({
+							//0 : no++,
+							kode 		: $("#txtkode").val(),
+							kode_produk :$(element).parents("tr").find("#txtkode_produk").val(),
+							nama_produk :$(element).val(),
+							lot 		:$(element).parents("tr").find("#txtlot").val(),
+							qty 		:$(element).parents("tr").find("#txtqty").val(),
+							uom 		:$(element).parents("tr").find("#txtuom").val(),
+							qty2 		:$(element).parents("tr").find("#txtqty2").val(),
+							uom2 		:$(element).parents("tr").find("#txtuom2").val(),
+							reff_note 	:$(element).parents("tr").find("#reff_note").val(),
+							grade 		:$(element).parents("tr").find("#grade").val()
+						});
 					    hasil_produksi = true;
 					}
 				}); 
 				//alert(arr.toString().length);
-				console.log(arr);
+				//console.log(arr);
 				//alert (JSON.stringify(arr));
 			
 				var arr2 = new Array();
 				$('.qty_konsum').each(function(index,item){
 					if ($(item).val()!=="") {
-						/*
 						arr2.push({
 							kode 		: $("#txtkode").val(),
 							qty_konsum  : $(item).parents("tr").find('#qty_konsum').val(),
@@ -860,9 +853,7 @@
 							qty_rm      : $(item).parents("tr").find('#qty_rm').val(),
 							grade 		: $(item).parents("tr").find("#grade").val(),
 						});				
-						*/
-						var ar2 = $("#txtkode").val()+',|^|'+$(item).parents("tr").find('#qty_konsum').val()+',|^|'+$(item).parents("tr").find('#quant_id').val()+',|^|'+$(item).parents("tr").find('#move_id').val()+',|^|'+$(item).parents("tr").find('#kode_produk').val()+',|^|'+$(item).parents("tr").find('#nama_produk').val()+',|^|'+$(item).parents("tr").find('#qty_smi').val()+',|^|'+$(item).parents("tr").find('#uom').val()+',|^|'+$(item).parents("tr").find('#lot').val()+',|^|'+$(item).parents("tr").find('#origin_prod').val()+',|^|'+$(item).parents("tr").find("#qty2").val()+',|^|'+$(item).parents("tr").find("#uom2").val()+',|^|'+$(item).parents("tr").find("#reff_note").val()+',|^|'+$(item).parents("tr").find('#qty_rm').val()+',|^|'+$(item).parents("tr").find("#grade").val();
-						arr2.push(ar2);
+					
 						//alert (JSON.stringify(arr2));
 						konsumsi_bahan = true;
 					}
@@ -895,7 +886,6 @@
 			if(hasil_produksi==false &&  produk_waste == false){
 				alert('Maaf, Produk Lot / Waste tidak boleh Kosong !');
 			}else{	
-			
 			    $('#btn-tambah').button('loading');
 			    $.ajax({
 			        dataType: "JSON",
@@ -927,17 +917,16 @@
 			              if(data.double == 'yes'){
 			              	alert_modal_warning(data.message2);
 			              }
-			              console.log(data.sql);
-			              alert_notify(data.icon,data.message,data.type);
+			              //console.log(data.sql);
+			              alert_notify(data.icon,data.message,data.type,function(){});
 
 			            }
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
-			          alert(jqXHR.responseText);
+			          alert(jqXHR.responseTex+' error');
 			          $('#btn-tambah').button('reset');
 			        }
 			    });
-			    
 			}
 		  
 		}// if valid true

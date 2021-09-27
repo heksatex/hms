@@ -271,11 +271,27 @@
 		var kode   = '<?php echo $kode?>';//kode MO
 		var origin_mo = '<?php echo $origin_mo ?>';
 		var valid  = true;
+		
+		//*-- barang Hasil Produksi *--\\
+		var kode_produk = $("#txtkode_produk").val();
+		var nama_produk = $("#txtproduct").val();
+		var lot  = $("#txtlot").val();
+		var qty  = $("#txtqty").val();
+		var uom  = $("#txtuom").val();
+		var qty2 = $("#txtqty2").val();
+		var uom2 = $("#txtuom2").val();
+		var reff_note = $("#reff_note").val();
+		var grade = $("#grade").val();
+
+		if(kode_produk == ''|| nama_produk == ''){
+			alert('Produk tidak Boleh kosong !');
+			valid = false;
+		}
 
 		//cek lot apa ada yg kosong
 		$('.txtlot').each(function(index,value){
 			if($(value).val()==''){
-		   	  alert('Lot tidak boleh kosong');		   	  
+		   	  alert('Lot tidak boleh kosong !');		   	  
 		   	  $(value).addClass('error'); 
 		   	  valid = false;
 			}else{
@@ -286,7 +302,7 @@
 		//cek qty apa ada yg kosong
 		$('.txtqty').each(function(index,value){
 			if($(value).val()==''){
-		   	  alert('Qty tidak boleh kosong');
+		   	  alert('Qty tidak boleh kosong !');
 		      $(value).addClass('error'); 
 		   	  valid = false;
 			}else{
@@ -330,23 +346,10 @@
         if(valid){			
 			var konsumsi_bahan = false;
 			//var hasil_produksi = true;		
-        
-			//*-- barang Hasil Produksi *--\\
-			var kode_produk = $("#txtkode_produk").val();
-			var nama_produk = $("#txtproduct").val();
-			var lot  = $("#txtlot").val();
-			var qty  = $("#txtqty").val();
-			var uom  = $("#txtuom").val();
-			var qty2 = $("#txtqty2").val();
-			var uom2 = $("#txtuom2").val();
-			var reff_note = $("#reff_note").val();
-			var grade = $("#grade").val();
-			
-
-			var arr = new Array();			
+     		var arr = new Array();			
 			$('.qty_konsum').each(function(index,item){
 				if ($(item).val()!=="") {
-					/*
+					
 					arr.push({
 						kode 		: $("#txtkode").val(),
 						qty_konsum  : $(item).parents("tr").find('#qty_konsum').val(),
@@ -364,16 +367,16 @@
 						qty_rm      : $(item).parents("tr").find('#qty_rm').val(),
 						grade       : $(item).parents("tr").find('#grade').val(),
 					});				
-					*/
-
+					
+					/*
 					var ar = $("#txtkode").val()+',|^|'+$(item).parents("tr").find('#qty_konsum').val()+',|^|'+$(item).parents("tr").find('#quant_id').val()+',|^|'+$(item).parents("tr").find('#move_id').val()+',|^|'+$(item).parents("tr").find('#kode_produk').val()+',|^|'+$(item).parents("tr").find('#nama_produk').val()+',|^|'+$(item).parents("tr").find('#qty_smi').val()+',|^|'+$(item).parents("tr").find('#uom').val()+',|^|'+$(item).parents("tr").find('#lot').val()+',|^|'+$(item).parents("tr").find('#origin_prod').val()+',|^|'+$(item).parents("tr").find("#qty2").val()+',|^|'+$(item).parents("tr").find("#uom2").val()+',|^|'+$(item).parents("tr").find("#reff_note").val()+',|^|'+$(item).parents("tr").find('#qty_rm').val()+',|^|'+$(item).parents("tr").find("#grade").val();
 						arr.push(ar);
-
-					//alert (JSON.stringify(arr));
+					*/
 					konsumsi_bahan = true;
 				}
 			});		
 
+			//alert(JSON.stringify(arr));
 			/*
 			if(konsumsi_bahan == false ){
 				alert_modal_warning('Maaf, Konsumsi Bahan Kosong !');
@@ -383,7 +386,7 @@
 			if(kode_produk == '' || nama_produk == '' || lot == ''){
 				alert('Maaf, Produk Lot / Hasil Produksi Masih Kosong !');
 			}else{
-			
+				
 			    $('#btn-tambah').button('loading');
 			    $.ajax({
 			        dataType: "JSON",
@@ -420,7 +423,7 @@
 			              if(data.double == 'yes'){
 			              	alert_modal_warning(data.message2);
 			              }
-			              alert_notify(data.icon,data.message,data.type);
+			              alert_notify(data.icon,data.message,data.type,function(){});
 			            }
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
