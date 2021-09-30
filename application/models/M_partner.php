@@ -140,10 +140,6 @@ class M_partner extends CI_Model
 		return $this->db->query("SELECT name FROM partner_states WHERE id = '$id' ");
 	}
 
-	public function cek_partner_by_idNama($id,$nama)
-	{
-		return $this->db->query("SELECT id,nama FROM partner where id='$id' AND nama = '$nama'");
-	}
 
 	public function cek_partner_by_nama($nama)
 	{

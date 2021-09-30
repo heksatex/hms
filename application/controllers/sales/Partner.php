@@ -183,8 +183,6 @@ class Partner extends MY_Controller
 	        }else{
 
 				// cek nama partner sudah ada atau belum ?
-				//$cek = $this->m_partner->cek_partner_by_idNama($id,$name)->row_array();
-
 				$cek = $this->m_partner->cek_partner_by_nama($name)->row_array();
 
    			    // cek apa nama_partner tidak ada 
