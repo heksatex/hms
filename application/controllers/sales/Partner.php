@@ -217,7 +217,7 @@ class Partner extends MY_Controller
 	                $note_log  = $last_id." | ".$name." | ".$invoice_street." | ".$invoice_city." | ".$invoice_zip." | ".$buyer_code;
 	                $this->_module->gen_history($sub_menu, $last_id, $jenis_log, $note_log, $username);
 
-	        		$callback = array('status' => 's],uccess', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success', 'kode_encrypt' => $id_encrypt);
+	        		$callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success', 'kode_encrypt' => $id_encrypt);
 
 	        	}else{ // jik id terisi maka update data partner
 
