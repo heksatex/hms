@@ -243,7 +243,7 @@
     function validAngka(a){
       if(!/^[0-9.]+$/.test(a.value)){
         a.value = a.value.substring(0,a.value.length-1000);
-        alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger');
+        alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger',function(){});
       }
     }
 
@@ -418,7 +418,7 @@
       //jika email tidak kosong
       if($('#email').val() != ''){
         if(!IsEmail($('#email').val())){ //email tidak valid
-          alert_notify('fa fa-warning','Email Tidak valid','danger');
+          alert_notify('fa fa-warning','Email Tidak valid','danger',function(){});
           simpan = false;
         }
       }
@@ -472,7 +472,7 @@
                   delivery_state   : $('#delivery_state').val(),
                   delivery_country : $('#delivery_country').val(),
                   delivery_zip     : $('#delivery_zip').val(),
-
+                  status           : 'tambah',
                   check_supplier   : check_supplier,
                   check_customer   : check_customer,
 
@@ -485,7 +485,7 @@
               }else if(data.status == "failed"){
                 //jika ada form belum keiisi
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 document.getElementById(data.field).focus();
               }else{

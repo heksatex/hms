@@ -156,6 +156,7 @@ class Partner extends MY_Controller
 
 	        $check_customer = $this->input->post('check_customer');
 	        $check_supplier = $this->input->post('check_supplier');
+			$status_simpan  = $this->input->post('status');
 
 	        if(empty($name)){
 	        	$callback = array('status' => 'failed', 'field' => 'name', 'message' => 'Name Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
@@ -181,12 +182,32 @@ class Partner extends MY_Controller
 	        	$callback = array('status' => 'failed', 'field' => 'delivery_city', 'message' => 'Delivery Street Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else{
 
+				// cek nama partner sudah ada atau belum ?
+				//$cek = $this->m_partner->cek_partner_by_idNama($id,$name)->row_array();
+
+				$cek = $this->m_partner->cek_partner_by_nama($name)->row_array();
+
+   			    // cek apa nama_partner tidak ada 
+				if(empty($cek['nama'])){
+					$nama_double = FALSE;
+			    }else{
+					$nama_double = TRUE;
+				}
+
+				if($status_simpan == 'edit' AND ($cek['id'] != $id)){
+
+					$callback = array('status' => 'failed', 'field' => 'name', 'message' => 'Name Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
+
+				}else if($nama_double == TRUE AND $status_simpan == 'tambah'){
+					$callback = array('status' => 'failed', 'field' => 'name', 'message' => 'Name Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
+
+				}else{
+
 	        	//lock tabel
 	        	$this->_module->lock_tabel('partner WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE');
 
 	        	if(empty($id)){ // jika id kosong maka simpan data
 
-	        		
 	        		$this->m_partner->save_partner($name,$tanggal,$invoice_street,$invoice_city,$invoice_state,$invoice_country,$invoice_zip,$buyer_code,$website,$tax_name,$tax_address,$tax_city,$npwp,$contact_person,$phone,$mobile,$fax,$email,$delivery_street,$delivery_city,$invoice_state,$delivery_country,$delivery_zip,$check_customer,$check_supplier);
 
 	        		//get max id partner
@@ -198,7 +219,7 @@ class Partner extends MY_Controller
 	                $note_log  = $last_id." | ".$name." | ".$invoice_street." | ".$invoice_city." | ".$invoice_zip." | ".$buyer_code;
 	                $this->_module->gen_history($sub_menu, $last_id, $jenis_log, $note_log, $username);
 
-	        		$callback = array('status' => 's],uccess', 'message' => 'Data Berhasil Disimpan !'.$last_id, 'icon' =>'fa fa-check', 'type' => 'success', 'kode_encrypt' => $id_encrypt);
+	        		$callback = array('status' => 's],uccess', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success', 'kode_encrypt' => $id_encrypt);
 
 	        	}else{ // jik id terisi maka update data partner
 
@@ -214,6 +235,8 @@ class Partner extends MY_Controller
 
 	        	//unlock tabel
 	        	$this->_module->unlock_tabel();
+
+				}
 
 	        }
 

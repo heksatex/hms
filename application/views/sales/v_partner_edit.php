@@ -103,13 +103,13 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Tax Name</label></div>
                   <div class="col-xs-8">
-                    <textarea type="text" class="form-control input-sm" name="tax_name" id="tax_name" ><?php echo $partner->tax_nama?></textarea>
+                    <input type="text" class="form-control input-sm" name="tax_name" id="tax_name" ><?php echo $partner->tax_nama?>
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Tax Address</label></div>
                   <div class="col-xs-8">
-                    <input type="text" class="form-control input-sm" name="tax_address" id="tax_address"  value="<?php echo $partner->tax_address?>" >
+                    <textarea type="text" class="form-control input-sm" name="tax_address" id="tax_address"  value="<?php echo $partner->tax_address?>" ></textarea>
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -254,7 +254,7 @@
     function validAngka(a){
       if(!/^[0-9.]+$/.test(a.value)){
         a.value = a.value.substring(0,a.value.length-1000);
-        alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger');
+        alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger',function(){});
       }
     }
 
@@ -463,7 +463,7 @@
       //jika email tidak kosong
       if($('#email').val() != ''){
         if(!IsEmail($('#email').val())){ //email tidak valid
-          alert_notify('fa fa-warning','Email Tidak valid','danger');
+          alert_notify('fa fa-warning','Email Tidak valid','danger',function(){});
           simpan = false;
         }
       }
@@ -512,13 +512,13 @@
                   mobile            : $('#mobile').val(),
                   fax               : $('#fax').val(),
                   email             : $('#email').val(),
-
+              
                   delivery_street  : $('#delivery_street').val(),
                   delivery_city    : $('#delivery_city').val(),
                   delivery_country : $('#delivery_country').val(),
                   delivery_state   : $('#delivery_state').val(),
                   delivery_zip     : $('#delivery_zip').val(),
-
+                  status           : 'edit',
                   check_supplier   : check_supplier,
                   check_customer   : check_customer,
 
@@ -531,14 +531,14 @@
               }else if(data.status == "failed"){
                 //jika ada form belum keiisi
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 document.getElementById(data.field).focus();
               }else{
 
                //jika berhasil disimpan/diubah
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 $("#foot").load(location.href + " #foot>*");
               }
