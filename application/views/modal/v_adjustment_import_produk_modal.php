@@ -54,7 +54,7 @@
                     'selectRow': true
                  },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[8];
+                   var rowId = rowData[7];
                    if(rowId.includes('SM') == true){  
                       this.api().cell(td).checkboxes.disable();
                    }
