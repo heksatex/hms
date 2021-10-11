@@ -18,7 +18,7 @@ class HPHtwisting extends MY_Controller
 	{
 		$id_dept        = 'HPHTWS';
         $data['id_dept']= $id_dept;
-
+		$data['mesin']  = $this->_module->get_list_mesin_report('TWS');
 		$this->load->view('report/v_hph_twisting', $data);
 	}
 
@@ -28,6 +28,7 @@ class HPHtwisting extends MY_Controller
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$nama_produk = $this->input->post('nama_produk');
+		$mo        = $this->input->post('mo');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
@@ -128,8 +129,14 @@ class HPHtwisting extends MY_Controller
 				$where_jenis = '';
 			}
 
+			if(!empty($mo)){
+				$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
+			}else{
+				$where_mo  = '';
+			}
+
 			if(!empty($mc)){
-				$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
+				$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
 			}else{
 				$where_mc  = '';
 			}
@@ -154,7 +161,7 @@ class HPHtwisting extends MY_Controller
 
 			$dataRecord= [];
 
-			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis."  ";
+			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis." ".$where_mo." ";
 
 			$items = $this->m_HPHtwisting->get_list_HPH_by_dept($where);
 			$sc  = '';
@@ -211,6 +218,7 @@ class HPHtwisting extends MY_Controller
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$nama_produk = $this->input->post('nama_produk');
+		$mo        = $this->input->post('mo');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
@@ -308,7 +316,7 @@ class HPHtwisting extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('A1', 'Laporan HPH');
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
 		$object->getActiveSheet()->mergeCells('A1:L1');
-		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//$object->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 		// set Departemen
  		$object->getActiveSheet()->SetCellValue('A2', 'Departemen');
@@ -342,7 +350,7 @@ class HPHtwisting extends MY_Controller
 
 
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:O6")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:P6")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -355,7 +363,7 @@ class HPHtwisting extends MY_Controller
 
 
 		// header table
-    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'TPM','Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Reff Note','Lokasi');
+    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'TPM','Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Reff Note','Lokasi','User');
 
 
     	$column = 0;
@@ -384,19 +392,27 @@ class HPHtwisting extends MY_Controller
 			$object->getSheet(0)->getColumnDimension('M')->SetWidth(9);
 			$object->getSheet(0)->getColumnDimension('N')->SetWidth(15);
 			$object->getSheet(0)->getColumnDimension('O')->SetWidth(12);
+			$object->getSheet(0)->getColumnDimension('P')->SetWidth(15);
 
 		// set border header column
-    	$index_header2 = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O');
+    	$index_header2 = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P');
     	foreach ($index_header2 as $val) {
 			$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
            	
     	}
 
-    	if(!empty($mc)){
-			$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
+    	if(!empty($mo)){
+			$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
+		}else{
+			$where_mo  = '';
+		}
+
+		if(!empty($mc)){
+			$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
 		}else{
 			$where_mc  = '';
 		}
+
 
 		if(!empty($lot)){
 			$where_lot  = "AND mpfg.lot LIKE '%".addslashes($lot)."%' ";
@@ -417,7 +433,7 @@ class HPHtwisting extends MY_Controller
 		}
 
     	// tbody
-		$where = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis."  ";
+		$where = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis." ".$where_mo." ";
 		$items = $this->m_HPHtwisting->get_list_HPH_by_dept($where);
 		$no    = 1;
 		$rowCount = 7;
@@ -454,6 +470,7 @@ class HPHtwisting extends MY_Controller
 				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->uom2);
 				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->reff_note);
 				$object->getActiveSheet()->SetCellValue('O'.$rowCount, $row->lokasi);
+				$object->getActiveSheet()->SetCellValue('P'.$rowCount, $row->nama_user);
 
     		}
 			//set border true
@@ -473,6 +490,7 @@ class HPHtwisting extends MY_Controller
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
 			
 			$rowCount++;
 

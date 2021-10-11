@@ -664,10 +664,16 @@ class _module extends CI_Model
 		return $this->db->query("SELECT IFNULL(sum(qty),0) as qty_target FROM penerimaan_barang_items WHERE kode = '$kode' ");
 	}
 
-	// query new
 	public function get_data_mms_for_log_history($id_dept)
 	{
 		return $this->db->query("SELECT kode FROM main_menu_sub WHERE dept_id = '$id_dept' ")->row();
 	}
+
+	public function get_list_mesin_report($id_dept)
+	{
+		return $this->db->query("SELECT mc_id, nama_mesin FROM mesin  WHERE dept_id = '$id_dept' ORDER BY row_order ")->result();
+	}
+
+	
 
 }

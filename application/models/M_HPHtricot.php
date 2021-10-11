@@ -4,8 +4,7 @@
  * 
  */
 class M_HPHtricot extends CI_Model
-{
-
+{	
 	public function get_list_HPH_tricot_by_kode($where)
 	{	
 		return $this->db->query("SELECT mp.kode, mp.origin, mpfg.kode_produk, mpfg.nama_produk, mp.origin,mp.reff_note,

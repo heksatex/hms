@@ -100,7 +100,7 @@
                       </label>
                     </div>
                     <div class="col-md-6 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
-                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed' style=''>
+                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
                           <label style="cursor:pointer;">
                             <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
                              Advanced 
@@ -122,12 +122,22 @@
                         <div class="col-md-4" >
                           <div class="form-group">
                             <div class="col-md-5">
+                              <label>MO </label>
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="mo" id="mo" >
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <div class="col-md-5">
                               <label>Lot </label>
                             </div>
                             <div class="col-md-7">
                                 <input type="text" class="form-control input-sm" name="lot" id="lot" >
                             </div>
                           </div> 
+                        </div>
+                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>Nama Produk </label>
@@ -136,16 +146,23 @@
                                 <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" >
                             </div>
                           </div>
-                        </div>
-                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>No Mesin </label>
                             </div>
                             <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="mc" id="mc" >
+                              <select type="text" class="form-control input-sm" name="mc" id="mc"  style="width:100% !important"> 
+                                <option value="">-- Pilih No Mesin --</option>
+                                <?php 
+                                  foreach ($mesin as $val) {
+                                      echo "<option value='".$val->mc_id."'>".$val->nama_mesin."</option>";
+                                  }
+                                ?>
+                              </select>
                             </div>
                           </div>
+                        </div>
+                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>User </label>
@@ -154,8 +171,6 @@
                                 <input type="text" class="form-control input-sm" name="user" id="user" >
                             </div>
                           </div>
-                        </div>
-                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>Jenis </label>
@@ -243,6 +258,9 @@
     $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
   });
 
+  // select 2 mesin
+  $('#mc').select2({});
+
   var d     = new Date();
   var month = d.getMonth();
   var day   = d.getDate();
@@ -252,14 +270,24 @@
   $('#tgldari').datetimepicker({
       defaultDate : new Date(year, month, day, 00, 00, 00),
       format : 'D-MMMM-YYYY HH:mm:ss',
-      ignoreReadonly: true
+      ignoreReadonly: true,
+      maxDate: new Date(),
   });
 
   // set date tglsampai
   $('#tglsampai').datetimepicker({
       defaultDate : new Date(),
       format : 'D-MMMM-YYYY HH:mm:ss',
-      ignoreReadonly: true
+      ignoreReadonly: true,
+      maxDate: new Date(),
+  });
+
+   // disable enter
+   $(window).keydown(function(event){
+    if(event.keyCode == 13) {
+      event.preventDefault();
+      return false;
+    }
   });
 
   // cek selisih saatu submit excel
@@ -302,6 +330,7 @@
       tgldari   = $('#tgldari').val();
       tglsampai = $('#tglsampai').val();
       nama_produk     = $('#nama_produk').val();
+      mo        = $('#mo').val();
       mc        = $('#mc').val();
       lot       = $('#lot').val();
       user      = $('#user').val();
@@ -346,7 +375,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/HPHwarpingdasar/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai,  nama_produk:nama_produk, mc:mc, lot:lot, user:user, jenis:jenis,  shift:checkboxes_arr},
+                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, nama_produk:nama_produk, mc:mc, lot:lot, user:user, jenis:jenis,  shift:checkboxes_arr},
                 success: function(data){
 
                   if(data.status == 'failed'){

@@ -19,7 +19,7 @@ class HPHtricot extends MY_Controller
 	{
 		$id_dept        = 'HPHTRI';
         $data['id_dept']= $id_dept;
-
+		$data['mesin']  = $this->_module->get_list_mesin_report('TRI');
 		$this->load->view('report/v_hph_tricot', $data);
 	}
 
@@ -28,6 +28,7 @@ class HPHtricot extends MY_Controller
 
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
+		$mo        = $this->input->post('mo');
 		$corak     = $this->input->post('corak');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
@@ -129,9 +130,14 @@ class HPHtricot extends MY_Controller
 				$where_jenis = '';
 			}
 
+			if(!empty($mo)){
+				$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
+			}else{
+				$where_mo  = '';
+			}
 
 			if(!empty($mc)){
-				$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
+				$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
 			}else{
 				$where_mc  = '';
 			}
@@ -161,7 +167,7 @@ class HPHtricot extends MY_Controller
 	        $stitch         = '';
 	        $rpm            = '';
 
-			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ";
+			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo." ";
 
 			$items = $this->m_HPHtricot->get_list_HPH_tricot_by_kode($where);
 			foreach ($items as $val) {
@@ -247,6 +253,7 @@ class HPHtricot extends MY_Controller
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$corak     = $this->input->post('corak');
+		$mo        = $this->input->post('mo');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
@@ -380,7 +387,7 @@ class HPHtricot extends MY_Controller
 
 
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:T7")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:U7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -393,7 +400,7 @@ class HPHtricot extends MY_Controller
 
 
 		// header table
-    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Grade','Lebar','Greige','Jadi','RPM','Stitch','Marketing','Reff Note','Lokasi');
+    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Grade','Lebar','Greige','Jadi','RPM','Stitch','Marketing','Reff Note','Lokasi','User');
 
     	$column = 0;
     	$merge  = TRUE;
@@ -415,13 +422,13 @@ class HPHtricot extends MY_Controller
 	                $count_merge++;
     			}else if($merge == false){
   					$columns = $column-$count_merge;
-                    $object->getActiveSheet()->setCellValueByColumnAndRow($columns, 6, $field);  
+                    $object->getActiveSheet()->setCellValueByColumnAndRow($columns, 7, $field);  
     			}
                 
                 $merge= false;
     		}
 
-    	
+			
     		$column++;
     	}
 
@@ -430,7 +437,7 @@ class HPHtricot extends MY_Controller
 
 
     	// set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -442,13 +449,13 @@ class HPHtricot extends MY_Controller
             }else if($loop ==2){
 				$object->getSheet(0)->getColumnDimension($val)->setWidth(19); // index C
             }else if($loop == 4){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(12); // index E
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index E
             }else if($loop == 6 ){
 				$object->getSheet(0)->getColumnDimension($val)->setWidth(31); // index G
             }else if($loop == 5 OR  ($loop >= 8 AND $loop <= 16)){
 				$object->getSheet(0)->getColumnDimension($val)->setWidth(9); // index F, I - Q
-            }else if($loop == 17){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(17); // index R
+            }else if($loop == 17 OR $loop == 20){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(17); // index R, U
             }else if($loop == 18){
 				$object->getSheet(0)->getColumnDimension($val)->setWidth(18); // index S
             }else if($loop == 19){
@@ -471,8 +478,14 @@ class HPHtricot extends MY_Controller
         $stitch         = '';
         $rpm            = '';
 
-        if(!empty($mc)){
-			$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
+		if(!empty($mo)){
+			$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
+		}else{
+			$where_mo  = '';
+		}
+
+		if(!empty($mc)){
+			$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
 		}else{
 			$where_mc  = '';
 		}
@@ -496,7 +509,7 @@ class HPHtricot extends MY_Controller
 		}
 
     	//tbody
-		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ";
+		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo." ";
     	$items = $this->m_HPHtricot->get_list_HPH_tricot_by_kode($where);
     	$num   = 1;
 		foreach ($items as $val) {
@@ -557,6 +570,7 @@ class HPHtricot extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $mkt);
 			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->reff_note_sq);
 			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->lokasi);
+			$object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->nama_user);
 
            	// set align
             $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -589,6 +603,7 @@ class HPHtricot extends MY_Controller
 			$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('T'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray);
 
 		
 			$lbr_jadi       = '';
