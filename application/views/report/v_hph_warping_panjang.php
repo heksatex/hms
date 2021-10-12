@@ -81,13 +81,13 @@
                     <div class="col-md-2 col-sm-2">
                       <label>Shift </label>
                     </div>
-                    <div class="col-sm-3 col-md-2">
+                    <div class="col-xs-4 col-sm-3 col-md-2">
                         <label><input type="checkbox" name="shift[]" value="Pagi"> Pagi </label>
                     </div>
-                    <div class="col-sm-3 col-md-2">
+                    <div class="col-xs-4 col-sm-3 col-md-2">
                         <label><input type="checkbox" name="shift[]"  value="Siang"> Siang </label>
                     </div>
-                    <div class="col-sm-3 col-md-2">
+                    <div class="col-xs-4 col-sm-3 col-md-2">
                         <label><input type="checkbox" name="shift[]"  value="Malam"> Malam </label>
                     </div>
                   </div>
@@ -100,7 +100,7 @@
                       </label>
                     </div>
                     <div class="col-md-6 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px; ">
-                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed' style=''>
+                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
                           <label style=" cursor:pointer;">
                             <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
                              Advanced 
@@ -122,12 +122,22 @@
                         <div class="col-md-4" >
                           <div class="form-group">
                             <div class="col-md-5">
+                              <label>MO </label>
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="mo" id="mo" >
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <div class="col-md-5">
                               <label>Lot </label>
                             </div>
                             <div class="col-md-7">
                                 <input type="text" class="form-control input-sm" name="lot" id="lot" >
                             </div>
                           </div> 
+                        </div>
+                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>Nama Produk </label>
@@ -136,16 +146,23 @@
                                 <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" >
                             </div>
                           </div>
-                        </div>
-                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>No Mesin </label>
                             </div>
                             <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="mc" id="mc" >
+                              <select type="text" class="form-control input-sm" name="mc" id="mc"  style="width:100% !important"> 
+                                <option value="">-- Pilih No Mesin --</option>
+                                <?php 
+                                  foreach ($mesin as $val) {
+                                      echo "<option value='".$val->mc_id."'>".$val->nama_mesin."</option>";
+                                  }
+                                ?>
+                              </select>
                             </div>
                           </div>
+                        </div>
+                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>User </label>
@@ -154,8 +171,6 @@
                                 <input type="text" class="form-control input-sm" name="user" id="user" >
                             </div>
                           </div>
-                        </div>
-                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>Jenis </label>
@@ -245,6 +260,9 @@
     $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
   });
 
+  // select 2 mesin
+  $('#mc').select2({});
+
   var d     = new Date();
   var month = d.getMonth();
   var day   = d.getDate();
@@ -254,13 +272,15 @@
   $('#tgldari').datetimepicker({
       defaultDate : new Date(year, month, day, 00, 00, 00),
       format : 'D-MMMM-YYYY HH:mm:ss',
-      ignoreReadonly: true
+      ignoreReadonly: true,
+      maxDate: new Date(),
   });
   // set date tglsampai
   $('#tglsampai').datetimepicker({
       defaultDate : new Date(),
       format : 'D-MMMM-YYYY HH:mm:ss',
-      ignoreReadonly: true
+      ignoreReadonly: true,
+      maxDate: new Date(),
   });
 
 

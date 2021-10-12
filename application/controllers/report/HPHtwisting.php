@@ -499,7 +499,7 @@ class HPHtwisting extends MY_Controller
         $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
 
         header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="HPH Warping Twisting.xls"'); //tell browser what's the file name
+        header('Content-Disposition: attachment;filename="HPH Twisting.xls"'); //tell browser what's the file name
         header('Cache-Control: max-age=0'); //no cache
         $object->save('php://output');
 			

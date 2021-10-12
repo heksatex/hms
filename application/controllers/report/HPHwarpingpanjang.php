@@ -15,20 +15,19 @@ class HPHwarpingpanjang extends MY_Controller
 
 	public function index()
 	{
-
 		$id_dept        = 'HPHWRP';
         $data['id_dept']= $id_dept;
-
+		$data['mesin']  = $this->_module->get_list_mesin_report('WRP');
 		$this->load->view('report/v_hph_warping_panjang', $data);
 	}
 
 
 	public function loadData()
 	{
-
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$nama_produk = $this->input->post('nama_produk');
+		$mo        = $this->input->post('mo');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
@@ -69,9 +68,9 @@ class HPHwarpingpanjang extends MY_Controller
 						# code...
 						if($val == 'Pagi'){
 							$jam_dari    = '07:00:00';
-							$jam_sampai  = '14:29:59';
+							$jam_sampai  = '14:59:59';
 						}else if($val == 'Siang'){
-							$jam_dari    = '14:30:00';
+							$jam_dari    = '15:00:00';
 							$jam_sampai  = '22:59:59';
 						}else if($val == 'Malam'){
 							$jam_dari    = '23:00:00';
@@ -129,8 +128,14 @@ class HPHwarpingpanjang extends MY_Controller
 				$where_jenis = '';
 			}
 
+			if(!empty($mo)){
+				$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
+			}else{
+				$where_mo  = '';
+			}
+
 			if(!empty($mc)){
-				$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
+				$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
 			}else{
 				$where_mc  = '';
 			}
@@ -155,7 +160,7 @@ class HPHwarpingpanjang extends MY_Controller
 
 			$dataRecord= [];
 
-			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis."  ";
+			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis." ".$where_mo."  ";
 
 			$items = $this->m_HPHwarpingpanjang->get_list_WRP_tricot_by_kode($where);
 			foreach ($items as $val) {
@@ -194,6 +199,7 @@ class HPHwarpingpanjang extends MY_Controller
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$nama_produk = $this->input->post('nama_produk');
+		$mo        = $this->input->post('mo');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
@@ -224,9 +230,9 @@ class HPHwarpingpanjang extends MY_Controller
 						# code...
 						if($val == 'Pagi'){
 							$jam_dari    = '07:00:00';
-							$jam_sampai  = '14:29:59';
+							$jam_sampai  = '14:59:59';
 						}else if($val == 'Siang'){
-							$jam_dari    = '14:30:00';
+							$jam_dari    = '15:00:00';
 							$jam_sampai  = '22:59:59';
 						}else if($val == 'Malam'){
 							$jam_dari    = '23:00:00';
@@ -291,7 +297,7 @@ class HPHwarpingpanjang extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('A1', 'Laporan HPH');
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
 		$object->getActiveSheet()->mergeCells('A1:N1');
-		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		//$object->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 		// set Departemen
  		$object->getActiveSheet()->SetCellValue('A2', 'Departemen');
@@ -325,7 +331,7 @@ class HPHwarpingpanjang extends MY_Controller
 		$object->getActiveSheet()->mergeCells('C4:F4');
 
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:N6")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:O6")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -338,7 +344,7 @@ class HPHwarpingpanjang extends MY_Controller
 
 
 		// header table
-    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'Origin', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Reff Note','Lokasi');
+    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'Origin', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Reff Note','Lokasi','User');
 
 
     	$column = 0;
@@ -366,16 +372,23 @@ class HPHwarpingpanjang extends MY_Controller
 			$object->getSheet(0)->getColumnDimension('L')->SetWidth(9);
 			$object->getSheet(0)->getColumnDimension('M')->SetWidth(15);
 			$object->getSheet(0)->getColumnDimension('N')->SetWidth(12);
+			$object->getSheet(0)->getColumnDimension('O')->SetWidth(15);
 
 		// set border header column
-    	$index_header2 = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
+    	$index_header2 = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O');
     	foreach ($index_header2 as $val) {
 			$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
            	
     	}
 
-    	if(!empty($mc)){
-			$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
+    	if(!empty($mo)){
+			$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
+		}else{
+			$where_mo  = '';
+		}
+
+		if(!empty($mc)){
+			$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
 		}else{
 			$where_mc  = '';
 		}
@@ -399,7 +412,7 @@ class HPHwarpingpanjang extends MY_Controller
 		}
 
     	// tbody
-		$where = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis."  ";
+		$where = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis." ".$where_mo." ";
 		$items = $this->m_HPHwarpingpanjang->get_list_WRP_tricot_by_kode($where);
 		$no    = 1;
 		$rowCount = 7;
@@ -421,6 +434,7 @@ class HPHwarpingpanjang extends MY_Controller
 				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
 				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->reff_note);
 				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->lokasi);
+				$object->getActiveSheet()->SetCellValue('O'.$rowCount, $row->nama_user);
 
     		}
 			//set border true
@@ -439,6 +453,7 @@ class HPHwarpingpanjang extends MY_Controller
 			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
 
 			
 			$rowCount++;
