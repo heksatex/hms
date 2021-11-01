@@ -364,7 +364,7 @@ class M_mo extends CI_Model
 	
 	public function get_list_mesin($dept_id)
 	{
-		return $this->db->query("SELECT * FROM mesin WHERE dept_id = '$dept_id' order by row_order ")->result();
+		return $this->db->query("SELECT * FROM mesin WHERE dept_id = '$dept_id'  AND status_aktif = 't' order by row_order ")->result();
 	}
 
 	public function get_nama_mesin_by_kode($mc_id)
