@@ -2631,6 +2631,9 @@ class MO extends MY_Controller
         }else if($dept_id == 'WRD'){
             $this->barcode_wrd($data_arr,$count);
 
+        }else if($dept_id == 'WRP'){
+            $this->barcode_wrp($kode,$data_arr);
+        
         }else if($dept_id == 'TRI'){
             $this->barcode_tri($data_arr,$count);
 
@@ -2697,6 +2700,7 @@ class MO extends MY_Controller
             $loop1 = 0;
             $nh_mo = '';
             $nh_dept = '';
+            $nh_mc   = '';
             foreach($nh as $nhx){
                 if($loop1 == 2){
                     $nh_mo = trim($nhx);
@@ -2706,9 +2710,14 @@ class MO extends MY_Controller
                     $nh_dept = trim($nhx);
                 }
 
+                if($loop1 == 4){
+                    $nh_mc = trim($nhx);
+                }
+
                 $loop1++;
             }
 
+            $pdf->SetFont('Arial','B',15,'C'); // set font
 
             $pdf->setXY(3,3+$heightNama);
             $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
@@ -2731,7 +2740,10 @@ class MO extends MY_Controller
             $pdf->Multicell(74,5,"Reff Note : ".$reff_note,0,'L');// reff note
 
             $pdf->setXY(3,5+$heightNama+30);
-            $pdf->Multicell(74,5,"Dept Tujuan : ".$nh_dept,0,'L');// Departemen Tujuan
+            if($nh_mc != ''){
+                $nh_mc = ' - '.$nh_mc;
+            }
+            $pdf->Multicell(74,5,"Dept Tujuan : ".$nh_dept.''.$nh_mc,0,'L');// Departemen Tujuan
 
             $pdf->setXY(3,5+$heightNama+35);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
@@ -2741,12 +2753,147 @@ class MO extends MY_Controller
             $pdf->setXY(0,5+$heightNama+48);
             $pdf->Multicell(80,5,$barcode,0,'C');// barcode
 
+            $pdf->SetFont('Arial','B',7,'C'); // set font
+            // ket barcode twisting
+            $pdf->setXY(0,5+$heightNama+51);
+            $pdf->Multicell(80,5,'~Barcode Twisting~',0,'C');
+
             $heightNama    = $heightNama + 40;
             $enter_barcode = $enter_barcode + 40;
             
             $loop++;
         }
+ 
 
+        $pdf->output();
+
+    }
+
+    function barcode_wrp($kode,$data_arr)
+    {
+    
+        $pdf = new PDF_Code128('L','mm',array(80,60));
+
+        $pdf->SetMargins(0,0,0);
+        $pdf->SetAutoPageBreak(False);
+        $pdf->AddPage();
+        $pdf->SetFont('Arial','B',15,'C');
+
+        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
+        $row   = explode("|^,", $data_arr2);
+
+        $loop          = 1;
+        $heightNama    = 0; 
+        $enter         = 1;
+        $enter_barcode = 13;
+
+        // get mesin by kode
+        //$get_mc = $this->m_mo->get_mesin_by_mo($kode)->row_array();
+        //$mesin  = $get_mc['nama_mesin'];
+
+        foreach ($row as $val ) {
+
+            if($loop == 2){
+                $pdf->AddPage();
+                $loop = 1;
+                $heightNama = 0; 
+                $enter_barcode = 13;
+            }
+
+            $items    = explode("^^",$val);
+            $barcode  = $items[0];
+
+            $bar = explode('/',$barcode);
+            $loopbr = 0;
+            $mc_wrp = '';
+            foreach($bar as $bars){
+                if($loopbr == 2){
+                    $mc_wrp =trim($bars);
+                }
+                $loopbr++;
+            }
+
+            //get produk,qty by kode
+            $get = $this->m_mo->get_data_fg_hasil_by_kode($kode,$barcode)->row_array();
+
+            $nama_produk = $get['nama_produk'];
+            $qty         = $get['qty'];
+            $uom         = $get['uom'];
+            $tgl         = $get['create_date'];
+            $reff_note   = $get['reff_note'];
+            /*
+                Format reff note dari PPIC
+                1. SC
+                2. MO Jac
+                3. MC JAC
+                4. Corak JAC
+                5. Jenis Benang
+                Contoh Penulisan Reff NOte 
+                SC1896 | MO211000406 | MC222 | 7P1514 | NYLON 70/6 TEXT
+            */
+            $note_head   = $get['note_head']; // INFO GB
+
+            $nh = explode('|', $note_head);
+            $loop1 = 0;
+            $nh_mo = '';
+            $nh_mc   = '';
+            foreach($nh as $nhx){
+                if($loop1 == 1){
+                    $nh_mo = trim($nhx);
+                }
+                if($loop1 == 2){
+                    $nh_mc = trim($nhx);
+                }
+
+                $loop1++;
+            }
+
+            $pdf->SetFont('Arial','B',15,'C'); // set font
+
+            $pdf->setXY(3,3+$heightNama);
+            $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
+
+            $pdf->SetFont('Arial','B',12,'C');
+
+            $pdf->setXY(3,5+$heightNama+10);
+            $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom,0,'L'); // qty
+
+            $pdf->setXY(3,5+$heightNama+15);
+            $pdf->Multicell(74,5,"MC : ".$mc_wrp,0,'L');// MC WRP
+
+            $pdf->setXY(3,5+$heightNama+20);
+            $pdf->Multicell(30,5,"Tgl.HPH   :",0,'L');// Tgl buat/hph
+
+            $pdf->setXY(24,5+$heightNama+20);
+            $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
+
+            $pdf->setXY(3,5+$heightNama+25);
+            $pdf->Multicell(74,5,"GB : ".$reff_note,0,'L');// reff note
+
+            $pdf->setXY(3,5+$heightNama+30);
+            if($nh_mc != ''){
+                $nh_mc = ' - '.$nh_mc;
+            }
+            $pdf->Multicell(74,5,"Dept Tujuan : JAC".$nh_mc,0,'L');// Departemen Tujuan
+
+            $pdf->setXY(3,5+$heightNama+35);
+            $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
+
+            $pdf->Code128(5,45,$barcode,70,8,'C',0,1); // barcode
+
+            $pdf->setXY(0,5+$heightNama+48);
+            $pdf->Multicell(80,5,$barcode,0,'C');// barcode
+
+            $pdf->SetFont('Arial','B',7,'C'); // set font
+            // ket barcode twisting
+            $pdf->setXY(0,5+$heightNama+51);
+            $pdf->Multicell(80,5,'~Barcode Warping Panjang~',0,'C');
+
+            $heightNama    = $heightNama + 40;
+            $enter_barcode = $enter_barcode + 40;
+            
+            $loop++;
+        }
 
         $pdf->output();
 
