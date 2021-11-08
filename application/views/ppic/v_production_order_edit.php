@@ -127,7 +127,7 @@
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Warehouse</label></div>
+                  <div class="col-xs-4"><label>Departement Tujuan</label></div>
                   <div class="col-xs-8">
                     <select class="form-control input-sm" name="warehouse" id="warehouse" />
                     <option value="">Pilih Warehouse</option>
@@ -197,7 +197,7 @@
                               <th class="style">Schedule Date</th>
                               <th class="style" style="text-align: right;" >Qty</th>
                               <th class="style">Uom</th>
-                              <th class="style">Reff Notes</th>
+                              <th class="style">Reff Notes PPIC</th>
                               <th class="style">Status</th>
                               <th class="style"></th>
                               <th class="style"></th>

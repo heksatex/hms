@@ -44,7 +44,7 @@
                   <th>Schedule Date</th>
                   <th>SO</th>
                   <th>Priority</th>
-                  <th>Warehouse</th>
+                  <th>Departement Tujuan</th>
                   <th>Notes</th>
                   <th>Status</th>
                 </tr>

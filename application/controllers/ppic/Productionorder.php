@@ -143,12 +143,12 @@ class Productionorder extends MY_Controller
                   'type' => 'danger' );    
             }elseif(empty($sales_order)){
                 $callback = array('status' => 'failed', 'field' => 'sales_order', 'message' => 'Sales Order Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
+            }elseif(empty($warehouse)){
+                $callback = array('status' => 'failed', 'field' => 'warehouse', 'message' => 'Departement Tujuan Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );  
+
             }elseif(empty($priority)){
                 $callback = array('status' => 'failed', 'field' => 'priority', 'message' => 'Priority Harus Diisi !', 'icon' =>'fa fa-warning', 
                   'type' => 'danger' );    
-            }elseif(empty($warehouse)){
-                $callback = array('status' => 'failed', 'field' => 'warehouse', 'message' => 'Warehouse Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );  
-
             }else{
 
                 if(empty($kode_prod)){//jika kode production order kosong, aksinya simpan data

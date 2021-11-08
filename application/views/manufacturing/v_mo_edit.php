@@ -173,7 +173,7 @@
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
-                <div class="col-xs-4"><label>Reff Note </label></div>
+                <div class="col-xs-4"><label>Reff Note PPIC </label></div>
                 <div id="ta" class="col-xs-8">
                   <textarea class="form-control input-sm" name="note" id="note" readonly="readonly"><?php echo $list->reff_note; ?></textarea>
                 </div>                                    

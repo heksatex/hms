@@ -12,7 +12,7 @@
           </div>
         </form>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>
         </div>
       </div>
     </div>
@@ -34,7 +34,7 @@
         </form>
         <div class="modal-footer">
           <button type="button" name="btn-ubah" id="btn-ubah" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." class="btn btn-primary btn-sm">Simpan</button>
-          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>
         </div>
       </div>
     </div>
@@ -55,7 +55,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" name="btn-tambah" id="btn-tambah" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."class="btn btn-primary btn-sm">Simpan</button>
-          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>
         </div>
       </div>
     </div>
@@ -75,7 +75,7 @@
           </div>
         </form>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>
         </div>
       </div>
     </div>

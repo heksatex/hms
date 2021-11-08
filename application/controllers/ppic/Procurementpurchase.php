@@ -98,11 +98,11 @@ class Procurementpurchase extends MY_Controller
                     $callback = array('status' => 'failed', 'field' => 'sales_order', 'message' => 'Sales Order  Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
                 }elseif(empty($kode_prod)){
                     $callback = array('status' => 'failed', 'field' => 'kode_prod', 'message' => 'Production Order Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
+                }elseif(empty($warehouse)){
+                    $callback = array('status' => 'failed', 'field' => 'warehouse', 'message' => 'Departement Tujuan Harus Diisi !', 'icon' =>'fa fa-warning', 
+                      'type' => 'danger' );    
                 }elseif(empty($priority)){
                     $callback = array('status' => 'failed', 'field' => 'priority', 'message' => 'Priority Harus Diisi !', 'icon' =>'fa fa-warning', 
-                      'type' => 'danger' );    
-                }elseif(empty($warehouse)){
-                    $callback = array('status' => 'failed', 'field' => 'warehouse', 'message' => 'Warehouse Harus Diisi !', 'icon' =>'fa fa-warning', 
                       'type' => 'danger' );    
                 }else{
 

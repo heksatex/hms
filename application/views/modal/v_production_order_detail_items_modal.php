@@ -54,7 +54,7 @@
 		            <th class="style">Departemen</th>
 		            <th class="style" style="text-align: right;">Qty Target</th>
 		            <th class="style" style="text-align: right;">Tersedia</th>
-		            <th class="style">Reff Note</th>
+		            <th class="style">Reff Note PPIC</th>
 		            <th class="style">Status</th>
 		        </tr>
 		        <tbody>
@@ -109,7 +109,7 @@
 		            <th class="style">Departemen</th>
 		            <th class="style" style="text-align: right;">Qty Target</th>
 		            <th class="style" style="text-align: right;">Tersedia</th>
-		            <th class="style">Reff Note</th>
+		            <th class="style">Reff Note PPIC</th>
 		            <th class="style">Status</th>
 		        </tr>
 		        <tbody>
@@ -164,7 +164,7 @@
 		            <th class="style">Departemen</th>
 		            <th class="style" style="text-align: right;">Qty Target</th>
 		            <th class="style" style="text-align: right;">Tersedia</th>
-		            <th class="style">Reff Note</th>
+		            <th class="style">Reff Note PPIC</th>
 		            <th class="style">Status</th>
 		        </tr>
 		        <tbody>

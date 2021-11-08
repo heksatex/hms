@@ -124,7 +124,7 @@
                   </div>                                    
                 </div>        
                 <div  class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Warehouse</label></div>
+                  <div class="col-xs-4"><label>Departement Tujuan</label></div>
                   <div class="col-xs-8">
                     <select class="form-control input-sm" name="warehouse" id="warehouse" />
                       <?php
@@ -199,7 +199,7 @@
                               <th class="style" width="150px">Schedule Date</th>
                               <th class="style" style="width:100px; text-align: right;" >Qty</th>
                               <th class="style" width="80px">Uom</th>
-                              <th class="style" width="200px">Reff Notes</th>
+                              <th class="style" width="200px">Reff Notes PPIC</th>
                               <th class="style" width="60px">Status</th>
                               <th class="style" width="80px"></th>
                               <th class="style" width="50px"></th>
