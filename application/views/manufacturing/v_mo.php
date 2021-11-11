@@ -53,7 +53,7 @@
                   <th>Product</th>
                   <th>qty</th>
                   <th>uom</th>
-                  <th>reff nonte PPIC</th>
+                  <th>reff note PPIC</th>
                   <th>status</th>
                 </tr>
               </thead>
