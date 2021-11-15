@@ -2819,6 +2819,8 @@ class MO extends MY_Controller
             $nama_produk = $get['nama_produk'];
             $qty         = $get['qty'];
             $uom         = $get['uom'];
+            $qty2         = $get['qty2'];
+            $uom2         = $get['uom2'];
             $tgl         = $get['create_date'];
             $reff_note   = $get['reff_note'];
             /*
@@ -2856,7 +2858,7 @@ class MO extends MY_Controller
             $pdf->SetFont('Arial','B',12,'C');
 
             $pdf->setXY(3,5+$heightNama+10);
-            $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom,0,'L'); // qty
+            $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom.", Qty2 : ".round($qty,2)." ".$uom2,0,'L'); // qty
 
             $pdf->setXY(3,5+$heightNama+15);
             $pdf->Multicell(74,5,"MC : ".$mc_wrp,0,'L');// MC WRP
