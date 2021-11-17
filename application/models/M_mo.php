@@ -661,7 +661,7 @@ class M_mo extends CI_Model
 
 	public function get_data_fg_hasil_by_kode($kode,$lot)
 	{
-		return $this->db->query("SELECT mp.create_date,mp.kode_produk, mp.nama_produk, mp.lot, mp.qty, mp.uom, sq.reff_note, mph.reff_note as note_head
+		return $this->db->query("SELECT mp.create_date,mp.kode_produk, mp.nama_produk, mp.lot, mp.qty, mp.uom, mp.qty2, mp.uom2, sq.reff_note, mph.reff_note as note_head
 								FROM mrp_production_fg_hasil mp
 								LEFT JOIN stock_quant sq ON mp.quant_id = sq.quant_id
 								LEFT Join mrp_production mph ON mp.kode = mph.kode
