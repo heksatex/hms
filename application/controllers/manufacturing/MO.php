@@ -2651,7 +2651,6 @@ class MO extends MY_Controller
 
     function barcode_tws($kode,$data_arr,$count)
     {
-    
         $pdf = new PDF_Code128('L','mm',array(80,60));
 
         $pdf->SetMargins(0,0,0);
@@ -2660,12 +2659,9 @@ class MO extends MY_Controller
         $pdf->SetFont('Arial','B',15,'C');
 
         $data_arr2   = rtrim($data_arr,'|^,');//empty |^
-        $row   = explode("|^,", $data_arr2);
+        $row         = explode("|^,", $data_arr2);
 
         $loop          = 1;
-        $heightNama    = 0; 
-        $enter         = 1;
-        $enter_barcode = 13;
 
         // get mesin by kode
         $get_mc = $this->m_mo->get_mesin_by_mo($kode)->row_array();
@@ -2673,14 +2669,11 @@ class MO extends MY_Controller
 
 
         foreach ($row as $val ) {
-            //$pdf->Cell($width,$height,$val,0,0,'R');
-            //$pdf->Cell($width,$height,'tes',0,0,'R');
-
+      
             if($loop == 2){
                 $pdf->AddPage();
                 $loop = 1;
-                $heightNama = 0; 
-                $enter_barcode = 13;
+               
             }
 
             $items    = explode("^^",$val);
@@ -2719,48 +2712,48 @@ class MO extends MY_Controller
 
             $pdf->SetFont('Arial','B',15,'C'); // set font
 
-            $pdf->setXY(3,3+$heightNama);
+            $pdf->setXY(3,2);
             $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
 
-            $pdf->SetFont('Arial','B',12,'C');
+            $pdf->SetFont('Arial','',12,'C'); // set font
 
-            $pdf->setXY(3,5+$heightNama+10);
+            $pdf->setXY(3,14);
             $pdf->Multicell(74,5,"Qty : ".$qty." ".$uom,0,'L'); // qty
 
-            $pdf->setXY(3,5+$heightNama+15);
+            $pdf->setXY(3,19);
             $pdf->Multicell(74,5,"MC : ".$mesin,0,'L');// MC TWS
 
-            $pdf->setXY(3,5+$heightNama+20);
+            $pdf->setXY(3,24);
             $pdf->Multicell(30,5,"Tgl.HPH   :",0,'L');// Tgl buat/hph
 
-            $pdf->setXY(24,5+$heightNama+20);
+            $pdf->setXY(24,24);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
-            $pdf->setXY(3,5+$heightNama+25);
+            $pdf->setXY(3,29);
             $pdf->Multicell(74,5,"Reff Note : ".$reff_note,0,'L');// reff note
 
-            $pdf->setXY(3,5+$heightNama+30);
+            $pdf->setXY(3,35);
             if($nh_mc != ''){
                 $nh_mc = ' - '.$nh_mc;
             }
+
+            $pdf->SetFont('Arial','B',12,'C'); // set font
+
             $pdf->Multicell(74,5,"Dept Tujuan : ".$nh_dept.''.$nh_mc,0,'L');// Departemen Tujuan
 
-            $pdf->setXY(3,5+$heightNama+35);
+            $pdf->setXY(3,40);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
             $pdf->Code128(5,45,$barcode,70,8,'C',0,1); // barcode
 
-            $pdf->setXY(0,5+$heightNama+48);
+            $pdf->setXY(0,53);
             $pdf->Multicell(80,5,$barcode,0,'C');// barcode
 
             $pdf->SetFont('Arial','B',7,'C'); // set font
             // ket barcode twisting
-            $pdf->setXY(0,5+$heightNama+51);
+            $pdf->setXY(0,56);
             $pdf->Multicell(80,5,'~Barcode Twisting~',0,'C');
 
-            $heightNama    = $heightNama + 40;
-            $enter_barcode = $enter_barcode + 40;
-            
             $loop++;
         }
  
@@ -2783,9 +2776,6 @@ class MO extends MY_Controller
         $row   = explode("|^,", $data_arr2);
 
         $loop          = 1;
-        $heightNama    = 0; 
-        $enter         = 1;
-        $enter_barcode = 13;
 
         // get mesin by kode
         //$get_mc = $this->m_mo->get_mesin_by_mo($kode)->row_array();
@@ -2796,8 +2786,6 @@ class MO extends MY_Controller
             if($loop == 2){
                 $pdf->AddPage();
                 $loop = 1;
-                $heightNama = 0; 
-                $enter_barcode = 13;
             }
 
             $items    = explode("^^",$val);
@@ -2819,8 +2807,8 @@ class MO extends MY_Controller
             $nama_produk = $get['nama_produk'];
             $qty         = $get['qty'];
             $uom         = $get['uom'];
-            $qty2         = $get['qty2'];
-            $uom2         = $get['uom2'];
+            $qty2        = $get['qty2'];
+            $uom2        = $get['uom2'];
             $tgl         = $get['create_date'];
             $reff_note   = $get['reff_note'];
             /*
@@ -2852,48 +2840,48 @@ class MO extends MY_Controller
 
             $pdf->SetFont('Arial','B',15,'C'); // set font
 
-            $pdf->setXY(3,3+$heightNama);
+            $pdf->setXY(3,2);
             $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
 
-            $pdf->SetFont('Arial','B',12,'C');
+            $pdf->SetFont('Arial','',12,'C');
 
-            $pdf->setXY(3,5+$heightNama+10);
-            $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom.", Qty2 : ".round($qty,2)." ".$uom2,0,'L'); // qty
+            $pdf->setXY(3,14);
+            $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom.", Qty2 : ".round($qty2,2)." ".$uom2,0,'L'); // qty
 
-            $pdf->setXY(3,5+$heightNama+15);
+            $pdf->setXY(3,19);
             $pdf->Multicell(74,5,"MC : ".$mc_wrp,0,'L');// MC WRP
 
-            $pdf->setXY(3,5+$heightNama+20);
+            $pdf->setXY(3,24);
             $pdf->Multicell(30,5,"Tgl.HPH   :",0,'L');// Tgl buat/hph
 
-            $pdf->setXY(24,5+$heightNama+20);
+            $pdf->setXY(24,24);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
-            $pdf->setXY(3,5+$heightNama+25);
+            $pdf->setXY(3,29);
             $pdf->Multicell(74,5,"GB : ".$reff_note,0,'L');// reff note
 
-            $pdf->setXY(3,5+$heightNama+30);
+            $pdf->setXY(3,35);
             if($nh_mc != ''){
                 $nh_mc = ' - '.$nh_mc;
             }
+
+            $pdf->SetFont('Arial','B',12,'C'); // set font
+
             $pdf->Multicell(74,5,"Dept Tujuan : JAC".$nh_mc,0,'L');// Departemen Tujuan
 
-            $pdf->setXY(3,5+$heightNama+35);
+            $pdf->setXY(3,40);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
             $pdf->Code128(5,45,$barcode,70,8,'C',0,1); // barcode
 
-            $pdf->setXY(0,5+$heightNama+48);
+            $pdf->setXY(0,53);
             $pdf->Multicell(80,5,$barcode,0,'C');// barcode
 
             $pdf->SetFont('Arial','B',7,'C'); // set font
-            // ket barcode twisting
-            $pdf->setXY(0,5+$heightNama+51);
+            // ket barcode warping panjang
+            $pdf->setXY(0,56);
             $pdf->Multicell(80,5,'~Barcode Warping Panjang~',0,'C');
-
-            $heightNama    = $heightNama + 40;
-            $enter_barcode = $enter_barcode + 40;
-            
+                    
             $loop++;
         }
 
