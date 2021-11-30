@@ -2827,7 +2827,11 @@ class MO extends MY_Controller
             $loop1 = 0;
             $nh_mo = '';
             $nh_mc   = '';
+            $nh_sc = '';
             foreach($nh as $nhx){
+                if($loop1 == 0){
+                    $nh_sc = trim($nhx);
+                }
                 if($loop1 == 1){
                     $nh_mo = trim($nhx);
                 }
@@ -2857,17 +2861,21 @@ class MO extends MY_Controller
             $pdf->setXY(24,24);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
-            $pdf->setXY(3,29);
-            $pdf->Multicell(74,5,"GB : ".$reff_note,0,'L');// reff note
+            $pdf->SetFont('Arial','B',12,'C'); // set font
+
+            $pdf->setXY(3,30);
+            $pdf->Multicell(74,5,"SC : ".$nh_sc,0,'L');// reff note
 
             $pdf->setXY(3,35);
             if($nh_mc != ''){
                 $nh_mc = ' - '.$nh_mc;
             }
 
-            $pdf->SetFont('Arial','B',12,'C'); // set font
+            if($reff_note != ''){
+                $reff_note = ' - '.$reff_note;
+            }
 
-            $pdf->Multicell(74,5,"Dept Tujuan : JAC".$nh_mc,0,'L');// Departemen Tujuan
+            $pdf->Multicell(74,5,"Dept Tujuan : JAC".$nh_mc."".$reff_note,0,'L');// Departemen Tujuan
 
             $pdf->setXY(3,40);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
