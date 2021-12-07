@@ -1091,8 +1091,9 @@ class Printmo extends MY_Controller
             $pdf->Output();
 
             // end if departement warping panjang
+            
         }else if($dept_id == 'JAC'){ // if departement jacquard
-
+       
             $nama_dept = strtoupper($dept['nama']);
             $pdf = new PDF_Code128('p','mm','A4');
 
@@ -1115,6 +1116,100 @@ class Printmo extends MY_Controller
             $pdf->setXY(140,17);    
             $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
             $pdf->Multicell(60,4, 'Tgl.Cetak : '. $tgl_now, 0,'R');
+
+            // explode reff note
+            $ex2 = explode('|', $head['reff_note']);
+            $a   = 0;
+            $benang = '';
+            $lb_greige = '';
+            $lb_jadi = '';
+            $stitch  = '';
+            $rpm     = '';
+            $pcs     = '';
+            $target_jam = '';
+            $target_shift = '';
+            foreach ($ex2 as $exs2) {
+                if($a == 4){ // benang
+                    //$benang = trim($exs2);
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $benang = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 9){ // l.grey
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $lb_greige = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 10){ // l.jadi
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $lb_jadi = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 11){ // pcs
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $pcs = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 13){ // stitch
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $stitch = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 15){ // rpm
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $rpm = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 16){ // target/2jam
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $target_jam = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 17){ // target/shift
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $target_shift = trim($exps);
+                        $b++;
+                    }
+                }
+                $a++;
+            }
 
             $pdf->SetFont('Arial','B',7,'C');
 
@@ -1151,28 +1246,21 @@ class Printmo extends MY_Controller
                 $pdf->SetFont('Arial','B',7,'C');
 
                 // caption tengah 
-                $pdf->setXY($y+70, $x); // y=80, x=22
+                $pdf->setXY($y+65, $x); // y=80, x=22
                 $pdf->Multicell(30, 4, 'Benang ', 0, 'L');
-                $pdf->setXY($y+70, $x+4);
+                $pdf->setXY($y+65, $x+4);
                 $pdf->Multicell(30, 4, 'Lb Greige / Jadi ', 0, 'L' );
-                $pdf->setXY($y+70, $x+8);
+                $pdf->setXY($y+65, $x+8);
                 $pdf->Multicell(30, 4, 'Panjang ', 0, 'L' );
-
-                $pdf->setXY($y+89, $x); // y=99, x=22
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+89, $x+4);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+89, $x+8);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
 
                 $pdf->SetFont('Arial','',7,'C');
                 // isi caption tengah
-                $pdf->setXY($y+90, $x); // y=100, x=22
-                $pdf->Multicell(20, 4, '', 0, 'L');
-                $pdf->setXY($y+90, $x+4);
-                $pdf->Multicell(20, 4, '', 0, 'L');
-                $pdf->setXY($y+90, $x+8);
-                $pdf->Multicell(20, 4, '', 0, 'L');
+                $pdf->setXY($y+84, $x); // y=99, x=22
+                $pdf->Multicell(20, 4, ': '.$benang, 0, 'L');
+                $pdf->setXY($y+84, $x+4);
+                $pdf->Multicell(30, 4, ': '.$lb_greige.' / '.$lb_jadi, 0, 'L');
+                $pdf->setXY($y+84, $x+8);
+                $pdf->Multicell(20, 4, ':', 0, 'L');
 
                 $pdf->SetFont('Arial','B',7,'C');
                 // caption tengah  2
@@ -1183,21 +1271,15 @@ class Printmo extends MY_Controller
                 $pdf->setXY($y+112, $x+8);
                 $pdf->Multicell(30, 4, 'Pcs ', 0, 'L' );
 
-                $pdf->setXY($y+122, $x); // y=132, x=22
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+122, $x+4);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+122, $x+8);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-
                 $pdf->SetFont('Arial','',7,'C');
-                // isi caption tengah 2
-                $pdf->setXY($y+123, $x); // y=133, x=22
-                $pdf->Multicell(20, 4, '', 0, 'L');
-                $pdf->setXY($y+123, $x+4);
-                $pdf->Multicell(40, 4, '', 0, 'L');
-
-
+                // isi tengah  2
+                $pdf->setXY($y+122, $x); // y=132, x=22
+                $pdf->Multicell(20, 4, ': '.$rpm, 0, 'L');
+                $pdf->setXY($y+122, $x+4);
+                $pdf->Multicell(20, 4, ': '.$stitch, 0, 'L');
+                $pdf->setXY($y+122, $x+8);
+                $pdf->Multicell(20, 4, ': '.$pcs, 0, 'L');
+             
                 $pdf->SetFont('Arial','B',7,'C');
                 // caption kanan  
                 $pdf->setXY($y+140, $x); // y=150, x=22
@@ -1205,12 +1287,16 @@ class Printmo extends MY_Controller
                 $pdf->setXY($y+140, $x+4);
                 $pdf->Multicell(30, 4, 'Target / Shift ', 0, 'L' );
             
+                $pdf->SetFont('Arial','',7,'C');
+                // isi caption kanan  
                 $pdf->setXY($y+160, $x);// y=170, x=22
-                $pdf->Multicell(20, 4, ':', 0, 'L');
+                $pdf->Multicell(20, 4, ': '.$target_jam, 0, 'L');
                 $pdf->setXY($y+160, $x+4);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
+                $pdf->Multicell(20, 4, ': '.$target_shift, 0, 'L');
 
                 $x = $x+16;
+
+                $pdf->SetFont('Arial','B',7,'C');
 
                 // header table
                 $pdf->setXY($y, $x); // y=10, x=38
