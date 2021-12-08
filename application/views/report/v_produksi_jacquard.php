@@ -45,7 +45,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>Jadwal Produksi Jacquard [Blm Fix]</b></h3>
+          <h3 class="box-title"><b>Jadwal Produksi Jacquard</b></h3>
         </div>
         <div class="box-body">
            
@@ -162,6 +162,14 @@
                               <th  class='style' style="min-width: 80px">Start Produksi</th>
                               <th  class='style' style="min-width: 80px">Finish Produksi</th>
                               <th  class='style'>Meter</th>
+                              <th  class='style'>Gulung</th>
+                              <th  class='style'>Mtr/Gl</th>
+                              <th  class='style'>Pcs</th>
+                              <th  class='style'>Gauge</th>
+                              <th  class='style'>Stitch/Cm</th>
+                              <th  class='style'>Courses</th>
+                              <th  class='style'>RPM</th>
+                              <th  class='style'>GB</th>
                               <th  class='style' style="min-width: 150px">Bahan Baku</th>
                               <th  class='style'>Target Qty</th>
                               <th  class='style'>RUN IN</th>
@@ -296,6 +304,14 @@
                       $("<td>").text(value.start_produksi),
                       $("<td>").text(value.finish_produksi),
                       $("<td>").text(value.meter),
+                      $("<td>").text(value.gulung),
+                      $("<td>").text(value.mtr_gl),
+                      $("<td>").text(value.pcs),
+                      $("<td>").text(value.gauge),
+                      $("<td>").text(value.stitch),
+                      $("<td>").text(value.courses),
+                      $("<td>").text(value.rpm),
+                      $("<td>").text(value.gb),
                       $("<td>").text(value.rm),
                       $("<td>").text(value.target_qty),
                       $("<td>").text(value.run_in),
@@ -386,6 +402,14 @@
                                   $("<td>").text(value.start_produksi),
                                   $("<td>").text(value.finish_produksi),
                                   $("<td>").text(value.meter),
+                                  $("<td>").text(value.gulung),
+                                  $("<td>").text(value.mtr_gl),
+                                  $("<td>").text(value.pcs),
+                                  $("<td>").text(value.gauge),
+                                  $("<td>").text(value.stitch),
+                                  $("<td>").text(value.courses),
+                                  $("<td>").text(value.rpm),
+                                  $("<td>").text(value.gb),
                                   $("<td>").text(value.rm),
                                   $("<td>").text(value.target_qty),
                                   $("<td>").text(value.run_in),
