@@ -1091,10 +1091,11 @@ class Printmo extends MY_Controller
             $pdf->Output();
 
             // end if departement warping panjang
+            
         }else if($dept_id == 'JAC'){ // if departement jacquard
-
+       
             $nama_dept = strtoupper($dept['nama']);
-            $pdf = new PDF_Code128('p','mm','A4');
+            $pdf = new PDF_Code128('l','mm','A4');
 
             $pdf->SetMargins(0,0,0);
             $pdf->SetAutoPageBreak(False);
@@ -1104,323 +1105,334 @@ class Printmo extends MY_Controller
             $pdf->SetFont('Arial','B',10,'C');
             $pdf->Cell(0,23,'LAPORAN HASIL PRODUKSI HARIAN ',0,0,'C');
 
+            // explode reff note
+            $ex2 = explode('|', $head['reff_note']);
+            $a   = 0;
+            $benang = '';
+            $lbr_greige = '';
+            $lbr_jadi = '';
+            $stitch  = '';
+            $rpm     = '';
+            $pcs     = '';
+            $target_jam = '';
+            $target_shift = '';
+            $panjang      = '';
+            foreach ($ex2 as $exs2) {
+                if($a == 4){ // benang
+                    //$benang = trim($exs2);
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $benang = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 8){ // pjg / mtr per GL
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $panjang = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 9){ // l.grey
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $lbr_greige = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 10){ // l.jadi
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $lbr_jadi = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 11){ // pcs
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $pcs = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 13){ // stitch
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $stitch = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 15){ // rpm
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $rpm = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 16){ // target/2jam
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $target_jam = trim($exps);
+                        $b++;
+                    }
+                }
+
+                if($a == 17){ // target/shift
+                   
+                    $exp = explode('=', $exs2);
+                    $b   = 1;
+                    foreach ($exp as $exps) {
+                        $target_shift = trim($exps);
+                        $b++;
+                    }
+                }
+                $a++;
+            }
+
             $pdf->SetFont('Arial','',15,'C');
             $pdf->setXY(10,8);
-            $pdf->Multicell(57,6,$head['nama_mesin'],1,'C');
+            $pdf->Multicell(95,8,$head['nama_mesin'],1,'C');
 
-            $pdf->setXY(150,8);
-            $pdf->Multicell(50,7,$head['kode'],1,'C');
+            $pdf->setXY(225,8);
+            $pdf->Multicell(60,8,$head['kode'],1,'C');
+
+            $pdf->SetFont('Arial','B',7,'C');
+            $pdf->setXY(188,18);    
+            $pdf->Multicell(60,4, 'Tgl.Produksi : ', 0,'R');
+            // Caption kiri
+            $pdf->setXY(10,25);
+            $pdf->Multicell(25, 4, 'Tgl. MO ', 0, 'L');
+
+            $pdf->setXY(10,29);
+            $pdf->Multicell(23, 4, 'Product ', 0, 'L');
+
+            $pdf->setXY(10,33);
+            $pdf->Multicell(25, 4, 'Origin ', 0, 'L');
+
+
+            $pdf->setXY(32, 25);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+            $pdf->setXY(32, 29);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+            $pdf->setXY(32, 33);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
 
             $pdf->SetFont('Arial','',7,'C');
-            $pdf->setXY(140,17);    
-            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
-            $pdf->Multicell(60,4, 'Tgl.Cetak : '. $tgl_now, 0,'R');
+            // isi kiri
+            $pdf->setXY(33,25);
+            $pdf->Multicell(50, 4, tgl_indo(date('d-m-Y H:i:s', strtotime($head['tanggal']))), 0, 'L');
+
+            $pdf->setXY(33,29);
+            $pdf->Multicell(58, 4, $head['nama_produk'], 0, 'L');
+
+            $pdf->setXY(33,33);
+            $pdf->Multicell(50, 4, $head['origin'], 0, 'L');
+
 
             $pdf->SetFont('Arial','B',7,'C');
 
-            $y = 10; 
-            $x = 22;
+             // caption tengah 
+            $pdf->setXY(90, 25); 
+            $pdf->Multicell(25, 4, 'Benang ', 0, 'L');
 
-            for($a=1; $a<4; $a++) {// looping ke isi ke bawah
+            $pdf->setXY(90,29);
+            $pdf->Multicell(25, 4, 'Lebar Greige / Jadi ', 0, 'L');
 
-                // Caption kiri
-                $pdf->setXY($y,$x);
-                $pdf->Multicell(20, 4, 'Tgl. MO ', 0, 'L');
-                $pdf->setXY($y,$x+4);
-                $pdf->Multicell(20, 4, 'Product ', 0, 'L');
-                $pdf->setXY($y,$x+8);
-                $pdf->Multicell(20, 4, 'Origin ', 0, 'L');
+            $pdf->setXY(90,33);
+            $pdf->Multicell(25, 4, 'Panjang ', 0, 'L');
 
-                $pdf->setXY($y+19, $x);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+19, $x+4);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+19, $x+8);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
+            $pdf->setXY(115, 25);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+            $pdf->setXY(115, 29);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+            $pdf->setXY(115, 33);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+
+
+            // isi tengah
+            $pdf->SetFont('Arial','',7,'C');
+            $pdf->setXY(116, 25);
+            $pdf->Multicell(40, 4, $benang, 0, 'L');
+            $pdf->setXY(116, 29);
+            $pdf->Multicell(30, 4, $lbr_greige.' / '.$lbr_jadi, 0, 'L');
+            $pdf->setXY(116, 33);
+            $pdf->Multicell(40, 4, $panjang, 0, 'L');
+
+
+            // caption tengah 2
+            $pdf->SetFont('Arial','B',7,'C');
+            $pdf->setXY(156, 25);
+            $pdf->Multicell(30, 4, 'RPM ', 0, 'L');
+
+            $pdf->setXY(156, 29);
+            $pdf->Multicell(30, 4, 'Stitch ', 0, 'L' );
+
+            $pdf->setXY(156, 33);
+            $pdf->Multicell(30, 4, 'PCS ', 0, 'L');
             
-                $pdf->SetFont('Arial','',7,'C');
+            $pdf->setXY(170, 25);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+            $pdf->setXY(170, 29);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+            $pdf->setXY(170, 33);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
 
-                // isi kiri
-                $pdf->setXY($y+20, $x); // y=30, x=22
-                $pdf->Multicell(50, 4, tgl_indo(date('d-m-Y H:i:s',strtotime($head['tanggal']))), 0, 'L');
-                $pdf->setXY($y+20, $x+4);
-                $pdf->Multicell(50, 4, $head['nama_produk'], 0, 'L');
-                $pdf->setXY($y+20, $x+8);
-                $pdf->Multicell(50, 4, $head['origin'], 0, 'L');
+            $pdf->SetFont('Arial','',7,'C');
+            // isi tengah 2
+            $pdf->setXY(171, 25);
+            $pdf->Multicell(30, 4, $rpm, 0, 'L');
+            $pdf->setXY(171, 29);
+            $pdf->Multicell(30, 4, $stitch, 0, 'L');
+            $pdf->setXY(171, 33);
+            $pdf->Multicell(30, 4, $pcs, 0, 'L');
 
-                $pdf->SetFont('Arial','B',7,'C');
+            $pdf->SetFont('Arial','B',7,'C');
 
-                // caption tengah 
-                $pdf->setXY($y+70, $x); // y=80, x=22
-                $pdf->Multicell(30, 4, 'Benang ', 0, 'L');
-                $pdf->setXY($y+70, $x+4);
-                $pdf->Multicell(30, 4, 'Lb Greige / Jadi ', 0, 'L' );
-                $pdf->setXY($y+70, $x+8);
-                $pdf->Multicell(30, 4, 'Panjang ', 0, 'L' );
+            // caption kanan
+            $pdf->setXY(200, 25);
+            $pdf->Multicell(35, 4, 'Target / 2 Jam ', 0, 'L');
+            $pdf->setXY(200, 29);
+            $pdf->Multicell(35, 4, 'Target / Shift ', 0, 'L');
 
-                $pdf->setXY($y+89, $x); // y=99, x=22
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+89, $x+4);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+89, $x+8);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
+            $pdf->setXY(220, 25);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
+            $pdf->setXY(220, 29);
+            $pdf->Multicell(3, 4, ':', 0, 'L');
 
-                $pdf->SetFont('Arial','',7,'C');
-                // isi caption tengah
-                $pdf->setXY($y+90, $x); // y=100, x=22
-                $pdf->Multicell(20, 4, '', 0, 'L');
-                $pdf->setXY($y+90, $x+4);
-                $pdf->Multicell(20, 4, '', 0, 'L');
-                $pdf->setXY($y+90, $x+8);
-                $pdf->Multicell(20, 4, '', 0, 'L');
-
-                $pdf->SetFont('Arial','B',7,'C');
-                // caption tengah  2
-                $pdf->setXY($y+112, $x); // y=122, x=22
-                $pdf->Multicell(30, 4, 'RPM ', 0, 'L');
-                $pdf->setXY($y+112, $x+4);
-                $pdf->Multicell(30, 4, 'Stitch ', 0, 'L' );
-                $pdf->setXY($y+112, $x+8);
-                $pdf->Multicell(30, 4, 'Pcs ', 0, 'L' );
-
-                $pdf->setXY($y+122, $x); // y=132, x=22
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+122, $x+4);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+122, $x+8);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-
-                $pdf->SetFont('Arial','',7,'C');
-                // isi caption tengah 2
-                $pdf->setXY($y+123, $x); // y=133, x=22
-                $pdf->Multicell(20, 4, '', 0, 'L');
-                $pdf->setXY($y+123, $x+4);
-                $pdf->Multicell(40, 4, '', 0, 'L');
-
-
-                $pdf->SetFont('Arial','B',7,'C');
-                // caption kanan  
-                $pdf->setXY($y+140, $x); // y=150, x=22
-                $pdf->Multicell(30, 4, 'Target / 2 Jam ', 0, 'L');
-                $pdf->setXY($y+140, $x+4);
-                $pdf->Multicell(30, 4, 'Target / Shift ', 0, 'L' );
+            // isi kanan 
+            $pdf->SetFont('Arial','',7,'C');
+            $pdf->setXY(221, 25);
+            $pdf->Multicell(30, 4, $target_jam, 0, 'L');
+            $pdf->setXY(221, 29);
+            $pdf->Multicell(30, 4, $target_shift, 0, 'L');
             
-                $pdf->setXY($y+160, $x);// y=170, x=22
-                $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY($y+160, $x+4);
-                $pdf->Multicell(20, 4, ':', 0, 'L');
+            // header tabel
+            $pdf->SetFont('Arial','B',7,'C');
 
-                $x = $x+16;
+            $pdf->setXY(10, 38);
+            $pdf->Multicell(18, 10, '', 1, 'C');
+            $pdf->setXY(10, 41);
+            $pdf->Multicell(18, 3, 'Operator / Shift', 0, 'C'); 
 
-                // header table
-                $pdf->setXY($y, $x); // y=10, x=38
-                $pdf->Multicell(12, 6, '', 1, 'C');
-                $pdf->setXY($y, $x);
-                $pdf->Multicell(12, 6, 'Interval', 0, 'C');
-                
-                $pdf->setXY($y+12, $x); // y=22, x=38
-                $pdf->Multicell(15, 6, '', 1, 'C');
-                $pdf->setXY($y+12,  $x);
-                $pdf->Multicell(15, 3, 'Waktu [120 Menit]', 0, 'C');
+            $pdf->setXY(28, 38);
+            $pdf->Multicell(19, 10, '', 1, 'C');
+            $pdf->setXY(28, 41);
+            $pdf->Multicell(19, 3, 'Meter/Panel', 0, 'C');
+           
+            $pdf->setXY(47, 38);
+            $pdf->Multicell(71, 10, '', 1, 'C');
+          
+            $pdf->setXY(47, 41);
+            $pdf->Multicell(71, 5, 'JENIS CACAT', 0, 'C');
 
-                $pdf->setXY($y+27,  $x); // y=37, x=38
-                $pdf->Multicell(15, 6, '', 1, 'C');
-                $pdf->setXY($y+27,  $x);
-                $pdf->Multicell(15, 3, 'Actual [Meter]', 0, 'C');
+            $pdf->setXY(118, 38);
+            $pdf->Multicell(26, 5, 'Posisi Cacat', 1, 'C');
+            $pdf->setXY(118, 43);
+            $pdf->Multicell(13, 5, 'GB', 1, 'C');
+            $pdf->setXY(131, 43);
+            $pdf->Multicell(13, 5, 'Blok', 1, 'C');
 
-                $pdf->setXY($y+42,  $x);
-                $pdf->Multicell(10, 6, '', 1, 'C');
-                $pdf->setXY($y+42,  $x);
-                $pdf->Multicell(10, 6, 'Eff [%]', 0, 'C');
+            $pdf->setXY(144, 38);
+            $pdf->Multicell(15, 5, 'Berat', 1, 'C');
+            $pdf->setXY(144, 43);
+            $pdf->Multicell(15, 5, '(Kg)', 1, 'C');
 
-                $pdf->setXY($y+52,  $x);
-                $pdf->Multicell(35, 6, '', 1, 'C');
-                $pdf->setXY($y+52,  $x);
-                $pdf->Multicell(35, 6, 'MASALAH', 0, 'C');
+            $pdf->setXY(159, 38);
+            $pdf->Multicell(15, 10, '', 1, 'C');
+            $pdf->setXY(159, 41);
+            $pdf->Multicell(15, 3, 'Grade', 0, 'C');
 
-                $pdf->setXY($y+87,  $x);
-                $pdf->Multicell(35, 6, '', 1, 'C');
-                $pdf->setXY($y+87,  $x);
-                $pdf->Multicell(35, 6, 'ACTION / KETERANGAN', 0, 'C');
+            $pdf->setXY(174, 38);
+            $pdf->Multicell(65, 10, '', 1, 'C');
+            $pdf->setXY(174, 41);
+            $pdf->Multicell(65, 3, 'Masalah', 0, 'C');
 
-                $pdf->setXY($y+122,  $x);
-                $pdf->Multicell(28, 3, '', 1, 'C');
-                $pdf->setXY($y+122,  $x);
-                $pdf->Multicell(28, 3, 'MASALAH', 0, 'C');
+            $pdf->setXY(239, 38);
+            $pdf->Multicell(45, 10, '', 1, 'C');
+            $pdf->setXY(239, 41);
+            $pdf->Multicell(45, 5, 'Action / Keterangan', 0, 'C');
 
-                $pdf->setXY($y+122, $x+3);//y =132, x=41
-                $pdf->Multicell(7, 3, 'A', 1, 'C');
-                $pdf->setXY($y+129,  $x+3);
-                $pdf->Multicell(7, 3, 'B', 1, 'C');
-                $pdf->setXY($y+136,  $x+3);
-                $pdf->Multicell(7, 3, 'C', 1, 'C');
-                $pdf->setXY($y+143,  $x+3);
-                $pdf->Multicell(7, 3, 'D', 1, 'C');
+            $x = 10;
+            $y = 48;
+            $width = 0;
 
-                $pdf->setXY($y+150, $x);
-                $pdf->Multicell(16, 3, '', 1, 'C');
-                $pdf->setXY($y+150,  $x);
-                $pdf->Multicell(16, 3, 'COUNTER', 0, 'C');
-                
-                $pdf->setXY($y+150,  $x+3);
-                $pdf->Multicell(8, 3, 'MTR', 1, 'C');
-                $pdf->setXY($y+158,  $x+3);
-                $pdf->Multicell(8, 3, 'PNL', 1, 'C');
-
-                $pdf->setXY($y+166,  $x);
-                $pdf->Multicell(12, 6, '', 1, 'C');
-                $pdf->setXY($y+166,  $x);
-                $pdf->Multicell(12, 6, 'MONTIR', 0, 'C');
-                
-                $pdf->setXY($y+178,  $x);
-                $pdf->Multicell(12, 6, '', 1, 'C');
-                $pdf->setXY($y+178,  $x);
-                $pdf->Multicell(12, 6, 'K.Shift', 0, 'C');
-
-                $x = $x+6;
-                $y = 10;
-                $num = 1;
-                $nums = '';
-                $pdf->SetFont('Arial','B',15,'C'); // set FONT
-
-                for($b=1; $b<5; $b++) {// looping ke bawah
-
-
-                    $length_col = array('12','15','15','10','35','35','7','7','7','7','8','8','12','12');
-                    $first = true;
-                    foreach($length_col as $length){// looping ke kanan
-                    
-                        if($first== true){
-                            $nums = $num;
-                            $first = false;
-                        }else{
-                            $nums = '';
-                        }
-
-                        $pdf->setXY($y, $x);
-                        $pdf->Multicell($length, 12, $nums, 1,'C');
-                        $y=$length+$y;
-                    }
-                    $num++;
-                    $x=$x+12;
-                    $y=10;
+            // looping ke samping
+            for($i=1; $i<= 14; $i++){
+                if($i == 1 ){
+                    $width = 18;
+                }elseif($i == 2){
+                    $width = 19;
+                }elseif($i== 3 || $i == 4 || $i ==  5 || $i == 6 || $i == 7 || $i == 8){
+                    $width = 11.83;                    
+                }elseif($i == 11 || $i == 12){
+                    $width = 15;
+                }elseif($i == 9 || $i == 10 ){
+                    $width = 13;
+                }elseif($i == 14){
+                    $width = 45;
+                }elseif($i == 13){
+                    $width = 65;
                 }
 
-                $pdf->SetFont('Arial','B',7,'C'); // set FONT
-
-                $pdf->setXY($y, $x); // y=10 , x=84
-
-                $pdf->Multicell(27, 15, '', 1, 'C');
-                $pdf->setXY(10, $x);
-                $pdf->Multicell(27, 7, 'BP :', 0, 'L');
-                $pdf->setXY(10, $x+5);
-                $pdf->Multicell(27, 8, 'Cones :', 0, 'L');
-                
-                $pdf->setXY($y+27, $x);
-                $pdf->Multicell(15, 15, '', 1, 'C');
-                $pdf->setXY($y+27, $x);
-                $pdf->Multicell(15, 5, 'Rata - Rata (%) :', 0, 'L');
-
-                $pdf->setXY($y+27+15, $x);
-                $pdf->Multicell(10, 15, '', 1, 'C'); // eff
-
-                $pdf->setXY($y+27+15+10, $x);
-                $pdf->Multicell(138, 7, '', 1, 'C'); // kolom kosong full / coolspan=10
-
-                $pdf->setXY(62, $x);
-                $pdf->Multicell(25, 5, 'Hasil :', 0, 'L');
-
-                $pdf->setXY(87, $x);
-                $pdf->Multicell(25, 5, 'Start :', 0, 'L');
-
-                $pdf->setXY(112, $x);
-                $pdf->Multicell(25, 5, 'Finish :', 0, 'L');
-
-                $pdf->setXY(137, $x);
-                $pdf->Multicell(25, 5, 'Berat :', 0, 'L');
-
-                $pdf->setXY(162, $x);
-                $pdf->Multicell(38, 5, 'No. Kp :', 0, 'L');
-                
-                $pdf->SetFont('Arial','B',6,'C'); // font 
-
-                $pdf->setXY($y+27+15+10, $x+7);
-                $pdf->Multicell(106, 8, '', 1, 'C'); // kolom keterangan
-
-                $pdf->setXY(62, $x+7);
-                $pdf->Multicell(35, 3, 'Keterangan :', 0, 'L');
-
-                $pdf->setXY(168, $x+7);
-                $pdf->Multicell(8, 8, '', 1, 'C'); // kolom shift
-                $pdf->setXY(168, $x+7);
-                $pdf->Multicell(8, 3, 'Shift :', 0, 'L');
-
-                $pdf->setXY(176, $x+7);
-                $pdf->Multicell(12, 8, '', 1, 'L');
-                $pdf->setXY(176, $x+7);
-                $pdf->Multicell(12, 3, 'Operator:', 0, 'L');
-                
-                $pdf->setXY(188, $x+7);
-                $pdf->Multicell(12, 8, '', 1, 'L');
-                $pdf->setXY(188, $x+7);
-                $pdf->Multicell(12, 3, 'Asisten :', 0, 'L');
-
-
-                $x=$x+20;
-                
+                $a = 1;
+                $y = 48;
+                for($a; $a<=27; $a++){ // looping kebawah
+                    $pdf->setXY($x, $y);
+                    $pdf->Multicell($width, 5, '', 1,'C');
+                    $y = $y + 5;
+                }
+                $x = $x + $width;
 
             }
 
-            // hasil, start, finish, Berat Kain, NO KP
+            $y + 8;
 
-            // keterangan , SHIFT, opeator, asisten
+            $pdf->setXY(10, $y);
+            $pdf->Multicell(13, 5, 'Catatan : ', 0, 'L');
 
-            /*
-            $x1 = 118; // untuk header
-            $x2 = 123; // untuk tbody
+            $pdf->SetFont('Arial','',7,'C');
 
-            // table 1
-            for($a=1; $a<4; $a++) {
+            $pdf->setXY(24, $y);
+            $pdf->Multicell(110, 5, '1. Isi setiap Kolom dengan BENAR, BERTANYA jika tidak mengerti cara mengisi form ini. ', 0, 'L');
 
-                $pdf->SetFont('Arial','B',8,'C');
-                $pdf->setXY(10,$x1);
-                $pdf->Cell(10, 5, 'No', 1, 0, 'C');
-                $pdf->Cell(30, 5, 'Jumlah Lembar', 1, 0, 'C');
-                $pdf->Cell(20, 5, 'Putaran', 1, 0, 'C');
-                $pdf->Cell(30, 5, 'Jam Mulai', 1, 0, 'C');
-                $pdf->Cell(30, 5, 'Jam Selesai', 1, 0, 'C');
-                $pdf->Cell(18, 5, 'Kg', 1, 0, 'C');
-                $pdf->Cell(23, 5, 'UMC', 1, 0, 'C');
-                $pdf->Cell(30, 5, 'Keterangan', 1, 0, 'C');
+            $pdf->setXY(24, $y+5);
+            $pdf->Multicell(110, 5, '2. Kolom START/HASIL diisi terlebih dahulu. (Start, Finish, dan Hasil/Pendapatan, Produksi) ', 0, 'L');
 
-                $array_length_column = array(10,30,20,30,30,18,23,30);
-                $x = $x2;
-                $y = 10;
-                for($i=1; $i<=5; $i++) {
-                    # code...
-                    foreach ($array_length_column as $length) {
-                        # code...
-                        $pdf->setXY($y, $x);
-                        $pdf->Multicell($length, 5, '', 1,'C');
-                        $y=$length+$y;
-                        //$y = $y + 5;
-                    }
-                    $x=$x+5;
-                    $y=10;
+            $pdf->setXY(24, $y+10);
+            $pdf->Multicell(110, 5, '3. Jika terdapat CACAT, isi kolom Counter, Jenis Cacat Kain dan Posisi Cacat. ', 0, 'L');
 
-                    if($i==5){
-                        $pdf->setXY($y, $x);
-                        $pdf->Multicell(40, 5, 'SHIFT/OPERATOR', 1,'L');
-                        $pdf->setXY($y+40, $x);
-                        $pdf->Multicell(151, 5, '', 1,'C');
-                    }
-                }
-                $x1 = $x1 + 37;
-                $x2 = $x2 + 37 ;
-            }
+            $pdf->setXY(140, $y);
+            $pdf->Multicell(110, 5, 'CATATAN & KETERANGAN KHUSUS : ');
 
-            */
+            $pdf->setXY(140, $y+5);
+            $pdf->Multicell(145, 15, '', 1);
 
+            $pdf->SetFont('Arial','',8,'C');
+            $pdf->setXY(225,$y+21);    
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(60,4, 'Tgl.Cetak : '.$tgl_now, 0,'R');
+        
             $pdf->Output();
             // end if departement jacquard
         }else{

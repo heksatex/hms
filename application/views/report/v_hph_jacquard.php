@@ -44,7 +44,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>HPH Jacquard [Blm Fix]</b></h3>
+          <h3 class="box-title"><b>HPH Jacquard</b></h3>
         </div>
         <div class="box-body">
            
@@ -215,6 +215,10 @@
                               <th  class='style'>Qty2</th>
                               <th  class='style'>Uom2</th>
                               <th  class='style'>Grade</th>
+                              <th  class='style'>L.Greige</th>
+                              <th  class='style'>L.Jadi</th>
+                              <th  class='style'>RPM</th>
+                              <th  class='style'>Stitch</th>
                               <th  class='style'>Marketing</th>
                               <th  class='style'>Reff Note </th>
                               <th  class='style'>Lokasi </th>
@@ -223,7 +227,7 @@
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="18" align="center">Tidak ada Data</td>
+                              <td colspan="21" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -411,6 +415,10 @@
                                  $("<td>").text(value.qty2),
                                  $("<td>").text(value.uom2),
                                  $("<td>").text(value.grade),
+                                 $("<td>").text(value.lbr_greige),
+                                 $("<td>").text(value.lbr_jadi),
+                                 $("<td>").text(value.rpm),
+                                 $("<td>").text(value.stitch),
                                  $("<td>").text(value.marketing),
                                  $("<td>").text(value.reff_note),
                                  $("<td>").text(value.lokasi),
@@ -419,7 +427,7 @@
                         tbody.append(tr);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='17' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='21' align='center'>").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);
