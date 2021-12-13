@@ -928,6 +928,24 @@
         });
     });
 
+    //modal mode print
+    $(document).on('click','#btn-print',function(e){
+        e.preventDefault();
+        var kode       = "<?php echo $list->kode; ?>";
+        var departemen = "<?php echo $list->dept_id; ?>";
+        var status     = $("#status").val();
+
+        if(kode == ""){
+          alert_modal_warning('Kode Pengiriman Kosong !');
+        }else if(status != 'done'){
+          alert_modal_warning('Print Pengiriman Barang Hanya bisa di Print saat statusnya "Terkirim" ! ');
+        }else{
+          var url = '<?php echo base_url() ?>warehouse/pengirimanbarang/print_pengiriman_barang';
+          window.open(url+'?kode='+ kode+'&&departemen='+ departemen,'_blank');
+        }
+
+    });
+
 </script>
 
 

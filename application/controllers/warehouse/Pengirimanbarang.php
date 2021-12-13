@@ -127,17 +127,17 @@ class Pengirimanbarang extends MY_Controller
   }
 
   function limit_words1($string, $word_limit){
-      
+
     $words = explode(" ",$string);
-    $new_word = implode(" ",array_splice($words,0,$word_limit));
-    return  $new_word.' [...]';
+    if(count($words) > $word_limit){
+      $new_word = implode(" ",array_splice($words,0,$word_limit));
+      return  $new_word.' [...]';
+    }
 
   }
 
   function limit_words($string, $awal_start, $awal_length, $akhir_start, $akhir_length){
         
-      //$jml_kata = str_word_count($string);
-
       $words = explode(" ",$string);
       $word_awal  = implode(" ",array_splice($words,$awal_start,$awal_length));
       $word_akhir = implode(" ",array_splice($words,$akhir_start,$akhir_length));
@@ -1766,6 +1766,206 @@ class Pengirimanbarang extends MY_Controller
         }// end if cek session 
 
         echo json_encode($callback);
+
+    }
+
+
+    function print_pengiriman_barang()
+    {
+
+        $this->load->library('Pdf');//load library pdf
+
+        $dept_id  = $this->input->get('departemen');
+        $kode     = $this->input->get('kode');
+
+		    $dept    = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
+
+        $head    = $this->m_pengirimanBarang->get_data_by_code($kode);
+
+			  $nama_dept = strtoupper($dept['nama']);
+			  //$pdf = new PDF_Code128('P','mm','A4');
+	      $pdf = new PDF_Code128('L','mm',array(210,148.5));
+
+	  		$pdf->SetMargins(0,0,0);
+	      $pdf->SetAutoPageBreak(False);
+	      $pdf->AddPage();
+	      $pdf->setTitle('Pengiriman Barang : '.$nama_dept);
+
+	      $pdf->SetFont('Arial','B',9,'C');
+	      $pdf->Cell(0,10,'PENGIRIMAN BARANG '.$nama_dept,0,0,'C');
+
+        $pdf->SetFont('Arial','',7,'C');
+
+		    $pdf->setXY(160,3);
+        $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+        $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+
+        $pdf->SetFont('Arial','B',8,'C');
+
+         // caption kiri
+        $pdf->setXY(5,10);
+        $pdf->Multicell(15,4,'Kode ',0,'L');
+
+        $pdf->setXY(5,13);
+        $pdf->Multicell(15,4,'Tgl.buat ',0,'L');
+
+        $pdf->setXY(5,16);
+        $pdf->Multicell(15,4,'Origin ',0,'L');
+
+        $pdf->setXY(19, 10);
+        $pdf->Multicell(5, 4, ':', 0, 'L');
+        $pdf->setXY(19, 13);
+        $pdf->Multicell(5, 4, ':', 0, 'L');
+        $pdf->setXY(19, 16);
+        $pdf->Multicell(5, 4, ':', 0, 'L');
+          
+         // isi kiri
+         $pdf->SetFont('Arial','',8,'C');
+
+         $pdf->setXY(20,10);
+         $pdf->Multicell(40,4,$head->kode,0,'L');
+         $pdf->setXY(20,13);
+         $pdf->Multicell(40,4,$head->tanggal,0,'L');
+         $pdf->setXY(20,16);
+         $pdf->Multicell(70,4,$head->origin,0,'L');
+
+         $pdf->SetFont('Arial','B',8,'C');
+        // caption tengah
+        $pdf->setXY(60,10);
+        $pdf->Multicell(25,4,'Reff Picking ',0,'L');
+        $pdf->setXY(60,13);
+        $pdf->Multicell(25,4,'Tgl.kirim ',0,'L');
+        $pdf->setXY(60,16);
+        $pdf->Multicell(25,4,'Tgl.Jatuh Tempo ',0,'L');
+
+        $pdf->setXY(85, 10);
+        $pdf->Multicell(5, 4, ':', 0, 'L');
+        $pdf->setXY(85, 13);
+        $pdf->Multicell(5, 4, ':', 0, 'L');
+        $pdf->setXY(85, 16);
+        $pdf->Multicell(5, 4, ':', 0, 'L');
+          
+         // isi tengah
+         $pdf->SetFont('Arial','',8,'C');
+
+         $pdf->setXY(86,10);
+         $pdf->Multicell(60,4,$head->reff_picking,0,'L');
+         $pdf->setXY(86,13);
+         $pdf->Multicell(40,4,$head->tanggal_transaksi,0,'L');
+         $pdf->setXY(86,16);
+         $pdf->Multicell(70,4,$head->tanggal_jt,0,'L');
+
+         
+         $pdf->SetFont('Arial','B',8,'C');
+         // caption tengah
+        $pdf->setXY(143,10);
+        $pdf->Multicell(25,4,'Reff Note ',0,'L');
+        $pdf->setXY(157, 10);
+        $pdf->Multicell(5, 4, ':', 0, 'L');
+
+        $reff_note = $this->limit_words1($head->reff_note,-40);
+        
+          // isi kanan
+        $pdf->SetFont('Arial','',8,'C');
+        $pdf->setXY(158,10);
+        $pdf->Multicell(52,4,$reff_note,0,'L');
+
+
+        // header table product
+        $pdf->SetFont('Arial','B',8,'C');
+        $pdf->setXY(5,23);
+        $pdf->Multicell(52,4,'Produk',0,'L');
+
+        $pdf->setXY(5,27);
+        $pdf->Cell(7, 5, 'No.', 1, 0, 'L');
+        $pdf->Cell(20, 5, 'Kode Produk', 1, 0, 'C');
+        $pdf->Cell(70, 5, 'Nama Produk', 1, 0, 'C');
+        $pdf->Cell(25, 5, 'Qty', 1, 0, 'R');
+        $pdf->Cell(10, 5, 'Uom', 1, 0, 'C');
+        $pdf->Cell(18, 5, 'Tersedia', 1, 0, 'C');
+
+        // set font tbody =
+        $pdf->SetFont('Arial','',8,'C');
+
+        // products
+        $items = $this->m_pengirimanBarang->get_list_pengiriman_barang($kode);
+        $x    = 5;
+        $y    = 32;
+        $no   = 1;
+        foreach($items as $row){
+
+          $pdf->setXY($x, $y);
+          $pdf->Multicell(7, 5, $no, 1,'L');
+          $pdf->setXY($x+7, $y);
+          $pdf->Multicell(20, 5, $row->kode_produk, 1,'L');
+          $pdf->setXY($x+27, $y);
+          $pdf->Multicell(70, 5, $row->nama_produk, 1,'L');
+          $pdf->setXY($x+97, $y);
+          $pdf->Multicell(25, 5, number_format($row->qty,2), 1,'R');
+          $pdf->setXY($x+122, $y);
+          $pdf->Multicell(10, 5, $row->uom, 1,'L');
+          $pdf->setXY($x+132, $y);
+          $pdf->Multicell(18, 5, number_format($row->sum_qty,2), 1,'R');
+
+          $no++;
+
+        }
+
+        $y = $y+15;
+
+        // header table details
+        $pdf->SetFont('Arial','B',8,'C');
+        $pdf->setXY(5,$y);
+        $pdf->Multicell(52,4,'Detail Produk',0,'L');
+
+        $pdf->setXY(5,$y+5);
+        $pdf->Cell(7, 5, 'No.', 1, 0, 'L');
+        $pdf->Cell(20, 5, 'Kode Produk', 1, 0, 'C');
+        $pdf->Cell(70, 5, 'Nama Produk', 1, 0, 'C');
+        $pdf->Cell(30, 5, 'Lot', 1, 0, 'C');
+        $pdf->Cell(15, 5, 'Qty', 1, 0, 'R');
+        $pdf->Cell(10, 5, 'Uom', 1, 0, 'L');
+        $pdf->Cell(15, 5, 'Qty2', 1, 0, 'R');
+        $pdf->Cell(10, 5, 'Uom2', 1, 0, 'L');
+        $pdf->Cell(20, 5, 'Reff Note', 1, 0, 'C');
+
+        // set font tbody =
+        $pdf->SetFont('Arial','',8,'C');
+
+        // details
+        $smi  = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode);
+        $x    = 5;
+        $y    = $y+10;
+        $no   = 1;
+        foreach($smi as $row){
+
+          $pdf->setXY($x, $y);
+          $pdf->Multicell(7, 5, $no, 1,'L');
+          $pdf->setXY($x+7, $y);
+          $pdf->Multicell(20, 5, $row->kode_produk, 1,'L');
+          $pdf->setXY($x+27, $y);
+          $pdf->Multicell(70, 5, $row->nama_produk, 1,'L');
+          $pdf->setXY($x+97, $y);
+          $pdf->Multicell(30, 5, $row->lot, 1,'L');
+          $pdf->setXY($x+127, $y);
+          $pdf->Multicell(15, 5, number_format($row->qty,2), 1,'R');
+          $pdf->setXY($x+142, $y);
+          $pdf->Multicell(10, 5, $row->uom, 1,'L');
+          $pdf->setXY($x+152, $y);
+          $pdf->Multicell(15, 5, round($row->qty2,2), 1,'R');
+          $pdf->setXY($x+167, $y);
+          $pdf->Multicell(10, 5, $row->uom2, 1,'L');
+          $pdf->setXY($x+177, $y);
+          $pdf->Multicell(20, 5, $row->reff_note, 1,'L');
+
+          $no++;
+          $y=$y+5;
+
+        }
+
+       
+
+	      $pdf->Output();
 
     }
     
