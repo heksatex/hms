@@ -2626,13 +2626,13 @@ class MO extends MY_Controller
         $dept_id   = $this->input->get('dept_id');
 
         if($dept_id == 'TWS'){
-            $this->barcode_tws($kode,$data_arr,$count);
+            $this->barcode_tws($kode,$data_arr,$dept_id);
 
         }else if($dept_id == 'WRD'){
-            $this->barcode_wrd($data_arr,$count);
+            $this->barcode_wrd($kode,$data_arr,$dept_id);
 
         }else if($dept_id == 'WRP'){
-            $this->barcode_wrp($kode,$data_arr);
+            $this->barcode_wrp($kode,$data_arr,$dept_id);
         
         }else if($dept_id == 'TRI'){
             $this->barcode_tri($data_arr,$count);
@@ -2649,7 +2649,7 @@ class MO extends MY_Controller
     }
 
 
-    function barcode_tws($kode,$data_arr,$count)
+    function barcode_tws($kode,$data_arr,$dept_id)
     {
         $pdf = new PDF_Code128('L','mm',array(80,60));
 
@@ -2660,24 +2660,28 @@ class MO extends MY_Controller
 
         $data_arr2   = rtrim($data_arr,'|^,');//empty |^
         $row         = explode("|^,", $data_arr2);
-
         $loop          = 1;
 
         // get mesin by kode
         $get_mc = $this->m_mo->get_mesin_by_mo($kode)->row_array();
         $mesin  = $get_mc['nama_mesin'];
-
-
+        
+        //get origin_mo
+        $origin_mo  = $this->m_mo->get_origin_mo_by_kode($kode);
+        $method= $dept_id.'|OUT';
+        
         foreach ($row as $val ) {
       
             if($loop == 2){
                 $pdf->AddPage();
                 $loop = 1;
-               
             }
 
             $items    = explode("^^",$val);
             $barcode  = $items[0];
+
+            // get reff picking by kode
+            $reff_picking  = $this->m_mo->get_reff_picking_pengiriman_by_kode($barcode, $method, $origin_mo);
 
             //get produk,qty by kode
             $get = $this->m_mo->get_data_fg_hasil_by_kode($kode,$barcode)->row_array();
@@ -2738,31 +2742,29 @@ class MO extends MY_Controller
             }
 
             $pdf->SetFont('Arial','B',12,'C'); // set font
-
             $pdf->Multicell(74,5,"Dept Tujuan : ".$nh_dept.''.$nh_mc,0,'L');// Departemen Tujuan
-
+            
             $pdf->setXY(3,40);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
+            
+            $pdf->SetFont('Arial','B',8,'C'); // set font
+            $pdf->setXY(3,45);
+            $pdf->Multicell(75,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
+            
+            $pdf->Code128(5,49,$barcode,70,8,'C',0,1); // barcode
 
-            $pdf->Code128(5,45,$barcode,70,8,'C',0,1); // barcode
-
-            $pdf->setXY(0,53);
-            $pdf->Multicell(80,5,$barcode,0,'C');// barcode
-
-            $pdf->SetFont('Arial','B',7,'C'); // set font
-            // ket barcode twisting
+            $pdf->SetFont('Arial','B',8,'C'); // set font
             $pdf->setXY(0,56);
-            $pdf->Multicell(80,5,'~Barcode Twisting~',0,'C');
+            $pdf->Multicell(80,5,$barcode.' - Barcode Twisting',0,'C');// barcode departement
 
             $loop++;
         }
- 
 
         $pdf->output();
 
     }
 
-    function barcode_wrp($kode,$data_arr)
+    function barcode_wrp($kode,$data_arr,$dept_id)
     {
     
         $pdf = new PDF_Code128('L','mm',array(80,60));
@@ -2773,9 +2775,12 @@ class MO extends MY_Controller
         $pdf->SetFont('Arial','B',15,'C');
 
         $data_arr2   = rtrim($data_arr,'|^,');//empty |^
-        $row   = explode("|^,", $data_arr2);
+        $row         = explode("|^,", $data_arr2);
+        $loop        = 1;
 
-        $loop          = 1;
+        //get origin_mo
+        $origin_mo  = $this->m_mo->get_origin_mo_by_kode($kode);
+        $method= $dept_id.'|OUT';
 
         // get mesin by kode
         //$get_mc = $this->m_mo->get_mesin_by_mo($kode)->row_array();
@@ -2790,6 +2795,9 @@ class MO extends MY_Controller
 
             $items    = explode("^^",$val);
             $barcode  = $items[0];
+
+            // get reff picking by kode
+            $reff_picking  = $this->m_mo->get_reff_picking_pengiriman_by_kode($barcode, $method, $origin_mo);
 
             $bar = explode('/',$barcode);
             $loopbr = 0;
@@ -2880,16 +2888,16 @@ class MO extends MY_Controller
             $pdf->setXY(3,40);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
-            $pdf->Code128(5,45,$barcode,70,8,'C',0,1); // barcode
+            $pdf->SetFont('Arial','B',8,'C'); // set font
+            $pdf->setXY(3,45);
+            $pdf->Multicell(75,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
 
-            $pdf->setXY(0,53);
-            $pdf->Multicell(80,5,$barcode,0,'C');// barcode
-
-            $pdf->SetFont('Arial','B',7,'C'); // set font
-            // ket barcode warping panjang
+            $pdf->Code128(5,49,$barcode,70,8,'C',0,1); // barcode
+            
+            $pdf->SetFont('Arial','B',8,'C'); // set font
             $pdf->setXY(0,56);
-            $pdf->Multicell(80,5,'~Barcode Warping Panjang~',0,'C');
-                    
+            $pdf->Multicell(80,5,$barcode.' - Barcode Warping Panjang',0,'C');// barcode
+       
             $loop++;
         }
 
@@ -2898,7 +2906,7 @@ class MO extends MY_Controller
     }
 
 
-    function barcode_wrd($data_arr,$count)
+    function barcode_wrd($kode,$data_arr,$dept_id)
     {
         
         $pdf = new PDF_Code128('p','mm',array(60,80));
@@ -2915,6 +2923,10 @@ class MO extends MY_Controller
         // $pdf->setXY(1,2);
         //$cellWidth     = 60;
         //$offset_length = FALSE;
+
+        //get origin_mo
+        $origin_mo  = $this->m_mo->get_origin_mo_by_kode($kode);
+        $method= $dept_id.'|OUT';
 
         $loop = 1;
         $heightNama = 0; 
@@ -2939,14 +2951,22 @@ class MO extends MY_Controller
             $items    = explode("^^",$val);
             $barcode  = $items[0];
 
+            // get reff picking by kode
+            $reff_picking  = $this->m_mo->get_reff_picking_pengiriman_by_kode($barcode, $method, $origin_mo);
+
             $pdf->setXY(0,3+$heightNama);
             $pdf->Multicell(60,5,$barcode,0,'C');
+            
+            $pdf->SetFont('Arial','B',8,'C');
+            $pdf->setXY(0,5+$heightNama+3);
+            $pdf->Multicell(60,3,'Reff Picking : '.$reff_picking,0,'C');
 
             $pdf->Code128(5,$enter+$enter_barcode,$barcode,50,10,'C',0,1);//barcode
 
+            $pdf->SetFont('Arial','B',15,'C');
+
             $pdf->setXY(0,5+$heightNama+20);
             $pdf->Multicell(60,5,$barcode,0,'C');
-
             $heightNama    = $heightNama + 40;
             $enter_barcode = $enter_barcode + 40;
             
