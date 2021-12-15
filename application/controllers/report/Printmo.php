@@ -42,7 +42,7 @@ class Printmo extends MY_Controller
 
             $pdf->setTitle($nama_dept);
             $pdf->SetFont('Arial','B',10,'C');
-            $pdf->Cell(0,23,'LAPORAN HARIAN '.$nama_dept,0,0,'C');
+            $pdf->Cell(0,23,'LAPORAN HASIL PRODUKSI HARIAN',0,0,'C');
 
             $pdf->SetFont('Arial','',15,'C');
             $pdf->setXY(10,8);
@@ -207,7 +207,7 @@ class Printmo extends MY_Controller
 
             $pdf->setTitle($nama_dept);
             $pdf->SetFont('Arial','B',10,'C');
-            $pdf->Cell(0,23,'LAPORAN HARIAN '.$nama_dept,0,0,'C');
+            $pdf->Cell(0,23,'LAPORAN HASIL PRODUKSI HARIAN ',0,0,'C');
 
 
             $pdf->SetFont('Arial','',15,'C');
@@ -575,7 +575,7 @@ class Printmo extends MY_Controller
 
             $pdf->setTitle($nama_dept);
             $pdf->SetFont('Arial','B',10,'C');
-            $pdf->Cell(0,23,'LAPORAN HASIL PRODUKSI ',0,0,'C');
+            $pdf->Cell(0,23,'LAPORAN HASIL PRODUKSI HARIAN ',0,0,'C');
 
 
             $mtr_gl         = '';
@@ -929,7 +929,7 @@ class Printmo extends MY_Controller
 
             $pdf->setTitle($nama_dept);
             $pdf->SetFont('Arial','B',10,'C');
-            $pdf->Cell(0,23,'LAPORAN HARIAN '.$nama_dept,0,0,'C');
+            $pdf->Cell(0,23,'LAPORAN HASIL PRODUKSI HARIAN',0,0,'C');
 
             $pdf->SetFont('Arial','',15,'C');
             $pdf->setXY(10,8);
@@ -1341,27 +1341,18 @@ class Printmo extends MY_Controller
             $pdf->Multicell(19, 3, 'Meter/Panel', 0, 'C');
            
             $pdf->setXY(47, 38);
-            $pdf->Multicell(71, 10, '', 1, 'C');
+            $pdf->Multicell(84, 10, '', 1, 'C');
           
             $pdf->setXY(47, 41);
-            $pdf->Multicell(71, 5, 'JENIS CACAT', 0, 'C');
-
-            $pdf->setXY(118, 38);
-            $pdf->Multicell(26, 5, 'Posisi Cacat', 1, 'C');
-            $pdf->setXY(118, 43);
-            $pdf->Multicell(13, 5, 'GB', 1, 'C');
-            $pdf->setXY(131, 43);
-            $pdf->Multicell(13, 5, 'Blok', 1, 'C');
-
-            $pdf->setXY(144, 38);
-            $pdf->Multicell(15, 5, 'Berat', 1, 'C');
-            $pdf->setXY(144, 43);
-            $pdf->Multicell(15, 5, '(Kg)', 1, 'C');
-
+            $pdf->Multicell(84, 5, 'JENIS CACAT', 0, 'C');
+       
+            $pdf->setXY(131, 38);
+            $pdf->Multicell(28, 10, 'Lot', 1, 'C');//
+   
             $pdf->setXY(159, 38);
             $pdf->Multicell(15, 10, '', 1, 'C');
             $pdf->setXY(159, 41);
-            $pdf->Multicell(15, 3, 'Grade', 0, 'C');
+            $pdf->Multicell(15, 5, 'Berat {Kg)', 0, 'C');
 
             $pdf->setXY(174, 38);
             $pdf->Multicell(65, 10, '', 1, 'C');
@@ -1378,29 +1369,35 @@ class Printmo extends MY_Controller
             $width = 0;
 
             // looping ke samping
-            for($i=1; $i<= 14; $i++){
+            for($i=1; $i<= 12; $i++){
                 if($i == 1 ){
                     $width = 18;
                 }elseif($i == 2){
                     $width = 19;
                 }elseif($i== 3 || $i == 4 || $i ==  5 || $i == 6 || $i == 7 || $i == 8){
-                    $width = 11.83;                    
-                }elseif($i == 11 || $i == 12){
+                    $width = 14;                    
+                }elseif($i == 10){
                     $width = 15;
-                }elseif($i == 9 || $i == 10 ){
-                    $width = 13;
-                }elseif($i == 14){
+                }elseif($i == 9 ){
+                    $width = 28;
+                }elseif($i == 12){
                     $width = 45;
-                }elseif($i == 13){
+                }elseif($i == 11){
                     $width = 65;
                 }
 
                 $a = 1;
+                $b = 1;
                 $y = 48;
                 for($a; $a<=27; $a++){ // looping kebawah
                     $pdf->setXY($x, $y);
                     $pdf->Multicell($width, 5, '', 1,'C');
+                    if($b==9){
+                        $y=$y+2;
+                        $b=0;
+                    }
                     $y = $y + 5;
+                    $b++;
                 }
                 $x = $x + $width;
 
@@ -1408,28 +1405,28 @@ class Printmo extends MY_Controller
 
             $y + 8;
 
-            $pdf->setXY(10, $y);
+            $pdf->setXY(10, $y-2);
             $pdf->Multicell(13, 5, 'Catatan : ', 0, 'L');
 
             $pdf->SetFont('Arial','',7,'C');
 
-            $pdf->setXY(24, $y);
+            $pdf->setXY(24, $y-2);
             $pdf->Multicell(110, 5, '1. Isi setiap Kolom dengan BENAR, BERTANYA jika tidak mengerti cara mengisi form ini. ', 0, 'L');
 
-            $pdf->setXY(24, $y+5);
+            $pdf->setXY(24, $y+2);
             $pdf->Multicell(110, 5, '2. Kolom START/HASIL diisi terlebih dahulu. (Start, Finish, dan Hasil/Pendapatan, Produksi) ', 0, 'L');
 
-            $pdf->setXY(24, $y+10);
+            $pdf->setXY(24, $y+6);
             $pdf->Multicell(110, 5, '3. Jika terdapat CACAT, isi kolom Counter, Jenis Cacat Kain dan Posisi Cacat. ', 0, 'L');
 
-            $pdf->setXY(140, $y);
+            $pdf->setXY(140, $y-2);
             $pdf->Multicell(110, 5, 'CATATAN & KETERANGAN KHUSUS : ');
 
-            $pdf->setXY(140, $y+5);
-            $pdf->Multicell(145, 15, '', 1);
+            $pdf->setXY(140, $y+3);
+            $pdf->Multicell(145, 10, '', 1);
 
             $pdf->SetFont('Arial','',8,'C');
-            $pdf->setXY(225,$y+21);    
+            $pdf->setXY(225,$y+13);    
             $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
             $pdf->Multicell(60,4, 'Tgl.Cetak : '.$tgl_now, 0,'R');
         
