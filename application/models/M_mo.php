@@ -675,4 +675,23 @@ class M_mo extends CI_Model
 								WHERE a.kode = '$kode' ");
 	}
 
+	public function get_origin_mo_by_kode($kode)
+	{
+		$result =  $this->db->query("SELECT origin FROm mrp_production where kode = '$kode' ")->row_array();
+		return $result['origin'];
+
+	}
+
+	public function get_reff_picking_pengiriman_by_kode($lot,$method,$origin)
+	{
+		$result = $this->db->query("SELECT pb.kode, pb.reff_picking
+							FROM stock_move_items smi
+							INNER JOIN stock_move sm ON smi.move_id = sm.move_id 
+							INNER JOIN pengiriman_barang pb ON sm.move_id = pb.move_id
+							WHERE smi.lot = '$lot' AND sm.method = '$method' AND sm.origin = '$origin'")->row_array();
+		return $result['reff_picking'];
+
+	}
+
+
 }
