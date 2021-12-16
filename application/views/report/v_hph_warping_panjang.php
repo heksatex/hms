@@ -283,6 +283,14 @@
       maxDate: new Date(),
   });
 
+  // disable enter
+  $(window).keydown(function(event){
+    if(event.keyCode == 13) {
+      event.preventDefault();
+      return false;
+    }
+  });
+
 
   // cek selisih saatu submit excel
   $('#frm_periode').submit(function(){
@@ -322,7 +330,8 @@
 
       tgldari   = $('#tgldari').val();
       tglsampai = $('#tglsampai').val();
-      nama_produk     = $('#nama_produk').val();
+      mo        = $('#mo').val();
+      nama_produk = $('#nama_produk').val();
       mc        = $('#mc').val();
       lot       = $('#lot').val();
       user      = $('#user').val();
@@ -366,7 +375,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/HPHwarpingpanjang/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai,  nama_produk:nama_produk, mc:mc, lot:lot, user:user, jenis:jenis, shift:checkboxes_arr },
+                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, nama_produk:nama_produk, mc:mc, lot:lot, user:user, jenis:jenis, shift:checkboxes_arr },
                 success: function(data){
                   if(data.status == 'failed'){
                     $('#total_record').html('Total Data : 0');
