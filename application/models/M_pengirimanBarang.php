@@ -125,6 +125,12 @@ class M_pengirimanBarang extends CI_Model
 		return $query->row();
 	}
 
+	public function get_data_by_code_print($kode,$dept_id)
+	{
+		$query = $this->db->query("SELECT * FROM pengiriman_barang where kode = '".$kode."' AND dept_id = '".$dept_id."' ");
+		return $query->row();
+	}
+
 
 	public function get_list_pengiriman_barang($kode)
 	{
@@ -133,6 +139,15 @@ class M_pengirimanBarang extends CI_Model
 								FROM pengiriman_barang_items pbi
 							    INNER JOIN pengiriman_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' ORDER BY row_order")->result();
+	}
+
+	public function get_list_pengiriman_barang_print($kode,$dept_id)
+	{
+		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod, pbi.row_order,
+								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk ) as sum_qty
+								FROM pengiriman_barang_items pbi
+							    INNER JOIN pengiriman_barang pb ON pbi.kode = pb.kode
+								WHERE pbi.kode = '$kode' AND pb.dept_id = '$dept_id' ORDER BY row_order")->result();
 	}
 
 	public function get_stock_move_by_kode($kode)
@@ -333,6 +348,16 @@ class M_pengirimanBarang extends CI_Model
 								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
 								 Where pb.kode = '$kode' 
+								 ORDER BY smi.row_order")->result();
+	}
+
+	public function get_stock_move_items_by_kode_print($kode,$dept_id)
+	{
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note
+								 FROM stock_move_items smi 
+								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
+								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
+								 Where pb.kode = '$kode' AND pb.dept_id = '$dept_id'
 								 ORDER BY smi.row_order")->result();
 	}
 
