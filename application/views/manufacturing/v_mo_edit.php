@@ -285,9 +285,9 @@
                                 <tr class="num">
                                   <td></td>
                                   <td><?php if($row->type == 'stockable'){?>
-                                      <a href="javascript:void(0)" onclick="view_quant('<?php echo $list->kode; ?>','<?php echo htmlentities($row->origin_prod); ?>','<?php echo $row->move_id ?>','<?php echo $row->kode_produk?>','<?php echo htmlentities($row->nama_produk)?>')"><?php echo $row->nama_produk?></a>
+                                      <a href="javascript:void(0)" onclick="view_quant('<?php echo $list->kode; ?>','<?php echo htmlentities($row->origin_prod); ?>','<?php echo $row->move_id ?>','<?php echo $row->kode_produk?>','<?php echo htmlentities($row->nama_produk)?>')"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a>
                                      <?php }else{
-                                        echo $row->nama_produk;
+                                        echo '['.$row->kode_produk.'] '.$row->nama_produk;
                                      }?>
                                   </td>
                                   <td align="right"><?php echo number_format($qty_rm_sisa,2)?></td>
@@ -336,7 +336,7 @@
                                 <tr class="num">
                                   <td></td>
                                   <td>
-                                    <a href="javascript:void(0)" onclick="view_rm_hasil('<?php echo $list->kode; ?>','<?php echo ($row->kode_produk); ?>', '<?php echo htmlentities($row->nama_produk)?>')"><?php echo $row->nama_produk?></a>
+                                    <a href="javascript:void(0)" onclick="view_rm_hasil('<?php echo $list->kode; ?>','<?php echo ($row->kode_produk); ?>', '<?php echo htmlentities($row->nama_produk)?>')"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a>
                                   </td>
                                   <td align="right"><?php echo number_format($row->tot_qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
