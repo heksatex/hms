@@ -1935,9 +1935,9 @@ class Pengirimanbarang extends MY_Controller
         $pdf->Cell(30, 5, 'Lot', 1, 0, 'C');
         $pdf->Cell(15, 5, 'Qty', 1, 0, 'R');
         $pdf->Cell(10, 5, 'Uom', 1, 0, 'L');
-        $pdf->Cell(15, 5, 'Qty2', 1, 0, 'R');
+        $pdf->Cell(10, 5, 'Qty2', 1, 0, 'R');
         $pdf->Cell(10, 5, 'Uom2', 1, 0, 'L');
-        $pdf->Cell(20, 5, 'Reff Note', 1, 0, 'C');
+        $pdf->Cell(28, 5, 'Reff Note', 1, 0, 'C');
 
         // details
         $smi  = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode,$dept_id);
@@ -1946,9 +1946,9 @@ class Pengirimanbarang extends MY_Controller
         $no   = 1;
         foreach($smi as $row){
 
-          // set font tbody 
-          $pdf->SetFont('Arial','',8,'C');
-          
+            // set font tbody 
+            $pdf->SetFont('Arial','',8,'C');
+            
             $pdf->setXY($x, $y);
             $pdf->Multicell(7, 5, $no, 1,'L');
             $pdf->setXY($x+7, $y);
@@ -1962,11 +1962,11 @@ class Pengirimanbarang extends MY_Controller
             $pdf->setXY($x+142, $y);
             $pdf->Multicell(10, 5, $row->uom, 1,'L');
             $pdf->setXY($x+152, $y);
-            $pdf->Multicell(15, 5, round($row->qty2,2), 1,'R');
-            $pdf->setXY($x+167, $y);
+            $pdf->Multicell(10, 5, round($row->qty2,2), 1,'R');
+            $pdf->setXY($x+162, $y);
             $pdf->Multicell(10, 5, $row->uom2, 1,'L');
-            $pdf->setXY($x+177, $y);
-            $pdf->Multicell(20, 5, $this->custom_char_out($row->reff_note,8), 1,'L');
+            $pdf->setXY($x+172, $y);
+            $pdf->Multicell(28, 5, $this->custom_char_out($row->reff_note,10), 1,'L');
             
             $no++;
             $y=$y+5;
