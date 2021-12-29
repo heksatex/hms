@@ -674,6 +674,11 @@ class _module extends CI_Model
 		return $this->db->query("SELECT mc_id, nama_mesin FROM mesin  WHERE dept_id = '$id_dept' ORDER BY row_order ")->result();
 	}
 
+	public function get_mst_status_by_kode($kode){
+		$result = $this->db->query("SELECT *  FROM mst_status where kode = '$kode' ")->row_array();
+		return $result['nama_status'];
+	}
+
 	
 
 }

@@ -361,14 +361,15 @@
                               <div class="col-xs-4">
                                 <select class="form-control input-sm" name="status" id="status">
                                   <?php 
-                                    $val = array('Aktif','Tidak Aktif');
-                                    for($i=0;$i<=1;$i++) {
-                                      if($val[$i] == "Aktif"){?>
-                                        <option selected><?php echo $val[$i];?></option>
+                                    $arr_status = array(array('value' => 't', 'text' => 'Aktif'), array( 'value'=> 'f', 'text' => 'Tidak Aktif'));
+                                    foreach ($arr_status as $val) {
+                                      if($val['value'] == $produk->status_produk){?>
+                                        <option value="<?php echo $val['value']; ?>" selected><?php echo $val['text'];?></option>
                                       <?php
-                                        }else{?>
-                                        <option><?php echo $val[$i];?></option>
-                                      <?php  }
+                                      }else{?>
+                                        <option value="<?php echo $val['value']; ?>" ><?php echo $val['text'];?></option>
+                                      <?php  
+                                      }
                                   }?>
                                 </select>                 
                               </div>               
@@ -585,6 +586,7 @@
                 bom             : $('#bom').val(),
                 tanggaldibuat   : $('#tanggaldibuat').val(),
                 note            : $('#note').val(),
+                statusproduk   : $('#status').val(),// aktif/tidak aktif
                 status          : 'edit',
 
           },success: function(data){
@@ -613,10 +615,6 @@
             $('#btn-simpan').button('reset');
           }
       });
-        window.setTimeout(function() {
-       $(".alert").fadeTo(500, 0).slideUp(500, function(){
-        $(this).remove(); });
-      }, 3000);
     });
    
 </script>

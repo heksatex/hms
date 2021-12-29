@@ -46,6 +46,7 @@
                   <th>Kategori</th>
                   <th>Route</th>
                   <th>Type</th>
+                  <th>Status</th>
                 </tr>
               </thead>
             </table>

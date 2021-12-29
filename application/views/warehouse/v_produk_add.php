@@ -260,17 +260,9 @@
                               <div class="col-xs-4">Status</div>
                               <div class="col-xs-4">
                                 <select class="form-control input-sm" name="status" id="status">
-                                  <?php 
-                                    $val = array('Aktif','Tidak Aktif');
-                                    for($i=0;$i<=1;$i++) {
-                                      if($val[$i] == "Aktif"){?>
-                                        <option selected><?php echo $val[$i];?></option>
-                                      <?php
-                                        }else{?>
-                                        <option><?php echo $val[$i];?></option>
-                                      <?php  }
-                                  }?>
-                                </select>                 
+                                  <option value="t">Aktif</option>
+                                  <option value="f">Tidak Aktif</option>
+                                </select>              
                               </div>               
                             </div>                            
                           </div>
@@ -534,6 +526,7 @@
                 tanggaldibuat   : $('#tgldibuat').val(),
                 note            : $('#note').val(),
                 status          : 'tambah',
+                statusproduk    : $('#status').val(),
                 autogenerate    : autogenerate_value,
 
           },success: function(data){
@@ -566,10 +559,6 @@
             $('#btn-simpan').button('reset');
           }
       });
-        window.setTimeout(function() {
-       $(".alert").fadeTo(500, 0).slideUp(500, function(){
-        $(this).remove(); });
-      }, 3000);
     });
    
 </script>
