@@ -286,7 +286,7 @@ class M_sales extends CI_Model
 	{
 		return $this->db->query("SELECT kode_produk, nama_produk, uom 
 								FROM  mst_produk 
-								WHERE nama_produk LIKE '%$name%' AND (nama_produk LIKE '%(Tricot)%' or nama_produk LIKE '%(Inspecting)%' or nama_produk LIKE '%(Knitting)%') LIMIT 50")->result_array();
+								WHERE nama_produk LIKE '%$name%' AND (nama_produk LIKE '%(Tricot)%' or nama_produk LIKE '%(Inspecting)%' or nama_produk LIKE '%(Knitting)%') AND status_produk = 't' LIMIT 50")->result_array();
 	}
 	
 

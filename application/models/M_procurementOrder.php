@@ -199,7 +199,7 @@ class M_procurementOrder extends CI_Model
 	{
 		return $this->db->query("SELECT kode_produk, nama_produk, uom
 								FROM  mst_produk 
-								WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%'  and type = 'stockable' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
+								WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%'  and type = 'stockable' AND status_produk = 't' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
 	}
 
 	public function get_produk_procurement_order_byid($kode_produk)
