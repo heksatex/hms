@@ -9,6 +9,15 @@ class M_produk extends CI_Model
 	var $column_search= array('kode_produk', 'nama_produk',  'create_date', 'uom','uom_2','nama_category', 'route_produksi', 'type','nama_status');
 	var $order  	  = array('nama_produk' => 'asc');
 
+	var $table2 		= 'bom';
+	var $column_order2 	= array(null, 'kode_bom','nama_bom','kode_produk','nama_produk',  'qty', 'uom');
+	var $column_search2	= array('kode_bom','nama_bom','kode_produk','nama_produk',  'qty', 'uom');
+	var $order2	 	  	= array('nama_bom' => 'asc');
+
+	var $column_order3  = array(null, 'mp.kode', 'tanggal','nama', 'nama_produk', 'qty', 'uom', 'reff_note', 'nama_status');
+	var $column_search3= array( 'mp.kode', 'tanggal','nama', 'nama_produk', 'qty','uom', 'reff_note', 'nama_status');
+	var $order3	       = array('mp.kode' => 'desc');
+
 	private function _get_datatables_query()
 	{
 		$this->db->select("p.kode_produk,p.nama_produk,p.create_date,p.uom,p.uom_2,c.nama_category,p.route_produksi,p.type, nama_status");
@@ -145,7 +154,141 @@ class M_produk extends CI_Model
 
 	public function get_jml_mo($kodeproduk)
 	{
-		return $this->db->query("SELECT COUNT(kode) as 'jml_mo' FROM mrp_production WHERE kode_produk = '$kodeproduk' AND status<>'cancel'")->row();
+		return $this->db->query("SELECT COUNT(kode) as 'jml_mo' FROM mrp_production WHERE kode_produk = '$kodeproduk' ")->row();
+	}
+
+	private function _get_datatables2_query()
+	{		
+
+		$this->db->from($this->table2);
+		$i = 0;
+	
+		foreach ($this->column_search2 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search2) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order2[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order2))
+		{
+			$order = $this->order2;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables2($kode_produk)
+	{
+		$this->_get_datatables2_query();	
+		$this->db->where('kode_produk',$kode_produk);
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered2($kode_produk)
+	{
+		$this->_get_datatables2_query();
+		$this->db->where('kode_produk',$kode_produk);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all2($kode_produk)
+	{
+		$this->db->where('kode_produk',$kode_produk);
+		$this->db->from($this->table2);
+		return $this->db->count_all_results();
+	}
+
+
+	private function _get_datatables3_query()
+	{
+		$this->db->select("mp.kode, mp.tanggal, mp.nama_produk, mp.qty, mp.uom, mp.status,  mp.reff_note, mp.dept_id, d.nama as departemen, s.nama_status");
+		$this->db->from("mrp_production mp");
+		$this->db->join("departemen d", "d.kode=mp.dept_id", "inner");
+		$this->db->JOIN("mst_status s","mp.status=s.kode","LEFT");
+
+		$i = 0;
+	
+		foreach ($this->column_search3 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search3) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order3[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order3))
+		{
+			$order = $this->order3;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables3($kode_produk)
+	{
+		$this->_get_datatables3_query();	
+		$this->db->where('kode_produk',$kode_produk);
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered3($kode_produk)
+	{
+		$this->db->where('mp.kode_produk',$kode_produk);
+		$this->_get_datatables3_query();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all3($kode_produk)
+	{
+		//$this->db->from($this->table);
+		$this->db->select("mp.kode, mp.tanggal, mp.nama_produk, mp.qty, mp.uom, mp.status");
+		$this->db->from("mrp_production mp");
+		$this->db->join("departemen d", "d.kode=mp.dept_id", "inner");
+		$this->db->JOIN("mst_status s","mp.status=s.kode","LEFT");
+		$this->db->where("mp.kode_produk", $kode_produk);
+		return $this->db->count_all_results();
 	}
 
 }

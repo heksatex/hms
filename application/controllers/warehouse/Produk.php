@@ -204,4 +204,90 @@ class Produk extends MY_Controller
         }
   }
 
+  function view_list_bom_produk_modal()
+  {
+    $kode_produk= $this->input->post('kode_produk');
+
+    $data['kode_produk'] = $kode_produk;
+    return $this->load->view('modal/v_produk_list_bom_modal', $data);
+  }
+
+
+  function get_data_list_bom_produk()
+  {
+      $kode_produk  = addslashes($this->input->post('kode_produk'));
+      $list = $this->m_produk->get_datatables2($kode_produk);
+      $data = array();
+      $no = $_POST['start'];
+      foreach ($list as $field) {
+          $kode_encrypt = $this->encryption->encrypt($field->kode_bom);
+          $kode_encrypt = encrypt_url($field->kode_bom);
+          $no++;
+          $row = array();
+          $row[] = $no;
+          $row[] = '<a href="'.base_url('ppic/billofmaterials/edit/'.$kode_encrypt).'" target="_blank">'.$field->kode_bom.'</a>';
+          $row[] = $field->nama_bom;
+          $row[] = $field->kode_produk;
+          $row[] = $field->nama_produk;
+          $row[] = $field->qty;
+          $row[] = $field->uom;
+          $data[] = $row;
+      }
+
+      $output = array(
+          "draw" => $_POST['draw'],
+          "recordsTotal" => $this->m_produk->count_all2($kode_produk),
+          "recordsFiltered" => $this->m_produk->count_filtered2($kode_produk),
+          "data" => $data,
+      );
+      //output dalam format JSON
+      echo json_encode($output);
+  }
+
+  function view_list_mo_produk_modal()
+  {
+    $kode_produk= $this->input->post('kode_produk');
+
+    $data['kode_produk'] = $kode_produk;
+    return $this->load->view('modal/v_produk_list_mo_modal', $data);
+  }
+
+
+  function get_data_list_mo_produk()
+  {
+      $kode_produk  = addslashes($this->input->post('kode_produk'));
+      $list = $this->m_produk->get_datatables3($kode_produk);
+      $data = array();
+      $no = $_POST['start'];
+      foreach ($list as $field) {
+          $kode_encrypt = encrypt_url($field->kode);
+          $no++;
+          $row = array();
+          $row[] = $no;
+          $row[] = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
+          $row[] = $field->tanggal;
+          $row[] = $field->departemen;
+          $row[] = $field->nama_produk;
+          $row[] = $field->qty;
+          $row[] = $field->uom;
+          $row[] = $field->nama_status;
+          $data[] = $row;
+        }
+ 
+        $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $this->m_produk->count_all3($kode_produk),
+            "recordsFiltered" => $this->m_produk->count_filtered3($kode_produk),
+            "data" => $data,
+        );
+        //output dalam format JSON
+        echo json_encode($output);
+  }
+
+
+
+
+
+  
+
 }
