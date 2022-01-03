@@ -470,10 +470,10 @@ class M_pengirimanBarang extends CI_Model
 		return $this->db->query("SELECT DISTINCT mp.kode_produk, mp.nama_produk, mp.uom
 								FROM  mst_produk mp
 								INNER JOIN stock_quant sq ON mp.kode_produk = sq.kode_produk
-								WHERE CONCAT(mp.kode_produk,mp.nama_produk)  LIKE '%$nama_produk%' and mp.type = 'stockable' AND sq.lokasi = '$lokasi' AND sq.reserve_move = '' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
+								WHERE CONCAT(mp.kode_produk,mp.nama_produk)  LIKE '%$nama_produk%' and mp.type = 'stockable' AND sq.lokasi = '$lokasi' AND sq.reserve_move = '' AND mp.status_produk = 't' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
 	}
 
-	public function get_produk_procurement_order_by_kode_produk($kode_produk)
+	public function get_produk_pengiriman_barang_by_kode_produk($kode_produk)
 	{
 		return $this->db->query("SELECT kode_produk, nama_produk, uom 
 								FROM  mst_produk 

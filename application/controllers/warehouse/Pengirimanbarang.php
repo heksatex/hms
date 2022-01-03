@@ -702,7 +702,7 @@ class Pengirimanbarang extends MY_Controller
     public function get_produk_pengirimanbarang_by_kode()
     {
         $kode_produk = addslashes($this->input->post('kode_produk'));
-        $result      = $this->m_pengirimanBarang->get_produk_procurement_order_by_kode_produk($kode_produk)->row_array();
+        $result      = $this->m_pengirimanBarang->get_produk_pengiriman_barang_by_kode_produk($kode_produk)->row_array();
         $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom']);
         echo json_encode($callback);
     }

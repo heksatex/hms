@@ -39,6 +39,7 @@ class Produk extends MY_Controller
           $row[] = $field->nama_category;
           $row[] = $field->route_produksi;
           $row[] = $field->type;
+          $row[] = $field->nama_status;
 
           $data[] = $row;
       }
@@ -73,7 +74,7 @@ class Produk extends MY_Controller
     }else{
       
       //lock table
-      $this->_module->lock_tabel('mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE');
+      $this->_module->lock_tabel('mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, mst_status WRITE');
 
       //cek auto generate kode produk atau input sendiri
       $autogenerate = $this->input->post('autogenerate');
@@ -95,6 +96,7 @@ class Produk extends MY_Controller
       $kategoribarang = $this->input->post('kategoribarang');
       $note           = $this->input->post('note');
       $lebarjadi      = $this->input->post('lebarjadi');
+      $statusproduk   = $this->input->post('statusproduk');
 
       
       //get id kategori barang
@@ -129,6 +131,14 @@ class Produk extends MY_Controller
           $nama_double = TRUE;
         }
 
+        if($bom == 1){
+          $log_bom = 'True';
+        }else{
+          $log_bom =  'False';
+        }
+
+        //get status aktif by kode f/t
+        $status_aktif = $this->_module->get_mst_status_by_kode($statusproduk);
 
         if(!empty($cek['kode_produk']) AND $status == 'tambah'){
             $callback = array('status' => 'failed', 'field' => 'kodeproduk', 'message' => 'Kode Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
@@ -136,32 +146,20 @@ class Produk extends MY_Controller
             $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Nama Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );   
         }else if(!empty($cek['kode_produk'])){
           //update/edit produk
-          $this->m_produk->update_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebarjadi);
+          $this->m_produk->update_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebarjadi,$statusproduk);
           $kodeproduk_encr = encrypt_url($kodeproduk);
-
-          if($bom == 1){
-            $log_bom = 'True';
-          }else{
-            $log_bom =  'False';
-          }
-
+         
           $jenis_log   = "edit";
-          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom;
+          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." |".$status_aktif;
           $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
         }else{
           //insert/add produk
-          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebarjadi);
+          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebarjadi,$statusproduk);
           $kodeproduk_encr = encrypt_url($kodeproduk);
 
-          if($bom == 1){
-            $log_bom = 'True';
-          }else{
-            $log_bom =  'False';
-          }
-
           $jenis_log   = "create";
-          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom;
+          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$status_aktif;
           $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kodeproduk_encr, 'icon' =>'fa fa-check', 'type' => 'success');
         }
@@ -205,5 +203,91 @@ class Produk extends MY_Controller
           return $this->load->view('warehouse/v_produk_edit',$data);
         }
   }
+
+  function view_list_bom_produk_modal()
+  {
+    $kode_produk= $this->input->post('kode_produk');
+
+    $data['kode_produk'] = $kode_produk;
+    return $this->load->view('modal/v_produk_list_bom_modal', $data);
+  }
+
+
+  function get_data_list_bom_produk()
+  {
+      $kode_produk  = addslashes($this->input->post('kode_produk'));
+      $list = $this->m_produk->get_datatables2($kode_produk);
+      $data = array();
+      $no = $_POST['start'];
+      foreach ($list as $field) {
+          $kode_encrypt = $this->encryption->encrypt($field->kode_bom);
+          $kode_encrypt = encrypt_url($field->kode_bom);
+          $no++;
+          $row = array();
+          $row[] = $no;
+          $row[] = '<a href="'.base_url('ppic/billofmaterials/edit/'.$kode_encrypt).'" target="_blank">'.$field->kode_bom.'</a>';
+          $row[] = $field->nama_bom;
+          $row[] = $field->kode_produk;
+          $row[] = $field->nama_produk;
+          $row[] = $field->qty;
+          $row[] = $field->uom;
+          $data[] = $row;
+      }
+
+      $output = array(
+          "draw" => $_POST['draw'],
+          "recordsTotal" => $this->m_produk->count_all2($kode_produk),
+          "recordsFiltered" => $this->m_produk->count_filtered2($kode_produk),
+          "data" => $data,
+      );
+      //output dalam format JSON
+      echo json_encode($output);
+  }
+
+  function view_list_mo_produk_modal()
+  {
+    $kode_produk= $this->input->post('kode_produk');
+
+    $data['kode_produk'] = $kode_produk;
+    return $this->load->view('modal/v_produk_list_mo_modal', $data);
+  }
+
+
+  function get_data_list_mo_produk()
+  {
+      $kode_produk  = addslashes($this->input->post('kode_produk'));
+      $list = $this->m_produk->get_datatables3($kode_produk);
+      $data = array();
+      $no = $_POST['start'];
+      foreach ($list as $field) {
+          $kode_encrypt = encrypt_url($field->kode);
+          $no++;
+          $row = array();
+          $row[] = $no;
+          $row[] = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
+          $row[] = $field->tanggal;
+          $row[] = $field->departemen;
+          $row[] = $field->nama_produk;
+          $row[] = $field->qty;
+          $row[] = $field->uom;
+          $row[] = $field->nama_status;
+          $data[] = $row;
+        }
+ 
+        $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $this->m_produk->count_all3($kode_produk),
+            "recordsFiltered" => $this->m_produk->count_filtered3($kode_produk),
+            "data" => $data,
+        );
+        //output dalam format JSON
+        echo json_encode($output);
+  }
+
+
+
+
+
+  
 
 }

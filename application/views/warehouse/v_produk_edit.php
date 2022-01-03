@@ -46,6 +46,10 @@
         width: 50%;
       }
     }
+
+    .pointer{
+      cursor:pointer;
+    }
     </style>
     
 </head>
@@ -138,12 +142,12 @@
                     <span class="glyphicon glyphicon-transfer"></span>
                     <span class="glyphicon-class"><?php echo $moves->jml_moves ?> Moves</span>
                   </li>
-                  <li>
+                  <li class="pointer" onclick="cek_bom('<?php echo $produk->kode_produk ?>','<?php echo htmlentities($produk->nama_produk) ?>')" data-toggle="tooltip" title="Lihat BoM Produk">
                     <span class="glyphicon glyphicon-list-alt"></span>
                     <span class="glyphicon-class"><?php echo $bom->jml_bom ?> BoM</span>
                   </li>                        
-                  <li>
-                    <span class="glyphicon glyphicon-cog"></span>
+                  <li class="pointer" onclick="cek_mo('<?php echo $produk->kode_produk ?>','<?php echo htmlentities($produk->nama_produk) ?>' )"  data-toggle="tooltip" title="Lihat MO Produk">
+                    <span class="glyphicon glyphicon-cog" ></span>
                     <span class="glyphicon-class"><?php echo $mo->jml_mo ?> MO</span>
                   </li>
                   <!--
@@ -361,14 +365,15 @@
                               <div class="col-xs-4">
                                 <select class="form-control input-sm" name="status" id="status">
                                   <?php 
-                                    $val = array('Aktif','Tidak Aktif');
-                                    for($i=0;$i<=1;$i++) {
-                                      if($val[$i] == "Aktif"){?>
-                                        <option selected><?php echo $val[$i];?></option>
+                                    $arr_status = array(array('value' => 't', 'text' => 'Aktif'), array( 'value'=> 'f', 'text' => 'Tidak Aktif'));
+                                    foreach ($arr_status as $val) {
+                                      if($val['value'] == $produk->status_produk){?>
+                                        <option value="<?php echo $val['value']; ?>" selected><?php echo $val['text'];?></option>
                                       <?php
-                                        }else{?>
-                                        <option><?php echo $val[$i];?></option>
-                                      <?php  }
+                                      }else{?>
+                                        <option value="<?php echo $val['value']; ?>" ><?php echo $val['text'];?></option>
+                                      <?php  
+                                      }
                                   }?>
                                 </select>                 
                               </div>               
@@ -585,6 +590,7 @@
                 bom             : $('#bom').val(),
                 tanggaldibuat   : $('#tanggaldibuat').val(),
                 note            : $('#note').val(),
+                statusproduk   : $('#status').val(),// aktif/tidak aktif
                 status          : 'edit',
 
           },success: function(data){
@@ -613,11 +619,41 @@
             $('#btn-simpan').button('reset');
           }
       });
-        window.setTimeout(function() {
-       $(".alert").fadeTo(500, 0).slideUp(500, function(){
-        $(this).remove(); });
-      }, 3000);
     });
+
+
+    // cek list bom produk
+    function cek_bom(kode_produk,nama_produk){
+      $("#view_data").modal({
+          show: true,
+          backdrop: 'static'
+      })
+      $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $('.modal-title').text('List BoM '+nama_produk);
+      $.post('<?php echo site_url()?>warehouse/produk/view_list_bom_produk_modal',
+          {kode_produk : kode_produk},
+          function(html){
+            setTimeout(function() {$(".view_body").html(html);  },1000);
+          }   
+      );
+    }
+
+
+    // cek list MO produk
+    function cek_mo(kode_produk,nama_produk){
+      $("#view_data").modal({
+          show: true,
+          backdrop: 'static'
+      })
+      $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $('.modal-title').text('List MO '+nama_produk);
+      $.post('<?php echo site_url()?>warehouse/produk/view_list_mo_produk_modal',
+          {kode_produk : kode_produk},
+          function(html){
+            setTimeout(function() {$(".view_body").html(html);  },1000);
+          }   
+      );
+    }
    
 </script>
 
