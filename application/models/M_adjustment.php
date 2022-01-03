@@ -184,7 +184,7 @@ class M_adjustment extends CI_Model
 
 	public function get_list_produk_adjustment($name)
 	{
-		return $this->db->query("SELECT kode_produk, nama_produk, uom FROM  mst_produk 	WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%'  and type = 'stockable' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
+		return $this->db->query("SELECT kode_produk, nama_produk, uom FROM  mst_produk 	WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%'  and type = 'stockable' AND status_produk = 't' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
 	}
 
 	public function get_total_qty_stock_quant_by_produk_lokasi($kode_produk,$kode_lokasi)
