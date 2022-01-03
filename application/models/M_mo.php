@@ -521,7 +521,7 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT count(lot) as jml_lot FROM stock_move_items WHERE lot LIKE '%$lot_prefix%' AND move_id = '$move_id'");
 */
 		
-		$result = $this->db->query("SELECT lot FROM stock_quant  WHERE lot LIKE '%$lot_prefix%'  ORDER BY RIGHT(lot,3) DESC LIMIT 1 ");
+		$result = $this->db->query("SELECT lot FROM stock_quant  WHERE lot LIKE '$lot_prefix%'  ORDER BY RIGHT(lot,3) DESC LIMIT 1 ");
 
 		if ($result->num_rows()>0){
             $row=$result->row();
@@ -536,7 +536,7 @@ class M_mo extends CI_Model
 
 	public function get_counter_by_lot_prefix_waste($lot_prefix_waste,$lokasi_waste)
 	{
-		return $this->db->query("SELECT count(lot) as jml_lot FROM stock_quant WHERE lot LIKE '%$lot_prefix_waste%' AND lokasi = '$lokasi_waste'");
+		return $this->db->query("SELECT count(lot) as jml_lot FROM stock_quant WHERE lot LIKE '$lot_prefix_waste%' AND lokasi = '$lokasi_waste'");
 	}
 	
 	public function cek_lot_stock_quant($lot,$lokasi)
