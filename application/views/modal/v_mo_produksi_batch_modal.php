@@ -1,6 +1,6 @@
 <?php 
 	if(!empty($row_lot)){//jika lot prefix nya tidak kosong maka dikasih counter
-		$counter =$row_lot;
+		 $counter =$row_lot;
 	}else{
 		$counter =$row_lot;
 	}
@@ -319,8 +319,11 @@
 	       last_counter =parseInt('<?php echo $counter;?>');	      
 	    }
 
+		dgt_nol_jv  = '<?php echo $dgt_nol_jv; ?>'; // ex 000
+		length 		= '<?php echo $length; ?>'; //ex -4
+
 		if(tambah){
-			last_counter1 = (("00" + last_counter).slice(-3));
+			last_counter1 = ((dgt_nol_jv + last_counter).slice(length));
 			var lot_prefix   = '<?php echo $lot_prefix;?>';
 			var lot_prefix_next = '';
 		 
