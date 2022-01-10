@@ -1,6 +1,6 @@
 <?php 
 	if(!empty($row_lot)){//jika lot prefix nya tidak kosong maka dikasih counter
-		$counter =$row_lot;
+		 $counter =$row_lot;
 	}else{
 		$counter =$row_lot;
 	}
@@ -10,6 +10,7 @@
 	}else{
 		$counter_waste =0;
 	}
+
 ?>
 <form class="form-horizontal" id="form_produksi" name="form_produksi">
 	<div class="form-group">
@@ -59,10 +60,10 @@
                 		</div>
                 	</div>
 	                <div class="col-md-6">	
-	                	<?php if($type_mo == 'colouring'){ // btn-copy untuk type_mo colouring saja?> 				
+	                	<?php if($copy_bahan_baku == 'true'){ // btn-copy untuk copy_bahan_baku = true;?> 				
                 		<div class="form-group">
 							<div class=" pull-right text-right">
-					            <button type="button" id="btn-copy" class="btn btn-primary btn-sm">Salin Konsumsi Bahan</button>
+					            <button type="button" id="btn-copy" class="btn btn-primary btn-sm" onclick="copy_rm()">Salin Konsumsi Bahan</button>
 							</div>					  
 						</div>
 						<?php }?>
@@ -257,11 +258,24 @@
 		}
 	}
 
+	function btn_copy(){// enable /disable  btn-copy
+		var items = false;
+		$(".produk").each(function(index, element) {
+			items = true;
+		});
+
+		if(items == false){
+			$("#btn-copy").prop('disabled',false);
+		}
+
+	}
+
 	//hapus row 
 	function delRow(r){	  
 	    var i = r.parentNode.parentNode.rowIndex;
 	  	document.getElementById("tabel_produksi").deleteRow(i);
 	  	total();
+		btn_copy(); // enable btn-copy
 	}
 
 	//fungsi panggil tambah_baris() ketika enter di qty
@@ -319,8 +333,11 @@
 	       last_counter =parseInt('<?php echo $counter;?>');	      
 	    }
 
+		dgt_nol_jv  = '<?php echo $dgt_nol_jv; ?>'; // ex 000
+		length 		= '<?php echo $length; ?>'; //ex -4
+
 		if(tambah){
-			last_counter1 = (("00" + last_counter).slice(-3));
+			last_counter1 = ((dgt_nol_jv + last_counter).slice(length));
 			var lot_prefix   = '<?php echo $lot_prefix;?>';
 			var lot_prefix_next = '';
 		 
@@ -638,47 +655,55 @@
 	   end SCRTIPT TABEL WASTE
 	******************************/
 
-	$(document).on("click","#btn-copy",function(e) {
 
-		$('.qty_konsum').each(function(index,item){
-			type 		= $(item).parents("tr").find("#type").val();
-			if ($(item).val()!=="" && type == 'stockable') {
-				kode_produk = $("#txtkode_produk").val();
-				nama_produk = "<?php echo htmlentities($product) ?>";
+	function copy_rm(){
+
+		$(document).one("click","#btn-copy",function(e) {
+
+
+			$('.qty_konsum').each(function(index,item){
+				type 		= $(item).parents("tr").find("#type").val();
+				if ($(item).val()!=="" && type == 'stockable') {
+					kode_produk = $("#txtkode_produk").val();
+					nama_produk = "<?php echo htmlentities($product) ?>";
+					qty_smi     = $(item).parents("tr").find('#qty_smi').val();
+					uom     	= $(item).parents("tr").find('#uom').val();
+					lot     	= $(item).parents("tr").find('#lot').val();
+					qty2        = $(item).parents("tr").find("#qty2").val();
+					uom2        = $(item).parents("tr").find("#uom2").val();		
+					grade_foreach 		= $(item).parents("tr").find("#grade_foreach").val();				
+
+				
+					html='<tr class="num">'
+						+ '<td></td>'
+						//+ '<td></td>'
+						+ '<td><input type="hidden" name="txtkode_produk" id="txtkode_produk"  class="form-control input-sm"  readonly="readonly" value="'+kode_produk+'"><input type="hidden" name="txtproduct[]" id="txtproduct"  class="form-control input-sm produk"  readonly="readonly" value="'+nama_produk+'">'
+						+ '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot" value="'+lot+'" onkeypress="enter(event);"></td>'
+						+ '<td><select class="form-control input-sm grade" name="grade" id="grade"><option value=""> Pilih Grade </option>'+grade_foreach+'</select></td>'
+						+ '<td><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm txtqty" value="'+qty_smi+'"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+						+ '<td><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm" value="'+uom+'"  readonly="readonly"></td>'
+						+ '<td><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm" value="'+qty2+'"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+						+ '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm" value="'+uom2+'"   readonly="readonly"></td>'
+						+ '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm" onkeypress="enter(event);"/></td>'
+						+ '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
+						+ '</tr>';
+						$('#tabel_produksi tbody').append(html);			
+				}			
+			});
+
+			$('.qty_konsum').each(function(index,item){
 				qty_smi     = $(item).parents("tr").find('#qty_smi').val();
-				uom     	= $(item).parents("tr").find('#uom').val();
-				lot     	= $(item).parents("tr").find('#lot').val();
-				qty2        = $(item).parents("tr").find("#qty2").val();
-				uom2        = $(item).parents("tr").find("#uom2").val();		
-				grade_foreach 		= $(item).parents("tr").find("#grade_foreach").val();				
-
-			
-				html='<tr class="num">'
-				    + '<td></td>'
-				    //+ '<td></td>'
-				    + '<td><input type="hidden" name="txtkode_produk" id="txtkode_produk"  class="form-control input-sm"  readonly="readonly" value="'+kode_produk+'"><input type="hidden" name="txtproduct[]" id="txtproduct"  class="form-control input-sm produk"  readonly="readonly" value="'+nama_produk+'">'
-				    + '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot" value="'+lot+'" onkeypress="enter(event);"></td>'
-				    + '<td><select class="form-control input-sm grade" name="grade" id="grade"><option value=""> Pilih Grade </option>'+grade_foreach+'</select></td>'
-				    + '<td><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm txtqty" value="'+qty_smi+'"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
-				    + '<td><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm" value="'+uom+'"  readonly="readonly"></td>'
-				    + '<td><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm" value="'+qty2+'"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
-				    + '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm" value="'+uom2+'"   readonly="readonly"></td>'
-				    + '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm" onkeypress="enter(event);"/></td>'
-				    + '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
-				    + '</tr>';
-				    $('#tabel_produksi tbody').append(html);			
-			}			
+				//set value qty dikonsumsi
+				$(item).eq(0).val(qty_smi);
+			});
+			//alert ketik salin konsumsi bahan selesai
+			alert_notify('fa fa-check','Salin Konsumsi Bahan berhasil !','success',function(){});
+			$("#btn-copy").prop('disabled',true);
+			total();
 		});
 
-		$('.qty_konsum').each(function(index,item){
-			qty_smi     = $(item).parents("tr").find('#qty_smi').val();
-			//set value qty dikonsumsi
-			$(item).eq(0).val(qty_smi);
-		});
-		//alert ketik salin konsumsi bahan selesai
-		alert_notify('fa fa-check','Salin Konsumsi Bahan berhasil !','success',function(){});
+	}
 
-	});
 
 	//simpan data 
 	//$("#btn-tambah").unbind( "click" );

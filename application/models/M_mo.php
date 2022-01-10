@@ -514,22 +514,54 @@ class M_mo extends CI_Model
 		return $this->db->query("INSERT INTO mrp_production_rm_hasil (kode,move_id,kode_produk,nama_produk,lot,qty,uom,origin_prod,row_order,quant_id) values $sql");
 	}
 
-	public function get_counter_by_lot_prefix($lot_prefix)
+	function cek_length_counter_lot_by_dept_id($dept_id)
 	{
-/*
-		
+		$query 	= $this->db->query("SELECT * FROM mrp_counter_lot where dept_id = '$dept_id' ")->row_array();
+		$rs     = $query['length_counter'];
+
+		if(empty($rs)){
+			$length 	= "3";
+			$dgt_nol 	= "000";
+			$dgt_nol_jv = "00";
+		}else{
+			$length  = $rs;
+			$dgt_nol = '';
+			$dgt_nol_jv = '';
+
+			for($i=0;$i<$rs;$i++){
+				$dgt_nol .= "0";
+			}
+
+			for($i=1;$i<$rs;$i++){
+				$dgt_nol_jv .= "0";
+			}
+		}
+
+		$data["length"] 	= $length;
+		$data["dgt_nol"] 	= $dgt_nol;
+		$data["dgt_nol_jv"] = $dgt_nol_jv;// buat javascript
+
+		return $data;
+	}
+
+	public function get_counter_by_lot_prefix($lot_prefix,$dept_id)
+	{
+		/*
 		return $this->db->query("SELECT count(lot) as jml_lot FROM stock_move_items WHERE lot LIKE '%$lot_prefix%' AND move_id = '$move_id'");
-*/
+		*/
+		$rs 	= $this->cek_length_counter_lot_by_dept_id($dept_id);
+		$dgt_nol= $rs['dgt_nol'];
+		$length = $rs['length'];
 		
-		$result = $this->db->query("SELECT lot FROM stock_quant  WHERE lot LIKE '$lot_prefix%'  ORDER BY RIGHT(lot,3) DESC LIMIT 1 ");
+		$result = $this->db->query("SELECT lot FROM stock_quant  WHERE lot LIKE '$lot_prefix%'  ORDER BY RIGHT(lot,$length) DESC LIMIT 1 ");
 
 		if ($result->num_rows()>0){
             $row=$result->row();
-            $dgt=substr($row->lot,-3)+1;
+            $dgt=substr($row->lot,-$length)+1;
         }else{
             $dgt="1";
         }
-        $dgt=substr("000" . $dgt,-3);            
+        $dgt=substr($dgt_nol . $dgt,-$length);            
         return $dgt;
 
 	}
