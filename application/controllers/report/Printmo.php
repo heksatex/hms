@@ -256,7 +256,7 @@ class Printmo extends MY_Controller
             $pdf->Multicell(50, 4, tgl_indo(date('d-m-Y H:i:s',strtotime($head['tanggal']))), 0, 'L');
 
             $pdf->setXY(30,29);
-            $pdf->Multicell(70, 4, $head['nama_produk'], 0, 'L');
+            $pdf->Multicell(80, 4, $head['nama_produk'], 0, 'L');
 
             $pdf->setXY(30,33);
             $pdf->Multicell(50, 4, $head['origin'], 0, 'L');
@@ -334,7 +334,7 @@ class Printmo extends MY_Controller
             $pdf->setXY(131, 25);
             $pdf->Multicell(30, 4, $mc_knitting, 0, 'L');
             $pdf->setXY(131, 29);
-            $pdf->Multicell(30, 4, $jns_benang, 0, 'L');
+            $pdf->Multicell(50, 4, $jns_benang, 0, 'L');
             $pdf->setXY(131, 33);
             $pdf->Multicell(30, 4, $lembar, 0, 'L');
             $pdf->setXY(131, 37);
@@ -577,7 +577,6 @@ class Printmo extends MY_Controller
             $pdf->SetFont('Arial','B',10,'C');
             $pdf->Cell(0,23,'LAPORAN HASIL PRODUKSI HARIAN ',0,0,'C');
 
-
             $mtr_gl         = '';
             $lbr_jadi       = '';
             $lbr_greige     = '';
@@ -692,7 +691,7 @@ class Printmo extends MY_Controller
             $pdf->Multicell(50, 4, tgl_indo(date('d-m-Y H:i:s', strtotime($head['tanggal']))), 0, 'L');
 
             $pdf->setXY(33,29);
-            $pdf->Multicell(58, 4, $head['nama_produk'], 0, 'L');
+            $pdf->Multicell(70, 4, $head['nama_produk'], 0, 'L');
 
             $pdf->setXY(33,33);
             $pdf->Multicell(50, 4, $head['origin'], 0, 'L');
@@ -701,86 +700,85 @@ class Printmo extends MY_Controller
             $pdf->SetFont('Arial','B',7,'C');
 
              // caption tengah 
-            $pdf->setXY(90, 25); 
+            $pdf->setXY(105, 25); 
             $pdf->Multicell(25, 4, 'Lot Prefix ', 0, 'L');
 
-            $pdf->setXY(90,29);
+            $pdf->setXY(105,29);
             $pdf->Multicell(25, 4, 'Benang ', 0, 'L');
 
-            $pdf->setXY(90,33);
+            $pdf->setXY(105,33);
             $pdf->Multicell(25, 4, 'Lebar Greige / Jadi ', 0, 'L');
 
-            $pdf->setXY(115, 25);
+            $pdf->setXY(130, 25);
             $pdf->Multicell(3, 4, ':', 0, 'L');
-            $pdf->setXY(115, 29);
+            $pdf->setXY(130, 29);
             $pdf->Multicell(3, 4, ':', 0, 'L');
-            $pdf->setXY(115, 33);
+            $pdf->setXY(130, 33);
             $pdf->Multicell(3, 4, ':', 0, 'L');
 
 
             // isi tengah
             $pdf->SetFont('Arial','',7,'C');
-            $pdf->setXY(116, 25);
+            $pdf->setXY(131, 25);
             $pdf->Multicell(40, 4, $head['lot_prefix'], 0, 'L');
-            $pdf->setXY(116, 29);
+            $pdf->setXY(131, 29);
             $pdf->Multicell(30, 4, '', 0, 'L');
-            $pdf->setXY(116, 33);
+            $pdf->setXY(131, 33);
             $pdf->Multicell(40, 4, $lbr_greige.' / '.$lbr_jadi, 0, 'L');
-
 
             // caption tengah 2
             $pdf->SetFont('Arial','B',7,'C');
-            $pdf->setXY(156, 25);
+            $pdf->setXY(171, 25);
             $pdf->Multicell(30, 4, 'RPM ', 0, 'L');
 
-            $pdf->setXY(156, 29);
+            $pdf->setXY(171, 29);
             $pdf->Multicell(30, 4, 'Stitch ', 0, 'L' );
 
-            $pdf->setXY(156, 33);
+            $pdf->setXY(171, 33);
             $pdf->Multicell(30, 4, 'PCS ', 0, 'L');
             
-            $pdf->setXY(170, 25);
+            $pdf->setXY(185, 25);
             $pdf->Multicell(3, 4, ':', 0, 'L');
-            $pdf->setXY(170, 29);
+            $pdf->setXY(185, 29);
             $pdf->Multicell(3, 4, ':', 0, 'L');
-            $pdf->setXY(170, 33);
+            $pdf->setXY(185, 33);
             $pdf->Multicell(3, 4, ':', 0, 'L');
 
             $pdf->SetFont('Arial','',7,'C');
             // isi tengah 2
-            $pdf->setXY(171, 25);
+            $pdf->setXY(186, 25);
             $pdf->Multicell(30, 4, $rpm, 0, 'L');
-            $pdf->setXY(171, 29);
+            $pdf->setXY(186, 29);
             $pdf->Multicell(30, 4, $stitch, 0, 'L');
-            $pdf->setXY(171, 33);
+            $pdf->setXY(186, 33);
             $pdf->Multicell(30, 4, $pcs, 0, 'L');
 
             $pdf->SetFont('Arial','B',7,'C');
 
             // caption kanan
-            $pdf->setXY(200, 25);
+            $pdf->setXY(216, 25);
             $pdf->Multicell(35, 4, 'QTY Order ', 0, 'L');
 
-            $pdf->setXY(200, 29);
+            $pdf->setXY(216, 29);
             $pdf->Multicell(35, 4, 'Panjang / Gig ', 0, 'L');
 
-            $pdf->setXY(200, 33);
+            $pdf->setXY(216, 33);
             $pdf->Multicell(35, 4, 'Target / Shift ', 0, 'L');
 
-            $pdf->setXY(220, 25);
+            $pdf->setXY(235, 25);
             $pdf->Multicell(3, 4, ':', 0, 'L');
-            $pdf->setXY(220, 29);
+            $pdf->setXY(235, 29);
             $pdf->Multicell(3, 4, ':', 0, 'L');
-            $pdf->setXY(220, 33);
+            $pdf->setXY(235, 33);
             $pdf->Multicell(3, 4, ':', 0, 'L'); 
 
             // isi kanan 
             $pdf->SetFont('Arial','',7,'C');
-            $pdf->setXY(221, 25);
+            $pdf->setXY(236, 25);
             $pdf->Multicell(30, 4, $head['qty'].' '.$head['uom'], 0, 'L');
-            $pdf->setXY(221, 29);
+            $pdf->setXY(236, 29);
             $pdf->Multicell(30, 4, $mtr_gl, 0, 'L');
-            $pdf->setXY(221, 33);
+            $pdf->setXY(236, 33);
             $pdf->Multicell(30, 4, $head['target_efisiensi']*8, 0, 'L');
 
 
