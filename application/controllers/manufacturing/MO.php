@@ -325,8 +325,8 @@ class MO extends MY_Controller
         $data['list_grade'] = $this->_module->get_list_grade();
         $data['lot_prefix'] = $lot_prefix;
         $data['konsumsi']   = $this->m_mo->get_konsumsi_bahan($move_id,'ready');
-        $sl                 = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get ,type_mo
-        $data['type_mo']    = $sl['type_mo'];
+        $sl                 = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get ,copy_bahanbaku true/false
+        $data['copy_bahan_baku']  = $sl['copy_bahan_baku'];
 
         if(!empty($lot_prefix)){
             $count              = $this->m_mo->get_counter_by_lot_prefix(addslashes($lot_prefix),$deptid);
