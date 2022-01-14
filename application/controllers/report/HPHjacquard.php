@@ -189,22 +189,46 @@ class HPHjacquard extends MY_Controller
 				$a     = 0;
 				foreach ($exp2 as $exps2) {
 					# code...
-					if($a == 7 ){// l.greige
+					if($a == 9 ){// l.greige
 	                    $ex2 = explode('=', $exps2);
-	                    $lbr_greige = trim($ex2[1]);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_greige = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
-	                if($a == 8){ // l.jadi
+	                if($a == 10){ // l.jadi
 	                    $ex2 = explode('=', $exps2);
-	                    $lbr_jadi = trim($ex2[1]);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_jadi = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
 
-	                if($a == 11){ // stitch
+	                if($a == 13){ // stitch
 	                    $ex2 = explode('=', $exps2);
-	                    $stitch = trim($ex2[1]);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$stitch = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
-	                if($a == 13){ // rpm
+	                if($a == 15){ // rpm
 	                    $ex2 = explode('=', $exps2);
-	                    $rpm = trim($ex2[1]);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$rpm = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
 	                $a++;
 				}
@@ -531,23 +555,47 @@ class HPHjacquard extends MY_Controller
 			$a     = 0;
 			foreach ($exp2 as $exps2) {
 				# code...
-				if($a == 7 ){// l.greige
-                    $ex2 = explode('=', $exps2);
-                    $lbr_greige = trim($ex2[1]);
-                }
-                if($a == 8){ // l.jadi
-                    $ex2 = explode('=', $exps2);
-                    $lbr_jadi = trim($ex2[1]);
-                }
+					if($a == 9 ){// l.greige
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_greige = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
+	                if($a == 10){ // l.jadi
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_jadi = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
 
-                if($a == 11){ // stitch
-                    $ex2 = explode('=', $exps2);
-                    $stitch = trim($ex2[1]);
-                }
-                if($a == 13){ // rpm
-                    $ex2 = explode('=', $exps2);
-                    $rpm = trim($ex2[1]);
-                }
+	                if($a == 13){ // stitch
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$stitch = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
+	                if($a == 15){ // rpm
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$rpm = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
                 $a++;
 			}
 

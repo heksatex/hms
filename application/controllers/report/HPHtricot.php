@@ -190,20 +190,44 @@ class HPHtricot extends MY_Controller
 					# code...
 					if($a == 7 ){// l.greige
 	                    $ex2 = explode('=', $exps2);
-	                    $lbr_greige = trim($ex2[1]);
+	                    $b   = 0;
+	                   	foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_greige = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
 	                if($a == 8){ // l.jadi
 	                    $ex2 = explode('=', $exps2);
-	                    $lbr_jadi = trim($ex2[1]);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_jadi = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
 
 	                if($a == 11){ // stitch
 	                    $ex2 = explode('=', $exps2);
-	                    $stitch = trim($ex2[1]);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$stitch = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
 	                if($a == 13){ // rpm
 	                    $ex2 = explode('=', $exps2);
-	                    $rpm = trim($ex2[1]);
+	                    $b   = 0 ;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$rpm = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
 	                }
 	                $a++;
 				}
@@ -531,22 +555,46 @@ class HPHtricot extends MY_Controller
 			foreach ($exp2 as $exps2) {
 				# code...
 				if($a == 7 ){// l.greige
-                    $ex2 = explode('=', $exps2);
-                    $lbr_greige = trim($ex2[1]);
-                }
-                if($a == 8){ // l.jadi
-                    $ex2 = explode('=', $exps2);
-                    $lbr_jadi = trim($ex2[1]);
-                }
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                   	foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_greige = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
+	                if($a == 8){ // l.jadi
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_jadi = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
 
-                if($a == 11){ // stitch
-                    $ex2 = explode('=', $exps2);
-                    $stitch = trim($ex2[1]);
-                }
-                if($a == 13){ // rpm
-                    $ex2 = explode('=', $exps2);
-                    $rpm = trim($ex2[1]);
-                }
+	                if($a == 11){ // stitch
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$stitch = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
+	                if($a == 13){ // rpm
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0 ;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$rpm = trim($ex2[$b]);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
                 $a++;
 			}
 
@@ -612,7 +660,6 @@ class HPHtricot extends MY_Controller
 	        $rpm            = '';
 	        $rowCount++;
 		}
-
 
     	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
 
