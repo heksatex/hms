@@ -583,7 +583,7 @@ class M_mo extends CI_Model
 
 	public function get_list_cacat($deptid)
 	{
-		return $this->db->query("SELECT kode_cacat, nama_cacat, CONCAT(kode_cacat,' ', nama_cacat) as kode_nama FROM mst_cacat WHERE  dept_id = '$deptid' LIMIT 0,10")->result_array();
+		return $this->db->query("SELECT kode_cacat, nama_cacat, CONCAT(kode_cacat,' ', nama_cacat) as kode_nama FROM mst_cacat WHERE  dept_id = '$deptid'")->result_array();
 	}
 
 	
