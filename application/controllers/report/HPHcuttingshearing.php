@@ -1,45 +1,47 @@
-<?php defined('BASEPATH') or exit ('No Direct Script Acces Allowed');
+<?php defined('BASEPATH') OR exit('No Direct Script Acces Allowed');
 
 /**
  * 
  */
-class HPHwarpingdasar extends MY_Controller
+class HPHcuttingshearing extends MY_Controller
 {
-	public function __construct()
+    public function __construct()
 	{
 		parent:: __construct();
 		$this->is_loggedin();//cek apakah user sudah login
 		$this->load->model('_module');
-        $this->load->model('m_HPHwarpingdasar');
+        $this->load->model('m_HPHjacquard');
+		$this->load->model('m_produksiJacquard');
 	}
+
 
 	public function index()
 	{
-
-		$id_dept        = 'HPHWRD';
+		$id_dept        = 'HPHCS';
         $data['id_dept']= $id_dept;
-		$data['mesin']  = $this->_module->get_list_mesin_report('WRD');
-		$this->load->view('report/v_hph_warping_dasar', $data);
+		$data['mesin']  = $this->_module->get_list_mesin_report('CS');
+		$this->load->view('report/v_hph_cuttingshearing', $data);
 	}
 
-	public function loadData()
+
+    function loadData()
 	{
 
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
-		$nama_produk = $this->input->post('nama_produk');
 		$mo        = $this->input->post('mo');
+		$corak     = $this->input->post('corak');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
 		$shift_arr = $this->input->post('shift');// array shift pagi/siang/malam
-		$id_dept   = 'WRD';
+		$id_dept   = 'CS';
 		$where_date = '';
 		$loop       = 1;
 		$condition_OR = '';
-
-		// cari selisih periode tangal
+        	
+       	// cari selisih periode tangal
         $diff    = strtotime($tglsampai) - strtotime($tgldari);
         $hasil   = floor($diff / (60 * 60 * 24));
       
@@ -147,10 +149,10 @@ class HPHwarpingdasar extends MY_Controller
 				$where_lot  = '';
 			}
 
-			if(!empty($nama_produk)){
-				$where_nama  = "AND mpfg.nama_produk LIKE '%".addslashes($nama_produk)."%' ";
+			if(!empty($corak)){
+				$where_corak  = "AND mpfg.nama_produk LIKE '%".addslashes($corak)."%' ";
 			}else{
-				$where_nama  = '';
+				$where_corak  = '';
 			}
 
 			if(!empty($user)){
@@ -161,37 +163,111 @@ class HPHwarpingdasar extends MY_Controller
 
 			$dataRecord= [];
 
-			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis." ".$where_mo." ";
+			$lbr_jadi       = '';
+	        $lbr_greige     = '';
+	        $stitch         = '';
+	        $rpm            = '';
 
-			$items = $this->m_HPHwarpingdasar->get_list_HPH_by_dept($where);
+			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo." ";
+
+			$items = $this->m_HPHjacquard->get_list_HPH_jacquard_by_kode($where);
 			foreach ($items as $val) {
+
+				// explode origin 
+				$exp   = explode('|', $val->origin);
+				$no    = 0;
+				foreach ($exp as $exps) {
+					if($no == 0){
+						$sc  = trim($exps);
+						$mkt = $this->m_produksiJacquard->get_marketing_by_kode($sc);
+					}
+					$no++;
+				}
+
+				// explode reff_note
+				$exp2  = explode('|', $val->reff_note);
+				$a     = 0;
+				foreach ($exp2 as $exps2) {
+					# code...
+					if($a == 9 ){// l.greige
+	                    $ex2 = explode('=', $exps2);
+						$b   = 1;
+						foreach ($ex2 as $exs2) {
+							if($b == 2){
+								$lbr_greige  = trim($exs2);
+							}
+							$b++;
+						}
+	                }
+
+	                if($a == 10){ // l.jadi
+	                    $ex2 = explode('=', $exps2);
+						$b   = 1;
+						foreach ($ex2 as $exs2) {
+							if($b == 2){
+								$lbr_jadi  = trim($exs2);
+							}
+							$b++;
+						}
+	                }
+
+	                if($a == 13){ // stitch
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 1;
+						foreach ($ex2 as $exs2) {
+							if($b == 2){
+								$stitch  = trim($exs2);
+							}
+							$b++;
+						}
+	                }
+	                if($a == 15){ // rpm
+	                    $ex2 = explode('=', $exps2);
+						$b   = 1;
+						foreach ($ex2 as $exs2) {
+							if($b == 2){
+								$rpm  = trim($exs2);
+							}
+							$b++;
+						}
+	                }
+	                $a++;
+				}
+
+
 				$dataRecord[] = array('kode' => $val->kode,
 									  'nama_mesin' => $val->nama_mesin,
-									  'origin'     => $val->origin,
+									  'sc'     => $sc,
 									  'tgl_hph'    => $val->tgl_hph,
 									  'kode_produk'=> $val->kode_produk,
 									  'nama_produk'=> $val->nama_produk,
 									  'lot'        => $val->lot,
-									  'qty1'       => number_format($val->qty,2),
+									  'qty1'       => $val->qty,
 									  'uom1'	   => $val->uom,
-									  'qty2'	   => number_format($val->qty2,2),
+									  'qty2'	   => $val->qty2,
 									  'uom2'       => $val->uom2,
+									  'grade'      => $val->nama_grade,
+									  'lbr_greige' => $lbr_greige,
+									  'lbr_jadi'   => $lbr_jadi,
+									  'marketing'  => $mkt,
 									  'nama_user'  => $val->nama_user,
-									  'reff_note'  => $val->reff_note,
+									  'reff_note'  => $val->reff_note_sq,
 									  'lokasi'     => $val->lokasi
 									);
+				$lbr_jadi       = '';
+		        $lbr_greige     = '';
+		        $stitch         = '';
+		        $rpm            = '';
 			}
 
-			$allcount           = $this->m_HPHwarpingdasar->getRecordCountHPH($where);
+			$allcount           = $this->m_HPHjacquard->get_record_hph_jacquard($where);
 	        $total_record       = 'Total Data : '. number_format($allcount);
 
 			$callback = array('record' => $dataRecord, 'total_record' => $total_record);
 
 		} //else if validasi
 
-
 		echo json_encode($callback);
-
 	}
 
 	public function export_excel_hph()
@@ -200,14 +276,14 @@ class HPHwarpingdasar extends MY_Controller
 		$this->load->library('excel');
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
-		$nama_produk = $this->input->post('nama_produk');
+		$corak     = $this->input->post('corak');
 		$mo        = $this->input->post('mo');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
 		$shift_arr = $this->input->post('shift[]');
-		$id_dept   = 'WRD';
+		$id_dept   = 'CS';
 		$where_date = '';
 		$loop       = 1;
 		$condition_OR = '';
@@ -281,6 +357,7 @@ class HPHwarpingdasar extends MY_Controller
 			}
 
 
+		
 		// get location by jenis (HPH=stock, Waste)
 		$cek = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
 
@@ -291,6 +368,7 @@ class HPHwarpingdasar extends MY_Controller
 		}else{
 			$where_jenis = '';
 		}
+		
 
 		$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
@@ -299,20 +377,19 @@ class HPHwarpingdasar extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('A1', 'Laporan HPH');
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
 		$object->getActiveSheet()->mergeCells('A1:L1');
-		//$object->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 		// set Departemen
  		$object->getActiveSheet()->SetCellValue('A2', 'Departemen');
 		$object->getActiveSheet()->mergeCells('A2:B2');
- 		$object->getActiveSheet()->SetCellValue('C2', ': Warping Dasar');
+ 		$object->getActiveSheet()->SetCellValue('C2', ': '.$cek['nama']);
 		$object->getActiveSheet()->mergeCells('C2:D2');
+
 
 		// set periode
  		$object->getActiveSheet()->SetCellValue('A3', 'Periode');
 		$object->getActiveSheet()->mergeCells('A3:B3');
  		$object->getActiveSheet()->SetCellValue('C3', ': '.tgl_indo(date('d-m-Y',strtotime($tgldari_capt))).' - '.tgl_indo(date('d-m-Y',strtotime($tglsampai_capt)) ));
 		$object->getActiveSheet()->mergeCells('C3:F3');
-
 
 		if(count($shift_arr) > 0 ){
 			$caption_shift = '';
@@ -333,7 +410,7 @@ class HPHwarpingdasar extends MY_Controller
 
 
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:O6")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:U7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -346,44 +423,81 @@ class HPHwarpingdasar extends MY_Controller
 
 
 		// header table
-    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'Origin', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Reff Note','Lokasi','User');
-
+    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Grade','Lebar','Greige','Jadi','Marketing','Reff Note','Lokasi','User');
 
     	$column = 0;
     	$merge  = TRUE;
+    	$columns = '';
+        $count_merge = 0; // untuk jml yg di merge
     	foreach ($table_head_columns as $field) {
 
-    		$object->getActiveSheet()->setCellValueByColumnAndRow($column, 6, $field);	
+    		if($column <= 12 OR $column >= 16){
+    			$columns = $column-$count_merge;
+	    		$object->getActiveSheet()->setCellValueByColumnAndRow($columns, 6, $field);  
+    	        $object->getActiveSheet()->mergeCellsByColumnAndRow($columns, 6, $columns, 7);
+    		}
+
+    		if($column >= 13 AND $column <= 15){
+    			if($merge == true){
+	    			$columns = $column;
+		    		$object->getActiveSheet()->setCellValueByColumnAndRow($columns, 6, $field);  
+	                $object->getActiveSheet()->mergeCells('N6:O6');// merge cell lebar
+	                $count_merge++;
+    			}else if($merge == false){
+  					$columns = $column-$count_merge;
+                    $object->getActiveSheet()->setCellValueByColumnAndRow($columns, 7, $field);  
+    			}
+                
+                $merge= false;
+    		}
+
+			
     		$column++;
     	}
 
-    	// set lebar column header
-		$index_header = array('A','B','D','E');
-		
-		foreach ($index_header as $val) {
-			# code...
-			$object->getSheet(0)->getColumnDimension($val)->setAutoSize(true);
-		}
-			$object->getSheet(0)->getColumnDimension('C')->SetWidth(12);
-			$object->getSheet(0)->getColumnDimension('F')->SetWidth(17);
-			$object->getSheet(0)->getColumnDimension('G')->SetWidth(42);
-			$object->getSheet(0)->getColumnDimension('H')->SetWidth(20);
-			$object->getSheet(0)->getColumnDimension('I')->SetWidth(10);
-			$object->getSheet(0)->getColumnDimension('J')->SetWidth(9);
-			$object->getSheet(0)->getColumnDimension('K')->SetWidth(10);
-			$object->getSheet(0)->getColumnDimension('L')->SetWidth(9);
-			$object->getSheet(0)->getColumnDimension('M')->SetWidth(15);
-			$object->getSheet(0)->getColumnDimension('N')->SetWidth(12);
-			$object->getSheet(0)->getColumnDimension('O')->SetWidth(15);
+    	// set wraptext
+        $object->getActiveSheet()->getStyle('F6:F'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 
-		// set border header column
-    	$index_header2 = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O');
-    	foreach ($index_header2 as $val) {
-			$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
-           	
+
+    	// set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+    		
+    		$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
+            $object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
+
+            if($loop <= 1 OR $loop == 7){
+				$object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A, B, 
+            }else if($loop ==2){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(10); // index C
+            }else if($loop == 4){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index E
+            }else if($loop == 6 ){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(40); // index G
+            }else if($loop == 5 OR  ($loop >= 8 AND $loop <= 14)){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(9); // index F, I - Q
+            }else if($loop >=15 ){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(18); // index p-u
+            }
+
+           	$object->getActiveSheet()->getStyle($val.'6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+            $object->getActiveSheet()->getStyle($val.'7')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
+
+            $object->getActiveSheet()->getStyle($val.'6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+            $object->getActiveSheet()->getStyle($val.'7')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
+
+
+            $loop++;
     	}
 
-    	if(!empty($mo)){
+        $rowCount = 8;
+        $lbr_jadi       = '';
+        $lbr_greige     = '';
+        $stitch         = '';
+        $rpm            = '';
+
+		if(!empty($mo)){
 			$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
 		}else{
 			$where_mo  = '';
@@ -401,10 +515,10 @@ class HPHwarpingdasar extends MY_Controller
 			$where_lot  = '';
 		}
 
-		if(!empty($nama_produk)){
-			$where_nama  = "AND mpfg.nama_produk LIKE '%".addslashes($nama_produk)."%' ";
+		if(!empty($corak)){
+			$where_corak  = "AND mpfg.nama_produk LIKE '%".addslashes($corak)."%' ";
 		}else{
-			$where_nama  = '';
+			$where_corak  = '';
 		}
 
 		if(!empty($user)){
@@ -413,33 +527,83 @@ class HPHwarpingdasar extends MY_Controller
 			$where_user  = '';
 		}
 
-    	// tbody
-		$where = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_nama." ".$where_user." ".$where_jenis." ".$where_mo." ";
-		$items = $this->m_HPHwarpingdasar->get_list_HPH_by_dept($where);
-		$no    = 1;
-		$rowCount = 7;
-    	foreach ($items as $row) {
-    		
-    		if($rowCount > 6){
+    	//tbody
+		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo." ";
+    	$items = $this->m_HPHjacquard->get_list_HPH_jacquard_by_kode($where);
+    	$num   = 1;
+		foreach ($items as $val) {
 
-	    		$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($no++));
-				$object->getActiveSheet()->SetCellValue('B'.$rowCount, mb_strtoupper($row->kode,'UTF-8'));
-				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->nama_mesin);
-				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
-				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->tgl_hph);
-				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
-				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
-				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->lot);
-				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->qty);
-				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom);
-				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->qty2);
-				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
-				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->reff_note);
-				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->lokasi);
-				$object->getActiveSheet()->SetCellValue('O'.$rowCount, $row->nama_user);
+			// explode origin 
+			$exp   = explode('|', $val->origin);
+			$no    = 0;
+			foreach ($exp as $exps) {
+				if($no == 0){
+					$sc  = trim($exps);
+					$mkt = $this->m_produksiJacquard->get_marketing_by_kode($sc);
+				}
+				$no++;
+			}
 
-    		}
-			//set border true
+			// explode reff_note
+			$exp2  = explode('|', $val->reff_note);
+			$a     = 0;
+			foreach ($exp2 as $exps2) {
+				# code...
+				if($a == 9 ){// l.greige
+                    $ex2 = explode('=', $exps2);
+					$b   = 1;
+					foreach ($ex2 as $exs2) {
+						if($b == 2){
+							$lbr_greige  = trim($exs2);
+						}
+						$b++;
+					}
+                }
+                if($a == 10){ // l.jadi
+                    $ex2 = explode('=', $exps2);
+					$b   = 1;
+					foreach ($ex2 as $exs2) {
+						if($b == 2){
+							$lbr_jadi  = trim($exs2);
+						}
+						$b++;
+					}
+                }
+                $a++;
+			}
+
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->kode);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->nama_mesin);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $sc);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->tgl_hph);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->kode_produk);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->nama_produk);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty2);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->uom2);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_grade);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $lbr_greige);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $lbr_jadi);
+			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $mkt);
+			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->reff_note_sq);
+			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->lokasi);
+			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->nama_user);
+
+           	// set align
+            $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $object->getActiveSheet()->getStyle('C'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $object->getActiveSheet()->getStyle('D'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $object->getActiveSheet()->getStyle('M'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            
+            // set wrapText
+            $object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+            $object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+
+
+            //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
@@ -456,20 +620,27 @@ class HPHwarpingdasar extends MY_Controller
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('Q'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray);
 
-			
-			$rowCount++;
+		
+			$lbr_jadi       = '';
+	        $lbr_greige     = '';
+	        $stitch         = '';
+	        $rpm            = '';
+	        $rowCount++;
+		}
 
-    	}
-
-        $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
 
         header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="HPH Warping Dasar.xls"'); //tell browser what's the file name
+        header('Content-Disposition: attachment;filename="HPH Cutting Shearing.xls"'); //tell browser what's the file name
         header('Cache-Control: max-age=0'); //no cache
         $object->save('php://output');
-			
-	}
+    }
 
-	
+
+
 }

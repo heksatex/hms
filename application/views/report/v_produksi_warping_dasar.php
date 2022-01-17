@@ -303,10 +303,10 @@
                       $("<td>").text(value.lembar),
                       $("<td>").text(value.pjg),
                       $("<td>").text(''),
-                      $("<td>").text(value.target),
-                      $("<td>").text(value.qty1),
+                      $("<td align='right'>").text(value.target),
+                      $("<td align='right'>").text(value.qty1),
                       $("<td>").text(value.qty2),
-                      $("<td>").text(value.sisa),
+                      $("<td align='right'>").text(value.sisa),
                       $("<td>").text(value.status),
               );
               tbody.append(tr);

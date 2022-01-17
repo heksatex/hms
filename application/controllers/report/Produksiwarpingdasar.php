@@ -372,10 +372,10 @@ class Produksiwarpingdasar extends MY_Controller
         						  'jml_beam'       => $jml_beam,
         						  'lembar' 		   => $lembar,
         						  'pjg'            => $pjg,
-        						  'target'         => $row->qty_target,
-        						  'qty1'           => $row->hph_qty1,
+        						  'target'         => number_format($row->qty_target,2),
+        						  'qty1'           => number_format($row->hph_qty1,2),
         						  'qty2'		   => $row->hph_qty2,
-        						  'sisa'           => $row->sisa_target,
+        						  'sisa'           => number_format($row->sisa_target,2),
         						  'status'         => $row->status );
 
         	$sales_contract = '';
@@ -406,7 +406,7 @@ class Produksiwarpingdasar extends MY_Controller
     	}else if($nama_field =='nama_mesin'){
     		$where = 'ms.'.$nama_field;
     	}else{
-    		$where;
+    		$where = '';
     	}
 
         return $where;

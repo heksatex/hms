@@ -44,7 +44,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>Jadwal Produksi Twisting</b></h3>
+          <h3 class="box-title"><b>Jadwal Produksi Inspecting1</b></h3>
         </div>
         <div class="box-body">
            
@@ -84,7 +84,7 @@
                               <span class="fa fa-download"></span> <label>Export</label>
                             </div>
                             <div class="col-12 col-sm-8 col-md-8">
-                              <form id="frm_excel" action="<?=base_url()?>report/produksitwisting/export_excel" method="POST">
+                              <form id="frm_excel" action="<?=base_url()?>report/produksiinspecting1/export_excel" method="POST">
                                 <input type="hidden" name="query" id="query">
                                 <button type="submit" class="btn btn-default btn-sm" id="btn-excel" name="btn-excel">
                                   <i class="fa fa-file-excel-o"></i>  Excel
@@ -151,20 +151,31 @@
                               <th  class="style no" >No. </th>
                               <th  class='style'>MO</th>
                               <th  class='style' style="min-width: 80px">Tgl.MO</th>
-                              <th  class='style'>MC</th>
-                              <th  class='style' style="min-width: 150px">Product</th>
-                              <th  class='style'>Sales Contract</th>
-                              <th  class='style'>Origin</th>
-                              <th  class='style'>Target</th>
+                              <th  class='style' style="min-width: 50">MC</th>
+                              <th  class='style'>SC</th>
+                              <th  class='style'>PD</th>
+                              <th  class='style'>Marketing</th>
+                              <th  class='style' style="min-width: 150px">Corak</th>
+                              <th  class='style'>L.Greige</th>
+                              <th  class='style'>L.Jadi</th>
+                              <th  class='style' style="min-width: 80px">Start Produksi</th>
+                              <th  class='style' style="min-width: 80px">Finish Produksi</th>
+                              <th  class='style'>Meter</th>
+                              <th  class='style'>Gulung</th>
+                              <th  class='style'>Mtr/Gl</th>
+                              <th  class='style'>Pcs</th>
+                              <th  class='style' style="min-width: 150px">Bahan Baku</th>
+                              <th  class='style'>Target Qty</th>
                               <th  class='style'>HPH/Qty1</th>
                               <th  class='style'>HPH/Qty2</th>
-                              <th  class='style'>Sisa</th>
-                              <th  class='style' >Status</th>
+                              <th  class='style'>Gulung</th>
+                              <th  class='style'>Sisa/Qty</th>
+                              <th  class='style'>Status</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="12" align="center">Tidak ada Data</td>
+                              <td colspan="19" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -195,23 +206,6 @@
 
 <script type="text/javascript">
 
-
-/*
-    $('#btn-load').on('click', function(){
-      $('#btn-load').button('loading');
-      createBody(0);
-      $('#btn-load').button('reset');
-
-    });
-    $('#example1').on('scroll', function() {
-       if($(this).scrollTop() + $(this).innerHeight() > $(this)[0].scrollHeight){
-       //if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
-          // alert('end reached');
-
-       }
-    });
-    var last_no = [];
-*/  
 
      //* Show collapse advanced search
     $('#advancedSearch').on('shown.bs.collapse', function () {
@@ -261,69 +255,90 @@
 
     createBody(0);
     var dataRecord = [];
-
     function createBody(pageNum){
+
       $("#example1_processing").css('display',''); // show loading
 
       $("#example1 tbody").remove();
       // alert('tes');
+      var id_dept ='<?php  echo $id_dept;?>';
+
       $.ajax({
         type : 'POST',
         dataType: 'json',
-        url  : '<?=base_url()?>report/produksitwisting/loadData/'+pageNum,
-        data : {id_dept : 'TWS', data_filter : arr_filter},
+        url  : '<?=base_url()?>report/produksiinspecting1/loadData/'+pageNum,
+        data : {id_dept : 'INS1', data_filter : arr_filter},
         success: function(data){
           //$('#pagination').html(data.pagination);
           $('#total_record').html(data.total_record);
 
           var tbody = $("<tbody id='0'/>");
-          var no    = 1;
+          var no    = 0;
           var empty = true;
           $.each(data.record, function(key, value) {
             empty = false;
+            if(value.kode == ''){
+              num = '';
+            }else{
+              no=no+1;
+              num = no;
+            }
             var tr = $("<tr>").append(
-                      $("<td>").text(no++),
-                      $("<td>").text(value.kode),
-                      $("<td>").text(value.tgl_mo),
-                      $("<td>").text(value.mc),
-                      $("<td>").text(value.product),
-                      $("<td>").text(value.sales_contract),
-                      $("<td>").text(value.origin),
-                      $("<td align='right'>").text(value.target),
-                      $("<td align='right'>").text(value.qty1),
-                      $("<td align='right'>").text(value.qty2),
-                      $("<td align='right'>").text(value.sisa),
-                      $("<td>").text(value.status),
+                        $("<td>").text(num),
+                        $("<td>").text(value.kode),
+                        $("<td>").text(value.tgl_mo),
+                        $("<td>").text(value.mc),
+                        $("<td>").text(value.sc),
+                        $("<td>").text(value.pd),
+                        $("<td>").text(value.marketing),
+                        $("<td>").text(value.corak),
+                        $("<td>").text(value.lbr_greige),
+                        $("<td>").text(value.lbr_jadi),
+                        $("<td>").text(value.start_produksi),
+                        $("<td>").text(value.finish_produksi),
+                        $("<td align='right'>").text(value.meter),
+                        $("<td align='right'>").text(value.gulung),
+                        $("<td align='right'>").text(value.mtr_gl),
+                        $("<td align='right'>").text(value.pcs),
+                        $("<td>").text(value.rm),
+                        $("<td align='right'>").text(value.target_qty),
+                        $("<td align='right'>").text(value.qty1),
+                        $("<td align='right'>").text(value.qty2),
+                        $("<td align='right'>").text(value.h_gulung),
+                        $("<td align='right'>").text(value.sisa),
+                        $("<td>").text(value.status),
+             
               );
               tbody.append(tr);
+
           });
 
           if(empty == true){
-              var tr = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
+              var tr = $("<tr>").append($("<td colspan='30' align='center'>").text('Tidak ada Data'));
               tbody.append(tr);
           }
           dataRecord.push(data.record);
-          //last_no_new = parseInt(last_no) + no;
-          //last_no     = [];
-          //last_no.push(last_no_new);
           //alert(last_no_new);
          $("#example1").append(tbody);
          $("#query").val(data.query);
          $("#example1_processing").css('display','none');
-
         },error: function (jqXHR, textStatus, errorThrown){
           alert(jqXHR.responseText);
+          //alert('error load items');
         }
       });
     }
 
 
+
     //klik button apply 
     $(document).on("click","#btn-filter",function(e) {
-        
+  
+       $("#example1_processing").css('display','');
+      
         var filter = false;
         var arr    = [];
-        var id_dept ='TWS';
+        var id_dept ='INS1';
       
         $(".element").each(function(index, value) {
           if ($(value).val()!=="") {
@@ -338,42 +353,58 @@
         }); 
 
         if(filter == true){
-          $("#example1_processing").css('display',''); // show loading
-
+          
           $("#example1 tbody").remove();
           $('#btn-filter').button('loading');
           $.ajax({
               type: "POST",
               dataType: "JSON",
-              url : '<?php echo site_url('report/produksitwisting/loadData/0') ?>',
+              url : '<?php echo site_url('report/produksiinspecting1/loadData') ?>',
               data : {data_filter_table:arr, data_filter:arr_filter, id_dept:id_dept},
               success : function(data){
                     $('#total_record').html(data.total_record);
 
                       var tbody = $("<tbody />");
-                      var no    = 1;
+                      var no    = 0;
                       var empty = true;
                       $.each(data.record, function(key, value) {
                         empty =false;
+                        if(value.kode == ''){
+                          num = '';
+                        }else{
+                          no=no+1;
+                          num = no;
+                        }
                         var tr = $("<tr>").append(
-                                $("<td>").text(no++),
-                                $("<td>").text(value.kode),
-                                $("<td>").text(value.tgl_mo),
-                                $("<td>").text(value.mc),
-                                $("<td>").text(value.product),
-                                $("<td>").text(value.sales_contract),
-                                $("<td>").text(value.origin),
-                                $("<td align='right'>").text(value.target),
-                                $("<td align='right'>").text(value.qty1),
-                                $("<td align='right'>").text(value.qty2),
-                                $("<td align='right'>").text(value.sisa),
-                                $("<td>").text(value.status), 
-                        );
+                                  $("<td>").text(num),
+                                  $("<td>").text(value.kode),
+                                  $("<td>").text(value.tgl_mo),
+                                  $("<td>").text(value.mc),
+                                  $("<td>").text(value.sc),
+                                  $("<td>").text(value.pd),
+                                  $("<td>").text(value.marketing),
+                                  $("<td>").text(value.corak),
+                                  $("<td>").text(value.lbr_greige),
+                                  $("<td>").text(value.lbr_jadi),
+                                  $("<td>").text(value.start_produksi),
+                                  $("<td>").text(value.finish_produksi),
+                                  $("<td align='right'>").text(value.meter),
+                                  $("<td align='right'>").text(value.gulung),
+                                  $("<td align='right'>").text(value.mtr_gl),
+                                  $("<td align='right'>").text(value.pcs),
+                                  $("<td>").text(value.rm),
+                                  $("<td align='right'>").text(value.target_qty),
+                                  $("<td align='right'>").text(value.qty1),
+                                  $("<td align='right'>").text(value.qty2),
+                                  $("<td align='right'>").text(value.h_gulung),
+                                  $("<td align='right'>").text(value.sisa),
+                                  $("<td>").text(value.status),
+                                    );
                        tbody.append(tr);
                       });
 
                     if(empty == true){
-                        var tr = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
+                        var tr = $("<tr>").append($("<td colspan='19' align='center'>").text('Tidak ada Data'));
                         tbody.append(tr);
                     }
                     $("#example1").append(tbody);
@@ -381,7 +412,6 @@
                     $('#btn-filter').button('reset');
                     $("#query").val(data.query);
                     $("#example1_processing").css('display','none');
-
                     $.each(data.dataArr, function(key, val) {
                       
                       arr_filter.push({caption:val.caption, nama_field : val.nama_field, operator:val.operator, isi:val.isi, condition:val.condition, type:'table'});
@@ -390,10 +420,11 @@
 
               },error: function (jqXHR, textStatus, errorThrown){
                 alert(jqXHR.responseText);
+                alert('error filter advanced');
                 $('#btn-filter').button('reset');
               }
           });
-
+       
         }else{
           alert_modal_warning('Maaf, Advanced Filter Kosong !');
         }
@@ -482,7 +513,7 @@
     $.ajax({
         type : 'POST',
         dataType: 'json',
-        url : '<?php echo site_url('report/produksitwisting/conditionFilter') ?>',
+        url : '<?php echo site_url('report/produksiwarpingdasar/conditionFilter') ?>',
         data : {"element" : element, "id_dept" : id_dept},
         success: function(response){
           //alert('tes');
@@ -543,8 +574,6 @@
       var value = "<select class='form-control input-sm value' name='cmbValue' id='value'>";
           value += "<option>draft</option>";
           value += "<option>ready</option>";
-          value += "<option>done</option>";
-          value += "<option>cancel</option>";
           value += "</select>";
     }
 

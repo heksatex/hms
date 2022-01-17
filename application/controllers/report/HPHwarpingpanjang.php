@@ -171,7 +171,7 @@ class HPHwarpingpanjang extends MY_Controller
 									  'kode_produk'=> $val->kode_produk,
 									  'nama_produk'=> $val->nama_produk,
 									  'lot'        => $val->lot,
-									  'qty1'       => $val->qty,
+									  'qty1'       => number_format($val->qty,2),
 									  'uom1'	   => $val->uom,
 									  'qty2'	   => $val->qty2,
 									  'uom2'       => $val->uom2,

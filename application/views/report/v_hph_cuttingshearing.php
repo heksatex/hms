@@ -44,11 +44,11 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>HPH Warping Dasar</b></h3>
+          <h3 class="box-title"><b>HPH Cutting Shearing</b></h3>
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/HPHwarpingdasar/export_excel_hph">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/HPHcuttingshearing/export_excel_hph">
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12"> 
@@ -99,7 +99,7 @@
                           <div id='total_record'>Total Data : 0</div>
                       </label>
                     </div>
-                    <div class="col-md-6 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
                         <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
                           <label style="cursor:pointer;">
                             <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
@@ -109,6 +109,7 @@
                     </div>
                   </div>
                 </div>
+         
               </div>
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
@@ -140,10 +141,10 @@
                         <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
-                              <label>Nama Produk </label>
+                              <label>Corak </label>
                             </div>
                             <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" >
+                                <input type="text" class="form-control input-sm" name="corak" id="corak" >
                             </div>
                           </div>
                           <div class="form-group">
@@ -151,14 +152,15 @@
                               <label>No Mesin </label>
                             </div>
                             <div class="col-md-7">
-                              <select type="text" class="form-control input-sm" name="mc" id="mc"  style="width:100% !important"> 
+                                <!--input type="text" class="form-control input-sm" name="mc" id="mc" -->
+                                <select type="text" class="form-control input-sm" name="mc" id="mc"  style="width:100% !important"> 
                                 <option value="">-- Pilih No Mesin --</option>
                                 <?php 
                                   foreach ($mesin as $val) {
                                       echo "<option value='".$val->mc_id."'>".$val->nama_mesin."</option>";
                                   }
                                 ?>
-                              </select>
+                                </select>
                             </div>
                           </div>
                         </div>
@@ -202,24 +204,28 @@
                             <tr>
                               <th  class="style no" >No. </th>
                               <th  class='style'>MO</th>
-                              <th  class='style'>No Mesin</th>
-                              <th  class='style'>Origin</th>
+                              <th  class='style' style="min-width: 80px">No Mesin</th>
+                              <th  class='style'>SC</th>
                               <th  class='style' style="min-width: 80px">Tgl HPH</th>
                               <th  class='style'>Kode Produk</th>
-                              <th  class='style' style="min-width: 150px">Nama Produk</th>
+                              <th  class='style' style="min-width: 200px">Nama Produk</th>
                               <th  class='style' style="min-width: 150px">Lot</th>
                               <th  class='style'>Qty1</th>
                               <th  class='style'>Uom1</th>
                               <th  class='style'>Qty2</th>
                               <th  class='style'>Uom2</th>
-                              <th  class='style'>Reff Note</th>
-                              <th  class='style'>Lokasi</th>
-                              <th  class='style' style="min-width: 80px">Nama User</th>
+                              <th  class='style'>Grade</th>
+                              <th  class='style'>L.Greige</th>
+                              <th  class='style'>L.Jadi</th>
+                              <th  class='style'>Marketing</th>
+                              <th  class='style'>Reff Note </th>
+                              <th  class='style'>Lokasi </th>
+                              <th  class='style' style="min-width: 80px" >Nama User</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="12" align="center">Tidak ada Data</td>
+                              <td colspan="21" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -232,6 +238,7 @@
               </div>
             </div>
             </div>
+
 
         </div>
         <!-- /.box-body -->
@@ -248,7 +255,7 @@
 
 <script type="text/javascript">
 
-    //* Show collapse advanced search
+  //* Show collapse advanced search
   $('#advancedSearch').on('shown.bs.collapse', function () {
       $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
   });
@@ -295,8 +302,7 @@
 
     tgldari   = $('#tgldari').data("DateTimePicker").date();
     tglsampai = $('#tglsampai').data("DateTimePicker").date();
-
-    var check_shif  = false;
+    var check_shif    = false;
     var checkboxes_arr =  new Array(); 
 
     var checkboxes_arr = $('input[name="shift[]"]').map(function(e, i) {
@@ -320,17 +326,20 @@
     }else if(check_shif == true && selisih > 30 ){
       alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
       return false;
+      
     }
 
   });
 
+
   // btn generate
   $("#btn-generate").on('click', function(){
+      
 
       tgldari   = $('#tgldari').val();
       tglsampai = $('#tglsampai').val();
-      nama_produk     = $('#nama_produk').val();
       mo        = $('#mo').val();
+      corak     = $('#corak').val();
       mc        = $('#mc').val();
       lot       = $('#lot').val();
       user      = $('#user').val();
@@ -357,7 +366,6 @@
       selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
 
       if(tgldari == '' || tglsampai == ''){
-
         alert_modal_warning('Periode Tanggal Harus diisi !');
 
       }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
@@ -367,15 +375,15 @@
         alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
 
       }else{  
-          $("#example1_processing").css('display',''); // show loading
-
+        
+          $("#example1_processing").css('display','');// show loading processing in table
           $('#btn-generate').button('loading');
           $("#example1 tbody").remove();
           $.ajax({
                 type: "POST",
                 dataType : "JSON",
-                url : "<?php echo site_url('report/HPHwarpingdasar/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, nama_produk:nama_produk, mc:mc, lot:lot, user:user, jenis:jenis,  shift:checkboxes_arr},
+                url : "<?php echo site_url('report/HPHcuttingshearing/loadData')?>",
+                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, user:user, jenis:jenis, shift :checkboxes_arr },
                 success: function(data){
 
                   if(data.status == 'failed'){
@@ -395,15 +403,19 @@
                                  $("<td>").text(no++),
                                  $("<td>").text(value.kode),
                                  $("<td>").text(value.nama_mesin),
-                                 $("<td>").text(value.origin),
+                                 $("<td>").text(value.sc),
                                  $("<td>").text(value.tgl_hph),
                                  $("<td>").text(value.kode_produk),
                                  $("<td>").text(value.nama_produk),
                                  $("<td>").text(value.lot),
                                  $("<td align='right'>").text(value.qty1),
                                  $("<td>").text(value.uom1),
-                                 $("<td  align='right'>").text(value.qty2),
+                                 $("<td align='right'>").text(value.qty2),
                                  $("<td>").text(value.uom2),
+                                 $("<td>").text(value.grade),
+                                 $("<td>").text(value.lbr_greige),
+                                 $("<td>").text(value.lbr_jadi),
+                                 $("<td>").text(value.marketing),
                                  $("<td>").text(value.reff_note),
                                  $("<td>").text(value.lokasi),
                                  $("<td>").text(value.nama_user),
@@ -411,21 +423,23 @@
                         tbody.append(tr);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='21' align='center'>").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);
                 }
-                
+
                 $('#btn-generate').button('reset');
-                $("#example1_processing").css('display','none'); // hidden loading
+                $("#example1_processing").css('display','none');// hidden loading processing in table
 
                 },error : function(jqXHR, textStatus, errorThrown){
                   alert(jqXHR.responseText);
                   //alert('error data');
+                  $("#example1_processing").css('display','none');// hidden loading processing in table
                   $('#btn-generate').button('reset');
                 }
           });
+          
       }
   });
 
