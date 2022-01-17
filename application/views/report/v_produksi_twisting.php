@@ -289,10 +289,10 @@
                       $("<td>").text(value.product),
                       $("<td>").text(value.sales_contract),
                       $("<td>").text(value.origin),
-                      $("<td>").text(value.target),
-                      $("<td>").text(value.qty1),
-                      $("<td>").text(value.qty2),
-                      $("<td>").text(value.sisa),
+                      $("<td align='right'>").text(value.target),
+                      $("<td align='right'>").text(value.qty1),
+                      $("<td align='right'>").text(value.qty2),
+                      $("<td align='right'>").text(value.sisa),
                       $("<td>").text(value.status),
               );
               tbody.append(tr);
@@ -363,10 +363,10 @@
                                 $("<td>").text(value.product),
                                 $("<td>").text(value.sales_contract),
                                 $("<td>").text(value.origin),
-                                $("<td>").text(value.target),
-                                $("<td>").text(value.qty1),
-                                $("<td>").text(value.qty2),
-                                $("<td>").text(value.sisa),
+                                $("<td align='right'>").text(value.target),
+                                $("<td align='right'>").text(value.qty1),
+                                $("<td align='right'>").text(value.qty2),
+                                $("<td align='right'>").text(value.sisa),
                                 $("<td>").text(value.status), 
                         );
                        tbody.append(tr);
