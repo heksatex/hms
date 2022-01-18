@@ -11,6 +11,12 @@
 		$counter_waste =0;
 	}
 
+	if(empty($konsumsi)){
+		$item_rm = false;
+	}else{
+		$item_rm = true;
+	}
+
 ?>
 <form class="form-horizontal" id="form_produksi" name="form_produksi">
 	<div class="form-group">
@@ -216,7 +222,8 @@
 
 	//load modal panggil funtion total
 	total();
-	
+	// panggil function cek_rm untuk disable enable button salin bahan baku
+	cek_rm();
 
 	//untuk mentotalkan qty inputan
 	function total(){	
@@ -266,6 +273,20 @@
 
 		if(items == false){
 			$("#btn-copy").prop('disabled',false);
+			cek_rm();
+		}
+
+	}
+
+	// cek rm 
+	function cek_rm(){
+		var items = false;
+		$('.qty_konsum').each(function(index,item){
+			items = true;
+		});
+
+		if(items == false){
+			$("#btn-copy").prop('disabled',true);
 		}
 
 	}
