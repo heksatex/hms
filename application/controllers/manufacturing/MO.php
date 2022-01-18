@@ -184,6 +184,7 @@ class MO extends MY_Controller
             $row[] = $field->qty;
             $row[] = $field->uom;
             $row[] = $field->reff_note;
+            $row[] = $field->responsible;
             $row[] = $field->nama_status;
  
             $data[] = $row;
