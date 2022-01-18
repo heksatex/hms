@@ -211,26 +211,6 @@ class HPHcuttingshearing extends MY_Controller
 						}
 	                }
 
-	                if($a == 13){ // stitch
-	                    $ex2 = explode('=', $exps2);
-	                    $b   = 1;
-						foreach ($ex2 as $exs2) {
-							if($b == 2){
-								$stitch  = trim($exs2);
-							}
-							$b++;
-						}
-	                }
-	                if($a == 15){ // rpm
-	                    $ex2 = explode('=', $exps2);
-						$b   = 1;
-						foreach ($ex2 as $exs2) {
-							if($b == 2){
-								$rpm  = trim($exs2);
-							}
-							$b++;
-						}
-	                }
 	                $a++;
 				}
 

@@ -194,7 +194,7 @@ class HPHjacquard extends MY_Controller
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$lbr_greige = trim($ex2[$b]);
+	                    		$lbr_greige = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
@@ -204,7 +204,7 @@ class HPHjacquard extends MY_Controller
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$lbr_jadi = trim($ex2[$b]);
+	                    		$lbr_jadi = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
@@ -215,7 +215,7 @@ class HPHjacquard extends MY_Controller
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$stitch = trim($ex2[$b]);
+	                    		$stitch = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
@@ -225,7 +225,7 @@ class HPHjacquard extends MY_Controller
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$rpm = trim($ex2[$b]);
+	                    		$rpm = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
@@ -554,13 +554,13 @@ class HPHjacquard extends MY_Controller
 			$exp2  = explode('|', $val->reff_note);
 			$a     = 0;
 			foreach ($exp2 as $exps2) {
-				# code...
+					# code...
 					if($a == 9 ){// l.greige
 	                    $ex2 = explode('=', $exps2);
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$lbr_greige = trim($ex2[$b]);
+	                    		$lbr_greige = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
@@ -570,7 +570,7 @@ class HPHjacquard extends MY_Controller
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$lbr_jadi = trim($ex2[$b]);
+	                    		$lbr_jadi = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
@@ -581,7 +581,7 @@ class HPHjacquard extends MY_Controller
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$stitch = trim($ex2[$b]);
+	                    		$stitch = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
@@ -591,7 +591,47 @@ class HPHjacquard extends MY_Controller
 	                    $b   = 0;
 	                    foreach($ex2 as $exs2){
 	                    	if($b == 1){
-	                    		$rpm = trim($ex2[$b]);
+	                    		$rpm = trim($exs2);
+	                    	}
+	                    	$b++;
+	                    }
+	                }	if($a == 9 ){// l.greige
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_greige = trim($exs2);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
+	                if($a == 10){ // l.jadi
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$lbr_jadi = trim($exs2);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
+
+	                if($a == 13){ // stitch
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$stitch = trim($exs2);
+	                    	}
+	                    	$b++;
+	                    }
+	                }
+	                if($a == 15){ // rpm
+	                    $ex2 = explode('=', $exps2);
+	                    $b   = 0;
+	                    foreach($ex2 as $exs2){
+	                    	if($b == 1){
+	                    		$rpm = trim($exs2);
 	                    	}
 	                    	$b++;
 	                    }
