@@ -2644,6 +2644,9 @@ class MO extends MY_Controller
         }else if($dept_id == 'TRI'){
             $this->barcode_tri($data_arr,$count);
 
+        }else if($dept_id == 'INS1'){
+            $this->barcode_ins1($data_arr);
+
         }else{// belum ada barcode
             $this->barcode_empty();
         }
@@ -2984,6 +2987,78 @@ class MO extends MY_Controller
 
 
     function barcode_tri($data_arr,$count)
+    {
+       
+        $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
+
+        $pdf->AddPage();
+
+        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
+        $row   = explode("|^,", $data_arr2);
+        $loop  = 1;
+
+
+        foreach ($row as $val) {
+
+            if($loop == 2){
+                $pdf->AddPage();
+                $loop = 1;
+            }
+            
+            $items    = explode("^^",$val);
+            $no_itm   = 0;
+            $barcode  = '';
+            $nama_grade = '';
+            foreach($items as $itm){
+                if($no_itm == 0 ){
+                    $barcode  = $itm;
+                }
+                if($no_itm == 1){
+                    $nama_grade = $itm;
+                }
+                $no_itm++;
+            }
+
+
+            $pdf->SetFont('Arial','B',25,'C');
+            $pdf->setXY(10,8);
+            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 1
+            //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
+
+            $pdf->SetFont('Arial','B',40);
+            $pdf->setXY(120,5);
+            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+            //$pdf->Cell(0,3,$nama_grade,0,1);//grade
+            
+            $pdf->Code128(30,18,$barcode,110,23,'C');//barcode 1       
+            
+            
+            $pdf->Line(20, 47, 170, 47); // garis tengah
+            //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
+
+            $pdf->SetFont('Arial','B',25,'C');
+            $pdf->setXY(10,54);
+            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
+            //$pdf->Cell(100,30,$barcode,0,0,'R');
+
+            $pdf->SetFont('Arial','B',40);
+            $pdf->setXY(120,51);
+            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+            //$pdf->Cell(0,27,$nama_grade,0,1);//grade
+
+            $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
+
+            $pdf->Line(170,3,170,100);//vertical
+
+            $loop++;
+        }
+
+
+        $pdf->Output();
+    }
+
+
+    function barcode_ins1($data_arr)
     {
        
         $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
