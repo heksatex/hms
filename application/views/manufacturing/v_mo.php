@@ -54,6 +54,7 @@
                   <th>qty</th>
                   <th>uom</th>
                   <th>reff note PPIC</th>
+                  <th>responsible</th>
                   <th>status</th>
                 </tr>
               </thead>
