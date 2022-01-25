@@ -480,9 +480,9 @@ class _module extends CI_Model
 		return $this->db->query("SELECT * FROM stock_move WHERE source_move LIKE '%$move_id%' AND origin = '$origin' AND status NOT IN ('$status1','$status2')");
 	}
 
-	public function get_stock_move_tujuan_mo($move_id,$method,$origin,$status1, $status2)
+	public function get_stock_move_tujuan_mo($move_id,$origin,$status1, $status2)
 	{
-		return $this->db->query("SELECT * FROM stock_move WHERE source_move LIKE '%$move_id%' AND method = '$method' AND origin = '$origin' AND status NOT IN ('$status1','$status2')");
+		return $this->db->query("SELECT * FROM stock_move WHERE source_move LIKE '%$move_id%' AND origin = '$origin' AND status NOT IN ('$status1','$status2')");
 	}
 
 	public function get_stock_move_by_move_id($move_id)
@@ -518,6 +518,11 @@ class _module extends CI_Model
 	public function get_kode_pengiriman_by_move_id($move_id)
 	{
 		return $this->db->query("SELECT kode FROM pengiriman_barang WHERE move_id = '$move_id'");
+	}
+
+	public function get_kode_penerimaan_by_move_id($move_id)
+	{
+		return $this->db->query("SELECT kode FROM penerimaan_barang WHERE move_id = '$move_id'");
 	}
 
 	public function get_list_grade()
