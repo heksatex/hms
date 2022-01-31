@@ -7,9 +7,14 @@
 
   <style>
     button[id="btn-simpan"],
+    button[id="btn-print"],
     button[id="btn-stok"]{/*untuk hidden button simpan di top */
       display: none;
     }
+    .validScan{
+      background-color: #dff0d8;
+    }
+   
   </style>
 
 <body class="hold-transition skin-black fixed sidebar-mini" >
@@ -21,6 +26,7 @@
    <?php $this->load->view("admin/_partials/main-menu.php") ?>
    <?php 
      $data['deptid']     = $list->dept_id;
+     $data['hms_top']    = 'empty';// menghilangkan top bar tulisan HMS saat mode HP
      $this->load->view("admin/_partials/topbar.php",$data)
     ?>
   </header>
@@ -58,7 +64,7 @@
           </div>
           <div class="col-md-4 col-sm-4 col-xs-3">
             <div class="image pull-right text-right">
-              <a href="<?php echo base_url('warehouse/penerimaanbarang/edit/'.encrypt_url($list->kode));?>"> 
+              <a href="<?php echo base_url('warehouse/penerimaanbarang/edit/'.encrypt_url($list->kode));?>" data-toggle="tooltip" title="List Mode">  
                 <img src="<?php echo base_url('dist/img/barcode-form-icon.png'); ?>" style="width: 40%; height: auto; text-align: right;">
               </a>
             </div>
@@ -69,26 +75,26 @@
               <div class="col-md-6">
                 <div class="form-group"> 
                   <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-2"><label>Barcode</label></div>
-                    <div class="col-xs-8">
+                    <!--div class="col-xs-2"><label>Barcode</label></div-->
+                    <div class="col-xs-9">
                     <input type="hidden" class="form-control input-sm" name="kode" id="kode" value="<?php echo $list->kode;?>"/>
                     <input type="hidden" class="form-control input-sm" id="valid" value="0" />
-                      <input type="text" class="form-control input-sm" name="barcode" id="barcode" autofocus onkeypress="enter(event);" autocomplete="off" />
+                      <input type="text" class="form-control input-lg" name="barcode" id="barcode" autofocus onkeypress="enter(event);" autocomplete="off" placeholder="Scan Barcode / Lot" />
                     </div>
                     <div class=" col-xs-2">
-                      <button type="button" id="scan" onclick="cek_data();" class="btn btn-primary btn-sm" >scan</button>
+                      <button type="button" id="scan" onclick="cek_data();" class="btn btn-primary btn-lg" >Scan</button>
                     </div>                                    
                   </div>
                 </div>
               </div>
               <div class="col-md-6">
                <center>
-                <label class="label label-warning" style="font-size: 20px;">Valid Scan : <label id="dari"></label> / <label id="sampai"></label> </label> 
+                <label class="label label-success" style="font-size: 20px;">Valid Scan : <label id="dari">-</label> / <label id="sampai">-</label> </label> 
                 </center>
                <br>
               </div>
               <div id="stat">
-                <input type="hidden" class="form-control input-sm" name="status" id="status" value="<?php echo $move_id['status'];?>" />
+                <input type="hidden" class="form-control input-sm" name="status" id="status" value="<?php echo $move_id['status'];?>" readonly/>
               </div>
 
             <div class="row">
@@ -96,7 +102,6 @@
                 <!-- tabel -->
                 <div class="col-md-12 table-responsive">
                   <table class="table table-condesed table-hover rlstable" width="100%" id ="tbl_detail">
-                   
                     <tr>
                       <th class="style no">No.</th>
                       <th class="style">Product</th>
@@ -148,33 +153,35 @@
      <?php $this->load->view("admin/_partials/footer.php") ?>
     </div>
   </footer>
-
-    <!-- Load Partial Modal -->
-   <?php $this->load->view("admin/_partials/modal.php") ?>
-
 </div>
 <!--/. Site wrapper -->
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
 
-
   function alert_scan(message){
-    bootbox.dialog({
-      message: message,
-      title: "<font color='red'><i class='glyphicon glyphicon-alert'></i></font> Warning !",
-      buttons: {
-        primary: {
-              label    : "ok",
-              className: "btn-primary  btn-sm",
-              callback : function() {
-                $('.bootbox').modal('hide');
-                $('#barcode').focus();
-              }
-         }
-      }
-    });
+    var dialog = bootbox.dialog({
+      	message: message,
+    		closeButton: false,
+        title: "<font color='red'><i class='glyphicon glyphicon-alert'></i></font> Warning !",
+        buttons: {
+            confirm: {
+                label: 'ok',
+                className: 'btn-primary btn-sm',
+                callback : function() {
+                  $('.bootbox').modal('hide');
+                  $('#barcode').focus();
+                }
+            },
+        },
+  	});
+    dialog.init(function(){
+      dialog.find([type='button']).focus();
+  	});
   }
+  
+  //relaoad page 
+  $('[name="valid"]').val('0');
 
   //untuk counter scan
   var lot = document.getElementsByName('lot');
@@ -198,7 +205,7 @@
     var valid     = document.getElementsByName('valid');
     var tot_valid = 0;
     var invalid   = 1;
-    var barcode = txtbarcode.trim();
+    var barcode   = txtbarcode.trim().toUpperCase();
 
     var lenRow =lot.length;
     if(txtbarcode == ""){//alert jika barcode scan kosong 
@@ -208,12 +215,20 @@
     }else{
       for(var i=0; i<lenRow; i++){
        // alert('masuk ke'+i);
-        var data = lot[i].value;
+        var data = lot[i].value.toUpperCase();
         if(barcode==data){
           //alert('sama');
+          var textValid =  $('[name="valid"]').eq(i).val();
+          if(textValid == 1){
+            setTimeout(function() { alert_notify("fa fa-warning ",barcode+" Sudah di Scan !","danger",function(){}); }, 1000);
+          }else{
+            setTimeout(function() { alert_notify("fa fa-check-circle ",barcode+" Valid Scan !","success",function(){}); }, 1000);
+          }
           $('#barcode').val('');
           $('[name="valid"]').eq(i).val("1");
-          document.getElementById(i+1).style.backgroundColor="#dff0d8";
+          //document.getElementById(i+1).style.backgroundColor="#dff0d8";
+          var id = i+1;
+          $('#tbl_detail tbody #'+id).addClass('validScan');
           $('#barcode').focus();
           invalid = 0;
         }else{
@@ -223,7 +238,6 @@
 
           tot_valid = tot_valid + parseInt(valid[i].value);
       }
-
      $('#dari').html(tot_valid);
      $('#valid').val(tot_valid);
 
@@ -252,19 +266,23 @@
     var origin  = '<?php echo $move_id['origin'];?>';  
     var baseUrl = '<?php echo base_url(); ?>';
     var method  = '<?php echo $move_id['method']?>';
-    refresh_div_in();
+    //refresh_div_in();
 
     //alert(scan)
-    if(scan<total && status =='ready' ){
+    if(status == 'cancel'){
+        var message = 'Maaf, Data Tidak bisa Dikirim, Data Sudah dibatalkan !';
+        alert_modal_warning(message);
+
+    }else if(status == 'done'){
+        var message = 'Maaf, Data Sudah Terkirim !';
+        alert_modal_warning(message);
+
+    }else if(scan<total && status =='ready' ){
       var message = "Maaf, Barcode Belum valid Semua !";
       alert_scan(message);
    
     }else if(status =='draft' ){
       var message = "Maaf, Product Belum ready !";
-      alert_modal_warning(message);
-   
-    }else if(status == 'done'){
-      var message = 'Maaf, Data Sudah Terkirim !';
       alert_modal_warning(message);
 
     }else{
@@ -285,16 +303,19 @@
                         data : {kode : $('#kode').val(), move_id : move_id, origin : origin, deptid : deptid, method : method },
                         error: function (xhr, ajaxOptions, thrownError) { 
                           alert(xhr.responseText);
-                          refresh_div_in();
                           $('#btn-kirim').button('reset');
+                          unblockUI( function(){});
+                          refresh_div_in();
                         }
                   })
                   .done(function(response){
                     if(response.sesi == 'habis'){//jika session habis
                       alert_modal_warning(response.message);
                       window.location = baseUrl;//replace ke halaman login
+                      //window.location.replace('../index');
                     }else if(response.status == 'draft' || response.status == 'ada' ||  response.status == 'not_valid'){
                     //jika ada item masih draft/status sudah terkirim/lokasi lot tidak valid
+                      unblockUI( function(){});
                       alert_modal_warning(response.message);
                       refresh_div_in();
                       $('#btn-kirim').button('reset');
@@ -323,8 +344,6 @@
       });
     }
   });
-
-
 
 </script>
 

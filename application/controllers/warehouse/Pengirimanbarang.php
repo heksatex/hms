@@ -986,7 +986,9 @@ class Pengirimanbarang extends MY_Controller
                     //update stock_move_produk
                     $this->_module->update_status_stock_move_produk_full($move_id,$status_done);
                     //update status tbl stock move 
-                    $this->_module->update_status_stock_move($move_id,$status_done);   
+                    $this->_module->update_status_stock_move($move_id,$status_done);
+                    // update tangal kirim = now
+                    $this->m_pengirimanBarang->update_tgl_kirim_pengiriman_barang($kode,$tgl);
 
                     //get move id tujuan
                     $sm_tj = $this->_module->get_stock_move_tujuan($move_id,$origin,'done','cancel')->row_array();
@@ -1150,7 +1152,7 @@ class Pengirimanbarang extends MY_Controller
                      $this->_module->update_perbatch($sql_update_stock_quant_move_id);
 
                      $where7 = rtrim($where7, ',');
-                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET reserve_origin =(case ".$case7." end) WHERE  quant_id in (".$where7.") ";
+                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET reserve_origin =(case ".$case7." end), lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
                      $this->_module->update_perbatch($sql_update_stock_quant_reserve_origin);
 
                     if(!empty($case3) AND !empty($where3)){

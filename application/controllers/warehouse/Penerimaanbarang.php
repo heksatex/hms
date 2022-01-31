@@ -302,6 +302,8 @@ class Penerimaanbarang extends MY_Controller
                      $this->_module->update_status_stock_move($move_id,$status_done);
                     //get move id tujuan
                      $sm_tj = $this->_module->get_stock_move_tujuan($move_id,$origin,'done','cancel')->row_array();
+                    // update tangal kirim = now
+                    $this->m_penerimaanBarang->update_tgl_kirim_penerimaan_barang($kode,$tgl);
 
                     $move_id_in = $move_id;//move id asal yg ngebentuk back order
                     

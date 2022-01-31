@@ -11,6 +11,21 @@
     $deptid = $deptid;
   }
 
+  if(!empty($hms_top)){
+  ?>
+  <style type="text/css">
+  @media (max-width: 767px) {
+    .logo {
+      display: none !important;
+    }
+
+    .content-wrapper .content-header{
+      padding: 0px !important;
+    }
+  }
+</style>
+  <?php
+  }
 ?>
 
 <!-- Top Bar -->

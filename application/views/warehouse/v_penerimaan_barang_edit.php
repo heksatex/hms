@@ -47,9 +47,9 @@
         <div class="box-header with-border">
           <h3 class="box-title"><b><?php echo $list->kode;?></b></h3>
           <div class="image pull-right text-right">
-            <!--a href="<?php echo base_url('warehouse/penerimaanbarang/edit_barcode/'.encrypt_url($list->kode));?>"> 
+            <a href="<?php echo base_url('warehouse/penerimaanbarang/edit_barcode/'.encrypt_url($list->kode));?>" data-toggle="tooltip" title="Scan Mode"> 
               <img src="<?php echo base_url('dist/img/barcode-scan-icon.jpg'); ?>" style="width: 50%; height: auto; text-align: right;">
-            </a-->
+            </a>
           </div>
         </div>
         <div class="box-body">
@@ -326,7 +326,6 @@
      <?php $this->load->view("admin/_partials/footer.php") ?>
     </div>
   </footer>
-
     <!-- Load Partial Modal -->
    <?php $this->load->view("admin/_partials/modal.php") ?>
 
