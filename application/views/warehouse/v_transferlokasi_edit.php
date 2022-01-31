@@ -101,15 +101,15 @@
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Lokasi Tujuan</label></div>
-                  <div class="col-xs-8">
-                    <input type="text" class="form-control input-sm" name="lokasi_tujuan" id="lokasi_tujuan"  value="<?php echo $tl->lokasi_tujuan; ?>" placeholder="Scan Lokasi Tujuan">
+                  <div class="col-xs-12 col-md-4 col-sm-4"><label>Lokasi Tujuan</label></div>
+                  <div class="col-xs-12 col-md-8 col-sm-8">
+                    <input type="text" class="form-control input-lg" name="lokasi_tujuan" id="lokasi_tujuan"  value="<?php echo $tl->lokasi_tujuan; ?>" placeholder="Scan Lokasi Tujuan">
                   </div>                                    
                 </div>
                  <div class="col-md-12 col-xs-12">
                   <div class="col-xs-12 col-md-4 col-sm-4"><label>Scan Barcode</label></div>
                   <div class="col-xs-12 col-md-8 col-sm-8">
-                    <input type="text" class="form-control input-sm" name="barcode_id" id="barcode_id"  placeholder="Scan Barcode ">
+                    <input type="text" class="form-control input-lg" name="barcode_id" id="barcode_id"  placeholder="Scan Barcode ">
                   </div>                                    
                 </div>
                 <br>

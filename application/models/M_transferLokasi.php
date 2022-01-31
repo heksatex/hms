@@ -108,7 +108,7 @@ class M_transferLokasi extends CI_Model
 
 	public function valid_lokasi_tujuan_by_dept($dept_id,$lokasi_tujuan)
 	{
-		$query =  $this->db->query("SELECT * FROM mst_lokasi Where dept_id = '$dept_id' AND kode_lokasi = '$lokasi_tujuan'");
+		$query =  $this->db->query("SELECT * FROM mst_lokasi Where dept_id = '$dept_id' AND kode_lokasi = '$lokasi_tujuan' AND kode_lokasi NOT IN (SELECT kode_lokasi FROM lokasi WHERE nama_lokasi = 'default_greige_out' OR nama_lokasi = 'default_adjustment') ");
 		return $query->data_seek(0);
 	}
 
@@ -129,6 +129,8 @@ class M_transferLokasi extends CI_Model
 
 	public function is_valid_lokasi_barcode_by_dept($lokasi_stock,$barcode_id)
 	{
+		$lokasi_in_valid = array('ADJ','GOUT');
+		$this->db->where_not_in('lokasi_fisik',$lokasi_in_valid);
 		$this->db->where('lokasi',$lokasi_stock);
 		$this->db->where('lot',$barcode_id);
 		$query = $this->db->get('stock_quant');
