@@ -490,6 +490,11 @@ class MO extends MY_Controller
             $where7= "";
             $case8 = "";
             $where8= "";
+            $case9 = "";
+            $where9= "";
+            $case10= "";
+            $where10="";
+            $where10x="";
             $lot_double = "";
             $lot_double_Waste = "";
             $case_qty2= "";
@@ -501,7 +506,7 @@ class MO extends MY_Controller
             $jml_lot_waste = 0;
 
             //lock table
-            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE');
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE');
 
             //get last quant id
             $start = $this->_module->get_last_quant_id();
@@ -522,8 +527,8 @@ class MO extends MY_Controller
 
                 //get move id tujuan
                 //$method= $deptid.'|OUT';
-                $method= $deptid.'|OUT';
-                $sm_tj = $this->_module->get_stock_move_tujuan_mo($move_id_fg,$method,$origin_mo,'done','cancel')->row_array();
+                //$method= $deptid.'|OUT';
+                $sm_tj = $this->_module->get_stock_move_tujuan_mo($move_id_fg,$origin_mo,'done','cancel')->row_array();
            
                 //get row order stock_move_items tujuan
                 $row_order_smi_tujuan  = $this->_module->get_row_order_stock_move_items_by_kode($sm_tj['move_id']);
@@ -598,14 +603,55 @@ class MO extends MY_Controller
 
                     if($sm_tj['move_id'] != ''){ // jika stock_move tujuan nya tidak kosong maka insert ke smi
 
-                        // stock_move_tujuan = pengiriman barang
-                        $sm_tj['move_id'];
-                        $kode_out = $this->_module->get_kode_pengiriman_by_move_id($sm_tj['move_id'])->row_array();
+                        // cek method apakakah OUT,IN,CON
+                        $mthd          = explode('|',$sm_tj['method']);
+                        //$method_dept   = trim($mthd[0]);
+                        $method_action = trim($mthd[1]);//OUT,IN,CON
+                        if($method_action == 'OUT'){
+                            // stock_move_tujuan = pengiriman barang
+                            $sm_tj['move_id'];
+                            $kode_out = $this->_module->get_kode_pengiriman_by_move_id($sm_tj['move_id'])->row_array();
+                            
+                            // get origin_prod by kode
+                            $op = $this->m_mo->get_origin_prod_pengiriman_barang_by_kode($kode_out['kode'],addslashes($kode_produk))->row_array();
+                            $origin_prod = $op['origin_prod'];
 
-                        // get origin_prod by kode
-                        $op = $this->m_mo->get_origin_prod_pengiriman_barang_by_kode($kode_out['kode'],addslashes($kode_produk))->row_array();
-                        $origin_prod = $op['origin_prod'];
+                            //update status pengiriman barang
+                            //$get_kode_out = $this->_module->get_kode_pengiriman_by_move_id($sm_tj['move_id'])->row_array();
+                            if(!empty($kode_out['kode'])){
+                                //update pengiriman barang items = ready
+                                $case8  .= "when kode = '".$kode_out['kode']."' then '".$status_ready."'";
+                                $where8 .= "'".$kode_out['kode']."',"; 
+                            }
 
+                        }else if($method_action == 'IN'){
+                            // get kode penerimaan barang by move_id
+                            $kode_in = $this->_module->get_kode_penerimaan_by_move_id($sm_tj['move_id'])->row_array();
+                            
+                            // get origin_prod by kode
+                            $op = $this->m_mo->get_origin_prod_penerimaan_barang_by_kode($kode_in['kode'],addslashes($kode_produk))->row_array();
+                            $origin_prod = $op['origin_prod'];
+
+                            //update status penerimaan barang
+                            if(!empty($kode_in['kode'])){
+                                //update penerimaan barang items = ready
+                                $case9  .= "when kode = '".$kode_in['kode']."' then '".$status_ready."'";
+                                $where9 .= "'".$kode_in['kode']."',"; 
+                            }
+                        }else if($method_action == 'CON'){
+                            // get origin prod by kode 
+                            $op = $this->m_mo->get_origin_prod_mrp_production_by_kode_mrp($row['kode'],addslashes($kode_produk))->row_array();
+                            $origin_prod = $op['origin_prod'];
+
+                            // update status mrp_production 
+                            if(!empty($row['kode'])){
+                                // update mrp_production dan rm target
+                                $case10  .= "when kode = '".$row['kode']."' then '".$status_ready."'";
+                                $where10 .= "'".$row['kode']."',"; 
+                                $where10x = $kode_produk;
+                            }
+                        }
+                  
                         //simpan stock move item tujuan
                         $sql_stock_move_items_batch .= "('".$sm_tj['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty']."','".addslashes($row['uom'])."','".$row['qty2']."','".addslashes($row['uom2'])."','".$status_ready."','".$row_order_smi_tujuan."','".addslashes($origin_prod)."', '".$tgl."'), ";
 
@@ -830,6 +876,24 @@ class MO extends MY_Controller
                 $sql_update_pengiriman_barang_items  = "UPDATE pengiriman_barang_items SET status_barang =(case ".$case8." end) WHERE  kode in (".$where8.") ";
                 $this->_module->update_perbatch($sql_update_pengiriman_barang_items); 
             }
+            
+            if(!empty($where9) AND !empty($case9)){
+                //update penerimaan barang
+                $where9 = rtrim($where9, ',');
+                $sql_update_penerimaan_barang  = "UPDATE penerimaan_barang SET status =(case ".$case9." end) WHERE  kode in (".$where9.") ";
+                $this->_module->update_perbatch($sql_update_penerimaan_barang);
+
+                //update penerimaan barang  items               
+                $sql_update_penerimaan_barang_items  = "UPDATE penerimaan_barang_items SET status_barang =(case ".$case9." end) WHERE  kode in (".$where9.") ";
+                $this->_module->update_perbatch($sql_update_penerimaan_barang_items); 
+            }
+
+            if(!empty($where10) AND !empty($case10)){
+                // update mrp_production_rm_target
+                $where10 = rtrim($where10, ',');
+                $sql_update_mrp_rm_target  = "UPDATE mrp_production_rm_target SET status =(case ".$case10." end) WHERE  kode in (".$where10.") AND kode_produk = '".addslashes($where10x)."' ";
+                $this->_module->update_perbatch($sql_update_mrp_rm_target); 
+            }
 
             if(!empty($array_rm)){
                 foreach ($array_rm as $row) {
@@ -977,6 +1041,11 @@ class MO extends MY_Controller
             $where7= "";
             $case8 = "";
             $where8= "";
+            $case9 = "";
+            $where9= "";
+            $case10= "";
+            $where10="";
+            $where10x="";
             $lot_double = "";
             $case_qty2= "";
             $qty2_update = "";
@@ -986,7 +1055,7 @@ class MO extends MY_Controller
             $hasil_produksi = FALSE;
 
             //lock table
-            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE');
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE');
 
 
             //get last quant id
@@ -1003,8 +1072,8 @@ class MO extends MY_Controller
 
             //get move id tujuan
             //$method= $deptid.'|OUT';
-            $method= $deptid.'|OUT';
-            $sm_tj = $this->_module->get_stock_move_tujuan_mo($move_id_fg,$method,$origin_mo,'done','cancel')->row_array();
+            //$method= $deptid.'|OUT'; dihilangkan
+            $sm_tj = $this->_module->get_stock_move_tujuan_mo($move_id_fg,$origin_mo,'done','cancel')->row_array();
            
             //get row order stock_move_items tujuan
             $row_order_smi_tujuan  = $this->_module->get_row_order_stock_move_items_by_kode($sm_tj['move_id']);
@@ -1077,29 +1146,63 @@ class MO extends MY_Controller
 
                 if($sm_tj['move_id'] != ''){ // jika stock_move tujuan nya tidak kosong maka insert ke smi
 
-                    // stock_move_tujuan = pengiriman barang
-                    $sm_tj['move_id'];
-                    $kode_out = $this->_module->get_kode_pengiriman_by_move_id($sm_tj['move_id'])->row_array();
+                    // cek method apakakah OUT,IN,CON
+                    $mthd          = explode('|',$sm_tj['method']);
+                    //$method_dept   = trim($mthd[0]);
+                    $method_action = trim($mthd[1]);//OUT,IN,CON
+                    if($method_action == 'OUT'){
+                        // stock_move_tujuan = pengiriman barang
+                        $sm_tj['move_id'];
+                        $kode_out = $this->_module->get_kode_pengiriman_by_move_id($sm_tj['move_id'])->row_array();
+                        
+                        // get origin_prod by kode
+                        $op = $this->m_mo->get_origin_prod_pengiriman_barang_by_kode($kode_out['kode'],addslashes($kode_produk))->row_array();
+                        $origin_prod = $op['origin_prod'];
 
-                    // get origin_prod by kode
-                    $op = $this->m_mo->get_origin_prod_pengiriman_barang_by_kode($kode_out['kode'],addslashes($kode_produk))->row_array();
-                    $origin_prod = $op['origin_prod'];
+                        //update status pengiriman barang
+                        //$get_kode_out = $this->_module->get_kode_pengiriman_by_move_id($sm_tj['move_id'])->row_array();
+                        if(!empty($kode_out['kode'])){
+                            //update pengiriman barang items = ready
+                            $case8  .= "when kode = '".$kode_out['kode']."' then '".$status_ready."'";
+                            $where8 .= "'".$kode_out['kode']."',"; 
+                        }
+
+                    }else if($method_action == 'IN'){
+                        // get kode penerimaan barang by move_id
+                        $kode_in = $this->_module->get_kode_penerimaan_by_move_id($sm_tj['move_id'])->row_array();
+                        
+                         // get origin_prod by kode
+                         $op = $this->m_mo->get_origin_prod_penerimaan_barang_by_kode($kode_in['kode'],addslashes($kode_produk))->row_array();
+                         $origin_prod = $op['origin_prod'];
+
+                         //update status penerimaan barang
+                         if(!empty($kode_in['kode'])){
+                            //update penerimaan barang items = ready
+                            $case9  .= "when kode = '".$kode_in['kode']."' then '".$status_ready."'";
+                            $where9 .= "'".$kode_in['kode']."',"; 
+                        }
+                    }else if($method_action == 'CON'){
+                        // get origin prod by kode 
+                        $op = $this->m_mo->get_origin_prod_mrp_production_by_kode_mrp($kode,addslashes($kode_produk))->row_array();
+                        $origin_prod = $op['origin_prod'];
+
+                        // update status mrp_production 
+                        if(!empty($kode)){
+                            // update mrp_production dan rm target
+                            $case10  .= "when kode = '".$kode."' then '".$status_ready."'";
+                            $where10 .= "'".$kode."',"; 
+                            $where10x = $kode_produk;
+                        }
+                    }
 
                     //stock move items tujuan
                     $sql_stock_move_items_batch .= "('".$sm_tj['move_id']."', '".$start."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes(trim($lot))."','".$qty."','".addslashes($uom)."','".$qty2."','".addslashes($uom2)."','".$status_ready."','".$row_order_smi_tujuan."','".addslashes($origin_prod)."', '".$tgl."'), ";
 
                         
-                    //update status stock move,stock move dan stock move produk  pengiriman brg = ready
+                    //update status stock move,stock move dan stock move produk  pengiriman brg, penerimaanbarang, mrp_production_rm_target == ready
                     $case7  .= "when move_id = '".$sm_tj['move_id']."' then '".$status_ready."'";
                     $where7 .= "'".$sm_tj['move_id']."',";
 
-                    //update status pengiriman barang
-                    $get_kode_out = $this->_module->get_kode_pengiriman_by_move_id($sm_tj['move_id'])->row_array();
-                    if(!empty($get_kode_out['kode'])){
-                        //update pengiriman barang items = ready
-                        $case8  .= "when kode = '".$get_kode_out['kode']."' then '".$status_ready."'";
-                        $where8 .= "'".$get_kode_out['kode']."',"; 
-                    }
                 }
                 
                 //cek lot apa pernah diinput ?
@@ -1109,8 +1212,6 @@ class MO extends MY_Controller
                     $lot_double .= $lot.',';
                 }
                 $start++;              
-
-
 
             }//end if cek jika kode produk/nama produk tidak kosong
 
@@ -1271,6 +1372,24 @@ class MO extends MY_Controller
                 //update pengiriman barang  items               
                 $sql_update_pengiriman_barang_items  = "UPDATE pengiriman_barang_items SET status_barang =(case ".$case8." end) WHERE  kode in (".$where8.") ";
                 $this->_module->update_perbatch($sql_update_pengiriman_barang_items); 
+            }
+
+            if(!empty($where9) AND !empty($case9)){
+                //update penerimaan barang
+                $where9 = rtrim($where9, ',');
+                $sql_update_penerimaan_barang  = "UPDATE penerimaan_barang SET status =(case ".$case9." end) WHERE  kode in (".$where9.") ";
+                $this->_module->update_perbatch($sql_update_penerimaan_barang);
+
+                //update penerimaan barang  items               
+                $sql_update_penerimaan_barang_items  = "UPDATE penerimaan_barang_items SET status_barang =(case ".$case9." end) WHERE  kode in (".$where9.") ";
+                $this->_module->update_perbatch($sql_update_penerimaan_barang_items); 
+            }
+
+            if(!empty($where10) AND !empty($case10)){
+                // update mrp_production_rm_target
+                $where10 = rtrim($where10, ',');
+                $sql_update_mrp_rm_target  = "UPDATE mrp_production_rm_target SET status =(case ".$case10." end) WHERE  kode in (".$where10.") AND kode_produk = '".addslashes($where10x)."' ";
+                $this->_module->update_perbatch($sql_update_mrp_rm_target); 
             }
 
             if(!empty($array_rm)){

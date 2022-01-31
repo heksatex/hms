@@ -538,6 +538,7 @@ class Productionorder extends MY_Controller
     	                $mthd          = explode('|',$rp->method);
     	                $method_dept   = trim($mthd[0]);
     	                $method_action = trim($mthd[1]);
+                        $dept_id_dari  = $rp->dept_id_dari;
 
     	                $nama_dept        = $this->_module->get_nama_dept_by_kode($method_dept)->row_array();
     	                $product_dept     = ($nama_dept['nama']);
@@ -894,9 +895,15 @@ class Productionorder extends MY_Controller
     	                ----------------------------------*/
     	                $method_action = 'IN';
     	                $method        = $warehouse.'|'.$method_action;
-    	                $lokasi_dari   = 'Transit Location';
-    	                $lokasi_tujuan = $warehouse.'/Stock';
+    	                //$lokasi_dari   = 'Transit Location';
+    	                //$lokasi_tujuan = $warehouse.'/Stock';
     	                $method_dept   = $warehouse; 
+
+                        $output_location = $this->_module->get_output_location_by_kode($dept_id_dari)->row_array();
+                        $lokasi_dari   = $output_location['output_location'];// ex : Transit Location GRG
+                        $stock_location = $this->_module->get_nama_dept_by_kode($warehouse)->row_array(); // ex : warehouse/stock
+    	                $lokasi_tujuan = $stock_location['stock_location'];
+
 
     	                $origin = $sales_order.'|'.$kode.'|'.$row_order; 
 
