@@ -280,6 +280,11 @@ class M_penerimaanBarang extends CI_Model
 		return $this->db->query("UPDATE penerimaan_barang SET status = '$status' WHERE kode = '$kode'");
 	}
 
+	public function update_tgl_kirim_penerimaan_barang($kode,$tgl)
+	{
+		return $this->db->query("UPDATE penerimaan_barang SET tanggal_transaksi = '$tgl' WHERE kode = '$kode'");
+	}
+
 	public function update_status_penerimaan_barang_items_full($kode,$status)
 	{
 		return $this->db->query("UPDATE penerimaan_barang_items SET status_barang = '$status' WHERE kode = '$kode' ");

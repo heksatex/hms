@@ -70,11 +70,11 @@
       <div class="box">
         <div class="box-header with-border">
           <h3 class="box-title"><b><?php echo $list->kode;?></b></h3>
-          <!--div class="image pull-right text-right">
+          <div class="image pull-right text-right">
             <a href="<?php echo base_url('warehouse/pengirimanbarang/edit_barcode/'.encrypt_url($list->kode));?>" data-toggle="tooltip" title="Barcode Mode"> 
               <img src="<?php echo base_url('dist/img/barcode-scan-icon.jpg'); ?>" style="width: 50%; height: auto; text-align: right;">
             </a>
-          </div-->
+          </div>
         </div>
         <div class="box-body">
           <form class="form-horizontal">

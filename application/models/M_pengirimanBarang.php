@@ -371,6 +371,11 @@ class M_pengirimanBarang extends CI_Model
 		return $this->db->query("UPDATE pengiriman_barang SET status = '$status' WHERE kode = '$kode'");
 	}
 
+	public function update_tgl_kirim_pengiriman_barang($kode,$tgl)
+	{
+		return $this->db->query("UPDATE pengiriman_barang SET tanggal_transaksi = '$tgl' WHERE kode = '$kode'");
+	}
+
 	public function update_status_pengiriman_barang_items($kode,$kode_produk,$status)
 	{
 		return $this->db->query("UPDATE pengiriman_barang_items SET status_barang = '$status' WHERE kode = '$kode' AND kode_produk = '$kode_produk' ");
