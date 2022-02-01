@@ -42,6 +42,10 @@
         min-width:  24px;
     }
 
+    .description{
+      resize: vertical;
+    }
+
    </style>
 </head>
 
@@ -270,7 +274,7 @@
                           ?>
                             <tr class="num">
                               <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>"></td>
-                              <td class="text-wrap width-200"><?php echo $row->nama_produk?></td>
+                              <td class="text-wrap width-200" data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk;?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk)?>"><?php echo $row->nama_produk?></td>
                               <td class="text-wrap width-150" data-content="edit" data-id="description" data-isi="<?php echo htmlentities($row->description);?>"><?php echo $row->description?></td>
                               <td class="width-80" align="right" data-content="edit" data-id="qty"  data-isi="<?php echo $row->qty;?>"><?php echo number_format($row->qty,2)?></td>
                               <td class="width-100" data-content="edit" data-id="uom"  data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
@@ -497,7 +501,7 @@
 </div>
 
 <?php $this->load->view("admin/_partials/js.php") ?>
-<script type="text/javascript" src="<?php echo base_url('dist/js/js_sales_contract_view.js') ?>"></script>
+<!--script type="text/javascript" src="<?php echo base_url('dist/js/js_sales_contract_view.js') ?>"></script-->
 
 <script type="text/javascript">
 
@@ -509,7 +513,7 @@
   function validAngka(a){
     if(!/^[0-9.]+$/.test(a.value)){
       a.value = a.value.substring(0,a.value.length-1000);
-      alert_notify('fa fa-warning','Maaf, Inputan Hanya Berupa Angka !','danger');
+      alert_notify('fa fa-warning','Maaf, Inputan Hanya Berupa Angka !','danger',function(){});
     }
   }
 
@@ -533,7 +537,7 @@
     var row   ='<tr class="num">'
           + '<td></td>'
           + '<td class="width-300"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select></td>'
-          + '<td><input type="text" class="form-control input-sm description" name="Description" id="description"></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
+          + '<td><textarea class="form-control description" name="Description" id="description"></textarea><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
           + '<td class="width-150"><input type="text" class="form-control input-sm" name="Qty" id="qty" onkeyup="validAngka(this)"></td>'
           + '<td class="width-120"><select type="text" class="form-control input-sm uom" name="Uom" id="uom"></select></td>'
           //+ '<td class="width-120"><input type="text" class="form-control input-sm" name="roll" id="roll"></td>'
@@ -658,7 +662,7 @@
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
       });
@@ -666,7 +670,7 @@
       // validasi untuk inputan textbox
       input.each(function(){
         if(!$(this).val() && $(this).attr('name')!='roll'){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
         }
       });
@@ -709,7 +713,9 @@
                 $("#foot").load(location.href + " #foot");
                 //$("#total").load(location.href + " #total");
                 $(".add-new").show();                   
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
+                $("#btn-header").load(location.href + " #btn-header");
+                refresh_tab_and_div();
              }
           },
           error: function (xhr, ajaxOptions, thrownError){
@@ -732,6 +738,77 @@
           if($(this).attr('data-id')=="row_order"){
             $(this).html('<input type="hidden"  class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
             row_order = $(this).attr('data-isi');
+          }else if($(this).attr('data-id') == 'kode_produk'){
+
+            var kode_produk = $(this).attr('data-isi');
+            var nama_produk = $(this).attr('data-isi2');
+
+            class_sel2_prod = 't_sel2_prod'+row_order;
+            class_nama_produk = 'e_nama_produk'+row_order;
+
+            $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+' " id="product" name="Product" ></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="'+ $(this).attr('data-id2') +'"> ');
+
+            // append berdasarkan nama produk
+            $newOption = new Option(nama_produk, kode_produk, true, true);
+            $('.t_sel2_prod'+row_order).append($newOption).trigger('change');
+
+             //select 2 product
+            $('.t_sel2_prod'+row_order).select2({
+              allowClear: true,
+              placeholder: "",
+              ajax:{
+                    dataType: 'JSON',
+                    type : "POST",
+                    url : "<?php echo base_url();?>sales/salescontract/get_produk_select2",
+                    //delay : 250,
+                    data : function(params){
+                      return{
+                        prod:params.term
+                      };
+                    }, 
+                    processResults:function(data){
+                      var results = [];
+
+                      $.each(data, function(index,item){
+                          results.push({
+                              id:item.kode_produk,
+                              text:item.nama_produk
+                          });
+                      });
+                      return {
+                        results:results
+                      };
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                    //  alert('Error data');
+                    //  alert(xhr.responseText);
+                    }
+              }
+            });
+
+            $('.t_sel2_prod'+row_order).change(function(){
+              $.ajax({
+                    dataType: "JSON",
+                    url : '<?php echo site_url('sales/salescontract/get_prod_by_id') ?>',
+                    type: "POST",
+                    data: {kode_produk: $(this).parents("tr").find("#product").val() },
+                    success: function(data){
+                      //alert(data.nama_produk);
+                      $('.e_nama_produk'+row_order).val(data.nama_produk);
+                      $('.description'+row_order).val(data.nama_produk);
+                      //$('.uom').val(data.uom);
+
+                      var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
+                      $(".uom"+row_order).empty().append($newOptionuom).trigger('change');
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                    //  alert('Error data');
+                    //  alert(xhr.responseText);
+                    }
+              });
+          });
+
+
           }else if($(this).attr('data-id')=='uom'){
 
             class_uom = 'uom'+row_order;
@@ -771,7 +848,11 @@
                     //  alert(xhr.responseText);
                     }
               }
-            });       
+            }); 
+          }else if($(this).attr('data-id')=="description"){
+            class_desc = 'description'+row_order;
+            $(this).html('<textarea type="text" class="form-control input-sm '+class_desc+'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
+          
           }else if($(this).attr('data-id')=="taxes"){
             $(this).html($(this).attr('data-isi'));
           }else if($(this).attr('data-id')=='qty' || $(this).attr('data-id')=='price'){
@@ -842,7 +923,7 @@
                             refresh_tab_and_div();
                             $("#btn-header").load(location.href + " #btn-header");
                             $(".add-new").show();                   
-                            alert_notify(data.icon,data.message,data.type);
+                            alert_notify(data.icon,data.message,data.type,function(){});
                          }
                       },
                       error: function (xhr, ajaxOptions, thrownError){
@@ -1020,19 +1101,19 @@
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
 
         if(!$(this).val() && $(this).attr('name')=='Color'){
-           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger');
+           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
         }
       });
 
       // validasi untuk inputan textbox
       input.each(function(){
         if(!$(this).val() && $(this).attr('name')!='Piece Info'){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
         }
       });
@@ -1076,7 +1157,7 @@
                 $("#foot").load(location.href + " #foot");
                 //$("#total").load(location.href + " #total");
                 $(".add-new-color-lines").show();                   
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
              }
           },
           error: function (xhr, ajaxOptions, thrownError){
@@ -1143,7 +1224,7 @@
                               $("#tab_2").load(location.href + " #tab_2");
                               $("#foot").load(location.href + " #foot");
                               $(".add-new-color-lines ").show();   
-                              alert_notify(data.icon,data.message,data.type);
+                              alert_notify(data.icon,data.message,data.type,function(){});
                            }
                         },
                         error: function (xhr, ajaxOptions, thrownError){
@@ -1256,7 +1337,7 @@
               }else if(data.status == "failed"){
                 //jika ada form belum keiisi
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 document.getElementById(data.field).focus();
               }else{
@@ -1332,7 +1413,7 @@
             }else if(data.status == "failed"){
               //jika details masih kosong
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $("#btn-header").load(location.href + " #btn-header");
               refresh_tab_and_div();
@@ -1530,7 +1611,7 @@
             }else if(data.status == "failed"){
               //jika ada form belum keiisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();
             }else{

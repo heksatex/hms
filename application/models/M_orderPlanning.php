@@ -98,13 +98,19 @@ class M_orderPlanning extends CI_Model
 		return $query->row();
 	}
 
-	public function save_due_date($sales_order,$row_order,$due_date)
+	public function save_due_date($sales_order,$kode_produk,$row_order,$due_date)
 	{
-		return $this->db->query("UPDATE sales_contract_items SET due_date = '$due_date' WHERE sales_order = '$sales_order' AND row_order ='$row_order' ");
+		return $this->db->query("UPDATE sales_contract_items SET due_date = '$due_date' WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order ='$row_order' ");
 	}
 
 	public function cek_due_date_sales_conctract_items_by_kode($sales_order)
 	{
 		return $this->db->query("SELECT * FROM sales_contract_items WHERE sales_order = '$sales_order' AND due_date is NULL ");
+	}
+
+	public function cek_sales_contract_items_by_kode($sales_order,$kode_produk,$row_order)
+	{
+		$query = $this->db->query("SELECT kode_produk FROM sales_contract_items WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order= '$row_order'");
+		return $query->row_array();
 	}
 }

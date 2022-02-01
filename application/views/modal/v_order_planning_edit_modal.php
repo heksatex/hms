@@ -60,6 +60,9 @@
 
   $("#btn-ubah").unbind( "click" );
   $('#btn-ubah').click(function(){
+
+    var kode_produk = '<?php echo $row->kode_produk;?>';
+
     if($('#due_date').val()==""){
       alert_modal_warning('Due Date tidak Boleh Kosong !');
     }else{
@@ -68,7 +71,7 @@
          dataType: "json",
          type: "POST",
          url :'<?php echo base_url('ppic/orderplanning/update_due_date')?>',
-         data: {sales_order    : $('#so').val(), row_order    : $('#row_order').val(), due_date    : $('#due_date').val() },
+         data: {sales_order    : $('#so').val(), row_order  : $('#row_order').val(), due_date : $('#due_date').val(), kode_produk:kode_produk, nama_produk:$('#product').val(),desc : $('#desc').val() },
          success: function(data){
             if(data.sesi == 'habis'){
               alert_modal_warning(data.message);
@@ -78,7 +81,7 @@
               $("#foot").load(location.href + " #foot");
               $('#edit_data').modal('hide');
               $('#btn-ubah').button('reset');
-              alert_notify(data.icon,data.message,data.type);
+              alert_notify(data.icon,data.message,data.type,function(){});
             }
             $('#btn-ubah').button('reset');
 
