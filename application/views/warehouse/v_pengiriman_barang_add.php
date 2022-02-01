@@ -100,12 +100,7 @@
                 <div class="col-md-12 col-xs-12" >
                   <div class="col-xs-4"><label>Tanggal Kirim </label></div>
                   <div class="col-xs-8 col-md-8">
-                      <div class='input-group date' id='tanggal' >
-                        <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi" readonly="readonly"  />
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                      </div>
+                    <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi" readonly="readonly" value="<?php echo date('Y-m-d H:i:s')?>" />
                   </div>                                    
                 </div>
                
@@ -297,14 +292,15 @@
 <script type="text/javascript">
   //var i = 2;
  
-
   var datenow=new Date();  
   datenow.setMonth(datenow.getMonth());
+  /*
   $('#tanggal').datetimepicker({
       defaultDate: datenow,
       format : 'YYYY-MM-DD HH:mm:ss',
       ignoreReadonly: true,
   });
+ */ 
 
   $('#tanggal2').datetimepicker({
       defaultDate: datenow,
@@ -324,7 +320,7 @@
       $('.nav.nav-tabs li:eq(2)').addClass('active');
       $('.tab-content .tab-pane:eq(2)').addClass('active')
       $('#lokasi_tujuan').focus();
-      alert_notify('fa fa-warning','Lokasi Tujuan Harus Diisi !','danger');
+      alert_notify('fa fa-warning','Lokasi Tujuan Harus Diisi !','danger',function(){});
 
     }else{
 
@@ -345,7 +341,7 @@
             }else if(data.status == "failed"){
               //jika ada form belum keisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
              $('#btn-simpan').button('reset');
             }else if(data.status == "ada"){
