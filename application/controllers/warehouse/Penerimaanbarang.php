@@ -230,10 +230,10 @@ class Penerimaanbarang extends MY_Controller
                 if(empty($reff_note)){
                     $callback = array('status' => 'failed', 'message' => 'Reff Note Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else{
-                    $this->m_penerimaanBarang->update_penerimaan_barang($kode,$tgl_transaksi,$reff_note);
+                    $this->m_penerimaanBarang->update_penerimaan_barang($kode,$reff_note);
                     $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                     $jenis_log   = "edit";
-                    $note_log    = "-> ".$tgl_transaksi." | ".$reff_note;
+                    $note_log    = "-> ".$reff_note;
                     $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
                 }
             }
@@ -684,6 +684,7 @@ class Penerimaanbarang extends MY_Controller
             $no++;
             $row = array();
             $row[] = $no.".";
+            $row[] = $field->kode_produk;
             $row[] = $field->nama_produk;
             $row[] = $field->lot;
             $row[] = number_format($field->qty,2)." ".$field->uom;

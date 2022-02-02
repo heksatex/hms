@@ -17,8 +17,8 @@ class M_pengirimanBarang extends CI_Model
 	var $banned         = array('ADJ','GOUT','TRB','TRD','JAC');
 
 	var $table3  	    = 'stock_quant';
-	var $column_order3  = array(null, 'nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
-	var $column_search3 = array('nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
+	var $column_order3  = array(null, 'kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
+	var $column_search3 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
 	var $order3  	    = array('create_date' => 'asc');
 
 	public function __construct()
@@ -396,9 +396,9 @@ class M_pengirimanBarang extends CI_Model
 		return $this->db->query("SELECT nama_produk FROM stock_move_items WHERE move_id = '$move_id' and nama_produk = '$nama_produk' GROUP BY nama_produk");
 	}
 
-	public function update_pengiriman_barang($kode,$tgl_transaksi,$reff_note)
+	public function update_pengiriman_barang($kode,$reff_note)
 	{
-		return $this->db->query("UPDATE pengiriman_barang set tanggal_transaksi = '$tgl_transaksi', reff_note = '$reff_note' WHERE kode = '$kode'");
+		return $this->db->query("UPDATE pengiriman_barang set reff_note = '$reff_note' WHERE kode = '$kode'");
 	}
 
 	public function cek_status_pengiriman_barang($kode)

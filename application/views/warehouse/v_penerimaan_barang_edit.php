@@ -97,16 +97,14 @@
                   <div class="col-xs-4"><label>Tanggal Kirim </label></div>
                   <div class="col-xs-8 col-md-8">
                     <div id="tgl_btn">
-                      <?php if($list->status=='draft' or $list->status=='ready') {?>
-                      <div class='input-group date' id='datetimepicker4' >
-                      <?php }?>
-                        <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi"   value="<?php echo $list->tanggal_transaksi?>" readonly="readonly" />
-                      <?php if($list->status=='draft' or $list->status=='ready') {?>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                      </div>
-                      <?php }?>
+                      <?php if($list->status=='draft' or $list->status =='ready') {
+                          $tgl_kirim = date('Y-m-d H:i:s');
+                        ?>
+                      <?php }else{
+                          $tgl_kirim = $list->tanggal_transaksi;
+                            }
+                        ?>
+                        <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi"   value="<?php echo $tgl_kirim?>" readonly="readonly" />
                     </div>
                   </div>                                    
                 </div>
@@ -374,7 +372,7 @@
             }else if(data.status == "failed"){
               //jika ada form belum keisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();//focus ke field yang belum keisi
               refresh_div_in();
@@ -387,7 +385,7 @@
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               refresh_div_in();
               $('#btn-simpan').button('reset');
@@ -458,8 +456,7 @@
                           refresh_div_in();                
                         }else{
                           refresh_div_in();               
-                          alert_notify(response.icon,response.message,response.type);
-                          parent.fadeOut('slow');
+                          alert_notify(response.icon,response.message,response.type,function(){});
                         }
                       })
                 }
@@ -506,7 +503,7 @@
               refresh_div_in();
               $('#btn-stok').button('reset');
               if(data.status_kurang == "yes"){
-                alert_notify(data.icon2,data.message2,data.type2);
+                alert_notify(data.icon2,data.message2,data.type2,function(){});
               }
             }else{
               
@@ -514,7 +511,7 @@
                 unblockUI( function() {});
               }else{
                 unblockUI( function() {
-                    setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               }
               refresh_div_in();
@@ -587,7 +584,7 @@
                           alert_modal_warning(response.message2);
                         }
                         unblockUI( function() {
-                          setTimeout(function() { alert_notify(response.icon,response.message,response.type); }, 1000);
+                          setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
                         });
                         refresh_div_in();                  
                         $('#btn-kirim').button('reset');

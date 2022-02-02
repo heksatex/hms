@@ -11,8 +11,8 @@ class M_penerimaanBarang extends CI_Model
 	var $order  	  = array('kode' => 'desc');
 
 	var $table3  	    = 'stock_quant';
-	var $column_order3  = array(null, 'nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
-	var $column_search3 = array('nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
+	var $column_order3  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
+	var $column_search3 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
 	var $order3  	    = array('create_date' => 'asc');
 
 	private function _get_datatables_query()
@@ -260,9 +260,9 @@ class M_penerimaanBarang extends CI_Model
 		return $this->db->query("SELECT status FROM penerimaan_barang where kode = '$kode'");
 	}
 
-	public function update_penerimaan_barang($kode,$tgl_transaksi,$reff_note)
+	public function update_penerimaan_barang($kode,$reff_note)
 	{
-		return $this->db->query("UPDATE penerimaan_barang set tanggal_transaksi = '$tgl_transaksi', reff_note = '$reff_note' WHERE kode = '$kode'");
+		return $this->db->query("UPDATE penerimaan_barang set reff_note = '$reff_note' WHERE kode = '$kode'");
 	}
 
 	public function cek_status_barang_penerimaan_barang_items($kode,$status)

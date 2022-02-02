@@ -201,7 +201,7 @@ class Pengirimanbarang extends MY_Controller
       }else{
 
           $kode       = $this->input->post('kode');
-          $tgl_transaksi  = $this->input->post('tgl_transaksi');
+          //$tgl_transaksi  = $this->input->post('tgl_transaksi');
           $reff_note   = addslashes($this->input->post('reff_note'));
           $move_id     = $this->input->post('move_id');
           $deptid      = $this->input->post('deptid');
@@ -220,14 +220,18 @@ class Pengirimanbarang extends MY_Controller
             }else{
 
               //lock table
-              $this->_module->lock_tabel('stock_move WRITE, pengiriman_barang WRITE');
+              $this->_module->lock_tabel('stock_move WRITE, pengiriman_barang WRITE, departemen as d WRITE');
               
               $warehouse     = $deptid;
               $method_dept   = $warehouse;
               $method_action = 'OUT'; 
               $method        = $warehouse.'|'.$method_action;
-              $lokasi_dari   = $warehouse.'/Stock';
-              $lokasi_tujuan = $lok_tujuan.'/Stock';
+
+              $stock_location_dr = $this->_module->get_nama_dept_by_kode($warehouse)->row_array(); // ex : warehouse/stock lokasi dari
+              $lokasi_dari   = $stock_location_dr['stock_location'];
+
+              $stock_location_tj = $this->_module->get_nama_dept_by_kode($lok_tujuan)->row_array(); // ex : warehouse/stock lokasi tujuan
+              $lokasi_tujuan = $stock_location_tj['stock_location'];
 
 
               // get  pengiriman barang
@@ -275,10 +279,10 @@ class Pengirimanbarang extends MY_Controller
                 if(empty($reff_note)){
                     $callback = array('status' => 'failed', 'message' => 'Reff Note Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else{
-                    $this->m_pengirimanBarang->update_pengiriman_barang($kode,$tgl_transaksi,$reff_note);
+                    $this->m_pengirimanBarang->update_pengiriman_barang($kode,$reff_note);
                     $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                     $jenis_log   = "edit";
-                    $note_log    = "-> ".$tgl_transaksi." | ".$reff_note;
+                    $note_log    = "-> ".$reff_note;
                     $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
                 }
             }
@@ -408,6 +412,7 @@ class Pengirimanbarang extends MY_Controller
             $no++;
             $row = array();
             $row[] = $no.".";
+            $row[] = $field->kode_produk;
             $row[] = $field->nama_produk;
             $row[] = $field->lot;
             $row[] = number_format($field->qty,2)." ".$field->uom;

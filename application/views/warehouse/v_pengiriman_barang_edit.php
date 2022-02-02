@@ -122,16 +122,14 @@
                   <div class="col-xs-4"><label>Tanggal Kirim </label></div>
                   <div class="col-xs-8 col-md-8">
                     <div id="tgl_btn">
-                      <?php if($list->status=='draft' or $list->status =='ready') {?>
-                      <div class='input-group date' id='datetimepicker4' >
-                      <?php }?>
-                        <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi"  value="<?php echo $list->tanggal_transaksi?>" readonly="readonly" />
-                      <?php if($list->status=='draft' or $list->status =='ready' ) {?>
-                        <span class="input-group-addon">
-                            <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                      </div>
-                      <?php }?>
+                      <?php if($list->status=='draft' or $list->status =='ready') {
+                          $tgl_kirim = date('Y-m-d H:i:s');
+                        ?>
+                      <?php }else{
+                          $tgl_kirim = $list->tanggal_transaksi;
+                            }
+                        ?>
+                        <input type='text' class="form-control input-sm" name="tgl_transaksi" id="tgl_transaksi"  value="<?php echo $tgl_kirim?>" readonly="readonly" />
                     </div>
                   </div>                                    
                 </div>
@@ -379,15 +377,11 @@
 <script type="text/javascript">
 
 
-  $(document).on('click','#datetimepicker4',function (e) {
-      $('#datetimepicker4').datepicker("show");
-  });
-
   // validasi angka
   function validAngka(a){
     if(!/^[0-9.]+$/.test(a.value)){
       a.value = a.value.substring(0,a.value.length-1000);
-      alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger');
+      alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger',function(){});
     }
   }
 
@@ -482,7 +476,7 @@
                           refresh_div_out();                
                         }else{
                           refresh_div_out();                
-                          alert_notify(response.icon,response.message,response.type);
+                          alert_notify(response.icon,response.message,response.type,function(){});
                           parent.fadeOut('slow');
                         }
                       })
@@ -527,7 +521,7 @@
             }else if(data.status == "failed"){
               //jika ada form belum keisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();//focus ke field yang belum keisi
               refresh_div_out();
@@ -540,7 +534,7 @@
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               refresh_div_out();
               $('#btn-simpan').button('reset');
@@ -586,7 +580,7 @@
               $('#btn-stok').button('reset');
               refresh_div_out();
               if(data.status_kurang == "yes"){
-                alert_notify(data.icon2,data.message2,data.type2);
+                alert_notify(data.icon2,data.message2,data.type2,function(){});
               }
             }else{
 
@@ -594,7 +588,7 @@
                 unblockUI( function() {});
               }else{
                 unblockUI( function() {
-                    setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               }
 
@@ -671,7 +665,7 @@
                           alert_modal_warning(response.message2);
                         }
                         unblockUI( function() {
-                          setTimeout(function() { alert_notify(response.icon,response.message,response.type); }, 1000);
+                          setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
                         });
                         refresh_div_out();                     
                         $('#btn-kirim').button('reset');
@@ -797,7 +791,7 @@
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
       });
@@ -805,7 +799,7 @@
       // validasi untuk inputan textbox
       input.each(function(){
         if(!$(this).val() && $(this).attr('name')!='reff'){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
         }
       });
@@ -840,7 +834,7 @@
             }else{
                  refresh_div_out();
                 $(".add-new").show();                   
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
              }
           },
           error: function (xhr, ajaxOptions, thrownError){
@@ -907,7 +901,7 @@
                         }else{
                             refresh_div_out();
                             $(".add-new").show();                   
-                            alert_notify(data.icon,data.message,data.type);
+                            alert_notify(data.icon,data.message,data.type,function(){});
                          }
                       },
                       error: function (xhr, ajaxOptions, thrownError){

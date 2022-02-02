@@ -12,6 +12,7 @@
           <thead>
             <tr>
               <th class="no">No</th>
+              <th>Kode Product</th>
               <th>Product</th>
               <th>Lot</th>
               <th>Qty</th>
@@ -50,8 +51,8 @@
            
             "columnDefs": [
               {
-               'targets':6,
-               'data' : 6,
+               'targets':7,
+               'data' : 7,
                /*
                'searchable':false,
                'orderable':false,
@@ -61,7 +62,7 @@
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[6];
+                   var rowId = rowData[7];
                 }, 
               },
               { 
@@ -74,7 +75,7 @@
             },
             'rowCallback': function(row, data, dataIndex){
                // Get row ID
-               var rowId = data[6];
+               var rowId = data[7];
                // If row ID is in the list of selected row IDs
             }
         });
@@ -91,7 +92,7 @@
 
   //simpan details ketika button simpan di klik
   $("#btn-tambah").off("click").on("click",function(e) {
-      var myCheckboxes = table.column(6).checkboxes.selected();
+      var myCheckboxes = table.column(7).checkboxes.selected();
       var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
 
@@ -138,7 +139,7 @@
                   $("#foot").load(location.href + " #foot");
                   $('#tambah_data').modal('hide');
                   $('#btn-tambah').button('reset');
-                  alert_notify(data.icon,data.message,data.type);
+                  alert_notify(data.icon,data.message,data.type,function(){});
                 }
 
               },error: function (xhr, ajaxOptions, thrownError) {
