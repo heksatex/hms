@@ -90,12 +90,31 @@ class Orderplanning extends MY_Controller
             $sales_order = $this->input->post('sales_order');
             $row_order   = $this->input->post('row_order');
             $due_date    = $this->input->post('due_date');
+            $kode_produk    = $this->input->post('kode_produk');
+            $nama_produk    = addslashes($this->input->post('nama_produk'));
+            $desc           = addslashes($this->input->post('desc'));
 
-            $this->m_orderPlanning->save_due_date($sales_order,$row_order,$due_date);
-            $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
-            $jenis_log   = "Edit";
-            $note_log    = "Edit Due Date | ".$sales_order." | ".$due_date." | ".$row_order;
-            $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+            ///lock table
+            $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE');
+
+            // cek kode produk by row 
+            $cek_items = $this->m_orderPlanning->cek_sales_contract_items_by_kode($sales_order,$kode_produk,$row_order);
+            if(empty($cek_items['kode_produk'])){
+
+                $callback = array('status' => 'failed','message' => 'Maaf, Data Gagal Disimpan, Data Produk Tidak ditemukan', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else{
+
+                $this->m_orderPlanning->save_due_date($sales_order,$kode_produk,$row_order,$due_date);
+                $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+                $jenis_log   = "edit";
+                $note_log    = "Add Due Date | ".$sales_order." | ".$due_date." | ".$kode_produk." | ".$nama_produk." | ".$desc." | ".$row_order;
+                $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+            }
+
+            
+            //unlock table
+            $this->_module->unlock_tabel();
 
         }
         echo json_encode($callback);
@@ -113,9 +132,11 @@ class Orderplanning extends MY_Controller
             $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
             
+            ///lock table
+            $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE');
+
             //cek_items sales contract
             $cek_details = $this->m_sales->cek_sales_contract_items_by_kode($sales_order)->num_rows();
-
 
             $status     = "status IN ('draft')";
             $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
@@ -141,12 +162,14 @@ class Orderplanning extends MY_Controller
                     $this->m_sales->update_status_sales_contract($sales_order,$status);
                     $callback = array('status' => 'success','message' => 'Confirm Date Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
 
-                    $jenis_log   = "confirm date";
-                    $note_log    = $sales_order;
+                    $jenis_log   = "edit";
+                    $note_log    = $sales_order.' -> Confirm Date';
                     $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
                 
                 }
             }
+            //unlock table
+            $this->_module->unlock_tabel();
 
         }
 

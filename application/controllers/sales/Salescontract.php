@@ -264,50 +264,56 @@ class Salescontract extends MY_Controller
 	        $tax_id = $this->input->post('taxes');
 	        $row    = $this->input->post('row_order');
 
-	        if(!empty($row)){//update details
-	        	$tax = $this->m_sales->get_data_tax_by_kode($tax_id)->row_array();
-				    $this->m_sales->update_contract_lines_detail($kode,$desc,$qty,$uom,$roll,$price,$tax_id,addslashes($tax['nama']),$row);
-				
-    				//update total di tabel sales_contract
-    				$total = $this->m_sales->get_total_untaxed($kode)->row_array(); 
-    				$total_val = $total['total_untaxed']+$total['total_tax'];
-    				$this->m_sales->update_total_sales_contract($kode,$total['total_untaxed'],$total['total_tax'],$total_val);
+          ////lock table
+          $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, sales_contract_items as sci WRITE,  tax WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
 
-            $jenis_log   = "edit";
-            $note_log    = "Edit data Details | ".$kode." | ".$desc." | ".$prod." | ".$qty." | ".$uom." | ".$roll." | ".$price." | ".addslashes($tax['nama']);;
-            $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+          //cek status sales contract
+          $status     = "status NOT IN ('draft','waiting_date')";
+          $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
+          
+          if(!empty($cek_status['sales_order'])){
+            $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa di Simpan !, Cek Status Sales Order !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-            $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
-                
-			   }else{//simpan data baru
+          }else{
 
-            //cek status sales contract
-            $status     = "status NOT IN ('draft','waiting_date')";
-            $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
+            if(!empty($row)){//update details
+              $tax = $this->m_sales->get_data_tax_by_kode($tax_id)->row_array();
+              $this->m_sales->update_contract_lines_detail($kode,$kode_prod,$prod,$desc,$qty,$uom,$roll,$price,$tax_id,addslashes($tax['nama']),$row);
+          
+              //update total di tabel sales_contract
+              $total = $this->m_sales->get_total_untaxed($kode)->row_array(); 
+              $total_val = $total['total_untaxed']+$total['total_tax'];
+              $this->m_sales->update_total_sales_contract($kode,$total['total_untaxed'],$total['total_tax'],$total_val);
 
-            if(!empty($cek_status['sales_order'])){
-              $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa di Simpan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-
-            }else{
-
-  		        $ro  = $this->m_sales->get_row_order_sales_contract_items($kode)->row_array();
-  		        $row_order = $ro['row_order']+1;
-  	          $tax = $this->m_sales->get_data_tax_by_kode($tax_id)->row_array();
-  	          $this->m_sales->save_contract_lines_detail($kode,$kode_prod,$prod,$desc,$qty,$uom,$roll,$price,$tax_id,addslashes($tax['nama']),$row_order);
-  	            	
-  	          //update total di tabel sales_contract
-  				    $total = $this->m_sales->get_total_untaxed($kode)->row_array(); 
-  				    $total_val = $total['total_untaxed']+$total['total_tax'];
-  				    $this->m_sales->update_total_sales_contract($kode,$total['total_untaxed'],$total['total_tax'],$total_val);
-
-  	          $jenis_log   = "edit";
-              $note_log    = "Tambah data Details | ".$kode." | ".$prod." | ".$desc." | ".$qty." | ".$uom." | ".$roll." | ".$price." | ".addslashes($tax['nama']);
+              $jenis_log   = "edit";
+              $note_log    = "Edit data Details | ".$kode." | ".$kode_prod." | ".$prod." | ".$desc." | ".$qty." | ".$uom." | ".$roll." | ".$price." | ".addslashes($tax['nama']);;
               $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
 
               $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
-            }
-                
-			   }
+                  
+            }else{//simpan data baru
+
+                $ro  = $this->m_sales->get_row_order_sales_contract_items($kode)->row_array();
+                $row_order = $ro['row_order']+1;
+                $tax = $this->m_sales->get_data_tax_by_kode($tax_id)->row_array();
+                $this->m_sales->save_contract_lines_detail($kode,$kode_prod,$prod,$desc,$qty,$uom,$roll,$price,$tax_id,addslashes($tax['nama']),$row_order);
+                    
+                //update total di tabel sales_contract
+                $total = $this->m_sales->get_total_untaxed($kode)->row_array(); 
+                $total_val = $total['total_untaxed']+$total['total_tax'];
+                $this->m_sales->update_total_sales_contract($kode,$total['total_untaxed'],$total['total_tax'],$total_val);
+
+                $jenis_log   = "edit";
+                $note_log    = "Tambah data Details | ".$kode." | ".$kode_prod." | ".$prod." | ".$desc." | ".$qty." | ".$uom." | ".$roll." | ".$price." | ".addslashes($tax['nama']);
+                $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+
+                $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+              
+              }
+          }
+          //unlock table
+          $this->_module->unlock_tabel();
+
 	        echo json_encode($callback);
         }
     }
@@ -377,7 +383,10 @@ class Salescontract extends MY_Controller
           $username  = addslashes($this->session->userdata('username'));
 
         	$sales_order = $this->input->post('sales_order');
-          
+        
+          ///lock table
+          $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
+
           //cek status sales contract
           $status     = "status IN ('draft')";
           $cek_status  = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
@@ -393,14 +402,16 @@ class Salescontract extends MY_Controller
           		$this->m_sales->update_status_sales_contract($sales_order,$status);
           		$callback = array('status' => 'success','message' => 'Confirm Contract Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
           		
-  	        	$jenis_log   = "confirm contract";
-  	          $note_log    = $sales_order;
+  	        	$jenis_log   = "edit";
+  	          $note_log    = $sales_order.' -> Confirm Contract';
   	          $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
   	            
           	}else{
           		$callback = array('status' => 'failed','message' => 'Contract Line Items Masing Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           	}
           }
+           //unlock table
+           $this->_module->unlock_tabel();
         	
         }
 
@@ -419,6 +430,9 @@ class Salescontract extends MY_Controller
 
         	$sales_order = $this->input->post('sales_order');
 
+           ///lock table
+           $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
+
           //cek status sales contract
           $status     = "status NOT IN ('date_assigned')";
           $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
@@ -433,14 +447,17 @@ class Salescontract extends MY_Controller
           		$this->m_sales->update_status_sales_contract($sales_order,$status);
           		$callback = array('status' => 'success','message' => 'Aprove Contract Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
           		
-  	        	$jenis_log   = "approve contract";
-  	          $note_log    = $sales_order;
+  	        	$jenis_log   = "edit";
+  	          $note_log    = $sales_order.' -> Approve Contract';
   	          $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
   	            
           	}else{
           		$callback = array('status' => 'failed','message' => 'Contract Lines Items Masih Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           	}
           } 
+
+          // unclock table
+          $this->_module->unlock_tabel();
         }
 
         echo json_encode($callback);
@@ -458,6 +475,9 @@ class Salescontract extends MY_Controller
           $username  = addslashes($this->session->userdata('username'));
 
           $sales_order = $this->input->post('sales_order');
+
+          ///lock table
+          $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE');
 
           //cek status sales contract
           $status     = "status IN ('waiting_color')";
@@ -478,14 +498,17 @@ class Salescontract extends MY_Controller
               $this->m_sales->update_is_approve_color_lines($sales_order,$is_approve);
               $callback = array('status' => 'success','message' => 'Aprove Color Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
               
-              $jenis_log   = "approve color";
-              $note_log    = $sales_order;
+              $jenis_log   = "edit";
+              $note_log    = $sales_order.' -> Approve Color';
               $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
                 
             }else{
               $callback = array('status' => 'failed','message' => 'Color Line Masih Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }
+            
           }
+          //unlock table
+          $this->_module->unlock_tabel();
         }
 
         echo json_encode($callback);

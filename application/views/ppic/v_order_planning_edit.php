@@ -255,7 +255,7 @@
             }else if(data.status == "failed"){
               //jika details masih kosong
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $("#tab_1").load(location.href + " #tab_1");
               $("#status_bar").load(location.href + " #status_bar");

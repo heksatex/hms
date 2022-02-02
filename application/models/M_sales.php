@@ -316,9 +316,9 @@ class M_sales extends CI_Model
 		return $this->db->query("SELECT row_order   FROM sales_contract_items WHERE sales_order = '$sales_order' order by row_order desc");
 	}
 
-	public function update_contract_lines_detail($kode,$desc,$qty,$uom,$roll,$price,$tax_id,$tax_nama,$row_order)
+	public function update_contract_lines_detail($kode,$kode_prod,$prod,$desc,$qty,$uom,$roll,$price,$tax_id,$tax_nama,$row_order)
 	{
-		return $this->db->query("UPDATE sales_contract_items SET description = '$desc', qty = '$qty', tax_id = '$tax_id', tax_nama = '$tax_nama',
+		return $this->db->query("UPDATE sales_contract_items SET kode_produk = '$kode_prod', nama_produk = '$prod', description = '$desc', qty = '$qty', tax_id = '$tax_id', tax_nama = '$tax_nama',
 																uom = '$uom', roll_info = '$roll', price = '$price'
 								WHERE sales_order = '$kode' AND row_order = '$row_order' ");
 	}
