@@ -10,7 +10,7 @@ class M_trackinglot extends CI_Model
     function get_data_info_by_lot($lot)
     {
         $this->db->where('lot',$lot);
-		$this->db->order_by('quant_id','asc');
+		$this->db->order_by('create_date','desc');
 		$query = $this->db->get('stock_quant');
 		return $query->row_array();
     }
@@ -25,7 +25,7 @@ class M_trackinglot extends CI_Model
 
     function get_pengiriman_barang_by_lot($lot)
     {
-        return $this->db->query("SELECT pb.kode, smi.tanggal_transaksi, pb.lokasi_dari, pb.lokasi_tujuan, smi.status, ms.nama_status
+        return $this->db->query("SELECT pb.kode, pb.tanggal_transaksi, pb.lokasi_dari, pb.lokasi_tujuan, smi.status, ms.nama_status
                         FROM pengiriman_barang pb
                         INNER JOIN stock_move_items smi ON pb.move_id = smi.move_id
                         INNER JOIN mst_status ms ON smi.status = ms.kode
@@ -58,7 +58,6 @@ class M_trackinglot extends CI_Model
                                 INNER JOIN mst_status ms ON tl.status = ms.kode
                                 WHERE tli.lot = '$lot' AND tl.status = 'done'  ")->result();
     }
-
 
 
     public function insert_tmp_tracking_lot_batch($sql)
