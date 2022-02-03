@@ -79,7 +79,7 @@
                   </div>
                 </div>
                 <div class="box-body" style="display: block;">
-
+                
                 <form name="input" class="form-horizontal" role="form">
                     <div class="col-md-6">
                         <div class="form-group"> 
@@ -135,7 +135,7 @@
                         </div> 
                         <div class="form-group"> 
                             <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>qty2 </label></div>
+                                <div class="col-xs-4"><label>Qty2 </label></div>
                                 <div class="col-xs-1 limit_capt"><label>:</label></div>
                                 <div class="col-xs-8" id="qty2">
                                 </div>
@@ -173,6 +173,9 @@
                                 </div>
                             </div>
                         </div> 
+                    </div>
+                    <div class="col-md-12">
+                        <p style="font-size:10px; color:red">* Jika Jml Barcode > 1 Cek Informasi Barcode lebih lanjut di Stock Quant</p>
                     </div>
                 </form>
 
@@ -250,7 +253,19 @@
     });
 
     function proses(){
-        let txtlot = $("#txtlot").val();        
+        let txtlot = $("#txtlot").val();   
+        // kosongkan informasi
+        $('#lot').text('');
+        $('#tgl_dibuat').text('');
+        $('#kode_produk').text('');
+        $('#nama_produk').text('');
+        $('#grade').text('');
+        $('#qty').text('');
+        $('#qty2').text('');
+        $('#lokasi').text('');
+        $('#lokasi_fisik').text('');
+        $('#reff_note').text('');
+        $('#jml').text('');
         
         if(txtlot == ''){
             alert_modal_warning('Barcode / Lot tidak boleh kosong');
