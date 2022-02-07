@@ -89,7 +89,7 @@
                         <label>Dari</label>
                     </div>
                     <div class="col-md-4">
-                      <select type="text" class="form-control input-sm" name="departemen" id="dari" >
+                      <select type="text" class="form-control input-sm" name="dari" id="dari" >
                       </select>
                     </div>
                   </div>

@@ -89,7 +89,7 @@
                         <label>Tujuan</label>
                     </div>
                     <div class="col-md-4">
-                      <select type="text" class="form-control input-sm" name="departemen" id="tujuan" >
+                      <select type="text" class="form-control input-sm" name="tujuan" id="tujuan" >
                       </select>
                     </div>
                   </div>

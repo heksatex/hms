@@ -80,12 +80,12 @@ class Pengirimanharian extends MY_Controller
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
 		$departemen  = $this->input->post('departemen');
-		$dept_tujuan = $this->input->post('dept_tujuan');
+		$dept_tujuan = $this->input->post('tujuan');
 		$status_arr  = $this->input->post('status[]');
 		$dataRecord  = [];
 
 		$dept = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
-		$dept_tujuan = $this->_module->get_nama_dept_by_kode($dept_tujuan)->row_array();
+		$dept_tuj = $this->_module->get_nama_dept_by_kode($dept_tujuan)->row_array();
 		
 		$status      = '';
 		$status_capt = ''; // info status untuk di header
@@ -120,7 +120,7 @@ class Pengirimanharian extends MY_Controller
 		// set Departemen tujuan
 		$object->getActiveSheet()->SetCellValue('A4', 'Tujuan');
 		$object->getActiveSheet()->mergeCells('A4:B4');
-		$object->getActiveSheet()->SetCellValue('C4', ': '.$dept_tujuan['nama']);
+		$object->getActiveSheet()->SetCellValue('C4', ': '.$dept_tuj['nama']);
 		$object->getActiveSheet()->mergeCells('C4:D4');
 
 		// Status
