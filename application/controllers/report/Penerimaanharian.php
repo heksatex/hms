@@ -79,12 +79,12 @@ class Penerimaanharian extends MY_Controller
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
 		$departemen  = $this->input->post('departemen');
-		$dept_dari   = $this->input->post('dept_dari');
+		$dept_dari   = $this->input->post('dari');
 		$status_arr  = $this->input->post('status[]');
 		$dataRecord  = [];
 
-		$dept = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
-		$dept_dari = $this->_module->get_nama_dept_by_kode($dept_dari)->row_array();
+		$dept    = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
+		$dept_dr = $this->_module->get_nama_dept_by_kode($dept_dari)->row_array();
 		
 		$status      = '';
 		$status_capt = ''; // info status untuk di header
@@ -119,7 +119,7 @@ class Penerimaanharian extends MY_Controller
 		// set Departemen tujuan
 		$object->getActiveSheet()->SetCellValue('A4', 'Tujuan');
 		$object->getActiveSheet()->mergeCells('A4:B4');
-		$object->getActiveSheet()->SetCellValue('C4', ': '.$dept_dari['nama']);
+		$object->getActiveSheet()->SetCellValue('C4', ': '.$dept_dr['nama']);
 		$object->getActiveSheet()->mergeCells('C4:D4');
 
 		// Status
