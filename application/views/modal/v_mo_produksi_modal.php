@@ -392,7 +392,7 @@
 			        dataType: "JSON",
 			        url : '<?php echo site_url('manufacturing/mO/save_produksi_modal') ?>',
 			        type: "POST",
-			        data: {data_rm   : arr, 
+			        data: {data_rm   : JSON.stringify(arr), 
 			        	   deptid 	 : deptid, 
 			        	   origin_mo : origin_mo, 
 			        	   kode 	 : kode,

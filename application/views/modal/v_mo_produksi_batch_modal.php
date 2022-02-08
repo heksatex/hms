@@ -937,7 +937,14 @@
 			        dataType: "JSON",
 			        url : '<?php echo site_url('manufacturing/mO/save_produksi_batch_modal') ?>',
 			        type: "POST",
-			        data: { deptid : deptid, origin_mo : origin_mo,  kode : kode, kode_produk:$("#txtkode_produk").val(), data_fg : arr, data_rm : arr2, data_waste : arr5},
+			        data: { deptid 		: deptid, 
+							origin_mo 	: origin_mo,  
+							kode 		: kode,
+							kode_produk:$("#txtkode_produk").val(), 
+							data_fg 	: JSON.stringify(arr), 
+							data_rm 	: JSON.stringify(arr2), 
+							data_waste 	: JSON.stringify(arr5)
+							},
 			        success: function(data){
 
 			        	if(data.sesi == "habis"){

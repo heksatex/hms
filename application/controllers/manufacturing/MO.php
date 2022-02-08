@@ -462,9 +462,9 @@ class MO extends MY_Controller
 
             $deptid   = $this->input->post('deptid');
 
-            $array_fg    = $this->input->post('data_fg');
-            $array_rm    = $this->input->post('data_rm');
-            $array_waste = $this->input->post('data_waste');
+            $array_fg    = json_decode($this->input->post('data_fg'),true); 
+            $array_rm    = json_decode($this->input->post('data_rm'),true); 
+            $array_waste = json_decode($this->input->post('data_waste'),true); 
             $kode        = $this->input->post('kode');
             $kode_produk = $this->input->post('kode_produk');
             $origin_mo   = $this->input->post('origin_mo');
@@ -1007,7 +1007,7 @@ class MO extends MY_Controller
             $nama_user = $this->_module->get_nama_user($username)->row_array();
             $deptid   = $this->input->post('deptid');
 
-            $array_rm    = $this->input->post('data_rm');     
+            $array_rm    = json_decode($this->input->post('data_rm'),true);     
             $kode        = $this->input->post('kode');
             $origin_mo   = $this->input->post('origin_mo');
             $kode_produk = $this->input->post('kode_produk');    
