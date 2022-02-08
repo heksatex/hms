@@ -55,11 +55,12 @@ class Stockquants extends MY_Controller
             $qty2        = $this->input->post('qty2');
             $uom2        = $this->input->post('uom2');
             $nama_grade  = $this->input->post('nama_grade');
+            $reff_note   = addslashes($this->input->post('reff_note'));
 
-            $this->m_stockQuants->update_stockquants($quant_id,$qty2,$uom2,$nama_grade);
+            $this->m_stockQuants->update_stockquants($quant_id,$qty2,$uom2,$nama_grade,$reff_note);
 
             $jenis_log   = "edit";        
-            $note_log    = $quant_id.' | '.$nama_produk.' | '.$nama_grade.' | '.$lot.' | '.$qty2.' | '.$uom2;
+            $note_log    = $quant_id.' | '.$nama_produk.' | '.$lot.' | '.$nama_grade.' | '.$qty2.' | '.$uom2.' | '.$reff_note;
             $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
 
             $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
@@ -231,6 +232,7 @@ class Stockquants extends MY_Controller
                                                     'qty2'        => $row->qty2,
                                                     'uom2'        => $row->uom2,
                                                     'lokasi'      => $row->lokasi,
+                                                    'lokasi_fisik'=> $row->lokasi_fisik,
                                                     'reff_note'   => $row->reff_note,
                                                     'reserve_move'=> $row->reserve_move);   
 
@@ -472,9 +474,9 @@ class Stockquants extends MY_Controller
                 $condition = 'OR';
 
                 // operator ex and, like, =, =>, ect
-                if($row['operator'] == 'LIKE'){
-                    $isi = "LIKE '%".addslashes($row['isi'])."%' ";
-                    $operator = 'LIKE';
+                if($row['operator'] == 'LIKE' OR $row['operator'] == 'NOT LIKE' ){
+                    $isi = $row['operator']." '%".addslashes($row['isi'])."%' ";
+                    $operator = $row['operator'];
                    // $whereAll .= "LIKE '%".$row['isi']."%' ".$condition;
                 }else{
                     $isi = $row['operator']." '".addslashes($row['isi'])."' ";
@@ -537,7 +539,7 @@ class Stockquants extends MY_Controller
             $after    = '';           
             $loop_text= 1;
             foreach ($data_filter as $row) {
-                # code... 
+               
 
                     if($row['type'] == 'table'){ //jika bukan dari favorite
 
@@ -578,8 +580,8 @@ class Stockquants extends MY_Controller
                             $data_ke++;
                         }
 
-                        if($operator == 'LIKE'){
-                            $isi_ = "LIKE '%".addslashes($isi)."%' ";
+                        if($operator == 'LIKE' OR $operator == 'NOT LIKE' ){
+                            $isi_ = $operator." '%".addslashes($isi)."%' ";
                             // $operator = 'LIKE';
                         }else{
                             $isi_ = $operator." '".addslashes($isi)."' ";
@@ -750,6 +752,7 @@ class Stockquants extends MY_Controller
                                       'qty2'       => $val->qty2,
                                       'uom2'       => $val->uom2,
                                       'lokasi'     => $val->lokasi,
+                                      'lokasi_fisik'  => $val->lokasi_fisik,
                                       'reff_note'  => $val->reff_note,
                                       'reserve_move'=> $val->reserve_move
                                   );

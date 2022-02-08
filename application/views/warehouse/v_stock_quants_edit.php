@@ -3,6 +3,11 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <style>
+    textarea{
+      resize: vertical;
+    }
+  </style>
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini">
@@ -145,9 +150,15 @@
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Lokasi Fisik </label></div>
+                  <div id="ta" class="col-xs-8">
+                    <input type='text' class="form-control input-sm" name="lokasi_fisik" id="lokasi_fisik" value="<?php echo $list->lokasi_fisik; ?>" readonly="readonly"   />
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Reff Note </label></div>
                   <div id="ta" class="col-xs-8">
-                    <textarea class="form-control" name="ref_note" id="ref_note" readonly="readonly"><?php echo $list->reff_note;?></textarea>
+                    <textarea class="form-control" name="reff_note" id="reff_note" ><?php echo $list->reff_note;?></textarea>
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -207,6 +218,7 @@
                 nama_produk: $('#nama_produk').val(),
                 lot        : $('#lot').val(),
                 quant_id   : $('#quant_id').val(),
+                reff_note  : $('#reff_note').val()
 
           },success: function(data){
             if(data.sesi == "habis"){
@@ -217,13 +229,13 @@
                 //jika ada form belum keiisi
                 $('#btn-simpan').button('reset');
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 $("#foot").load(location.href+" #foot>*",""); 
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               $('#btn-simpan').button('reset');
               $("#foot").load(location.href+" #foot>*",""); 

@@ -132,9 +132,9 @@ class M_stockQuants extends CI_Model
 	}
 
 	
-	public function update_stockquants($quant_id,$qty2,$uom2,$nama_grade)
+	public function update_stockquants($quant_id,$qty2,$uom2,$nama_grade,$reff_note)
 	{
-		$this->db->query("UPDATE stock_quant SET qty2 = '$qty2', uom2 = '$uom2', nama_grade = '$nama_grade' WHERE quant_id = '$quant_id' ");
+		$this->db->query("UPDATE stock_quant SET qty2 = '$qty2', uom2 = '$uom2', nama_grade = '$nama_grade', reff_note = '$reff_note' WHERE quant_id = '$quant_id' ");
 
 		$this->db->query("UPDATE mrp_production_fg_hasil SET qty2 = '$qty2', uom2 = '$uom2', nama_grade = '$nama_grade' WHERE quant_id = '$quant_id' ");
 

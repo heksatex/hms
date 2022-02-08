@@ -34,7 +34,7 @@
 
     .li-adv:hover{
        background-color: #f2dede;
-       color: 
+        
     }
   
     /* < CSS advanced search */
@@ -122,7 +122,7 @@
                 <div class="col-md-6">
                   <div class="col-md-4">
                     <label>
-                      <div id='total_record'></div>
+                      <div id='total_record'>Total Data : 0</div>
                     </label>
                   </div>
                   <div class="col-md-8">
@@ -192,6 +192,7 @@
                               <li onclick="groupBy('nama_produk','Group By Nama Produk',1)" class="li-adv" data-index="1" >Nama Produk</li>
                               <li onclick="groupBy('lot','Group By Lot',2)" class="li-adv" data-index="2">Lot</li>
                               <li onclick="groupBy('lokasi','Group By Lokasi',3)" class="li-adv" data-index="3">Lokasi</li>
+                              <li onclick="groupBy('lokasi_fisik','Group By Lokasi Fisik',4)" class="li-adv" data-index="4">Lokasi Fisik</li>
                             </div>
                           </div>
 
@@ -285,12 +286,20 @@
                       <th  class='style'  width='100px'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
                       <th  class='style'  width='50px'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
                       <th  class='style'  width='200px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi</a></th>
+                      <th  class='style'  width='100px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi Fisik</a></th>
                       <th  class='style'  width='200px'><!--a class="column_sort" id="reff_note" data-order="desc" href="javascript:void(0)"-->Reff Note</a></th>
                       <th  class='style'  width='80px'><!--a class="column_sort" id="reserve_move" data-order="desc" href="javascript:void(0)"-->Reserve Move</a></th>
                     </tr>
                   </thead>
-                  <tbody></tbody>
+                  <tbody>
+                    <tr>
+                      <td colspan="14" align="center">Tidak ada Data</td>
+                    </tr>
+                  </tbody>
               </table>
+              <div id="example1_processing" class="table_processing" style="display: none">
+                 Processing...
+              </div>
             </div>
 
         </div>
@@ -379,7 +388,8 @@
     // event jika caption ditambahkan di texbox
     $('#tags').on('itemAdded', function(event){
      // alert('added belum '+JSON.stringify(arr_filter));
-      please_wait(function(){});
+  
+     //please_wait(function(){});
       var check_arr_filter = false;
       var check_arr_group  = false;
       var check_favorite_arr_filter   = false;
@@ -455,7 +465,7 @@
       }
 
       //alert('added sudah '+JSON.stringify(arr_filter));
-      unblockUI( function() {});
+      //unblockUI( function() {});
       
     });
 
@@ -490,6 +500,9 @@
         if(filter == true && empty_value == false){
           $("#example1 tbody").remove();
           $('#btn-filter').button('loading');
+          $("#example1_processing").css('display','');// show loading processing in table
+          please_wait(function(){});
+          
           $.ajax({
               type: "POST",
               dataType: "JSON",
@@ -498,6 +511,7 @@
               success : function(data){
                     $('#pagination').html(data.pagination);
                     $('#total_record').html(data.total_record);
+                    var empty = true;
 
                     if(arr_grouping.length > 0 ){//jika arr_grouping ny terisi
                       $("#example1").append(data.record);
@@ -505,6 +519,7 @@
                       var tbody = $("<tbody />");
                       var no    = 1;
                       $.each(data.record, function(key, value) {
+                        empty = false;
                         /*
                         var tr = $("<tr class='' id='"+key+"' />")
                         $.each(value, function(k, v) {
@@ -520,7 +535,7 @@
                         var tr = $("<tr>").append(
                           $("<td>").text(no++),
                           $("<td>").text(value.kode_produk),
-                          $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'">'+value.nama_produk+'</a>'),
+                          $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'" target="_blank">'+value.nama_produk+'</a>'),
                           $("<td>").text(value.create_date),
                           $("<td>").text(value.lot),
                           $("<td>").text(value.grade),
@@ -529,6 +544,7 @@
                           $("<td>").text(value.qty2),
                           $("<td>").text(value.uom2),
                           $("<td>").text(value.lokasi),
+                          $("<td>").text(value.lokasi_fisik),
                           $("<td>").text(value.reff_note),
                           $("<td>").text(value.reserve_move),
                         );
@@ -537,7 +553,15 @@
 
                       $("#example1").append(tbody);
                     }
+                    $("#example1_processing").css('display','none');// hidden loading processing in table
+
                     $('#btn-filter').button('reset');
+
+                    if(empty == true && arr_grouping.length == 0){
+                      var tr = $("<tr>").append($("<td colspan='14' align='center'>").text('Tidak ada Data'));
+                      tbody.append(tr);
+                      $("#example1").append(tbody);
+                    }
 
                     $.each(data.dataArr, function(key, val) {
                       
@@ -545,10 +569,14 @@
                       $('[data-role="tags-input"]').tagsinput("add", val.caption);
                     });
 
+                    unblockUI( function() {});
+
               },error: function (jqXHR, textStatus, errorThrown){
                 //alert(jqXHR.responseText);
                 alert('Error Filter Tabel');
+                $("#example1_processing").css('display','none');// hidden loading processing in table
                 $('#btn-filter').button('reset');
+                unblockUI( function() {});
               }
           });
         }else if(empty_value == true){
@@ -564,10 +592,10 @@
 
     //event if item caption removed in textbox
     $('#tags').on('itemRemoved', function(event){
-      please_wait(function(){});
+      //please_wait(function(){});
       var caption = event.item;//item removed
       removeArray(caption,'remove');
-      unblockUI( function() {});
+      //unblockUI( function() {});
     });
 
 
@@ -699,6 +727,9 @@
     // load creationGroup
     function creationGroup(){
 
+      please_wait(function(){});
+      $("#example1_processing").css('display','');// show loading processing in table
+
       tmp_arr_group =[];
 
       var id_dept ='<?php  echo $id_dept;?>';
@@ -716,10 +747,22 @@
           tmp_arr_group1.push(data.tmp_arr_group);
           tmp_arr_group.push({'group_ke': data.group_ke, 'record':data.tmp_arr_group});
           tmp_arr_group1 = [];
+          $("#example1_processing").css('display','none');// hidden loading processing in table
+          unblockUI( function() {});
+
+          if(data.record == ''){
+            var tr = $("<tr>").append($("<td colspan='14' align='center'>").text('Tidak ada Data'));
+            tbody.append(tr);
+            $("#example1").append(tbody);
+          }
+
           //alert('check arr '+JSON.stringify(tmp_arr_group));
         },error: function (jqXHR, textStatus, errorThrown){
           //alert(jqXHR.responseText);
           alert('Error Create Group');
+          $("#example1_processing").css('display','none');// hidden loading processing in table
+          unblockUI( function() {});
+
         }
       });
 
@@ -727,7 +770,7 @@
 
    
     //jika next page ,isi akan rubah lagi
-    createPagination(0);
+    //createPagination(0);
     $('#pagination').on('click','a',function(e){
       
       e.preventDefault(); 
@@ -739,10 +782,12 @@
 
     function createPagination(pageNum){
       $("#example1 tbody").remove();
+      $("#example1_processing").css('display','');// show loading processing in table
       // alert('tes');
       var page = '';
       // alert('check arr '+JSON.stringify(arr_filter));
       var id_dept ='<?php  echo $id_dept;?>';
+      please_wait(function(){});
 
       $.ajax({
         type : 'POST',
@@ -755,12 +800,14 @@
           ///alert('berhasil2')
           var tbody = $("<tbody id='0'/>");
           var no    = 1;
+          var empty = true;
           $.each(data.record, function(key, value) {
             //var tr = $("<tr class='' id='"+key+"' />")
+            empty = false;
             var tr = $("<tr>").append(
                       $("<td>").text(no++),
                       $("<td>").text(value.kode_produk),
-                      $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'">'+value.nama_produk+'</a>'),
+                      $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'" target="_blank">'+value.nama_produk+'</a>'),
                       $("<td>").text(value.create_date),
                       $("<td>").text(value.lot),
                       $("<td>").text(value.grade),
@@ -769,17 +816,26 @@
                       $("<td>").text(value.qty2),
                       $("<td>").text(value.uom2),
                       $("<td>").text(value.lokasi),
+                      $("<td>").text(value.lokasi_fisik),
                       $("<td>").text(value.reff_note),
                       $("<td>").text(value.reserve_move),
               );
               tbody.append(tr);
           });
+          if(empty){
+            var tr = $("<tr>").append($("<td colspan='14' align='center'>").text('Tidak ada Data'));
+            tbody.append(tr);
+          }
+         $("#example1_processing").css('display','none');// hidden loading processing in table
 
          $("#example1").append(tbody);
+         unblockUI( function() {});
 
           //alert('berhasil');
         },error: function (jqXHR, textStatus, errorThrown){
           alert('Error Load Items');
+          $("#example1_processing").css('display','none');// hidden loading processing in table
+          unblockUI( function() {});
           //alert(jqXHR.responseText);
         }
       });
@@ -842,6 +898,7 @@
     if(type_condition == 'text'){
       var condition = "<select class='form-control input-sm condition width-input' name='cmbCondition' id='cmbCondition' >";
           condition +="<option>LIKE</option>";
+          condition +="<option>NOT LIKE</option>";
           condition += "</select>";
       var value = "<input type='text' class='form-control input-sm value width-input' name='txtValue' id='value' >";
 
@@ -936,7 +993,7 @@
               var tr = $("<tr>").append(
                        $("<td>").text(no++),
                        $("<td>").text(value.kode_produk),
-                       $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'">'+value.nama_produk+'</a>'),
+                       $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'" target="_blank">'+value.nama_produk+'</a>'),
                        $("<td>").text(value.create_date),
                        $("<td>").text(value.lot),
                        $("<td>").text(value.grade),
@@ -945,6 +1002,7 @@
                        $("<td>").text(value.qty2),
                        $("<td>").text(value.uom2),
                        $("<td>").text(value.lokasi),
+                       $("<td>").text(value.lokasi_fisik),
                        $("<td>").text(value.reff_note),
                        $("<td>").text(value.reserve_move),
                   );
@@ -1020,7 +1078,7 @@
                           row +=  "<tr  style='background-color: #f2f2f2;' >";
                           row += "<td>"+no+++"</td>";
                           row += "<td>"+value.kode_produk+"</td>";
-                          row += "<td><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"'>"+value.nama_produk+"</a></td>";
+                          row += "<td><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"' target='_blank'>"+value.nama_produk+"</a></td>";
                           row += "<td>"+value.create_date+"</td>";
                           row += "<td>"+value.lot+"</td>";
                           row += "<td>"+value.nama_grade+"</td>";
@@ -1029,6 +1087,7 @@
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
                           row += "<td>"+value.lokasi+"</td>";
+                          row += "<td>"+value.lokasi_fisik+"</td>";
                           row += "<td>"+value.reff_note+"</td>";
                           row += "<td>"+value.reserve_move+"</td>";
                           row += "</tr>";
@@ -1125,7 +1184,7 @@
                           row +=  "<tr  style='background-color: #f2f2f2;' >";
                           row += "<td>"+no+++"</td>";
                           row += "<td>"+value.kode_produk+"</td>";
-                          row += "<td><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"'>"+value.nama_produk+"</a></td>";
+                          row += "<td><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"' target='_blank'>"+value.nama_produk+"</a></td>";
                           row += "<td>"+value.create_date+"</td>";
                           row += "<td>"+value.lot+"</td>";
                           row += "<td>"+value.nama_grade+"</td>";
@@ -1134,6 +1193,7 @@
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
                           row += "<td>"+value.lokasi+"</td>";
+                          row += "<td>"+value.lokasi_fisik+"</td>";
                           row += "<td>"+value.reff_note+"</td>";
                           row += "<td>"+value.reserve_move+"</td>";
                           row += "</tr>";
