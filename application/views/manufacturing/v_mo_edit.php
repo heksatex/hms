@@ -685,9 +685,11 @@
   $(".modal").on('hidden.bs.modal', function(){
     //window.location.reload(true);
     $("#mo").load(location.href + " #mo>*");
+    $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm');
+    $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch');
+
     readonly_textfield();
     refresh_mo();
-
   });
 
   //select 2 no mesin 
@@ -899,7 +901,10 @@
           show: true,
           backdrop: 'static'
       });
-      $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('produksi_rm_batch');
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+
+      $(".produksi_rm_batch").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $.post('<?php echo site_url()?>manufacturing/mO/produksi_rm_batch',
         { kode        : $('#kode').val(),
           kode_produk : $('#kode_produk').val(), 
@@ -916,13 +921,13 @@
           qty2_std    : $('#qty2_std').val(),
           lot_prefix  : $('#lot_prefix').val(),
           lot_prefix_waste  : $('#lot_prefix_waste').val(),       
-        },function(html){
-            setTimeout(function() {
-              $(".tambah_data").html(html);  
-
-            },1000);
-        }   
-      );
+        } 
+      ).done(function(html){
+        setTimeout(function() {
+          $(".produksi_rm_batch").html(html)  
+        },1000);
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+      });
     }
   });
 
@@ -951,7 +956,10 @@
           show: true,
           backdrop: 'static'
       });
-      $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('produksi_rm');
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+
+      $(".produksi_rm").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $.post('<?php echo site_url()?>manufacturing/mO/produksi_rm',
         { kode        : $('#kode').val(),
           kode_produk : $('#kode_produk').val(), 
@@ -968,12 +976,14 @@
           qty2_std    : $('#qty2_std').val(),
           lot_prefix  : $('#lot_prefix').val(),
           
-        },function(html){
-            setTimeout(function() {
-              $(".tambah_data").html(html);
-            },1000);
         }   
-      );
+      ).done(function(html){
+        setTimeout(function() {
+              $(".produksi_rm").html(html);  
+            },1000);
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+
+      });;
     }
   });
 

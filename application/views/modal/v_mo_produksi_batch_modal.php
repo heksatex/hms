@@ -972,8 +972,9 @@
 			              }
 			              //console.log(data.sql);
 			              alert_notify(data.icon,data.message,data.type,function(){});
-
+						  
 			            }
+						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch'); 
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
 			          alert(jqXHR.responseTex+' error');
