@@ -426,15 +426,15 @@ class Pengirimanbarang extends MY_Controller
         }
         $output = array(
             "draw" => $_POST['draw'],
-            "recordsTotal" => $this->m_pengirimanBarang->count_all3($kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
-            "recordsFiltered" => $this->m_pengirimanBarang->count_filtered3($kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
+            "recordsTotal" => $this->m_pengirimanBarang->count_all3($kode,$kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
+            "recordsFiltered" => $this->m_pengirimanBarang->count_filtered3($kode,$kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
             "data" => $data,
         );
         //output dalam format JSON
         echo json_encode($output);
     }
 
-
+/*
     public function save_details_modala()//revisi ada perbaikan mungkin tidak dipakai
     {
         $sub_menu  = $this->uri->segment(2);
@@ -458,6 +458,7 @@ class Pengirimanbarang extends MY_Controller
           $row        = explode("^,", $check);
           $status     = "";
           $status_brg = "ready";
+          $lot        = '';
 
           //lock tabel
           $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE' );
@@ -481,7 +482,6 @@ class Pengirimanbarang extends MY_Controller
               $row_order++;
               $start++;
           }
-
 
           if(!empty($sql_stock_quant_batch)){
               $sql_stock_quant_batch = rtrim($sql_stock_quant_batch, ', ');
@@ -518,6 +518,7 @@ class Pengirimanbarang extends MY_Controller
         }
         echo json_encode($callback);
     }
+*/
 
     public function save_details_quant_modal()
     {
