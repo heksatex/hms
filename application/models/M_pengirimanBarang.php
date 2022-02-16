@@ -536,9 +536,9 @@ class M_pengirimanBarang extends CI_Model
 		return $this->db->query("SELECT origin_prod FROM penerimaan_barang_items WHERE kode = '$kode' AND kode_produk = '$kode_produk' ");
 	}
 
-	public function get_move_id_by_method_origin($method,$origin,$status)
+	public function get_move_id_by_method_origin($method,$origin,$status,$status2)
 	{
-		return $this->db->query("SELECT move_id FROM stock_move WHERE method = '$method' AND origin = '$origin' AND status NOT IN ('$status') ");
+		return $this->db->query("SELECT move_id FROM stock_move WHERE method = '$method' AND origin = '$origin' AND status NOT IN ('$status','$status2') ");
 	}
   
 }

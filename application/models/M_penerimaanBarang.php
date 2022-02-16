@@ -236,12 +236,13 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note
-								 FROM stock_move_items smi 
-								 INNER JOIN penerimaan_barang pb ON smi.move_id = pb.move_id
-								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
-								 Where pb.kode = '$kode' 
-								 ORDER BY smi.row_order")->result();
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid
+								FROM stock_move_items smi 
+								INNER JOIN penerimaan_barang pb ON smi.move_id = pb.move_id
+								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
+								LEFT JOIN penerimaan_barang_tmp tmp ON pb.kode = tmp.kode AND smi.lot = tmp.lot
+								Where pb.kode = '$kode' 
+								ORDER BY smi.row_order")->result();
 	}
 
 
@@ -309,14 +310,13 @@ class M_penerimaanBarang extends CI_Model
 		return $this->db->query("SELECT sm.move_id, rm.move_id,rm.kode
 								FROM stock_move sm
 								INNER JOIN mrp_production_rm_target rm ON sm.move_id =rm.move_id
-								WHERE sm.source_move = '$move_id' LIMIT 1");
+								WHERE sm.source_move LIKE '%$move_id%' LIMIT 1");
 	}
 
 	public function get_qty_penerimaan_barang_items_by_kode($kode,$kode_produk)
     {
    		return $this->db->query("SELECT qty FROM penerimaan_barang_items WHERE kode = '$kode' AND kode_produk = '$kode_produk'");
     }
-
 
     public function update_status_penerimaan_barang_items($kode,$kode_produk,$status)
 	{
@@ -337,6 +337,78 @@ class M_penerimaanBarang extends CI_Model
 	{
 		return $this->db->query("SELECT * FROM mrp_production_rm_target where move_id = '$move_id' AND kode_produk = '$kode_produk' order by row_order ");
 	}
+
+	public function cek_scan_by_lot($kode,$lot)
+	{
+		return $this->db->query("SELECT lot FROM penerimaan_barang_tmp WHERE kode = '$kode' AND lot = '$lot'");
+	}
+
+	public function get_list_stock_move_items_by_lot($move_id,$lot,$status)
+	{
+		return $this->db->query("SELECT * FROM stock_move_items where move_id = '$move_id' AND lot = '$lot' AND status = '$status'")->result();
+	}
+
+	public function simpan_penerimaan_barang_tmp($kode,$quant_id,$move_id,$kode_produk,$lot,$valid,$tgl)
+	{
+		return $this->db->query("INSERT INTO penerimaan_barang_tmp (kode,quant_id,move_id,kode_produk,lot,valid,valid_date) VALUES ('$kode','$quant_id','$move_id','$kode_produk','$lot','$valid','$tgl')");
+	}
+
+	public function get_count_valid_scan_by_kode($kode)
+	{
+		$this->db->SELECT('kode');
+		$this->db->FROM('penerimaan_barang_tmp');
+		$this->db->where('kode', $kode);
+		$this->db->where('valid', 't');
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function get_count_all_scan_by_kode($move_id)
+	{
+		$this->db->SELECT('move_id');
+		$this->db->FROM('stock_move_items');
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function get_stock_move_items_by_move_id_partial_in($move_id)
+	{
+		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid
+								FROM stock_move_items  smi
+								INNER JOIN penerimaan_barang_tmp tmp ON smi.move_id = tmp.move_id AND smi.lot = tmp.lot
+								WHERE smi.move_id = '$move_id' 
+								order by smi.row_order ")->result();
+	}
+
+	/*
+	public function get_qty_stock_move_items_partial_by_kode($move_id,$kode_produk)
+    {
+   		return $this->db->query("SELECT sum(smi.qty) as sum_qty 
+								FROM stock_move_items  smi
+								INNER JOIN penerimaan_barang_tmp tmp ON smi.move_id = tmp.move_id AND smi.lot = tmp.lot
+								WHERE  smi.move_id = '$move_id' And smi.kode_produk = '$kode_produk'  ");
+    }
+	*/
+
+	public function get_stock_move_items_not_penerimaan_barang_tmp($move_id)
+    {
+   		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid
+							FROM stock_move_items  smi
+							LEFT JOIN penerimaan_barang_tmp tmp ON smi.move_id = tmp.move_id AND smi.lot = tmp.lot
+							WHERE smi.move_id = '$move_id' AND smi.lot NOT IN (SELECT lot FROM penerimaan_barang_tmp WHERE move_id = '$move_id')
+							order by smi.row_order ")->result();
+    }
+
+	public function cek_penerimaan_barang_tmp_by_kode($kode)
+	{
+		$this->db->where('kode', $kode);
+		$query = $this->db->get('penerimaan_barang_tmp');
+		return $query->num_rows();
+		
+	}
+
+ 
 
 }
 
