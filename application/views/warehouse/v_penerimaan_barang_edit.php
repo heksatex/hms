@@ -561,7 +561,7 @@
                           type: 'POST',
                           dataType : 'json',
                           url : "<?php echo site_url('warehouse/penerimaanbarang/kirim_barang')?>",
-                          data : {kode : $('#kode').val(), move_id : move_id, deptid : deptid, origin : $('#origin').val(), method : method},
+                          data : {kode:$('#kode').val(), move_id:move_id, deptid:deptid, origin:$('#origin').val(), method:method, mode:"list"},
                           error: function (xhr, ajaxOptions, thrownError) { 
                             alert(xhr.responseText);
                             $('#btn-kirim').button('reset');

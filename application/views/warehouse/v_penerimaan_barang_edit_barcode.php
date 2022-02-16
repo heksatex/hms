@@ -14,8 +14,9 @@
     .validScan{
       background-color: #dff0d8;
     }
-   
   </style>
+
+
 
 <body class="hold-transition skin-black fixed sidebar-mini" >
 <!-- Site wrapper -->
@@ -82,14 +83,14 @@
                       <input type="text" class="form-control input-lg" name="barcode" id="barcode" autofocus onkeypress="enter(event);" autocomplete="off" placeholder="Scan Barcode / Lot" />
                     </div>
                     <div class=" col-xs-2">
-                      <button type="button" id="scan" onclick="cek_data();" class="btn btn-primary btn-lg" >Scan</button>
+                      <button type="button" id="btn-scan" onclick="cek_data();" class="btn btn-primary btn-lg" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." >Scan</button>
                     </div>                                    
                   </div>
                 </div>
               </div>
               <div class="col-md-6">
                <center>
-                <label class="label label-success" style="font-size: 20px;">Valid Scan : <label id="dari">-</label> / <label id="sampai">-</label> </label> 
+                <label class="label label-success" style="font-size: 20px;" id="counter_valid">Valid Scan : <?php echo $count?> / <?php echo $count_all?> </label> 
                 </center>
                <br>
               </div>
@@ -104,34 +105,47 @@
                   <table class="table table-condesed table-hover rlstable" width="100%" id ="tbl_detail">
                     <tr>
                       <th class="style no">No.</th>
+                      <th class="style" style="width: 120px;">Kode Product</th>
                       <th class="style">Product</th>
-                      <th class="style">Qty</th>
+                      <th class="style" style="text-align: right;">Qty</th>
                       <th class="style">uom</th>
+                      <th class="style" style="text-align: right;">Qty2</th>
+                      <th class="style">uom2</th>
                       <th class="style">Lot</th>
+                      <th class="style">Reff Note</th>
                       <th class="style">Status</th>
                       <th class="style">Quant Id</th>
                     </tr>
-                      <tbody>
+                    <tbody>
                         <?php
-                          $i=1;
+                         
                          foreach ($items as $row) {
+                           if($row->valid == 't'){
+                            $color = 'num validScan';
+                           }else{
+                             $color = 'num';
+                           }
                         ?>
-                      <tr class="num" id="<?php echo $i;?>">
+                      <tr class="<?php echo $color;?>" >
                         <td></td>
+                        <td><?php echo $row->kode_produk?></td>
                         <td><?php echo $row->nama_produk?></td>
-                        <td><?php echo $row->qty?></td>
+                        <td align="right"><?php echo $row->qty?></td>
                         <td><?php echo $row->uom?></td>
+                        <td  align="right"><?php echo $row->qty2?></td>
+                        <td><?php echo $row->uom2?></td>
                         <td><?php echo $row->lot?>
-                            <input type="hidden" name="lot"  id="lot" value="<?php echo $row->lot?>">
-                            <input type="hidden" name="valid" id="valid" value="0" style="width: 20px;"></td>
+                        <td><?php echo $row->reff_note?></td>
+                            <!--input type="hidden" name="lot"  id="lot" value="<?php echo $row->lot?>">
+                            <input type="hidden" name="valid" id="valid" value="0" style="width: 20px;"></td-->
                         <td><?php echo $row->status?></td>
                         <td><?php echo $row->quant_id?></td>
+                      </tr>
                        <?php 
-                        $i++;
                         }
                         ?>
-                      </tbody>
-                    </table>
+                    </tbody>
+                  </table>
                 </div>
                 <!-- /.tabel -->
               </div>
@@ -158,6 +172,12 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
+
+  status  = $('#status').val();
+  if(status == 'done' || status == 'cancel'){
+    $('#btn-scan').prop('disabled', true);
+    $('#barcode').prop('disabled', true);
+  }
 
   function alert_scan(message){
     var dialog = bootbox.dialog({
@@ -200,51 +220,52 @@
   //untuk cek valid barcode
   function cek_data() {
     var txtbarcode = $('#barcode').val();
-    var lot       = document.getElementsByName('lot');
-    var cek       = document.getElementsByName('cek');
-    var valid     = document.getElementsByName('valid');
-    var tot_valid = 0;
-    var invalid   = 1;
     var barcode   = txtbarcode.trim().toUpperCase();
+    var deptid  = '<?php echo $move_id['dept_id'];?>';
 
     var lenRow =lot.length;
     if(txtbarcode == ""){//alert jika barcode scan kosong 
       var message =  "Barcode Tidak Boleh Kosong !";
       alert_scan(message);
-
+      $('#barcode').focus();
     }else{
-      for(var i=0; i<lenRow; i++){
-       // alert('masuk ke'+i);
-        var data = lot[i].value.toUpperCase();
-        if(barcode==data){
-          //alert('sama');
-          var textValid =  $('[name="valid"]').eq(i).val();
-          if(textValid == 1){
-            setTimeout(function() { alert_notify("fa fa-warning ",barcode+" Sudah di Scan !","danger",function(){}); }, 1000);
-          }else{
-            setTimeout(function() { alert_notify("fa fa-check-circle ",barcode+" Valid Scan !","success",function(){}); }, 1000);
+
+      $('#btn-scan').button('loading');
+
+      $.ajax({
+         type: "POST",
+         dataType: "json",
+         url :'<?php echo base_url('warehouse/penerimaanbarang/valid_barcode_in')?>',
+         beforeSend: function(e) {
+            if(e && e.overrideMimeType) {
+                e.overrideMimeType("application/json;charset=UTF-8");
+            }
+         },
+         data: {kode:$('#kode').val(), deptid:deptid, txtbarcode:txtbarcode
+          },success: function(data){
+            if(data.sesi == "habis"){
+              //alert jika session habis
+              alert_scan(data.message);
+              window.location = baseUrl;//replace ke halaman login
+            }else if(data.status == "failed"){
+              //alert_scan(data.message);
+              refresh_div_in();
+              alert_notify(data.icon,data.message,data.type,function(){});
+              
+            }else{
+              alert_notify(data.icon,data.message,data.type,function(){});
+              refresh_div_in();
+            }
+            $('#barcode').focus();
+            $('#barcode').val('');
+            $('#btn-scan').button('reset');
+
+          },error: function (xhr, ajaxOptions, thrownError) { 
+            alert(xhr.responseText);
+            $('#btn-proses').button('reset');
+            refresh_div_in();
           }
-          $('#barcode').val('');
-          $('[name="valid"]').eq(i).val("1");
-          //document.getElementById(i+1).style.backgroundColor="#dff0d8";
-          var id = i+1;
-          $('#tbl_detail tbody #'+id).addClass('validScan');
-          $('#barcode').focus();
-          invalid = 0;
-        }else{
-          $('#barcode').val('');
-          $('#barcode').focus();
-        }
-
-          tot_valid = tot_valid + parseInt(valid[i].value);
-      }
-     $('#dari').html(tot_valid);
-     $('#valid').val(tot_valid);
-
-      if(invalid == 1 ){
-        var message =  "Barcode Tidak Valid !";
-        alert_scan(message);
-      }
+      });
     }
   }
 
@@ -253,6 +274,7 @@
       $("#status_bar").load(location.href + " #status_bar");
       $("#foot").load(location.href + " #foot");
       $("#tbl_detail").load(location.href + " #tbl_detail");
+      $("#counter_valid").load(location.href + " #counter_valid");
   }
 
     //untuk aksi kirim barang
@@ -300,7 +322,7 @@
                         type: 'POST',
                         dataType : 'json',
                         url : "<?php echo site_url('warehouse/penerimaanbarang/kirim_barang')?>",
-                        data : {kode : $('#kode').val(), move_id : move_id, origin : origin, deptid : deptid, method : method },
+                        data : {kode:$('#kode').val(), move_id:move_id, origin:origin, deptid:deptid, method:method, mode:"scan" },
                         error: function (xhr, ajaxOptions, thrownError) { 
                           alert(xhr.responseText);
                           $('#btn-kirim').button('reset');
@@ -324,7 +346,7 @@
                         alert_modal_warning(response.message2);
                       }
                       unblockUI( function() {
-                        setTimeout(function() { alert_notify(response.icon,response.message,response.type); }, 1000);
+                        setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
                       });
                       refresh_div_in();
                       $('#btn-kirim').button('reset');

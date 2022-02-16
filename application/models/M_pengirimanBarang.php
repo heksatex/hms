@@ -293,14 +293,15 @@ class M_pengirimanBarang extends CI_Model
 	}
 
 
-	function count_filtered3($kode_produk,$lokasi,$origin,$dept_id)
+	function count_filtered3($kode,$kode_produk,$lokasi,$origin,$dept_id)
 	{
 		$this->db->where('kode_produk',$kode_produk );
 		$this->db->where('lokasi',$lokasi );
 		$this->db->where('reserve_move','');
 		//cek type departement	
 		$cek_dept = $this->_module->cek_departement_by_kode($dept_id)->row_array();
-		if($cek_dept['type_dept'] == 'manufaktur'){
+		$cek_type = $this->cek_type_created($kode)->row_array();
+		if($cek_dept['type_dept'] == 'manufaktur' AND $cek_type['type_created'] == 0){
 			$this->db->where('reserve_origin',$origin);	
 		}		
 		$this->_get_datatables3_query();
@@ -308,14 +309,15 @@ class M_pengirimanBarang extends CI_Model
 		return $query->num_rows();
 	}
 
-	public function count_all3($kode_produk,$lokasi,$origin,$dept_id)
+	public function count_all3($kode,$kode_produk,$lokasi,$origin,$dept_id)
 	{
 		$this->db->where('kode_produk',$kode_produk );
 		$this->db->where('lokasi',$lokasi );
 		$this->db->where('reserve_move','');
 		//cek type departement
 		$cek_dept = $this->_module->cek_departement_by_kode($dept_id)->row_array();
-		if($cek_dept['type_dept'] == 'manufaktur'){
+		$cek_type = $this->cek_type_created($kode)->row_array();
+		if($cek_dept['type_dept'] == 'manufaktur' AND $cek_type['type_created'] == 0){
 			$this->db->where('reserve_origin',$origin);	
 		}
 		$this->db->from($this->table3);
@@ -534,9 +536,9 @@ class M_pengirimanBarang extends CI_Model
 		return $this->db->query("SELECT origin_prod FROM penerimaan_barang_items WHERE kode = '$kode' AND kode_produk = '$kode_produk' ");
 	}
 
-	public function get_move_id_by_method_origin($method,$origin,$status)
+	public function get_move_id_by_method_origin($method,$origin,$status,$status2)
 	{
-		return $this->db->query("SELECT move_id FROM stock_move WHERE method = '$method' AND origin = '$origin' AND status NOT IN ('$status') ");
+		return $this->db->query("SELECT move_id FROM stock_move WHERE method = '$method' AND origin = '$origin' AND status NOT IN ('$status','$status2') ");
 	}
   
 }

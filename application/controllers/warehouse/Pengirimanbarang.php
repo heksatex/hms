@@ -426,15 +426,15 @@ class Pengirimanbarang extends MY_Controller
         }
         $output = array(
             "draw" => $_POST['draw'],
-            "recordsTotal" => $this->m_pengirimanBarang->count_all3($kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
-            "recordsFiltered" => $this->m_pengirimanBarang->count_filtered3($kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
+            "recordsTotal" => $this->m_pengirimanBarang->count_all3($kode,$kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
+            "recordsFiltered" => $this->m_pengirimanBarang->count_filtered3($kode,$kode_produk,$destination_location['lokasi_dari'],$origin,$deptid),
             "data" => $data,
         );
         //output dalam format JSON
         echo json_encode($output);
     }
 
-
+/*
     public function save_details_modala()//revisi ada perbaikan mungkin tidak dipakai
     {
         $sub_menu  = $this->uri->segment(2);
@@ -458,6 +458,7 @@ class Pengirimanbarang extends MY_Controller
           $row        = explode("^,", $check);
           $status     = "";
           $status_brg = "ready";
+          $lot        = '';
 
           //lock tabel
           $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE' );
@@ -481,7 +482,6 @@ class Pengirimanbarang extends MY_Controller
               $row_order++;
               $start++;
           }
-
 
           if(!empty($sql_stock_quant_batch)){
               $sql_stock_quant_batch = rtrim($sql_stock_quant_batch, ', ');
@@ -518,6 +518,7 @@ class Pengirimanbarang extends MY_Controller
         }
         echo json_encode($callback);
     }
+*/
 
     public function save_details_quant_modal()
     {
@@ -1000,7 +1001,6 @@ class Pengirimanbarang extends MY_Controller
 
                     $move_id_out = $move_id;//move id asal yg ngebentuk back order
                    
-
                     //get row order stock_move_items
                     $row_order  = $this->_module->get_row_order_stock_move_items_by_kode($sm_tj['move_id']);
                     
@@ -1042,7 +1042,7 @@ class Pengirimanbarang extends MY_Controller
                                     if($ex_mt == 'IN' AND $tmp_mt == 'IN'){
 
                                         // get move id in yang draft by method dan origin()
-                                        $get_mto = $this->m_pengirimanBarang->get_move_id_by_method_origin($row['method'],$origin,'done')->row_array();
+                                        $get_mto = $this->m_pengirimanBarang->get_move_id_by_method_origin($row['method'],$origin,'done','cancel')->row_array();
 
                                         if($get_mto['move_id'] != ''){
 
@@ -1087,6 +1087,7 @@ class Pengirimanbarang extends MY_Controller
                             $querysm_tujuan = $this->_module->get_stock_move_tujuan($move_id,$origin,'done','cancel')->row_array();
                             if(!empty($querysm_tujuan['move_id'])){
                                 
+                                                            
                                 //insert stock_move items untuk stock_move tujuan
                                 $sql_stock_move_items_batch .= "('".$querysm_tujuan['move_id']."', '".$val->quant_id."', '".addslashes($val->kode_produk)."', '".addslashes($val->nama_produk)."', '".addslashes($val->lot)."', '".$val->qty."', '".addslashes($val->uom)."', '".$val->qty2."', '".addslashes($val->uom2)."', '".$status."', '".$row_order."', '".addslashes($origin_prod)."', '".$tgl."'), ";
                                 $sm_pasangan = false;
@@ -1100,11 +1101,18 @@ class Pengirimanbarang extends MY_Controller
                                 //update stock move 
                                 $get_kode_in = $this->m_pengirimanBarang->get_kode_penerimaan_by_move_id($move_id)->row_array();
                                 if(!empty($get_kode_in['kode'])){
-                                    //update penerimaan barang items = ready
+                                  //update penerimaan barang items = ready
                                     $case4  .= "when kode = '".$get_kode_in['kode']."' then '".$status."'";
                                     $where4 .= "'".$get_kode_in['kode']."',"; 
                                 }
-
+                                  
+                                //cek jika method stock move tujuan nya IN
+                                $mthd = explode("|",$querysm_tujuan['method']);
+                                $ex_mthd = $mthd[1];
+                                if($ex_mthd == 'IN'){ // jika stock move tujuanya IN maka loop_sm ==false
+                                    $loop_sm = false;
+                                }
+                                  
                             }else{
                                 //jika sdh tidak ada stockmove tujuan maka loop_sm berhenti
                                 $loop_sm = false;
