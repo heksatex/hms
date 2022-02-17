@@ -687,6 +687,7 @@
     $("#mo").load(location.href + " #mo>*");
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm');
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch');
+    $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('tambah_quant');
 
     readonly_textfield();
     refresh_mo();
@@ -729,15 +730,20 @@
             show: true,
             backdrop: 'static'
         })
+        $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('tambah_quant');
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+
        var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
         $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
         $('.modal-title').text('Tambah Details Product Qty');
           $.post('<?php echo site_url()?>manufacturing/mO/tambah_data_details_quant_mo',
             {kode_produk : kode_produk, move_id : move_id, deptid:deptid, origin_prod : origin_prod},
-            function(html){
-              setTimeout(function() {$(".tambah_data").html(html);  },1000);
-            }   
-         );
+          ).done(function(html){
+            setTimeout(function() {
+              $(".tambah_quant").html(html)  
+            },1000);
+            $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+          });
       }
   }
 
@@ -1006,7 +1012,7 @@
                   })
                   .done(function(response){
                     $("#table_rm").load(location.href + " #table_rm");
-                    alert_notify(response.icon,response.message,response.type);
+                    alert_notify(response.icon,response.message,response.type, function(){});
                   })
                   .fail(function(){
                     bootbox.alert('Error....');

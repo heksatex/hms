@@ -115,8 +115,7 @@
 	                          $("#status_bar").load(location.href + " #status_bar");
 	                          $("#foot").load(location.href + " #foot");  
 	                          $('#view_data').modal('hide');                 
-	                          alert_notify(response.icon,response.message,response.type);
-	                          parent.fadeOut('slow');
+	                          alert_notify(response.icon,response.message,response.type,function(){});
 	                        }
 	                      })
 	                }

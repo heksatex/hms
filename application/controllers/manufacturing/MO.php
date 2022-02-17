@@ -588,6 +588,8 @@ class MO extends MY_Controller
                 }
                 */
 
+                $cek_dl     = $this->m_mo->cek_validasi_double_lot_by_dept($deptid);
+
                 //simpan fg hasil
                 foreach ($array_fg as $row) {
 
@@ -662,11 +664,21 @@ class MO extends MY_Controller
                     }
 
                     //cek lot apa pernah diinput ?
-                    $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])),$lokasi_fg['lokasi_tujuan'])->row_array();
+                    if($cek_dl == 'true'){
+                        $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])))->row_array();
+                        if(strtoupper($cek_lot['lot']) == strtoupper(trim($row['lot']))){
+                            $lot_double .= $row['lot'].',';
+                        }
+                    }
+
+                    /*
+                    //cek lot apa pernah diinput ?
+                    $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])),'ADJ')->row_array();
                     if($cek_lot['lot'] == trim($row['lot'])){
                         //ambil lot double untuk alert
                         $lot_double .= $row['lot'].',';
                     }
+                    */
 
 
                     $start++;
@@ -697,6 +709,7 @@ class MO extends MY_Controller
                
                 //lokasi waste lot by dept id
                 $lokasi_waste = $this->m_mo->get_location_waste_by_deptid($deptid)->row_array();
+                $cek_dl       = $this->m_mo->cek_validasi_double_lot_by_dept($deptid);
 
                 foreach ($array_waste as $row) {
 
@@ -710,11 +723,21 @@ class MO extends MY_Controller
                     $sql_stock_move_items_batch .= "('".$move_id_fg."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty']."','".addslashes($row['uom'])."','".$row['qty2']."','".addslashes($row['uom2'])."','".$status_done."','".$row_order_smi."','','".$tgl."'), ";
 
                     //cek lot apa pernah diinput ?
-                    $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])),$lokasi_waste['waste_location'])->row_array();
+                    if($cek_dl == 'true'){
+                        $cek_lot = $this->m_mo->cek_lot_stock_quant_waste(addslashes(trim($row['lot'])),$lokasi_waste['waste_location'])->row_array();
+                         if(strtoupper($cek_lot['lot']) == strtoupper(trim($row['lot']))){
+                             $lot_double_Waste .= $row['lot'].',';
+                         }
+                    }
+
+                    /*
+                    //cek lot apa pernah diinput ?
+                    $cek_lot = $this->m_mo->cek_lot_stock_quant_waste(addslashes(trim($row['lot'])),$lokasi_waste['waste_location'])->row_array();
                     if($cek_lot['lot'] == trim($row['lot'])){
                         //ambil lot double untuk alert
                         $lot_double_Waste .= $row['lot'].',';
                     }
+                    */
 
                     $start++;
                     $row_order++;
@@ -1204,13 +1227,24 @@ class MO extends MY_Controller
                     $where7 .= "'".$sm_tj['move_id']."',";
 
                 }
-                
+
+                $cek_dl     = $this->m_mo->cek_validasi_double_lot_by_dept($deptid);
+
+                 //cek lot apa pernah diinput ?
+                 if($cek_dl == 'true'){
+                    $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($lot)))->row_array();
+                    if(strtoupper($cek_lot['lot']) == strtoupper(trim($lot))){
+                        $lot_double .= $lot.',';
+                    }
+                }
+                /*
                 //cek lot apa pernah diinput ?
                 $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($lot)),$lokasi_fg['lokasi_tujuan'])->row_array();
                 if($cek_lot['lot'] == trim($lot)){
                     //ambil lot double untuk alert
                     $lot_double .= $lot.',';
                 }
+                */
                 $start++;              
 
             }//end if cek jika kode produk/nama produk tidak kosong
@@ -1543,21 +1577,28 @@ class MO extends MY_Controller
     {
 
         $kode  = $this->input->post('kode');
-        $lot  = $this->input->post('txtlot');
+        $lot   = $this->input->post('txtlot');
+        $head  = $this->m_mo->get_data_by_code($kode);
 
-        $move_fg  = $this->m_mo->get_move_id_fg_target_by_kode($kode)->row_array();
-        $move_id_fg = $move_fg['move_id'];
-
-        //lokasi tujuan fg
-        $lokasi_fg = $this->_module->get_location_by_move_id($move_id_fg)->row_array();
-
-        $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($lot)),$lokasi_fg['lokasi_tujuan'])->row_array();
+        // cek validasi double lot
+        $cek_dl = $this->m_mo->cek_validasi_double_lot_by_dept($head->dept_id);
         $lot_double = FALSE;
-        if(($cek_lot['lot'] == trim($lot)) AND $lot !=''){
-            $lot_double = TRUE;
+        if($cek_dl == 'true'){
+            $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($lot)))->row_array();
+            if((strtoupper($cek_lot['lot']) == strtoupper(trim($lot))) AND $lot !=''){
+                $lot_double = TRUE;
+            }
         }
 
-        $callback = array('double' => $lot_double, 'message' => 'Lot '.$lot.' pernah diinput ! ');
+        /*
+        $move_fg  = $this->m_mo->get_move_id_fg_target_by_kode($kode)->row_array();
+        $move_id_fg = $move_fg['move_id'];
+        
+        //lokasi tujuan fg
+        $lokasi_fg = $this->_module->get_location_by_move_id($move_id_fg)->row_array();
+        */
+
+        $callback = array('double' => $lot_double, 'message' => 'Lot '.$lot.' sudah pernah diinput ! ');
 
         echo json_encode($callback);
 
