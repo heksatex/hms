@@ -275,6 +275,20 @@ class M_transferLokasi extends CI_Model
 		return $this->db->get('stock_quant');
 	}
 
+	public function get_jml_items_transfer_lokasi_by_kode($kode_tl)
+	{
+		$this->db->WHERE('kode_tl',$kode_tl);
+		$result = $this->db->get('transfer_lokasi_items');
+		return $result->num_rows();	
+	}
+	
+	public function update_jml_items_transfer_lokasi_by_kode($kode_tl,$count)
+	{
+		$this->db->set('total_lot', $count);
+		$this->db->where('kode_tl', $kode_tl);
+		return $this->db->update('transfer_lokasi');
+	}
+
 
 
 

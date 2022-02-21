@@ -116,7 +116,7 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-0 col-md-4 col-sm-4"></div>
                   <div class="col-xs-12 col-md-8 col-sm-8">
-                    <button  type="button" class="btn btn-sm btn-primary" name="btn-scan" id="btn-scan"><i class="fa fa-barcode"></i> Scan </button>
+                    <button  type="button" class="btn btn-sm btn-primary" name="btn-scan" id="btn-scan" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."><i class="fa fa-barcode"></i> Scan </button>
                   </div>                                    
                 </div>                
               </div>
