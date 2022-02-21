@@ -276,7 +276,11 @@ class Transferlokasi extends MY_Controller
 			   			if($tli){
 							// update status transfer lokasi
 							$status = 'ready';
-							$this->m_transferLokasi->update_status_transfer_lokasi($kode_tl,$status);	   				
+							$this->m_transferLokasi->update_status_transfer_lokasi($kode_tl,$status);	 
+							
+							//update jml lot di header
+							$count = $this->m_transferLokasi->get_jml_items_transfer_lokasi_by_kode($kode_tl);
+							$this->m_transferLokasi->update_jml_items_transfer_lokasi_by_kode($kode_tl,$count);
 			   			}
 
 		      			$jenis_log   = "edit";
@@ -469,6 +473,10 @@ class Transferlokasi extends MY_Controller
 			    	    $this->_module->update_reff_batch($sql_update2);
 
 		    		}
+
+					//update jml lot di header
+					$count = $this->m_transferLokasi->get_jml_items_transfer_lokasi_by_kode($kode_tl);
+					$this->m_transferLokasi->update_jml_items_transfer_lokasi_by_kode($kode_tl,$count);
 
 		    		$status = 'done';
 					$this->m_transferLokasi->update_status_transfer_lokasi($kode_tl,$status);	   				
