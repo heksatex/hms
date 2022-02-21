@@ -571,9 +571,14 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT count(lot) as jml_lot FROM stock_quant WHERE lot LIKE '$lot_prefix_waste%' AND lokasi = '$lokasi_waste'");
 	}
 	
-	public function cek_lot_stock_quant($lot,$lokasi)
+	public function cek_lot_stock_quant($lot)
 	{
-		return $this->db->query("SELECT lot from stock_quant WHERE lot = '$lot' and lokasi = '$lokasi' ");
+		return $this->db->query("SELECT lot from stock_quant WHERE lot = '$lot' and (lokasi NOT LIKE '%ADJ%' OR lokasi NOT LIKE '%Waste%') ");
+	}
+
+	public function cek_lot_stock_quant_waste($lot,$lokasi_waste)
+	{
+		return $this->db->query("SELECT lot from stock_quant WHERE lot = '$lot' and lokasi = '$lokasi_waste' ");
 	}
 
 	public function cek_qty_stock_move_items_by_produk($move_id,$origin_prod,$status)
@@ -733,6 +738,12 @@ class M_mo extends CI_Model
 							WHERE smi.lot = '$lot' AND sm.method = '$method' AND sm.origin = '$origin'")->row_array();
 		return $result['reff_picking'];
 
+	}
+
+	public function cek_validasi_double_lot_by_dept($dept_id)
+	{
+		$result =  $this->db->query("SELECT validasi_double_lot FROM departemen WHERE kode = '$dept_id' ")->row_array();
+		return $result['validasi_double_lot'];
 	}
 
 

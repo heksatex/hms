@@ -136,7 +136,7 @@
                   $("#foot").load(location.href + " #foot");
                   $('#tambah_data').modal('hide');
                   $('#btn-tambah').button('reset');
-                  alert_notify(data.icon,data.message,data.type);
+                  alert_notify(data.icon,data.message,data.type,function(){});
                 }
 
               },error: function (xhr, ajaxOptions, thrownError) {

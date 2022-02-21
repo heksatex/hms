@@ -391,22 +391,64 @@
 			//cek untuk lot double
 			var sama = false;
 			var arr3 = [];
+			var sama_2 = false;
 			$(".txtlot").each(function(){
 			    var value = $(this).val();
+				var thiss   = this;
 			    if (arr3.indexOf(value) == -1){
 				    arr3.push(value);
 			        $(this).removeClass("error");
+					sama_2 = false;
 			    }else{
 			        $(this).addClass("error");
-					sama = true;
+					sama   = true;
+					sama_2 = true;
 			    }
+
+				// validasi kp double
+				cek_double_lot(value, thiss, sama_2);
+				
 			});	
 
 			if(sama==true){
 				alert('Lot ada yang sama !');
 			}
 		}
+
+		// validasi kp double key up
+		$('.txtlot').on('keyup', function(){
+			var txtlot   = $(this).val();
+			var thiss    = this;
+			cek_double_lot(txtlot,thiss,'');
+		});	
+
 	}
+
+	function cek_double_lot(txtlot,thiss,sama_2){
+
+		var kode     = '<?php echo $kode?>';//kode MO
+		$.ajax({
+				dataType : 'JSON',
+				type     : 'POST',
+				url      : '<?php echo site_url('manufacturing/mO/cek_input_lot_double') ?>',
+				data     : {kode : kode, txtlot :txtlot},
+				success : function(data){
+					if(data.double == true){
+						alert(data.message);
+						$(thiss).addClass("error");
+					}else if(sama_2 == true){
+						$(thiss).addClass("error");
+					}else{
+						$(thiss).removeClass("error");
+					}
+				},error : function (jqXHR, textStatus, errorThrown){
+					alert(jqXHR.responseText);
+					alert('error data');
+				}
+		});
+		return;
+	}
+
 
 	/*********************************
 	  END SCRTIPT TABEL PRODUCT LOT
@@ -681,7 +723,6 @@
 
 		$(document).one("click","#btn-copy",function(e) {
 
-
 			$('.qty_konsum').each(function(index,item){
 				type 		= $(item).parents("tr").find("#type").val();
 				if ($(item).val()!=="" && type == 'stockable') {
@@ -709,9 +750,13 @@
 						+ '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
 						+ '</tr>';
 						$('#tabel_produksi tbody').append(html);			
-				}			
+						
+						
+				}
+								
 			});
 
+			
 			$('.qty_konsum').each(function(index,item){
 				qty_smi     = $(item).parents("tr").find('#qty_smi').val();
 				//set value qty dikonsumsi
@@ -721,8 +766,24 @@
 			alert_notify('fa fa-check','Salin Konsumsi Bahan berhasil !','success',function(){});
 			$("#btn-copy").prop('disabled',true);
 			total();
-		});
 
+			//cek untuk lot double
+			$(".txtlot").each(function(){
+				var value = $(this).val();
+				var thiss = this;
+				// validasi kp double
+				cek_double_lot(value, thiss,'');
+			});
+
+			// validasi kp double key up
+			$('.txtlot').on('keyup', function(){
+				var txtlot   = $(this).val();
+				var thiss    = this;
+				cek_double_lot(txtlot,thiss,'');
+			});	
+			
+		});
+		
 	}
 
 
@@ -972,8 +1033,9 @@
 			              }
 			              //console.log(data.sql);
 			              alert_notify(data.icon,data.message,data.type,function(){});
-
+						  
 			            }
+						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch'); 
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
 			          alert(jqXHR.responseTex+' error');
