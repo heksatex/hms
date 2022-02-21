@@ -688,7 +688,6 @@
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm');
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch');
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('tambah_quant');
-
     readonly_textfield();
     refresh_mo();
   });
@@ -910,6 +909,8 @@
       $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('produksi_rm_batch');
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
 
+      $("#btn-produksi").prop('disabled',true);
+
       $(".produksi_rm_batch").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $.post('<?php echo site_url()?>manufacturing/mO/produksi_rm_batch',
         { kode        : $('#kode').val(),
@@ -964,6 +965,7 @@
       });
       $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('produksi_rm');
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+      $("#btn-produksi-batch").prop('disabled',true);
 
       $(".produksi_rm").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $.post('<?php echo site_url()?>manufacturing/mO/produksi_rm',
@@ -1062,7 +1064,7 @@
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $("#foot").load(location.href + " #foot");
               $("#status_bar").load(location.href + " #status_bar");
@@ -1116,7 +1118,7 @@
               $("#foot").load(location.href + " #foot");
               $('#btn-stok').button('reset');
               if(data.status_kurang == "yes"){
-                alert_notify(data.icon2,data.message2,data.type2);
+                alert_notify(data.icon2,data.message2,data.type2,function(){});
               }
             }else{
 
@@ -1124,7 +1126,7 @@
                  unblockUI( function() {});                  
               }else{
                 unblockUI( function() {
-                    setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               }
               $("#status_bar").load(location.href + " #status_bar");
@@ -1185,7 +1187,7 @@
             }else if(data.status == "failed"){
                //jika ada form belum keisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $('#btn-simpan').button('reset');
               document.getElementById(data.field).focus();//focus ke field yang belum keisi
@@ -1193,7 +1195,7 @@
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $('#btn-simpan').button('reset');
               readonly_textfield();
@@ -1251,13 +1253,13 @@
                 window.location.replace('../index');
               }else if(data.status == "failed"){
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 refresh_mo(); 
                 $('#btn-done').button('reset')         
               }else{
                 unblockUI( function() {
-                    setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 refresh_mo();
                 $('#btn-done').button('reset');           
