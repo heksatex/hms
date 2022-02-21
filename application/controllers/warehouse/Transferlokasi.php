@@ -279,8 +279,8 @@ class Transferlokasi extends MY_Controller
 							$this->m_transferLokasi->update_status_transfer_lokasi($kode_tl,$status);	 
 							
 							//update jml lot di header
-							$count = $this->m_transferLokasi->get_jml_items_transfer_lokasi_by_kode($kode_tl);
-							$this->m_transferLokasi->update_jml_items_transfer_lokasi_by_kode($kode_tl,$count);
+							$total_lot = $this->m_transferLokasi->get_jml_items_transfer_lokasi_by_kode($kode_tl);
+							$this->m_transferLokasi->update_jml_items_transfer_lokasi_by_kode($kode_tl,$total_lot);
 			   			}
 
 		      			$jenis_log   = "edit";
@@ -352,6 +352,10 @@ class Transferlokasi extends MY_Controller
 					$status = 'draft';
 					$this->m_transferLokasi->update_status_transfer_lokasi($kode_tl,$status);	   				
 	   			}
+
+				//update jml lot di header
+				$total_lot = $this->m_transferLokasi->get_jml_items_transfer_lokasi_by_kode($kode_tl);
+				$this->m_transferLokasi->update_jml_items_transfer_lokasi_by_kode($kode_tl,$total_lot);
 
             	$jenis_log   = "cancel";
 				$note_log    = "Hapus Items ". $nama_produk." | ".$barcode_id." | ".$quant_id;
