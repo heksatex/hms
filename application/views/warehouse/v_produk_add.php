@@ -113,10 +113,16 @@
                         <!-- kiri -->
                         <div class="col-md-6">
                           <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-4">Lebar Jadi (inch)</div>
+                           <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4">Lebar Greige </div>
                               <div class="col-xs-4">
-                                <input type="number" class="form-control input-sm" name="lebar" id="lebar" onkeypress="return hanyaAngka(event)" >
+                                <input type="texxt" class="form-control input-sm" name="lebargreige" id="lebargreige" >
+                              </div>
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4">Lebar Jadi </div>
+                              <div class="col-xs-4">
+                                <input type="text" class="form-control input-sm" name="lebarjadi" id="lebarjadi" >
                               </div>
                             </div>
                             <div class="col-md-12 col-xs-12">
@@ -415,15 +421,6 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
-
-  // validasi lebar jadi
-  function hanyaAngka(evt){
-    var charCode = (evt.which) ? evt.which : event.keyCode
-    if (charCode > 31 && (charCode < 48 || charCode > 57))
-    return false;
-    return true;
-  }
-
   
   //set tgl buat
   var datenow=new Date();  
@@ -519,7 +516,8 @@
                 typeproduk      : $('#typeproduk').val().toLowerCase(),
                 uomproduk       : $('#uomproduk').val(),
                 uomproduk2      : $('#uomproduk2').val(),
-                lebarjadi       : $('#lebar').val(),
+                lebarjadi       : $('#lebarjadi').val(),
+                lebargreige       : $('#lebargreige').val(),
                 kategoribarang  : $('#kategoribarang').val(),
                 routeproduksi   : $('#routeproduksi').val(),
                 bom             : $('#bom').val(),
