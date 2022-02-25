@@ -122,9 +122,9 @@ class M_produk extends CI_Model
 		return $this->db->query("SELECT kode_produk,nama_produk FROM mst_produk where kode_produk = '$kodeproduk'");
 	}
 
-	public function update_produk($kode_produk,$nama_produk,$uom,$uom_2,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom,$lebargreige,$lebarjadi,$statusproduk)
+	public function update_produk($kode_produk,$nama_produk,$uom,$uom_2,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk)
 	{
-		return $this->db->query("UPDATE mst_produk set nama_produk = '$nama_produk', uom = '$uom',uom_2 = '$uom_2', route_produksi = '$route_produksi', type = '$type', dapat_dibeli = '$dapat_dibeli', dapat_dijual = '$dapat_dijual', id_category = '$id_category', note = '$note', bom = '$bom', lebar_greige = '$lebargreige' ,lebar_jadi = '$lebarjadi', status_produk = '$statusproduk'  WHERE kode_produk = '$kode_produk' ");
+		return $this->db->query("UPDATE mst_produk set nama_produk = '$nama_produk', uom = '$uom',uom_2 = '$uom_2', route_produksi = '$route_produksi', type = '$type', dapat_dibeli = '$dapat_dibeli', dapat_dijual = '$dapat_dijual', id_category = '$id_category', note = '$note', bom = '$bom', lebar_greige = '$lebargreige', uom_lebar_greige = '$uom_lebargreige' ,lebar_jadi = '$lebarjadi', uom_lebar_jadi = '$uom_lebarjadi', status_produk = '$statusproduk'  WHERE kode_produk = '$kode_produk' ");
 	}
 
 	public function get_nama_category_by_id($id)
@@ -132,9 +132,9 @@ class M_produk extends CI_Model
 		return $this->db->query("SELECT id,nama_category FROM mst_category WHERE id = '$id'");
 	}
 
-	public function save_produk($kode_produk,$nama_produk,$uom,$uom_2,$create_date,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom, $lebargreige,$lebarjadi,$statusproduk)
+	public function save_produk($kode_produk,$nama_produk,$uom,$uom_2,$create_date,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk)
 	{
-		return $this->db->query("INSERT INTO mst_produk(kode_produk,nama_produk,uom,uom_2,create_date,route_produksi,type,dapat_dibeli,dapat_dijual,id_category,note,bom,lebar_greige,lebar_jadi,status_produk) VALUES ('$kode_produk','$nama_produk','$uom','$uom_2','$create_date','$route_produksi','$type','$dapat_dibeli','$dapat_dijual','$id_category','$note', '$bom','$lebargreige','$lebarjadi','$statusproduk')");
+		return $this->db->query("INSERT INTO mst_produk(kode_produk,nama_produk,uom,uom_2,create_date,route_produksi,type,dapat_dibeli,dapat_dijual,id_category,note,bom,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi,status_produk) VALUES ('$kode_produk','$nama_produk','$uom','$uom_2','$create_date','$route_produksi','$type','$dapat_dibeli','$dapat_dijual','$id_category','$note', '$bom','$lebargreige','$uom_lebargreige','$lebarjadi','$uom_lebarjadi','$statusproduk')");
 	}
 
 	public function get_qty_onhand($kodeproduk)

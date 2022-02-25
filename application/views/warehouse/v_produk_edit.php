@@ -194,13 +194,40 @@
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Lebar Greige</div>
                               <div class="col-xs-4">
-                                <input type="text" class="form-control input-sm" name="lebargreige" id="lebargreige" value="<?php echo $produk->lebar_greige;?>">
+                                <input type="text" class="form-control input-sm" name="lebargreige" id="lebargreige" value="<?php echo $produk->lebar_greige;?>" style="text-align:right;">
+                              </div>
+                              <div class="col-xs-3">
+                                <select class="form-control input-sm" name="uom_lebargreige" id="uom_lebargreige" >
+                                  <option value=""></option>
+                                    <?php foreach ($uom as $row) {
+                                            if($row->short == $produk->uom_lebar_greige){
+                                              echo "<option selected value='".$row->short."'>".$row->short."</option>";
+
+                                            }else{
+                                              echo "<option value='".$row->short."'>".$row->short."</option>";
+                                            }
+                                          }
+                                    ?>
+                                </select>
                               </div>
                             </div>
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Lebar Jadi </div>
                               <div class="col-xs-4">
-                                <input type="text" class="form-control input-sm" name="lebarjadi" id="lebarjadi" value="<?php echo $produk->lebar_jadi;?>">
+                                <input type="text" class="form-control input-sm" name="lebarjadi" id="lebarjadi" value="<?php echo $produk->lebar_jadi;?>" style="text-align:right;">
+                              </div>
+                              <div class="col-xs-3">
+                                <select class="form-control input-sm" name="uom_lebarjadi" id="uom_lebarjadi" >
+                                  <option value=""></option>
+                                    <?php foreach ($uom as $row) {
+                                            if($row->short == $produk->uom_lebar_jadi){
+                                              echo "<option selected value='".$row->short."'>".$row->short."</option>";
+                                            }else{
+                                              echo "<option value='".$row->short."'>".$row->short."</option>";
+                                            }
+                                          }
+                                    ?>
+                                </select>
                               </div>
                             </div>
                             <div class="col-md-12 col-xs-12">
@@ -581,7 +608,9 @@
                 dapatdijual     : dapatdijual_value,
                 dapatdibeli     : dapatdibeli_value,
                 lebarjadi       : $('#lebarjadi').val(),
+                uom_lebarjadi   : $('#uom_lebarjadi').val(),
                 lebargreige     : $('#lebargreige').val(),
+                uom_lebargreige : $('#uom_lebargreige').val(),
                 typeproduk      : $('#typeproduk').val().toLowerCase(),
                 uomproduk       : $('#uomproduk').val(),
                 uomproduk2      : $('#uomproduk2').val(),
