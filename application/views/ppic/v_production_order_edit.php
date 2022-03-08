@@ -305,11 +305,6 @@
 
 <script type="text/javascript">
 
-  $('#sch_date').datetimepicker().on('dp.show', function() {
-    $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
-  }).on('dp.hide', function() {
-     $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
-  });
  
 
   //validasi inputan harus angka
@@ -365,6 +360,15 @@
   // Append table with add row form on add new button click
   $(document).on("click", ".add-new", function(){
 
+    /*
+  $('#sch_date').datetimepicker().on('dp.show', function() {
+    alert('tes');
+    //$(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+  }).on('dp.hide', function() {
+     $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+  });
+  */
+
     $(".add-new").hide();
     var index = $("#procurements tbody tr:last-child").index();
     var row   ='<tr class="">'
@@ -395,6 +399,10 @@
           minDate : datetomorrow,
           format : 'YYYY-MM-DD HH:mm:ss',
           ignoreReadonly: true,
+        }).on('dp.show', function() {
+          $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function() {
+          $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
         });
 
         //select 2 product
@@ -657,7 +665,12 @@
                 minDate : datetomorrow,
                 format : 'YYYY-MM-DD HH:mm:ss',
                 ignoreReadonly: true,
-             });
+             }).on('dp.show', function() {
+              $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+            }).on('dp.hide', function() {
+              $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+            });
+            
           }else if($(this).attr('data-id')=='qty'){
             $(this).html('<input type="text"  class="form-control input-sm width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
           }else if($(this).attr('data-id')=='lebar_greige' || $(this).attr('data-id')=='lebar_jadi'){
