@@ -196,6 +196,10 @@
                             <th class="style">uom</th>
                             <th class="style" style="text-align: right;">Qty2</th>
                             <th class="style">uom2 </th>
+                            <?php if($show_lebar['show_lebar'] == 'true'){?>
+                              <th class="style" style="text-align: right;">Lbr.Greige</th>
+                              <th class="style" style="text-align: right;">Lbr.Jadi</th>
+                            <?php }?>
                             <th class="style">Reff Note</th>
                             <th class="style">Status</th>
                             <th class="style">Quant Id</th>
@@ -214,6 +218,10 @@
                                 <td><?php echo $row->uom?></td>
                                 <td align="right"><?php echo number_format($row->qty2,2)?></td>
                                 <td><?php echo $row->uom2?></td>
+                                <?php if($show_lebar['show_lebar'] == 'true'){?>
+                                  <td align="right"><?php echo $row->lebar_greige.' '.$row->uom_lebar_greige;?></td>
+                                  <td align="right"><?php echo $row->lebar_jadi.' '.$row->uom_lebar_jadi;?></td>
+                                <?php }?>
                                 <td><?php echo $row->reff_note?></td>
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                 <td><?php echo $row->quant_id?></td>

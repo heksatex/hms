@@ -236,7 +236,7 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid, smi.lebar_greige,smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi
 								FROM stock_move_items smi 
 								INNER JOIN penerimaan_barang pb ON smi.move_id = pb.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
@@ -374,7 +374,7 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_stock_move_items_by_move_id_partial_in($move_id)
 	{
-		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid
+		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid, smi.lokasi_fisik, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi
 								FROM stock_move_items  smi
 								INNER JOIN penerimaan_barang_tmp tmp ON smi.move_id = tmp.move_id AND smi.lot = tmp.lot
 								WHERE smi.move_id = '$move_id' 
@@ -393,7 +393,7 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_stock_move_items_not_penerimaan_barang_tmp($move_id)
     {
-   		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid
+   		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid, smi.lokasi_fisik, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi
 							FROM stock_move_items  smi
 							LEFT JOIN penerimaan_barang_tmp tmp ON smi.move_id = tmp.move_id AND smi.lot = tmp.lot
 							WHERE smi.move_id = '$move_id' AND smi.lot NOT IN (SELECT lot FROM penerimaan_barang_tmp WHERE move_id = '$move_id')

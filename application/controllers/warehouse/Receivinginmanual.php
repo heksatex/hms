@@ -232,7 +232,7 @@ class Receivinginmanual extends MY_Controller
 	    			$row_order++;
 
 	    			//insert ke stock quant
-	    			$sql_simpan_stock_quant .= "('".$start."','".$tanggal."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".$lot."','','".$qty."','".addslashes($uom)."','','','RCV/Stock','".addslashes($note)."','',''), ";
+	    			$sql_simpan_stock_quant .= "('".$start."','".$tanggal."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".$lot."','','".$qty."','".addslashes($uom)."','','','RCV/Stock','".addslashes($note)."','','','".$tanggal."','','','',''), ";
 	    			$start++;
 
 

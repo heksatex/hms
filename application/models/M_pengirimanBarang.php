@@ -345,7 +345,7 @@ class M_pengirimanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lokasi_fisik
 								 FROM stock_move_items smi 
 								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id

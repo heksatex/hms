@@ -265,7 +265,7 @@ class _module extends CI_Model
 
 	public function simpan_mrp_production_batch($sql)
 	{
-		return $this->db->query("INSERT INTO mrp_production (kode,tanggal,origin,kode_produk,nama_produk,qty,uom,tanggal_jt,reff_note,kode_bom,start_time,finish_time,source_location,destination_location,dept_id,status,kode_warna,responsible) values $sql ");
+		return $this->db->query("INSERT INTO mrp_production (kode,tanggal,origin,kode_produk,nama_produk,qty,uom,tanggal_jt,reff_note,kode_bom,start_time,finish_time,source_location,destination_location,dept_id,status,kode_warna,responsible,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi) values $sql ");
 	}
 
 	public function simpan_mrp_production_rm_target_batch($sql)
@@ -385,12 +385,12 @@ class _module extends CI_Model
 
 	public function simpan_stock_quant_batch($sql)
 	{
-		return $this->db->query("INSERT INTO stock_quant (quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,reff_note,reserve_move,reserve_origin) VALUES $sql ");
+		return $this->db->query("INSERT INTO stock_quant (quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,reff_note,reserve_move,reserve_origin,move_date,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi) VALUES $sql ");
 	}
 
 	public function simpan_stock_move_items_batch($sql)
 	{
-		return $this->db->query("INSERT INTO stock_move_items (move_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,status,row_order,origin_prod,tanggal_transaksi) values $sql ");
+		return $this->db->query("INSERT INTO stock_move_items (move_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,status,row_order,origin_prod,tanggal_transaksi,lokasi_fisik,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi) values $sql ");
 	}
 
 
@@ -684,6 +684,15 @@ class _module extends CI_Model
 		return $result['nama_status'];
 	}
 
+	public  function get_status_aktif_by_produk($kode_produk)
+	{
+		return $this->db->query("SELECT status_produk FROM mst_produk WHERE kode_produk = '$kode_produk'");
+	}
+
+	public function cek_show_lebar_by_dept_id($dept_id)
+	{
+		return $this->db->query("SELECT show_lebar FROM departemen WHERE kode = '$dept_id' ");
+	}
 	
 
 }

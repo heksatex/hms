@@ -439,6 +439,7 @@ class Procurementorder extends MY_Controller
             $sql_log_history_mo = "";
             $sql_log_history_in = "";
             $sql_log_history_out= "";
+            $arr_kode    = [];
 
             $cek_status = $this->m_procurementOrder->cek_status_procurement_order_items_by_row($kode,addslashes($kode_produk),$row_order)->row_array();
             
@@ -679,7 +680,7 @@ class Procurementorder extends MY_Controller
 
     	                  $source_location = $method_dept."/Stock";
     	                  //sql simpan mrp_production
-    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$source_location."','".$source_location."','".$method_dept."','draft','','".$nama_user."'), ";
+    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$source_location."','".$source_location."','".$method_dept."','draft','','".$nama_user."','','','',''), ";
 
                            //get mms kode berdasarkan dept_id
                           $mms = $this->_module->get_kode_sub_menu_deptid('mO',$method_dept)->row_array();

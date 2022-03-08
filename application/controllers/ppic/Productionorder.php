@@ -135,7 +135,6 @@ class Productionorder extends MY_Controller
             $priority    = addslashes($this->input->post('priority'));
             $warehouse   = addslashes($this->input->post('warehouse'));
 
-
             if(empty($tgl)){
                 $callback = array('status' => 'failed', 'field' => 'tgl', 'message' => 'Create Date Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
             }elseif(empty($note)){
@@ -223,6 +222,7 @@ class Productionorder extends MY_Controller
         $data["productionorder"] = $this->m_productionOrder->get_data_by_code($kode_decrypt);
         $data['details']    = $this->m_productionOrder->get_data_detail_by_code($kode_decrypt);
         $data['warehouse']  = $this->_module->get_list_departement();
+        $data['uom']        = $this->_module->get_list_uom();
 
         if(empty($data["productionorder"])){
           show_404();
@@ -256,7 +256,9 @@ class Productionorder extends MY_Controller
         }
 
         $result3     = $this->m_productionOrder->get_bom_by_nama_produk($nama_produk)->row_array();
-        $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result2['uom'], 'qty'=>$result['qty'], 'kode_bom'=>$result3['kode_bom'], 'nama_bom'=>$result3['nama_bom'] );
+        $result4     = $this->m_productionOrder->get_lebar_by_kode_produk($kode_produk)->row_array();
+
+        $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result2['uom'], 'qty'=>$result['qty'], 'kode_bom'=>$result3['kode_bom'], 'nama_bom'=>$result3['nama_bom'], 'lebar_greige' => $result4['lebar_greige'], 'uom_lebar_greige' => $result4['uom_lebar_greige'], 'lebar_jadi' => $result4['lebar_jadi'], 'uom_lebar_jadi' => $result4['uom_lebar_jadi'] );
         echo json_encode($callback);
     }
 
@@ -296,6 +298,10 @@ class Productionorder extends MY_Controller
             $tgl         = $this->input->post('tgl'); 
             $qty         = $this->input->post('qty'); 
             $uom         = addslashes($this->input->post('uom')); 
+            $lebar_greige= addslashes($this->input->post('lebar_greige')); 
+            $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige')); 
+            $lebar_jadi  = addslashes($this->input->post('lebar_jadi')); 
+            $uom_lebar_jadi     = addslashes($this->input->post('uom_lebar_jadi')); 
             $reff        = addslashes($this->input->post('reff')); 
             $row         = $this->input->post('row_order'); 
 
@@ -316,10 +322,10 @@ class Productionorder extends MY_Controller
 
                 }else{
 
-    				$this->m_productionOrder->update_production_order_items($kode,$tgl,$kode_produk_ex_row,$kode_bom,$qty,$reff,$row_order_ex_row);
+    				$this->m_productionOrder->update_production_order_items($kode,$tgl,$kode_produk_ex_row,$kode_bom,$qty,$reff,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$row_order_ex_row);
                     
                     $jenis_log   = "edit";
-                    $note_log    = "Edit data Details | ".$kode." | ".$tgl." | ".$kode_produk_ex_row." | ".$kode_bom." | ".$qty." | ".$reff." | ".$row_order_ex_row;
+                    $note_log    = "Edit data Details | ".$kode." | ".$tgl." | ".$kode_produk_ex_row." | ".$kode_bom." | ".$qty." | ".$lebar_greige." ".$uom_lebar_greige." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$reff." | ".$row_order_ex_row;
                     $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
 
                     $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
@@ -329,7 +335,7 @@ class Productionorder extends MY_Controller
 		        $ro  = $this->m_productionOrder->get_row_order_production_order_items($kode)->row_array();
 		        $row_order = $ro['row_order']+1;
 		        $status  = 'draft';
-	            $this->m_productionOrder->save_production_order_items($kode,$kode_produk,$produk,$kode_bom,$tgl,$qty,$uom,$reff,$status,$row_order);
+	            $this->m_productionOrder->save_production_order_items($kode,$kode_produk,$produk,$kode_bom,$tgl,$qty,$uom,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$reff,$status,$row_order);
 	           
 	            $cek_details = $this->m_productionOrder->cek_status_production_order_items($kode,'')->num_rows(); 
 
@@ -351,7 +357,7 @@ class Productionorder extends MY_Controller
                 $nama_bom  = $bm['nama_bom'];
 				
 	            $jenis_log   = "edit";
-                $note_log    = "Tambah data Details | ".$kode." | ".$produk." | ".$kode_bom." | ".$nama_bom."| ".$tgl." | ".$qty." | ".$uom." | ".$reff;
+                $note_log    = "Tambah data Details | ".$kode." | ".$produk." | ".$kode_bom." | ".$nama_bom."| ".$tgl." | ".$qty." | ".$uom." | ".$lebar_greige." ".$uom_lebar_greige." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$reff;
                 $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
                 $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                 
@@ -378,12 +384,14 @@ class Productionorder extends MY_Controller
             $data      = explode("^|",$row);
         	$row_order = $data[0];
         	$kode_produk = addslashes($data[1]);
-        	$nama_produk = addslashes($data[2]);
-        	$qty = $data[3];
-        	$uom = addslashes($data[4]);
-        	$reff_notes    = addslashes($data[5]);
-        	$schedule_date = $data[6];
-        	$sales_order   = $data[7];
+
+            // get data procurement order by row
+            $get = $this->m_productionOrder->get_data_production_order_items_by_kode($kode,addslashes($kode_produk),$row_order)->row_array();
+
+        	$nama_produk = addslashes($get['nama_produk']);
+        	$qty         = $get['qty'];
+        	$uom         = addslashes($get['uom']);
+        	$schedule_date = $get['schedule_date'];
 
 
             $cek_status = $this->m_productionOrder->cek_status_production_order_items_by_row($kode,$kode_produk,$row_order)->row_array(); 
@@ -448,17 +456,25 @@ class Productionorder extends MY_Controller
         	$data = explode("^|",$row);
         	$row_order   = $data[0];
         	$kode_produk = ($data[1]);
-        	$nama_produk = ($data[2]);//ex.. J-5P143SR-126" (Inspecting)
-        	$prod_exp = explode('"',$nama_produk);
-        	$nama_produk2= ($prod_exp[0]); //ex J-5P143SR-126
-        	$qty = $data[3];
-        	$uom = ($data[4]);
-        	$reff_notes    = ($data[5]);
-        	$schedule_date = $data[6];
-        	$sales_order   = ($data[7]);
-        	$warehouse     = ($data[8]);
-            $kode_bom_set  = ($data[9]);
-        	$status = "generated"; 
+
+            // get data procurement order by row(
+            $get = $this->m_productionOrder->get_data_production_order_items_by_kode($kode,addslashes($kode_produk),$row_order)->row_array();
+            
+        	$nama_produk   = $get['nama_produk'];//ex.. J-5P143SR-126" (Inspecting)
+        	$prod_exp      = explode('"',$nama_produk);
+        	$nama_produk2  = ($prod_exp[0]); //ex J-5P143SR-126
+        	$qty           = $get['qty'];
+        	$uom           = $get['uom'];
+        	$reff_notes    = $get['reff_notes'];
+        	$schedule_date = $get['schedule_date'];
+        	$sales_order   = $get['sales_order'];
+        	$warehouse     = $get['warehouse'];
+            $kode_bom_set  = $get['kode_bom'];
+            $lebar_greige  = $get['lebar_greige'];
+            $uom_lebar_greige = $get['uom_lebar_greige'];
+            $lebar_jadi    = $get['lebar_jadi'];
+            $uom_lebar_jadi= $get['uom_lebar_jadi'];
+        	$status        = "generated"; 
         	
 
             $sm_row           = 1;
@@ -486,6 +502,7 @@ class Productionorder extends MY_Controller
             $sql_log_history_mo = "";
             $sql_log_history_in = "";
             $sql_log_history_out= "";
+            $arr_kode           = [];
 
             $cek_status = $this->m_productionOrder->cek_status_production_order_items_by_row($kode,addslashes($kode_produk),$row_order)->row_array(); 
 
@@ -502,6 +519,8 @@ class Productionorder extends MY_Controller
 
                 /*--Get ROUTE produk by kode_produk--*/
             	$jen_route  = $this->_module->get_jenis_route_product(addslashes($kode_produk))->row_array();
+
+                $stat_produk = $this->_module->get_status_aktif_by_produk(addslashes($kode_produk))->row_array();// status produk aktif/tidak
                 
                 $produk_empty       = FALSE;
                 $bom_empty          = FALSE;
@@ -515,7 +534,12 @@ class Productionorder extends MY_Controller
       				
       				//unlock table
     	            $this->_module->unlock_tabel();
-            	}else{
+            	}else if($stat_produk['status_produk']== 'f'){
+                    $callback = array('status' => 'success','message' => 'Maaf, Status Produk tidak aktif', 'icon' =>'fa fa-warning', 'type' => 'danger');
+      				
+                    //unlock table
+                  $this->_module->unlock_tabel();
+                }else{
 
     	        	$last_move   = $this->_module->get_kode_stock_move();
     	            $move_id     = "SM".$last_move; //Set kode stock_move
@@ -766,7 +790,7 @@ class Productionorder extends MY_Controller
 
     	                  $source_location = $method_dept."/Stock";
     	                  //sql simpan mrp_production
-    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$source_location."','".$source_location."','".$method_dept."','draft','','".$nama_user."'), ";
+    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$source_location."','".$source_location."','".$method_dept."','draft','','".$nama_user."','".addslashes($lebar_greige)."','".addslashes($uom_lebar_greige)."','".addslashes($lebar_jadi)."','".addslashes($uom_lebar_jadi)."'), ";
 
                            //get mms kode berdasarkan dept_id
                           $mms = $this->_module->get_kode_sub_menu_deptid('mO',$method_dept)->row_array();
@@ -1019,10 +1043,9 @@ class Productionorder extends MY_Controller
     	        }//else if cek route produksi
 
             }//else cek status 
-		    
-		    echo json_encode($callback);
-
+            
 	    }	
+        echo json_encode($callback);
     }
 
     public function batal_detail_production_order()
@@ -1041,8 +1064,12 @@ class Productionorder extends MY_Controller
             $data   = explode("^|",$row);
             $row_order   = $data[0];
             $kode_produk = ($data[1]);
-            $nama_produk = ($data[2]);//ex.. J-5P143SR-126" (Inspecting)
-            $sales_order = ($data[7]);
+
+            // get data procurement order by row
+            $get = $this->m_productionOrder->get_data_production_order_items_by_kode($kode,addslashes($kode_produk),$row_order)->row_array();
+
+            $nama_produk = $get['nama_produk'];//ex.. J-5P143SR-126" (Inspecting)
+            $sales_order = $get['sales_order'];
             $origin      = $sales_order.'|'.$kode.'|'.$row_order;
             /*
             $prod_exp = explode('"',$nama_produk);

@@ -298,12 +298,14 @@ class Pengirimanbarang extends MY_Controller
     {   
         if(!isset($kode)) show_404();
         $kode_decrypt  = decrypt_url($kode);
-        $data["list"]  = $this->m_pengirimanBarang->get_data_by_code($kode_decrypt);
+        $list          = $this->m_pengirimanBarang->get_data_by_code($kode_decrypt);
+        $data["list"]  = $list;
         $data["items"] = $this->m_pengirimanBarang->get_list_pengiriman_barang($kode_decrypt);
         $move          = $this->m_pengirimanBarang->get_stock_move_by_kode($kode_decrypt)->row_array();
         $data['smove'] = $move;
         $data['mo']    = $this->m_pengirimanBarang->get_kode_mo_pengiriman_barang_by_move_id($move['move_id'])->row_array();
         $data['smi'] = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode_decrypt);
+        $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($list->dept_id)->row_array();
 
         if(empty($data["list"])){
           show_404();
@@ -575,6 +577,11 @@ class Pengirimanbarang extends MY_Controller
             $qty2        = $cek_sq['qty2'];
             $uom2        = $cek_sq['uom2'];
             $lokasi      = $cek_sq['lokasi'];
+            $lokasi_fisik = $cek_sq['lokasi_fisik'];
+            $lebar_greige     = $cek_sq['lebar_greige'];
+            $uom_lebar_greige = $cek_sq['uom_lebar_greige'];
+            $lebar_jadi       = $cek_sq['lebar_jadi'];
+            $uom_lebar_jadi   = $cek_sq['uom_lebar_jadi'];
 
             /*
               $dt1         =  $row[0];
@@ -642,7 +649,7 @@ class Pengirimanbarang extends MY_Controller
                 */
 
                 //insert ke stock move items
-                $sql_stock_move_items_batch .= "('".$move_id."', '".$quantid."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes(trim($lot))."','".$qty."','".addslashes($uom)."','".$qty2."','".addslashes($uom2)."','ready','".$row_order."','".addslashes($origin_prod)."', '".$tgl."'), ";     
+                $sql_stock_move_items_batch .= "('".$move_id."', '".$quantid."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes(trim($lot))."','".$qty."','".addslashes($uom)."','".$qty2."','".addslashes($uom2)."','ready','".$row_order."','".addslashes($origin_prod)."', '".$tgl."','".addslashes($lokasi_fisik)."','".addslashes($lebar_greige)."','".addslashes($uom_lebar_greige)."','".addslashes($lebar_jadi)."','".addslashes($uom_lebar_jadi)."'), ";     
                 $row_order++;           
 
                 //update reserve move by quant id di stok quant                
@@ -1089,7 +1096,7 @@ class Pengirimanbarang extends MY_Controller
                                 
                                                             
                                 //insert stock_move items untuk stock_move tujuan
-                                $sql_stock_move_items_batch .= "('".$querysm_tujuan['move_id']."', '".$val->quant_id."', '".addslashes($val->kode_produk)."', '".addslashes($val->nama_produk)."', '".addslashes($val->lot)."', '".$val->qty."', '".addslashes($val->uom)."', '".$val->qty2."', '".addslashes($val->uom2)."', '".$status."', '".$row_order."', '".addslashes($origin_prod)."', '".$tgl."'), ";
+                                $sql_stock_move_items_batch .= "('".$querysm_tujuan['move_id']."', '".$val->quant_id."', '".addslashes($val->kode_produk)."', '".addslashes($val->nama_produk)."', '".addslashes($val->lot)."', '".$val->qty."', '".addslashes($val->uom)."', '".$val->qty2."', '".addslashes($val->uom2)."', '".$status."', '".$row_order."', '".addslashes($origin_prod)."', '".$tgl."','','".addslashes($val->lebar_greige)."','".addslashes($val->uom_lebar_greige)."','".addslashes($val->lebar_jadi)."','".addslashes($val->uom_lebar_jadi)."'), ";
                                 $sm_pasangan = false;
                                 $row_order++;
                                 
@@ -1157,7 +1164,7 @@ class Pengirimanbarang extends MY_Controller
 
                     //update lokasi tbl stock quant
                      $where2 = rtrim($where2, ',');
-                     $sql_update_stock_quant  = "UPDATE stock_quant SET lokasi =(case ".$case2." end) WHERE  quant_id in (".$where2.") ";
+                     $sql_update_stock_quant  = "UPDATE stock_quant SET lokasi =(case ".$case2." end), move_date = '".$tgl."' WHERE  quant_id in (".$where2.") ";
                      $this->_module->update_perbatch($sql_update_stock_quant);
 
                      $where6 = rtrim($where2, ',');
@@ -1525,7 +1532,7 @@ class Pengirimanbarang extends MY_Controller
                                   $where2 .= "'".$stock['quant_id']."',"; 
                                   
                                   //insert  stock move items batch
-                                  $sql_stock_move_items_batch .= "('".$move_id."', '".$stock['quant_id']."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".$stock['qty']."','".addslashes($uom)."','".$stock['qty2']."','".addslashes($stock['uom2'])."','".$status_brg."','".$row_order."','".addslashes($origin_prod)."', '".$tgl."'), ";                                      
+                                  $sql_stock_move_items_batch .= "('".$move_id."', '".$stock['quant_id']."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".$stock['qty']."','".addslashes($uom)."','".$stock['qty2']."','".addslashes($stock['uom2'])."','".$status_brg."','".$row_order."','".addslashes($origin_prod)."', '".$tgl."','".addslashes($stock['lokasi_fisik'])."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."'), ";                                      
                                   $row_order++;                                 
                                   $kebutuhan_qty = round($kebutuhan_qty,2) - round($stock['qty'],2);
                                
@@ -1543,9 +1550,9 @@ class Pengirimanbarang extends MY_Controller
                                   //$where_move_items .= "'".$stock['move_id']."',";
 
                                   //insert stock_quant_batch
-                                  $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".addslashes($stock['nama_grade'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$lokasi['lokasi_dari']."','".addslashes($stock['reff_note'])."','".$move_id."','".$stock['reserve_origin']."'), ";
+                                  $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".addslashes($stock['nama_grade'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$lokasi['lokasi_dari']."','".addslashes($stock['reff_note'])."','".$move_id."','".$stock['reserve_origin']."','".$tgl."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."'), ";
                                   //insert  stock move items batch
-                                  $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$status_brg."','".$row_order."','".addslashes($origin_prod)."', '".$tgl."'), ";
+                                  $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$status_brg."','".$row_order."','".addslashes($origin_prod)."', '".$tgl."','".addslashes($stock['lokasi_fisik'])."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."'), ";
                                   $row_order++;
                                   $start++;
                                   $kebutuhan_qty = 0;
@@ -1603,7 +1610,7 @@ class Pengirimanbarang extends MY_Controller
                                         $case_qty2 = "when quant_id = '".$val['quant_id']."' then '".$qty2_update."'";
 
                                         //insert qty stock_quant_batch dengan quant_id baru 
-                                        $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($cek_sq['kode_produk'])."', '".addslashes($cek_sq['nama_produk'])."','".addslashes(trim($cek_sq['lot']))."','".addslashes($cek_sq['nama_grade'])."','".$qty_lebih."','".addslashes($cek_sq['uom'])."','".$qty2_new."','".addslashes($cek_sq['uom2'])."','".$cek_sq['lokasi']."','".addslashes($cek_sq['reff_note'])."','','".$cek_sq['reserve_origin']."'), ";
+                                        $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($cek_sq['kode_produk'])."', '".addslashes($cek_sq['nama_produk'])."','".addslashes(trim($cek_sq['lot']))."','".addslashes($cek_sq['nama_grade'])."','".$qty_lebih."','".addslashes($cek_sq['uom'])."','".$qty2_new."','".addslashes($cek_sq['uom2'])."','".$cek_sq['lokasi']."','".addslashes($cek_sq['reff_note'])."','','".$cek_sq['reserve_origin']."','".$tgl."','".addslashes($cek_sq['lebar_greige'])."','".addslashes($cek_sq['uom_lebar_greige'])."','".addslashes($cek_sq['lebar_jadi'])."','".addslashes($cek_sq['uom_lebar_jadi'])."'), ";
                                         $start++;
 
                                         $qty_lebih = 0;
@@ -1697,6 +1704,10 @@ class Pengirimanbarang extends MY_Controller
                             $where4_2 = rtrim($where4_2, ',');
                             $sql_update_qty_smi = "UPDATE stock_move_items set qty = (case ".$case4." end), qty2 = (case ".$case_qty2." end) WHERE quant_id IN (".$where4.") AND move_id IN (".$where4_2.") ";
                             $this->_module->update_perbatch($sql_update_qty_smi);
+                            $case4 = '';
+                            $case_qty2  = '';
+                            $where4     = '';
+                            $where4_2   = '';
                         }
 
                         // update reserve_move stock_quant
@@ -1704,6 +1715,8 @@ class Pengirimanbarang extends MY_Controller
                             $where5  = rtrim($where5, ', ');
                             $sql_update_reserve_move  = "UPDATE stock_quant SET reserve_move =(case ".$case5." end) WHERE  quant_id in (".$where5.") ";
                             $this->_module->update_perbatch($sql_update_reserve_move);
+                            $case5  = '';
+                            $where5 = '';
                         }
 
                         // delete stock_move_items
@@ -1713,6 +1726,9 @@ class Pengirimanbarang extends MY_Controller
 
                             $sql_delete_smi = "DELETE FROM stock_move_items WHERE move_id IN (".$where_del1.") AND quant_id IN (".$where_del2.") ";
                             $this->_module->update_perbatch($sql_delete_smi);
+
+                            $where_del1 = '';
+                            $where_del2 = '';
                         }
 
                         

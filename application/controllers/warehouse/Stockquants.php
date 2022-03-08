@@ -56,11 +56,15 @@ class Stockquants extends MY_Controller
             $uom2        = $this->input->post('uom2');
             $nama_grade  = $this->input->post('nama_grade');
             $reff_note   = addslashes($this->input->post('reff_note'));
+            $lebar_greige       = addslashes($this->input->post('lebar_greige'));
+            $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
+            $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
+            $uom_lebar_jadi     = addslashes($this->input->post('uom_lebar_jadi'));
 
-            $this->m_stockQuants->update_stockquants($quant_id,$qty2,$uom2,$nama_grade,$reff_note);
+            $this->m_stockQuants->update_stockquants($quant_id,$qty2,$uom2,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
 
             $jenis_log   = "edit";        
-            $note_log    = $quant_id.' | '.$nama_produk.' | '.$lot.' | '.$nama_grade.' | '.$qty2.' | '.$uom2.' | '.$reff_note;
+            $note_log    = $quant_id.' | '.$nama_produk.' | '.$lot.' | '.$nama_grade.' | '.$qty2.' | '.$uom2.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$reff_note;
             $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
 
             $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
@@ -151,9 +155,6 @@ class Stockquants extends MY_Controller
     }
 
 
-    
-
-
     public function loadData($record=0)
     {   
 
@@ -225,12 +226,15 @@ class Stockquants extends MY_Controller
                                                     'kode_produk' => $row->kode_produk, 
                                                     'nama_produk' => $row->nama_produk,
                                                     'create_date' => $row->create_date,
+                                                    'move_date'   => $row->move_date,
                                                     'lot'         => $row->lot,
                                                     'grade'       => $row->nama_grade,
                                                     'qty'         => $row->qty,
                                                     'uom'         => $row->uom,
                                                     'qty2'        => $row->qty2,
                                                     'uom2'        => $row->uom2,
+                                                    'lebar_greige'=> $row->lebar_greige.' '.$row->uom_lebar_greige,
+                                                    'lebar_jadi'  => $row->lebar_jadi.' '.$row->uom_lebar_jadi,
                                                     'lokasi'      => $row->lokasi,
                                                     'lokasi_fisik'=> $row->lokasi_fisik,
                                                     'reff_note'   => $row->reff_note,
@@ -745,12 +749,15 @@ class Stockquants extends MY_Controller
                                       'id_encr'    => encrypt_url($val->quant_id),
                                       'nama_produk'=> $val->nama_produk,
                                       'create_date'=> $val->create_date,
+                                      'move_date'  => $val->move_date,
                                       'lot'        => $val->lot,
                                       'nama_grade' => $val->nama_grade,
                                       'qty'        => $val->qty,
                                       'uom'        => $val->uom,
                                       'qty2'       => $val->qty2,
                                       'uom2'       => $val->uom2,
+                                      'lebar_greige'=> $val->lebar_greige.' '.$val->uom_lebar_greige,
+                                      'lebar_jadi'  => $val->lebar_jadi.' '.$val->uom_lebar_jadi,
                                       'lokasi'     => $val->lokasi,
                                       'lokasi_fisik'  => $val->lokasi_fisik,
                                       'reff_note'  => $val->reff_note,
