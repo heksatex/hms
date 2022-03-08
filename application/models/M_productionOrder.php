@@ -202,7 +202,7 @@ class M_productionOrder extends CI_Model
 	{
 		$query = $this->db->query("SELECT pd.kode_prod,pd.kode_produk, pd.nama_produk, pd.kode_bom, 
 									pd.schedule_date, pd.qty, pd.uom, pd.reff_notes, pd.`status`, pd.row_order, 
-       								b.kode_bom as kodebom, b.nama_bom       
+       								b.kode_bom as kodebom, b.nama_bom, pd.lebar_jadi, pd.uom_lebar_jadi, pd.lebar_greige, pd.uom_lebar_greige, pd.id
 
 								FROM production_order_items pd
 								LEFT JOIN bom b ON pd.kode_bom = b.kode_bom
@@ -245,15 +245,16 @@ class M_productionOrder extends CI_Model
 		return $this->db->query("SELECT row_order  FROM production_order_items WHERE kode_prod = '$kode_prod' order by row_order desc");
 	}
 
-	public function save_production_order_items($kode_prod,$kode_produk,$produk,$kode_bom,$tgl,$qty,$uom,$reff,$status,$row_order)
+	public function save_production_order_items($kode_prod,$kode_produk,$produk,$kode_bom,$tgl,$qty,$uom,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$reff,$status,$row_order)
 	{
-		return $this->db->query("INSERT INTO production_order_items (kode_prod,kode_produk,nama_produk,kode_bom,schedule_date,qty,uom,reff_notes,status,row_order) values ('$kode_prod','$kode_produk','$produk','$kode_bom','$tgl','$qty','$uom','$reff','$status','$row_order')");	
+		return $this->db->query("INSERT INTO production_order_items (kode_prod,kode_produk,nama_produk,kode_bom,schedule_date,qty,uom,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi,reff_notes,status,row_order) values ('$kode_prod','$kode_produk','$produk','$kode_bom','$tgl','$qty','$uom','$lebar_greige','$uom_lebar_greige','$lebar_jadi','$uom_lebar_jadi','$reff','$status','$row_order')");	
 	}
 
-	public function update_production_order_items($kode_prod,$tgl,$kode_produk,$kode_bom,$qty,$reff,$row_order)
+	public function update_production_order_items($kode_prod,$tgl,$kode_produk,$kode_bom,$qty,$reff,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$row_order)
 	{
 		return $this->db->query("UPDATE production_order_items SET schedule_date = '$tgl', qty = '$qty', reff_notes = '$reff',
-																	kode_bom = '$kode_bom' 
+																	kode_bom = '$kode_bom', lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', 
+																	lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'
 																WHERE kode_prod = '$kode_prod' AND kode_produk = '$kode_produk' AND row_order = '$row_order'");
 	}
 
@@ -303,6 +304,20 @@ class M_productionOrder extends CI_Model
 	public function cek_nama_produk_by_kode($kode_produk){
 		return $this->db->query("SELECT nama_produk FROM mst_produk WHERE kode_produk = '$kode_produk' ");
 	}
+
+	public function get_lebar_by_kode_produk($kode_produk)
+	{
+		return $this->db->query("SELECT lebar_greige, uom_lebar_greige, lebar_jadi,uom_lebar_jadi FROM mst_produk where kode_produk = '$kode_produk' ");
+	}
+
+	public function get_data_production_order_items_by_kode($kode,$kode_produk,$row_order)
+	{
+		return $this->db->query("SELECT poi.nama_produk, poi.kode_bom,poi.schedule_date,poi.qty, poi.uom, poi.lebar_greige,poi.uom_lebar_greige, poi.lebar_jadi, poi.uom_lebar_jadi, poi.reff_notes, po.sales_order, po.warehouse
+								FROM production_order_items poi 
+								INNER JOIN production_order po ON poi.kode_prod = po.kode_prod 
+								where poi.kode_prod = '$kode' AND poi.kode_produk = '$kode_produk' AND poi.row_order = '$row_order'");
+	}
+
 
 
 }

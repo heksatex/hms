@@ -167,7 +167,7 @@
           }else if(data.status == "failed"){
               //jika ada form belum keiisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
                document.getElementById(data.field).focus();
           }else{

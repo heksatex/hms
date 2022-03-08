@@ -173,7 +173,10 @@ class M_adjustment extends CI_Model
 
 	public function get_adjustment_detail_by_code($kode_adjustment)
 	{
-		$query = $this->db->query("SELECT ai.kode_adjustment, ai.quant_id, ai.kode_produk, mp.nama_produk, ai.lot, ai.uom, ai.qty_data , ai.qty_adjustment, ai.uom2, ai.qty_data2 , ai.qty_adjustment2, ai.move_id, ai.row_order, ai.qty_move FROM adjustment_items ai INNER JOIN mst_produk mp ON ai.kode_produk = mp.kode_produk WHERE ai.kode_adjustment = '".$kode_adjustment."' ORDER BY ai.row_order");
+		$query = $this->db->query("SELECT ai.kode_adjustment, ai.quant_id, ai.kode_produk, mp.nama_produk, ai.lot, ai.uom, ai.qty_data , ai.qty_adjustment, ai.uom2, ai.qty_data2 , ai.qty_adjustment2, ai.move_id, ai.row_order, ai.qty_move, sq.lokasi_fisik, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi
+									FROM adjustment_items ai 
+									INNER JOIN mst_produk mp ON ai.kode_produk = mp.kode_produk 
+									LEFT JOIN stock_quant sq ON ai.quant_id = sq.quant_id WHERE ai.kode_adjustment = '".$kode_adjustment."' ORDER BY ai.row_order");
 		return $query->result();
 	}
 

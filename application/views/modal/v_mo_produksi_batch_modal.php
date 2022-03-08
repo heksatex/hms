@@ -86,6 +86,12 @@
 								<th class="style" style="width: 65px;">uom</th>
 								<th class="style" style="width: 100px;">Qty2</th>
 								<th class="style" style="width: 65px;">uom2</th>
+								<?php if($show_lebar['show_lebar'] == 'true'){?>
+								<th class="style" style="width: 100px;">Lbr Greige</th>
+								<th class="style" style="width: 65px;">Uom.Lbr Grg</th>
+								<th class="style" style="width: 100px;">Lbr Jadi</th>
+								<th class="style" style="width: 65px;">Uom.Lbr Jadi</th>
+								<?php }?>
 								<th class="style">Reff Note</th>
 								<th class="style"></th>
 							</tr>
@@ -191,7 +197,10 @@
 							<input type="hidden" name="grade"  id="grade" class="form-control input-sm grade" value="<?php echo $row->nama_grade;?>">
 							<input type="hidden" name="grade_foreach"  id="grade_foreach" class="form-control input-sm grade_foreach" value="<?php foreach($list_grade as $list){  if($list->nama_grade == $row->nama_grade) {echo "<option selected>".$list->nama_grade."</option>"; }else{echo "<option>".$list->nama_grade."</option>";}}?>">
 							<input type="hidden" name="grade"  id="type" class="form-control input-sm type" value="<?php echo $row->type ?>">
-
+							<input type="hidden" name="lbr_greige"  id="lbr_greige" class="form-control input-sm lbr_greige" value="<?php echo $row->lebar_greige ?>">
+							<input type="hidden" name="uom_lbr_greige"  id="uom_lbr_greige" class="form-control input-sm uom_lbr_greige" value="<?php echo $row->uom_lebar_greige ?>">
+							<input type="hidden" name="lbr_jadi"  id="lbr_jadi" class="form-control input-sm lbr_jadi" value="<?php echo $row->lebar_jadi ?>">
+							<input type="hidden" name="uom_lbr_jadi"  id="uom_lbr_jadi" class="form-control input-sm uom_lbr_jadi" value="<?php echo $row->uom_lebar_jadi ?>">
 						</td>
 					</tr>
 					<?php
@@ -373,13 +382,20 @@
 		    //+ '<td></td>'
 		    + '<td class="width-200"><input add="manual" type="hidden" name="txtkode_produk" id="txtkode_produk"  class="form-control input-sm"  readonly="readonly" value="<?php echo ($kode_produk) ?>"><input type="hidden" name="txtproduct[]" id="txtproduct"  class="form-control input-sm produk"  readonly="readonly" data-toggle="tooltip" title="<?php echo htmlentities($product) ?>" value="<?php echo htmlentities($product) ?>">'
 		 
-		    +  '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot" value="'+lot_prefix_next+'" onkeypress="enter(event);"></td>'
-		    + '<td class="width-120"><select class="form-control input-sm grade" name="grade" id="grade"><option value=""> Pilih Grade </option><?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";}?></select></td>'
-		    + '<td class="width-100"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm txtqty" value="<?php echo $qty1_std;?>"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
-		    + '<td ><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm" value="<?php echo $uom_1;?>"  readonly="readonly"></td>'
-		    + '<td class="width-100"><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm" value="<?php echo $qty2_std;?>"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
-		    + '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm" value="<?php echo $uom_2?>"  readonly="readonly"></td>'
-		    + '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm" onkeypress="enter(event);"/></td>'
+		    +  '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot width-150" value="'+lot_prefix_next+'" onkeypress="enter(event);"></td>'
+		    + '<td class="width-120"><select class="form-control input-sm grade width-100" name="grade" id="grade"><option value=""> Pilih Grade </option><?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";}?></select></td>'
+		    + '<td class="width-100"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm width-80 txtqty" value="<?php echo $qty1_std;?>"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+		    + '<td ><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm width-50" value="<?php echo $uom_1;?>"  readonly="readonly"></td>'
+		    + '<td class="width-100"><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm width-80" value="<?php echo $qty2_std;?>"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+		    + '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm width-50" value="<?php echo $uom_2?>"  readonly="readonly"></td>'
+			<?php if($show_lebar['show_lebar'] == 'true'){?>
+			+ '<td><input type="text" name="txtlebar_greige" id="txtlebar_greige" class="form-control input-sm width-80" value="<?php echo $lbr_produk->lebar_greige;?>"  onkeypress="enter(event);"></td>'
+		    + '<td><select type="text" name="txtuom_lebar_greige"  id="txtuom_lebar_greige" class="form-control input-sm width-80" ><option value=""></option><?php foreach($uom as $row){ if($row->short == $lbr_produk->uom_lebar_greige){ echo "<option selected value=".$row->short.">".$row->short."</option>"; }else{ echo  "<option value=".$row->short.">".$row->short."</option>"; }}?></select></td>'
+
+			+ '<td ><input type="text" name="txtlebar_jadi" id="txtlebar_jadi" class="form-control input-sm width-80" value="<?php echo $lbr_produk->lebar_jadi;?>"  onkeypress="enter(event);"></td>'
+		    + '<td><select type="text" name="txtuom_lebar_jadi"  id="txtuom_lebar_jadi" class="form-control input-sm width-80" ><option value=""></option><?php foreach($uom as $row){ if($row->short == $lbr_produk->uom_lebar_jadi){ echo "<option selected value=".$row->short.">".$row->short."</option>"; }else{ echo  "<option value=".$row->short.">".$row->short."</option>"; }}?></select></td>'
+			<?php }?>
+		    + '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm width-150" onkeypress="enter(event);"/></td>'
 		    + '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
 		    + '</tr>';
 		    $('#tabel_produksi tbody').append(html);
@@ -722,6 +738,7 @@
 	function copy_rm(){
 
 		$(document).one("click","#btn-copy",function(e) {
+			var row_order_rm = 1;
 
 			$('.qty_konsum').each(function(index,item){
 				type 		= $(item).parents("tr").find("#type").val();
@@ -733,24 +750,44 @@
 					lot     	= $(item).parents("tr").find('#lot').val();
 					qty2        = $(item).parents("tr").find("#qty2").val();
 					uom2        = $(item).parents("tr").find("#uom2").val();		
-					grade_foreach 		= $(item).parents("tr").find("#grade_foreach").val();				
-
+					grade_foreach 	= $(item).parents("tr").find("#grade_foreach").val();				
+					lbr_greige  	= $(item).parents("tr").find("#lbr_greige").val();		
+					uom_lbr_greige  = $(item).parents("tr").find("#uom_lbr_greige").val();
+					lbr_jadi  		= $(item).parents("tr").find("#lbr_jadi").val();		
+					uom_lbr_jadi  	= $(item).parents("tr").find("#uom_lbr_jadi").val();
+					
+					row = "grg"+row_order_rm;
+					row2 = "gjd"+row_order_rm;
 				
 					html='<tr class="num">'
 						+ '<td></td>'
 						//+ '<td></td>'
 						+ '<td><input type="hidden" name="txtkode_produk" id="txtkode_produk"  class="form-control input-sm"  readonly="readonly" value="'+kode_produk+'"><input type="hidden" name="txtproduct[]" id="txtproduct"  class="form-control input-sm produk"  readonly="readonly" value="'+nama_produk+'">'
-						+ '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot" value="'+lot+'" onkeypress="enter(event);"></td>'
-						+ '<td><select class="form-control input-sm grade" name="grade" id="grade"><option value=""> Pilih Grade </option>'+grade_foreach+'</select></td>'
-						+ '<td><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm txtqty" value="'+qty_smi+'"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
-						+ '<td><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm" value="'+uom+'"  readonly="readonly"></td>'
-						+ '<td><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm" value="'+qty2+'"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
-						+ '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm" value="'+uom2+'"   readonly="readonly"></td>'
-						+ '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm" onkeypress="enter(event);"/></td>'
+						+ '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot width-150" value="'+lot+'" onkeypress="enter(event);"></td>'
+						+ '<td><select class="form-control input-sm grade width-100" name="grade" id="grade"><option value=""> Pilih Grade </option>'+grade_foreach+'</select></td>'
+						+ '<td><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm txtqty width-80" value="'+qty_smi+'"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+						+ '<td><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm width-50" value="'+uom+'"  readonly="readonly"></td>'
+						+ '<td><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm width-80" value="'+qty2+'"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+						+ '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm width-50" value="'+uom2+'"   readonly="readonly"></td>'
+						<?php if($show_lebar['show_lebar'] == 'true'){?>
+						+ '<td><input type="text" name="txtlebar_greige" id="txtlebar_greige" class="form-control input-sm width-80" value="'+lbr_greige+'"  onkeypress="enter(event);"></td>'
+						+ '<td><select type="text" name="txtuom_lebar_greige"  id="txtuom_lebar_greige" class="form-control input-sm width-80 '+row+'" ><option value=""></option><?php foreach($uom as $row){ echo  "<option value=".$row->short.">".$row->short."</option>"; }?></select></td>'
+
+						+ '<td><input type="text" name="txtlebar_jadi" id="txtlebar_jadi" class="form-control input-sm width-80" value="'+lbr_jadi+'"  onkeypress="enter(event);"></td>'
+						+ '<td><select type="text" name="txtuom_lebar_jadi"  id="txtuom_lebar_jadi" class="form-control input-sm width-80 '+row2+'" ><option value=""></option><?php foreach($uom as $row){ echo  "<option value=".$row->short.">".$row->short."</option>"; }?></select></td>'
+						<?php }?>
+						+ '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm width-150" onkeypress="enter(event);"/></td>'
 						+ '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
 						+ '</tr>';
 						$('#tabel_produksi tbody').append(html);			
 						
+						var $option = $("<option selected></option>").val('<?php echo $lbr_produk->uom_lebar_greige;?>').text('<?php echo $lbr_produk->uom_lebar_greige;?>');
+            			$('.'+row).append($option).trigger('change');
+
+						var $option2 = $("<option selected></option>").val('<?php echo $lbr_produk->uom_lebar_jadi;?>').text('<?php echo $lbr_produk->uom_lebar_jadi;?>');
+            			$('.'+row2).append($option2).trigger('change');
+
+						row_order_rm++;
 						
 				}
 								
@@ -797,6 +834,7 @@
 		var kode   = '<?php echo $kode?>';//kode MO
 		var origin_mo = '<?php echo $origin_mo ?>';
 		var valid  = true;
+		var show_lebar = '<?php echo $show_lebar['show_lebar'];?>';
 
 		//cek lot apa ada yg kosong
 		$('.txtlot').each(function(index,value){
@@ -915,11 +953,21 @@
 			var konsumsi_bahan = false;
 			var hasil_produksi = false;
 			var produk_waste   = false;
+			var lbr_greige     = '';
+			var uom_lbr_greige = '';
+			var lbr_jadi       = '';
+			var uom_lbr_jadi   = '';
 
 				var arr = new Array();
 				
 				$(".produk").each(function(index, element) {
 					if ($(element).val()!=="") {
+						if(show_lebar == 'true'){
+							lbr_greige 		= $(element).parents("tr").find('#txtlebar_greige').val();
+							uom_lbr_greige  = $(element).parents("tr").find('#txtuom_lebar_greige').val();
+							lbr_jadi    	= $(element).parents("tr").find('#txtlebar_jadi').val();
+							uom_lbr_jadi    = $(element).parents("tr").find('#txtuom_lebar_jadi').val();
+						}
 						arr.push({
 							//0 : no++,
 							kode 		: $("#txtkode").val(),
@@ -931,7 +979,11 @@
 							qty2 		:$(element).parents("tr").find("#txtqty2").val(),
 							uom2 		:$(element).parents("tr").find("#txtuom2").val(),
 							reff_note 	:$(element).parents("tr").find("#reff_note").val(),
-							grade 		:$(element).parents("tr").find("#grade").val()
+							grade 		:$(element).parents("tr").find("#grade").val(),
+							lbr_greige 		: lbr_greige,
+							uom_lbr_greige  : uom_lbr_greige,
+							lbr_jadi    	: lbr_jadi,
+							uom_lbr_jadi   	: uom_lbr_jadi,
 						});
 					    hasil_produksi = true;
 					}
@@ -959,6 +1011,10 @@
 							reff_note   : $(item).parents("tr").find("#reff_note").val(),
 							qty_rm      : $(item).parents("tr").find('#qty_rm').val(),
 							grade 		: $(item).parents("tr").find("#grade").val(),
+							lbr_greige  : $(item).parents("tr").find('#lbr_greige').val(),
+							uom_lbr_greige  : $(item).parents("tr").find('#uom_lbr_greige').val(),
+							lbr_jadi    : $(item).parents("tr").find('#lbr_jadi').val(),
+							uom_lbr_jadi  : $(item).parents("tr").find('#uom_lbr_jadi').val(),
 						});				
 					
 						//alert (JSON.stringify(arr2));

@@ -447,7 +447,7 @@
     // validasi untuk inputan textbox
     input.each(function(){
       if(!$(this).val()){
-        alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+        alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
         empty = true;
       }
     });
@@ -491,7 +491,7 @@
           }else{
               refresh_adjustment();
               $(".add-new").show();                   
-              alert_notify(data.icon,data.message,data.type);
+              alert_notify(data.icon,data.message,data.type,function(){});
            }
         },
         error: function (xhr, ajaxOptions, thrownError){
@@ -544,7 +544,7 @@
                 //jika ada form belum keiisi
                 $('#btn-simpan').button('reset');
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                 document.getElementById(data.field).focus();
                 refresh_adjustment();
@@ -552,7 +552,7 @@
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               $('#btn-simpan').button('reset');
               refresh_adjustment();
@@ -623,7 +623,7 @@
                       }else{
                           refresh_adjustment();
                           $(".add-new").show();                   
-                          alert_notify(data.icon,data.message,data.type);
+                          alert_notify(data.icon,data.message,data.type,function(){});
                        }
                     },
                     error: function (xhr, ajaxOptions, thrownError){
@@ -686,7 +686,7 @@
                   }else{
                       refresh_adjustment();
                       unblockUI( function() {
-                      setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                      setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                       });
                       $("#btn-header").load(location.href + " #btn-header>*");
                    }
@@ -755,7 +755,7 @@
                   }else{
                       refresh_adjustment();
                       unblockUI( function() {
-                      setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                      setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                       });
                       $("#btn-header").load(location.href + " #btn-header>*");
                    }

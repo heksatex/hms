@@ -99,7 +99,7 @@
                 </div>  
               </div>
               <div class="col-md-12 col-xs-12">
-                <div class="col-xs-4"><label>qty </label></div>
+                <div class="col-xs-4"><label>Qty </label></div>
                 <div class="col-xs-8">
                   <input type="text" class="form-control input-sm" name="qty" id="qty"  value="<?php echo $list->qty; echo ' '.$list->uom;?>"  readonly="readonly"   />
                 </div>                                    
@@ -110,6 +110,47 @@
                   <input type="text" class="form-control input-sm" name="bom" id="bom"  value="<?php echo htmlentities($bom['nama_bom']);?>"  readonly="readonly"   />
                 </div>                                    
               </div>
+
+              <?php if($show_lebar['show_lebar'] == 'true') {?>
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Lebar Greige </label></div>
+                <div class="col-xs-5">
+                  <input type="text" class="form-control input-sm" name="lebar_greige_mo" id="lebar_greige_mo"  value="<?php echo $list->lebar_greige; ?>"  readonly="readonly"   />
+                </div> 
+                <div class="col-xs-3">
+                    <select class="form-control input-sm" name="uom_lebar_greige_mo" id="uom_lebar_greige_mo" disabled="true">
+                    	<option value=""></option>
+                            <?php foreach ($uom as $row) {
+                                    if($row->short == $list->uom_lebar_greige){
+                                    	echo "<option selected value='".$row->short."'>".$row->short."</option>";
+                                	}else{
+                                      echo "<option value='".$row->short."'>".$row->short."</option>";
+                                	}
+                                }
+                         ?>
+                    </select>
+                </div>                                   
+              </div>
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Lebar Jadi </label></div>
+                <div class="col-xs-5">
+                  <input type="text" class="form-control input-sm" name="lebar_jadi_mo" id="lebar_jadi_mo"  value="<?php echo $list->lebar_jadi; ?>"  readonly="readonly"  />
+                </div>
+                <div class="col-xs-3">
+                    <select class="form-control input-sm" name="uom_lebar_jadi_mo" id="uom_lebar_jadi_mo" disabled="true">
+                    	<option value=""></option>
+                            <?php foreach ($uom as $row) {
+                                    if($row->short == $list->uom_lebar_jadi){
+                                    	echo "<option selected value='".$row->short."'>".$row->short."</option>";
+                                	}else{
+                                      echo "<option value='".$row->short."'>".$row->short."</option>";
+                                	}
+                                }
+                         ?>
+                    </select>
+                </div>                                      
+              </div>
+              <?php }?>
 
               <?php if($type_mo['type_mo']=='colouring') {?>
               <div class="col-md-12 col-xs-12">
@@ -503,6 +544,10 @@
                             <th class="style">uom</th>
                             <th class="style" style="text-align: right;">Qty2</th>
                             <th class="style">uom2</th>
+                            <?php if($show_lebar['show_lebar'] == 'true'){?>
+                              <th class="style">Lbr.Greige</th>
+                              <th class="style">Lbr.Jadi</th>
+                            <?php }?>
                             <th class="style">Grade</th>
                             <th class="style">Reff Note</th>
                             <th class="style">Cacat</th>
@@ -520,6 +565,10 @@
                                 <td><?php echo $row->uom?></td>
                                 <td align="right"><?php echo number_format($row->qty2,2)?></td>
                                 <td><?php echo $row->uom2?></td>
+                                <?php if($show_lebar['show_lebar'] == 'true'){?>
+                                  <td><?php echo $row->lebar_greige." ".$row->uom_lebar_greige?></td>
+                                  <td><?php echo $row->lebar_jadi." ".$row->uom_lebar_jadi?></td>
+                                <?php }?>
                                 <td><?php echo $row->nama_grade?></td>
                                 <td class="text-wrap width-200"><?php echo $row->reff_note?></td>
                                 <td>
@@ -679,6 +728,11 @@
     $("#btn-produksi-batch").show();
     $('#mc').attr('disabled', true);
     $("#btn-cancel-edit").attr('id','btn-cancel');
+    $("#lebar_jadi_mo").attr("readonly", true);
+    $("#lebar_greige_mo").attr("readonly", true);
+    $('#uom_lebar_jadi_mo').attr('disabled', true);
+    $('#uom_lebar_greige_mo').attr('disabled', true);
+
   }
 
   //untuk reload page setelah buka modal tambah_data
@@ -782,6 +836,10 @@
     $("#btn-print").hide();//sembuyikan btn-print
     $("#btn-cancel").attr('id','btn-cancel-edit');// ubah id btn-cancel jadi btn-cancel-edit
     $('#mc').attr('disabled', false).attr('id', 'mc');
+    $("#lebar_jadi_mo").attr("readonly", false);
+    $("#lebar_greige_mo").attr("readonly", false);
+    $('#uom_lebar_jadi_mo').attr('disabled', false).attr('id','uom_lebar_jadi_mo');
+    $('#uom_lebar_greige_mo').attr('disabled', false).attr('id','uom_lebar_greige_mo');
   });
 
 
@@ -1178,7 +1236,11 @@
                 lot_prefix  : $('#lot_prefix').val(),
                 lot_prefix_waste  : $('#lot_prefix_waste').val(),
                 deptid      : deptid,
-                type_mo     : type_mo
+                type_mo     : type_mo,
+                lebar_greige     : $('#lebar_greige_mo').val(),
+                uom_lebar_greige : $('#uom_lebar_greige_mo').val(),
+                lebar_jadi       : $('#lebar_jadi_mo').val(),
+                uom_lebar_jadi   : $('#uom_lebar_jadi_mo').val(),
           },success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis

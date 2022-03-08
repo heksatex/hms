@@ -67,6 +67,12 @@
                   </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Tanggal diterima</label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <input type='text' class="form-control input-sm" name="tgl" id="tgl"  value="<?php echo $list->move_date; ?>" readonly="readonly" />
+                  </div>
+                </div>
+                <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Kode Produk </label></div>
                   <div class="col-xs-8 col-md-8">
                     <input type='text' class="form-control input-sm" name="kode_produk" id="kode_produk" value="<?php echo $list->kode_produk; ?>" readonly="readonly" />
@@ -101,13 +107,6 @@
                     </select>
                   </div>
                 </div>
-             
-              </div>
-
-            </div>
-            <div class="col-md-6" >
-              <div class="form-group">   
-               
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Qty </label></div>
                   <div class="col-xs-8">
@@ -143,6 +142,60 @@
                     </select>
                   </div>                                    
                 </div>
+             
+              </div>
+
+            </div>
+            <div class="col-md-6" >
+              <div class="form-group">   
+
+              <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Lebar Greige </label></div>
+                  <div id="ta" class="col-xs-8">
+                    <input type='text' class="form-control input-sm" name="lebar_greige" id="lebar_greige"  value="<?php echo $list->lebar_greige; ?>"  />
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Uom Lebar Greige </label></div>
+                  <div class="col-xs-8">
+                    <select class="form-control input-sm " id="uom_lebar_greige" name="uom_lebar_greige">
+                        <option value=""></option>
+                        <?php 
+                          foreach ($list_uom as $row) {
+                            if($list->uom_lebar_greige == $row->short){
+                              echo "<option selected>".$row->short."</option>";
+                            }else{
+                              echo "<option >".$row->short."</option>";
+                            }
+                          }
+                        ?>
+                    </select>
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Lebar Jadi </label></div>
+                  <div id="ta" class="col-xs-8">
+                    <input type='text' class="form-control input-sm" name="lebar_jadi" id="lebar_jadi"  value="<?php echo $list->lebar_greige; ?>"  />
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Uom Lebar Jadi </label></div>
+                  <div class="col-xs-8">
+                    <select class="form-control input-sm " id="uom_lebar_jadi" name="uom_lebar_jadi">
+                        <option value=""></option>
+                        <?php 
+                          foreach ($list_uom as $row) {
+                            if($list->uom_lebar_jadi == $row->short){
+                              echo "<option selected>".$row->short."</option>";
+                            }else{
+                              echo "<option >".$row->short."</option>";
+                            }
+                          }
+                        ?>
+                    </select>
+                  </div>                                    
+                </div>
+              
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Lokasi </label></div>
                   <div id="ta" class="col-xs-8">
@@ -165,6 +218,12 @@
                   <div class="col-xs-4"><label>Reserve Move </label></div>
                   <div id="ta" class="col-xs-8">
                     <input type='text' class="form-control input-sm" name="reserve_move" id="reserve_move" value="<?php echo $list->reserve_move; ?>" readonly="readonly"   />
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Umur </label></div>
+                  <div id="ta" class="col-xs-8">
+                    <input type='text' class="form-control input-sm" name="umur" id="umur" value="<?php echo $list->umur.' Hari'; ?>" readonly="readonly"   />
                   </div>                                    
                 </div>
               </div>
@@ -218,7 +277,11 @@
                 nama_produk: $('#nama_produk').val(),
                 lot        : $('#lot').val(),
                 quant_id   : $('#quant_id').val(),
-                reff_note  : $('#reff_note').val()
+                reff_note  : $('#reff_note').val(),
+                lebar_greige  :$('#lebar_greige').val(),
+                uom_lebar_greige :$('#uom_lebar_greige').val(),
+                lebar_jadi       :$('#lebar_jadi').val(),
+                uom_lebar_jadi   :$('#uom_lebar_jadi').val(),
 
           },success: function(data){
             if(data.sesi == "habis"){

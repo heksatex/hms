@@ -16,8 +16,18 @@
         min-width:  24px;
     }
     @media screen and (min-width: 768px) {
+      /*
       .over {
-        overflow-x: visible !important;
+        
+        overflow-x: auto !important;
+        
+      }
+      */
+    }
+
+    @media screen and (max-width: 768px) {
+      .td-reffNotes-items {
+        white-space: normal !important;
       }
     }
 
@@ -27,6 +37,7 @@
       width: 200px; /* responsiveness */
       height: auto;
     }
+    
 
     /*
     @media screen and (max-width: 767px) {
@@ -183,12 +194,12 @@
                   <ul class="nav nav-tabs " >
                     <li class="active"><a href="#tab_1" data-toggle="tab">Procurements</a></li>
                   </ul>
-                  <div class="tab-content over"><br>
+                  <div class="tab-content "><br>
                     <div class="tab-pane active" id="tab_1">
 
                       <!-- Tabel  -->
                       <div class="col-md-12 table-responsive over">
-                        <table class="table table-condesed table-hover rlstable  over" width="100%" id="procurements" >
+                        <table class="table table-condesed table-hover rlstable over" width="100%" id="procurements" >
                           <thead>                          
                             <tr>
                               <th class="style no">No.</th>
@@ -197,6 +208,10 @@
                               <th class="style">Schedule Date</th>
                               <th class="style" style="text-align: right;" >Qty</th>
                               <th class="style">Uom</th>
+                              <th class="style">Lbr Griege</th>
+                              <th class="style">Uom Lbr.Griege</th>
+                              <th class="style">Lbr Jadi</th>
+                              <th class="style">Uom Lbr.Jadi</th>
                               <th class="style">Reff Notes PPIC</th>
                               <th class="style">Status</th>
                               <th class="style"></th>
@@ -211,19 +226,23 @@
                                if($row->status == 'cancel') $color = 'red'; else $color = '';
                             ?>
                               <tr style="color:<?php echo $color;?>">
-                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order."^|".$row->kode_produk."^|".htmlentities($row->nama_produk)."^|".$row->qty."^|".$row->uom."^|".htmlentities($row->reff_notes)."^|".$row->schedule_date."^|".$productionorder->sales_order."^|".$productionorder->warehouse."^|".$row->kode_bom;?>" data-isi2="<?php echo $row->row_order; ?>"><?php echo $no++.".";?></td>
+                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order."^|".$row->kode_produk?>" data-isi2="<?php echo $row->row_order; ?>"><?php echo $no++.".";?></td>
                                 <td class="text-wrap width-200" ><?php echo $row->nama_produk?></a></td>
                                 <td class="text-wrap width-200" data-content="edit" data-id="bom" data-isi="<?php echo $row->kode_bom?>" data-isi2="<?php echo htmlentities($row->nama_bom)?>" data-isi3="<?php echo htmlentities($row->kode_produk);?>"><?php echo $row->nama_bom?></a></td>
                                 <td class="text-wrap width-220" data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date;?>"><?php echo $row->schedule_date?></td>
                                 <td class="width-100" data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
                                 <td class="width-100" ><?php echo $row->uom?></td>
+                                <td class="width-150" data-content="edit" data-name="Lebar Greige" data-id="lebar_greige" data-isi="<?php echo htmlentities($row->lebar_greige);?>" align="right"><?php echo $row->lebar_greige?></td>
+                                <td class="width-100" data-content="edit" data-name="Uom lebar Greige" data-id="uom_lebar_greige" data-isi="<?php echo $row->uom_lebar_greige;?>" ><?php echo $row->uom_lebar_greige?></td>
+                                <td class="width-150" data-content="edit" data-name="Lebar Jadi" data-id="lebar_jadi" data-isi="<?php echo htmlentities($row->lebar_jadi);?>"><?php echo $row->lebar_jadi?></td>
+                                <td class="width-100" data-content="edit" data-name="Uom lebar Jadi" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" align="right"><?php echo $row->uom_lebar_jadi?></td>
                                 <td class="td-reffNotes-items"  data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_notes);?>"> <?php echo $row->reff_notes?></td>
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                 <td class="width-200"  style="text-align: center;" >
                                   <?php if($row->status == 'draft'){?>
-                                  <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" ><i class="fa fa-save"></i></a>
+                                  <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;"><i class="fa fa-save"></i></a>
                                   <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;   margin-right: 24px;"><i class="fa fa-edit"></i></a>
-                                  <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip"><i class="fa fa-trash" style="color: red"></i></a>
+                                  <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red; margin-right: 24px;"></i></a>
                                   <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;"><i class="fa fa-close"></i></a>
                                 <?php }
                                     if($row->status == 'generated' OR $row->status == 'cancel'){?>
@@ -249,7 +268,7 @@
                                 <a href="javascript:void(0)" class="add-new"><i class="fa fa-plus"></i> Tambah Data</a>
                               </td>
                             </tr>
-                          <tfoot>
+                          </foot>
                         </table>
                       </div>
                       <!-- Tabel  -->
@@ -286,11 +305,18 @@
 
 <script type="text/javascript">
 
+  $('#sch_date').datetimepicker().on('dp.show', function() {
+    $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+  }).on('dp.hide', function() {
+     $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+  });
+ 
+
   //validasi inputan harus angka
   function validAngka(a){
     if(!/^[0-9.]+$/.test(a.value)){
       a.value = a.value.substring(0,a.value.length-1000);
-      alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger');
+      alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger',function(){});
     }
   }
 
@@ -343,12 +369,16 @@
     var index = $("#procurements tbody tr:last-child").index();
     var row   ='<tr class="">'
           + '<td></td>'
-          + '<td class="text-wrap width-200"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
-          + '<td class="text-wrap width-200"><select type="text" class="form-control input-sm bom" name="BOM" id="bom"></select></select></td>'
-          + '<td class="text-wrap width-300"><div class="input-group date" id="sch_date" ><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
-          + '<td class="width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>'
-          + '<td class="width-100"><input type="text" class="form-control input-sm uom" name="Uom" id="uom" readonly></td>'
-          + '<td class="text-wrap width-200"><textarea type="text" class="form-control input-sm" name="reff" id="reff"></textarea></td>'
+          + '<td class="text-wrap"><select type="text" class="form-control input-sm  width-150 prod" name="Product" id="product"></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
+          + '<td class="text-wrap "><select type="text" class="form-control input-sm width-150 bom" name="BOM" id="bom"></select></select></td>'
+          + '<td class="text-wrap width-300"><div class="input-group width-150 date" id="sch_date" ><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
+          + '<td class=""><input type="text" class="form-control input-sm width-100 qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>'
+          + '<td class=""><input type="text" class="form-control input-sm width-50 uom" name="Uom" id="uom" readonly></td>'
+          + '<td class=""><input type="text" class="form-control input-sm width-80 lebar_greige" name="Lebar Grige" id="lebar_greige" ></td>'
+          + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_greige" name="Uom Lebar Greige" id="uom_lebar_greige"><option value=""></option><?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
+          + '<td class=""><input type="text" class="form-control input-sm width-80 lebar_jadi" name="Lebar Jadi" id="lebar_jadi" ></td>'
+          + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_jadi" name="Uom Lebar Jadi" id="uom_lebar_jadi"><option value=""></option><?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
+          + '<td class="text-wrap "><textarea type="text" class="form-control input-sm width-150" name="reff" id="reff"></textarea></td>'
           + '<td></td>'
           + '<td align="center"><button type="button" class="btn btn-primary btn-xs add width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
           + '<td></td>'
@@ -411,6 +441,10 @@
                     $('.prodhidd').val(data.nama_produk);
                     $('.qty').val(data.qty);
                     $('.uom').val(data.uom);
+                    $('.lebar_greige').val(data.lebar_greige);
+                    $('.lebar_jadi').val(data.lebar_jadi);
+                    $('.uom_lebar_jadi').val(data.uom_lebar_jadi);
+                    $('.uom_lebar_greige').val(data.uom_lebar_greige);
 
                     //untuk event selected select2 uom
                     var $newOption = $("<option></option>").val(data.kode_bom).text(data.nama_bom);
@@ -484,12 +518,12 @@
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
 
         if(!$(this).val() && $(this).attr('name')=='BOM' ){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
 
@@ -498,35 +532,43 @@
       // validasi untuk inputan textbox
       input.each(function(){
         if(!$(this).val() && $(this).attr('name')!='reff'){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
         }
       });
 
       if(!empty && !empty2){
-        var kode  = "<?php echo $productionorder->kode_prod ?>";
-        var kode_produk  = $(this).parents("tr").find("#product").val();
-        var produk       = $(this).parents("tr").find("#prodhidd").val();
-        var kode_bom     = $(this).parents("tr").find("#bom").val();
-        var schedule_date= $(this).parents("tr").find("#schedule_date").val();
-        var qty   = $(this).parents("tr").find("#qty").val();
-        var uom   = $(this).parents("tr").find("#uom").val();
-        var reff  = $(this).parents("tr").find("#reff").val();
-        var row_order = $(this).parents("tr").find("#row_order").val();
+        var kode           = "<?php echo $productionorder->kode_prod ?>";
+        var kode_produk   = $(this).parents("tr").find("#product").val();
+        var produk        = $(this).parents("tr").find("#prodhidd").val();
+        var kode_bom      = $(this).parents("tr").find("#bom").val();
+        var schedule_date = $(this).parents("tr").find("#schedule_date").val();
+        var qty           = $(this).parents("tr").find("#qty").val();
+        var uom           = $(this).parents("tr").find("#uom").val();
+        var lebar_greige  = $(this).parents("tr").find("#lebar_greige").val();
+        var uom_lebar_greige  = $(this).parents("tr").find("#uom_lebar_greige").val();
+        var lebar_jadi    = $(this).parents("tr").find("#lebar_jadi").val();
+        var uom_lebar_jadi    = $(this).parents("tr").find("#uom_lebar_jadi").val();
+        var reff          = $(this).parents("tr").find("#reff").val();
+        var row_order     = $(this).parents("tr").find("#row_order").val();
 
         $.ajax({
           dataType: "JSON",
           url : '<?php echo site_url('ppic/productionorder/simpan_detail_production_order') ?>',
           type: "POST",
-          data: {kode : kode, 
+          data: {kode       : kode, 
                 kode_produk : kode_produk,
-                produk  : produk,
-                kode_bom: kode_bom,
-                tgl   : schedule_date, 
-                qty   : qty,
-                uom   : uom,
-                reff  : reff,
-                row_order : row_order  },
+                produk      : produk,
+                kode_bom    : kode_bom,
+                tgl         : schedule_date, 
+                qty         : qty,
+                uom         : uom,
+                lebar_greige      : lebar_greige,
+                uom_lebar_greige  : uom_lebar_greige,
+                lebar_jadi        : lebar_jadi,
+                uom_lebar_jadi    : uom_lebar_jadi,
+                reff        : reff,
+                row_order   : row_order  },
           success: function(data){
             if(data.sesi=='habis'){
                 //alert jika session habis
@@ -538,7 +580,7 @@
             }else{
                 refresh_production();
                 $(".add-new").show();                   
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
             }
           },
           error: function (xhr, ajaxOptions, thrownError){
@@ -548,7 +590,6 @@
         });
       }   
     });
-
 
 
     // Edit row on edit button click
@@ -567,7 +608,7 @@
             class_sel2_bom = 'sel2_bom'+row_order;
                        
             //select 2 bom by kode-produk
-            $(this).html('<select type="text" class="form-control input-sm '+class_sel2_bom+'" id="bom" name="BOM" ></select> ');
+            $(this).html('<select type="text" class="form-control input-sm width-150 '+class_sel2_bom+'" id="bom" name="BOM" ></select> ');
 
             var $newOption = $("<option></option>").val(kode_bom).text(nama_bom);
             $('.sel2_bom'+row_order).empty().append($newOption).trigger('change');
@@ -609,7 +650,7 @@
            
 
           }else if($(this).attr('data-id')=="schedule_date"){
-            $(this).html('<div class="input-group date " id="sch_date2" ><input type="text" class="form-control input-sm" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div> ');
+            $(this).html('<div class="input-group date width-150" id="sch_date2" ><input type="text" class="form-control input-sm  " value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div> ');
             var datetomorrow=new Date();
             datetomorrow.setDate(datetomorrow.getDate() + 1);  
             $('#sch_date2').datetimepicker({
@@ -618,12 +659,23 @@
                 ignoreReadonly: true,
              });
           }else if($(this).attr('data-id')=='qty'){
-            $(this).html('<input type="text"  class="form-control input-sm" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
-          }else if($(this).attr('data-id')=="reff"){
+            $(this).html('<input type="text"  class="form-control input-sm width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+          }else if($(this).attr('data-id')=='lebar_greige' || $(this).attr('data-id')=='lebar_jadi'){
+            $(this).html('<input type="text"  class="form-control input-sm width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" > ');
+          }else if($(this).attr('data-id')=='uom_lebar_greige' || $(this).attr('data-id')=='uom_lebar_jadi'){
 
+            var value_option  = $(this).attr('data-isi');
+            uom_lbr_row       = $(this).attr('data-id')+row_order;
             
+            $(this).html('<select type="text" class="form-control input-sm width-80 '+uom_lbr_row+'"  id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'"></select>');
+
+            var $option = $("<option selected></option>").val(value_option).text(value_option);
+            $('.'+uom_lbr_row).append($option).trigger('change');
+
+            $('.'+uom_lbr_row).append('<?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?>').trigger('change');
+       
+          }else if($(this).attr('data-id')=="reff"){
             $(this).html('<textarea type="text" onkeyup="textAreaAdjust(this)" class="form-control input-sm" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
-             
           }
 
         });  
@@ -686,7 +738,7 @@
                         }else{
                             refresh_production();
                             $(".add-new").show();                   
-                            alert_notify(data.icon,data.message,data.type);
+                            alert_notify(data.icon,data.message,data.type,function(){});
                          }
                       },
                       error: function (xhr, ajaxOptions, thrownError){
@@ -747,7 +799,7 @@
                     }else{
                         refresh_production();
                         unblockUI( function() {
-                          setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                          setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                         });
                         //$(this).parents("tr").find(".btn-generate").button("reset");
                      }
@@ -814,7 +866,7 @@
                     }else{
                         refresh_production();
                         unblockUI( function() {
-                          setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                          setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                         });
                      }
                   },
@@ -870,7 +922,7 @@
               //jika ada form belum keiisi
               refresh_production();
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();
               $('#btn-simpan').button('reset');
@@ -878,7 +930,7 @@
               //jika berhasil disimpan/diubah
               refresh_production();
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
             }
             $('#btn-simpan').button('reset');

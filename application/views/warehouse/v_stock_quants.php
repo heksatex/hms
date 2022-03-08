@@ -86,6 +86,14 @@
       }
     }
 
+    .min-width-200{
+      min-width:200px;
+    }
+
+    .min-width-130{
+      min-width: 130px;
+    }
+
      </style>
 </head>
 
@@ -279,12 +287,15 @@
                       <th  class='style'  width='80px'><!--a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)"-->Kode Produk</a></th>
                       <th  class='style'  width='300px'><!--a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)"-->Nama Produk</a></th>
                       <th  class='style'  width='100px'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Dibuat</a></th>
+                      <th  class='style'  width='100px'><!--a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Diterima</a></th>
                       <th  class='style'  width='200px'><!--a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)"-->Lot</a></th>
                       <th  class='style'  width='50px'><!--a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"-->Grade</a></th>
                       <th  class='style'  width='100px'><!--a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)"-->Qty</a></th>
                       <th  class='style'  width='50px'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
                       <th  class='style'  width='100px'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
                       <th  class='style'  width='50px'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
+                      <th  class='style'  width='100px'><!--a class="column_sort" id="lebar_greige data-order="desc" href="javascript:void(0)"-->Lbr.Greige</a></th>
+                      <th  class='style'  width='100px'><!--a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)"-->Lbr.Jadi</a></th>
                       <th  class='style'  width='200px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi</a></th>
                       <th  class='style'  width='100px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi Fisik</a></th>
                       <th  class='style'  width='200px'><!--a class="column_sort" id="reff_note" data-order="desc" href="javascript:void(0)"-->Reff Note</a></th>
@@ -535,14 +546,17 @@
                         var tr = $("<tr>").append(
                           $("<td>").text(no++),
                           $("<td>").text(value.kode_produk),
-                          $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'" target="_blank">'+value.nama_produk+'</a>'),
+                          $("<td class='min-width-200'>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'" target="_blank">'+value.nama_produk+'</a>'),
                           $("<td>").text(value.create_date),
-                          $("<td>").text(value.lot),
+                          $("<td>").text(value.move_date),
+                          $("<td class='min-width-130'>").text(value.lot),
                           $("<td>").text(value.grade),
-                          $("<td>").text(value.qty),
+                          $("<td align='right'>").text(value.qty),
                           $("<td>").text(value.uom),
-                          $("<td>").text(value.qty2),
+                          $("<td align='right'>").text(value.qty2),
                           $("<td>").text(value.uom2),
+                          $("<td align='right'>").text(value.lebar_greige),
+                          $("<td align='right'>").text(value.lebar_jadi),
                           $("<td>").text(value.lokasi),
                           $("<td>").text(value.lokasi_fisik),
                           $("<td>").text(value.reff_note),
@@ -807,14 +821,17 @@
             var tr = $("<tr>").append(
                       $("<td>").text(no++),
                       $("<td>").text(value.kode_produk),
-                      $("<td>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'" target="_blank">'+value.nama_produk+'</a>'),
+                      $("<td class='min-width-200'>").html('<a href="<?=base_url()?>warehouse/stockquants/edit/'+value.quant_id+'" target="_blank">'+value.nama_produk+'</a>'),
                       $("<td>").text(value.create_date),
-                      $("<td>").text(value.lot),
+                      $("<td>").text(value.move_date),
+                      $("<td class='min-width-130'>").text(value.lot),
                       $("<td>").text(value.grade),
-                      $("<td>").text(value.qty),
+                      $("<td  align='right'>").text(value.qty),
                       $("<td>").text(value.uom),
-                      $("<td>").text(value.qty2),
+                      $("<td  align='right'>").text(value.qty2),
                       $("<td>").text(value.uom2),
+                      $("<td  align='right'>").text(value.lebar_greige),
+                      $("<td  align='right'>").text(value.lebar_jadi),
                       $("<td>").text(value.lokasi),
                       $("<td>").text(value.lokasi_fisik),
                       $("<td>").text(value.reff_note),
@@ -1001,6 +1018,8 @@
                        $("<td>").text(value.uom),
                        $("<td>").text(value.qty2),
                        $("<td>").text(value.uom2),
+                       $("<td>").text(value.lebar_greige),
+                       $("<td>").text(value.lebar_jadi),
                        $("<td>").text(value.lokasi),
                        $("<td>").text(value.lokasi_fisik),
                        $("<td>").text(value.reff_note),
@@ -1078,14 +1097,17 @@
                           row +=  "<tr  style='background-color: #f2f2f2;' >";
                           row += "<td>"+no+++"</td>";
                           row += "<td>"+value.kode_produk+"</td>";
-                          row += "<td><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"' target='_blank'>"+value.nama_produk+"</a></td>";
+                          row += "<td class='min-width-200'><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"' target='_blank'>"+value.nama_produk+"</a></td>";
                           row += "<td>"+value.create_date+"</td>";
-                          row += "<td>"+value.lot+"</td>";
+                          row += "<td>"+value.move_date+"</td>";
+                          row += "<td class='min-width-130'>"+value.lot+"</td>";
                           row += "<td>"+value.nama_grade+"</td>";
                           row += "<td align='right'>"+value.qty+"</td>";
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td align='right'>"+value.lebar_greige+"</td>";
+                          row += "<td align='right'>"+value.lebar_jadi+"</td>";
                           row += "<td>"+value.lokasi+"</td>";
                           row += "<td>"+value.lokasi_fisik+"</td>";
                           row += "<td>"+value.reff_note+"</td>";
@@ -1111,7 +1133,7 @@
             }
 
             },error: function (jqXHR, textStatus, errorThrown){
-              //alert(jqXHR.responseText);
+              alert(jqXHR.responseText);
               alert('Error Load Child Root');
             }
       });
@@ -1184,14 +1206,17 @@
                           row +=  "<tr  style='background-color: #f2f2f2;' >";
                           row += "<td>"+no+++"</td>";
                           row += "<td>"+value.kode_produk+"</td>";
-                          row += "<td><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"' target='_blank'>"+value.nama_produk+"</a></td>";
+                          row += "<td class='min-width-200'><a href='<?=base_url()?>warehouse/stockquants/edit/"+value.id_encr+"' target='_blank'>"+value.nama_produk+"</a></td>";
                           row += "<td>"+value.create_date+"</td>";
-                          row += "<td>"+value.lot+"</td>";
+                          row += "<td>"+value.move_date+"</td>";
+                          row += "<td class='min-width-130'>"+value.lot+"</td>";
                           row += "<td>"+value.nama_grade+"</td>";
                           row += "<td align='right' >"+value.qty+"</td>";
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td>"+value.lebar_greige+"</td>";
+                          row += "<td>"+value.lebar_jadi+"</td>";
                           row += "<td>"+value.lokasi+"</td>";
                           row += "<td>"+value.lokasi_fisik+"</td>";
                           row += "<td>"+value.reff_note+"</td>";
