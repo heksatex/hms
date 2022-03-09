@@ -687,6 +687,7 @@ class Salescontract extends MY_Controller
     		$pdf->SetFont('Arial','B',9);
     		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
     		if(!empty($sc->reference)){
+         
     			$pdf->Cell(47,0.5,'Referensi :',0,0, 'L');
     		}
     		$pdf->Cell(49,0.5,'Tanggal Pembelian :',0,0, 'L');
@@ -734,10 +735,10 @@ class Salescontract extends MY_Controller
         foreach ($list as $row) {
         	$pdf->Cell(7,6,$no++,0,0,'LR');
         	$pdf->Cell(65,6,$row->description,0,0,'LR');
-		    $pdf->Cell(20,6,number_format($row->qty,2),0,0,'R');
-		    $pdf->Cell(20,6,$row->uom,0,0);
-		    $pdf->Cell(30,6,number_format($row->price,4),0,0,'R');
-		    $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),4),0,1,'R'); 
+          $pdf->Cell(20,6,number_format($row->qty,2),0,0,'R');
+          $pdf->Cell(20,6,$row->uom,0,0);
+          $pdf->Cell(30,6,number_format($row->price,4),0,0,'R');
+          $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),4),0,1,'R'); 
         }
 				
 			  $pdf->Cell(10,2,'',0,1);
@@ -833,6 +834,9 @@ class Salescontract extends MY_Controller
   			$pdf->cell(15,0.5,$sc->note,0,0, 'L');
   			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
 	   	}
+       
+  		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
+       
   		$pdf->SetFont('Arial','B',9);  
   		$pdf->Cell(15,0,'');
   		$pdf->Cell(60,0.5,'Menyatakan Setuju, ',0,0, 'c');
@@ -1037,6 +1041,9 @@ class Salescontract extends MY_Controller
     			$pdf->cell(15,0.5,$sc->note,0,0, 'L');
     			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
     		}
+
+        $pdf->Cell(10,5,'',0,1);//ENTER ke bawah
+
     		$pdf->SetFont('Arial','B',9);  
     		$pdf->Cell(60,0.5,'We hereby confirm and accept this contract of sales, ',0,0, 'c');
     		$pdf->Cell(65,0,'');
