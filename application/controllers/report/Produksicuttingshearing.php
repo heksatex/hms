@@ -327,6 +327,8 @@ class Produksicuttingshearing extends MY_Controller
         	$gulung      = $row->gulung;
 			$sisa_target = $row->sisa_target;
       		$status      = $row->status;
+            $lbr_greige  = $row->lebar_greige.' '.$row->uom_lebar_greige;
+            $lbr_jadi    = $row->lebar_jadi.' '.$row->uom_lebar_jadi;
 
         	// explode origin
         	$ex = explode('|', $row->origin);
@@ -369,6 +371,7 @@ class Produksicuttingshearing extends MY_Controller
                         $b++;
                     }
                 }
+                /*
                 if($a == 9 ){// l.greige
                     $exp = explode('=', $exs2);
                     $b   = 1;
@@ -389,6 +392,7 @@ class Produksicuttingshearing extends MY_Controller
                         $b++;
                     }
                 }
+                */
                 if($a == 11){ // pcs
                     $exp = explode('=', $exs2);
                      $b   = 1;
@@ -742,6 +746,8 @@ class Produksicuttingshearing extends MY_Controller
             $gulung      = $row->gulung;
             $sisa_target = $row->sisa_target;
             $status      = $row->status;
+            $lbr_greige  = $row->lebar_greige.' '.$row->uom_lebar_greige;
+            $lbr_jadi    = $row->lebar_jadi.' '.$row->uom_lebar_jadi;
 
             // explode origin
             $ex = explode('|', $row->origin);
@@ -784,6 +790,7 @@ class Produksicuttingshearing extends MY_Controller
                         $b++;
                     }
                 }
+                /*
                 if($a == 9 ){// l.greige
                     $exp = explode('=', $exs2);
                     $b   = 1;
@@ -804,6 +811,7 @@ class Produksicuttingshearing extends MY_Controller
                         $b++;
                     }
                 }
+                */
                 if($a == 11){ // pcs
                     $exp = explode('=', $exs2);
                      $b   = 1;

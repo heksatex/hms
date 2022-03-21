@@ -9,7 +9,7 @@ class M_HPHtricot extends CI_Model
 	{	
 		return $this->db->query("SELECT mp.kode, mp.origin, mpfg.kode_produk, mpfg.nama_produk, mp.origin,mp.reff_note,
 								 mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.create_date as tgl_hph, mpfg.nama_grade,
-								 ms.nama_mesin, mpfg.nama_user,mpfg.lokasi,sq.reff_note as reff_note_sq
+								 ms.nama_mesin, mpfg.nama_user,mpfg.lokasi,sq.reff_note as reff_note_sq, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi
 
 								FROM mrp_production mp
 								INNER JOIN mrp_production_fg_hasil mpfg ON mp.kode = mpfg.kode

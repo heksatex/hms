@@ -245,8 +245,8 @@ class HPHtricot extends MY_Controller
 									  'qty2'	   => $val->qty2,
 									  'uom2'       => $val->uom2,
 									  'grade'      => $val->nama_grade,
-									  'lbr_greige' => $lbr_greige,
-									  'lbr_jadi'   => $lbr_jadi,
+									  'lbr_greige' => $val->lebar_greige.' '.$val->uom_lebar_greige,
+									  'lbr_jadi'   => $val->lebar_jadi.' '.$val->uom_lebar_jadi,
 									  'rpm'        => $rpm,
 									  'stitch'     => $stitch,
 									  'marketing'  => $mkt,
@@ -651,8 +651,8 @@ class HPHtricot extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty2);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->uom2);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_grade);
-			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $lbr_greige);
-			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $lbr_jadi);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->lebar_greige.' '.$val->uom_lebar_greige);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_jadi.' '.$val->uom_lebar_jadi);
 			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $rpm);
 			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $stitch);
 			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $mkt);

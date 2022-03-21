@@ -410,6 +410,15 @@ class Stock extends MY_Controller
         //bold huruf
         $object->getActiveSheet()->getStyle("A1:Q4")->getFont()->setBold(true);
 
+        // Border 
+		$styleArray = array(
+            'borders' => array(
+              'allborders' => array(
+                'style' => PHPExcel_Style_Border::BORDER_THIN
+              )
+            )
+        );
+
 
         // header table
         $table_head_columns  = array('No', 'Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'Umur (Hari)');
@@ -419,6 +428,15 @@ class Stock extends MY_Controller
             # code...
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 4, $judul);  
             $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+    		
+    		$object->getActiveSheet()->getStyle($val.'4')->applyFromArray($styleArray);
+            $object->getActiveSheet()->getStyle($val.'5')->applyFromArray($styleArray);
         }
 
 
@@ -445,7 +463,30 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_jadi);
             $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->uom_lebar_jadi);
             $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->umur);
+
+             //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('Q'.$rowCount)->applyFromArray($styleArray);
+
             $rowCount++;
+
+
         }
 
     	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  

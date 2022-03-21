@@ -8,7 +8,7 @@ class M_produksiTricot extends CI_Model
 
 	public function get_list_produksi_tricot_by_kode($where)
 	{
-		return $this->db->query("SELECT mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.start_time, mp.finish_time, mp.qty as meter, mp.reff_note, mp.status,
+		return $this->db->query("SELECT mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.start_time, mp.finish_time, mp.qty as meter, mp.reff_note, mp.status, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi,
 										(SELECT IFNULL(sum(mpfg.qty),0) as total_qty1
 												 FROM mrp_production_fg_hasil mpfg
 												 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = 'TRI')) as hph_qty1,
