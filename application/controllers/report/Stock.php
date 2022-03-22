@@ -79,6 +79,7 @@ class Stock extends MY_Controller
         	}
 
         	$list = $this->m_stock->get_list_stock_grouping($where_lokasi, $nama_field, $where_result);
+            $tot_group = 0;
         	foreach ($list as $gp) {
         		# code...
         		$dataRecord[]  = array('group' => 'Yes',
@@ -87,11 +88,14 @@ class Stock extends MY_Controller
         							   'jml'        => '',
                                        'by'         => $nama_field
         						);
+                $tot_group++;
+                
+
         	}
 
         	$group = true;
         	$name_total = "Total Group : ";
-            $allcount   = count($data_group);
+            $allcount   = $tot_group;
 
         }else{
             $name_total="Total Data : ";
