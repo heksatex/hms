@@ -22,7 +22,7 @@ class M_stock extends CI_Model
 
 	public function get_list_stock_grouping($where_lokasi,$groupBy,$where)
 	{
-		return $this->db->query("SELECT $groupBy as nama_field, concat($groupBy,' (',count(*),')') as grouping, sum(qty) as 'tqty'  from stock_quant WHERE $where_lokasi $where group by $groupBy ")->result();
+		return $this->db->query("SELECT $groupBy as nama_field, concat($groupBy,' (',count(*),')') as grouping from stock_quant WHERE $where_lokasi $where group by $groupBy ")->result();
 	}
 
 	public function get_record_stock($where_lokasi,$where)
