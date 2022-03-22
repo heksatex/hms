@@ -84,7 +84,7 @@ class Stock extends MY_Controller
         		$dataRecord[]  = array('group' => 'Yes',
         							   'nama_field' => $gp->nama_field,
         							   'grouping'   => $gp->grouping,
-        							   'jml'        => $gp->tqty,
+        							   'jml'        => '',
                                        'by'         => $nama_field
         						);
         	}
@@ -253,7 +253,7 @@ class Stock extends MY_Controller
                 $row .= "<td></td>";
                 $row .= "<td class='show collapsed group1'  href='#' data-content='edit' data-isi='".$gp2->nama_field."' data-group='".$by2."' data-tbody='".$id."' group-ke='".$group_ke_next."'' data-root='".$groupOf."' node-root='No' style='cursor:pointer;'><i class='glyphicon glyphicon-plus'></td>";
                 $row .= "<td colspan='4'>".$gp2->grouping."</td>";
-                $row .= "<td align='right'>".$gp2->tqty."</td>";
+                $row .= "<td align='right'></td>";
                 $row .= "<td colspan='3' class='list_pagination'></td>";
                 $row .= "<td colspan='2' ></td>";
                 $row .= "</tr>";
