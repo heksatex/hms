@@ -412,7 +412,7 @@ class Stock extends MY_Controller
 		$object->getActiveSheet()->mergeCells('A1:L1');
 
         //bold huruf
-        $object->getActiveSheet()->getStyle("A1:Q4")->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle("A1:R4")->getFont()->setBold(true);
 
         // Border 
 		$styleArray = array(
@@ -425,7 +425,7 @@ class Stock extends MY_Controller
 
 
         // header table
-        $table_head_columns  = array('No', 'Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -435,7 +435,7 @@ class Stock extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -451,22 +451,23 @@ class Stock extends MY_Controller
         foreach ($list as $val) {
             # code...
             $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
-            $object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->lot);
-            $object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->nama_grade);
-            $object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->move_date);
-            $object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lokasi);
-            $object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lokasi_fisik);
-            $object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->kode_produk);
-            $object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->nama_produk);
-            $object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
-            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
-            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty2);
-            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->uom2);
-            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->lebar_greige);
-            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->uom_lebar_greige);
-            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->uom_lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->umur);
+            $object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->quant_id);
+            $object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->lot);
+            $object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->nama_grade);
+            $object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->move_date);
+            $object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lokasi);
+            $object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->lokasi_fisik);
+            $object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->kode_produk);
+            $object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->nama_produk);
+            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->qty);
+            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->uom);
+            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->qty2);
+            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->uom2);
+            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->lebar_greige);
+            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->uom_lebar_greige);
+            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->uom_lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->umur);
 
              //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -487,6 +488,7 @@ class Stock extends MY_Controller
 			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('Q'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray);
 
             $rowCount++;
 
