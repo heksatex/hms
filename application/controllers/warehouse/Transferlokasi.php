@@ -44,7 +44,7 @@ class Transferlokasi extends MY_Controller
             $row[] = $field->total_lot;
             $row[] = $field->note;
             $row[] = $field->nama_status;
- 
+            $row[] = $field->nama_user;
             $data[] = $row;
         }
  
@@ -135,17 +135,34 @@ class Transferlokasi extends MY_Controller
 	      		if(!$validLokasiTujuan){
 	      			$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      		}else{
-					if(empty($kode_tl)){
-						// create transfer lokasi
+					if(empty($kode_tl)){// create transfer lokasi
+						
+						// cek transfer lokasi yg status nya draft atau ready by user
+						$status_tl  = " IN ('draft','ready')";
+						$cek_tl_user = $this->m_transferLokasi->cek_transfer_lokasi_by_user($nama_user['nama'],$status_tl)->num_rows();
+						if($cek_tl_user > 0){
 
-						$kode = $this->m_transferLokasi->get_kode_tl();
-	          			$last_id_encr = encrypt_url($kode);
-						$this->m_transferLokasi->save_transfer_lokasi($kode,$tgl,$note,$dept_id,$lokasi_tujuan,$nama_user['nama'],$status);
+							$cek_tl = $this->m_transferLokasi->cek_transfer_lokasi_by_user($nama_user['nama'],$status_tl)->result();
+							$list_tl = '';
+							foreach($cek_tl as $row){
+								$list_tl .= $row->kode_tl.", ";
+							}
 
-						$jenis_log   = "create";
-			            $note_log    = $nama_departemen." | ".$lokasi_tujuan." | ".$note;
-			          	$this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
-			          	$callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $last_id_encr, 'icon' =>'fa fa-check', 'type' => 'success');
+							$list_tl = rtrim($list_tl, ', ');
+
+							$callback = array('status' => 'failed', 'field' => '', 'message' => ' Maaf, Anda tidak bisa membuat Transfer Lokasi baru, sebelum Transfer Lokasi sebelumnya <b> SELESAI </b> atau <b>DIBATALKAN</b> ! <br>Berikut Kode TL ('.$list_tl.')', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+
+						}else{
+							
+							$kode = $this->m_transferLokasi->get_kode_tl();
+							$last_id_encr = encrypt_url($kode);
+							$this->m_transferLokasi->save_transfer_lokasi($kode,$tgl,$note,$dept_id,$lokasi_tujuan,$nama_user['nama'],$status);
+							
+							$jenis_log   = "create";
+							$note_log    = $nama_departemen." | ".$lokasi_tujuan." | ".$note;
+							$this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+							$callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $last_id_encr, 'icon' =>'fa fa-check', 'type' => 'success');
+						}
 
 					}else{
 						// update transfer lokasi
@@ -222,10 +239,14 @@ class Transferlokasi extends MY_Controller
 	      		$validLokasiTujuan = $this->m_transferLokasi->valid_lokasi_tujuan_by_dept($dept_id,$lokasi_tujuan);
 
 	      		// validasi barcode
-	      		$validBarcode = $this->m_transferLokasi->verified_barcode_by_dept($barcode_id);
+	      		$validBarcode = $this->m_transferLokasi->verified_barcode_by_dept($lokasi_stock,$barcode_id);
 
 	      		// cek lokasi barcode by dept
 	      		$validBarcodeDepartement = $this->m_transferLokasi->is_valid_lokasi_barcode_by_dept($lokasi_stock,$barcode_id);
+
+				// cek barcode apakah ada di kode TL lain dengan status ready 
+				$status_tl = 'ready';
+				$validBarcodeInput = $this->m_transferLokasi->cek_barcode_in_transfer_lokasi_by_status($status_tl, $barcode_id);
 
 	      		if(!$validLokasiTujuanBy){
 	      			$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Tidak sama !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
@@ -233,10 +254,21 @@ class Transferlokasi extends MY_Controller
 	      			$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      		}else if(!$validBarcode){
 	      			$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Barcode tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+
 	      		}else if($validBarcodeDepartement['lokasi'] != $lokasi_stock){
 	      			$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Lokasi Barcode tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+	      		}else if($validBarcodeInput > 0){
 
-	      		}else{
+					// get list kode Tl 
+					$cek_tl = $this->m_transferLokasi->get_list_kode_tl_by_barcode($status_tl,$barcode_id);
+					$list_tl = '';
+					foreach($cek_tl as $row){
+						$list_tl .= $row->kode_tl.', ';
+					}	
+					$list_tl = rtrim($list_tl, ', ');
+					$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Barcode sudah pernah diinput di Kode TL ('.$list_tl.') ! ', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+
+				}else{
 
                     //lock table
 	                $this->_module->lock_tabel('transfer_lokasi WRITE, transfer_lokasi_items WRITE, stock_quant WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE');
