@@ -148,7 +148,9 @@
               unblockUI( function() {
                 setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
-               document.getElementById(data.field).focus();
+              $('#btn-simpan').button('reset');
+              document.getElementById(data.field).focus();
+
           }else{
            //jika berhasil disimpan/diubah
             unblockUI( function() {
