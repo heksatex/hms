@@ -192,13 +192,15 @@
         </div>
         <div class="box-body">
 
-          <form name="input" class="form-horizontal" role="form" id="form_filter" action="<?=base_url()?>report/stock/export_excel_stock" method="POST">
+          <form name="input" class="form-horizontal" role="form" id="form_filter"  action="<?=base_url()?>report/stock/export_excel_stock" method="POST">
               <div class="col-md-12">
                 <div class="col-md-8">
                   <div class="col-md-3">
                     <select class="form-control input-sm" name="cmbSearch" id="cmbSearch">
                       <option value="umur">Umur</option>
                       <option value="nama_produk">Nama Produk</option>
+                      <option value="lot">Lot</option>
+                      <option value="nama_grade">Grade</option>
                       <option value="lokasi">Lokasi</option>
                       <option value="lokasi_fisik">Lokasi Rak</option>
                     </select>
@@ -412,6 +414,7 @@
     $('#sql').val('');
   });
 
+
   // disable enter
   $(window).keydown(function(event){
     if(event.keyCode == 13) {
@@ -419,8 +422,8 @@
       return false;
     }
   });
-  
   /*
+  
    // set date tgldari
   $('#tgldari').datetimepicker({
       defaultDate : new Date(),
@@ -535,6 +538,8 @@
       field = 'Tgl Dibuat';
     }else if(field == 'umur'){
       field = 'Umur';
+    }else if(field == 'lot'){
+      field = 'Lot';
     }
     return field;
   }
@@ -550,6 +555,14 @@
           value += "</select>";
           value += '</div>';
           
+          $('#f_search').html(value);
+    }else if(value == 'nama_grade'){
+      var value = '<div class="col-md-6"> ';
+          value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
+          value += "<option value=''>Pilih Grade</option>";
+          value += "<?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";} ?>";
+          value += "</select>";
+          value += '</div>';
           $('#f_search').html(value);
     }else if( value == 'umur'){
       var value = '<div class="col-md-3"> ';
@@ -599,7 +612,7 @@
           }else if(cmbOperator == '>'){
             caption_sparate ='Older Than';
           }
-        }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik'){
+        }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade'){
           caption_sparate = '=';
         }else{
           caption_sparate = 'LIKE';
@@ -747,27 +760,17 @@
      });
   }
 
-    // disable enter input text
-    $(document).ready(function() {
-      $('input[type="text"]').keydown(function(event){
-        if(event.keyCode == 13) {
-          event.preventDefault();
-          return false;
-        }
-      });
-    });
+    
 
     // cek sql saat klik btn excel
-    $("#form_filter").submit(function(){
+    $("#form_filter").submit(function(event){
 
         var sql = $('#sql').val();
         if(sql == ''){
           alert('Silahkan Filter Terlebih Dahulu !');
           return false;
         }else{
-          
         }
-
     });
 
     // remove aray group

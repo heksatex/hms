@@ -24,6 +24,7 @@ class Stock extends MY_Controller
         $data['list_grade'] = $this->_module->get_list_grade();
         $data['warehouse']  = $this->m_stock->get_list_departement_stock();
         $data['type_condition'] = $type_condition;
+        $data['list_grade'] = $this->_module->get_list_grade();
     	$this->load->view('report/v_stock', $data);
     }
 
