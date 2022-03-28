@@ -74,7 +74,7 @@ class M_sales extends CI_Model
 	{
 		$this->_get_datatables_query();
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		if($sales_group != 'Administrator'){
+		if($sales_group != 'MKT005'){// Administrator
 			$this->db->where("sc.sales_group", $sales_group);
 		}
 		if($_POST['length'] != -1)
@@ -87,7 +87,7 @@ class M_sales extends CI_Model
 	{
 		$this->_get_datatables_query();
 		$this->db->where("mmss.main_menu_sub_kode",$mmss);
-		if($sales_group != 'Administrator' ){
+		if($sales_group != 'MKT005' ){// Administrator
 			$this->db->where("sc.sales_group", $sales_group);
 		}
 		$query = $this->db->get();
@@ -104,7 +104,7 @@ class M_sales extends CI_Model
 		$this->db->JOIN("mst_sales_group sg", "sc.sales_group=sg.kode_sales_group","INNER");
 		$this->db->group_by('sc.sales_order');
 		$this->db->where("mmss.main_menu_sub_kode",$mmss);
-		if($sales_group != 'Administrator' ){
+		if($sales_group != 'MKT005' ){// administrator
 			$this->db->where("sc.sales_group", $sales_group);
 		}
 		return $this->db->count_all_results();
@@ -112,7 +112,11 @@ class M_sales extends CI_Model
 
 	public function cek_sales_group_by_username($username)
 	{
-		return $this->db->query("SELECT sales_group FROM user where username = '$username'");
+		return $this->db->query("SELECT u.sales_group 
+								FROM user u 
+								INNER JOIN mst_sales_group mst ON u.sales_group = mst.kode_sales_group
+								where u.username = '$username'");
+		//return $this->db->query("SELECT sales_group FROM user where username = '$username'");
 	} 
 
 	public function get_list_departement()
@@ -372,6 +376,7 @@ class M_sales extends CI_Model
 		return $this->db->query("UPDATE sales_contract SET status = '$status' WHERE sales_order = '$sales_order' ");
 	}
 
+	
 	/* >> Approve Color  */
 	
 	public function cek_sales_color_line_by_kode($sales_order)

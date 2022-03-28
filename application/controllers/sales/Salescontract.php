@@ -135,6 +135,10 @@ class Salescontract extends MY_Controller
             $order_production = 'true';
           }
           */
+
+          // cek sales_person
+          $sg = $this->m_sales->cek_sales_group_by_username($username)->row_array();
+
           if(empty($customer)){
               $callback = array('status' => 'failed', 'field' => 'customer', 'message' => 'Customer Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
           }elseif(empty($invoice_address)){
@@ -158,7 +162,10 @@ class Salescontract extends MY_Controller
               $callback = array('status' => 'failed', 'field' => 'delivery_date', 'message' => 'Delivery Date Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
           }elseif(empty($note_head)){
               $callback = array('status' => 'failed', 'field' => 'note_head', 'message' => 'Note Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
+          }elseif(empty($sg['sales_group'])){
+            $callback = array('status' => 'failed', 'field' => 'note_head', 'message' => 'Sales Person tidak ada, Silahkan tentukan Sales Person nya terlebih dahulu !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
           }else{
+
               if(empty($sales_order)){//jika sales order kosong, aksinya simpan data
                   $kode['sales_order'] =  $this->m_sales->get_kode_sales_order();
                   $kode_encrypt        = encrypt_url($kode['sales_order']);
@@ -828,9 +835,10 @@ class Salescontract extends MY_Controller
 
 	  	if(!empty($sc->note)){
   			$pdf->SetFont('Arial','B',9);  
-  			$pdf->Cell(14,0.5,'Catatan :',0,0, 'L');
+  			$pdf->Cell(14,4,'Catatan :',0,0, 'L');
   			$pdf->SetFont('Arial','',9);
-  			$pdf->cell(15,0.5,$sc->note,0,0, 'L');
+        $pdf->Multicell(0,4,$sc->note,0, 'L');
+  			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
   			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
 	   	}
   		$pdf->SetFont('Arial','B',9);  
@@ -1032,9 +1040,10 @@ class Salescontract extends MY_Controller
 
     	  if(!empty($sc->note)){
     			$pdf->SetFont('Arial','B',9);  
-    			$pdf->Cell(10,0.5,'Note :',0,0, 'L');
+    			$pdf->Cell(10,4,'Note :',0,0, 'L');
     			$pdf->SetFont('Arial','',9);
-    			$pdf->cell(15,0.5,$sc->note,0,0, 'L');
+    			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
+          $pdf->Multicell(0,4,$sc->note,0, 'L');
     			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
     		}
     		$pdf->SetFont('Arial','B',9);  
