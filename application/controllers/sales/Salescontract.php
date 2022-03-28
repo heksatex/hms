@@ -39,7 +39,7 @@ class Salescontract extends MY_Controller
             $row[] = '<a href="'.base_url('sales/salescontract/edit/'.$kode_encrypt).'">'.$field->sales_order.'</a>';
             $row[] = $field->create_date;
             $row[] = $field->customer_name;
-            $row[] = $field->sales_group;
+            $row[] = $field->nama_sales_group;
             $row[] = $field->nama_status;
             $data[] = $row;
         }

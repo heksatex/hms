@@ -97,7 +97,7 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Sales Person</label></div>
                   <div class="col-xs-8">
-                    <input type="text" class="form-control input-sm" name="salesperson" id="salesperson" value="<?php echo $salescontract->sales_group?>" readonly="readonly" />
+                    <input type="text" class="form-control input-sm" name="salesperson" id="salesperson" value="<?php echo $salescontract->nama_sales_group?>" readonly="readonly" />
                   </div>
                   <div id="confirm">
                     <input type="hidden" class="form-control input-sm" name="status" id="status" readonly="readonly" value="<?php echo $salescontract->status?>" />
