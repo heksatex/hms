@@ -104,6 +104,7 @@
                   <th>Total </th>
                   <th>Note</th>
                   <th>Status</th>
+                  <th>User</th>
                 </tr>
               </thead>
             </table>
@@ -153,7 +154,6 @@
                     data.status  = $('#status').val();
                     data.note    = $('#note').val();
                 },
-                //"data":{"id_dept" : "<?php echo $id_dept;?>"}
             },
  
             "columnDefs": [
@@ -164,19 +164,13 @@
               {
                 "targets" : 1,
                  render: function (data, type, full, meta) {
-                        return "<div class='text-wrap width-140'>" + data + "</div>";
-                }
-              },
-              {
-                "targets" : 6,
-                 render: function (data, type, full, meta) {
-                        return "<div class='text-wrap width-150'>" + data + "</div>";
+                        return "<div class='text-wrap width-110'>" + data + "</div>";
                 }
               },
               {
                 "targets" : 7,
                  render: function (data, type, full, meta) {
-                        return "<div class='text-wrap width-130'>" + data + "</div>";
+                        return "<div class='text-wrap width-50'>" + data + "</div>";
                 }
               },
 
