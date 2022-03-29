@@ -97,7 +97,7 @@
      </style>
 </head>
 
-<body class="hold-transition skin-black fixed sidebar-mini">
+<body class="hold-transition skin-black fixed sidebar-mini" onload="get_default()">
 <!-- Site wrapper -->
 <div class="wrapper">
   <!-- main -header -->
@@ -294,6 +294,7 @@
                       <th  class='style'  width='50px'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
                       <th  class='style'  width='100px'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
                       <th  class='style'  width='50px'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
+                      <th  class='style'  width='100px'><!--a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)"-->Qty Opname</a></th>
                       <th  class='style'  width='100px'><!--a class="column_sort" id="lebar_greige data-order="desc" href="javascript:void(0)"-->Lbr.Greige</a></th>
                       <th  class='style'  width='100px'><!--a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)"-->Lbr.Jadi</a></th>
                       <th  class='style'  width='200px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi</a></th>
@@ -304,7 +305,7 @@
                   </thead>
                   <tbody>
                     <tr>
-                      <td colspan="14" align="center">Tidak ada Data</td>
+                      <td colspan="18" align="center">Tidak ada Data</td>
                     </tr>
                   </tbody>
               </table>
@@ -364,6 +365,12 @@
       $('[data-role="tags-input"]').tagsinput({ });
     });
 
+    // body onload
+    function get_default(){
+      $("#tags").tagsinput('removeAll');
+      $("#cmbElement").prop('selectedIndex',0);
+
+    }
 
     // function grouping table from onlick caption
     function groupBy(groupBy,caption,dataIndex){
@@ -555,6 +562,7 @@
                           $("<td>").text(value.uom),
                           $("<td align='right'>").text(value.qty2),
                           $("<td>").text(value.uom2),
+                          $("<td align='right'>").text(value.qty_opname),
                           $("<td align='right'>").text(value.lebar_greige),
                           $("<td align='right'>").text(value.lebar_jadi),
                           $("<td>").text(value.lokasi),
@@ -572,7 +580,7 @@
                     $('#btn-filter').button('reset');
 
                     if(empty == true && arr_grouping.length == 0){
-                      var tr = $("<tr>").append($("<td colspan='14' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='18' align='center'>").text('Tidak ada Data'));
                       tbody.append(tr);
                       $("#example1").append(tbody);
                     }
@@ -765,7 +773,7 @@
           unblockUI( function() {});
 
           if(data.record == ''){
-            var tr = $("<tr>").append($("<td colspan='14' align='center'>").text('Tidak ada Data'));
+            var tr = $("<tr>").append($("<td colspan='18' align='center'>").text('Tidak ada Data'));
             tbody.append(tr);
             $("#example1").append(tbody);
           }
@@ -830,6 +838,7 @@
                       $("<td>").text(value.uom),
                       $("<td  align='right'>").text(value.qty2),
                       $("<td>").text(value.uom2),
+                      $("<td align='right'>").text(value.qty_opname),
                       $("<td  align='right'>").text(value.lebar_greige),
                       $("<td  align='right'>").text(value.lebar_jadi),
                       $("<td>").text(value.lokasi),
@@ -840,7 +849,7 @@
               tbody.append(tr);
           });
           if(empty){
-            var tr = $("<tr>").append($("<td colspan='14' align='center'>").text('Tidak ada Data'));
+            var tr = $("<tr>").append($("<td colspan='18' align='center'>").text('Tidak ada Data'));
             tbody.append(tr);
           }
          $("#example1_processing").css('display','none');// hidden loading processing in table
@@ -958,6 +967,15 @@
           value += "<option>done</option>";
           value += "<option>cancel</option>";
           value += "</select>";
+
+    }else if(type_condition == 'opname'){
+      var condition = "<select class='form-control input-sm condition width-input' name='cmbCondition' id='cmbCondition'  >";
+          condition += "<option>=</option>";
+          condition += "</select>";
+      var value = "<select class='form-control input-sm value width-input' name='cmbValue' id='value'  >";
+          value += "<option>draft</option>";
+          value += "<option>done</option>";
+          value += "</select>";
     }
 
     $('#filterAdvanced tr:nth-child('+rowIndex+') td:nth-child(2)').html(condition);//set cmbCondition
@@ -966,6 +984,7 @@
 
   // < Tabel Filter
 
+  /*
 
   $(document).on('click', '.column_sort', function(){
       $("#example1 tbody").remove();
@@ -1018,6 +1037,7 @@
                        $("<td>").text(value.uom),
                        $("<td>").text(value.qty2),
                        $("<td>").text(value.uom2),
+                       $("<td>").text(value.qty_opname),
                        $("<td>").text(value.lebar_greige),
                        $("<td>").text(value.lebar_jadi),
                        $("<td>").text(value.lokasi),
@@ -1037,6 +1057,8 @@
       })
          
   }); 
+
+  */
 
 
   $(document).on("click", ".group1", function(e){
@@ -1106,6 +1128,7 @@
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td align='right'>"+value.qty_opname+"</td>";
                           row += "<td align='right'>"+value.lebar_greige+"</td>";
                           row += "<td align='right'>"+value.lebar_jadi+"</td>";
                           row += "<td>"+value.lokasi+"</td>";
@@ -1215,6 +1238,7 @@
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td>"+value.qty_opname+"</td>";
                           row += "<td>"+value.lebar_greige+"</td>";
                           row += "<td>"+value.lebar_jadi+"</td>";
                           row += "<td>"+value.lokasi+"</td>";
