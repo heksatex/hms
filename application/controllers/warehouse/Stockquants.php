@@ -143,9 +143,9 @@ class Stockquants extends MY_Controller
     {
         if(!isset($id)) show_404();
             $quant_id = decrypt_url($id);
-            $data['id_dept'] ='SQ';
-            $data['list'] = $this->m_stockQuants->get_stock_quant_by_kode($quant_id);
-            $data['list_uom']= $this->_module->get_list_uom();
+            $data['id_dept']    ='SQ';
+            $data['list']       = $this->m_stockQuants->get_stock_quant_by_kode($quant_id);
+            $data['list_uom']   = $this->_module->get_list_uom();
             $data['list_grade'] = $this->_module->get_list_grade();
             if(empty($data['list'])){
               show_404();
@@ -172,8 +172,8 @@ class Stockquants extends MY_Controller
         
         $whereAll      = "";
         $no            = 1;
-        $dataRecord   = [];
-        $dataArr      = [];
+        $dataRecord    = [];
+        $dataArr       = [];
 
         if(!empty($kolom_order)){
             $kolom_order = "ORDER BY ".$kolom_order;
@@ -198,17 +198,20 @@ class Stockquants extends MY_Controller
                 $grouping1  = $this->grouping_1_params($data_grouping,$where,$id_dept,$kolom_order,$order);
                 $dataRecord = $grouping1[0];
                 $tmp_arr_group = $grouping1[1];
+                $jml_group     = $grouping1[2];
                 $group_ke  = 1;
 
             }elseif (count($data_grouping) == 2) {
                 $grouping2  = $this->grouping_1_params($data_grouping,$where,$id_dept,$kolom_order,$order);
                 $dataRecord = $grouping2[0];
                 $tmp_arr_group = $grouping2[1];
+                $jml_group     = $grouping2[2];
                 $group_ke  = 1;
             }
        
             $name_total = "Total Group : ";
-            $allcount   = count($data_grouping);
+            //$allcount   = count($data_grouping);
+            $allcount   = $jml_group;
             $pagination = '';
             $group   = true;
 
@@ -233,6 +236,7 @@ class Stockquants extends MY_Controller
                                                     'uom'         => $row->uom,
                                                     'qty2'        => $row->qty2,
                                                     'uom2'        => $row->uom2,
+                                                    'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
                                                     'lebar_greige'=> $row->lebar_greige.' '.$row->uom_lebar_greige,
                                                     'lebar_jadi'  => $row->lebar_jadi.' '.$row->uom_lebar_jadi,
                                                     'lokasi'      => $row->lokasi,
@@ -288,6 +292,7 @@ class Stockquants extends MY_Controller
         }
 
         $tmp_arr_group = [];
+        $jml_group     = 0;
 
         $group1   = $this->m_stockQuants->get_list_stock_quant_grouping($groupBy,$where1);
         foreach ($group1 as $gp1) {
@@ -341,9 +346,10 @@ class Stockquants extends MY_Controller
 
             */
             $row .= "</tbody>";
+            $jml_group++;
 
         }
-        return array($row,$tmp_arr_group);
+        return array($row,$tmp_arr_group,$jml_group);
     }
 
 
@@ -482,6 +488,14 @@ class Stockquants extends MY_Controller
                     $isi = $row['operator']." '%".addslashes($row['isi'])."%' ";
                     $operator = $row['operator'];
                    // $whereAll .= "LIKE '%".$row['isi']."%' ".$condition;
+                }else if($row['nama_field'] == 'qty_opname'){
+                    if($row['isi'] == 'done'){
+                        $isi = " > 0 ";
+                    }else{
+                        $isi = " = 0 ";
+                    }
+
+                    $operator = $row['operator'];
                 }else{
                     $isi = $row['operator']." '".addslashes($row['isi'])."' ";
                     $operator = $row['operator'];
@@ -587,6 +601,12 @@ class Stockquants extends MY_Controller
                         if($operator == 'LIKE' OR $operator == 'NOT LIKE' ){
                             $isi_ = $operator." '%".addslashes($isi)."%' ";
                             // $operator = 'LIKE';
+                        }else if($nama_field == 'qty_opname'){
+                            if($isi == 'done'){
+                                $isi_ = " > 0 ";
+                            }else{
+                                $isi_ = " = 0 ";
+                            }
                         }else{
                             $isi_ = $operator." '".addslashes($isi)."' ";
                             // $operator = $row['operator'];
@@ -756,11 +776,12 @@ class Stockquants extends MY_Controller
                                       'uom'        => $val->uom,
                                       'qty2'       => $val->qty2,
                                       'uom2'       => $val->uom2,
+                                      'qty_opname' => $val->qty_opname.' '.$val->uom_opname,
                                       'lebar_greige'=> $val->lebar_greige.' '.$val->uom_lebar_greige,
                                       'lebar_jadi'  => $val->lebar_jadi.' '.$val->uom_lebar_jadi,
-                                      'lokasi'     => $val->lokasi,
-                                      'lokasi_fisik'  => $val->lokasi_fisik,
-                                      'reff_note'  => $val->reff_note,
+                                      'lokasi'      => $val->lokasi,
+                                      'lokasi_fisik'=> $val->lokasi_fisik,
+                                      'reff_note'   => $val->reff_note,
                                       'reserve_move'=> $val->reserve_move
                                   );
             }

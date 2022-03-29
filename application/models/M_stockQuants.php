@@ -127,7 +127,7 @@ class M_stockQuants extends CI_Model
 
 	public function get_stock_quant_by_kode($quant_id)
 	{
-		$query = $this->db->query("SELECT quant_id, create_date, move_date, kode_produk, nama_produk, lot, nama_grade, qty, uom, qty2, uom2, lokasi, lokasi_fisik, lebar_greige, uom_lebar_greige, lebar_jadi,uom_lebar_jadi, reff_note, reserve_move, reserve_origin, (datediff(now(), move_date) ) as umur FROM stock_quant WHERE quant_id = '$quant_id'");
+		$query = $this->db->query("SELECT quant_id, create_date, move_date, kode_produk, nama_produk, lot, nama_grade, qty, uom, qty2, uom2, lokasi, lokasi_fisik, lebar_greige, uom_lebar_greige, lebar_jadi,uom_lebar_jadi, reff_note, reserve_move, reserve_origin, (datediff(now(), move_date) ) as umur, qty_opname, uom_opname FROM stock_quant WHERE quant_id = '$quant_id'");
 		return $query->row();
 	}
 
