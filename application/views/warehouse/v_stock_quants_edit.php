@@ -120,13 +120,13 @@
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Qty 2 </label></div>
+                  <div class="col-xs-4"><label>Qty2 </label></div>
                   <div id="ta" class="col-xs-8">
                     <input type='text' class="form-control input-sm" name="qty2" id="qty2"  value="<?php echo $list->qty2; ?>"  />
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Uom 2 </label></div>
+                  <div class="col-xs-4"><label>Uom2 </label></div>
                   <div class="col-xs-8">
                     <select class="form-control input-sm " id="uom2" name="uom2">
                         <option value=""></option>
@@ -141,6 +141,18 @@
                         ?>
                     </select>
                   </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Qty Opname </label></div>
+                  <div class="col-xs-8">
+                    <input type='text' class="form-control input-sm" name="qty_opname" id="qty_opname"  value="<?php echo $list->qty_opname; ?>"  readonly/>
+                  </div>
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Uom Opname </label></div>
+                  <div class="col-xs-8">
+                    <input type='text' class="form-control input-sm" name="qty_opname" id="qty_opname"  value="<?php echo $list->uom_opname; ?>" readonly>
+                  </div>
                 </div>
              
               </div>
