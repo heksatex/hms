@@ -1171,8 +1171,8 @@ class Pengirimanbarang extends MY_Controller
                      $sql_update_stock_quant_move_id  = "UPDATE stock_quant SET reserve_move =(case ".$case6." end) WHERE  quant_id in (".$where6.") ";
                      $this->_module->update_perbatch($sql_update_stock_quant_move_id);
 
-                     $where7 = rtrim($where7, ',');
-                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET reserve_origin =(case ".$case7." end), lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
+                     $where7 = rtrim($where7, ',');// update reserve origin di hapus
+                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET  lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
                      $this->_module->update_perbatch($sql_update_stock_quant_reserve_origin);
 
                     if(!empty($case3) AND !empty($where3)){
