@@ -120,70 +120,95 @@
                    <div class="panel panel-default" style="margin-bottom: 0px;">
                     <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
                       <div class="panel-body" style="padding: 5px">
-                        <div class="col-md-4" >
-                          <div class="form-group">
-                            <div class="col-md-5">
-                              <label>MO </label>
+                        <div class="form-group col-md-12" style="margin-bottom:0px">
+                          <div class="col-md-4" >
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>MO </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="mo" id="mo" >
+                              </div>
                             </div>
-                            <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="mo" id="mo" >
-                            </div>
-                          </div>
-                          <div class="form-group">
-                            <div class="col-md-5">
-                              <label>Lot </label>
-                            </div>
-                            <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="lot" id="lot" >
-                            </div>
-                          </div> 
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <div class="col-md-5">
-                              <label>Corak </label>
-                            </div>
-                            <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="corak" id="corak" >
-                            </div>
-                          </div>
-                          <div class="form-group">
-                            <div class="col-md-5">
-                              <label>No Mesin </label>
-                            </div>
-                            <div class="col-md-7">
-                                <!--input type="text" class="form-control input-sm" name="mc" id="mc" -->
-                                <select type="text" class="form-control input-sm" name="mc" id="mc"  style="width:100% !important"> 
-                                <option value="">-- Pilih No Mesin --</option>
-                                <?php 
-                                  foreach ($mesin as $val) {
-                                      echo "<option value='".$val->mc_id."'>".$val->nama_mesin."</option>";
-                                  }
-                                ?>
-                                </select>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Lot </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="lot" id="lot" >
+                              </div>
+                            </div> 
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Corak </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="corak" id="corak" placeholder="Corak / Nama Produk">
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group">
-                            <div class="col-md-5">
-                              <label>User </label>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>No Mesin </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <!--input type="text" class="form-control input-sm" name="mc" id="mc" -->
+                                  <select type="text" class="form-control input-sm" name="mc" id="mc"  style="width:100% !important"> 
+                                  <option value="">-- Pilih No Mesin --</option>
+                                  <?php 
+                                    foreach ($mesin as $val) {
+                                        echo "<option value='".$val->mc_id."'>".$val->nama_mesin."</option>";
+                                    }
+                                  ?>
+                                  </select>
+                              </div>
                             </div>
-                            <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="user" id="user" >
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Sales Contract </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" >
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Marketing </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <select type="text" class="form-control input-sm" name="sales_group" id="sales_group"  style="width:100% !important"> 
+                                    <option value="">-- Pilih Marketing --</option>
+                                    <?php 
+                                      foreach ($mst_sales_group as $val) {
+                                          echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
+                                      }
+                                    ?>
+                                  </select>
+                              </div>
                             </div>
                           </div>
-                          <div class="form-group">
-                            <div class="col-md-5">
-                              <label>Jenis </label>
-                            </div>
-                            <div class="col-md-7">
-                                <select type="text" class="form-control input-sm" name="jenis" id="jenis" >
-                                  <option>All</option>
-                                  <option>HPH</option>
-                                  <option>Waste</option>
-                                </select>
-                            </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                                <div class="col-md-5">
+                                  <label>User </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control input-sm" name="user" id="user" >
+                                </div>
+                              </div>
+                              <div class="form-group col-md">
+                                <div class="col-md-5">
+                                  <label>Jenis </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <select type="text" class="form-control input-sm" name="jenis" id="jenis" >
+                                      <option>All</option>
+                                      <option>HPH</option>
+                                      <option>Waste</option>
+                                    </select>
+                                </div>
+                              </div>
                           </div>
                         </div>
                       </div>
@@ -345,6 +370,8 @@
       lot       = $('#lot').val();
       user      = $('#user').val();
       jenis     = $('#jenis').val();
+      sales_order     = $('#sales_order').val();
+      sales_group     = $('#sales_group').val();
       tgldari_2 = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
       var check_shif  = false;
@@ -384,7 +411,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/HPHtricot/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, user:user, jenis:jenis, shift :checkboxes_arr },
+                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group, user:user, jenis:jenis, shift :checkboxes_arr },
                 success: function(data){
 
                   if(data.status == 'failed'){

@@ -202,7 +202,9 @@
                       <option value="lot">Lot</option>
                       <option value="nama_grade">Grade</option>
                       <option value="lokasi">Lokasi</option>
-                      <option value="lokasi_fisik">Lokasi Rak</option>
+                      <option value="lokasi_fisik">Lokasi Fisik</option>
+                      <option value="sales_order">Sales Contract [SC]</option>
+                      <option value="sales_group">Marketing</option>
                     </select>
                   </div>
                   <div id='f_search'>
@@ -376,12 +378,14 @@
                               <th  class='style min-width-100' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
                               <th  class='style min-width-100' ><a class="column_sort" id="lebar_greige" data-order="desc" href="javascript:void(0)">Lbr Greige</a></th>
                               <th  class='style min-width-100' ><a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)">Lbr Jadi</th>
+                              <th  class='style min-width-80' ><a class="column_sort" id="sales_order" data-order="desc" href="javascript:void(0)">SC</th>
+                              <th  class='style min-width-100' ><a class="column_sort" id="sales_group" data-order="desc" href="javascript:void(0)">Marketing</th>
                               <th  class='style' >Umur (Hari)</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="16" align="center">Tidak ada Data</td>
+                              <td colspan="18" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -416,13 +420,13 @@
 
 
   // disable enter
+  /*
   $(window).keydown(function(event){
     if(event.keyCode == 13) {
       event.preventDefault();
       return false;
     }
   });
-  /*
   
    // set date tgldari
   $('#tgldari').datetimepicker({
@@ -439,6 +443,16 @@
   });
 
   */
+
+  // untuk buat array pilihan mst sales group
+  var obj_sales = new Array();
+    <?php 
+      foreach($mst_sales_group as $key ){
+    ?>
+          obj_sales.push({kode:"<?php echo $key->kode_sales_group?>", name:"<?php echo $key->nama_sales_group;?>"});
+    <?php 
+      }
+    ?>
 
   //show / hide collapse child in tabel
    $(document).on("hide.bs.collapse show.bs.collapse", ".child", function (event) {
@@ -540,6 +554,10 @@
       field = 'Umur';
     }else if(field == 'lot'){
       field = 'Lot';
+    }else if(field == 'sales_order'){
+      field = 'Sales Contract';
+    }else if(field == 'sales_group'){
+      field = 'Marketing';
     }
     return field;
   }
@@ -550,7 +568,7 @@
     if(value == 'lokasi'){
       var value = '<div class="col-md-6"> ';
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
-          value += "<option value=''>Pilih Lokasi Stock</option>";
+          value += "<option value=''>-- Pilih Lokasi Stock --</option>";
           value += "<?php foreach($warehouse as $row){ echo "<option>".$row->stock_location."</option>";} ?>";
           value += "</select>";
           value += '</div>';
@@ -561,6 +579,14 @@
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
           value += "<option value=''>Pilih Grade</option>";
           value += "<?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";} ?>";
+          value += "</select>";
+          value += '</div>';
+          $('#f_search').html(value);
+    }else if(value == 'sales_group'){
+      var value = '<div class="col-md-6"> ';
+          value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
+          value += "<option value=''>-- Pilih Marketing --</option>";
+          value += "<?php foreach($mst_sales_group as $row){ echo "<option value='".$row->kode_sales_group."'>".$row->nama_sales_group."</option>";} ?>";
           value += "</select>";
           value += '</div>';
           $('#f_search').html(value);
@@ -588,8 +614,8 @@
   // klik btn search
   $('#btn-search').on('click', function(e){
     //alert('masuk');
-    var search   = $('#search').val();
-    var cmbSearch = $('#cmbSearch').val();
+    var search      = $('#search').val();
+    var cmbSearch   = $('#cmbSearch').val();
     var cmbOperator = $('#cmbOperator').val();
 
     var id      = 'id-'+search;
@@ -612,14 +638,25 @@
           }else if(cmbOperator == '>'){
             caption_sparate ='Older Than';
           }
-        }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade'){
+        }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group'){
           caption_sparate = '=';
         }else{
           caption_sparate = 'LIKE';
         }
-        
+
+        if(cmbSearch == 'sales_group'){
+          $.each(obj_sales, function(index,isi){
+            if(obj_sales[index].kode == search){
+              name_sales_group = obj_sales[index].name;
+            }
+          });
+          caption_value = name_sales_group;
+        }else{
+          caption_value = search;
+        }
+
         // add tags to result                
-        var span = ' <span class="breadcumb "> <span class="breadcumb-field"> '+caption_field+' '+caption_sparate+' </span><span class="breadcumb-value"><span class="ul-pl-02">'+search+'</span> <i class="fa fa-times" data-type="search" data-search="'+cmbSearch+'" id="'+htmlentities_script(id)+'" data-togle="tooltip" title="Delete Filter"></i></span></span>';
+        var span = ' <span class="breadcumb "> <span class="breadcumb-field"> '+caption_field+' '+caption_sparate+' </span><span class="breadcumb-value"><span class="ul-pl-02">'+caption_value+'</span> <i class="fa fa-times" data-type="search" data-search="'+cmbSearch+'" id="'+htmlentities_script(id)+'" data-togle="tooltip" title="Delete Filter"></i></span></span>';
         
         $('#result').append(span);
         $('.breadcumb .breadcumb-value').find('i').addClass("breadcumb-close");
@@ -766,10 +803,14 @@
     $("#form_filter").submit(function(event){
 
         var sql = $('#sql').val();
-        if(sql == ''){
+        if(event.keyCode == 13){
+          event.preventDefault();
+          return false;
+        }else if(sql == ''){
           alert('Silahkan Filter Terlebih Dahulu !');
           return false;
         }else{
+
         }
     });
 
@@ -928,6 +969,8 @@
                                 $("<td align='right'>").text(value.qty2),
                                 $("<td align='right'>").text(value.lebar_greige),
                                 $("<td align='right'>").text(value.lebar_jadi),
+                                $("<td>").text(value.sales_order),
+                                $("<td>").text(value.sales_group),
                                 $("<td>").text(value.umur_produk),
                       );
                       tbody.append(tr);
@@ -1044,6 +1087,8 @@
                                   $("<td align='right'>").text(value.qty2),
                                   $("<td align='right'>").text(value.lebar_greige),
                                   $("<td align='right'>").text(value.lebar_jadi),
+                                  $("<td>").text(value.sales_order),
+                                  $("<td>").text(value.sales_group),
                                   $("<td>").text(value.umur_produk),
                        );
                       tbody.append(tr);
@@ -1234,6 +1279,8 @@
                       $("<td align='right'>").text(value.qty2),
                       $("<td align='right'>").text(value.lebar_greige),
                       $("<td align='right'>").text(value.lebar_jadi),
+                      $("<td>").text(value.sales_order),
+                      $("<td>").text(value.sales_group),
                       $("<td>").text(value.umur_produk),
             );    
             tbody.append(tr);

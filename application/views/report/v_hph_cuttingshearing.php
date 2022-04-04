@@ -137,16 +137,16 @@
                                 <input type="text" class="form-control input-sm" name="lot" id="lot" >
                             </div>
                           </div> 
-                        </div>
-                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>Corak </label>
                             </div>
                             <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="corak" id="corak" >
+                                <input type="text" class="form-control input-sm" name="corak" id="corak" placeholder="Corak / Nama Produk">
                             </div>
                           </div>
+                        </div>
+                        <div class="col-md-4">
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>No Mesin </label>
@@ -163,6 +163,29 @@
                                 </select>
                             </div>
                           </div>
+                          <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Sales Contract </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" >
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Marketing </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <select type="text" class="form-control input-sm" name="sales_group" id="sales_group"  style="width:100% !important"> 
+                                    <option value="">-- Pilih Marketing --</option>
+                                    <?php 
+                                      foreach ($mst_sales_group as $val) {
+                                          echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
+                                      }
+                                    ?>
+                                  </select>
+                              </div>
+                            </div>
                         </div>
                         <div class="col-md-4">
                           <div class="form-group">
@@ -344,6 +367,8 @@
       lot       = $('#lot').val();
       user      = $('#user').val();
       jenis     = $('#jenis').val();
+      sales_order     = $('#sales_order').val();
+      sales_group     = $('#sales_group').val();
       tgldari_2 = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
       var check_shif  = false;
@@ -383,7 +408,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/HPHcuttingshearing/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, user:user, jenis:jenis, shift :checkboxes_arr },
+                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot,  sales_order:sales_order, sales_group:sales_group, user:user, jenis:jenis, shift :checkboxes_arr },
                 success: function(data){
 
                   if(data.status == 'failed'){
