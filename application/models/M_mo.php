@@ -511,7 +511,7 @@ class M_mo extends CI_Model
 
 	public function simpan_mrp_production_fg_hasil_batch($sql)
 	{
-		return $this->db->query("INSERT INTO mrp_production_fg_hasil (kode,move_id,quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,nama_user,row_order,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi) values $sql");
+		return $this->db->query("INSERT INTO mrp_production_fg_hasil (kode,move_id,quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,nama_user,row_order,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi,sales_order,sales_group) values $sql");
 	}
 
 	public function simpan_mrp_production_rm_hasil_batch($sql)

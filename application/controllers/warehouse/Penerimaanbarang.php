@@ -849,7 +849,6 @@ class Penerimaanbarang extends MY_Controller
           $origin     = $this->input->post('origin');
           $check      = $this->input->post('checkbox');
           $countchek  = $this->input->post('countchek');
-          $sql_stock_quant_batch      = "";
           $sql_stock_move_items_batch = "";
           $tgl        = date('Y-m-d H:i:s');
           //$row        = explode("^,", $check);
@@ -1241,7 +1240,7 @@ class Penerimaanbarang extends MY_Controller
                                     $case_qty2 .= "when quant_id = '".$stock['quant_id']."' then '".$qty2_update."'";
 
                                     //insert qty stock_quant_batch dengan quant_id baru 
-                                    $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".addslashes($stock['nama_grade'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$lokasi['lokasi_dari']."','".addslashes($stock['reff_note'])."','".$move_id."','".$stock['reserve_origin']."','".$tgl."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."'), ";
+                                    $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".addslashes($stock['nama_grade'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$lokasi['lokasi_dari']."','".addslashes($stock['reff_note'])."','".$move_id."','".$stock['reserve_origin']."','".$tgl."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."','".addslashes($stock['sales_order'])."','".addslashes($stock['sales_group'])."'), ";
                                     //insert stock move items batch
                                     $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".($kebutuhan_qty)."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$status_brg."','".$row_order."','".addslashes($origin_prod)."', '".$tgl."','".addslashes($stock['lokasi_fisik'])."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."'), ";
                                     $row_order++;
