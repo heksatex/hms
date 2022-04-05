@@ -217,6 +217,15 @@ class MO extends MY_Controller
         $warna             = $this->m_mo->get_warna_by_kode($kode_decrypt)->row_array();
         $orgn              = $kode_decrypt."|".$warna['kode_warna'];
         $cek_request       = $this->m_mo->cek_origin_di_stock_move($orgn)->row_array();//cek udh request color ?
+
+        if($list->dept_id == 'TRI' OR $list->dept_id == 'JAC'){
+            $lot_prefix   = 'KP/[MY]/[MC]/[DEPT]/';
+        }else{
+            $lot_prefix   = $list->lot_prefix;
+        }
+
+        $data['lot_prefix'] = $lot_prefix;
+
         if(!empty($cek_request['origin'])){
             $data['dystuff']   = $this->m_mo->get_dyeing_stuff($kode_decrypt);
             $data['aux']       = $this->m_mo->get_aux($kode_decrypt);
@@ -296,9 +305,30 @@ class MO extends MY_Controller
         $move_id          = $this->input->post('move_id');
         $move_id_fg       = $this->input->post('move_id_fg');
         $deptid           = $this->input->post('deptid');
-        $lot_prefix       = $this->input->post('lot_prefix');
         $lot_prefix_waste = $this->input->post('lot_prefix_waste');
         $kode_produk      = $this->input->post('kode_produk');
+
+        if($deptid == 'TRI' OR $deptid == 'JAC'){
+            //cek MC by dept_id
+            $list   = $this->m_mo->get_data_by_code($kode);
+            if(empty($list->mc_id)){
+                $lot_prefix = '';
+            }else{// setting lot prefix by defualt KP/my/MC/DEPT/
+                // get no mesin by mc_id 
+                $no_mesin = $this->m_mo->no_mesin_by_mc_id($list->mc_id);
+                $tgl_bln   = date('m').''.date('y');// ex 0122
+                if($deptid == 'TRI'){
+                    $dept_prefix = 'TR';
+                }else{
+                    $dept_prefix = $deptid;
+                }
+
+                $lot_prefix  = 'KP/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
+            }
+        }else{
+            $lot_prefix  = $this->input->post('lot_prefix');       
+        };
+        
         $get_uom          = $this->_module->get_uom_by_kode_produk($kode_produk)->row_array();//get uom 1 dan uom 2 by kode_produk
         $data['deptid']   = $deptid;
         $data['uom_1']    = $get_uom['uom'];
@@ -408,8 +438,29 @@ class MO extends MY_Controller
         $move_id          = $this->input->post('move_id');
         $move_id_fg       = $this->input->post('move_id_fg');
         $deptid           = $this->input->post('deptid');
-        $lot_prefix       = $this->input->post('lot_prefix');       
         $kode_produk      = $this->input->post('kode_produk');
+
+        if($deptid == 'TRI' OR $deptid == 'JAC'){
+            //cek MC by dept_id
+            $list   = $this->m_mo->get_data_by_code($kode);
+            if(empty($list->mc_id)){
+                $lot_prefix = '';
+            }else{// setting lot prefix by defualt KP/my/MC/DEPT/
+                // get no mesin by mc_id 
+                $no_mesin = $this->m_mo->no_mesin_by_mc_id($list->mc_id);
+                $tgl_bln   = date('m').''.date('y');// ex 0122
+                if($deptid == 'TRI'){
+                    $dept_prefix = 'TR';
+                }else{
+                    $dept_prefix = $deptid;
+                }
+
+                $lot_prefix  = 'KP/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
+            }
+        }else{
+            $lot_prefix  = $this->input->post('lot_prefix');       
+        }
+
         $get_uom          = $this->_module->get_uom_by_kode_produk($kode_produk)->row_array();//get uom 1 dan uom 2 by kode_produk
         $data['deptid']   = $deptid;
         $data['uom_1']    = $get_uom['uom'];
@@ -798,7 +849,7 @@ class MO extends MY_Controller
                             $where_move_items .= "'".$row['move_id']."',";
 
                             //simpan qty_konsum di stock_quant dan stock_move_items dengan quant_id baru
-                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$qty2_new."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
+                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$qty2_new."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($row['sales_order'])."','".addslashes($row['sales_group'])."'), ";
                                             
                             $sql_stock_move_items_batch .= "('".$row['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$qty2_new."','".addslashes($row['uom2'])."','".$status_brg."','".$row_order."','".addslashes($row['origin_prod'])."','".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
 
@@ -1321,7 +1372,7 @@ class MO extends MY_Controller
                             $where_move_items .= "'".$row['move_id']."',";
 
                             //simpan qty_konsum di stock_quant dan stock_move_items dengan quant_id baru
-                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$qty2_new."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
+                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$qty2_new."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($row['sales_order'])."','".addslashes($row['sales_group'])."'), ";
                                             
                             $sql_stock_move_items_batch .= "('".$row['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$qty2_new."','".addslashes($row['uom2'])."','".$status_done."','".$row_order."','".addslashes($row['origin_prod'])."', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
 
@@ -2091,6 +2142,10 @@ class MO extends MY_Controller
                      $callback = array('status' => 'failed', 'field' => 'mc', 'message' => 'No Mesin Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else{
 
+                    if($deptid == 'TRI' OR $deptid == 'JAC'){
+                        $lot_prefix = '';
+                    }
+
                     $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
                     
                     if($show_lebar['show_lebar'] == 'true'){
@@ -2099,6 +2154,10 @@ class MO extends MY_Controller
                         $lebar = '';
                     }
 
+                    if($deptid == 'TRI' OR $deptid == 'JAC'){
+                        $lot_prefix = 'Format Lot Prefix Default System';
+                    }
+                    
                     $mc = $this->m_mo->get_nama_mesin_by_kode($mesin)->row_array();
                     $nama_mesin = $mc['nama_mesin'];
                     
@@ -2108,6 +2167,7 @@ class MO extends MY_Controller
                     }else{
                         $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$lot_prefix." | ".$lot_prefix_waste ; ;
                     }
+
 
                     $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username, $deptid);
                          

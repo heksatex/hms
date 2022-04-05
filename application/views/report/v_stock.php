@@ -759,10 +759,10 @@
                         $row  += "<tbody id="+$group+">";
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
-                        $row += "<td colspan='5'>"+value.grouping+"</td>";
-                        $row += "<td align='right'>"+value.jml+"</td>";
+                        $row += "<td colspan='4'>"+value.grouping+"</td>";
+                        $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
+                        $row += "<td align='right'  colspan='2'>"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
-                        $row += "<td colspan='2' ></td>";
                         $row += "</tr>";
                         $row += "</tbody>";
                         $ro++;
@@ -1226,8 +1226,9 @@
                         $row  += "<tbody id="+$group+">";
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
-                        $row += "<td colspan='5'>"+value.grouping+"</td>";
-                        $row += "<td align='right'>"+value.jml+"</td>";
+                        $row += "<td colspan='4'>"+value.grouping+"</td>";
+                        $row += "<td align='right'>"+value.qty1+"</td>";
+                        $row += "<td align='right'>"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "<td colspan='2' ></td>";
                         $row += "</tr>";

@@ -257,7 +257,7 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Lot Prefix</label></div>
                 <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm" name="lot_prefix" id="lot_prefix"  readonly="readonly"   value="<?php echo $list->lot_prefix;?>" />
+                  <input type='text' class="form-control input-sm" name="lot_prefix" id="lot_prefix"  readonly="readonly"   value="<?php echo $lot_prefix;?>" />
                 </div>                                    
               </div>
                <div class="col-md-12 col-xs-12">
@@ -825,8 +825,13 @@
     $("#target_efisiensi").attr("readonly", false);
     $("#qty1_std").attr("readonly", false);
     $("#qty2_std").attr("readonly", false);
-    $("#lot_prefix").attr("readonly", false);
     $("#lot_prefix_waste").attr("readonly", false);
+
+    var dept_id = "<?php echo $list->dept_id; ?>";
+    if(dept_id != 'TRI' && dept_id != 'JAC'){
+      $("#lot_prefix").attr("readonly", false);
+    }
+
     $("#btn-simpan").show();//tampilkan btn-simpan
     $("#btn-edit").hide();//sembuyikan btn-edit
     $("#btn-produksi").hide();//sembuyikan btn-produksi

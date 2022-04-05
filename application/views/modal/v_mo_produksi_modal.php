@@ -216,6 +216,8 @@
 							<input type="hidden" name="lbr_jadi"  id="lbr_jadi" class="form-control input-sm lbr_jadi" value="<?php echo $row->lebar_jadi ?>">
 							<input type="hidden" name="uom_lbr_jadi"  id="uom_lbr_jadi" class="form-control input-sm uom_lbr_jadi" value="<?php echo $row->uom_lebar_jadi ?>">
 							<input type="hidden" name="grade"  id="grade" class="form-control input-sm grade" value="<?php echo $row->nama_grade ?>">
+							<input type="hidden" name="sales_order"  id="sales_order" class="form-control input-sm sales_order" value="<?php echo $row->sales_order ?>">
+							<input type="hidden" name="sales_group"  id="sales_group" class="form-control input-sm sales_group" value="<?php echo $row->sales_group ?>">
 
 						</td>
 					</tr>
@@ -435,6 +437,8 @@
 						uom_lbr_greige  : $(item).parents("tr").find('#uom_lbr_greige').val(),
 						lbr_jadi    : $(item).parents("tr").find('#lbr_jadi').val(),
 						uom_lbr_jadi  : $(item).parents("tr").find('#uom_lbr_jadi').val(),
+						sales_order  : $(item).parents("tr").find('#sales_order').val(),
+						sales_group  : $(item).parents("tr").find('#sales_group').val(),
 					});				
 					
 					/*
