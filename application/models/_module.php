@@ -715,6 +715,16 @@ class _module extends CI_Model
 		$result = $this->db->get('mst_sales_group');
 		return $result->result();
 	}
+
+	public function get_nama_sales_Group_by_kode($kode)
+	{
+		$this->db->where('kode_sales_group',$kode);
+		$this->db->SELECT('nama_sales_group');
+		$this->db->FROM("mst_sales_group");
+		$query  = $this->db->get();
+		$result = $query->row_array();
+		return $result['nama_sales_group'];
+	}
 	
 
 }

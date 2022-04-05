@@ -28,7 +28,7 @@ class M_stock extends CI_Model
 
 	public function get_list_stock_grouping($where_lokasi,$groupBy,$where)
 	{
-		return $this->db->query("SELECT $groupBy as nama_field, concat($groupBy,' (',count(*),')') as grouping 
+		return $this->db->query("SELECT $groupBy as nama_field, concat($groupBy,' (',count(*),')') as grouping, sum(qty) as tot_qty, sum(qty2) as tot_qty2
 								FROM stock_quant as sq 
 								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group 
 								WHERE $where_lokasi $where group by $groupBy ")->result();
@@ -46,14 +46,6 @@ class M_stock extends CI_Model
 		return $this->db->query("SELECT DISTINCT stock_location  FROM departemen ORDER BY nama ")->result();
 	}
 
-	public function get_nama_sales_Group_by_kode($kode)
-	{
-		$this->db->where('kode_sales_group',$kode);
-		$this->db->SELECT('nama_sales_group');
-		$this->db->FROM("mst_sales_group");
-		$query  = $this->db->get();
-		$result = $query->row_array();
-		return $result['nama_sales_group'];
-	}
+	
 
 }

@@ -667,7 +667,7 @@ class Salescontract extends MY_Controller
         $sc   = $this->m_sales->get_data_by_kode($so);
         $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
         $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
-
+        $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
 
     		$pdf = new FPDF('p','mm','legal');
     		// membuat halaman baru
@@ -707,7 +707,7 @@ class Salescontract extends MY_Controller
     		}
         $tgl_idn = tgl_indo($tgl_trans);
     		$pdf->Cell(50,0.5,$tgl_idn,0,0, 'L');
-    		$pdf->Cell(15,0.5,$sc->sales_group,0,0, 'L');
+    		$pdf->Cell(15,0.5,$nama_sales_group,0,0, 'L');
     		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
     		$pdf->SetFont('Arial','',9);
@@ -772,12 +772,20 @@ class Salescontract extends MY_Controller
 		    $pdf->Cell(60,1,'','B',0,'C');//garis atas pajak
 			
 		  	$pdf->Cell(10,4,'',0,1);
+
+        // get PPN by code
+        $ppn = $this->m_sales->get_ppn_by_sc($so)->row_array();
+        if(!empty($ppn['tax_id'])){
+          $info_ppn= 'Pajak ('.$ppn['ket'].')';
+        }else{
+          $info_ppn= 'Pajak ';
+        }
 			
 			  $pdf->Cell(60,0,'',0,0);
 		    $pdf->Cell(37,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
 		  	$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(25,0,'Pajak ',0,0);
+		    $pdf->Cell(25,0,$info_ppn,0,0);
 		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,4),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
@@ -862,10 +870,12 @@ class Salescontract extends MY_Controller
   		}
 
 	   	if(!empty($sc->sales_group)){
+
+        $nama = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
 		    $pdf->Cell(5,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
 		  	$pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(60,0,'('.$sc->sales_group.")",0,0,'C'); 
+		    $pdf->Cell(60,0,'('.$nama.")",0,0,'C'); 
   			$pdf->SetFont('Arial','',9);
   		}
 
@@ -881,6 +891,8 @@ class Salescontract extends MY_Controller
       $sc   = $this->m_sales->get_data_by_kode($so);
       $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
       $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
+      $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
+
 
     	$pdf = new FPDF('p','mm','legal');
   		// membuat halaman baru
@@ -920,7 +932,7 @@ class Salescontract extends MY_Controller
   		}
       $tgl_eng = tgl_eng($tgl_trans);
   		$pdf->Cell(50,0.5,$tgl_eng,0,0, 'L');
-  		$pdf->Cell(15,0.5,$sc->sales_group,0,0, 'L');
+  		$pdf->Cell(15,0.5,$nama_sales_group,0,0, 'L');
   		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
   		// Memberikan space kebawah agar tidak terlalu rapat
@@ -977,12 +989,20 @@ class Salescontract extends MY_Controller
 		    $pdf->Cell(60,1,'','B',0,'C');//garis atas pajak
 			
 	   		$pdf->Cell(10,4,'',0,1);
+
+         // get PPN by code
+        $ppn = $this->m_sales->get_ppn_by_sc($so)->row_array();
+        if(!empty($ppn['tax_id'])){
+          $info_ppn= 'Taxes ('.$ppn['ket'].')';
+        }else{
+          $info_ppn= 'Taxes ';
+        }
 			
 		  	$pdf->Cell(60,0,'',0,0);
 		    $pdf->Cell(37,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
 	   		$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(25,0,'Taxes ',0,0);
+		    $pdf->Cell(25,0,$info_ppn,0,0);
 		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,4),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
@@ -1066,10 +1086,11 @@ class Salescontract extends MY_Controller
     		}
 
     		if(!empty($sc->sales_group)){
+
     		  $pdf->Cell(5,0,'',0,0);
     		  $pdf->Cell(20,0,'',0,0);
     			$pdf->SetFont('Arial','B',9);
-    		  $pdf->Cell(60,0,'('.$sc->sales_group.")",0,0,'C'); 
+    		  $pdf->Cell(60,0,'('.$nama_sales_group.")",0,0,'C'); 
     			$pdf->SetFont('Arial','',9);
     		}
 

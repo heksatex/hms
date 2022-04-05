@@ -376,6 +376,14 @@ class M_sales extends CI_Model
 		return $this->db->query("UPDATE sales_contract SET status = '$status' WHERE sales_order = '$sales_order' ");
 	}
 
+	public function get_ppn_by_sc($sales_order)
+	{
+		return $this->db->query("SELECT sci.tax_id, sci.tax_nama, t.ket 
+								FROM sales_contract_items as sci INNER JOIN tax  as t ON sci.tax_id = t.id
+								where sci.sales_order = '$sales_order' 
+								LIMIT 1");
+	}
+
 	
 	/* >> Approve Color  */
 	
