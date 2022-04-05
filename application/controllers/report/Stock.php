@@ -88,7 +88,8 @@ class Stock extends MY_Controller
         		$dataRecord[]  = array('group' => 'Yes',
         							   'nama_field' => $gp->nama_field,
         							   'grouping'   => $gp->grouping,
-        							   'jml'        => '',
+        							   'qty'        => 'Qty1 = '.number_format($gp->tot_qty,2),
+        							   'qty2'       => 'Qty2= '.number_format($gp->tot_qty2,2),
                                        'by'         => $nama_field
         						);
                 $tot_group++;
@@ -264,9 +265,9 @@ class Stock extends MY_Controller
                 $row .= "<td></td>";
                 $row .= "<td class='show collapsed group1'  href='#' data-content='edit' data-isi='".$gp2->nama_field."' data-group='".$by2."' data-tbody='".$id."' group-ke='".$group_ke_next."'' data-root='".$groupOf."' node-root='No' style='cursor:pointer;'><i class='glyphicon glyphicon-plus'></td>";
                 $row .= "<td colspan='4'>".$gp2->grouping."</td>";
-                $row .= "<td align='right'></td>";
+                $row .= "<td align='right'colspan='2'>Qty1 = ".number_format($gp2->tot_qty,2)."</td>";
+                $row .= "<td align='right'colspan='2'>Qty2 = ".number_format($gp2->tot_qty2,2)."</td>";
                 $row .= "<td colspan='3' class='list_pagination'></td>";
-                $row .= "<td colspan='2' ></td>";
                 $row .= "</tr>";
                 $row .="</tbody>";
                 $no++;
@@ -389,7 +390,7 @@ class Stock extends MY_Controller
     function get_sales_group_by_kode()
     {
         $kode = $this->input->post('kode_sales_group');
-        $nama = $this->m_stock->get_nama_sales_Group_by_kode($kode);
+        $nama = $this->_module->get_nama_sales_Group_by_kode($kode);
         $callback = array('status'=> 'success', 'nama'=>$nama);
         echo json_encode($callback);
     }
