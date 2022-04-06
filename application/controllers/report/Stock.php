@@ -89,7 +89,7 @@ class Stock extends MY_Controller
         							   'nama_field' => $gp->nama_field,
         							   'grouping'   => $gp->grouping,
         							   'qty'        => 'Qty1 = '.number_format($gp->tot_qty,2),
-        							   'qty2'       => 'Qty2= '.number_format($gp->tot_qty2,2),
+        							   'qty2'       => 'Qty2 = '.number_format($gp->tot_qty2,2),
                                        'by'         => $nama_field
         						);
                 $tot_group++;
