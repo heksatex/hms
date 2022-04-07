@@ -500,7 +500,7 @@ class M_mo extends CI_Model
 								smi.lot, smi.qty, smi.uom,smi.origin_prod,smi.qty2,smi.uom2, rm.qty as qty_rm, sq.reff_note,sq.nama_grade,mp.type,
 								(SELECT count(kode_produk) as jml_prod FROM stock_move_items smi2 WHERE 
 									smi2.kode_produk = smi.kode_produk AND smi2.move_id = '$move_id' AND smi2.status = '$status') as jml_produk,
-								smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi
+								smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, sq.sales_order, sq.sales_group
 								FROM stock_move_items smi
 								INNER JOIN mrp_production_rm_target rm ON smi.origin_prod = rm.origin_prod AND rm.move_id = smi.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id 
@@ -511,7 +511,7 @@ class M_mo extends CI_Model
 
 	public function simpan_mrp_production_fg_hasil_batch($sql)
 	{
-		return $this->db->query("INSERT INTO mrp_production_fg_hasil (kode,move_id,quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,nama_user,row_order,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi) values $sql");
+		return $this->db->query("INSERT INTO mrp_production_fg_hasil (kode,move_id,quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,nama_user,row_order,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi,sales_order,sales_group) values $sql");
 	}
 
 	public function simpan_mrp_production_rm_hasil_batch($sql)
@@ -753,9 +753,14 @@ class M_mo extends CI_Model
 
 	public function get_lebar_produk_by_kode($kode)
 	{
-		
 		$result = $this->db->query("SELECT lebar_greige, uom_lebar_greige, lebar_jadi, uom_lebar_jadi FROM mrp_production WHERE kode = '$kode' ");
 		return $result->row();
+	}
+
+	public function no_mesin_by_mc_id($mc_id)
+	{
+		$result = $this->db->query("SELECT no_mesin FROM mesin where mc_id = '$mc_id'")->row_array();
+		return $result['no_mesin'];
 	}
 
 

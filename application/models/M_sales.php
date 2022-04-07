@@ -7,8 +7,8 @@ class M_sales extends CI_Model
 {
 
 	//var $table 		  = 'sales_contract';
-	var $column_order = array(null, 'sales_order', 'create_date', 'customer_name', 'sales_group','status');
-	var $column_search= array('sc.sales_order', 'create_date', 'customer_name', 'sales_group','status','nama_produk');
+	var $column_order = array(null, 'sales_order', 'create_date', 'customer_name', 'nama_sales_group','status');
+	var $column_search= array('sc.sales_order', 'create_date', 'customer_name', 'nama_sales_group','status','nama_produk');
 	var $order  	  = array('create_date' => 'desc');
 
 	var $table2 		= 'partner';
@@ -27,10 +27,11 @@ class M_sales extends CI_Model
 	{	
 
 
-	    $this->db->select("sc.sales_order,sc.create_date,sc.customer_name,sc.sales_group,sc.status, mmss.nama_status");
+	    $this->db->select("sc.sales_order,sc.create_date,sc.customer_name,sc.sales_group,sg.nama_sales_group,sc.status, mmss.nama_status");
 		$this->db->from("sales_contract sc");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=sc.status", "inner");
 		$this->db->join("sales_contract_items sci", "sci.sales_order=sc.sales_order", "left");
+		$this->db->JOIN("mst_sales_group sg", "sc.sales_group=sg.kode_sales_group","INNER");
 		$this->db->group_by('sc.sales_order');
 		
 		//$this->db->from($this->table);
@@ -73,7 +74,7 @@ class M_sales extends CI_Model
 	{
 		$this->_get_datatables_query();
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		if($sales_group != 'Administrator'){
+		if($sales_group != 'MKT005'){// Administrator
 			$this->db->where("sc.sales_group", $sales_group);
 		}
 		if($_POST['length'] != -1)
@@ -86,7 +87,7 @@ class M_sales extends CI_Model
 	{
 		$this->_get_datatables_query();
 		$this->db->where("mmss.main_menu_sub_kode",$mmss);
-		if($sales_group != 'Administrator'){
+		if($sales_group != 'MKT005' ){// Administrator
 			$this->db->where("sc.sales_group", $sales_group);
 		}
 		$query = $this->db->get();
@@ -96,13 +97,14 @@ class M_sales extends CI_Model
 	public function count_all($mmss,$sales_group)
 	{
 		//$this->db->from($this->table);
-		$this->db->select("sc.sales_order,sc.create_date,sc.customer_name,sc.sales_group,sc.status, mmss.nama_status");
+		$this->db->select("sc.sales_order,sc.create_date,sc.customer_name,sc.sales_group,sg.nama_sales_group,sc.status, mmss.nama_status");
 		$this->db->from("sales_contract sc");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=sc.status", "inner");
 		$this->db->join("sales_contract_items sci", "sci.sales_order=sc.sales_order", "left");
+		$this->db->JOIN("mst_sales_group sg", "sc.sales_group=sg.kode_sales_group","INNER");
 		$this->db->group_by('sc.sales_order');
 		$this->db->where("mmss.main_menu_sub_kode",$mmss);
-		if($sales_group != 'Administrator'){
+		if($sales_group != 'MKT005' ){// administrator
 			$this->db->where("sc.sales_group", $sales_group);
 		}
 		return $this->db->count_all_results();
@@ -110,7 +112,11 @@ class M_sales extends CI_Model
 
 	public function cek_sales_group_by_username($username)
 	{
-		return $this->db->query("SELECT sales_group FROM user where username = '$username'");
+		return $this->db->query("SELECT u.sales_group 
+								FROM user u 
+								INNER JOIN mst_sales_group mst ON u.sales_group = mst.kode_sales_group
+								where u.username = '$username'");
+		//return $this->db->query("SELECT sales_group FROM user where username = '$username'");
 	} 
 
 	public function get_list_departement()
@@ -251,7 +257,10 @@ class M_sales extends CI_Model
 
 	public function get_data_by_kode($sales_order)
 	{
-		$query = $this->db->query("SELECT * FROM sales_contract WHERE sales_order = '$sales_order'");
+		$query = $this->db->query("SELECT sc.id,sc.sales_order, sc.create_date, sc.customer_id, sc.customer_name, sc.invoice_address, sc.delivery_address, sc.buyer_code, sc.order_type, sc.reference, sc.warehouse, sc.currency_nama, sc.currency_symbol, sc.delivery_date, sc.time_shipment, sc.order_production, sc.sales_group, sc.status, sc.untaxed_value, sc.tax_value, sc.total_value, sc.incoterm_id, sc.paymentterm_id, sc.destination, sc.bank, sc.clause, sc.note, sc.note_head,  mst.nama_sales_group 
+								FROM sales_contract sc 
+								INNER JOIN mst_sales_group mst ON sc.sales_group = mst.kode_sales_group
+								WHERE sc.sales_order = '$sales_order'");
 		return $query->row();
 	}
 
@@ -367,6 +376,15 @@ class M_sales extends CI_Model
 		return $this->db->query("UPDATE sales_contract SET status = '$status' WHERE sales_order = '$sales_order' ");
 	}
 
+	public function get_ppn_by_sc($sales_order)
+	{
+		return $this->db->query("SELECT sci.tax_id, sci.tax_nama, t.ket 
+								FROM sales_contract_items as sci INNER JOIN tax  as t ON sci.tax_id = t.id
+								where sci.sales_order = '$sales_order' 
+								LIMIT 1");
+	}
+
+	
 	/* >> Approve Color  */
 	
 	public function cek_sales_color_line_by_kode($sales_order)

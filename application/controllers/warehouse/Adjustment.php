@@ -519,7 +519,7 @@ class Adjustment extends MY_Controller
               }
              
               // simpan stock_quant
-              $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','','".$row->qty_adjustment."','".$row->uom."','".$row->qty_adjustment2."','".$row->uom2."','".$kode_lokasi."','','','','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+              $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','','".$row->qty_adjustment."','".$row->uom."','".$row->qty_adjustment2."','".$row->uom2."','".$kode_lokasi."','','','','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
 
               // simpan stock_move
               $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin."','".$method."','".$la['adjustment_location']."','".$kode_lokasi."','".$status_done."','".$sm_row."',''), ";
@@ -613,7 +613,7 @@ class Adjustment extends MY_Controller
                   
                   if($qty_adjustment != 0){
                     // insert stock quant dengan id baru 
-                    $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$row->qty_adjustment2."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+                    $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$row->qty_adjustment2."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
 
                     $quant_id_new = true; // untuk stock_move_items
                    
@@ -643,7 +643,7 @@ class Adjustment extends MY_Controller
                   $qty_adj  = $qty_adjustment - $qty_data;
 
                   // insert stock quant dengan id baru 
-                  $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$row->qty_adjustment2."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+                  $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$row->qty_adjustment2."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
 
                   $quant_id_new = true; // untuk stock_move_items
 

@@ -42,7 +42,10 @@ class M_produksiJacquard extends CI_Model
 
     public function get_marketing_by_kode($sc)
 	{
-		$query =  $this->db->query("SELECT sales_group FROM sales_contract Where sales_order = '$sc'");
+		$query =  $this->db->query("SELECT mst.nama_sales_group as sales_group 
+									FROM sales_contract sc 
+									INNER JOIN mst_sales_group mst ON sc.sales_group =mst.kode_sales_group
+									Where sc.sales_order = '$sc'");
 		$result = $query->result_array();
 		return $result[0]['sales_group'];
 	}

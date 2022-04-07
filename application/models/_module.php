@@ -385,7 +385,7 @@ class _module extends CI_Model
 
 	public function simpan_stock_quant_batch($sql)
 	{
-		return $this->db->query("INSERT INTO stock_quant (quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,reff_note,reserve_move,reserve_origin,move_date,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi) VALUES $sql ");
+		return $this->db->query("INSERT INTO stock_quant (quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,reff_note,reserve_move,reserve_origin,move_date,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi,sales_order,sales_group) VALUES $sql ");
 	}
 
 	public function simpan_stock_move_items_batch($sql)
@@ -692,6 +692,38 @@ class _module extends CI_Model
 	public function cek_show_lebar_by_dept_id($dept_id)
 	{
 		return $this->db->query("SELECT show_lebar FROM departemen WHERE kode = '$dept_id' ");
+	}
+
+	public function get_sales_group_by_sales_order($sales_order)
+	{
+		$this->db->select("sales_group"); // MKT001
+		$this->db->FROM("sales_contract");
+		$this->db->WHERE("sales_order",$sales_order);
+		$query = $this->db->get();
+		$result =  $query->row_array();
+		return $result['sales_group'];
+	}
+
+	public function get_list_sales_group()
+	{
+		$result = $this->db->get('mst_sales_group');
+		return $result->result();
+	}
+
+	public function get_list_sales_group_by_view()
+	{
+		$result = $this->db->get('mst_sales_group');
+		return $result->result();
+	}
+
+	public function get_nama_sales_Group_by_kode($kode)
+	{
+		$this->db->where('kode_sales_group',$kode);
+		$this->db->SELECT('nama_sales_group');
+		$this->db->FROM("mst_sales_group");
+		$query  = $this->db->get();
+		$result = $query->row_array();
+		return $result['nama_sales_group'];
 	}
 	
 

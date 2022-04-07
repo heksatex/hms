@@ -20,6 +20,7 @@ class HPHjacquard extends MY_Controller
 		$id_dept        = 'HPHJAC';
         $data['id_dept']= $id_dept;
 		$data['mesin']  = $this->_module->get_list_mesin_report('jac');
+		$data['mst_sales_group'] = $this->_module->get_list_sales_group();
 		$this->load->view('report/v_hph_jacquard', $data);
 	}
 
@@ -35,6 +36,8 @@ class HPHjacquard extends MY_Controller
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
+		$sales_group  = $this->input->post('sales_group');
+		$sales_order  = $this->input->post('sales_order');
 		$shift_arr = $this->input->post('shift');// array shift pagi/siang/malam
 		$id_dept   = 'JAC';
 		$where_date = '';
@@ -161,6 +164,18 @@ class HPHjacquard extends MY_Controller
 				$where_user  = '';
 			}
 
+			if(!empty($sales_order)){
+				$where_sales_order  = "AND mpfg.sales_order LIKE '%".addslashes($sales_order)."%' ";
+			}else{
+				$where_sales_order  = '';
+			}
+
+			if(!empty($sales_group)){
+				$where_sales_group  = "AND mpfg.sales_group LIKE '%".addslashes($sales_group)."%' ";
+			}else{
+				$where_sales_group  = '';
+			}
+
 			$dataRecord= [];
 
 			$lbr_jadi       = '';
@@ -168,12 +183,13 @@ class HPHjacquard extends MY_Controller
 	        $stitch         = '';
 	        $rpm            = '';
 
-			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo." ";
+			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo." ".$where_sales_order." ".$where_sales_group." ";
 
 			$items = $this->m_HPHjacquard->get_list_HPH_jacquard_by_kode($where);
 			foreach ($items as $val) {
 
 				// explode origin 
+				/*
 				$exp   = explode('|', $val->origin);
 				$no    = 0;
 				foreach ($exp as $exps) {
@@ -183,6 +199,10 @@ class HPHjacquard extends MY_Controller
 					}
 					$no++;
 				}
+				*/
+
+				$mkt = $val->nama_sales_group;
+				$sc  = $val->sales_order;
 
 				// explode reff_note
 				$exp2  = explode('|', $val->reff_note);
@@ -285,6 +305,8 @@ class HPHjacquard extends MY_Controller
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
 		$shift_arr = $this->input->post('shift[]');
+		$sales_group  = $this->input->post('sales_group');
+		$sales_order  = $this->input->post('sales_order');
 		$id_dept   = 'JAC';
 		$where_date = '';
 		$loop       = 1;
@@ -533,13 +555,26 @@ class HPHjacquard extends MY_Controller
 			$where_user  = '';
 		}
 
+		if(!empty($sales_order)){
+			$where_sales_order  = "AND mpfg.sales_order LIKE '%".addslashes($sales_order)."%' ";
+		}else{
+			$where_sales_order  = '';
+		}
+
+		if(!empty($sales_group)){
+			$where_sales_group  = "AND mpfg.sales_group LIKE '%".addslashes($sales_group)."%' ";
+		}else{
+			$where_sales_group  = '';
+		}
+
     	//tbody
-		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo." ";
+		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."   ".$where_sales_order."  ".$where_sales_group." ";
     	$items = $this->m_HPHjacquard->get_list_HPH_jacquard_by_kode($where);
     	$num   = 1;
 		foreach ($items as $val) {
 
 			// explode origin 
+			/*
 			$exp   = explode('|', $val->origin);
 			$no    = 0;
 			foreach ($exp as $exps) {
@@ -549,6 +584,9 @@ class HPHjacquard extends MY_Controller
 				}
 				$no++;
 			}
+			*/
+			$mkt  = $val->nama_sales_group;
+			$sc   = $val->sales_order;
 
 			// explode reff_note
 			$exp2  = explode('|', $val->reff_note);

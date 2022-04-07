@@ -39,7 +39,7 @@ class Salescontract extends MY_Controller
             $row[] = '<a href="'.base_url('sales/salescontract/edit/'.$kode_encrypt).'">'.$field->sales_order.'</a>';
             $row[] = $field->create_date;
             $row[] = $field->customer_name;
-            $row[] = $field->sales_group;
+            $row[] = $field->nama_sales_group;
             $row[] = $field->nama_status;
             $data[] = $row;
         }
@@ -135,6 +135,10 @@ class Salescontract extends MY_Controller
             $order_production = 'true';
           }
           */
+
+          // cek sales_person
+          $sg = $this->m_sales->cek_sales_group_by_username($username)->row_array();
+
           if(empty($customer)){
               $callback = array('status' => 'failed', 'field' => 'customer', 'message' => 'Customer Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
           }elseif(empty($invoice_address)){
@@ -158,7 +162,10 @@ class Salescontract extends MY_Controller
               $callback = array('status' => 'failed', 'field' => 'delivery_date', 'message' => 'Delivery Date Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
           }elseif(empty($note_head)){
               $callback = array('status' => 'failed', 'field' => 'note_head', 'message' => 'Note Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
+          }elseif(empty($sg['sales_group'])){
+            $callback = array('status' => 'failed', 'field' => 'note_head', 'message' => 'Sales Person tidak ada, Silahkan tentukan Sales Person nya terlebih dahulu !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
           }else{
+
               if(empty($sales_order)){//jika sales order kosong, aksinya simpan data
                   $kode['sales_order'] =  $this->m_sales->get_kode_sales_order();
                   $kode_encrypt        = encrypt_url($kode['sales_order']);
@@ -660,7 +667,7 @@ class Salescontract extends MY_Controller
         $sc   = $this->m_sales->get_data_by_kode($so);
         $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
         $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
-
+        $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
 
     		$pdf = new FPDF('p','mm','legal');
     		// membuat halaman baru
@@ -701,7 +708,7 @@ class Salescontract extends MY_Controller
     		}
         $tgl_idn = tgl_indo($tgl_trans);
     		$pdf->Cell(50,0.5,$tgl_idn,0,0, 'L');
-    		$pdf->Cell(15,0.5,$sc->sales_group,0,0, 'L');
+    		$pdf->Cell(15,0.5,$nama_sales_group,0,0, 'L');
     		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
     		$pdf->SetFont('Arial','',9);
@@ -766,12 +773,20 @@ class Salescontract extends MY_Controller
 		    $pdf->Cell(60,1,'','B',0,'C');//garis atas pajak
 			
 		  	$pdf->Cell(10,4,'',0,1);
+
+        // get PPN by code
+        $ppn = $this->m_sales->get_ppn_by_sc($so)->row_array();
+        if(!empty($ppn['tax_id'])){
+          $info_ppn= 'Pajak ('.$ppn['ket'].')';
+        }else{
+          $info_ppn= 'Pajak ';
+        }
 			
 			  $pdf->Cell(60,0,'',0,0);
 		    $pdf->Cell(37,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
 		  	$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(25,0,'Pajak ',0,0);
+		    $pdf->Cell(25,0,$info_ppn,0,0);
 		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,4),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
@@ -829,9 +844,10 @@ class Salescontract extends MY_Controller
 
 	  	if(!empty($sc->note)){
   			$pdf->SetFont('Arial','B',9);  
-  			$pdf->Cell(14,0.5,'Catatan :',0,0, 'L');
+  			$pdf->Cell(14,4,'Catatan :',0,0, 'L');
   			$pdf->SetFont('Arial','',9);
-  			$pdf->cell(15,0.5,$sc->note,0,0, 'L');
+        $pdf->Multicell(0,4,$sc->note,0, 'L');
+  			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
   			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
 	   	}
        
@@ -858,10 +874,12 @@ class Salescontract extends MY_Controller
   		}
 
 	   	if(!empty($sc->sales_group)){
+
+        $nama = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
 		    $pdf->Cell(5,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
 		  	$pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(60,0,'('.$sc->sales_group.")",0,0,'C'); 
+		    $pdf->Cell(60,0,'('.$nama.")",0,0,'C'); 
   			$pdf->SetFont('Arial','',9);
   		}
 
@@ -877,6 +895,8 @@ class Salescontract extends MY_Controller
       $sc   = $this->m_sales->get_data_by_kode($so);
       $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
       $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
+      $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
+
 
     	$pdf = new FPDF('p','mm','legal');
   		// membuat halaman baru
@@ -916,7 +936,7 @@ class Salescontract extends MY_Controller
   		}
       $tgl_eng = tgl_eng($tgl_trans);
   		$pdf->Cell(50,0.5,$tgl_eng,0,0, 'L');
-  		$pdf->Cell(15,0.5,$sc->sales_group,0,0, 'L');
+  		$pdf->Cell(15,0.5,$nama_sales_group,0,0, 'L');
   		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
   		// Memberikan space kebawah agar tidak terlalu rapat
@@ -973,12 +993,20 @@ class Salescontract extends MY_Controller
 		    $pdf->Cell(60,1,'','B',0,'C');//garis atas pajak
 			
 	   		$pdf->Cell(10,4,'',0,1);
+
+         // get PPN by code
+        $ppn = $this->m_sales->get_ppn_by_sc($so)->row_array();
+        if(!empty($ppn['tax_id'])){
+          $info_ppn= 'Taxes ('.$ppn['ket'].')';
+        }else{
+          $info_ppn= 'Taxes ';
+        }
 			
 		  	$pdf->Cell(60,0,'',0,0);
 		    $pdf->Cell(37,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
 	   		$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(25,0,'Taxes ',0,0);
+		    $pdf->Cell(25,0,$info_ppn,0,0);
 		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,4),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
@@ -1036,9 +1064,10 @@ class Salescontract extends MY_Controller
 
     	  if(!empty($sc->note)){
     			$pdf->SetFont('Arial','B',9);  
-    			$pdf->Cell(10,0.5,'Note :',0,0, 'L');
+    			$pdf->Cell(10,4,'Note :',0,0, 'L');
     			$pdf->SetFont('Arial','',9);
-    			$pdf->cell(15,0.5,$sc->note,0,0, 'L');
+    			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
+          $pdf->Multicell(0,4,$sc->note,0, 'L');
     			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
     		}
 
@@ -1064,10 +1093,11 @@ class Salescontract extends MY_Controller
     		}
 
     		if(!empty($sc->sales_group)){
+
     		  $pdf->Cell(5,0,'',0,0);
     		  $pdf->Cell(20,0,'',0,0);
     			$pdf->SetFont('Arial','B',9);
-    		  $pdf->Cell(60,0,'('.$sc->sales_group.")",0,0,'C'); 
+    		  $pdf->Cell(60,0,'('.$nama_sales_group.")",0,0,'C'); 
     			$pdf->SetFont('Arial','',9);
     		}
 
