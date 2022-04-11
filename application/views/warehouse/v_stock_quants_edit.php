@@ -187,7 +187,7 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Lebar Jadi </label></div>
                   <div id="ta" class="col-xs-8">
-                    <input type='text' class="form-control input-sm" name="lebar_jadi" id="lebar_jadi"  value="<?php echo $list->lebar_greige; ?>"  />
+                    <input type='text' class="form-control input-sm" name="lebar_jadi" id="lebar_jadi"  value="<?php echo $list->lebar_jadi; ?>"  />
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
