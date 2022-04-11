@@ -219,7 +219,11 @@ class MO extends MY_Controller
         $cek_request       = $this->m_mo->cek_origin_di_stock_move($orgn)->row_array();//cek udh request color ?
 
         if($list->dept_id == 'TRI' OR $list->dept_id == 'JAC'){
-            $lot_prefix   = 'KP/[MY]/[MC]/[DEPT]/';
+            if($list->type_production =='Proofing'){
+                $lot_prefix   = 'PF/[MY]/[MC]/[DEPT]/COUNTER';
+            }else{
+                $lot_prefix   = 'KP/[MY]/[MC]/[DEPT]/COUNTER';
+            }
         }else{
             $lot_prefix   = $list->lot_prefix;
         }
@@ -454,8 +458,12 @@ class MO extends MY_Controller
                 }else{
                     $dept_prefix = $deptid;
                 }
-
-                $lot_prefix  = 'KP/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
+                if($list->type_production == 'Proofing'){
+                    $awal = 'PF';
+                }else{
+                    $awal = 'KP';
+                }
+                $lot_prefix  = $awal.'/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
             }
         }else{
             $lot_prefix  = $this->input->post('lot_prefix');       
@@ -1842,7 +1850,7 @@ class MO extends MY_Controller
         echo json_encode($callback);
     }
 
-  
+    /*
     public function request_color()
     {
         $sub_menu = $this->uri->segment(2);
@@ -2083,6 +2091,7 @@ class MO extends MY_Controller
 
         echo json_encode($callback);
     }
+    */
 
     public function simpan()
     {
@@ -2107,6 +2116,7 @@ class MO extends MY_Controller
             $target_efisiensi   = $this->input->post('target_efisiensi');
             $qty1_std           = $this->input->post('qty1_std');
             $qty2_std           = $this->input->post('qty2_std');
+            $type_production    = $this->input->post('type_production');
             $lot_prefix         = addslashes($this->input->post('lot_prefix'));
             $lot_prefix_waste   = $this->input->post('lot_prefix_waste');
             $lebar_greige       = addslashes($this->input->post('lebar_greige'));
@@ -2140,13 +2150,15 @@ class MO extends MY_Controller
                      $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Reff Note Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else if(empty($mesin)){
                      $callback = array('status' => 'failed', 'field' => 'mc', 'message' => 'No Mesin Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
-                }else{
+                }else if(empty($type_production)){
+                    $callback = array('status' => 'failed', 'field' => 'type_production', 'message' => 'Type Production Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
+               }else{
 
                     if($deptid == 'TRI' OR $deptid == 'JAC'){
                         $lot_prefix = '';
                     }
 
-                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
+                    $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production);
                     
                     if($show_lebar['show_lebar'] == 'true'){
                         $lebar = $lebar_greige."  ".$uom_lebar_greige." | ".$lebar_jadi."  ".$uom_lebar_jadi." | ";
@@ -2163,9 +2175,9 @@ class MO extends MY_Controller
                     
                     $jenis_log   = "edit";
                     if($type_mo == 'colouring'){                    
-                        $note_log    = "-> ".$lebar." ".$berat." | ".$air." | ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$lot_prefix." | ".$lot_prefix_waste ;
+                        $note_log    = "-> ".$lebar." ".$berat." | ".$air." | ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste ;
                     }else{
-                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$lot_prefix." | ".$lot_prefix_waste ; ;
+                        $note_log    = "-> ".$lebar." ".$finish." | ".$start." | ".$reff_note." | ".$nama_mesin." | ".$target_efisiensi." | ".$qty1_std." | ".$qty2_std." | ".$type_production." | ".$lot_prefix." | ".$lot_prefix_waste ; 
                     }
 
 

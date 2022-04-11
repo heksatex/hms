@@ -372,7 +372,7 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT * FROM mesin where mc_id = '$mc_id' ");
 	}
 
-	public function update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi)
+	public function update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production)
 	{
 		return $this->db->query("UPDATE mrp_production set berat = '$berat', air = '$air', start_time = '$start', 
 														   finish_time = '$finish',reff_note = '$reff_note', 
@@ -383,7 +383,8 @@ class M_mo extends CI_Model
 														   lebar_greige = '$lebar_greige',
 														   uom_lebar_greige = '$uom_lebar_greige',
 														   lebar_jadi = '$lebar_jadi',
-														   uom_lebar_jadi = '$uom_lebar_jadi'
+														   uom_lebar_jadi = '$uom_lebar_jadi',
+														   type_production = '$type_production'
 														WHERE kode = '$kode' ");
 	}
 
