@@ -150,7 +150,7 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Sales Person</label></div>
                   <div class="col-xs-8">
-                    <input type="text" class="form-control input-sm" name="sales_person" id="sales_person" readonly="readonly" value="<?php echo $salescontract->sales_group?>"  />
+                    <input type="text" class="form-control input-sm" name="sales_person" id="sales_person" readonly="readonly" value="<?php echo $salescontract->nama_sales_group?>"  />
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
