@@ -255,6 +255,24 @@
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Type Production</label></div>
+                <div class="col-xs-8">
+                  <select class="form-control input-sm" name="type_production" id="type_production" disabled >
+                  <?php $type = array('Proofing', 'Production'); ?>
+                  <option value="">Pilih Type Production</option>
+                  <?php 
+                    foreach($type as $val){
+                      if($val == $list->type_production ){
+                        echo "<option selected>".$val."</option>";
+                      }else{
+                        echo "<option>".$val."</option>";
+                      }
+                    }
+                  ?>
+                  </select>
+                </div>                                    
+              </div>
+              <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Lot Prefix</label></div>
                 <div class="col-xs-8">
                   <input type='text' class="form-control input-sm" name="lot_prefix" id="lot_prefix"  readonly="readonly"   value="<?php echo $lot_prefix;?>" />
@@ -719,6 +737,7 @@
     $("#target_efisiensi").attr("readonly", true);
     $("#qty1_std").attr("readonly", true);
     $("#qty2_std").attr("readonly", true);
+    $("#type_production").attr("disabled", true);
     $("#lot_prefix").attr("readonly", true);
     $("#lot_prefix_waste").attr("readonly", true);
     $("#btn-produksi").show();
@@ -748,6 +767,21 @@
 
   //select 2 no mesin 
   $('#mc').select2({});
+  // setting lot prefix TRI< JAC
+  var dept_id = "<?php echo $list->dept_id?>";
+  if(dept_id == 'TRI'|| dept_id == 'JAC'){
+    $('#type_production').on('change', function(){
+      var type = $('#type_production').val();
+      if(type == 'Production'){
+        $('#lot_prefix').val('KP/[MY]/[MC]/DEPT/COUNTER');
+      }else if(type == 'Proofing'){
+        $('#lot_prefix').val('PF/[MY]/[MC]/DEPT/COUNTER');
+      }else{
+        $('#lot_prefix').val('');
+      }
+
+    });
+  }
 
   //untuk mengatur lebar textarea sesuai value yang ada
   $('#ta').on( 'change keyup keydown paste cut', 'textarea', function (){
@@ -826,6 +860,8 @@
     $("#qty1_std").attr("readonly", false);
     $("#qty2_std").attr("readonly", false);
     $("#lot_prefix_waste").attr("readonly", false);
+
+    $('#type_production').attr('disabled', false).attr('id','type_production');
 
     var dept_id = "<?php echo $list->dept_id; ?>";
     if(dept_id != 'TRI' && dept_id != 'JAC'){
@@ -1238,6 +1274,7 @@
                 target_efisiensi : $('#target_efisiensi').val(),
                 qty1_std    : $('#qty1_std').val(),
                 qty2_std    : $('#qty2_std').val(),
+                type_production  : $('#type_production').val(),
                 lot_prefix  : $('#lot_prefix').val(),
                 lot_prefix_waste  : $('#lot_prefix_waste').val(),
                 deptid      : deptid,
