@@ -5,14 +5,15 @@
  */
 class M_user extends CI_Model
 {
-	var $column_order = array(null, 'nama', 'username', 'level');
-	var $column_search= array('nama', 'username', 'level');
-	var $order  	  = array('nama' => 'asc');
+	var $column_order = array(null, 'u.nama', 'u.username', 'u.level','d.nama_departemen');
+	var $column_search= array('u.nama', 'u.username', 'u.level', 'd.nama_departemen');
+	var $order  	  = array('u.nama' => 'asc');
 
 	private function _get_datatables_query()
 	{
-		$this->db->select("nama,username,level");
-		$this->db->from("user");		
+		$this->db->select("u.nama,u.username,u.level, u.dept, d.nama_departemen");
+		$this->db->from("user as u");		
+		$this->db->JOIN("mst_departemen_all as d","d.kode = u.dept","LEFT");
 
 		$i = 0;
 	
@@ -66,8 +67,9 @@ class M_user extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select("nama,username,level");
-		$this->db->from("user");				
+		$this->db->select("u.nama,u.username,u.level, u.dept, d.nama_departemen");
+		$this->db->from("user as u");		
+		$this->db->JOIN("mst_departemen_all as d","d.kode = u.dept","LEFT");				
 		return $this->db->count_all_results();
 	}
 
@@ -81,14 +83,14 @@ class M_user extends CI_Model
 		return $this->db->query("SELECT username FROM user where username = '$login'");
 	}
 
-	public function save_user($username,$password,$nama,$create_date)
+	public function save_user($username,$password,$nama,$create_date,$departemen,$level,$sales_group)
 	{
-		return $this->db->query("INSERT INTO user(username,password,nama,create_date) VALUES ('$username','$password','$nama','$create_date')");
+		return $this->db->query("INSERT INTO user(username,password,nama,create_date,dept,level,sales_group) VALUES ('$username','$password','$nama','$create_date','$departemen','$level','$sales_group')");
 	}
 
-	public function update_user($username,$nama)
+	public function update_user($username,$nama,$departemen,$level,$sales_group)
 	{
-		return $this->db->query("UPDATE user set nama = '$nama'WHERE username = '$username' ");
+		return $this->db->query("UPDATE user set nama = '$nama' , dept = '$departemen', level='$level', sales_group='$sales_group' WHERE username = '$username' ");
 	}
 
 	public function delete_user_priv($username)
@@ -121,8 +123,15 @@ class M_user extends CI_Model
 	{
 		$query  =  $this->db->query("SELECT count(kode) as jml FROM main_menu_sub WHERE link_menu LIKE '%$link_menu%'  ");
 		$result = $query->row();
-
 		return $result->jml;
+	}
+
+	public function get_nama_departemen_all_by_kode($kode)
+	{
+		$this->db->where('kode',$kode);
+		$query  = $this->db->get('mst_departemen_all');
+		$result = $query->row_array();
+		return $result['nama_departemen'];
 	}
 
 }

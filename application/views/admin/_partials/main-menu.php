@@ -65,7 +65,14 @@
           <!-- Menu Footer-->
           <li class="user-footer">
             <div class="pull-left">
-              <a href="<?php echo base_url('setting/ganti_pass/edit'); ?>" class="btn btn-default btn-flat">Ganti Password</a>
+              <?php 
+                  $sub_menu = $this->db->get_where('user_priv as mms', array('main_menu_sub_kode' => 'mms91', 'username' => $username));
+                  if($sub_menu->num_rows() > 0){
+              ?>
+                    <a href="<?php echo base_url('setting/ganti_pass/edit'); ?>" class="btn btn-default btn-flat">Ganti Password</a>
+              <?php 
+                  }
+              ?>
             </div>
             <div class="pull-right">
               <a href="<?php echo base_url('login/logout'); ?>" class="btn btn-default btn-flat">Sign out</a>

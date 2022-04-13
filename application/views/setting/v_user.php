@@ -42,6 +42,7 @@
                   <th>Nama User</th>
                   <th>Login</th>
                   <th>Level</th>                  
+                  <th>Departemen</th>                  
                 </tr>
               </thead>
             </table>
