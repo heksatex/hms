@@ -151,7 +151,7 @@
                         <option value="">-- Pilih Sales Group --</option>
                           <?php 
                             foreach ($mst_sales_group as $val) {
-                              if($val->sales_group == $user->sales_group){
+                              if($val->kode_sales_group == $user->sales_group){
                                 echo "<option selected value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
                               }else{
                                 echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
