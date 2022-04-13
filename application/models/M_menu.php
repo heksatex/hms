@@ -19,11 +19,11 @@ class M_menu extends CI_Model
 
 	public function sub_main_menu($username,$main_menu)
 	{
-		$query = $this->db->query("SELECT mms.nama, mms.link_menu, mms.inisial_class, mms.ikon, mms.status_bar, mms.dept_id
+		$query = $this->db->query("SELECT mms.kode, mms.nama, mms.link_menu, mms.inisial_class, mms.ikon, mms.status_bar, mms.dept_id
                             FROM main_menu_sub mms
                             INNER JOIN user_priv up ON up.main_menu_sub_kode=mms.kode
                             INNER JOIN main_menu mm ON up.main_menu_kode = mm.kode
-                            WHERE up.username= '".$username."' AND mm.inisial_class = '".$main_menu."'
+                            WHERE up.username= '".$username."' AND mm.inisial_class = '".$main_menu."' and mms.is_menu_sub = ''
                             ORDER BY mms.row_order");
 		return $query->result();
 	}
@@ -91,7 +91,7 @@ class M_menu extends CI_Model
 
 	public function get_inisial($id_dept, $inisial_menu, $inisial_menu_sub)
 	{
-		return $this->db->query("SELECT mms.inisial_class from main_menu_sub mms
+		return $this->db->query("SELECT mms.inisial_class,mms.is_menu_sub  from main_menu_sub mms
 								inner join main_menu_rel mmr on mms.kode=mmr.main_menu_sub_kode
 								INNER JOIN main_menu mm ON mmr.main_menu_kode = mm.kode
 								where mms.dept_id='".$id_dept."' and mm.inisial_class='".$inisial_menu."' AND mms.inisial_class = '".$inisial_menu_sub."'");

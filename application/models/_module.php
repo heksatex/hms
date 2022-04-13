@@ -725,6 +725,19 @@ class _module extends CI_Model
 		$result = $query->row_array();
 		return $result['nama_sales_group'];
 	}
+
+	public function get_list_level_akses()
+	{
+		$result = $this->db->get('mst_level_akses');
+		return $result->result();
+	}
+
+	public function get_list_departemen_all()
+	{
+		$this->db->order_by('nama_departemen', 'ASC');
+		$result = $this->db->get('mst_departemen_all');
+		return $result->result();
+	}
 	
 
 }

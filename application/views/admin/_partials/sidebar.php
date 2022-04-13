@@ -17,23 +17,81 @@
         $id = $id_dept;// di dapat dari parsingan controller yang view nya list aja dengan array nya harus id_dept
       }
 
-      $username = $this->session->userdata('username'); 
+      $username    = $this->session->userdata('username'); 
       $get_inisial = $this->m_menu->get_inisial($id, $this->uri->segment(1), $this->uri->segment(2) )->row_array();//untuk mengambil inisial kelas di mms agar sub menu aktif
-      $menu     = $this->m_menu->sub_main_menu($username,$this->uri->segment(1));//mengambil data sub main menu
+      $menu        = $this->m_menu->sub_main_menu($username,$this->uri->segment(1));//mengambil data sub main menu
+      
+      foreach ($menu as $menus): 
+     
+        $sub_menu = $this->db->JOIN('user_priv as up','mms.kode = up.main_menu_sub_kode','INNER')->get_where('main_menu_sub as mms', array('mms.is_menu_sub' => $menus->kode, 'up.username' => $username));
+        $child    = '';
 
-          foreach ($menu as $menus): 
+        // jika terdapat is_menu_sub by mms
+        if($sub_menu->num_rows() > 0 ){// sub menu dengan child nya
+
+          // cek child dari parent/treeview apa aktif
+          foreach($sub_menu->result() as $sub){
+
+              if($get_inisial['inisial_class']==$sub->inisial_class AND $id == $sub->dept_id){
+                $child = 'active';
+              }
+          }
+
+          // cek apakah is_menu_sub nya tidak kosong
+          if(!empty($get_inisial['is_menu_sub']) and $child == 'active'){
+            $treeview_ = 'treeview active';
+          }else{
+            $treeview_ = '';
+          }
+          ?>
+            <!-- treeview menu-->
+            <li class="<?php echo $treeview_; ?> ">
+              <a href="#">
+                <i class="<?php echo $menus->ikon; ?>"></i>
+                <span><?php echo $menus->nama ?></span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+
+              <ul class="treeview-menu">
+                <?php 
+                foreach($sub_menu->result() as $sub){
+                  $active2 = '';
+                  if($get_inisial['inisial_class']==$sub->inisial_class AND $id == $sub->dept_id){
+                    $active2 = 'active';
+                  }
+                ?>
+                  <li class="<?php echo $active2; ?>">
+                    <a href="<?php echo  base_url($sub->link_menu); ?>"><i class="<?php echo $sub->ikon; ?>"></i> <span><?php echo $sub->nama ?></span></a>
+                  </li>
+
+                <?php 
+                } ?>
+              </ul>
+
+            </li> 
+            <!--// treeview menu-->
+          <?php
+        
+        }else{  // sub menu tanpa child
+
+            // jika is_menu_sub nya kosong
             if($get_inisial['inisial_class']==$menus->inisial_class AND $id == $menus->dept_id){
               $active = 'active';
             }else{
               $active = '';
             }
-            ?>
+          ?>
             <li class="<?php echo $active; ?>">
               <a href="<?php echo  base_url($menus->link_menu); ?>"><i class="<?php echo $menus->ikon; ?>"></i> <span><?php echo $menus->nama ?></span></a>
             </li>
-       
-    <?php endforeach; ?>
-    <!--li><a href="#"><i class="fa fa-book"></i> <span><?php echo $username;?></span></a></li-->
+          <?php  
+        }
+
+      endforeach;
+    ?>
+     
      <li class="header">END NAVIGATION</li>
   </ul>
 
