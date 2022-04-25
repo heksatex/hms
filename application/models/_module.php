@@ -21,6 +21,14 @@ class _module extends CI_Model
 		return $this->db->query("SELECT kode FROM main_menu_sub WHERE inisial_class = '".$sub_menu."' AND dept_id = '".$deptid."'");
 	}
 
+	public function get_kode_sub_menu_deptid_user($sub_menu,$deptid,$username)
+	{
+		return $this->db->query("SELECT mms.kode 
+								FROM main_menu_sub mms
+								INNER JOIN user_priv up ON mms.kode = up.main_menu_sub_kode
+								WHERE  up.username ='".$username."' AND mms.inisial_class = '".$sub_menu."' AND mms.dept_id = '".$deptid."'");
+	}
+
 	public function get_prod($id)
 	{
 		return $this->db->query("SELECT * FROM mst_produk WHERE nama_produk LIKE '%".$id."%'");
@@ -639,12 +647,12 @@ class _module extends CI_Model
 		return $this->db->query("SELECT kode FROM mrp_production WHERE origin = '$origin' AND dept_id = '$dept_id' $status ");
 	}
 
-	public function cek_status_pengiriman_barang_by_move_id($origin,$move_id,$status)// production_order, procurement_purchase
+	public function cek_status_pengiriman_barang_by_move_id($origin,$move_id,$status)// production_order, procurement_purchase, color order
 	{
 		return $this->db->query("SELECT kode FROM pengiriman_barang WHERE  origin = '$origin' AND move_id = '$move_id' $status ");
 	}
 
-	public function cek_status_penerimaan_barang_by_move_id($origin,$move_id,$status)// production_order, procurement_purchase
+	public function cek_status_penerimaan_barang_by_move_id($origin,$move_id,$status)// production_order, procurement_purchase, color order
 	{
 		return $this->db->query("SELECT kode FROM penerimaan_barang WHERE  origin = '$origin' AND move_id = '$move_id' $status ");
 	}
@@ -726,6 +734,16 @@ class _module extends CI_Model
 		return $result['nama_sales_group'];
 	}
 
+	public function get_inisial_sales_Group_by_kode($kode)
+	{
+		$this->db->where('kode_sales_group',$kode);
+		$this->db->SELECT('inisial');
+		$this->db->FROM("mst_sales_group");
+		$query  = $this->db->get();
+		$result = $query->row_array();
+		return $result['inisial'];
+	}
+
 	public function get_list_level_akses()
 	{
 		$result = $this->db->get('mst_level_akses');
@@ -739,5 +757,19 @@ class _module extends CI_Model
 		return $result->result();
 	}
 	
+	public function get_list_handling()
+	{
+		return $this->db->query("SELECT id,nama_handling FROM mst_handling ORDER BY id ")->result();
+	}
+
+	public function get_handling_by_id($id)
+	{
+		return $this->db->query("SELECT * FROM mst_handling WHERE id = '$id' ");
+	}
+
+	public function get_warna_by_id($id)
+	{
+		return $this->db->query("SELECT * FROM warna WHERE id = '$id' ");
+	}
 
 }

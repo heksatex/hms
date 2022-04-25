@@ -8,6 +8,15 @@
     button[id="btn-simpan"],button[id="btn-cancel"]{/*untuk hidden button simpan/cancel di top bar MO*/
       display: none;
     }
+    
+    .box-color {
+       width: 100%;
+      border: 1px solid;
+      border-color: #d2d6de;
+      padding: 50px;
+      margin: 10px 0px 10px 0px;
+      border-radius: 5px;
+    }
   </style>
 
 </head>
@@ -52,11 +61,13 @@
       <div class="box">
         <div class="box-header with-border">
           <h3 class="box-title"><b><?php echo $list->kode;?></b></h3>
-          <?php if($list->dept_id=='DYE'){?>
+          <?php if($list->dept_id=='DYE'){
+              if(!empty($menu)){  ?>
           <div class=" pull-right text-right">
             <button class="btn btn-primary btn-sm" id="btn-request" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Request</button>
           </div>
-        <?php }?>
+        <?php }
+            }?>
         </div>
         <div class="box-body">
           <form class="form-horizontal" id="mo">
@@ -165,6 +176,31 @@
                   <input type="text" class="form-control input-sm highlight" name="berat" id="berat"  value="<?php echo $list->berat;?>" onkeyup="highlight(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
                 </div>                                    
               </div>
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Handling </label></div>
+                <div class="col-xs-8">
+                  <select class="form-control input-sm" name="handling" id="handling" >
+                    <option value="">Pilih Handling</option>
+                    <?php 
+                      foreach ($handling as $row) {
+                        if($list->id_handling == $row->id){?>
+                          <option value="<?php echo $row->id;?>" selected><?php echo $row->nama_handling;?></option>
+                    <?php 
+                        }else{?>
+                          <option value="<?php echo $row->id;?>"><?php echo $row->nama_handling;?></option>
+                    <?php
+                        }
+                      }?>
+                  </select>
+                </div>                                    
+              </div>
+              <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4 "> <div class="box-color" style="background-color: <?php echo $list->kode_warna;?>"></div></div>
+                  <div class="col-xs-8 col-md-8" id="ta">
+                      <textarea class="form-control input-sm" name="notes_dti" id="notes_dti" readonly="readonly"><?php echo $list->notes_dti; ?></textarea>
+                  </div>                                    
+              </div>
+
             <?php }?>
             </div>
             </div>
@@ -174,7 +210,8 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Warna </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm" name="warna" id="warna"  value="<?php echo $list->kode_warna;?>"  readonly="readonly"   />
+                  <input type="hidden" class="form-control input-sm" name="id_warna" id="id_warna"  value="<?php echo $list->id_warna;?>"  readonly="readonly"   />
+                  <input type="text" class="form-control input-sm" name="warna" id="warna"  value="<?php echo $list->nama_warna;?>"  readonly="readonly"   />
                 </div>                                    
               </div>
               <?php }?>
@@ -1134,60 +1171,77 @@
   //klik button request
   $("#btn-request").unbind( "click" );
   $('#btn-request').click(function(){
-    $('#btn-request').button('loading');
-    var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
-    please_wait(function(){});
 
-      $.ajax({
-         type: "POST",
-         dataType: "json",
-         url :'<?php echo base_url('manufacturing/mO/request_color')?>',
-         beforeSend: function(e) {
-            if(e && e.overrideMimeType) {
-                e.overrideMimeType("application/json;charset=UTF-8");
-            }
-         },
-         data: {warna : $('#warna').val(),kode   : $('#kode').val(), deptid : deptid
-          },success: function(data){
-            if(data.sesi == "habis"){
-              //alert jika session habis
-              alert_modal_warning(data.message);
-              window.location.replace('../index');
-            }else if(data.status == "failed"){
-              unblockUI( function() {});
-              alert_modal_warning(data.message);
-              $("#status_bar").load(location.href + " #status_bar");
-              $("#table_aux").load(location.href + " #table_aux");
-              $("#table_dyest").load(location.href + " #table_dyest");
-              $('#btn-request').button('reset');
-            }else{
-              //jika berhasil disimpan/diubah
-              unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-              });
-              $("#foot").load(location.href + " #foot");
-              $("#status_bar").load(location.href + " #status_bar");
-              $("#table_aux").load(location.href + " #table_aux");
-              $("#table_dyest").load(location.href + " #table_dyest");
-              //$(".highlight").prop("readonly", false);
-              $("#mo").load(location.href + " #mo");
-              $('#btn-request').button('reset');
-            }
-             
-          },error: function (xhr, ajaxOptions, thrownError) { 
-            alert(xhr.responseText);
-            setTimeout($.unblockUI, 1000); 
-            unblockUI( function(){});
-            $('#btn-request').button('reset');
+    var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
+
+    bootbox.dialog({
+        message: "Apakah Anda yakin ingin Request Resep Obat ?",
+        title  : "<i class='fa fa-gear'></i> Request Resep Obat !",
+        buttons: {
+          danger: {
+              label    : "Yes ",
+              className: "btn-primary btn-sm",
+              callback : function() {
+                please_wait(function(){});
+                $.ajax({
+                  dataType: "JSON",
+                  url     : '<?php echo site_url('manufacturing/mO/request_obat') ?>',
+                  type    : "POST",
+                  data    : {id_warna:$('#id_warna').val(), kode:$('#kode').val(), deptid:deptid, origin: $('#origin').val()},
+                  success: function(data){
+                    if(data.sesi=='habis'){
+                        //alert jika session habis
+                        alert_modal_warning(data.message);
+                        window.location.replace('../index');
+                    }else if(data.status == 'failed'){
+                        unblockUI( function() {});
+                        alert_modal_warning(data.message);
+                        $("#status_bar").load(location.href + " #status_bar");
+                        $("#table_aux").load(location.href + " #table_aux");
+                        $("#table_dyest").load(location.href + " #table_dyest");
+                        $('#btn-request').button('reset');
+                    }else{
+                         //jika berhasil disimpan/diubah
+                        unblockUI( function() {
+                            setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                        });
+                        $("#foot").load(location.href + " #foot");
+                        $("#status_bar").load(location.href + " #status_bar");
+                        $("#table_aux").load(location.href + " #table_aux");
+                        $("#table_dyest").load(location.href + " #table_dyest");
+                        //$(".highlight").prop("readonly", false);
+                        $("#mo").load(location.href + " #mo");
+                        $('#btn-request').button('reset');
+                    }
+
+                  },error: function (xhr, ajaxOptions, thrownError){
+                    alert(xhr.responseText);
+                    setTimeout($.unblockUI, 1000); 
+                    unblockUI( function(){});
+                    $('#btn-request').button('reset');
+                  }
+                });
+              }
+          },
+          success: {
+                label    : "No",
+                className: "btn-default  btn-sm",
+                callback : function() {
+                  $('.bootbox').modal('hide');
+                }
           }
-      });
+        }
+        });
     });
+
+  
 
   //klik button cek stock
   $("#btn-stok").unbind( "click" );
   $('#btn-stok').click(function(){
     var deptid = "<?php echo $list->dept_id; ?>";//parsing data id dept untuk log history
     var lokasi = "<?php echo $list->source_location; ?>";
+    var type_mo = "<?php echo $type_mo['type_mo'];?>";// untuk menentukan origin
     $('#btn-stok').button('loading');
     please_wait(function(){});
     var move_id = '<?php echo $move_id_rm['move_id'];?>';
@@ -1201,7 +1255,7 @@
                 e.overrideMimeType("application/json;charset=UTF-8");
             }
          },
-         data: {move_id : move_id, kode : $('#kode').val(), deptid : deptid, origin : $('#origin').val(), lokasi : lokasi
+         data: {move_id : move_id, kode : $('#kode').val(), deptid : deptid, origin : $('#origin').val(), lokasi : lokasi, type_mo:type_mo 
           },success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis

@@ -11,8 +11,11 @@
 <div class="wrapper">
   <!-- main -header -->
   <header class="main-header">
-   <?php $this->load->view("admin/_partials/main-menu.php") ?>
-   <?php $this->load->view("admin/_partials/topbar.php") ?>
+    <?php $this->load->view("admin/_partials/main-menu.php") ?>
+    <?php
+      $data['deptid']     = $id_dept;
+      $this->load->view("admin/_partials/topbar.php",$data)
+    ?>
   </header>
 
   <!-- Menu Side Bar -->

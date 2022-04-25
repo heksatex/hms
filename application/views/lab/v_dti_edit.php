@@ -3,6 +3,18 @@
 <html>
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+   <!-- color picker -->
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/colorpicker/bootstrap-colorpicker.min.css') ?>">
+  <style type="text/css">
+    .div1 {
+      width: 100%;
+      border: 1px solid;
+      border-color: #d2d6de;
+      padding: 50px;
+      margin: 10px 0px 10px 0px;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini" id="block-page">
@@ -11,8 +23,11 @@
 
   <!-- main -header -->
   <header class="main-header">
-   <?php $this->load->view("admin/_partials/main-menu.php") ?>
-   <?php $this->load->view("admin/_partials/topbar.php") ?>
+    <?php $this->load->view("admin/_partials/main-menu.php") ?>
+    <?php
+      $data['deptid']     = $id_dept;
+      $this->load->view("admin/_partials/topbar.php",$data)
+    ?>
   </header>
 
   <!-- Menu Side Bar -->
@@ -38,7 +53,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b><?php echo $color->kode_warna;?></b></h3>
+          <h3 class="box-title"><b><?php echo $color->nama_warna;?></b></h3>
         </div>
         <div class="box-body">
             <form class="form-horizontal">
@@ -50,21 +65,41 @@
             <div class="form-group">
               <div class="col-md-6">
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Tanggal </label></div>
+                  <div class="col-xs-4"><label>Tanggal dibuat </label></div>
                   <div class="col-xs-8 col-md-8">
                     <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly"  value="<?php echo $color->tanggal?>"/>
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Warna </label></div>
+                  <div class="col-xs-4"><label>Nama Warna </label></div>
                   <div class="col-xs-8">
-                    <input type="text" class="form-control input-sm" name="warna" id="warna"  value="<?php echo $color->kode_warna?>"  readonly="readonly" />
+                    <input type="text" class="form-control input-sm" name="warna" id="warna"  value="<?php echo $color->nama_warna?>"  readonly="readonly" />
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Notes </label></div>
                   <div class="col-xs-8">
                     <textarea type="text" class="form-control input-sm" name="note" id="note"  ><?php echo $color->notes?></textarea>
+                  </div>                                    
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Kode Warna </label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <div class="input-group my-colorpicker" id="my-colorpicker">
+                      <input type="text" class="form-control input-sm" id="kode_warna" name="kode_warna"  value="<?php echo $color->kode_warna?>">
+                      <span class="input-group-addon" id='groupColor'>
+                           <i id="wstyle" ></i>
+                      </span>
+                    </div>
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label></label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <div class="div1"  id="content_colors" style="background-color:<?php echo $color->kode_warna?>">
+                    </div>
                   </div>                                    
                 </div>
               </div>
@@ -99,12 +134,12 @@
                             ?>
                               <tr class="num">
                                 <td></td>
-                                <td><?php echo $row->nama_produk?></td>
+                                <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
                                 <td><?php echo $row->qty?></td>
                                 <td><?php echo $row->uom?></td>
                                 <td><?php echo $row->reff_note?></td>
                                 <td class="no" align="center" >
-                                 <a onclick="hapus('<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->kode_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
+                                 <a onclick="hapus('<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->id_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
                                  </a>
                                 </td>
                               </tr>
@@ -112,11 +147,13 @@
                               }
                             ?>
                           </tbody>
-                          <tr>
-                            <td colspan="8">
-                               <a href="javascript:void(0)" class="add"><i class="fa fa-plus"></i> Tambah Data</a>
-                            </td>
-                          </tr>
+                          <tfoot>
+                            <tr>
+                              <td colspan="8">
+                                 <a href="javascript:void(0)" class="add"><i class="fa fa-plus"></i> Tambah Data</a>
+                              </td>
+                            </tr>
+                          </tfoot>
                         </table>
                       </div>
                       <!-- Tabel Dye stuff -->
@@ -140,12 +177,12 @@
                             ?>
                               <tr class="num">
                                 <td></td>
-                                <td><?php echo $row->nama_produk?></td>
+                                <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
                                 <td><?php echo $row->qty?></td>
                                 <td><?php echo $row->uom?></td>
                                 <td><?php echo $row->reff_note?></td>
                                 <td class="no" align="center" >
-                                 <a onclick="hapus('<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->kode_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
+                                 <a onclick="hapus('<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->id_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
                                  </a>
                                 </td>
                               </tr>
@@ -153,11 +190,13 @@
                               }
                             ?>
                           </tbody>
-                          <tr>
-                            <td colspan="8">
-                               <a href="javascript:void(0)" class="add2"><i class="fa fa-plus"></i> Tambah Data</a>
-                            </td>
-                          </tr>
+                          <tfoot>
+                            <tr>
+                              <td colspan="8">
+                                 <a href="javascript:void(0)" class="add2"><i class="fa fa-plus"></i> Tambah Data</a>
+                              </td>
+                            </tr>
+                          </tfoot>
                         </table>
                       </div>
                       <!-- Tabel AUX -->
@@ -185,19 +224,33 @@
   <footer class="main-footer">
    <?php $this->load->view("admin/_partials/modal.php") ?>
     <div id="foot">
-     <?php $this->load->view("admin/_partials/footer.php") ?>
+     <?php 
+        $data['kode'] =  $color->id;
+        $data['mms']  =  $mms->kode;
+        $this->load->view("admin/_partials/footer.php",$data) 
+     ?>
     </div>
   </footer>
 
 </div>
 
 <?php $this->load->view("admin/_partials/js.php") ?>
+<!-- color picker -->
+<script src="<?php echo site_url('plugins/colorpicker/bootstrap-colorpicker.min.js') ?>"></script>
 
 <script type="text/javascript">
+
+  $(".my-colorpicker").colorpicker();
+
+  $('.my-colorpicker').colorpicker().on('changeColor', function (e) {
+      $('#content_colors')[0].style.backgroundColor = e.color.toHex();
+  });
+
 
   //modal tambah data Dyeing Stuff
   $(".add").unbind( "click" );
   $(document).on('click','.add',function(e){
+      var id_warna = '<?php echo $color->id?>';
       e.preventDefault();
       $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $("#tambah_data").modal({
@@ -206,7 +259,7 @@
       });
       $('.modal-title').text('Tambah Data Dyeing Stuff');
         $.post('<?php echo site_url()?>lab/dti/tambah_dyeing_stuff_modal',
-          {warna      : $('#warna').val(),tipe_obat     : 'DYE'},
+          {id_warna:id_warna, warna:$('#warna').val(), tipe_obat:'DYE'},
           function(html){
             setTimeout(function() {$(".tambah_data").html(html);  },2000);
           }   
@@ -215,6 +268,7 @@
 
   $(".add2").unbind( "click" );
   $(document).on('click','.add2',function(e){
+      var id_warna = '<?php echo $color->id?>';
       e.preventDefault();
       $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $("#tambah_data").modal({
@@ -223,7 +277,7 @@
       });
       $('.modal-title').text('Tambah Data AUX');
         $.post('<?php echo site_url()?>lab/dti/tambah_aux_modal',
-          {warna      : $('#warna').val(),tipe_obat     : 'AUX'},
+          {id_warna:id_warna, warna:$('#warna').val(), tipe_obat:'AUX'},
           function(html){
             setTimeout(function() {$(".tambah_data").html(html);  },2000);
           }   
@@ -235,6 +289,7 @@
   $("#btn-simpan").unbind( "click" );
   $('#btn-simpan').click(function(){
     $('#btn-simpan').button('loading');
+    var id   = '<?php echo $color->id; ?>';
     please_wait(function(){});
       $.ajax({
          type: "POST",
@@ -246,8 +301,10 @@
             }
          },
          data: {tanggal    : $('#tgl').val(),
-                warna      : $('#warna').val(),
+                id         : id,
                 note       : $('#note').val(),
+                warna      : $('#warna').val(),
+                kode_warna : $('#kode_warna').val(),
                 status     : 'edit',
 
           },success: function(data){
@@ -258,13 +315,13 @@
             }else if(data.status == "failed"){
               //jika ada form belum keisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();//focus ke field yang belum keisi
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $("#foot").load(location.href + " #foot");
             }
@@ -282,6 +339,7 @@
   //klik button generate
   $("#btn-generate").unbind( "click" );
   $('#btn-generate').click(function(){
+    var id_warna   = '<?php echo $color->id; ?>';
     $('#btn-generate').button('loading');
     please_wait(function(){});
       $.ajax({
@@ -293,7 +351,7 @@
                 e.overrideMimeType("application/json;charset=UTF-8");
             }
          },
-         data: {warna      : $('#warna').val(),
+         data: {id_warna : id_warna
           },success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis
@@ -302,13 +360,13 @@
             }else if(data.status == "failed"){
               //jika ada form belum keisi
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();//focus ke field yang belum keisi
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $("#foot").load(location.href + " #foot");
               $("#status_bar").load(location.href + " #status_bar");
@@ -324,7 +382,7 @@
     });
 
   //hapus dyeing stuff and aux
-  function hapus(nama_produk,warna,type_obat,row_order)
+  function hapus(nama_produk,id_warna,type_obat,row_order)
   {
       var baseUrl = '<?php echo base_url(); ?>';
         bootbox.dialog({
@@ -339,7 +397,7 @@
                           type: 'POST',
                           dataType: "json",
                           url : "<?php echo site_url('lab/dti/hapus_dye_aux')?>",
-                          data : {nama_produk : nama_produk,warna : warna, type_obat:type_obat , row_order:row_order },
+                          data : {nama_produk:nama_produk, id_warna:id_warna, type_obat:type_obat, row_order:row_order },
                     })
                     .done(function(response){
                       if(response.sesi == 'habis'){
@@ -349,7 +407,7 @@
                         $("#table_aux").load(location.href + " #table_aux");
                         $("#table_dyest").load(location.href + " #table_dyest");
                         $("#foot").load(location.href + " #foot");                   
-                        alert_notify(response.icon,response.message,response.type);
+                        alert_notify(response.icon,response.message,response.type,function(){});
                         parent.fadeOut('slow');
                       }
                     })

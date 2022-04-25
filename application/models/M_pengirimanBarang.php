@@ -6,8 +6,8 @@ class M_pengirimanBarang extends CI_Model
 {
 	
 	//var $table 		  = 'pengiriman_barang';
-	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'tanggal_jt','lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'tanggal_jt', 'lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
+	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'origin','lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
+	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'origin', 'lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
 	var $order  	  = array('kode' => 'desc');
 
 	var $table2  	    = 'stock_kain_greige';
@@ -49,7 +49,7 @@ class M_pengirimanBarang extends CI_Model
         }
 
 		//$this->db->from($this->table);
-		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status");
+		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status, pb.origin");
 		$this->db->from("pengiriman_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
 
@@ -345,10 +345,11 @@ class M_pengirimanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lokasi_fisik
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lokasi_fisik, tmp.valid
 								 FROM stock_move_items smi 
 								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
+								 LEFT JOIN pengiriman_barang_tmp tmp ON pb.kode = tmp.kode AND smi.lot = tmp.lot
 								 Where pb.kode = '$kode' 
 								 ORDER BY smi.row_order")->result();
 	}
@@ -436,12 +437,14 @@ class M_pengirimanBarang extends CI_Model
 								 WHERE pb.kode = '$kode'");
 	}
 
+	/*
 	public function cek_valid_lokasi_lot_by_move_id($move_id)
 	{
 		return $this->db->query("SELECT move_id,lot,kode_lokasi FROM stock_kain_greige skg 
 								 INNER JOIN stock_move_items smi ON skg.barcode_id = smi.lot
 								 WHERE smi.move_id = '$move_id' AND kode_lokasi IN ('ADJ','GOUT','TRB','TRD','JAC')");
 	}
+	*/	
 
     public function get_kode_mo_pengiriman_barang_by_move_id($move_id)
 	{	
@@ -540,6 +543,50 @@ class M_pengirimanBarang extends CI_Model
 	{
 		return $this->db->query("SELECT move_id FROM stock_move WHERE method = '$method' AND origin = '$origin' AND status NOT IN ('$status','$status2') ");
 	}
+
+
+	public function simpan_pengiriman_barang_tmp($kode,$quant_id,$move_id,$kode_produk,$lot,$valid,$tgl)
+	{
+		return $this->db->query("INSERT INTO pengiriman_barang_tmp (kode,quant_id,move_id,kode_produk,lot,valid,valid_date) VALUES ('$kode','$quant_id','$move_id','$kode_produk','$lot','$valid','$tgl')");
+	}
+
+	public function get_count_valid_scan_by_kode($kode)
+	{
+		$this->db->SELECT('kode');
+		$this->db->FROM('pengiriman_barang_tmp');
+		$this->db->where('kode', $kode);
+		$this->db->where('valid', 't');
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function get_count_all_scan_by_kode($move_id)
+	{
+		$this->db->SELECT('move_id');
+		$this->db->FROM('stock_move_items');
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function cek_scan_by_lot($kode,$lot)
+	{
+		return $this->db->query("SELECT lot FROM pengiriman_barang_tmp WHERE kode = '$kode' AND lot = '$lot'");
+	}
+
+	public function get_list_stock_move_items_by_lot($move_id,$lot,$status)
+	{
+		return $this->db->query("SELECT * FROM stock_move_items where move_id = '$move_id' AND lot = '$lot' AND status = '$status'")->result();
+	}
+
+	public function cek_pengiriman_barang_tmp_by_kode($kode)
+	{
+		$this->db->where('kode', $kode);
+		$query = $this->db->get('pengiriman_barang_tmp');
+		return $query->num_rows();
+		
+	}
+
   
 }
 

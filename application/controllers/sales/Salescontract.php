@@ -208,19 +208,19 @@ class Salescontract extends MY_Controller
         $data['warehouse'] = $this->m_sales->get_list_departement();
         $data["currency"]  = $this->m_sales->get_list_currency();
         $data["salescontract"] = $this->m_sales->get_data_by_kode($kode_decrypt);
-        $data["details"]   = $this->m_sales->get_data_detail_by_kode($kode_decrypt);
+        $data["details"]       = $this->m_sales->get_data_detail_by_kode($kode_decrypt);
         $data["details_color_lines"] = $this->m_sales->get_data_color_line_by_kode($kode_decrypt);
-        $data["incoterm"]  = $this->m_sales->get_list_incoterm();
-        $data["paymentterm"]  = $this->m_sales->get_list_paymentterm();
-        $data["tax"]       = $this->m_sales->get_list_tax();
-        $data["list_uom"]  = $this->_module->get_list_uom();
+        $data["incoterm"]      = $this->m_sales->get_list_incoterm();
+        $data["paymentterm"]   = $this->m_sales->get_list_paymentterm();
+        $data["tax"]           = $this->m_sales->get_list_tax();
+        $data["list_uom"]      = $this->_module->get_list_uom();
+        $data['handling']      = $this->_module->get_list_handling();
 
         if(empty($data["salescontract"])){
           show_404();
         }else{
           return $this->load->view('sales/v_sales_contract_edit',$data);
         }
-
 
     }
 
@@ -244,9 +244,8 @@ class Salescontract extends MY_Controller
     {
 	    $kode_produk = addslashes($this->input->post('kode_produk'));
    		$result      = $this->m_sales->get_produk_byid($kode_produk)->row_array();
-      $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'] );
+      $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'], 'lebar_jadi'=>$result['lebar_jadi'], 'uom_lebar_jadi'=>$result['uom_lebar_jadi'] );
         echo json_encode($callback);
-        
     }
 
     public function simpan_detail()
@@ -560,43 +559,80 @@ class Salescontract extends MY_Controller
           $sub_menu  = $this->uri->segment(2);
           $username  = addslashes($this->session->userdata('username'));
 
-          $kode = $this->input->post('kode');
-          $kode_prod = addslashes($this->input->post('kode_prod'));
-          $prod  = addslashes($this->input->post('prod'));
-          $desc  = addslashes($this->input->post('desc'));
-          $color = addslashes($this->input->post('color'));
-          $color_name = addslashes($this->input->post('color_name'));
-          $qty   = $this->input->post('qty');
-          $uom   = addslashes($this->input->post('uom'));
-          $piece_info  = $this->input->post('piece_info');
-          $row = $this->input->post('row_order');
-          $date = date('Y-m-d H:i:s');
+          $kode         = $this->input->post('kode');
+          $kode_prod    = addslashes($this->input->post('kode_prod'));
+          $prod         = addslashes($this->input->post('prod'));
+          $desc         = addslashes($this->input->post('desc'));
+          $color        = addslashes($this->input->post('color'));
+          $color_name   = addslashes($this->input->post('color_name'));
+          $qty          = $this->input->post('qty');
+          $uom          = addslashes($this->input->post('uom'));
+          $piece_info   = $this->input->post('piece_info');
+          $row          = $this->input->post('row_order');
+          $handling     = $this->input->post('handling');
+          $lebar_jadi   = $this->input->post('lebar_jadi');
+          $uom_lebar_jadi   = $this->input->post('uom_lebar_jadi');
+          $date         = date('Y-m-d H:i:s');
 
-          if(!empty($row)){//update details
-            $this->m_sales->update_color_lines_detail($kode,$desc,$color_name,$qty,$uom,$piece_info,$row);
-            $jenis_log   = "edit";
-            $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc." | ".$qty." | ".$uom." | ".$piece_info;
-            $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
-            $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
-
-          }else{//simpan data baru
-
-            //check warna yang sama 
-            $check_dcl = $this->m_sales->check_details_color_lines($kode,$kode_prod,$color)->row_array();
-            if(empty($check_dcl['sales_order'])){
-              $ro  = $this->m_sales->get_row_order_sales_color_lines($kode,$kode_prod)->row_array();
-              $row_order = $ro['row_order']+1;
-              $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order);
-
-              $jenis_log   = "edit";
-              $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$color."| ".$color_name." | ".$qty." | ".$uom." | ".$piece_info;
-              $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
-              $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
-            }else{
-              $callback = array('status' => 'failed','message' => 'Maaf, Product sudah pernah diinput !', 'icon' =>'fa fa-check', 'type' => 'danger');
-            }
-                    
+          if(!empty($handling)){
+            $hd = $this->_module->get_handling_by_id($handling)->row_array();
+            $nama_handling = $hd['nama_handling'];
+          }else{
+            $nama_handling = '';
           }
+
+          if(!empty($color)){
+            $wr = $this->_module->get_warna_by_id($color)->row_array();
+            $nama_warna = $wr['nama_warna'];
+          }else{
+            $nama_warna = '';
+          }
+
+          $status     = "status NOT IN ('waiting_color', 'product_generated')";
+          $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->num_rows();
+          if($cek_status > 0){
+            $callback = array('status' => 'failed','message' => 'Color Lines tidak bisa disimpan, Status Sales Contract tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+          }else{
+
+            if(!empty($row)){//update details
+
+              // cek apakah sudah terbentuk OW atau belum 
+              $cek_OW = $this->m_sales->cek_item_color_lines_by_kode($kode,$row)->row_array();
+              
+              if(!empty($cek_OW['ow'])){
+                $callback = array('status' => 'failed','message' => 'Color Lines tidak disimpan, OW Sudah dibuat !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+              }else{
+                
+                $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$lebar_jadi,$uom_lebar_jadi);
+                $jenis_log   = "edit";
+                $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
+                $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
+                $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+              }
+                
+            }else{//simpan data baru
+              
+              $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
+              $row_order = $ro['row_order']+1;
+              $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$handling,$lebar_jadi,$uom_lebar_jadi);
+              
+              // cek status sales_contract
+              $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
+
+              if($is_approve_null > 0){
+                $this->m_sales->update_status_sales_contract($kode,'waiting_color');
+              }
+              
+              $jenis_log   = "edit";
+              $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
+              $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
+              $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+                      
+            }
+        }
 
           echo json_encode($callback);
         }
@@ -640,6 +676,58 @@ class Salescontract extends MY_Controller
         }
     }
 
+    public function create_OW()
+    {
+
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+              // session habis
+              $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+            $sub_menu  = $this->uri->segment(2);
+            $username  = addslashes($this->session->userdata('username')); 
+
+            $kode = addslashes($this->input->post('kode'));
+            $row  = $this->input->post('row_order');
+            $tgl  = date('Y-m-d H:i:s');
+
+            // lock tabel
+            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE');
+
+            // cek validasi item apakah ada atau tidak
+            // cek validasi apakah items tersebut sudah terbuat OW atau belum
+            $items = $this->m_sales->cek_item_color_lines_by_kode($kode,$row)->row_array();
+
+            if(empty($items['sales_order'])){
+              $callback = array('status' => 'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else if(!empty($items['ow'])){
+              $callback = array('status' => 'failed','message' => 'Data Color Lines ini sudah dibuat OW !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else{
+
+              // get last no ow
+              $no_ow = $this->m_sales->no_OW();
+
+              // update tangal ow dan no ow
+              $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
+
+              $jenis_log   = "edit";
+              $note_log    = "Membuat OW | ".$no_ow." | ". $row;
+              $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+
+              $callback = array('status' => 'success','message' => ' OW telah berhasil dibuat !', 'icon' =>'fa fa-check', 'type' => 'success');
+            }
+
+            // unlock tabel
+            $this->_module->unlock_tabel();
+
+        }
+
+        echo json_encode($callback);
+
+    }
+
     /* Finish COLOR LINES */
 
 
@@ -667,7 +755,7 @@ class Salescontract extends MY_Controller
         $sc   = $this->m_sales->get_data_by_kode($so);
         $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
         $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
-        $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
+        $inisial_sales_group = $this->_module->get_inisial_sales_Group_by_kode($sc->sales_group);
 
     		$pdf = new FPDF('p','mm','legal');
     		// membuat halaman baru
@@ -708,7 +796,7 @@ class Salescontract extends MY_Controller
     		}
         $tgl_idn = tgl_indo($tgl_trans);
     		$pdf->Cell(50,0.5,$tgl_idn,0,0, 'L');
-    		$pdf->Cell(15,0.5,$nama_sales_group,0,0, 'L');
+    		$pdf->Cell(15,0.5,$inisial_sales_group,0,0, 'L');
     		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
     		$pdf->SetFont('Arial','',9);
@@ -875,11 +963,10 @@ class Salescontract extends MY_Controller
 
 	   	if(!empty($sc->sales_group)){
 
-        $nama = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
 		    $pdf->Cell(5,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
 		  	$pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(60,0,'('.$nama.")",0,0,'C'); 
+		    $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
   			$pdf->SetFont('Arial','',9);
   		}
 
@@ -895,7 +982,7 @@ class Salescontract extends MY_Controller
       $sc   = $this->m_sales->get_data_by_kode($so);
       $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
       $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
-      $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sc->sales_group);
+      $inisial_sales_group = $this->_module->get_inisial_sales_Group_by_kode($sc->sales_group);
 
 
     	$pdf = new FPDF('p','mm','legal');
@@ -936,7 +1023,7 @@ class Salescontract extends MY_Controller
   		}
       $tgl_eng = tgl_eng($tgl_trans);
   		$pdf->Cell(50,0.5,$tgl_eng,0,0, 'L');
-  		$pdf->Cell(15,0.5,$nama_sales_group,0,0, 'L');
+  		$pdf->Cell(15,0.5,$inisial_sales_group,0,0, 'L');
   		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
   		// Memberikan space kebawah agar tidak terlalu rapat
@@ -1097,7 +1184,7 @@ class Salescontract extends MY_Controller
     		  $pdf->Cell(5,0,'',0,0);
     		  $pdf->Cell(20,0,'',0,0);
     			$pdf->SetFont('Arial','B',9);
-    		  $pdf->Cell(60,0,'('.$nama_sales_group.")",0,0,'C'); 
+    		  $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
     			$pdf->SetFont('Arial','',9);
     		}
 

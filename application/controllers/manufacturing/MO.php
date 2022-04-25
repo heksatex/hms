@@ -201,8 +201,9 @@ class MO extends MY_Controller
     }
 
     public function edit($kode = null)
-    {   
+    {
         if(!isset($kode)) show_404();
+        $username          = addslashes($this->session->userdata('username')); 
         $kode_decrypt      = decrypt_url($kode);
         $list              = $this->m_mo->get_data_by_code($kode_decrypt);
         $data["list"]      = $list;
@@ -215,8 +216,17 @@ class MO extends MY_Controller
         $data["total_fg"]  = $this->m_mo->get_total_fg($kode_decrypt);
         $data['berat']     = $this->m_mo->get_berat_by_kode($kode_decrypt)->row_array();
         $warna             = $this->m_mo->get_warna_by_kode($kode_decrypt)->row_array();
-        $orgn              = $kode_decrypt."|".$warna['kode_warna'];
+        $orgn              = $list->origin."|".$kode_decrypt;
         $cek_request       = $this->m_mo->cek_origin_di_stock_move($orgn)->row_array();//cek udh request color ?
+        $data['handling']  = $this->_module->get_list_handling();
+        // akses menu 
+        $mms = $this->_module->get_kode_sub_menu_deptid_user('mO',$list->dept_id,$username)->row_array();
+        if(!empty($mms['kode'])){
+            $mms_kode = $mms['kode'];
+        }else{
+            $mms_kode = '';
+        }
+        $data['menu'] = $mms_kode;
 
         if($list->dept_id == 'TRI' OR $list->dept_id == 'JAC'){
             if($list->type_production =='Proofing'){
@@ -1850,29 +1860,33 @@ class MO extends MY_Controller
         echo json_encode($callback);
     }
 
-    /*
-    public function request_color()
+    public function request_obat()
     {
-        $sub_menu = $this->uri->segment(2);
-        $username = $this->session->userdata('username'); 
-        $deptid   = $this->input->post('deptid');
 
         if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
             // session habis
             $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
-            $kode  = $this->input->post('kode');
-            $warna = $this->input->post('warna');
-            $orgn  =$kode."|".$warna;
+            $kode     = $this->input->post('kode');
+            $warna    = $this->input->post('id_warna');
+            $origin_mo= $this->input->post('origin');
+
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username'); 
+            $nu       = $this->_module->get_nama_user($username)->row_array();
+            $nama_user= addslashes($nu['nama']);
+            $deptid   = $this->input->post('deptid');
+
+            $orgn     = $origin_mo."|".$kode; // ex SO18|CO7|2|OW210300001|MG210300004
             
             $status_kain = $this->m_mo->cek_status_produk_kain($kode)->row_array();
             if(!empty($status_kain['status'])){
 
-                $cek_request  = $this->m_mo->cek_origin_di_stock_move($orgn)->row_array();//cek apa sudah request color ?
+                $cek_request  = $this->m_mo->cek_origin_di_stock_move($orgn)->row_array();//cek apa sudah request obat ?
                 if(empty($cek_request['origin'])){
 
                     $cek_ba = $this->m_mo->cek_berat_air($kode)->row_array();
-                    if(!empty($cek_ba['berat']) AND !empty($cek_ba['air'])){
+                    if($cek_ba['berat'] > 0 AND $cek_ba['air'] > 0 ){
 
                         //lock table
                         $this->_module->lock_tabel('warna WRITE, warna_items WRITE, mrp_route WRITE, stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production_rm_target WRITE, mrp_production WRITE');
@@ -1899,23 +1913,26 @@ class MO extends MY_Controller
                             $case3                      = "";
                             $where3                     = "";
                             $sql_rm_target_batch        = "";
+                            $arr_kode[]                 = "";
+                            $kode_out[]                 = "";
 
                             $route = $this->m_mo->get_route_warna('obat_dyeing');
                             $kode_warna  = $this->m_mo->get_warna_items_by_warna($warna);
                             $get_row = $this->m_mo->get_row_order_rm_target($kode)->row_array();//get last_order di mrp rm target
                             $rm_row  = $get_row['row']+1;
                             $ba      = $this->m_mo->get_berat_air_by_kode($kode)->row_array();
+                            $sm_row  = 1;///stock move row_order
+                            $empty_item = TRUE;
 
                             foreach($route as $val){
                           
                                 $mthd          = explode("|",$val->method);
                                 $method_dept   = trim($mthd[0]);
                                 $method_action = trim($mthd[1]);
-                                $sm_row     = 1;///stock move row_order
                                 $smp_row    = 1;//stock move produk row_order
 
                                 //stock move 
-                                $origin = $kode."|".$warna;
+                                $origin = $orgn;
                                 $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin."','".$val->method."','".$val->lokasi_dari."','".$val->lokasi_tujuan."','draft','".$sm_row."','".$source_move."'), ";
                                 $sm_row = $sm_row + 1;
                                 
@@ -1960,7 +1977,11 @@ class MO extends MY_Controller
                                     $source_move = $move_id;
                                 }
 
+                                $last_num_origin = 1;
+
                                 foreach($kode_warna as $row){
+                                    $empty_item = FALSE;
+
                                     $kode_prod  = $row->kode_produk;
                                     $nama_prod  = $row->nama_produk;
                                     $qty        = $row->qty;
@@ -1974,19 +1995,24 @@ class MO extends MY_Controller
                                         $qty_asli  = $qty*$ba['air'];
                                     }
 
+                                    if($method_action =='CON'){
+                                        $origin_prod = $kode_prod.'_'.$last_num_origin;
+                                    }else{
+                                        $origin_prod = '';
+                                    }
+
                                     //stock move produk
-                                    $sql_stock_move_produk_batch .= "('".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."'), ";
+                                    $sql_stock_move_produk_batch .= "('".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."','".$origin_prod."'), ";
 
                                     if($method_action == 'OUT'){//pengiriman barang
 
-                                        $sql_out_items_batch .= "('".$kode_out."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."'), ";
+                                        $sql_out_items_batch .= "('".$kode_out."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."',''), ";
 
                                         //update reff notes pengiriman 
                                         $case2  .= "when kode = '".$kode_out."' then '".$reff_notes."'";
                                         $where2 .= "'".$kode_out."',";
                                     
                                     }else if($method_action =='IN'){//penerimaan barang
-                                        
                                        
                                         $sql_in_items_batch   .= "('".$kode_in."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."'), "; 
                                         //update reff notes penerimaan
@@ -1994,13 +2020,12 @@ class MO extends MY_Controller
                                         $where3 .= "'".$kode_in."',";
 
                                     }else if($method_action =='CON'){
-                              
-                                        $sql_rm_target_batch  .= "('".$kode."','".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','".$rm_row."'), ";
+
+                                        $sql_rm_target_batch  .= "('".$kode."','".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','".$rm_row."','".$origin_prod."','draft'), ";
                                         //rm + 1
                                         $rm_row =  $rm_row  + 1;
+                                        $last_num_origin = $last_num_origin + 1;
                                     }
-
-
 
                                     //smp row_order + 1
                                     $smp_row = $smp_row + 1;
@@ -2010,77 +2035,92 @@ class MO extends MY_Controller
                                 $last_move = $last_move + 1;
                                 $move_id   = "SM".$last_move;
                                 //$i=$i+1;
+
+                            } // end foreach route
+
+                            if($empty_item == TRUE){
+                                //action sql query
+                                $callback = array('message' => 'Maaf, Resep Obat Dyeing Stuff atau AUX masih belum tersedia ! ',  'status' => 'failed' );
+
+                            }else{
+
+                                //action sql query
+                                if(!empty($sql_stock_move_batch)){
+                                  $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
+                                  $this->_module->create_stock_move_batch($sql_stock_move_batch);
+
+                                  if(!empty($sql_stock_move_produk_batch)){
+                                      $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
+                                      $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
+                                  }
+                                }
+
+                                if(!empty($sql_out_batch)){
+                                  $sql_out_batch = rtrim($sql_out_batch, ', ');
+                                  $this->_module->simpan_pengiriman_batch($sql_out_batch);
+
+                                  $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
+                                  $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
+                                }
+                                
+                                if(!empty($sql_in_batch)){
+                                  $sql_in_batch = rtrim($sql_in_batch, ', ');
+                                  $this->_module->simpan_penerimaan_batch($sql_in_batch);
+
+                                  $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
+                                  $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
+
+                                  $where = rtrim($where, ',');
+                                  $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
+                                  $this->_module->update_reff_batch($sql_update_reff_out_batch);
+
+                                  $where2 = rtrim($where2, ',');
+                                  $sql_update_reff_notes_out_batch  = "UPDATE pengiriman_barang SET reff_note =(case ".$case2." end) WHERE  kode in (".$where2.") ";
+                                  $this->_module->update_reff_batch($sql_update_reff_notes_out_batch);
+
+                                  $where3 = rtrim($where3, ',');
+                                  $sql_update_reff_notes_in_batch  = "UPDATE penerimaan_barang SET reff_note =(case ".$case3." end) WHERE  kode in (".$where3.") ";
+                                  $this->_module->update_reff_batch($sql_update_reff_notes_in_batch);
+
+                                }
+
+                                if(!empty($sql_rm_target_batch)){
+                                    $sql_rm_target_batch = rtrim($sql_rm_target_batch, ', ');
+                                   $this->m_mo->save_obat($sql_rm_target_batch);
+                                }
+
+                                $this->m_lab->update_status_warna($warna,'requested');
+
+                                // get nama warna by id
+                                $nama_warna  = $this->m_mo->get_nama_warna_by_id($warna);
+
+                                //unlock table
+                                $this->_module->unlock_tabel();
+                                
+                                $jenis_log   = "edit";
+                                $note_log    = "Request Resep Obat -> ".$kode." | ".$nama_warna ;
+                                $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username, $deptid);
+                                
+                                $callback    = array('status'=>'success', 'message' => 'Request Resep Obat Berhasil !',  'icon' =>'fa fa-check', 'type' => 'success');
                             }
-
-                            //action sql query
-                            if(!empty($sql_stock_move_batch)){
-                              $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
-                              $this->_module->create_stock_move_batch($sql_stock_move_batch);
-
-                              $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
-                              $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
-                            }
-
-                            if(!empty($sql_out_batch)){
-                              $sql_out_batch = rtrim($sql_out_batch, ', ');
-                              $this->_module->simpan_pengiriman_batch($sql_out_batch);
-
-                              $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
-                              $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
-                            }
-                            
-                            if(!empty($sql_in_batch)){
-                              $sql_in_batch = rtrim($sql_in_batch, ', ');
-                              $this->_module->simpan_penerimaan_batch($sql_in_batch);
-
-                              $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
-                              $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
-
-                              $where = rtrim($where, ',');
-                              $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
-                              $this->_module->update_reff_batch($sql_update_reff_out_batch);
-
-                              $where2 = rtrim($where2, ',');
-                              $sql_update_reff_notes_out_batch  = "UPDATE pengiriman_barang SET reff_note =(case ".$case2." end) WHERE  kode in (".$where2.") ";
-                              $this->_module->update_reff_batch($sql_update_reff_notes_out_batch);
-
-                              $where3 = rtrim($where3, ',');
-                              $sql_update_reff_notes_in_batch  = "UPDATE penerimaan_barang SET reff_note =(case ".$case3." end) WHERE  kode in (".$where3.") ";
-                              $this->_module->update_reff_batch($sql_update_reff_notes_in_batch);
-
-                            }
-
-                            if(!empty($sql_rm_target_batch)){
-                                $sql_rm_target_batch = rtrim($sql_rm_target_batch, ', ');
-                               $this->m_mo->save_obat($sql_rm_target_batch);
-                            }
-
-                            $this->m_lab->update_status_warna($warna,'requested');
-
-                            //unlock table
-                            $this->_module->unlock_tabel();
-                            
-                            $jenis_log   = "request color";
-                            $note_log    = $kode."|".$warna ;
-                            $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username, $deptid);
-                            
-                            $callback    = array('status'=>'success', 'message' => 'Request Color Berhasil !',  'icon' =>'fa fa-check', 'type' => 'success');
 
                         }else{
-                            $callback = array('message' => 'Maaf, Warna Belum ready !',  'status' => 'failed' );
+                            $callback = array('message' => 'Maaf, Resep Obat Warna Belum ready !'.$cek_status['status'],  'status' => 'failed' );
                         }
 
                     }else{
-                        if($cek_ba['berat']==null){
+                        if($cek_ba['berat'] <= 0){
                           $callback = array('message' => 'Maaf, Berat Harus Diisi !',  'status' => 'failed' );
-                        }else if($cek_ba['air'] == null){
+                        }else if($cek_ba['air'] <= 0){
                           $callback = array('message' => 'Maaf, Air Harus Diisi !',  'status' => 'failed' );
+                        }else{
+                          $callback = array('message' => 'Maaf, Air Harus Diisi !1'.$cek_ba['berat'].' '.$cek_ba['air'],  'status' => 'failed' );
                         }
                     }
 
 
                 }else{
-                    $callback = array('message' => 'Maaf, Anda sudah melakukan Request Color !',  'status' => 'failed' );
+                    $callback = array('message' => 'Maaf, Anda sudah melakukan Request Resep Obat !',  'status' => 'failed' );
                 }
 
             }else{
@@ -2091,7 +2131,7 @@ class MO extends MY_Controller
 
         echo json_encode($callback);
     }
-    */
+    
 
     public function simpan()
     {
@@ -2209,9 +2249,16 @@ class MO extends MY_Controller
             $kode       = $this->input->post('kode');
             $move_id    = $this->input->post('move_id');//move_id rm_target
             $origin_mo  = $this->input->post('origin');
+            $type_mo    = $this->input->post('type_mo');
             $lokasi_quant = $this->input->post('lokasi');//lokasi untuk stock_quant produk consumable
             $ex_orgn    = explode("|", $origin_mo);
-            $origin     = $ex_orgn[0].'|'.$ex_orgn[1].'|';
+
+            if($type_mo == 'colouring'){
+                $origin  = $origin_mo;
+            }else{
+                $origin  = $ex_orgn[0].'|'.$ex_orgn[1].'|';
+            }
+
             $status_brg = 'ready';
             $tgl        = date('Y-m-d H:i:s');
             $sql_stock_quant_batch      = "";
@@ -2545,19 +2592,19 @@ class MO extends MY_Controller
                     }
 
                    
-                    //cek apa ada product yang statusnya ready atau done ?
-                    $all_produk_rm = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready','done')->row_array();
-
-                    //jika tidak ada maka update status  mrp_production = ready
-                    if(!empty($all_produk_rm['status'])){
-                        $this->m_mo->update_status_mrp_production($kode,$status_brg);
-                        
-                        $cek_status2 = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
-                        if($cek_status2['status']=='ready'){
-                            $this->_module->update_status_stock_move($move_id,$status_brg);
+                    if($type_mo == 'colouring' AND $deptid != 'DYE'){
+                        //cek apa ada product yang statusnya ready atau done ?
+                        $all_produk_rm = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready','done')->row_array();
+                        //jika tidak ada maka update status  mrp_production = ready
+                        if(!empty($all_produk_rm['status'])){
+                            $this->m_mo->update_status_mrp_production($kode,$status_brg);
+                            
+                            $cek_status2 = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
+                            if($cek_status2['status']=='ready'){
+                                $this->_module->update_status_stock_move($move_id,$status_brg);
+                            }
                         }
                     }
-                     
                     
                     //unlock table
                     $this->_module->unlock_tabel();
@@ -2790,7 +2837,7 @@ class MO extends MY_Controller
           $kosong     = false;
 
           //lock tabel
-          $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, mst_produk mp WRITE' );
+          $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, mst_produk mp WRITE, departemen WRITE' );
           
           //cek status mrp_production = done
           $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
@@ -2888,17 +2935,23 @@ class MO extends MY_Controller
                     $this->_module->update_perbatch($sql_update_stock_quant);
                   }
 
-                  $this->m_mo->update_status_mrp_production_rm_target($kode,addslashes($origin_prod),$status_brg);   
-                  //cek apa produk yang status nya ready atau done ?
-                  $cek_status = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready', 'done')->row_array();
-                  if(!empty($cek_status['status'])){
-                    $this->m_mo->update_status_mrp_production($kode,$status_brg);
-                    $this->m_mo->update_status_stock_move_produk_mo($move_id,addslashes($origin_prod),$status_brg);
-                    $cek_status2 = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
-                    if($cek_status2['status']=='ready'){
-                        $this->_module->update_status_stock_move($move_id,$status_brg);
-                    }
+                  $this->m_mo->update_status_mrp_production_rm_target($kode,addslashes($origin_prod),$status_brg);  
+                  // cek type mo
+                  $to    = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
+                  if($to['type_mo'] != 'colouring' AND $deptid != 'DYE') {
+
+                        //cek apa produk yang status nya ready atau done ?
+                        $cek_status = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready', 'done')->row_array();
+                        if(!empty($cek_status['status'])){
+                          $this->m_mo->update_status_mrp_production($kode,$status_brg);
+                          $this->m_mo->update_status_stock_move_produk_mo($move_id,addslashes($origin_prod),$status_brg);
+                          $cek_status2 = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
+                          if($cek_status2['status']=='ready'){
+                              $this->_module->update_status_stock_move($move_id,$status_brg);
+                            }
+                        }
                   }
+                  
               }
 
               //unlock table

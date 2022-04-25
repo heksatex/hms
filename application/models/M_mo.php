@@ -173,7 +173,11 @@ class M_mo extends CI_Model
 
 	public function get_data_by_code($kode)
 	{
-		$query = $this->db->query("SELECT * FROM mrp_production where kode = '".$kode."' ");
+		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, hd.nama_handling, w.nama_warna, w.kode_warna, w.notes as notes_dti
+								  FROM mrp_production mrp 
+								  LEFT join  mst_handling hd ON mrp.id_handling = hd.id 
+								  LEFT JOIN warna w ON mrp.id_warna = w.id
+								  where mrp.kode = '".$kode."' ");
 		return $query->row();
 	}
 
@@ -212,10 +216,11 @@ class M_mo extends CI_Model
 
 	public function cek_status_produk_kain($kode)
 	{
-		return $this->db->query("SELECT sm.status
-								 FROM mrp_production_rm_target rm
-								 INNER JOIN stock_move sm ON rm.move_id = sm.move_id 
-								 WHERE rm.kode = '".$kode."' AND sm.status in ('ready')");
+		return $this->db->query("SELECT rm.status
+								FROM mrp_production_rm_target rm
+								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
+								INNER JOIN mst_category cat ON mp.id_category = cat.id
+								WHERE rm.kode = '".$kode."' AND rm.status in ('ready')  AND cat.nama_category LIKE '%kain%'");
 	}
 
 	public function get_list_bahan_baku_hasil($kode,$kode_produk)
@@ -317,9 +322,9 @@ class M_mo extends CI_Model
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
 								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
-								INNER JOIN warna_items wi ON m.kode_warna = wi.kode_warna AND wi.kode_produk = rm.kode_produk 
+								INNER JOIN warna_items wi ON m.id_warna = wi.id_warna AND wi.kode_produk = rm.kode_produk 
 								INNER JOIN stock_move_produk smp ON smp.move_id = rm.move_id AND smp.kode_produk = rm.kode_produk 
-								WHERE rm.kode = '$kode' AND mp.category IN ('11','12') AND wi.type_obat = 'DYE' 
+								WHERE rm.kode = '$kode' AND mp.id_category IN ('11','12') AND wi.type_obat = 'DYE' 
 								order by rm.row_order")->result();
    }
 
@@ -329,9 +334,9 @@ class M_mo extends CI_Model
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
 								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
-								INNER JOIN warna_items wi ON m.kode_warna = wi.kode_warna AND wi.kode_produk = rm.kode_produk 
+								INNER JOIN warna_items wi ON m.id_warna = wi.id_warna AND wi.kode_produk = rm.kode_produk 
 								INNER JOIN stock_move_produk smp ON smp.move_id = rm.move_id AND smp.kode_produk = rm.kode_produk 
-								WHERE rm.kode = '$kode' AND mp.category IN ('11','12') AND wi.type_obat = 'AUX' 
+								WHERE rm.kode = '$kode' AND mp.id_category IN ('11','12') AND wi.type_obat = 'AUX' 
 								order by rm.row_order")->result();
    }
 
@@ -343,18 +348,18 @@ class M_mo extends CI_Model
 
 	public function get_warna_items_by_warna($warna)
 	{
-		return $this->db->query("SELECT * FROM warna_items WHERE kode_warna = '$warna' order by type_obat,row_order")->result();
+		return $this->db->query("SELECT * FROM warna_items WHERE id_warna = '$warna' order by type_obat,row_order")->result();
 	}
 
 
 	public function cek_status_warna($warna)
 	{
-		return $this->db->query("SELECT * FROM warna WHERE kode_warna = '$warna' AND status in ('ready','requested','done')");
+		return $this->db->query("SELECT * FROM warna WHERE id = '$warna' AND status in ('ready','requested','done')");
 	}
 
 	public function get_warna_by_kode($kode)
 	{
-		return $this->db->query("SELECT kode_warna FROM mrp_production WHERE kode = '$kode'");
+		return $this->db->query("SELECT id_warna FROM mrp_production WHERE kode = '$kode'");
 	}
 
 	public function cek_origin_di_stock_move($origin)
@@ -416,7 +421,7 @@ class M_mo extends CI_Model
 
 	public function save_obat($sql)
 	{
-		return $this->db->query("INSERT INTO mrp_production_rm_target (kode,move_id,kode_produk,nama_produk,qty,uom,row_order) 
+		return $this->db->query("INSERT INTO mrp_production_rm_target (kode,move_id,kode_produk,nama_produk,qty,uom,row_order,origin_prod,status) 
 								values $sql ");
 	} 
 
@@ -762,6 +767,12 @@ class M_mo extends CI_Model
 	{
 		$result = $this->db->query("SELECT no_mesin FROM mesin where mc_id = '$mc_id'")->row_array();
 		return $result['no_mesin'];
+	}
+
+	public function get_nama_warna_by_id($id_warna)
+	{
+		$result = $this->db->query("SELECT nama_warna FROM warna where id = '$id_warna'")->row_array();
+		return $result['nama_warna'];
 	}
 
 

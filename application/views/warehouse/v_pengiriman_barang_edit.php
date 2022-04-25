@@ -17,7 +17,20 @@
         margin: 10 0px;
         min-width:  24px;
     }
+    
   </style>
+
+  <?php 
+    if($smove['method'] == 'GRG|OUT'){
+    ?>
+    <style>
+      button[id="btn-kirim"]{/*untuk hidden button kirim saat pengiriman GRG */
+       display: none;
+      }
+    </style>
+  <?php 
+    }
+  ?>
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini">
@@ -185,10 +198,7 @@
                               <tr class="num">
                                 <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order."^|".$row->kode_produk."^|".$smove['move_id']."^|".$row->origin_prod?>"></td>
                                 <td><?php echo $row->kode_produk;?></td>
-                                <td>
-                                  <?php if($smove['method']!="GRG|OUT" OR $row->status_barang=='done'){echo $row->nama_produk;}else{?>
-                                  <a href="javascript:void(0)" onclick="tambah('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>')"><?php echo $row->nama_produk?></a>
-                                  <?php }?>
+                                <td> <?php echo $row->nama_produk?></a>
                                   <?php if($row->status_barang == 'done' OR $row->status_barang == 'cancel'){echo "";}else{?>
                                    <a href="javascript:void(0)" onclick="tambah_quant('<?php echo htmlentities($row->nama_produk); ?>','<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>','<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                      <span class="glyphicon  glyphicon-share"></span></a>

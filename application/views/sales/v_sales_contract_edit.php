@@ -42,7 +42,7 @@
         min-width:  24px;
     }
 
-    .description{
+    .set_textarea{
       resize: vertical;
     }
 
@@ -112,7 +112,7 @@
 
               <div class="col-md-6">
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Sales Order</label></div>
+                  <div class="col-xs-4"><label>Sales Contract</label></div>
                   <div class="col-xs-8">
                     <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly" value="<?php echo $salescontract->sales_order?>" />
                   </div>                                    
@@ -233,11 +233,6 @@
               </div>
             </div>
 
-            <?php 
-
-          //nl2br(htmlspecialchars($sc->bank));
-            ?>
-
             <div class="row">
               <div class="col-md-12">
                 <!-- Custom Tabs -->
@@ -258,7 +253,7 @@
                             <th class="style" width="200px">Product</th>
                             <th class="style" width="150px">Description</th>
                             <th class="style" width="120px" style="text-align: right;">Qty</th>
-                            <th class="style" width="50px" >Uom</th>
+                            <th class="style" width="80px" >Uom</th>
                             <!--th class="style" width="120px">Roll Info</th-->
                             <th class="style" width="120px">Unit Price</th>
                             <th class="style" width="130px">Taxes</th>
@@ -353,9 +348,13 @@
 	                            <th class="style" width="150px">Description</th>
 	                            <th class="style" width="150px">Color</th>
 	                            <th class="style" width="150px">Color Name</th>
+                              <th class="style" width="100px">Handling</th>
 	                            <th class="style" width="80px" style="text-align: right;">Qty</th>
+	                            <th class="style" width="80px" >Uom</th>
 	                            <th class="style" width="150px" >Piece Info</th>
-	                            <th class="style" width="50px" >Uom</th>
+	                            <th class="style" width="120px">Lebar Jadi</th>
+	                            <th class="style" width="100px">Uom Lbr Jadi</th>
+	                            <th class="style" width="80px" >OW</th>
 	                            <th class="style" width="50px"></th>
 	                          </tr>
 	                        </thead>
@@ -367,26 +366,37 @@
                                   <tr class="num">
                                     <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>"></td>
                                     <td class="text-wrap width-150"><?php echo $row->nama_produk?></td>
-                                    <td class="text-wrap width-150" data-content="edit" data-id="description_color" data-isi="<?php echo htmlentities($row->description);?>"><?php echo $row->description?></td>
-                                    <td class="text-wrap" data-id="color"  data-isi="<?php echo $row->kode_warna;?>"><?php echo $row->kode_warna?></td>
-                                    <td class="text-wrap" data-content="edit" data-id="color_name"  data-isi="<?php echo $row->color_alias_name;?>"><?php echo $row->color_alias_name?></td>
+                                    <td class="text-wrap width-150" data-content="edit" data-name="Description" data-id="description_color" data-isi="<?php echo htmlentities($row->description);?>"><?php echo $row->description?></td>
+                                    <td class="text-wrap" data-content="edit" data-id="color"  data-isi="<?php echo $row->id_warna;?>" data-isi2="<?php echo $row->nama_warna;?>"><?php echo $row->nama_warna?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Color" data-id="color_name"  data-isi="<?php echo $row->color_alias_name;?>"><?php echo htmlentities($row->color_alias_name)?></td>
+                                    <td class="text-wrap" data-content="edit" data-id="handling"  data-isi="<?php echo $row->id_handling;?>"><?php echo $row->nama_handling?></td>
                                     <td align="right" data-content="edit" data-id="qty"  data-isi="<?php echo $row->qty;?>"><?php echo $row->qty?></td>
-                                    <td class="text-wrap width-150" data-content="edit" data-id="piece_info" data-isi="<?php echo $row->piece_info;?>"><?php echo $row->piece_info?></td>
-                                    <td data-content="edit" data-id="uom"  data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
+                                    <td ><?php echo $row->uom?></td>
+                                    <td class="text-wrap width-150" data-content="edit" data-name="Piece Info" data-id="piece_info" data-isi="<?php echo $row->piece_info;?>"><?php echo htmlentities($row->piece_info)?></td>
+                                    <td class="text-wrap" data-content="edit" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
+                                    <td class="text-wrap width-80"  data-content="edit" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" ><?php echo $row->uom_lebar_jadi?></td>
+                                    <td ><?php echo $row->ow?></td>
                                     <td>
+                                      <?php if(empty($row->ow)){?>
                                         <a class="add-color-lines" title="Simpan" data-toggle="tooltip" row_id='tes'><i class="fa fa-save"></i></a>
-                                        <a class="edit-color-lines" title="edit" data-toggle="tooltip" style="color: #FFC107;"><i class="fa fa-edit"></i></a>
+
+                                        <?php if($salescontract->status =='product_generated' AND $row->is_approve == 'f'){?>
+                                        <a class="ow-color-lines" title="OW" data-toggle="tooltip"><i class="fa  fa-arrow-right"></i></a>
+                                        <?php }?>
+
+                                        <a class="edit-color-lines" title="Edit" data-toggle="tooltip" style="color: #FFC107;"><i class="fa fa-edit"></i></a>
                                         <a class="delete-color-lines" title="Hapus" data-toggle="tooltip"><i class="fa fa-trash" style="color: red"></i></a>
-                                        <a class="cancel-color-lines" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;"><i class="fa fa-close"></i></a>
+                                        <a class="cancel-color-lines" title="Cancel" data-toggle="tooltip"><i class="fa fa-close"></i></a>
+                                      <?php }?>
                                     </td>
+                                  </tr>
                                 <?php 
                                   }     
                                 ?>
-                       
                           </tbody>
                           <tfoot>
                             <tr>
-                              <td colspan="11">
+                              <td colspan="13">
                                 <a href="javascript:void(0)" class="add-new-color-lines"><i class="fa fa-plus"></i> Tambah Data</a>
                               </td>
                             </tr>
@@ -517,6 +527,12 @@
     }
   }
 
+  //auto height in textarea
+  function textAreaAdjust(o) {
+    o.style.height = "1px";
+    o.style.height = (25+o.scrollHeight)+"px";
+  }
+
   function refresh_tab_and_div(){
     $("#tab_1").load(location.href + " #tab_1");
     $("#tab_2").load(location.href + " #tab_2");
@@ -537,7 +553,7 @@
     var row   ='<tr class="num">'
           + '<td></td>'
           + '<td class="width-300"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select></td>'
-          + '<td><textarea class="form-control description" name="Description" id="description"></textarea><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
+          + '<td><textarea class="form-control description set_textarea" name="Description" id="description"></textarea><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
           + '<td class="width-150"><input type="text" class="form-control input-sm" name="Qty" id="qty" onkeyup="validAngka(this)"></td>'
           + '<td class="width-120"><select type="text" class="form-control input-sm uom" name="Uom" id="uom"></select></td>'
           //+ '<td class="width-120"><input type="text" class="form-control input-sm" name="roll" id="roll"></td>'
@@ -608,7 +624,6 @@
                 }
           });
       });
-
 
 
       //select 2 uom
@@ -979,16 +994,19 @@
     var index = $("#color_lines tbody tr:last-child").index();
     var row   ='<tr class="num">'
           + '<td></td>'
-          + '<td><select type="text" class="form-control input-sm prod_color" name="Product" id="product"></select></td>'
-          + '<td><input type="text" class="form-control input-sm description_color" name="Description" id="description_color"></select><input type="hidden" class="form-control input-sm prodhidd_color" name="prodhidd" id="prodhidd_color"></td>'
-          + '<td><select type="text" class="form-control input-sm color" name="Color" id="color"></select></td>'
-          + '<td><input type="text" class="form-control input-sm" name="Color Name" id="color_name"></td>'
-          + '<td><input type="text" class="form-control input-sm" name="Qty" id="qty" onkeyup="validAngka(this)"></td>'
-          + '<td><input type="text" class="form-control input-sm" name="Piece Info" id="piece_info"></td>'
-          + '<td><input type="text" class="form-control input-sm uom_color" name="Uom" id="uom"></td>'
+          + '<td><select type="text" class="form-control input-sm prod_color width-150" name="Product" id="product"></select></td>'
+          + '<td><textarea type="text" class="form-control input-sm description_color set_textarea  width-150" onkeyup="textAreaAdjust(this)"  name="Description" id="description_color"></textarea><input type="hidden" class="form-control input-sm prodhidd_color" name="prodhidd" id="prodhidd_color"></td>'
+          + '<td><select type="text" class="form-control input-sm color width-150" name="Color" id="color"></select></td>'
+          + '<td><textarea type="text" class="form-control input-sm  width-150 set_textarea" onkeyup="textAreaAdjust(this)"  name="Color Name" id="color_name"></textarea></td>'
+          + '<td><select type="text" class="form-control input-sm  width-100" name="Handling" id="handling" ><option value=""></option><?php foreach($handling as $row){?><option value="<?php echo $row->id; ?>"><?php echo $row->nama_handling;?></option>"<?php }?></select></td>'
+          + '<td><input type="text" class="form-control input-sm width-100" name="Qty" id="qty" onkeyup="validAngka(this)"></td>'
+          + '<td><input type="text" class="form-control input-sm uom_color width-50" name="Uom" id="uom" readonly></td>'
+          + '<td><textarea type="text" class="form-control  input-sm width-100 set_textarea" onkeyup="textAreaAdjust(this)"  name="Piece Info" id="piece_info"></textarea></td>'
+          + '<td class=""><input type="text" class="form-control input-sm width-100 lebar_jadi" name="Lebar Jadi" id="lebar_jadi" ></td>'
+          + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_jadi" name="Uom Lebar Jadi" id="uom_lebar_jadi"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
+          + '<td></td>'
           + '<td><button type="button" class="btn btn-primary btn-xs add-color-lines width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit-color-lines" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal-color-lines width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
           + '</tr>';
-
 
         $('#color_lines tbody').append(row);
         $("#color_lines tbody tr").eq(index + 1).find(".add-color-lines, .edit-color-lines").toggle();
@@ -1040,6 +1058,8 @@
                   $('.prodhidd_color').val(data.nama_produk);
                   $('.description_color').val(data.nama_produk);
                   $('.uom_color').val(data.uom);
+                  $('.lebar_jadi').val(data.lebar_jadi);
+                  $('.uom_lebar_jadi').val(data.uom_lebar_jadi);
                 },
                 error: function (xhr, ajaxOptions, thrownError){
                 //  alert('Error data');
@@ -1056,7 +1076,7 @@
           ajax:{
                 dataType: 'JSON',
                 type : "POST",
-                url : "<?php echo base_url();?>sales/salescontract/get_color_select2",
+                url  : "<?php echo base_url();?>sales/salescontract/get_color_select2",
                 //delay : 250,
                 data : function(params){
                   return{
@@ -1068,8 +1088,8 @@
 
                   $.each(data, function(index,item){
                       results.push({
-                          id:item.kode_warna,
-                          text:item.kode_warna
+                          id:item.id,
+                          text:item.nama_warna
                       });
                   });
                   return {
@@ -1108,6 +1128,15 @@
         if(!$(this).val() && $(this).attr('name')=='Color'){
            alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
         }
+
+        if(!$(this).val() && $(this).attr('name')=='Handling'){
+           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+        }
+
+        if(!$(this).val() && $(this).attr('id')=='uom_lebar_jadi'){
+           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+        }
+
       });
 
       // validasi untuk inputan textbox
@@ -1119,32 +1148,38 @@
       });
 
       if(!empty && !empty2){
-        var kode  =  "<?php echo $salescontract->sales_order; ?>";
-        var kode_prod  = $(this).parents("tr").find("#product").val();
-        var prod  = $(this).parents("tr").find("#prodhidd_color").val();
-        var desc  = $(this).parents("tr").find("#description_color").val();
-        var color  = $(this).parents("tr").find("#color").val();
-        var color_name = $(this).parents("tr").find("#color_name").val();
-        var qty   = $(this).parents("tr").find("#qty").val();
-        var uom   = $(this).parents("tr").find("#uom").val();
+        var kode        =  "<?php echo $salescontract->sales_order; ?>";
+        var kode_prod   = $(this).parents("tr").find("#product").val();
+        var prod        = $(this).parents("tr").find("#prodhidd_color").val();
+        var desc        = $(this).parents("tr").find("#description_color").val();
+        var color       = $(this).parents("tr").find("#color").val();
+        var color_name  = $(this).parents("tr").find("#color_name").val();
+        var handling    = $(this).parents("tr").find("#handling").val();
+        var qty         = $(this).parents("tr").find("#qty").val();
+        var uom         = $(this).parents("tr").find("#uom").val();
         var piece_info  = $(this).parents("tr").find("#piece_info").val();
-        var row_order = $(this).parents("tr").find("#row_order").val();
+        var lebar_jadi  = $(this).parents("tr").find("#lebar_jadi").val();
+        var uom_lebar_jadi  = $(this).parents("tr").find("#uom_lebar_jadi").val();
+        var row_order   = $(this).parents("tr").find("#row_order").val();
         //var dat = $(this).parents("tr").find('input[type="text"]').val();
               
         $.ajax({
           dataType: "JSON",
           url : '<?php echo site_url('sales/salescontract/simpan_detail_color_lines') ?>',
           type: "POST",
-          data: {kode : kode, 
-                kode_prod  : kode_prod,
-                prod  : prod,
-                color : color,
-                color_name : color_name,
-                desc  : desc, 
-                qty   : qty,
-                uom   : uom,
-                piece_info: piece_info,
-                row_order : row_order  },
+          data: {kode       : kode, 
+                kode_prod   : kode_prod,
+                prod        : prod,
+                color       : color,
+                color_name  : color_name,
+                handling    : handling,
+                desc        : desc, 
+                qty         : qty,
+                uom         : uom,
+                piece_info  : piece_info,
+                lebar_jadi  : lebar_jadi,
+                uom_lebar_jadi  : uom_lebar_jadi,
+                row_order   : row_order  },
           success: function(data){
             if(data.sesi=='habis'){
                 //alert jika session habis
@@ -1155,14 +1190,17 @@
             }else{
                 $("#tab_2").load(location.href + " #tab_2");
                 $("#foot").load(location.href + " #foot");
-                //$("#total").load(location.href + " #total");
                 $(".add-new-color-lines").show();                   
                 alert_notify(data.icon,data.message,data.type,function(){});
-             }
+            }
+            $("#ref_status").load(location.href + " #ref_status");
+            refresh_tab_and_div();
+
           },
           error: function (xhr, ajaxOptions, thrownError){
             alert('Error data');
             alert(xhr.responseText);
+            refresh_tab_and_div();
           }
         });
 
@@ -1258,8 +1296,118 @@
         $(this).parents("tr").find("td[data-content='edit']").each(function(){
           if($(this).attr('data-id')=="row_order"){
             $(this).html('<input type="hidden"  class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
+            row_order = $(this).attr('data-isi');
+
           }else if($(this).attr('data-id')=='qty'){
-            $(this).html('<input type="text"  class="form-control" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+          
+          }else if($(this).attr('data-id')=='lebar_jadi'){
+            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" > ');
+          
+          }else if($(this).attr('data-id') == 'color'){
+
+            var id_warna    = $(this).attr('data-isi');
+            var nama_warna  = $(this).attr('data-isi2');
+
+            class_sel2_color = 'sel2_color'+row_order;
+                       
+            //select 2 bom by kode-produk
+            $(this).html('<select type="text" class="form-control input-sm width-150 '+class_sel2_color+'" id="color" name="Color" ></select> ');
+
+            var $newOption = $("<option></option>").val(id_warna).text(nama_warna);
+            $('.sel2_color'+row_order).empty().append($newOption).trigger('change');
+
+            $('.sel2_color'+row_order).select2({
+              allowClear: true,
+              placeholder: "",
+              ajax:{
+                    dataType: 'JSON',
+                    type : "POST",
+                    url  : "<?php echo base_url();?>sales/salescontract/get_color_select2",
+                    //delay : 250,
+                    data : function(params){
+                      return{
+                        prod:params.term
+                      };
+                    }, 
+                    processResults:function(data){
+                      var results = [];
+
+                      $.each(data, function(index,item){
+                          results.push({
+                              id:item.id,
+                              text:item.nama_warna
+                          });
+                      });
+                      return {
+                        results:results
+                      };
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                    //  alert('Error data');
+                    //  alert(xhr.responseText);
+                    }
+              }
+            }); 
+
+           
+          }else if($(this).attr('data-id') == 'handling'){
+
+            var obj_handling = new Array();
+            <?php 
+              foreach($handling as $key ){
+            ?>
+                  obj_handling.push({id:"<?php echo $key->id?>", nama_handling:"<?php echo $key->nama_handling;?>"});
+            <?php 
+              }
+            ?>
+
+            var value_option  = $(this).attr('data-isi');
+            handling_row      = $(this).attr('data-id')+row_order;
+
+            var option = '<option value=""></option>';
+            $.each(obj_handling, function(index,val){
+                  if(obj_handling[index].id == value_option ){
+                    option += "<option selected value='"+obj_handling[index].id+"'>"+obj_handling[index].nama_handling+"</option>";
+                  }else{
+                    option += "<option value='"+obj_handling[index].id+"'>"+obj_handling[index].nama_handling+"</option>";
+                  }
+            });
+
+            $(this).html('<select type="text" class="form-control input-sm width-80 '+handling_row+'"  id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'"></select>');
+            $('.'+handling_row).append(option).trigger('change');
+
+          }else if($(this).attr('data-id') == 'uom_lebar_jadi'){
+
+            var value_option  = $(this).attr('data-isi');
+            uom_lbr_row       = $(this).attr('data-id')+row_order;
+
+            var obj_uom = new Array();
+            <?php 
+              foreach($list_uom as $key ){
+            ?>
+                  obj_uom.push({id:"<?php echo $key->short?>", nama:"<?php echo $key->short;?>"});
+            <?php 
+              }
+            ?>
+
+            var option = '<option value=""></option>';
+            $.each(obj_uom, function(index,val){
+                  if(obj_uom[index].id == value_option ){
+                    option += "<option selected value='"+obj_uom[index].id+"'>"+obj_uom[index].nama+"</option>";
+                  }else{
+                    option += "<option value='"+obj_uom[index].id+"'>"+obj_uom[index].nama+"</option>";
+                  }
+            });
+            
+            $(this).html('<select type="text" class="form-control input-sm width-80 '+uom_lbr_row+'"  id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'"></select>');
+
+            $('.'+uom_lbr_row).append(option).trigger('change');
+
+          }else if($(this).attr('data-id')=='description_color' || $(this).attr('data-id') == 'color_name' || $(this).attr('data-id') =='piece_info' ){
+            
+            $(this).html('<textarea type="text" onkeyup="textAreaAdjust(this)" class="form-control input-sm set_textarea width-150" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
+
           }else{
             $(this).html('<input type="text"  class="form-control" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'"> ');
           }
@@ -1280,6 +1428,80 @@
         $(".add-new-color-lines").show();
     });
 
+     // create OW / kilik panah kanan untuk OW
+    $(document).on("click", ".ow-color-lines", function(){ 
+
+        var status = $("#status").val();
+        if(status == 'product_generated'){
+
+          $(this).parents("tr").find("td[data-content='edit']").each(function(){
+            if($(this).attr('data-id')=="row_order"){
+              $(this).html('<input type="hidden" class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
+            }
+          });
+
+          var kode      =  "<?php echo $salescontract->sales_order; ?>";
+          var row_order = $(this).parents("tr").find("#row_order").val();
+
+          bootbox.dialog({
+            message: "Apakah Anda ingin membuat OW ?",
+            title: "<i class='fa fa-gear'></i> Create OW !",
+            buttons: {
+              danger: {
+                  label    : "Yes ",
+                  className: "btn-primary btn-sm",
+                  callback : function() {
+                      please_wait(function(){});
+                      $.ajax({
+                          dataType: "JSON",
+                          url : '<?php echo site_url('sales/salescontract/create_OW') ?>',
+                          type: "POST",
+                          data: {kode:kode,  row_order:row_order },
+                          success: function(data){
+                            if(data.sesi=='habis'){
+                                //alert jika session habis
+                                alert_modal_warning(data.message);
+                                window.location.replace('../index');
+                            }else if(data.status == 'failed'){
+                                alert_modal_warning(data.message);
+                                unblockUI( function(){});
+                                $("#tab_2").load(location.href + " #tab_2");
+                                $("#foot").load(location.href + " #foot");
+                                $("#ref_status").load(location.href + " #ref_status");
+                            }else{
+                                unblockUI( function() {
+                                  setTimeout(function() { 
+                                    alert_notify(data.icon,data.message,data.type, function(){
+                                  },1000); 
+                                  });
+                                });
+                                $("#ref_status").load(location.href + " #ref_status");
+                                $("#tab_2").load(location.href + " #tab_2");
+                                $("#foot").load(location.href + " #foot");
+                              }
+                              refresh_tab_and_div();
+                          },
+                          error: function (xhr, ajaxOptions, thrownError){
+                            alert('Error Create OW');
+                            //alert(xhr.responseText);
+                            unblockUI( function(){});
+                          }
+                        });
+                  }
+              },
+              success: {
+                    label    : "No",
+                    className: "btn-default  btn-sm",
+                    callback : function() {
+                      $('.bootbox').modal('hide');
+                    }
+              }
+            }
+            });
+        }else{
+        alert_modal_warning('Maaf, Tidak Bisa membuat OW !')
+        }
+    });
 
   /* END COLOR LINES */
 
@@ -1498,10 +1720,6 @@
             $('#btn-approve').button('reset');
           }
       });
-        window.setTimeout(function() {
-       $(".alert").fadeTo(500, 0).slideUp(500, function(){
-        $(this).remove(); });
-      }, 3000);
     });
 
 
@@ -1529,12 +1747,12 @@
               //jika details masih kosong
               $("#ref_status").load(location.href + " #ref_status");
               $("#btn-header").load(location.href + " #btn-header");
-              $("#status_bar").load(location.href + " #status_bar");
+              refresh_tab_and_div();
               unblockUI( function() {
                 //setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
                 alert_modal_warning(data.message);
               });
-             $('#btn-approve-color').button('reset');
+              $('#btn-approve-color').button('reset');
              
             }else{
               unblockUI( function() {
@@ -1543,13 +1761,13 @@
                 },1000); 
                 });
               });
-              $("#ref_status").load(location.href + " #ref_status");
-              $("#btn-header").load(location.href + " #btn-header");
-              $("#status_bar").load(location.href + " #status_bar");
-              $("#foot").load(location.href + " #foot");
-              $("#total").load(location.href + " #total");
-
             }
+            $("#ref_status").load(location.href + " #ref_status");
+            $("#btn-header").load(location.href + " #btn-header");
+            $("#status_bar").load(location.href + " #status_bar");
+            $("#foot").load(location.href + " #foot");
+            $("#tab_2").load(location.href + " #tab_2");
+            
             $('#btn-approve-color').button('reset');
 
           },error: function (xhr, ajaxOptions, thrownError) {
@@ -1558,30 +1776,26 @@
             $('#btn-approve-color').button('reset');
           }
       });
-        window.setTimeout(function() {
-       $(".alert").fadeTo(500, 0).slideUp(500, function(){
-        $(this).remove(); });
-      }, 3000);
     });
 
 
-  // modal Create Color
-  $("#btn-create-color").unbind( "click" );
-  $(document).on('click','#btn-create-color',function(e){
-      e.preventDefault();
-      $("#tambah_data").modal({
-          show: true,
-          backdrop: 'static'
-      });
-      $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $('.modal-title').text('Create Color');
-        $.post('<?php echo site_url()?>sales/salescontract/create_color_modal',
-          {txtProduct      : $('#product').val() },
-          function(html){
-            setTimeout(function() {$(".tambah_data").html(html);  },1000);
-          }   
-       );
-  });
+    // modal Create Color
+    $("#btn-create-color").unbind( "click" );
+    $(document).on('click','#btn-create-color',function(e){
+        e.preventDefault();
+        $("#tambah_data").modal({
+            show: true,
+            backdrop: 'static'
+        });
+        $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Create Color');
+          $.post('<?php echo site_url()?>sales/salescontract/create_color_modal',
+            {txtProduct      : $('#product').val() },
+            function(html){
+              setTimeout(function() {$(".tambah_data").html(html);  },1000);
+            }   
+        );
+    });
 
 
     //btn simpan create color

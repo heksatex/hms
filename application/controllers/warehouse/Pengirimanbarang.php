@@ -170,7 +170,7 @@ class Pengirimanbarang extends MY_Controller
           $row[] = '<a href="'.base_url('warehouse/pengirimanbarang/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
           $row[] = $field->tanggal;
           $row[] = $field->tanggal_transaksi;
-          $row[] = $field->tanggal_jt;
+          $row[] = $field->origin;
           $row[] = $field->lokasi_tujuan;
           $row[] = $field->reff_picking;
           $row[] = $reff_note;
@@ -320,8 +320,11 @@ class Pengirimanbarang extends MY_Controller
         if(!isset($kode)) show_404();
         $kode_decrypt   = decrypt_url($kode);
         $data["list"]   = $this->m_pengirimanBarang->get_data_by_code($kode_decrypt);
-        $data["move_id"]= $this->m_pengirimanBarang->get_move_id_by_kode($kode_decrypt)->row_array();
+        $smi            = $this->m_pengirimanBarang->get_move_id_by_kode($kode_decrypt)->row_array();
+        $data["move_id"]= $smi;
         $data['items']  = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode_decrypt);
+        $data['count']  = $this->m_pengirimanBarang->get_count_valid_scan_by_kode($kode_decrypt);
+        $data['count_all'] = $this->m_pengirimanBarang->get_count_all_scan_by_kode($smi['move_id']);
 
         if(empty($data["list"])){
           show_404();
@@ -943,8 +946,10 @@ class Pengirimanbarang extends MY_Controller
     {
         $kode        = $this->input->post('kode');
         $move_id     = $this->input->post('move_id');
+        $deptid      = $this->input->post('deptid');
+        $origin      = $this->input->post('origin');
         $method      = $this->input->post('method');
-        $origin      = $this->input->post('origin');       
+        $mode        = $this->input->post('mode');// scan mode / list mode       
         $sql_stock_move_items_batch = "";
         $tgl         = date('Y-m-d H:i:s');
         $status_done = 'done';
@@ -964,17 +969,27 @@ class Pengirimanbarang extends MY_Controller
         $where7      = "";
 
         //cek lokasi valid lot
-        $cek_lot  = $this->m_pengirimanBarang->cek_valid_lokasi_lot_by_move_id($move_id)->row_array();
-        $sub_menu = $this->uri->segment(2);
-        $username = addslashes($this->session->userdata('username')); 
-        $nu       = $this->_module->get_nama_user($username)->row_array();
-        $nama_user= $nu['nama'];
-        $deptid   = $this->input->post('deptid');
-
+        //$cek_lot  = $this->m_pengirimanBarang->cek_valid_lokasi_lot_by_move_id($move_id)->row_array();
+        
         if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
-            // session habis
+          // session habis
             $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
-        }else{
+          }else{
+
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username')); 
+            $nu       = $this->_module->get_nama_user($username)->row_array();
+            $nama_user= $nu['nama'];
+
+            // cek jika mode scan
+            $cek_tmp = $this->m_pengirimanBarang->cek_pengiriman_barang_tmp_by_kode($kode);
+            // get jml semua lot yg akan di scan
+            $count_all_lot = $this->m_pengirimanBarang->get_count_all_scan_by_kode($move_id);
+            // get jml lot yg sudah di scan
+            $count_lot_scan  = $this->m_pengirimanBarang->get_count_valid_scan_by_kode($kode);
+
+            
+
             //cek status terkirim ?
             $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
             if($cek_kirim['status'] == 'draft'){
@@ -983,12 +998,18 @@ class Pengirimanbarang extends MY_Controller
                 $callback = array('status' => 'ada', 'message'=>'Maaf, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }elseif($cek_kirim['status'] == 'cancel'){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if($cek_tmp == 0 AND $mode == 'scan'){
+                $callback = array('status' => 'failed', 'message'=>'Barcode belum di Scan, Silahkan Scan Barcode terlebih dahulu !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if($count_all_lot != $count_lot_scan AND $mode =='scan' AND $method == 'GRG|OUT' ){
+              $callback = array('status' => 'failed', 'message'=>'Barcode Harus di Scan Semua  !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                /*
             }elseif(!empty($cek_lot['lot']) AND  $method == 'GRG|OUT'){  //lokasi lot tidak valid
                 $callback = array('status' => 'not_valid', 'message'=>'Maaf, Lokasi  Lot "'.$cek_lot['lot'].'" tidak valid !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                */
                // break;
             }else{
                     //lock tabel 
-                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE');
+                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE');
             
                     //lokasi tujuan 
                     $lokasi = $this->m_pengirimanBarang->get_location_by_move_id($move_id)->row_array();                    
@@ -1172,7 +1193,12 @@ class Pengirimanbarang extends MY_Controller
                      $this->_module->update_perbatch($sql_update_stock_quant_move_id);
 
                      $where7 = rtrim($where7, ',');// update reserve origin di hapus
-                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET  lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
+                     if($method == 'GRG|OUT'){
+                       $reserve_origin = " reserve_origin =(case ".$case7." end), ";
+                     }else{
+                       $reserve_origin = "";
+                     }
+                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET $reserve_origin lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
                      $this->_module->update_perbatch($sql_update_stock_quant_reserve_origin);
 
                     if(!empty($case3) AND !empty($where3)){
@@ -1798,6 +1824,71 @@ class Pengirimanbarang extends MY_Controller
 
         echo json_encode($callback);
 
+    }
+
+    function valid_barcode_out()
+    {
+
+        if (empty($this->session->userdata('username'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username')); 
+
+            $deptid      = $this->input->post('deptid');
+            $kode        = addslashes($this->input->post('kode'));
+            $txtbarcode  = $this->input->post('txtbarcode');
+            $tgl         = date('Y-m-d H:i:s');
+
+            // lock table
+            $this->_module->lock_tabel('stock_move as sm WRITE, stock_move_items WRITE, pengiriman_barang as pb WRITE, pengiriman_barang_tmp WRITE, pengiriman_barang WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE');
+
+            //cek status terkirim ?
+            $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
+            if($cek_kirim['status'] == 'draft'){
+                $callback = array('status' => 'ada', 'message'=>'Maaf, Product yang akan di Scan belum ready !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }elseif($cek_kirim['status'] == 'done'){
+                $callback = array('status' => 'ada', 'message'=>'Maaf, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if($cek_kirim['status'] == 'cancel'){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else{ 
+                // cek lo apa sudah di scan / belum
+                $ck_scan = $this->m_pengirimanBarang->cek_scan_by_lot($kode,$txtbarcode)->row_array();
+                if(!empty($ck_scan['lot'])){// jika tidak koosong
+                    $callback = array('status' => 'failed', 'message'=>'Barcode '.$txtbarcode.' Sudah di Scan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else{
+
+                    $mv = $this->m_pengirimanBarang->get_move_id_by_kode($kode)->row_array();
+
+                    // get list tmp pengirimanan barang by lot yg ready
+                    $tmp   = $this->m_pengirimanBarang->get_list_stock_move_items_by_lot($mv['move_id'],$txtbarcode,'ready');
+                    $empty = true;
+                    foreach($tmp as $row){
+                        $empty  = false;
+                        // insert to pengiriman barang tmp
+                        $this->m_pengirimanBarang->simpan_pengiriman_barang_tmp($kode,$row->quant_id,$mv['move_id'],$row->kode_produk,$row->lot,'t',$tgl);
+                    }
+
+                    if($empty == true ){
+                        $callback = array('status' => 'failed', 'message'=>'Barcode '.$txtbarcode.' Tidak valid  !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    }else{
+
+                        $jenis_log   = "edit";
+                        $note_log    = "Scan Barcode ".$txtbarcode;
+                        $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+
+                        $callback = array('status' => 'success', 'message'=>'Barcode '.$txtbarcode.' Valid Scan !', 'icon' => 'fa fa-check', 'type'=>'success');   
+                    }
+                }
+            }
+
+            //unlock table            
+            $this->_module->unlock_tabel();
+
+        }
+        echo json_encode($callback);
     }
 
 

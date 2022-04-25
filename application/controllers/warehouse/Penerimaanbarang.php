@@ -148,7 +148,7 @@ class Penerimaanbarang extends MY_Controller
             $row[] = '<a href="'.base_url('warehouse/penerimaanbarang/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
             $row[] = $field->tanggal;
             $row[] = $field->tanggal_transaksi;
-            $row[] = $field->tanggal_jt;
+            $row[] = $field->origin;
             $row[] = $field->lokasi_tujuan;
             $row[] = $field->reff_picking;
             $row[] = $reff_note;
@@ -300,7 +300,7 @@ class Penerimaanbarang extends MY_Controller
                 $callback = array('status' => 'failed', 'message'=>'Barcode belum di Scan, Silahkan Scan Barcode terlebih dahulu !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else{    
                     //lock table
-                    $this->_module->lock_tabel('stock_move WRITE, stock_move_produk WRITE, stock_move_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, stock_quant WRITE, departemen d WRITE, pengiriman_barang WRITE, log_history WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, penerimaan_barang_tmp WRITE, stock_move_items  as smi WRITE, penerimaan_barang_tmp as tmp WRITE');
+                    $this->_module->lock_tabel('stock_move WRITE, stock_move_produk WRITE, stock_move_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, stock_quant WRITE, departemen d WRITE, pengiriman_barang WRITE, log_history WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, penerimaan_barang_tmp WRITE, stock_move_items  as smi WRITE, penerimaan_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE');
                 
                     //lokasi tujuan 
                     $lokasi = $this->m_penerimaanBarang->get_location_by_move_id($move_id)->row_array();
@@ -486,8 +486,21 @@ class Penerimaanbarang extends MY_Controller
                             $sql_update_mrp_rm_target  = "UPDATE mrp_production_rm_target SET status =(case ".$case8." end) WHERE  origin_prod in (".$where8.") AND kode in (".$whereMo.") ";
                             $this->_module->update_perbatch($sql_update_mrp_rm_target);
 
-                            $sql_update_mrp_production  = "UPDATE mrp_production SET status ='ready' WHERE  kode in (".$whereMo.") "; 
-                            $this->_module->update_perbatch($sql_update_mrp_production);
+                            $update_status = true;
+                            // cek apakah untuk MG Dyeing 
+                            $cek_mrp = $this->m_penerimaanBarang->get_type_mo_dept_id_mrp_production_by_kode($whereMo);
+                            if($cek_mrp['dept_id'] == 'DYE' AND $cek_mrp['type_mo'] == 'colouring' ){
+                                // cek status mrp_rm yg sama dengan draft dan cancel
+                                $cek_mrp_rm = $this->m_penerimaanBarang->cek_mrp_production_rm_target_by_kode($whereMo)->num_rows();
+                                if($cek_mrp_rm > 0 ){
+                                    $update_status = false;
+                                }
+                            }
+
+                            if($update_status == true) {
+                                $sql_update_mrp_production  = "UPDATE mrp_production SET status ='ready' WHERE  kode in (".$whereMo.") "; 
+                                $this->_module->update_perbatch($sql_update_mrp_production);
+                            }
 
                          }
                     }
