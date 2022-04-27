@@ -356,7 +356,7 @@ class M_pengirimanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode_print($kode,$dept_id)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lebar_greige, smi.uom_lebar_greige, sq.nama_grade
 								 FROM stock_move_items smi 
 								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
@@ -584,7 +584,43 @@ class M_pengirimanBarang extends CI_Model
 		$this->db->where('kode', $kode);
 		$query = $this->db->get('pengiriman_barang_tmp');
 		return $query->num_rows();
+	}
+
+	public function get_nama_warna_by_origin($kode_co, $row_order)
+	{
+		return $this->db->query("SELECT cod.id_warna, w.id, w.nama_warna
+								FROM  color_order_detail cod
+								INNER JOIN warna w ON cod.id_warna = w.id 
+								Where kode_co ='".$kode_co."' AND row_order = '".$row_order."'");
+	}
+
+	public function get_route_by_origin($origin)
+	{
+		return $this->db->query("SELECT distinct method FROM stock_move where origin = '$origin'")->result();
+	}
+
+	public function get_route_by_origin_method($origin,$method)
+	{
 		
+		return $this->db->query("SELECT move_id, method FROM stock_move where origin = '$origin' AND method = '$method' ")->result();
+	}
+
+	public function get_kode_out_by_move_id($move_id)
+	{
+		$query = $this->db->query("SELECT kode FROM pengiriman_barang where move_id = '$move_id'")->row_array();
+		return $query['kode'];
+	}
+
+	public function get_kode_in_by_move_id($move_id)
+	{
+		$query = $this->db->query("SELECT kode FROM penerimaan_barang where move_id = '$move_id'")->row_array();
+		return $query['kode'];
+	}
+
+	public function get_kode_mrp_by_move_id($move_id)
+	{
+		$query = $this->db->query("SELECT distinct kode FROM mrp_production_rm_target where move_id = '$move_id'")->row_array();
+		return $query['kode'];
 	}
 
   
