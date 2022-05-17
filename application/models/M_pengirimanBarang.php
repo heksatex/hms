@@ -623,6 +623,62 @@ class M_pengirimanBarang extends CI_Model
 		return $query['kode'];
 	}
 
+	public function get_kode_mrp_production_rm_target_by_move_id($move_id)
+	{
+		return $this->db->query("SELECT distinct(kode) FROM mrp_production_rm_target WHERE move_id = '$move_id' ");
+	}
+
+
+	public function get_type_mo_dept_id_mrp_production_by_kode($kode_mo)
+	{
+		$query = $this->db->query("SELECT mrp.dept_id, dept.type_mo
+									FROM mrp_production mrp 
+									INNER JOIN departemen dept ON mrp.dept_id =dept.kode 
+									where mrp.kode in ($kode_mo) ")->row_array();
+		return $query;
+	}
+
+	public function cek_mrp_production_rm_target_by_kode($kode_mo)
+	{
+		return $this->db->query("SELECT status FROM mrp_production_rm_target where kode in ($kode_mo) AND status IN ('draft','cancel') ");
+	}
+
+	public function get_quality_control_by_kode($kode,$dept_id){
+		return $this->db->query("SELECT qc.dept_id, qc.qc_1, qc.qc_2
+								FROM pengiriman_barang as pb
+								INNER JOIN quality_control as qc ON pb.dept_id = qc.dept_id
+								WHERE qc.dept_id = '$dept_id' AND pb.kode = '$kode'");
+	}
+
+	public function update_quality_control($kode,$qc_ke,$value)
+	{
+		return $this->db->query("UPDATE pengiriman_barang set $qc_ke = '$value' WHERE kode = '$kode'");
+	}
+
+	public function get_nama_qc_by_dept($dept_id,$qc_ke)
+	{
+		return $this->db->query("SELECT $qc_ke as qc FROM quality_control WHERE dept_id = '$dept_id' ");
+	}
+
+	public function cek_quality_control_by_dept($dept_id)
+	{
+		$this->db->select('dept_id, qc_1, qc_2');
+		$this->db->where('dept_id',$dept_id);
+		$query = $this->db->get('quality_control');
+		return $query;
+	}
+
+
+	public function cek_qc_pengiriman_barang_departemen_by_kode($kode,$qc_ke)
+	{
+		return $this->db->query("SELECT $qc_ke as qc FROM pengiriman_barang WHERE kode = '$kode'");
+	}
+
+	public function cek_qc_item_by_dept($dept_id,$qc_ke)
+	{
+		return $this->db->query("SELECT $qc_ke as qc FROM quality_control WHERE dept_id = '$dept_id'");
+	}
+
   
 }
 

@@ -37,42 +37,8 @@
             	<input type="text" name="uom" id="uom" class="form-control input-sm"  value="<?php echo $get['uom'] ?>" readonly="readonly"/>
           </div>
         </div>
-		</div>
-	</div>
-	<div class="form-group">
-		<div class="col-md-6">
-			<div class="col-md-12 col-xs-12">
-	      <div class="col-xs-4"><label>Reff Notes</label></div>
-	        <div class="col-xs-8">
-	          <textarea  type="text" class="form-control input-sm"  name="reff" id="reff"  ><?php echo $get['reff_notes'] ?></textarea>
-	        </div>  
-	      </div>
-	      <div class="col-md-12 col-xs-12">
-	        <div class="col-xs-4"><label>Status</label></div>
-	        <div class="col-xs-8">
-	          <input type="text" name="status" id="status" class="form-control input-sm"  value="<?php echo $get['status'] ?>" readonly="readonly"/>
-	        </div>  
-	      </div>
         <div class="col-md-12 col-xs-12">
-          <div class="col-xs-4"><label>Route</label></div>
-          <div class="col-xs-8">
-            <select class="form-control input-sm" name="route_co" id="route_co" >
-              <option value="">Pilih Route</option>
-              <?php 
-                foreach ($route as $row) {
-                  if($get['route_co'] == $row->kode){?>
-                    <option value="<?php echo $row->kode;?>" selected><?php echo $row->nama;?></option>
-              <?php 
-                  }else{?>
-                    <option value="<?php echo $row->kode;?>"><?php echo $row->nama;?></option>
-              <?php
-                  }
-                }?>
-            </select>
-          </div>  
-        </div>
-        <div class="col-md-12 col-xs-12">
-          <div class="col-xs-4"><label>Handling</label></div>
+          <div class="col-xs-4"><label>Finishing</label></div>
           <div class="col-xs-8">
             <select class="form-control input-sm" name="handling" id="handling" >
               <option value="">Pilih Handling</option>
@@ -89,7 +55,18 @@
             </select>
           </div>  
         </div>
-        <div class="col-md-12 col-xs-12">
+      
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-md-6">
+      <div class="col-md-12 col-xs-12">
+          <div class="col-xs-4"><label>Gramasi</label></div>
+          <div class="col-xs-8">
+             	<input type="text" name="gramasi" id="gramasi" class="form-control input-sm"   value="<?php echo $get['gramasi'] ?>" >
+          </div>  
+      </div>
+      <div class="col-md-12 col-xs-12">
           <div class="col-xs-4"><label>Lebar Jadi</label></div>
           <div class="col-xs-5">
               <input type="text" name="lebar_jadi" id="lebar_jadi" class="form-control input-sm" value="<?php echo $get['lebar_jadi'] ?>" />
@@ -107,7 +84,37 @@
                   ?>
               </select>
           </div>  
+      </div>
+      <div class="col-md-12 col-xs-12">
+          <div class="col-xs-4"><label>Route</label></div>
+          <div class="col-xs-8">
+            <select class="form-control input-sm" name="route_co" id="route_co" >
+              <option value="">Pilih Route</option>
+              <?php 
+                foreach ($route as $row) {
+                  if($get['route_co'] == $row->kode){?>
+                    <option value="<?php echo $row->kode;?>" selected><?php echo $row->nama;?></option>
+              <?php 
+                  }else{?>
+                    <option value="<?php echo $row->kode;?>"><?php echo $row->nama;?></option>
+              <?php
+                  }
+                }?>
+            </select>
+          </div>  
         </div>
+			<div class="col-md-12 col-xs-12">
+	      <div class="col-xs-4"><label>Reff Notes</label></div>
+	        <div class="col-xs-8">
+	          <textarea  type="text" class="form-control input-sm"  name="reff" id="reff"  ><?php echo $get['reff_notes'] ?></textarea>
+	        </div>  
+	      </div>
+	      <div class="col-md-12 col-xs-12">
+	        <div class="col-xs-4"><label>Status</label></div>
+	        <div class="col-xs-8">
+	          <input type="text" name="status" id="status" class="form-control input-sm"  value="<?php echo $get['status'] ?>" readonly="readonly"/>
+	        </div>  
+	      </div>
 		</div>
 	</div>
 </form>
@@ -152,6 +159,7 @@
       var reff     =  $('#reff').val();
       var route_co = $('#route_co').val();
       var handling = $('#handling').val();
+      var gramasi  = $('#gramasi').val();
       var lebar_jadi     = $('#lebar_jadi').val();
       var uom_lebar_jadi = $('#uom_lebar_jadi').val();
 
@@ -161,6 +169,7 @@
       $('#handling').removeClass('error'); 
       $('#lebar_jadi').removeClass('error'); 
       $('#uom_lebar_jadi').removeClass('error'); 
+      $('#gramasi').removeClass('error'); 
 
       if(qty == 0){
           alert('Qty tidak boleh kurang atau sama dengan 0 !');
@@ -175,8 +184,11 @@
           alert('Route Harus diisi !');
           $('#route_co').addClass('error'); 
       }else if(handling == ''){
-          alert('Handling Harus diisi !');
+          alert('Finishing Harus diisi !');
           $('#handling').addClass('error'); 
+      }else if(gramasi == ''){
+          alert('Gramasi Harus diisi !');
+          $('#gramasi').addClass('error'); 
       }else if(lebar_jadi == ''){
           alert('Lebar Jadi Harus diisi !');
           $('#lebar_jadi').addClass('error'); 
@@ -197,9 +209,10 @@
                     reff       : reff, 
                     row_order  : $('#row_order').val(),
                     route_co   : route_co,
-                    handling   : $('#handling').val(),
-                    lebar_jadi : $('#lebar_jadi').val(),
-                    uom_lebar_jadi : $('#uom_lebar_jadi').val(),
+                    handling   : handling,
+                    gramasi    : gramasi,
+                    lebar_jadi : lebar_jadi,
+                    uom_lebar_jadi : uom_lebar_jadi,
                     kode_co    : $('#kode_co').val() },
              success: function(data){
               if(data.status == 'failed'){

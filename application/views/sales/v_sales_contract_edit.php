@@ -348,7 +348,8 @@
 	                            <th class="style" width="150px">Description</th>
 	                            <th class="style" width="150px">Color</th>
 	                            <th class="style" width="150px">Color Name</th>
-                              <th class="style" width="100px">Handling</th>
+                              <th class="style" width="100px">Finishing</th>
+                              <th class="style" width="80px">Gramasi</th>
 	                            <th class="style" width="80px" style="text-align: right;">Qty</th>
 	                            <th class="style" width="80px" >Uom</th>
 	                            <th class="style" width="150px" >Piece Info</th>
@@ -364,17 +365,18 @@
                                   foreach ($details_color_lines as $row) {
                                 ?>
                                   <tr class="num">
-                                    <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>"></td>
+                                    <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>" data-isi2="<?php echo $row->ow;?>"></td>
                                     <td class="text-wrap width-150"><?php echo $row->nama_produk?></td>
                                     <td class="text-wrap width-150" data-content="edit" data-name="Description" data-id="description_color" data-isi="<?php echo htmlentities($row->description);?>"><?php echo $row->description?></td>
-                                    <td class="text-wrap" data-content="edit" data-id="color"  data-isi="<?php echo $row->id_warna;?>" data-isi2="<?php echo $row->nama_warna;?>"><?php echo $row->nama_warna?></td>
-                                    <td class="text-wrap" data-content="edit" data-name="Color" data-id="color_name"  data-isi="<?php echo $row->color_alias_name;?>"><?php echo htmlentities($row->color_alias_name)?></td>
-                                    <td class="text-wrap" data-content="edit" data-id="handling"  data-isi="<?php echo $row->id_handling;?>"><?php echo $row->nama_handling?></td>
-                                    <td align="right" data-content="edit" data-id="qty"  data-isi="<?php echo $row->qty;?>"><?php echo $row->qty?></td>
+                                    <td class="text-wrap" data-content="edit" data-id="color"   data-name="Color" data-isi="<?php echo $row->id_warna;?>" data-isi2="<?php echo $row->nama_warna;?>"><?php echo $row->nama_warna?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Color Name" data-id="color_name"  data-isi="<?php echo $row->color_alias_name;?>"><?php echo htmlentities($row->color_alias_name)?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Finishing" data-id="handling"  data-isi="<?php echo $row->id_handling;?>"><?php echo $row->nama_handling?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Gramasi" data-id="gramasi"  data-isi="<?php echo $row->gramasi;?>"><?php echo $row->gramasi?></td>
+                                    <td align="right" data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>"><?php echo $row->qty?></td>
                                     <td ><?php echo $row->uom?></td>
                                     <td class="text-wrap width-150" data-content="edit" data-name="Piece Info" data-id="piece_info" data-isi="<?php echo $row->piece_info;?>"><?php echo htmlentities($row->piece_info)?></td>
-                                    <td class="text-wrap" data-content="edit" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
-                                    <td class="text-wrap width-80"  data-content="edit" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" ><?php echo $row->uom_lebar_jadi?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Lebar Jadi" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
+                                    <td class="text-wrap width-80"  data-content="edit" data-name="Uom Lebar Jadi" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" ><?php echo $row->uom_lebar_jadi?></td>
                                     <td ><?php echo $row->ow?></td>
                                     <td>
                                       <?php if(empty($row->ow)){?>
@@ -998,7 +1000,8 @@
           + '<td><textarea type="text" class="form-control input-sm description_color set_textarea  width-150" onkeyup="textAreaAdjust(this)"  name="Description" id="description_color"></textarea><input type="hidden" class="form-control input-sm prodhidd_color" name="prodhidd" id="prodhidd_color"></td>'
           + '<td><select type="text" class="form-control input-sm color width-150" name="Color" id="color"></select></td>'
           + '<td><textarea type="text" class="form-control input-sm  width-150 set_textarea" onkeyup="textAreaAdjust(this)"  name="Color Name" id="color_name"></textarea></td>'
-          + '<td><select type="text" class="form-control input-sm  width-100" name="Handling" id="handling" ><option value=""></option><?php foreach($handling as $row){?><option value="<?php echo $row->id; ?>"><?php echo $row->nama_handling;?></option>"<?php }?></select></td>'
+          + '<td><select type="text" class="form-control input-sm  width-100" name="Finishing" id="handling" ><option value=""></option><?php foreach($handling as $row){?><option value="<?php echo $row->id; ?>"><?php echo $row->nama_handling;?></option>"<?php }?></select></td>'
+          + '<td><input type="text" class="form-control input-sm width-100" name="Gramasi" id="gramasi" onkeyup="validAngka(this)"></td>'
           + '<td><input type="text" class="form-control input-sm width-100" name="Qty" id="qty" onkeyup="validAngka(this)"></td>'
           + '<td><input type="text" class="form-control input-sm uom_color width-50" name="Uom" id="uom" readonly></td>'
           + '<td><textarea type="text" class="form-control  input-sm width-100 set_textarea" onkeyup="textAreaAdjust(this)"  name="Piece Info" id="piece_info"></textarea></td>'
@@ -1120,23 +1123,30 @@
 
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
+        
         if(!$(this).val() && $(this).attr('name')=='Product' ){
           alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
-
         if(!$(this).val() && $(this).attr('name')=='Color'){
-           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+          alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+          empty2 = true;
         }
 
-        if(!$(this).val() && $(this).attr('name')=='Handling'){
-           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+        if(!$(this).val() && $(this).attr('name')=='Finishing'){
+          alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+          empty2 = true;
         }
 
-        if(!$(this).val() && $(this).attr('id')=='uom_lebar_jadi'){
-           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+        if(!$(this).val() && $(this).attr('name')=='Gramasi'){
+          alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+          empty2 = true;
         }
 
+        if(!$(this).val() && $(this).attr('name')=='Uom Lebar Jadi'){
+          alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+          empty2 = true;
+        }
       });
 
       // validasi untuk inputan textbox
@@ -1144,6 +1154,7 @@
         if(!$(this).val() && $(this).attr('name')!='Piece Info'){
           alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
+          //break;
         }
       });
 
@@ -1155,6 +1166,7 @@
         var color       = $(this).parents("tr").find("#color").val();
         var color_name  = $(this).parents("tr").find("#color_name").val();
         var handling    = $(this).parents("tr").find("#handling").val();
+        var gramasi     = $(this).parents("tr").find("#gramasi").val();
         var qty         = $(this).parents("tr").find("#qty").val();
         var uom         = $(this).parents("tr").find("#uom").val();
         var piece_info  = $(this).parents("tr").find("#piece_info").val();
@@ -1173,6 +1185,7 @@
                 color       : color,
                 color_name  : color_name,
                 handling    : handling,
+                gramasi     : gramasi,
                 desc        : desc, 
                 qty         : qty,
                 uom         : uom,
@@ -1194,6 +1207,7 @@
                 alert_notify(data.icon,data.message,data.type,function(){});
             }
             $("#ref_status").load(location.href + " #ref_status");
+            $("#btn-header").load(location.href + " #btn-header");
             refresh_tab_and_div();
 
           },
@@ -1226,7 +1240,7 @@
 
       $(this).parents("tr").find("td[data-content='edit']").each(function(){
         if($(this).attr('data-id')=="row_order"){
-          $(this).html('<input type="text" class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
+          $(this).html('<input type="hidden" class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
         }
       });
      
@@ -1290,19 +1304,25 @@
     // Edit row on edit button click COLOR LINES
     $(document).on("click", ".edit-color-lines", function(){  
       var status = $("#status").val();
+      var ow     = '';
+      $(this).parents("tr").find("td[data-content='edit']").each(function(){
+        if($(this).attr('data-id')=="row_order"){
+          ow = $(this).attr('data-isi2');
+        }
+      });
 
-       if(status == 'waiting_color'){
+       if(ow == ''){
 
         $(this).parents("tr").find("td[data-content='edit']").each(function(){
           if($(this).attr('data-id')=="row_order"){
             $(this).html('<input type="hidden"  class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
             row_order = $(this).attr('data-isi');
 
-          }else if($(this).attr('data-id')=='qty'){
-            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+          }else if($(this).attr('data-id')=='qty' || $(this).attr('data-id')=='gramasi'){
+            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)"> ');
           
           }else if($(this).attr('data-id')=='lebar_jadi'){
-            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" > ');
+            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" > ');
           
           }else if($(this).attr('data-id') == 'color'){
 
@@ -1416,6 +1436,7 @@
 
         $(this).parents("tr").find(".add-color-lines, .edit-color-lines").toggle();
         $(this).parents("tr").find(".cancel-color-lines, .delete-color-lines").toggle();
+        $(this).parents("tr").find(".ow-color-lines").toggle();
         $(".add-new-color-lines").hide();
       }else{
          alert_modal_warning('Maaf, Data tidak bisa diubah !')

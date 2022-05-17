@@ -414,14 +414,14 @@ class M_sales extends CI_Model
 	public function no_OW()
 	{
 		$kode= "OW".date("y") .  date("m");
-        $result=$this->db->query("SELECT ow FROM sales_color_line WHERE month(tanggal_ow)='" . date("m") . "' AND year(tanggal_ow)='" . date("Y") . "' ORDER BY RIGHT(ow,5) DESC LIMIT 1");
+        $result=$this->db->query("SELECT ow FROM sales_color_line WHERE month(tanggal_ow)='" . date("m") . "' AND year(tanggal_ow)='" . date("Y") . "' ORDER BY RIGHT(ow,4) DESC LIMIT 1");
         if ($result->num_rows()>0){
             $row=$result->row();
-            $dgt=substr($row->ow,-5)+1;
+            $dgt=substr($row->ow,-4)+1;
         }else{
             $dgt="1";
         }
-        $dgt=substr("00000" . $dgt,-5);            
+        $dgt=substr("0000" . $dgt,-4);            
         $ow =$kode . $dgt;
         return $ow;
 	}
@@ -429,7 +429,7 @@ class M_sales extends CI_Model
 	public function get_data_color_line_by_kode($sales_order)
 	{
 		return $this->db->query("SELECT a.kode_produk, a.nama_produk, a.sales_order, a.description, a.id_warna, a.color_alias_name, a.qty, 
-		a.uom, a.piece_info, a.row_order, a.is_approve,a.ow,b.nama_warna,a.id_handling,c.nama_handling,a.lebar_jadi, a.uom_lebar_jadi													
+		a.uom, a.piece_info, a.row_order, a.is_approve,a.ow,b.nama_warna,a.id_handling,c.nama_handling,a.lebar_jadi, a.uom_lebar_jadi, a.gramasi											
 							FROM sales_color_line a
 							LEFT JOIN warna b ON a.id_warna = b.id
 							LEFT JOIN mst_handling c ON a.id_handling = c.id
@@ -454,10 +454,10 @@ class M_sales extends CI_Model
 		return $this->db->query("SELECT row_order  FROM sales_color_line WHERE sales_order = '$sales_order' order by row_order desc LIMIT 1");
 	}
 
-    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$handling,$lebar_jadi,$uom_lebar_jadi)
+    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi)
 	{
-		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,lebar_jadi,uom_lebar_jadi)
-			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$lebar_jadi','$uom_lebar_jadi')");
+		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi)
+			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi')");
 	}
 
 	public function delete_color_lines_detail($sales_order,$row_order)
@@ -470,11 +470,10 @@ class M_sales extends CI_Model
 		return $this->db->query("SELECT is_approve FROM sales_color_line WHERE sales_order = '$sales_order' AND row_order = '$row_order' ");
 	}
 
-    public function update_color_lines_detail($kode,$desc,$color,$color_name,$qty,$piece_info,$row_order,$handling,$lebar_jadi,$uom_lebar_jadi)
+    public function update_color_lines_detail($kode,$desc,$color,$color_name,$qty,$piece_info,$row_order,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi)
 	{
-		return $this->db->query("UPDATE sales_color_line SET description = '$desc', id_warna = '$color', color_alias_name = '$color_name', qty = '$qty', 
-																piece_info = '$piece_info', id_handling = '$handling', lebar_jadi = '$lebar_jadi', 
-																uom_lebar_jadi = '$uom_lebar_jadi'
+		return $this->db->query("UPDATE sales_color_line SET description = '$desc', id_warna = '$color', color_alias_name = '$color_name', 
+																qty = '$qty', piece_info = '$piece_info', id_handling = '$handling', lebar_jadi = '$lebar_jadi', gramasi = '$gramasi',uom_lebar_jadi = '$uom_lebar_jadi'
 								WHERE sales_order = '$kode' AND row_order = '$row_order' ");
 	}
 

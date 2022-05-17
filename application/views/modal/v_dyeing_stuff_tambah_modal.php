@@ -134,7 +134,8 @@
                 $('#btn-tambah').button('reset');
                 $("#table_dyest").load(location.href + " #table_dyest");
                 $("#table_aux").load(location.href + " #table_aux");
-                $("#foot").load(location.href + " #foot");                   
+                $("#foot").load(location.href + " #foot");    
+                $("#status_head").load(location.href + " #status_head");
                 $('#tambah_data').modal('hide');
                 alert_notify(data.icon,data.message,data.type,function(){});
              }

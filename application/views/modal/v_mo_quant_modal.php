@@ -52,7 +52,7 @@
 		                <td><?php echo $row->uom2?></td>
 		                <td><?php echo $row->reff_note?></td>
 		                <td>
-		                	<?php if($row->status == 'ready'){?>
+		                	<?php if($row->status == 'ready' AND $type_mo['type_mo']!='colouring'){?>
 		                	<a onclick="hapus_quant_mo('<?php  echo $row->move_id ?>', '<?php  echo ($row->quant_id) ?>', '<?php  echo ($row->origin_prod) ?>', '<?php  echo ($row->row_order) ?>',  '<?php  echo ($row->status) ?>')"  href="javascript:void(0)" data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a>
 		                	<?php }?>
 		                </td>

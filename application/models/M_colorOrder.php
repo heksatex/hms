@@ -16,8 +16,8 @@ class M_colorOrder extends CI_Model
 	var $order2  	    = array('a.create_date' => 'desc');
 
 	//var $table3 	    = 'sales_color_line';
-	var $column_order3  = array(null, 'ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling', 'piece_info');
-	var $column_search3 = array('ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'piece_info');
+	var $column_order3  = array(null, 'ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'piece_info');
+	var $column_search3 = array('ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info');
 	var $order3  	    = array('tanggal_ow' => 'asc');
 
 
@@ -148,7 +148,7 @@ class M_colorOrder extends CI_Model
 	{
 		$query = $this->db->query("SELECT a.kode_co, a.ow, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.status, a.row_order, 
 												 b.kode as kode_route,b.nama as route_co,
-												 a.id_warna, c.nama_warna, c.kode_warna, a.id_handling, d.nama_handling, a.lebar_jadi, a.uom_lebar_jadi
+												 a.id_warna, c.nama_warna, c.kode_warna, a.id_handling, d.nama_handling, a.lebar_jadi, a.uom_lebar_jadi, a.gramasi
 									FROM color_order_detail a 
 									LEFT JOIN route_co b ON a.route_co = b.kode
 									LEFT JOIN warna c ON a.id_warna = c.id
@@ -264,7 +264,7 @@ class M_colorOrder extends CI_Model
 	{
 		
 		//$this->db->from($this->table3);
-		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling");
+		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling, a.gramasi");
 		$this->db->from("sales_color_line a");
 		$this->db->JOIN("warna b", "a.id_warna = b.id", "LEFT");
 		$this->db->JOIN("mst_handling c", "a.id_handling =  c.id", "LEFT");
@@ -346,11 +346,11 @@ class M_colorOrder extends CI_Model
 
 	}
 
-	public function simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff,$status,$row_order,$route_co,$id_handling,$lebar_jadi,$uom_lebar_jadi)
+	public function simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff,$status,$row_order,$route_co,$id_handling,$gramasi,$lebar_jadi,$uom_lebar_jadi)
 	{
 		$tgl = date('Y-m-d H:i:s');
-		return $this->db->query("INSERT INTO color_order_detail (kode_co, tanggal, ow, kode_produk, nama_produk, id_warna, qty, uom, reff_notes, status, row_order, route_co,id_handling,lebar_jadi,uom_lebar_jadi) 
-								values ('$kode_co','$tgl','$ow','$kode_produk','$nama_produk','$id_warna','$qty','$uom','$reff','$status','$row_order','$route_co','$id_handling','$lebar_jadi','$uom_lebar_jadi') ");
+		return $this->db->query("INSERT INTO color_order_detail (kode_co, tanggal, ow, kode_produk, nama_produk, id_warna, qty, uom, reff_notes, status, row_order, route_co,id_handling,gramasi,lebar_jadi,uom_lebar_jadi) 
+								values ('$kode_co','$tgl','$ow','$kode_produk','$nama_produk','$id_warna','$qty','$uom','$reff','$status','$row_order','$route_co','$id_handling','$gramasi','$lebar_jadi','$uom_lebar_jadi') ");
 	}
 
 	public function update_one_is_approve_color_lines($sales_order, $id_warna, $is_approve, $row_order)
@@ -371,15 +371,15 @@ class M_colorOrder extends CI_Model
 
 	public function get_color_detail_by_id($kode_co, $row_order)
 	{
-		return $this->db->query("SELECT a.kode_co, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.status, a.row_order, a.ow, a.route_co, a.lebar_jadi, a.uom_lebar_jadi, a.id_handling, a.id_warna, b.nama_warna
+		return $this->db->query("SELECT a.kode_co, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.status, a.row_order, a.ow, a.route_co, a.lebar_jadi, a.uom_lebar_jadi, a.id_handling, a.id_warna, b.nama_warna, a.gramasi
 								 FROM color_order_detail a 
 								 LEFT JOIN warna b ON a.id_warna = b.id 
 								 WHERE a.kode_co = '$kode_co' AND a.row_order = '$row_order' ");
 	}
 
-	public function ubah_color_detail($kode_co, $route_co, $row_order, $qty, $reff, $handling, $lebar_jadi, $uom_lebar_jadi)
+	public function ubah_color_detail($kode_co, $route_co, $row_order, $qty, $reff, $handling, $lebar_jadi, $uom_lebar_jadi,$gramasi)
 	{
-		return $this->db->query("UPDATE color_order_detail SET qty =  '$qty', reff_notes='$reff', route_co = '$route_co', id_handling = '$handling', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'
+		return $this->db->query("UPDATE color_order_detail SET qty =  '$qty', reff_notes='$reff', route_co = '$route_co', id_handling = '$handling', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi', gramasi = '$gramasi'
 								 WHERE kode_co  = '$kode_co' AND row_order = '$row_order'");
 	}
 
@@ -574,7 +574,7 @@ class M_colorOrder extends CI_Model
 
 	public function simpan_mrp_production_batch($sql)
 	{
-		return $this->db->query("INSERT INTO mrp_production (kode,tanggal,origin,kode_produk,nama_produk,qty,uom,tanggal_jt,reff_note,kode_bom,start_time,finish_time,source_location,destination_location,dept_id,status,id_warna,responsible,id_handling,lebar_jadi,uom_lebar_jadi) values $sql ");
+		return $this->db->query("INSERT INTO mrp_production (kode,tanggal,origin,kode_produk,nama_produk,qty,uom,tanggal_jt,reff_note,kode_bom,start_time,finish_time,source_location,destination_location,dept_id,status,id_warna,responsible,id_handling,lebar_jadi,uom_lebar_jadi,gramasi) values $sql ");
 	}
 
 	public function simpan_mrp_production_rm_target_batch($sql)
@@ -647,7 +647,7 @@ class M_colorOrder extends CI_Model
 
 	public function get_color_order_details_by_row($kode_co, $row_order)
 	{
-		$this->db->select('a.kode_sc, b.kode_co, b.tanggal, b.ow, b.kode_produk, b.nama_produk, b.id_warna, b.qty, b.uom, b.reff_notes, b.route_co, b.row_order, b.id_handling, b.lebar_jadi, b.uom_lebar_jadi ');
+		$this->db->select('a.kode_sc, b.kode_co, b.tanggal, b.ow, b.kode_produk, b.nama_produk, b.id_warna, b.qty, b.uom, b.reff_notes, b.route_co, b.row_order, b.id_handling, b.lebar_jadi, b.uom_lebar_jadi, b.gramasi ');
 		$this->db->from('color_order_detail b');
 		$this->db->join('color_order a','b.kode_co = a.kode_co', 'inner');
 		$this->db->where('b.kode_co',$kode_co);

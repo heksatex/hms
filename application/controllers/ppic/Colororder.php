@@ -292,6 +292,7 @@ class Colororder extends MY_Controller
                       $id_handling  = $val->id_handling;
                       $lebar_jadi   = $val->lebar_jadi;
                       $uom_lebar_jadi = $val->uom_lebar_jadi;
+                      $gramasi      = $val->gramasi;
 
                       // get nama warna by id_warna
                       $cek_warna = $this->m_colorOrder->cek_warna_by_id_warna($id_warna)->row_array();
@@ -491,7 +492,7 @@ class Colororder extends MY_Controller
                           $location = $loc['stock_location'];
 
                           //sql simpan mrp_production
-                          $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$location."','".$location."','".$method_dept."','draft','".$id_warna."','".$nama_user."','".$id_handling."','".$lebar_jadi."','".$uom_lebar_jadi."'), ";
+                          $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$location."','".$location."','".$method_dept."','draft','".$id_warna."','".$nama_user."','".$id_handling."','".$lebar_jadi."','".$uom_lebar_jadi."','".$gramasi."'), ";
 
                           //sql simpan mrp production rm target
                           $origin_prod  = $kode_prod_rm_target.'_1';
@@ -1052,6 +1053,7 @@ class Colororder extends MY_Controller
             $route_co   = addslashes($this->input->post('route_co'));
             $qty        = $this->input->post('qty');
             $handling   = $this->input->post('handling');
+            $gramasi   = $this->input->post('gramasi');
             $lebar_jadi = $this->input->post('lebar_jadi');
             $uom_lebar_jadi = $this->input->post('uom_lebar_jadi');
             $reff       = addslashes($this->input->post('reff'));
@@ -1086,9 +1088,9 @@ class Colororder extends MY_Controller
                 $nm_route = $this->m_colorOrder->get_nama_route_by_kode($route_co)->row_array();
                 $nama_route = $nm_route['nama'];
                 
-                $this->m_colorOrder->ubah_color_detail($kode_co,$route_co,$row_order,$qty,$reff,$handling,$lebar_jadi,$uom_lebar_jadi);
+                $this->m_colorOrder->ubah_color_detail($kode_co,$route_co,$row_order,$qty,$reff,$handling,$lebar_jadi,$uom_lebar_jadi,$gramasi);
                 $jenis_log   = "edit";
-                $note_log    = "Edit Color Details | ".$qty." | ".$reff." | ".$nama_route." | ".$nama_handling." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$row_order;
+                $note_log    = "Edit Color Details | ".$qty." | ".$reff." | ".$nama_route." | ".$nama_handling." | ".$gramasi." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$row_order;
                 $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, $note_log, $username);
                 $callback = array('status' => 'success', 'message'=>'Data Berhasil diubah !', 'icon' => 'fa fa-check', 'type'=>'success');
 
@@ -1120,6 +1122,7 @@ class Colororder extends MY_Controller
             $row[] = $field->uom;
             $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
             $row[] = $field->nama_handling;
+            $row[] = $field->gramasi;
             $row[] = $field->piece_info;
             $row[] = $field->row_order;
             //$row[] = '';//buat checkbox
@@ -1171,10 +1174,11 @@ class Colororder extends MY_Controller
               $lebar_jadi  = $items['lebar_jadi'];
               $uom_lebar_jadi  = $items['uom_lebar_jadi'];
               $id_handling = $items['id_handling'];
+              $gramasi     = $items['gramasi'];
               $reff_notes  = addslashes($items['piece_info']);
               $row_color_line = $items['row_order'];
 
-              $this->m_colorOrder->simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff_notes,'draft', $row_order,$route_co,$id_handling,$lebar_jadi,$uom_lebar_jadi); 
+              $this->m_colorOrder->simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff_notes,'draft', $row_order,$route_co,$id_handling,$gramasi,$lebar_jadi,$uom_lebar_jadi); 
               $row_order++;
               $this->m_colorOrder->update_one_is_approve_color_lines($so,$id_warna,$is_approve,$row_color_line);
             }

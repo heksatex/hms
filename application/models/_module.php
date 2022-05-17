@@ -771,5 +771,15 @@ class _module extends CI_Model
 	{
 		return $this->db->query("SELECT * FROM warna WHERE id = '$id' ");
 	}
+	
+	public function get_level_akses_by_user($username)
+	{
+		return $this->db->query("SELECT level FROM user where username = '$username' ");
+	}
+
+	public function cek_departemen_by_user($username)
+	{
+		return $this->db->query("SELECT dept FROM user where username = '$username' ");
+	}
 
 }

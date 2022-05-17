@@ -570,6 +570,7 @@ class Salescontract extends MY_Controller
           $piece_info   = $this->input->post('piece_info');
           $row          = $this->input->post('row_order');
           $handling     = $this->input->post('handling');
+          $gramasi      = $this->input->post('gramasi');
           $lebar_jadi   = $this->input->post('lebar_jadi');
           $uom_lebar_jadi   = $this->input->post('uom_lebar_jadi');
           $date         = date('Y-m-d H:i:s');
@@ -605,9 +606,9 @@ class Salescontract extends MY_Controller
 
               }else{
                 
-                $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$lebar_jadi,$uom_lebar_jadi);
+                $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi);
                 $jenis_log   = "edit";
-                $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
+                $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$gramasi." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
                 $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                 $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 
@@ -617,7 +618,7 @@ class Salescontract extends MY_Controller
               
               $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
               $row_order = $ro['row_order']+1;
-              $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$handling,$lebar_jadi,$uom_lebar_jadi);
+              $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi);
               
               // cek status sales_contract
               $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
@@ -627,7 +628,7 @@ class Salescontract extends MY_Controller
               }
               
               $jenis_log   = "edit";
-              $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
+              $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
               $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
               $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                       

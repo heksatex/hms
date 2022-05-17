@@ -11,7 +11,6 @@ class Pengirimanbarang extends MY_Controller
 		$this->is_loggedin();//cek apakah user sudah login
 		$this->load->model("_module");//load modul global
 		$this->load->model("m_pengirimanBarang");///load model pengiriman barang
-
 	}
 
 	public function index()
@@ -307,6 +306,31 @@ class Pengirimanbarang extends MY_Controller
         $data['smi'] = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode_decrypt);
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($list->dept_id)->row_array();
 
+        $qc            = $this->m_pengirimanBarang->get_quality_control_by_kode($kode_decrypt,$list->dept_id)->row();
+        if(!empty($qc)){
+          $data['qc_1']  = $qc->qc_1;
+          $data['qc_2']  = $qc->qc_2;
+        }else{
+          $data['qc_1']  = "";
+          $data['qc_2']  = "";
+        }
+        $data['data_qc'] = $qc;
+
+        $username = $this->session->userdata('username'); 
+
+        // cek level akses by user
+        $level_akses = $this->_module->get_level_akses_by_user($username)->row_array();
+        // cek departemen by user
+        $cek_dept = $this->_module->cek_departemen_by_user($username)->row_array();
+
+        if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
+          $data['show_qc']   = true;
+        }else if($cek_dept['dept'] == 'QC'){
+          $data['show_qc']  = true;
+        }else{
+          $data['show_qc'] = false;
+        }
+        
         if(empty($data["list"])){
           show_404();
         }else{
@@ -967,6 +991,10 @@ class Pengirimanbarang extends MY_Controller
         $where6      = "";
         $case7       = "";
         $where7      = "";
+        $case8       = "";
+        $where8      = "";
+        $whereMo     = "";
+        $whereQuant  = "";
 
         //cek lokasi valid lot
         //$cek_lot  = $this->m_pengirimanBarang->cek_valid_lokasi_lot_by_move_id($move_id)->row_array();
@@ -988,7 +1016,34 @@ class Pengirimanbarang extends MY_Controller
             // get jml lot yg sudah di scan
             $count_lot_scan  = $this->m_pengirimanBarang->get_count_valid_scan_by_kode($kode);
 
-            
+            // cek dept id apakah terdapat quality control
+            $cek_qc_dept = $this->m_pengirimanBarang->cek_quality_control_by_dept($deptid)->num_rows();
+            //$cek_qc_dept = $cek_qc->num_rows();
+            //$cek_qc_dept2 = $cek_qc->row_array();
+            $qc_out   ='false';
+            $nama_qc  = '';
+
+            if($cek_qc_dept > 0 ){
+              // cek apakah qc_1 atau/dan qc_2 telah dilakukan
+              $qc_item = array('qc_1','qc_2');
+              foreach($qc_item as $items){
+                  // cek qc items 
+                  $cek_qc_item = $this->m_pengirimanBarang->cek_qc_item_by_dept($deptid,$items)->row_array();
+
+                  if(!empty($cek_qc_item['qc'])){
+                    $cek_qc = $this->m_pengirimanBarang->cek_qc_pengiriman_barang_departemen_by_kode($kode,$items)->row_array();
+                    if($cek_qc['qc'] == 'true'){// jika sudah di QC
+                      //$nama_qc .= $cek_qc_item['qc'].', ';
+                      $qc_out  = 'true';
+                    }else{ // jika belum di QC
+                      $nama_qc .= $cek_qc_item['qc'].' & ';
+                      $qc_out ='false';
+                    }
+                  }
+              }
+              $nama_qc = rtrim($nama_qc,' & ');
+              
+            }
 
             //cek status terkirim ?
             $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
@@ -1002,14 +1057,18 @@ class Pengirimanbarang extends MY_Controller
                 $callback = array('status' => 'failed', 'message'=>'Barcode belum di Scan, Silahkan Scan Barcode terlebih dahulu !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if($count_all_lot != $count_lot_scan AND $mode =='scan' AND $method == 'GRG|OUT' ){
               $callback = array('status' => 'failed', 'message'=>'Barcode Harus di Scan Semua  !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                /*
+
+            }else if($cek_qc_dept > 0 AND $qc_out == 'false' ){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa Dikirim, sebelum dilakukan Quality Control (QC) " '.$nama_qc.' " !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+           
+              /*
             }elseif(!empty($cek_lot['lot']) AND  $method == 'GRG|OUT'){  //lokasi lot tidak valid
                 $callback = array('status' => 'not_valid', 'message'=>'Maaf, Lokasi  Lot "'.$cek_lot['lot'].'" tidak valid !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 */
                // break;
             }else{
                     //lock tabel 
-                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE');
+                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE');
             
                     //lokasi tujuan 
                     $lokasi = $this->m_pengirimanBarang->get_location_by_move_id($move_id)->row_array();                    
@@ -1085,7 +1144,8 @@ class Pengirimanbarang extends MY_Controller
                                         $loop_sm2 =false;
                                     }
 
-                                    if($ex_mt == 'CON' AND $con_next == true){
+                                    //if($ex_mt == 'CON' AND $con_next == true){
+                                    if($ex_mt == 'CON' AND $ex_deptid != $deptid){// terapaki sementara jalur OBAt ke DYE
 
                                         //get  origin_prod by move id, kode_produk
                                         $get_origin_prod = $this->m_pengirimanBarang->get_origin_prod_mrp_production_by_kode($row['move_id'],addslashes($val->kode_produk))->row_array();
@@ -1093,10 +1153,11 @@ class Pengirimanbarang extends MY_Controller
                                         $loop_sm2 =false;
                                                
                                     }
-
+                                    /*
                                     if($ex_deptid == $deptid AND $ex_mt == 'CON'){
                                         $con_next = true;
                                     }
+                                    */
 
                                 }elseif($loop_sm2 == false){
                                     break;//paksa keluar looping
@@ -1125,6 +1186,7 @@ class Pengirimanbarang extends MY_Controller
                                 //update status stock move,stock move dan stock move produk  penerimaan brg = ready
                                 $case3  .= "when move_id = '".$move_id."' then '".$status."'";
                                 $where3 .= "'".$move_id."',";
+                                $whereQuant .= "'".addslashes($val->quant_id)."',"; //quant id
 
                                 //update stock move 
                                 $get_kode_in = $this->m_pengirimanBarang->get_kode_penerimaan_by_move_id($move_id)->row_array();
@@ -1136,9 +1198,20 @@ class Pengirimanbarang extends MY_Controller
                                   
                                 //cek jika method stock move tujuan nya IN
                                 $mthd = explode("|",$querysm_tujuan['method']);
-                                $ex_mthd = $mthd[1];
+                                $ex_mthd   = $mthd[1];
+                                $ex_deptid = $mt[0];
                                 if($ex_mthd == 'IN'){ // jika stock move tujuanya IN maka loop_sm ==false
                                     $loop_sm = false;
+                                }
+
+                                // jika mthod CON dan ex_deptid nya != deptid OUT
+                                if($ex_mthd == 'CON' AND $ex_deptid != $deptid){
+
+                                  ///get kode MO by move id 
+                                  $mrp = $this->m_pengirimanBarang->get_kode_mrp_production_rm_target_by_move_id($move_id)->row_array();
+                                  $case8  .= "when origin_prod = '".addslashes($origin_prod)."' then '".$status."'";
+                                  $where8 .= "'".addslashes($origin_prod)."',";
+                                  $whereMo = "'".$mrp['kode']."',";
                                 }
                                   
                             }else{
@@ -1167,7 +1240,6 @@ class Pengirimanbarang extends MY_Controller
                         //update stock quant reserve_origin 
                         $case7 .= "when quant_id = '".$val->quant_id."' then '".$origin."'";
                         $where7.= "'".$val->quant_id."',";
-
 
                     }//end foreach
 
@@ -1211,6 +1283,40 @@ class Pengirimanbarang extends MY_Controller
                       $where3 = rtrim($where3, ',');
                       $sql_update_stock_move_produk  = "UPDATE stock_move_produk SET status =(case ".$case3." end) WHERE  move_id in (".$where3.") ";
                       $this->_module->update_perbatch($sql_update_stock_move_produk);
+
+
+                      //update status = ready
+                      $where3 = rtrim($where3, ',');
+                      $whereQuant = rtrim($whereQuant, ',');
+                      $sql_update_stock_move_items  = "UPDATE stock_move_items SET status =(case ".$case3." end) WHERE  move_id in (".$where3.") AND quant_id in (".$whereQuant.") ";
+                      $this->_module->update_perbatch($sql_update_stock_move_items);
+
+                      //update status=ready untuk MO tujuan
+                      if(!empty($where8) AND !empty($case8)){
+
+                        $where8 = rtrim($where8, ',');
+                        $whereMo = rtrim($whereMo, ',');
+                        $sql_update_mrp_rm_target  = "UPDATE mrp_production_rm_target SET status =(case ".$case8." end) WHERE  origin_prod in (".$where8.") AND kode in (".$whereMo.") ";
+                        $this->_module->update_perbatch($sql_update_mrp_rm_target);
+
+                        $update_status = true;
+
+                        $cek_mrp = $this->m_pengirimanBarang->get_type_mo_dept_id_mrp_production_by_kode($whereMo);
+                        if( $cek_mrp['type_mo'] == 'colouring' ){
+                            // cek status mrp_rm yg sama dengan draft dan cancel
+                            $cek_mrp_rm = $this->m_pengirimanBarang->cek_mrp_production_rm_target_by_kode($whereMo)->num_rows();
+                            if($cek_mrp_rm > 0 ){
+                                $update_status = false;
+                            }
+                        }
+
+                        if($update_status == true) {
+                            $sql_update_mrp_production  = "UPDATE mrp_production SET status ='ready' WHERE  kode in (".$whereMo.") "; 
+                            $this->_module->update_perbatch($sql_update_mrp_production);
+                        }
+
+                      }
+
                     }
 
                     if(!empty($case4) AND !empty($where4)){
@@ -1224,12 +1330,13 @@ class Pengirimanbarang extends MY_Controller
                        $sql_update_penerimaan_barang_items  = "UPDATE penerimaan_barang_items SET status_barang =(case ".$case4." end) WHERE  kode in (".$where4.") ";
                        $this->_module->update_perbatch($sql_update_penerimaan_barang_items); 
                     }
-                    
+                    /*
                     $qty2   = $this->m_pengirimanBarang->get_qty2_by_kode($move_id)->row_array();
 
                     //update berat di mrp production
                     $sql_update_berat = "UPDATE mrp_production set berat = '".$qty2['jml_qty2']."' WHERE origin = '".$origin."' AND dept_id = 'DYE'";
                     $this->_module->update_perbatch($sql_update_berat);
+                    */
 
                      /*
                      //update lokasi lot jadi GOUT di stock kain greige
@@ -1891,18 +1998,80 @@ class Pengirimanbarang extends MY_Controller
         echo json_encode($callback);
     }
 
+    public function quality_control_out()
+    {
+      if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+        // session habis
+        $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+      }else{
+
+        $sub_menu = $this->uri->segment(2);
+        $username = addslashes($this->session->userdata('username'));
+        $deptid     = $this->input->post('deptid');
+        $kode       = addslashes($this->input->post('kode'));
+        $qc_ke      = addslashes($this->input->post('qc_ke'));// ex qc_1, qc_2 harus sama dengan table
+        $value      = $this->input->post('value');
+
+        //cek status terkirim ?
+        $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
+        if($cek_kirim['status'] == 'done'){
+             $callback = array('status' => 'failed', 'alert'=>'modal', 'message'=>'Maaf, QC tidak bisa dilakukan, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+        }else if($cek_kirim['status'] == 'cancel'){
+             $callback = array('status' => 'failed','alert'=>'modal', 'message'=>'Maaf, QC tidak bisa dilakukan, Data Pengiriman Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+        }else if($cek_kirim['status'] == 'draft'){
+          $callback = array('status' => 'failed', 'alert'=>'notify', 'message'=>'Maaf, QC tidak bisa dilakukan, status data pengiriman masih draft !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+
+        }else{
+
+            // update qc pengiriman Barang 
+            $this->m_pengirimanBarang->update_quality_control($kode,$qc_ke,$value);
+
+            // get caption
+            $get = $this->m_pengirimanBarang->get_nama_qc_by_dept($deptid,$qc_ke)->row();
+            $gets = $get->qc;
+            
+            if($value == 'true'){
+              $note= "QC ".$gets." telah dilakukan ";
+            }else{
+              $note= "QC ".$gets." dibatalkan ";
+            }
+            
+            $jenis_log   = "edit";
+            $note_log    = $note;
+            $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+
+            $callback = array('status' => 'success', 'message'=>$note, 'icon' => 'fa fa-check', 'type'=>'success');   
+        }
+
+      }
+
+      echo json_encode($callback);
+    }
+
 
     function print_pengiriman_barang()
     {
+      if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+        // session habis
+        print_r('Waktu And Telah Habis, Silahkan Login Kembali !');
 
+      }else{
         $dept_id  = $this->input->get('departemen');
         $kode     = $this->input->get('kode');
-
+        
         if($dept_id == 'GRG'){
+          $jenis_log  = "done";
+          $note_log   = "Print Pengiriman Barang Greige (GREIGE OUT)";
+          $sub_menu   = $this->uri->segment(2);
+          $username   = addslashes($this->session->userdata('username')); 
+          $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$dept_id);
           $this->print_pengiriman_barang_greige($dept_id,$kode);
         }else{
           $this->print_pengiriman_barang_all($dept_id,$kode);
         }
+
+      }
+
     }
 
 
@@ -2017,6 +2186,7 @@ class Pengirimanbarang extends MY_Controller
       $pdf->setXY(120, 24);
       $pdf->Multicell(5, 4, ':', 0, 'L');
 
+      $pdf->SetFont('Arial','',8,'C');
       // isi note
       $pdf->setXY(121,20);
       $pdf->Multicell(85,4,$origin,0,'L');
@@ -2134,7 +2304,7 @@ class Pengirimanbarang extends MY_Controller
           $tot_qty2= $tot_qty2 + $row->qty2;
          
 
-          if($pdf->GetY() > 120){
+          if($pdf->GetY() > 120){ // jika Y lebih dari 120 maka buat Halaman Baru
 
             $pdf->SetMargins(0,0,0);
             $pdf->SetAutoPageBreak(False);

@@ -15,6 +15,7 @@
             <th>Uom</th>
             <th>Lebar Jadi</th>
             <th>Handling</th>
+            <th>Gramasi</th>
             <th>Reff Notes</th>
             <th width="50px"></th>
         </thead>
@@ -51,13 +52,13 @@
            
             "columnDefs": [
               {
-               'targets':10,
-               'data' : 10,
+               'targets':11,
+               'data' : 11,
                 'checkboxes': {
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[10];
+                   var rowId = rowData[11];
                 },
               },
               {
@@ -73,7 +74,7 @@
             },
             'rowCallback': function(row, data, dataIndex){
                // Get row ID
-               var rowId = data[10];
+               var rowId = data[11];
                // If row ID is in the list of selected row IDs
             }
         });
@@ -91,7 +92,7 @@
   $("#btn-tambah").unbind( "click" );
   $('#btn-tambah').click(function(){
     
-      var myCheckboxes = table.column(10).checkboxes.selected();
+      var myCheckboxes = table.column(11).checkboxes.selected();
       var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
 

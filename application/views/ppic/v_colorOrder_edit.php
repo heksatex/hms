@@ -146,7 +146,8 @@
                             <th class="style">Color</th>
                             <th class="style">Qty</th>
                             <th class="style">Uom</th>
-                            <th class="style">Handling</th>
+                            <th class="style">Finishing</th>
+                            <th class="style">Gramasi</th>
                             <th class="style">Lebar Jadi</th>
                             <th class="style">Route</th>
                             <th class="style">Reff Notes</th>
@@ -164,11 +165,12 @@
                               <tr class="num">
                                 <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order ?>" ></td>
                                 <td><?php echo $row->ow?></td>
-                                <td><a href="javascript:void(0)" onclick="edit('<?php  echo $row->kode_co ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"><?php echo $row->nama_produk?></a></td>
+                                <td class="width-120"><a href="javascript:void(0)" onclick="edit('<?php  echo $row->kode_co ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"><?php echo $row->nama_produk?></a></td>
                                 <td><?php echo $row->nama_warna?></td>
                                 <td><?php echo $row->qty?></td>
                                 <td><?php echo $row->uom?></td>
                                 <td><?php echo $row->nama_handling?></td>
+                                <td><?php echo $row->gramasi?></td>
                                 <td><?php echo $row->lebar_jadi.' '.$row->uom_lebar_jadi?></td>
                                 <td><?php echo $row->route_co?></td>
                                 <td><?php echo $row->reff_notes?></td>

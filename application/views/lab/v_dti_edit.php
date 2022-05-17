@@ -14,6 +14,55 @@
       margin: 10px 0px 10px 0px;
       border-radius: 5px;
     }
+    
+    .bs-glyphicons {
+      padding-left: 0;
+      padding-bottom: 1px;
+      margin-bottom: 20px;
+      list-style: none;
+      overflow: hidden;
+    }
+
+    .bs-glyphicons li {
+      float: left;
+      width: 100%;
+      height: 50px;
+      padding: 10px;
+      margin: 0 -1px -1px 0;
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: left;
+      border: 1px solid #ddd;
+
+    }
+
+    .bs-glyphicons .glyphicon {
+      margin-top: 5px;
+      margin-bottom: 10px;
+      font-size: 20px;
+      margin : auto;
+    }
+
+    .bs-glyphicons .glyphicon-class {
+      display: inline-block;
+      text-align: center;
+      word-wrap: break-word; /* Help out IE10+ with class names */
+    }
+
+    .bs-glyphicons li:hover {
+      background-color: rgba(86, 61, 124, .1);
+    }
+
+    @media (min-width: 768px) {
+      .bs-glyphicons li {
+        width: 100%;
+      }
+    }
+
+    .pointer{
+      cursor:pointer;
+    }
+
   </style>
 </head>
 
@@ -68,6 +117,9 @@
                   <div class="col-xs-4"><label>Tanggal dibuat </label></div>
                   <div class="col-xs-8 col-md-8">
                     <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly"  value="<?php echo $color->tanggal?>"/>
+                    <div id="status_head">
+                      <input type='hidden' class="form-control input-sm" name="status" id="status" readonly="readonly"  value="<?php echo $color->status?>"/>
+                    </div>
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -102,6 +154,17 @@
                     </div>
                   </div>                                    
                 </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label></label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <ul class="bs-glyphicons">
+                      <li class="pointer" onclick="cek_history_dti('<?php echo $color->id ?>', '<?php echo $color->nama_warna?>')" data-toggle="tooltip" title="Lihat History DTI">
+                        <span class="glyphicon glyphicon-cog"></span>            
+                        <span class="glyphicon-class">History DTI</span>
+                      </li>                        
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -124,7 +187,7 @@
                             <th class="style">Product</th>
                             <th class="style">qty (%)</th>
                             <th class="style">uom</th>
-                            <th class="style">reff Notes</th>
+                            <th class="style">reff notes</th>
                             <th class="style"></th>
                           </tr>
                           <tbody>
@@ -161,13 +224,13 @@
                       <!-- Tabel AUX  -->
                       <div class="col-md-6 table-responsive">
                         <table class="table table-condesed table-hover rlstable" width="100%" id="table_aux" >
-                          <label>AUX</label>
+                          <label>Auxiliary</label>
                           <tr>
                             <th class="style no">No.</th>
                             <th class="style">Product</th>
                             <th class="style">qty (g/L)</th>
                             <th class="style">uom</th>
-                            <th class="style">reff Notes</th>
+                            <th class="style">reff notes</th>
                             <th class="style"></th>
                           </tr>
                           <tbody>
@@ -284,6 +347,22 @@
        );
   });
 
+  // cek hisotry DTI
+  function cek_history_dti(id_warna, nama_warna){
+      $("#view_data").modal({
+          show: true,
+          backdrop: 'static'
+      })
+      $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $('.modal-title').text('History DTI ( '+nama_warna+')' );
+      $.post('<?php echo site_url()?>lab/dti/view_history_dti',
+          {id_warna : id_warna},
+          function(html){
+            setTimeout(function() {$(".view_body").html(html);  },1000);
+          }   
+      );
+    }
+
 
   //klik button simpan
   $("#btn-simpan").unbind( "click" );
@@ -325,6 +404,7 @@
               });
               $("#foot").load(location.href + " #foot");
             }
+            $("#status_head").load(location.href + " #status_head");
              $('#btn-simpan').button('reset');
           },error: function (xhr, ajaxOptions, thrownError) { 
             alert(xhr.responseText);
@@ -362,6 +442,7 @@
               unblockUI( function() {
                 setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
+             $('#btn-generate').button('reset');
               document.getElementById(data.field).focus();//focus ke field yang belum keisi
             }else{
               //jika berhasil disimpan/diubah
@@ -371,6 +452,7 @@
               $("#foot").load(location.href + " #foot");
               $("#status_bar").load(location.href + " #status_bar");
             }
+            $("#status_head").load(location.href + " #status_head");
              $('#btn-generate').button('reset');
           },error: function (xhr, ajaxOptions, thrownError) { 
             alert(xhr.responseText);
@@ -406,7 +488,8 @@
                       }else{
                         $("#table_aux").load(location.href + " #table_aux");
                         $("#table_dyest").load(location.href + " #table_dyest");
-                        $("#foot").load(location.href + " #foot");                   
+                        $("#foot").load(location.href + " #foot");              
+                        $("#status_head").load(location.href + " #status_head");     
                         alert_notify(response.icon,response.message,response.type,function(){});
                         parent.fadeOut('slow');
                       }
@@ -427,6 +510,24 @@
         });
       return false;
   }
+
+  //modal mode print
+  $(document).on('click','#btn-print',function(e){
+        e.preventDefault();
+        var id_warna   = '<?php echo $color->id; ?>';
+        var status     = $("#status").val();
+
+        if(id_warna == ""){
+          alert_modal_warning('Id Warna Kosong !');
+        }else if(status == 'cancel' || status == 'draft'){
+          alert_modal_warning('Print DTI Hanya bisa di Print saat statusnya Ready, Requested, Done! ');
+        }else{
+          var url = '<?php echo base_url() ?>lab/dti/print_dti';
+          window.open(url+'?id_warna='+ id_warna,'_blank');
+        }
+  });
+
+
 </script>
 
 

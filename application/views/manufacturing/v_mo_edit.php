@@ -177,10 +177,10 @@
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
-                <div class="col-xs-4"><label>Handling </label></div>
+                <div class="col-xs-4"><label>Finishing </label></div>
                 <div class="col-xs-8">
-                  <select class="form-control input-sm" name="handling" id="handling" >
-                    <option value="">Pilih Handling</option>
+                  <select class="form-control input-sm" name="handling" id="handling" disabled="true">
+                    <option value="">Pilih Finishing</option>
                     <?php 
                       foreach ($handling as $row) {
                         if($list->id_handling == $row->id){?>
@@ -192,6 +192,18 @@
                         }
                       }?>
                   </select>
+                </div>                                    
+              </div>
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Gramasi </label></div>
+                <div class="col-xs-8">
+                  <input type="text" class="form-control input-sm highlight" name="gramasi" id="gramasi"  value="<?php echo $list->gramasi;?>" onkeyup="highlight(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                </div>                                    
+              </div>
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Program </label></div>
+                <div class="col-xs-8">
+                  <input type="text" class="form-control input-sm highlight" name="program" id="program"  value="<?php echo $list->program;?>" onkeyup="highlight(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
@@ -391,7 +403,7 @@
                                   <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty))echo number_format($row->sum_qty,2)?></td>
                                   <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                   <td><?php echo $row->reff?></td>
-                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft')){?>
+                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring'){?>
                                     <a href="javascript:void(0)" onclick="tambah_quant('<?php echo $row->kode_produk ?>','<?php echo $row->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                    <?php }?>
@@ -487,9 +499,9 @@
                                   <td align="right"><?php echo number_format($row->qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
-                                  <td>
+                                  <!--td>
                                     <a onclick=""  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
-                                  </td>
+                                  </td-->
                                 </tr>
                               <?php 
                                 }
@@ -525,9 +537,9 @@
                                   <td align="right"><?php echo number_format($row->qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
-                                  <td>
+                                  <!--td>
                                     <a onclick=""  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
-                                  </td>
+                                  </td-->
                                 </tr>
                               <?php 
                                 }
@@ -770,6 +782,8 @@
     $('#btn-edit').show();
     $("#air").attr("readonly", true);
     $("#berat").attr("readonly", true);
+    $("#gramasi").attr("readonly", true);
+    $("#program").attr("readonly", true);
     $("#note").attr("readonly", true);
     $("#target_efisiensi").attr("readonly", true);
     $("#qty1_std").attr("readonly", true);
@@ -788,6 +802,7 @@
     $("#lebar_greige_mo").attr("readonly", true);
     $('#uom_lebar_jadi_mo').attr('disabled', true);
     $('#uom_lebar_greige_mo').attr('disabled', true);
+    $('#handling').attr('disabled', true);
 
   }
 
@@ -892,6 +907,8 @@
     $('#mc').select2({});
     $("#air").attr("readonly", false);
     $("#berat").attr("readonly", false);
+    $("#gramasi").attr("readonly", false);
+    $("#program").attr("readonly", false);
     $("#note").attr("readonly", false);
     $("#target_efisiensi").attr("readonly", false);
     $("#qty1_std").attr("readonly", false);
@@ -918,6 +935,8 @@
     $("#lebar_greige_mo").attr("readonly", false);
     $('#uom_lebar_jadi_mo').attr('disabled', false).attr('id','uom_lebar_jadi_mo');
     $('#uom_lebar_greige_mo').attr('disabled', false).attr('id','uom_lebar_greige_mo');
+    $('#handling').attr('disabled', false).attr('id','handling');
+
   });
 
 
@@ -1289,6 +1308,7 @@
               $("#foot").load(location.href + " #foot");
               $('#btn-stok').button('reset');
             }
+            $("#mo").load(location.href + " #mo>*");
 
           },error: function (xhr, ajaxOptions, thrownError) { 
             alert(xhr.responseText);
@@ -1337,6 +1357,11 @@
                 uom_lebar_greige : $('#uom_lebar_greige_mo').val(),
                 lebar_jadi       : $('#lebar_jadi_mo').val(),
                 uom_lebar_jadi   : $('#uom_lebar_jadi_mo').val(),
+                handling    : $('#handling').val(),
+                gramasi     : $('#gramasi').val(),
+                program     : $('#program').val(),
+                origin      : $('#origin').val(),
+
           },success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis
