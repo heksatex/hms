@@ -306,6 +306,12 @@ class Pengirimanbarang extends MY_Controller
         $data['smi'] = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode_decrypt);
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($list->dept_id)->row_array();
 
+        // cek priv akses menu
+        $sub_menu           = $this->uri->segment(2);
+        $username           = $this->session->userdata('username'); 
+        $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
+
         $qc            = $this->m_pengirimanBarang->get_quality_control_by_kode($kode_decrypt,$list->dept_id)->row();
         if(!empty($qc)){
           $data['qc_1']  = $qc->qc_1;
@@ -316,7 +322,6 @@ class Pengirimanbarang extends MY_Controller
         }
         $data['data_qc'] = $qc;
 
-        $username = $this->session->userdata('username'); 
 
         // cek level akses by user
         $level_akses = $this->_module->get_level_akses_by_user($username)->row_array();
@@ -343,12 +348,19 @@ class Pengirimanbarang extends MY_Controller
     {   
         if(!isset($kode)) show_404();
         $kode_decrypt   = decrypt_url($kode);
-        $data["list"]   = $this->m_pengirimanBarang->get_data_by_code($kode_decrypt);
+        $list           = $this->m_pengirimanBarang->get_data_by_code($kode_decrypt);
+        $data["list"]   = $list;
         $smi            = $this->m_pengirimanBarang->get_move_id_by_kode($kode_decrypt)->row_array();
         $data["move_id"]= $smi;
         $data['items']  = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode_decrypt);
         $data['count']  = $this->m_pengirimanBarang->get_count_valid_scan_by_kode($kode_decrypt);
         $data['count_all'] = $this->m_pengirimanBarang->get_count_all_scan_by_kode($smi['move_id']);
+
+        // cek priv akses menu
+        $sub_menu           = $this->uri->segment(2);
+        $username           = $this->session->userdata('username'); 
+        $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
 
         if(empty($data["list"])){
           show_404();
@@ -1524,6 +1536,75 @@ class Pengirimanbarang extends MY_Controller
         echo json_encode($callback);
     }
 
+    public function batal_pengiriman_barang()
+    {
+
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+         // session habis
+          $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+          $sub_menu  = $this->uri->segment(2);
+          $username  = addslashes($this->session->userdata('username')); 
+
+          $kode     = $this->input->post('kode');
+          $move_id  = $this->input->post('move_id');
+          $deptid   = $this->input->post('deptid');
+
+          $tgl         = date('Y-m-d H:i:s');
+          $status_cancel = 'cancel';
+
+          // cek item pengiriman_barang by move id
+          $smi_out = $this->m_pengirimanBarang->cek_stock_move_items_pengiriman_barang_by_move_id($move_id);
+          
+
+          //cek status terkirim ?
+          $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
+          if($cek_kirim['status'] == 'done'){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa dibatalkan, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+          }elseif($cek_kirim['status'] == 'cancel'){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+              
+          }elseif($smi_out > 0){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa dibatalkan, Harap Hapus terlebih dahulu details Produk / Lot !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+
+          }else{
+            
+              // lock table
+              $this->_module->lock_tabel('pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_move WRITE, stock_move_produk WRITE' );
+
+              // batal pengiriman_brang
+              $sql_update_status_pengiriman = "UPDATE pengiriman_barang SET status = '".$status_cancel."' WHERE kode = '".$kode."' ";
+              $this->_module->update_perbatch($sql_update_status_pengiriman);
+
+              // batal pengiriman_barang items
+              $sql_update_status_pengiriman_items = "UPDATE pengiriman_barang_items SET status_barang = '".$status_cancel."' WHERE kode = '".$kode."' ";
+              $this->_module->update_perbatch($sql_update_status_pengiriman_items);
+              
+              // batal stock_move, stock_move_produk
+              $sql_update_status_stock_move = "UPDATE stock_move SET status = '".$status_cancel."' WHERE move_id = '".$move_id."' ";
+              $this->_module->update_perbatch($sql_update_status_stock_move);
+
+              $sql_update_status_stock_move_produk = "UPDATE stock_move_produk SET status = '".$status_cancel."' WHERE move_id = '".$move_id."' ";
+              $this->_module->update_perbatch($sql_update_status_stock_move_produk);
+
+              // unlock table
+              $this->_module->unlock_tabel();
+
+              $jenis_log   = "cancel";
+              $note_log    = "Batal Pengiriman Barang ";
+              $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+              
+              $callback = array('status' => 'success', 'message'=>'Data Pengiriman Barang Berhasil di batalkan !', 'icon' => 'fa fa-check', 'type'=>'success');
+          }
+
+
+        }
+
+        echo json_encode($callback);
+        
+
+    }
    
     public function cek_stok()
     {
@@ -2304,7 +2385,7 @@ class Pengirimanbarang extends MY_Controller
           $tot_qty2= $tot_qty2 + $row->qty2;
          
 
-          if($pdf->GetY() > 120){ // jika Y lebih dari 120 maka buat Halaman Baru
+          if($pdf->GetY() > 100){ // jika Y lebih dari 120 maka buat Halaman Baru
 
             $pdf->SetMargins(0,0,0);
             $pdf->SetAutoPageBreak(False);
@@ -2397,7 +2478,7 @@ class Pengirimanbarang extends MY_Controller
       $xPos=$pdf->GetX();
       $yPos=$pdf->GetY();
       $pdf->SetXY($xPos +5 , $yPos);
-      $pdf->Multicell(72,$cellHeight,'@TOTAL ',1,'C');
+      $pdf->Multicell(72,$cellHeight,$pdf->GetY() > 100,1,'C');
 
       // isi gulung
       $pdf->SetXY($xPos +77 , $yPos);
@@ -2455,8 +2536,6 @@ class Pengirimanbarang extends MY_Controller
       $kotak = 0;
       $baris_kotak = 0;
       $baris_kotak_loop = 0;
-      $baris_kotak_in = 0;
-      $baris_kotak_con = 0;
       foreach($route as $routes){
         if($var_yPost == true){
           $yPos=$pdf->GetY();
@@ -2535,8 +2614,15 @@ class Pengirimanbarang extends MY_Controller
           $var_yPost = false;
           $xx = 5;
         }
-      
+
       }
+
+      $yPos=$yPos;
+      $xx = $xx;
+      $pdf->SetXY($xPos + $xx , $yPos);
+      $pdf->SetFillColor(255);
+      $pdf->Multicell(8,$cellHeight + 4,'END',1,'C');
+      $xx = $xx + 5;
 
       $pdf->Output();
 

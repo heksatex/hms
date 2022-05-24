@@ -182,6 +182,12 @@ class Penerimaanbarang extends MY_Controller
         $data['smi'] = $this->m_penerimaanBarang->get_stock_move_items_by_kode($kode_decrypt);
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($list->dept_id)->row_array();
 
+        // cek priv akses menu
+        $sub_menu           = $this->uri->segment(2);
+        $username           = $this->session->userdata('username'); 
+        $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
+
         if(empty($data["list"])){
             show_404();
         }else{
@@ -195,12 +201,19 @@ class Penerimaanbarang extends MY_Controller
     {   
         if(!isset($kode)) show_404();
         $kode_decrypt   = decrypt_url($kode);
-        $data["list"]   = $this->m_penerimaanBarang->get_data_by_code($kode_decrypt);
+        $list           = $this->m_penerimaanBarang->get_data_by_code($kode_decrypt);
+        $data["list"]   = $list;
         $smi            = $this->m_penerimaanBarang->get_move_id_by_kode($kode_decrypt)->row_array();
         $data["move_id"]= $smi;
         $data['items']  = $this->m_penerimaanBarang->get_stock_move_items_by_kode($kode_decrypt);
         $data['count']  = $this->m_penerimaanBarang->get_count_valid_scan_by_kode($kode_decrypt);
         $data['count_all'] = $this->m_penerimaanBarang->get_count_all_scan_by_kode($smi['move_id']);
+
+        // cek priv akses menu
+        $sub_menu           = $this->uri->segment(2);
+        $username           = $this->session->userdata('username'); 
+        $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
 
         if(empty($data["list"])){
             show_404();
@@ -778,6 +791,74 @@ class Penerimaanbarang extends MY_Controller
         echo json_encode($callback);
     }
 
+
+    public function batal_penerimaan_barang()
+    {
+
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+         // session habis
+          $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+          $sub_menu  = $this->uri->segment(2);
+          $username  = addslashes($this->session->userdata('username')); 
+
+          $kode     = $this->input->post('kode');
+          $move_id  = $this->input->post('move_id');
+          $deptid   = $this->input->post('deptid');
+
+          $status_cancel = 'cancel';
+
+          // cek item penerimaan_barang by move id
+          $smi_out = $this->m_penerimaanBarang->cek_stock_move_items_penerimaan_barang_by_move_id($move_id);
+          
+          //cek status terkirim ?
+          $cek_kirim  = $this->m_penerimaanBarang->cek_status_barang($kode)->row_array();
+          if($cek_kirim['status'] == 'done'){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa dibatalkan, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+          }elseif($cek_kirim['status'] == 'cancel'){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+              
+          }elseif($smi_out > 0){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa dibatalkan, Harap Hapus terlebih dahulu details Produk / Lot !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+
+          }else{
+            
+              // lock table
+              $this->_module->lock_tabel('penerimaan_barang WRITE, penerimaan_barang_items WRITE, stock_move WRITE, stock_move_produk WRITE' );
+
+              // batal penerimaan_barang
+              $sql_update_status_penerimaan = "UPDATE penerimaan_barang SET status = '".$status_cancel."' WHERE kode = '".$kode."' ";
+              $this->_module->update_perbatch($sql_update_status_penerimaan);
+
+              // batal penerimaan_barang items
+              $sql_update_status_penerimaan_items = "UPDATE penerimaan_barang_items SET status_barang = '".$status_cancel."' WHERE kode = '".$kode."' ";
+              $this->_module->update_perbatch($sql_update_status_penerimaan_items);
+              
+              // batal stock_move, stock_move_produk
+              $sql_update_status_stock_move = "UPDATE stock_move SET status = '".$status_cancel."' WHERE move_id = '".$move_id."' ";
+              $this->_module->update_perbatch($sql_update_status_stock_move);
+
+              $sql_update_status_stock_move_produk = "UPDATE stock_move_produk SET status = '".$status_cancel."' WHERE move_id = '".$move_id."' ";
+              $this->_module->update_perbatch($sql_update_status_stock_move_produk);
+
+              // unlock table
+              $this->_module->unlock_tabel();
+
+              $jenis_log   = "cancel";
+              $note_log    = "Batal Penerimaan Barang ";
+              $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+              
+              $callback = array('status' => 'success', 'message'=>'Data Penerimaan Barang Berhasil di batalkan !', 'icon' => 'fa fa-check', 'type'=>'success');
+          }
+
+
+        }
+
+        echo json_encode($callback);
+        
+
+    }
 
     public function tambah_data_details_quant_penerimaan()
     {

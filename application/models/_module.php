@@ -43,6 +43,13 @@ class _module extends CI_Model
 
 	}
 
+	public function cek_priv_menu_by_user($username,$mm_sub)
+	{
+		return $this->db->query("SELECT username 
+								FROM user_priv
+								WHERE username = '$username' AND  main_menu_sub_kode = '$mm_sub'");
+	}
+
 	public function lock_tabel($table)
 	{
 		 $this->db->query("LOCK TABLES $table ");

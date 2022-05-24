@@ -18,16 +18,6 @@
         </div>  
       </div>
       <div class="col-md-12 col-xs-12">
-        <div class="col-xs-4"><label>Reff Notes </label></div>
-          <div class="col-xs-8">
-            <textarea type="text" class="form-control input-sm" name="reff_note" id="reff_note"  ></textarea>
-          </div>                                    
-      </div>
-    </div>
-  </div>
-  <div class="form-group">
-    <div class="col-md-6">
-      <div class="col-md-12 col-xs-12">
         <div class="col-xs-4"><label>Qty (g/L)</label></div>
         <div class="col-xs-8">
           <input type="text" name="txtQty" id="txtQty" class="form-control input-sm" onkeyup="validAngka(this)"/>
@@ -36,8 +26,24 @@
       <div class="col-md-12 col-xs-12">
         <div class="col-xs-4"><label>uom</label></div>
         <div class="col-xs-8">
-          <input name="txtUom" id="txtUom" class="form-control input-sm" readonly="readonly">
+          <select class="form-control input-sm" name="txtUom" id="txtUom" >
+                    <option value=""></option>
+                    <?php foreach ($uom as $row) {
+                            echo "<option value='".$row->short."'>".$row->short."</option>";
+                          }
+                    ?>
+          </select>
         </div>  
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-md-6">
+      <div class="col-md-12 col-xs-12">
+        <div class="col-xs-4"><label>Reff Notes </label></div>
+          <div class="col-xs-8">
+            <textarea type="text" class="form-control input-sm" name="reff_note" id="reff_note"  ></textarea>
+          </div>                                    
       </div>
     </div>
   </div>
@@ -118,6 +124,7 @@
                  reff_note   : $('#reff_note').val(),
                  tipe_obat   : $('#tipe').val(),
                  id_warna    : $('#id_warna').val(),
+                 row_order   :'',
                   },
           success: function(data){
             if(data.status == "failed"){

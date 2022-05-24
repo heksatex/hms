@@ -7,6 +7,7 @@
                 <th>No</th>
                 <th>MG</th>
                 <th>Tanggal dibuat</th>
+                <th>Origin</th>
                 <th>Mesin</th>
                 <th>Status</th>
             </tr>

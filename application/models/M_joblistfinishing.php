@@ -40,9 +40,12 @@ class M_joblistfinishing extends CI_Model
         }
 
 		//$this->db->from($this->table);
-		$this->db->select(" mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.status, mmss.nama_status ");
+		$this->db->select("mrp.kode, mrp.tanggal, mrp.dept_id, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.status, mmss.nama_status ");
 		$this->db->from("mrp_production mrp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
+		$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
+		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
+		$this->db->join("pengiriman_barang pb", "pb.move_id = sm.move_id","left");
 
 		$i = 0;
 	
@@ -81,9 +84,11 @@ class M_joblistfinishing extends CI_Model
 	function get_datatables($id_dept,$mmss)
 	{
 		$this->_get_datatables_query();
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where('mrp.dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$this->db->where_in('mrp.status',array('ready','draft'));
+		$where = "(mrp.status IN ('ready','draft')  OR pb.status IN ('ready','draft'))";
+		$this->db->where($where);
+		//$this->db->where_in('mrp.status',array('ready','draft'));
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
@@ -92,9 +97,11 @@ class M_joblistfinishing extends CI_Model
 
 	function count_filtered($id_dept,$mmss)
 	{
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where('mrp.dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$this->db->where_in('mrp.status',array('ready','draft'));
+		$where = "(mrp.status IN ('ready','draft')  OR pb.status IN ('ready','draft'))";
+		$this->db->where($where);
+		//$this->db->where_in('mrp.status',array('ready','draft'));
 		$this->_get_datatables_query();
 		$query = $this->db->get();
 		return $query->num_rows();
@@ -106,12 +113,15 @@ class M_joblistfinishing extends CI_Model
 		$this->db->select("mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.status, mmss.nama_status");
 		$this->db->from("mrp_production mrp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
+		$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
+		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
+		$this->db->join("pengiriman_barang pb", "pb.move_id = sm.move_id","left");
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$this->db->where('dept_id',$id_dept);
-		$this->db->where_in('mrp.status',array('ready','draft'));
+		$this->db->where('mrp.dept_id',$id_dept);
+		$where = "(mrp.status IN ('ready','draft')  OR pb.status IN ('ready','draft'))";
+		$this->db->where($where);
 		return $this->db->count_all_results();
 	}
-
 
 
 	public function cek_item_rm_target($kode,$category)
@@ -129,9 +139,38 @@ class M_joblistfinishing extends CI_Model
 		return $this->db->query("SELECT sm.move_id, inb.kode, inb.status
 									FROM stock_move as  sm
 									INNER JOIN penerimaan_barang inb ON sm.move_id = inb.move_id
-									where sm.method = '$method' AND sm.origin = '$origin' 
+									where sm.method = '$method' AND sm.origin = '$origin' AND sm.status not in ('cancel')
 									ORDER BY sm.create_date desc
 									LIMIT 1");
+	}
+
+	public function get_link_out_by_kode($origin,$method)
+	{
+		return $this->db->query("SELECT sm.move_id, outs.kode, outs.status, ms.nama_status
+									FROM stock_move as  sm
+									INNER JOIN pengiriman_barang as outs ON sm.move_id = outs.move_id
+									INNER JOIN mst_status as ms ON outs.status = ms.kode
+									where sm.method = '$method' AND sm.origin = '$origin' AND sm.status not in ('cancel')
+									ORDER BY sm.create_date desc
+									LIMIT 1");
+	}
+
+	public function get_move_id_by_sourve_move($move_id)
+	{
+		return $this->db->query("SELECT move_id FROM stock_move where source_move = '$move_id' ");
+	}
+
+	public function get_pengiriman_barang_by_move_id($move_id)
+	{
+		return $this->db->query("SELECT kode, qc_1, qc_2 FROM pengiriman_barang where move_id = '$move_id' ");
+	}
+
+	public function get_quality_control_by_kode($kode,$dept_id)
+	{
+		return $this->db->query("SELECT qc.dept_id, qc.qc_1, qc.qc_2
+								FROM pengiriman_barang as pb
+								INNER JOIN quality_control as qc ON pb.dept_id = qc.dept_id
+								WHERE qc.dept_id = '$dept_id' AND pb.kode = '$kode'");
 	}
 
 

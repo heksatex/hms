@@ -163,7 +163,7 @@
                                   <?php if($smove['method']!="GRG|OUT" OR $row->status_barang=='done'){echo $row->nama_produk;}else{?>
                                   <a href="javascript:void(0)" onclick="tambah('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>')"><?php echo $row->nama_produk?></a>
                                   <?php }?>
-                                 <?php if($row->status_barang == 'done' or $row->status_barang == 'cancel'){echo "";}else{?>
+                                 <?php if($row->status_barang == 'done' or $row->status_barang == 'cancel' OR $akses_menu == 0){echo "";}else{?>
                                    <a href="javascript:void(0)" onclick="tambah_quant('<?php echo htmlentities($row->nama_produk); ?>','<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant"> 
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                   <?php }?>
@@ -226,10 +226,10 @@
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                 <td><?php echo $row->quant_id?></td>
                                 <td class="no" align="center" >
-                                  
-                                 <a onclick="hapus('<?php  echo $list->kode ?>','<?php  echo $list->move_id ?>','<?php  echo $row->kode_produk ?>','<?php  echo htmlentities($row->nama_produk) ?>', '<?php  echo $row->quant_id ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
-                                 </a>
-                                                             
+                                  <?php if($akses_menu > 0){?>
+                                    <a onclick="hapus('<?php  echo $list->kode ?>','<?php  echo $list->move_id ?>','<?php  echo $row->kode_produk ?>','<?php  echo htmlentities($row->nama_produk) ?>', '<?php  echo $row->quant_id ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
+                                    </a>
+                                  <?php }?>
                                </td>
                               </tr>
                             <?php 
@@ -598,6 +598,79 @@
                         $('#btn-kirim').button('reset');
                       }
 
+                    })
+              }
+          },
+          success: {
+                label    : "No",
+                className: "btn-default  btn-sm",
+                callback : function() {
+                $('.bootbox').modal('hide');
+                }
+          }
+        }
+      });
+    }
+  });
+
+  
+  //klik button batal penerimaan barang
+  $("#btn-cancel").unbind( "click" );
+  $(document).on('click','#btn-cancel',function(e){
+      var move_id = '<?php echo $smove['move_id'];?>';
+      var status  = $('#status').val();
+      var method  = '<?php echo $smove['method'];?>';
+      var deptid  = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
+         
+      if(status == 'cancel'){
+        var message = 'Maaf, Data Sudah dibatalkan !';
+        alert_modal_warning(message);
+        
+      }else if(status=='done'){
+        var message = 'Maaf, Data tidak bisa dibatalkan, Data Sudah Terkirim !';
+        alert_modal_warning(message);
+
+      }else{
+        bootbox.dialog({
+        message: "Anda yakin ingin membatalkan Penerimaan Barang ?",
+        title: "<i class='glyphicon glyphicon-trash'></i> Cancel !",
+        buttons: {
+          danger: {
+              label    : "Yes ",
+              className: "btn-primary btn-sm",
+              callback : function() {
+                    please_wait(function(){});
+                    $('#btn-cancel').button('loading');
+                    $.ajax({
+                          type: 'POST',
+                          dataType : 'json',
+                          url  : "<?php echo site_url('warehouse/penerimaanbarang/batal_penerimaan_barang')?>",
+                          data : {kode:$('#kode').val(), move_id:move_id, deptid:deptid},
+                          error: function (xhr, ajaxOptions, thrownError) { 
+                          alert(xhr.responseText);
+                          $('#btn-cancel').button('reset');
+                          unblockUI( function(){});
+                          refresh_div_in();
+                        }
+                    })
+                    .done(function(response){
+                      if(response.sesi == 'habis'){//jika session habis
+                        alert_modal_warning(response.message);
+                        window.location.replace('../index');
+                      }else if(response.status == 'failed' ){
+                        
+                        unblockUI( function(){});
+                        alert_modal_warning(response.message);                      
+                        refresh_div_in();                 
+                        $('#btn-cancel').button('reset');
+                      }else{
+                        
+                        unblockUI( function() {
+                          setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
+                        });
+                        refresh_div_in();                     
+                        $('#btn-cancel').button('reset');
+                      }
                     })
               }
           },

@@ -553,7 +553,7 @@
             setTimeout(function() {
               $(".edit_data").html(html)  
             },1000);
-            $("#edit_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+            $("#edit_data .modal-dialog .modal-content .modal-footer #btn-ubah").attr('disabled',false);
       });
   }
 

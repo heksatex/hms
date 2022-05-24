@@ -422,6 +422,13 @@ class M_penerimaanBarang extends CI_Model
 		return $this->db->query("SELECT status FROM mrp_production_rm_target where kode in ($kode_mo) AND status IN ('draft','cancel') ");
 	}
 
+	public function cek_stock_move_items_penerimaan_barang_by_move_id($move_id)
+	{
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get('stock_move_items');
+		return $query->num_rows();
+	}
+
  
 
 }

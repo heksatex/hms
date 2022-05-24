@@ -44,7 +44,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>Job List Gudang Greige Out</b></h3>
+          <h3 class="box-title"><b>Job List Gudang Greige</b></h3>
         </div>
         <div class="box-body">
            

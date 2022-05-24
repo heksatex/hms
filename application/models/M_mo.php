@@ -186,6 +186,7 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT rm.status,rm.kode_produk,rm.nama_produk,rm.qty,rm.uom,rm.kode,rm.row_order,rm.origin_prod,rm.move_id, mp.type, 
 									(SELECT sum(smi.qty) FROM stock_move_items smi WHERE smi.move_id = rm.move_id And smi.origin_prod = rm.origin_prod AND smi.status = 'ready' ) as sum_qty,
 									(SELECT sum(smi.qty) FROM stock_move_items smi WHERE smi.move_id = rm.move_id And smi.origin_prod = rm.origin_prod AND smi.status = 'done' ) as sum_qty_done,
+									(SELECT sum(smi.qty) FROM stock_move_items smi WHERE smi.move_id = rm.move_id And smi.origin_prod = rm.origin_prod AND smi.status = 'cancel' ) as sum_qty_cancel,
 									(SELECT bi.note FROM bom_items bi WHERE bi.kode_produk = rm.kode_produk AND bi.row_order = rm.row_order AND bi.kode_bom = mrp.kode_bom ) as reff
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mst_produk mp ON mp.kode_produk = rm.kode_produk 
@@ -318,25 +319,25 @@ class M_mo extends CI_Model
 
    public function get_dyeing_stuff($kode)
    {
-     	return $this->db->query("SELECT rm.nama_produk, rm.qty, rm.uom,  wi.qty qty_asli, rm.status
+     	return $this->db->query("SELECT rm.kode_produk, rm.nama_produk, rm.qty, rm.uom,  rm.status, wi.qty as qty_asli, wi.reff_note
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
-								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
-								INNER JOIN warna_items wi ON m.id_warna = wi.id_warna AND wi.kode_produk = rm.kode_produk 
-								INNER JOIN stock_move_produk smp ON smp.move_id = rm.move_id AND smp.kode_produk = rm.kode_produk 
-								WHERE rm.kode = '$kode' AND mp.id_category IN ('11','12') AND wi.type_obat = 'DYE' 
+								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk							
+								INNER JOIN warna w ON m.id_warna = w.id
+								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk
+								WHERE rm.kode = '$kode' AND mp.id_category IN ('12') 
 								order by rm.row_order")->result();
    }
 
    public function get_aux($kode)
    {
-   		return $this->db->query("SELECT rm.nama_produk, rm.qty, rm.uom,  wi.qty qty_asli, rm.status
+   		return $this->db->query("SELECT rm.kode_produk, rm.nama_produk, rm.qty, rm.uom,  rm.status, wi.qty as qty_asli,wi.reff_note
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
-								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
-								INNER JOIN warna_items wi ON m.id_warna = wi.id_warna AND wi.kode_produk = rm.kode_produk 
-								INNER JOIN stock_move_produk smp ON smp.move_id = rm.move_id AND smp.kode_produk = rm.kode_produk 
-								WHERE rm.kode = '$kode' AND mp.id_category IN ('11','12') AND wi.type_obat = 'AUX' 
+								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk							
+								INNER JOIN warna w ON m.id_warna = w.id
+								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk
+								WHERE rm.kode = '$kode' AND mp.id_category IN ('11')
 								order by rm.row_order")->result();
    }
 
@@ -503,7 +504,7 @@ class M_mo extends CI_Model
 			 smi.qty2, smi.uom2, smi.`status`, smi.origin_prod, smi.row_order, smi.qty2, smi.uom2, sq.reff_note
 								FROM stock_move_items smi
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
-								WHERE smi.move_id = '$move_id' AND smi.origin_prod = '$origin_prod' AND smi.status = 'ready' ORDER BY row_order")->result();
+								WHERE smi.move_id = '$move_id' AND smi.origin_prod = '$origin_prod' AND smi.status in ('ready','cancel') ORDER BY row_order")->result();
 	}
 
 	public function update_status_stock_move_produk_mo($move_id, $origin_prod, $status)

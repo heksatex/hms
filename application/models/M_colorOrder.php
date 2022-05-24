@@ -656,6 +656,12 @@ class M_colorOrder extends CI_Model
 		return $query->result();
 	}
 
+	public function cek_route_color_order($route_co)
+	{
+		$this->db->where('nama_route',$route_co);
+		return $this->db->get('mrp_route');
+	}
+
 	public function get_kategori_produk_by_dept($dept_id)
 	{
 		$this->db->where('dept_id',$dept_id);

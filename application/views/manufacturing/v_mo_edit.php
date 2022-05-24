@@ -61,7 +61,7 @@
       <div class="box">
         <div class="box-header with-border">
           <h3 class="box-title"><b><?php echo $list->kode;?></b></h3>
-          <?php if($list->dept_id=='DYE'){
+          <?php if($list->dept_id=='DYE' AND $akses_menu >0){
               if(!empty($menu)){  ?>
           <div class=" pull-right text-right">
             <button class="btn btn-primary btn-sm" id="btn-request" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Request</button>
@@ -203,7 +203,14 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Program </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm highlight" name="program" id="program"  value="<?php echo $list->program;?>" onkeyup="highlight(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                  <input type="text" class="form-control input-sm highlight" name="program" id="program"  value="<?php echo $list->program;?>" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                </div>                                    
+              </div>
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Warna </label></div>
+                <div class="col-xs-8">
+                  <input type="hidden" class="form-control input-sm" name="id_warna" id="id_warna"  value="<?php echo $list->id_warna;?>"  readonly="readonly"   />
+                  <input type="text" class="form-control input-sm" name="warna" id="warna"  value="<?php echo $list->nama_warna;?>"  readonly="readonly"   />
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
@@ -218,15 +225,6 @@
             </div>
             <div class="col-md-6">
             <div class="form-group">   
-              <?php if($type_mo['type_mo']=='colouring') {?>
-              <div class="col-md-12 col-xs-12">
-                <div class="col-xs-4"><label>Warna </label></div>
-                <div class="col-xs-8">
-                  <input type="hidden" class="form-control input-sm" name="id_warna" id="id_warna"  value="<?php echo $list->id_warna;?>"  readonly="readonly"   />
-                  <input type="text" class="form-control input-sm" name="warna" id="warna"  value="<?php echo $list->nama_warna;?>"  readonly="readonly"   />
-                </div>                                    
-              </div>
-              <?php }?>
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Start Time </label></div>
                 <div class="col-xs-8 col-md-8">
@@ -386,7 +384,6 @@
                                 $sisa        = $row->qty-$row->sum_qty_done;
                                 $qty_rm_sisa = $sisa;
 
-
                                 if(round($row->sum_qty,2) > round($sisa,2)){$color = 'red';}elseif(round($row->sum_qty,2) < round($sisa,2)){$color = 'blue';}else{$color = '';}
 
                               ?>
@@ -400,10 +397,10 @@
                                   </td>
                                   <td align="right"><?php echo number_format($qty_rm_sisa,2)?></td>
                                   <td><?php echo $row->uom?></td>
-                                  <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty))echo number_format($row->sum_qty,2)?></td>
+                                  <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty) AND $row->status == 'ready')echo number_format($row->sum_qty,2); if($row->status == 'cancel') echo number_format($row->sum_qty_cancel,2); ?></td>
                                   <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                   <td><?php echo $row->reff?></td>
-                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring'){?>
+                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0){?>
                                     <a href="javascript:void(0)" onclick="tambah_quant('<?php echo $row->kode_produk ?>','<?php echo $row->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                    <?php }?>
@@ -485,7 +482,7 @@
                               <th class="style" style="text-align: right;">Qty</th>
                               <th class="style">uom</th>
                               <th class="style">Status</th>
-                              <th class="style"></th>
+                              <th class="style">reff</th>
                             </tr>
                             <tbody>
                               <?php
@@ -494,11 +491,12 @@
                               ?>
                                 <tr class="num">
                                   <td></td>
-                                  <td><?php echo $row->nama_produk?></td>
+                                  <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
                                   <td><?php echo $row->qty_asli?></td>
                                   <td align="right"><?php echo number_format($row->qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
+                                  <td><?php echo $row->reff_note?></td>
                                   <!--td>
                                     <a onclick=""  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
                                   </td-->
@@ -515,7 +513,7 @@
                         <!-- Tabel Kanan -->
                         <div class="col-md-6 table-responsive">
                           <table class="table table-condesed table-hover rlstable" width="100%" id ="table_aux">
-                            <label>AUX</label>
+                            <label>Auxiliary</label>
                             <tr>
                               <th class="style no">No.</th>
                               <th class="style">Product</th>
@@ -523,7 +521,7 @@
                               <th class="style" style="text-align: right;">Qty</th>
                               <th class="style">uom</th>
                               <th class="style">Status</th>
-                              <th class="style"></th>
+                              <th class="style">reff</th>
                             </tr>
                             <tbody>
                               <?php
@@ -532,11 +530,12 @@
                               ?>
                                 <tr class="num">
                                   <td></td>
-                                  <td><?php echo $row->nama_produk?></td>
+                                  <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
                                   <td><?php echo $row->qty_asli?></td>
                                   <td align="right"><?php echo number_format($row->qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
+                                  <td><?php echo $row->reff_note?></td>
                                   <!--td>
                                     <a onclick=""  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
                                   </td-->
@@ -1193,7 +1192,14 @@
 
     var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
 
-    bootbox.dialog({
+    var status = $('#status').val();
+    if(status == 'done'){
+      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+    }else if(status == 'cancel'){
+      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+    }else{
+
+      bootbox.dialog({
         message: "Apakah Anda yakin ingin Request Resep Obat ?",
         title  : "<i class='fa fa-gear'></i> Request Resep Obat !",
         buttons: {
@@ -1250,8 +1256,9 @@
                 }
           }
         }
-        });
-    });
+      });
+    }
+  });
 
   
 

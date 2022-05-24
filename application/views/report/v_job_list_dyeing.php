@@ -142,7 +142,8 @@
                       <th>Status Kain</th>
                       <th>Status Obat</th>
                       <th>Status MG</th>
-                      <th>Action</th>
+                      <th>QC Dyeing</th>
+                      <th>Dyeing Out</th>
                     </tr>
                   </thead>
                 </table>
@@ -226,6 +227,11 @@
                   "targets": [ 8 ], 
                   "orderable": false, 
               },
+              { 
+                  "targets": [ 9 ], 
+                  "orderable": false, 
+              },
+             
             ],
         });
 

@@ -15,6 +15,11 @@
       border-radius: 5px;
     }
 
+    button[id="btn-generate"],
+    button[id="btn-duplicate"]{
+      display: none;
+    }
+
   </style>
 
 </head>

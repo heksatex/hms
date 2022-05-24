@@ -643,7 +643,8 @@ class M_pengirimanBarang extends CI_Model
 		return $this->db->query("SELECT status FROM mrp_production_rm_target where kode in ($kode_mo) AND status IN ('draft','cancel') ");
 	}
 
-	public function get_quality_control_by_kode($kode,$dept_id){
+	public function get_quality_control_by_kode($kode,$dept_id)
+	{
 		return $this->db->query("SELECT qc.dept_id, qc.qc_1, qc.qc_2
 								FROM pengiriman_barang as pb
 								INNER JOIN quality_control as qc ON pb.dept_id = qc.dept_id
@@ -677,6 +678,13 @@ class M_pengirimanBarang extends CI_Model
 	public function cek_qc_item_by_dept($dept_id,$qc_ke)
 	{
 		return $this->db->query("SELECT $qc_ke as qc FROM quality_control WHERE dept_id = '$dept_id'");
+	}
+
+	public function cek_stock_move_items_pengiriman_barang_by_move_id($move_id)
+	{
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get('stock_move_items');
+		return $query->num_rows();
 	}
 
   

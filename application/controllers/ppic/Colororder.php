@@ -241,7 +241,10 @@ class Colororder extends MY_Controller
                       break;
                   }
 
-                  if(empty($route_co)){
+                  // cek route color order
+                  $cek_route_co  = $this->m_colorOrder->cek_route_color_order($route_co)->num_rows();
+
+                  if(empty($route_co) OR $cek_route_co == 0){
                     $route_empty = TRUE;
                     break;
                   }

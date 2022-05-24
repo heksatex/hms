@@ -130,7 +130,7 @@
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Notes </label></div>
-                  <div class="col-xs-8">
+                  <div class="col-xs-8" id="ta">
                     <textarea type="text" class="form-control input-sm" name="note" id="note"  ><?php echo $color->notes?></textarea>
                   </div>                                    
                 </div>
@@ -197,12 +197,12 @@
                             ?>
                               <tr class="num">
                                 <td></td>
-                                <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                <td><a href="javascript:void(0)" onclick="edit('Dyeing Stuff', '<?php  echo $row->row_order ?>','<?php  echo htmlentities($row->kode_produk) ?>','<?php  echo htmlentities($row->nama_produk) ?>')" data-togle="tooltip" title="Edit Product"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?> </a></td>
                                 <td><?php echo $row->qty?></td>
                                 <td><?php echo $row->uom?></td>
                                 <td><?php echo $row->reff_note?></td>
                                 <td class="no" align="center" >
-                                 <a onclick="hapus('<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->id_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
+                                 <a onclick="hapus('<?php  echo htmlentities($row->kode_produk) ?>','<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->id_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)" data-togle="tooltip" title="Hapus Product"><i class="fa fa-trash" style="color: red"></i> 
                                  </a>
                                 </td>
                               </tr>
@@ -240,12 +240,12 @@
                             ?>
                               <tr class="num">
                                 <td></td>
-                                <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                <td><a href="javascript:void(0)" onclick="edit('Auxiliary', '<?php  echo $row->row_order ?>', '<?php  echo htmlentities($row->kode_produk) ?>','<?php  echo htmlentities($row->nama_produk) ?>')" data-togle="tooltip" title="Edit Product"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?> </a></td>
                                 <td><?php echo $row->qty?></td>
                                 <td><?php echo $row->uom?></td>
                                 <td><?php echo $row->reff_note?></td>
                                 <td class="no" align="center" >
-                                 <a onclick="hapus('<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->id_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
+                                 <a onclick="hapus('<?php  echo htmlentities($row->kode_produk) ?>','<?php  echo htmlentities($row->nama_produk) ?>','<?php  echo $row->id_warna ?>', '<?php  echo $row->type_obat ?>', '<?php  echo $row->row_order ?>')"  href="javascript:void(0)"  data-togle="tooltip" title="Hapus Product"><i class="fa fa-trash" style="color: red"></i> 
                                  </a>
                                 </td>
                               </tr>
@@ -309,6 +309,11 @@
       $('#content_colors')[0].style.backgroundColor = e.color.toHex();
   });
 
+  //untuk mengatur lebar textarea sesuai value yang ada
+  $('#ta').on( 'change keyup keydown paste cut', 'textarea', function (){
+    $(this).height(0).height(this.scrollHeight);
+  }).find( 'textarea' ).change();
+
 
   //modal tambah data Dyeing Stuff
   $(".add").unbind( "click" );
@@ -346,6 +351,31 @@
           }   
        );
   });
+
+  // edit dyeing stuff / aux
+  function edit(caption, row_order, kode_produk, nama_produk)
+  {
+      //$("#edit_data").modal('show');
+      var id_warna = '<?php echo $color->id?>';
+      var warna    = '<?php echo $color->nama_warna?>';
+      $("#edit_data").modal({
+          show: true,
+          backdrop: 'static'
+      });
+      $("#edit_data .modal-dialog .modal-content .modal-footer #btn-ubah").attr('disabled',true);
+
+      $(".edit_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $('.modal-title').text('Edit '+caption);
+
+      $.post('<?php echo site_url()?>lab/dti/edit_dye_aux_modal',
+            {id_warna:id_warna, warna:warna, row_order:row_order, kode_produk:kode_produk,nama_produk:nama_produk },
+      ).done(function(html){
+            setTimeout(function() {
+              $(".edit_data").html(html)  
+            },1000);
+            $("#edit_data .modal-dialog .modal-content .modal-footer #btn-ubah").attr('disabled',false);
+      });
+  }
 
   // cek hisotry DTI
   function cek_history_dti(id_warna, nama_warna){
@@ -464,7 +494,7 @@
     });
 
   //hapus dyeing stuff and aux
-  function hapus(nama_produk,id_warna,type_obat,row_order)
+  function hapus(kode_produk,nama_produk,id_warna,type_obat,row_order)
   {
       var baseUrl = '<?php echo base_url(); ?>';
         bootbox.dialog({
@@ -479,7 +509,7 @@
                           type: 'POST',
                           dataType: "json",
                           url : "<?php echo site_url('lab/dti/hapus_dye_aux')?>",
-                          data : {nama_produk:nama_produk, id_warna:id_warna, type_obat:type_obat, row_order:row_order },
+                          data : {kode_produk:kode_produk, nama_produk:nama_produk, id_warna:id_warna, type_obat:type_obat, row_order:row_order },
                     })
                     .done(function(response){
                       if(response.sesi == 'habis'){
@@ -511,7 +541,21 @@
       return false;
   }
 
-  //modal mode print
+  // duplicate DTI
+  $(document).on('click','#btn-duplicate',function(e){
+        e.preventDefault();
+        var id_warna   = '<?php echo $color->id; ?>';
+        var duplicate  = 'true';
+
+        if(id_warna == ""){
+          alert_modal_warning('Id Warna Kosong !');
+        }else{
+          var url = '<?php echo base_url() ?>lab/dti/add';
+          window.open(url+'?id_warna='+ id_warna+'&&duplicate='+duplicate,'_blank');
+        }
+  });
+
+  // print DTI
   $(document).on('click','#btn-print',function(e){
         e.preventDefault();
         var id_warna   = '<?php echo $color->id; ?>';
