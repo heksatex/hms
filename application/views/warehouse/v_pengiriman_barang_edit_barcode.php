@@ -8,6 +8,7 @@
   <style>
     button[id="btn-simpan"],
     button[id="btn-print"],
+    button[id="btn-cancel"],
     button[id="btn-stok"]{/*untuk hidden button simpan di top */
       display: none;
     }
@@ -15,8 +16,6 @@
       background-color: #dff0d8;
     }
   </style>
-
-
 
 <body class="hold-transition skin-black fixed sidebar-mini" >
 <!-- Site wrapper -->
@@ -72,6 +71,13 @@
           </div>
         </div>
         <div class="box-body">
+            <?php 
+            if($akses_menu > 0 ){
+              $disabled = '';
+            }else{
+              $disabled = 'disabled';
+            }
+            ?>
           <form class="form-horizontal" id="scan">
               <div class="col-md-6">
                 <div class="form-group"> 
@@ -80,14 +86,15 @@
                     <div class="col-xs-9">
                     <input type="hidden" class="form-control input-sm" name="kode" id="kode" value="<?php echo $list->kode;?>"/>
                     <input type="hidden" class="form-control input-sm" id="valid" value="0" />
-                      <input type="text" class="form-control input-lg" name="barcode" id="barcode" autofocus onkeypress="enter(event);" autocomplete="off" placeholder="Scan Barcode / Lot" />
+                      <input type="text" class="form-control input-lg" name="barcode" id="barcode" autofocus onkeypress="enter(event);" autocomplete="off" placeholder="Scan Barcode / Lot" <?php echo $disabled?>/>
                     </div>
                     <div class=" col-xs-2">
-                      <button type="button" id="btn-scan" onclick="cek_data();" class="btn btn-primary btn-lg" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." >Scan</button>
+                      <button type="button" id="btn-scan" onclick="cek_data();" class="btn btn-primary btn-lg" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." <?php echo $disabled?>>Scan</button>
                     </div>                                    
                   </div>
                 </div>
               </div>
+
               <div class="col-md-6">
                <center>
                 <label class="label label-success" style="font-size: 20px;" id="counter_valid">Valid Scan : <?php echo $count?> / <?php echo $count_all?> </label> 
