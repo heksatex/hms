@@ -1889,6 +1889,27 @@ class MO extends MY_Controller
         echo json_encode($callback);
     }
 
+    public function request_obat_modal()
+    {
+
+        $deptid     = $this->input->post('deptid');
+        $id_warna   = $this->input->post('id_warna');
+        $kode       = $this->input->post('kode');
+        $origin     = $this->input->post('origin');
+
+        $data['deptid']      = $deptid;
+        $data['id_warna']    = $id_warna;
+        $data['kode']        = $kode;
+        $data['origin']      = $origin;
+
+        // get nama warna by id
+        $data['nama_warna']  = $this->m_mo->get_nama_warna_by_id($id_warna);
+        // get_list varian by id_warna
+        $data['list_varian'] = $this->m_mo->get_list_varian_by_id($id_warna);
+
+        return $this->load->view('modal/v_mo_request_modal', $data);
+    }
+
     public function request_obat()
     {
 
@@ -1905,6 +1926,7 @@ class MO extends MY_Controller
             $nu       = $this->_module->get_nama_user($username)->row_array();
             $nama_user= addslashes($nu['nama']);
             $deptid   = $this->input->post('deptid');
+            $varian   = $this->input->post('varian');
 
             $orgn     = $origin_mo."|".$kode; // ex SO18|CO7|2|OW210300001|MG210300004
             
@@ -1921,6 +1943,8 @@ class MO extends MY_Controller
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Proses Produksi telah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if(empty($status_kain['status'])){
                 $callback = array('message' => 'Maaf, Produk (kain) belum Ready !',  'status' => 'failed' );
+            }else if(empty($varian)){
+                $callback = array('message' => 'Varian Harus diisi !',  'status' => 'failed' );
             }else{
                 
                 $cek_request  = $this->m_mo->cek_origin_di_stock_move($orgn)->row_array();//cek apa sudah request obat ?
@@ -1960,7 +1984,7 @@ class MO extends MY_Controller
                             $sql_log_history_out        = "";
 
                             $route = $this->m_mo->get_route_warna('obat_dyeing');
-                            $kode_warna  = $this->m_mo->get_warna_items_by_warna($warna);
+                            $kode_warna  = $this->m_mo->get_warna_items_by_warna($warna,$varian);
                             $get_row = $this->m_mo->get_row_order_rm_target($kode)->row_array();//get last_order di mrp rm target
                             $rm_row  = $get_row['row']+1;
                             $ba      = $this->m_mo->get_berat_air_by_kode($kode)->row_array();
@@ -2169,6 +2193,9 @@ class MO extends MY_Controller
 
                                 // get nama warna by id
                                 $nama_warna  = $this->m_mo->get_nama_warna_by_id($warna);
+
+                                $sql_update_mrp_warna_varian  = "UPDATE mrp_production SET id_warna_varian ='$varian' WHERE  kode = '$kode' ";
+                                $this->_module->update_reff_batch($sql_update_mrp_warna_varian);
 
                                 //unlock table
                                 $this->_module->unlock_tabel();
@@ -2777,7 +2804,7 @@ class MO extends MY_Controller
         $move_id    = $this->input->post('move_id');
         $deptid     = $this->input->post('deptid');
         $origin_prod= $this->input->post('origin_prod');
-        $kode       = $this->input->post('kode'); //kode MO untu log history
+        $kode_mo       = $this->input->post('kode'); //kode MO untu log history
         $kode_produk= $this->input->post('kode_produk');
         $nama_produk= $this->input->post('nama_produk');
 
@@ -2787,7 +2814,7 @@ class MO extends MY_Controller
         $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$deptid)->row_array();
         $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
         
-        $data['kode']        = $kode;
+        $data['kode']        = $kode_mo;
         $data['deptid']      = $deptid;
         $data['kode_produk'] = $kode_produk;
         $data['nama_produk'] = $nama_produk;

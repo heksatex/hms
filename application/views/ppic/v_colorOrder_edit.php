@@ -165,7 +165,13 @@
                               <tr class="num">
                                 <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order ?>" ></td>
                                 <td><?php echo $row->ow?></td>
-                                <td class="width-120"><a href="javascript:void(0)" onclick="edit('<?php  echo $row->kode_co ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"><?php echo $row->nama_produk?></a></td>
+                                <td class="width-120">
+                                  <?php if($akses_menu > 0){?>
+                                  <a href="javascript:void(0)" onclick="edit('<?php  echo $row->kode_co ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"><?php echo $row->nama_produk?></a>
+                                  <?php }else{
+                                    echo $row->nama_produk;
+                                  }?>
+                                  </td>
                                 <td><?php echo $row->nama_warna?></td>
                                 <td><?php echo $row->qty?></td>
                                 <td><?php echo $row->uom?></td>
@@ -183,7 +189,7 @@
                                  <!--View Detail yang terbentuk-->
                                        <a href="javascript:void(0)" data-toggle="tooltip" title="Details" onclick="view_detail('<?php echo $colororder->kode_sc; ?>','<?php echo $row->kode_co; ?>','<?php echo $row->kode_produk; ?>','<?php echo htmlentities($row->nama_produk); ?>','<?php echo $row->row_order?>','<?php echo $row->ow?>','<?php echo $row->route_co?>')"><span class="glyphicon  glyphicon-share"></span></a>
 
-                                <?php }else if($row->status == 'draft'){?>
+                                <?php }else if($row->status == 'draft' AND $akses_menu > 0){?>
                                  <!--hapus items -->
 
                                     <a title="Hapus" data-toggle="tooltip" onclick="hapus('<?php  echo $row->kode_co ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
@@ -191,9 +197,9 @@
                                 </td>
                                 <td>
                                   <!-- button Genarate dan batal CO -->
-                                  <?php if($row->status == 'draft'){?>
+                                  <?php if($row->status == 'draft' AND $akses_menu > 0){?>
                                     <button type="button" class="btn btn-primary btn-xs btn-generate" title="Generate" data-toggle="tooltip" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Generate</button>
-                                  <?php }else if($row->status == 'generated'){?>
+                                  <?php }else if($row->status == 'generated' AND $akses_menu > 0){?>
                                      <button type="button" class="btn btn-danger btn-xs btn-cancel-items width-btn" title="Batal Items" data-toggle="tooltip" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Batal</button>
                                   <?php }?>
                                 </td>
@@ -202,6 +208,7 @@
                               }
                             ?>
                           </tbody>
+                          <?php if($akses_menu > 0){?>
                           <tfoot>
                             <tr>
                               <td colspan="8">
@@ -209,6 +216,7 @@
                               </td>
                             </tr>
                           <tfoot>
+                          <?php }?>
                         </table>
                       </div>
                       <!-- Tabel  -->

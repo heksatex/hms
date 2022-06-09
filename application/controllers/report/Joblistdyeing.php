@@ -48,31 +48,52 @@ class Joblistdyeing extends MY_Controller
                 $nama_status = $field->status;
             }
 
-            $category_kain  = " AND mc.nama_category LIKE '%kain hasil%' ";
-            $status_kain    = $this->cek_status_kain($field->kode,$category_kain);
-            $category_resep = " AND mc.nama_category IN ('DYE','AUX') ";
-            $status_resep   = $this->cek_status_kain($field->kode,$category_resep);
+            // get Link and status Kain
+            //$category_kain  = " AND mc.nama_category LIKE '%kain hasil%' ";
+            //$status_kain    = $this->cek_status_kain($field->kode,$category_kain);
 
-            if($status_kain == 'Draft'  || $status_kain == 'Cancel'){
+            $method         = $id_dept.'|IN';
+            $kain           = $this->get_kode_in_kain($field->origin,$method);
+            $kode_in_kain   = $kain[0];
+            $status_kain     = $kain[1];
+            $kode_in_kain_enc = encrypt_url($kode_in_kain);
+
+            if($status_kain == 'draft'  || $status_kain == 'cancel'){
                 $color      = "style='color: red' !important";
                 $alias_stat_kain = 'Belum Tersedia';
-            }else if($status_kain == 'Ready'|| $status_kain == 'Done'){
-                $color      = "style='color: green' !important";
+            }else if($status_kain == 'ready'){
+                $color      = "style='color: blue' !important";
+                $alias_stat_kain = 'Harus Diterima';
+            }else if( $status_kain == 'done'){
+                $color      = "style='color: Green' !important";
                 $alias_stat_kain = 'Tersedia';
             }else{
                 $color = '';
                 $alias_stat_kain = '';
             }
 
-            $method         = $id_dept.'|IN';
-            $kode_in_kain   = $this->get_kode_in_kain($field->origin,$method);
-            $kode_in_kain_enc = encrypt_url($kode_in_kain);
             $link_kain      = '<a href="'.base_url('warehouse/penerimaanbarang/edit/'.$kode_in_kain_enc).'" target="_blank" data-toggle="tooltip" title="No Dye IN :'.$kode_in_kain.'"" '.$color.'>'.$alias_stat_kain.'</a>';
-            
+
+
+            // get Link and status Obat
+
+            //$category_resep = " AND mc.nama_category IN ('DYE','AUX') ";
+            //$status_resep   = $this->cek_status_obat($field->kode,$category_resep);
+
+            $origin_obat    = $field->origin.'|'.$field->kode;  
+            $method_out     = 'GOB|OUT';
+            $obat           = $this->get_kode_out_obat($origin_obat,$method_out);
+            $kode_out_obat   = $obat[0];
+            $status_resep   = $obat[1];
+            $kode_out_obat_enc = encrypt_url($kode_out_obat);
+
             if($status_resep == 'Draft' || $status_resep == 'Cancel'){
                 $color2      = "style='color: red' !important";
                 $alias_stat_resep = 'Belum Tersedia';
-            }else if($status_resep == 'Ready' || $status_resep == 'Done'){
+            }else if($status_resep == 'Ready'){
+                $color2      = "style='color: blue' !important";
+                $alias_stat_resep = 'Harus Dikirim';
+            }else if($status_resep == 'Done'){
                 $color2      = "style='color: green' !important";
                 $alias_stat_resep = 'Tersedia';
             }else{
@@ -80,11 +101,8 @@ class Joblistdyeing extends MY_Controller
                 $alias_stat_resep = '';
             }
 
-            $origin_obat    = $field->origin.'|'.$field->kode;            
-            $kode_in_obat   = $this->get_kode_in_obat($origin_obat,$method);
-            $kode_in_obat_enc = encrypt_url($kode_in_obat);
-            $link_obat        = '<div '.$color2.'>'.$alias_stat_resep.'</div>';
-            //$link_obat      = '<a href="'.base_url('warehouse/penerimaanbarang/edit/'.$kode_in_obat_enc).'" target="_blank" data-toggle="tooltip" title="No Dye IN :'.$kode_in_obat.'"" '.$color2.'>'.$status_resep.'</a>';
+            //$link_obat        = '<div '.$color2.'>'.$alias_stat_resep.'</div>';
+            $link_obat      = '<a href="'.base_url('warehouse/pengirimanbarang/edit/'.$kode_out_obat_enc).'" target="_blank" data-toggle="tooltip" title="No GOB Out :'.$kode_out_obat.'"" '.$color2.'>'.$alias_stat_resep.'</a>';
 
 
             if($nama_status == 'Draft'){
@@ -215,23 +233,51 @@ class Joblistdyeing extends MY_Controller
 
     }
 
+
+    function cek_status_obat($kode,$category)
+    {
+
+        $rs = $this->m_joblistdyeing->cek_item_rm_target($kode,$category);
+        $status = "Ready";
+        $loop   = false;
+        foreach($rs as $row){
+            $loop = true;
+            // cek jml yang sudah ada di stock_move_items berdasarkan produk
+            $jml = $row->jml;
+
+            if($row->jml == 0 ){ // jika == 0 bearti draft
+                $status = "Draft";
+            }
+        }
+
+        if($loop== true){
+            $status = $status;
+        }else{
+            $status = "";
+        }
+
+        return $status;
+
+    }
+
     function get_kode_in_kain($origin,$method)
     {
 
         // get kode in 
         $kode     = $this->m_joblistdyeing->get_link_kain_by_kode($origin,$method)->row_array();
         $kode_in  = $kode['kode'];
-        return $kode_in;
+        $status_in = $kode['status'];
+        return array($kode_in,$status_in);
 
     }
 
-    function get_kode_in_obat($origin,$method)
+    function get_kode_out_obat($origin,$method)
     {
-
         // get kode in 
-        $kode     = $this->m_joblistdyeing->get_link_kain_by_kode($origin,$method)->row_array();
+        $kode     = $this->m_joblistdyeing->get_link_out_by_kode($origin,$method)->row_array();
         $kode_in  = $kode['kode'];
-        return $kode_in;
+        $status   = $kode['nama_status'];
+        return array($kode_in,$status);
 
     }
 

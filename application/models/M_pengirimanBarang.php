@@ -687,6 +687,14 @@ class M_pengirimanBarang extends CI_Model
 		return $query->num_rows();
 	}
 
+	public function get_warna_by_co($kode_co,$row_order)
+	{
+		return $this->db->query("SELECT w.nama_warna 
+								FROM color_order_detail as cod 
+								INNER JOIN warna as w ON cod.id_warna = w.id
+								WHERE cod.kode_co = '$kode_co' AND cod.row_order  = '$row_order' ");
+	}
+
   
 }
 

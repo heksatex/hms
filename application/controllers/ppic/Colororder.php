@@ -140,6 +140,13 @@ class Colororder extends MY_Controller
         $data['mms']        = $this->_module->get_data_mms_for_log_history('CO');// get mms by dept untuk menu yg beda-beda
         $data["colororder"] = $this->m_colorOrder->get_data_by_code($kode_decrypt);
         $data['detail']     = $this->m_colorOrder->get_data_detail_by_code($kode_decrypt);
+
+        // cek priv akses menu
+        $sub_menu           = $this->uri->segment(2);
+        $username           = $this->session->userdata('username'); 
+        $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,'CO')->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
+
         return $this->load->view('ppic/v_colorOrder_edit',$data);
     }
 

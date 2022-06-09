@@ -89,14 +89,14 @@
           <h3 class="box-title"><b><?php echo $salescontract->sales_order;?></b></h3>
             <div class="pull-right text-right" id="btn-header">
             <?php if($salescontract->status=='draft'){?>
-                <button class="btn btn-primary btn-sm" id="btn-confirm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Confirm Contract</button>
+                  <button class="btn btn-primary btn-sm" id="btn-confirm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Confirm Contract</button>
             <?php }elseif($salescontract->status=='date_assigned'){?>
-                 <button class="btn btn-primary btn-sm" id="btn-approve" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Approve Contract</button>
+                  <button class="btn btn-primary btn-sm" id="btn-approve" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Approve Contract</button>
             <?php }elseif($salescontract->status=='waiting_color'){?>
-            	 <button class="btn btn-primary btn-sm" id="btn-create-color" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Create Color</button>	
-                 <button class="btn btn-primary btn-sm" id="btn-approve-color" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Approve Color</button>
+            	    <button class="btn btn-primary btn-sm" id="btn-create-color" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Create Color</button>	
+                  <!--button class="btn btn-primary btn-sm" id="btn-approve-color" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Approve Color</button-->
+                  <button class="btn btn-primary btn-sm" id="btn-approve-order" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Approve Order</button>
             <?php }elseif($salescontract->status=='product_generated'){?>
-                 <button class="btn btn-primary btn-sm" id="btn-approve-order" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Approve Order</button>
             <?php }
             ?>
             </div>
@@ -356,6 +356,7 @@
 	                            <th class="style" width="120px">Lebar Jadi</th>
 	                            <th class="style" width="100px">Uom Lbr Jadi</th>
 	                            <th class="style" width="80px" >OW</th>
+	                            <th class="style" >Status</th>
 	                            <th class="style" width="50px"></th>
 	                          </tr>
 	                        </thead>
@@ -378,11 +379,31 @@
                                     <td class="text-wrap" data-content="edit" data-name="Lebar Jadi" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
                                     <td class="text-wrap width-80"  data-content="edit" data-name="Uom Lebar Jadi" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" ><?php echo $row->uom_lebar_jadi?></td>
                                     <td ><?php echo $row->ow?></td>
+                                    <td style="min-width:80px;" >
+                                        <?php if(!empty($row->ow)){ ?>
+                                        <select class="form-control input-sm status_scl" id="status_scl" name="status_scl" sc="<?php echo $row->sales_order;?>" row_order="<?php echo $row->row_order;?>" ow="<?php echo $row->ow;?>" >
+                                          <?php $arr_stat = array('t','f');
+                                                foreach($arr_stat as $stats){
+                                                  if($stats == 't'){
+                                                    $status = 'Aktif';
+                                                  }else{
+                                                    $status = 'Tidak Aktif';
+                                                  }
+
+                                                  if($row->status == $stats){
+                                                    echo '<option value="'.$row->status.'" selected>'.$status.'</option>';
+                                                  }else{
+                                                    echo '<option value="'.$stats.'">'.$status.'</option>';
+                                                  }
+                                                }
+                                          ?>
+                                        </select>
+                                        <?php } ?>
                                     <td>
                                       <?php if(empty($row->ow)){?>
                                         <a class="add-color-lines" title="Simpan" data-toggle="tooltip" row_id='tes'><i class="fa fa-save"></i></a>
 
-                                        <?php if($salescontract->status =='product_generated' AND $row->is_approve == 'f'){?>
+                                        <?php if($salescontract->status =='waiting_color' ){?>
                                         <a class="ow-color-lines" title="OW" data-toggle="tooltip"><i class="fa  fa-arrow-right"></i></a>
                                         <?php }?>
 
@@ -542,6 +563,42 @@
     $("#foot").load(location.href + " #foot");
     $("#total").load(location.href + " #total");
   }
+
+  // untuk ubah status sales color line aktif/tidak aktif
+  $(document).on("change", ".status_scl", function(){
+
+    var sales_order = $(this).attr('sc');
+    var row_order   = $(this).attr('row_order');
+    var value       = $(this).val();
+    var ow          = $(this).attr('ow');
+    $.ajax({
+          dataType: "JSON",
+          url : '<?php echo site_url('sales/salescontract/update_status_color_lines') ?>',
+          type: "POST",
+          data: {sales_order  : sales_order, 
+                row_order     : row_order,
+                ow            : ow,
+                value         : value},
+          success: function(data){
+            if(data.sesi=='habis'){
+                //alert jika session habis
+                alert_modal_warning(data.message);
+                window.location.replace('../index');
+            }else{
+                $("#tab_2").load(location.href + " #tab_2");
+                $("#foot").load(location.href + " #foot");
+                //$("#total").load(location.href + " #total");
+                alert_notify(data.icon,data.message,data.type,function(){});
+             }
+          },
+          error: function (xhr, ajaxOptions, thrownError){
+            alert('Error data');
+            alert(xhr.responseText);
+          }
+        });
+        
+
+  });
 
   // Append table with add row form on add new button click
   $(document).on("click", ".add-new", function(){
@@ -1453,7 +1510,7 @@
     $(document).on("click", ".ow-color-lines", function(){ 
 
         var status = $("#status").val();
-        if(status == 'product_generated'){
+        if(status == 'waiting_color'){
 
           $(this).parents("tr").find("td[data-content='edit']").each(function(){
             if($(this).attr('data-id')=="row_order"){
@@ -1520,7 +1577,7 @@
             }
             });
         }else{
-        alert_modal_warning('Maaf, Tidak Bisa membuat OW !')
+          alert_modal_warning('Maaf, Tidak Bisa membuat OW !');
         }
     });
 

@@ -47,18 +47,20 @@ class Joblistgrgout extends MY_Controller
             $no++;
             $row = array();
             $row[] = $no;
-            $row[] = '<a href="'.base_url('warehouse/pengirimanbarang/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
+            $row[] = '<a href="'.base_url('warehouse/pengirimanbarang/edit/'.$kode_encrypt).'" target="_blank">'.$field->kode.'</a>';
             $row[] = $field->tanggal;
             $row[] = $field->origin;
             $row[] = $field->reff_picking;
             $row[] = $field->nama_produk;
+            $row[] = $field->nama_warna;
             $row[] = $field->target_mtr;
             $row[] = $field->mtr;
             $row[] = $field->kg;
             $row[] = $field->gl;
             $row[] = $nama_status;
+            /*
             $row[] = '<a href="#" onclick=kirim_barang("'.$field->kode.'","'.$field->move_id.'","'.$field->method.'","'.$field->origin.'","'.$id_dept.'","'.$field->status.'")> kirim>> </a>';
- 
+            */
             $data[] = $row;
         }
  

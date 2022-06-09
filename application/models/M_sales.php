@@ -29,9 +29,9 @@ class M_sales extends CI_Model
 
 	    $this->db->select("sc.sales_order,sc.create_date,sc.customer_name,sc.sales_group,sg.nama_sales_group,sc.status, mmss.nama_status");
 		$this->db->from("sales_contract sc");
-		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=sc.status", "inner");
 		$this->db->join("sales_contract_items sci", "sci.sales_order=sc.sales_order", "left");
 		$this->db->JOIN("mst_sales_group sg", "sc.sales_group=sg.kode_sales_group","INNER");
+		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=sc.status", "left");
 		$this->db->group_by('sc.sales_order');
 		
 		//$this->db->from($this->table);
@@ -99,9 +99,9 @@ class M_sales extends CI_Model
 		//$this->db->from($this->table);
 		$this->db->select("sc.sales_order,sc.create_date,sc.customer_name,sc.sales_group,sg.nama_sales_group,sc.status, mmss.nama_status");
 		$this->db->from("sales_contract sc");
-		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=sc.status", "inner");
 		$this->db->join("sales_contract_items sci", "sci.sales_order=sc.sales_order", "left");
 		$this->db->JOIN("mst_sales_group sg", "sc.sales_group=sg.kode_sales_group","INNER");
+		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=sc.status", "left");
 		$this->db->group_by('sc.sales_order');
 		$this->db->where("mmss.main_menu_sub_kode",$mmss);
 		if($sales_group != 'MKT005' ){// administrator
@@ -429,7 +429,7 @@ class M_sales extends CI_Model
 	public function get_data_color_line_by_kode($sales_order)
 	{
 		return $this->db->query("SELECT a.kode_produk, a.nama_produk, a.sales_order, a.description, a.id_warna, a.color_alias_name, a.qty, 
-		a.uom, a.piece_info, a.row_order, a.is_approve,a.ow,b.nama_warna,a.id_handling,c.nama_handling,a.lebar_jadi, a.uom_lebar_jadi, a.gramasi											
+		a.uom, a.piece_info, a.row_order, a.is_approve,a.ow,b.nama_warna,a.id_handling,c.nama_handling,a.lebar_jadi, a.uom_lebar_jadi, a.gramasi, a.status											
 							FROM sales_color_line a
 							LEFT JOIN warna b ON a.id_warna = b.id
 							LEFT JOIN mst_handling c ON a.id_handling = c.id
@@ -440,7 +440,7 @@ class M_sales extends CI_Model
 	{
 		return $this->db->query("SELECT kode_produk, nama_produk, uom 
 								FROM  sales_contract_items  
-								WHERE sales_order = '$kode' AND nama_produk LIKE '%$name%'  LIMIT 10")->result_array();
+								WHERE sales_order = '$kode' AND nama_produk LIKE '%$name%' GROUP BY kode_produk LIMIT 10")->result_array();
 	}
 
 	public function get_list_color_by_name($name)
@@ -454,7 +454,7 @@ class M_sales extends CI_Model
 		return $this->db->query("SELECT row_order  FROM sales_color_line WHERE sales_order = '$sales_order' order by row_order desc LIMIT 1");
 	}
 
-    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi)
+    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi)
 	{
 		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi)
 			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi')");
@@ -492,6 +492,11 @@ class M_sales extends CI_Model
 	public function simpan_no_ow_sales_color_line($kode,$row_order,$ow,$tgl)
 	{
 		return $this->db->query("UPDATE sales_color_line SET ow = '$ow', tanggal_ow = '$tgl' WHERE sales_order = '$kode' and row_order = '$row_order' ");
+	}
+
+	public function update_status_color_line_by_row($sales_order,$row_order,$value,$ow)
+	{
+		return $this->db->query("UPDATE sales_color_line SET status = '$value' WHERE sales_order = '$sales_order' and row_order = '$row_order' AND ow = '$ow' ");
 	}
 
 	/* COLOR LINES << */

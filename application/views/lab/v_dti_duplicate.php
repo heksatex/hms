@@ -83,7 +83,7 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Tanggal dibuat </label></div>
                   <div class="col-xs-8 col-md-8">
-                      <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly" value="<?php echo date('Y-m-d h:i:s')?>" />
+                      <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly" value="<?php echo date('Y-m-d H:i:s')?>" />
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -239,41 +239,38 @@
             }
     ?>  
 
-    var arr_dye = [];
-    
     function tambah_baris(data,kode_produk,nama_produk,qty,uom,reff_note){
         
-
         var index  = $("#table_dyest tbody[id='tbody_dye'] tr:last-child").index();
-        var ro     = index+1;
-        //alert('jml ro '+ro);
-        
-        arr_dye.push(ro);
-        if(ro < 0){
-            arr_dye = [];
-            ro      = index+1;
+        if(index== -1){
+            row = 0;
+        }else{
+            row  = parseInt($("#table_dyest tbody[id='tbody_dye'] tr:last-child td .row").val());
         }
-        
-        alert(arr_dye);
+        var ro     = row+1;
+        delRow  = "delRow_dye(this)";
+       
         var class_produk = 'kode_produk_'+ro;
+        var produk       = 'nama_produk'+ro;
         var class_uom    = 'uom_'+ro;
         var row        = '<tr class="num">'
-                    + '<td></td>'
+                    + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
                     + '<td  class="min-width-200">'
                         + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
-                        + '<input type="hidden" class="form-control input-sm nama_produk" name="nama_produk" id="nama_produk"></td>'
+                        + '<input type="text" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
                     + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" value="'+qty+'"></td>'
                     + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
-                    + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="tnote">'+reff_note+'</textarea></td>'
-                    + '<td class="width-50" align="center"><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
+                    + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff">'+reff_note+'</textarea></td>'
+                    + '<td class="width-50" align="center"><a onclick="'+delRow+';"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
                     + '</tr>';
 
         $('#table_dyest tbody[id="tbody_dye"] ').append(row);
         //$("#components tbody tr").eq(index + 1).find(".add, .edit").toggle();
         $('[data-toggle="tooltip"]').tooltip();
 
-        var sel_produk = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_produk);
-        var sel_uom = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_uom);
+        var sel_produk  = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_produk);
+        var sel_uom     = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_uom);
+        var produk_hide = $('#table_dyest tbody[id="tbody_dye"] tr .'+produk);
 
         if(data==true){
             //untuk event selected select2 nama_produk
@@ -327,8 +324,7 @@
                 type: "POST",
                 data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
                 success: function(data){
-                    $('.nama_produk').val(data.nama_produk);
-                    //$('#qty').val(data.qty);
+                    produk_hide.val(data.nama_produk);
                     //untuk event selected select2 uom
                     var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
                     sel_uom.empty().append($newOptionuom).trigger('change');
@@ -350,7 +346,6 @@
                     type : "POST",
                     url : "<?php echo base_url();?>lab/dti/get_uom_select2",
                     data : function(params){
-
                         return{
                             prod:params.term,
                         };
@@ -390,19 +385,27 @@
     function tambah_baris_aux(data,kode_produk,nama_produk,qty,uom,reff_note){
 
         var index  = $("#table_aux tbody[id='tbody_aux'] tr:last-child").index();
-        var ro     = index+1;
+        
+        if(index== -1){
+          row = 0;
+        }else{
+          row  = parseInt($("#table_aux tbody[id='tbody_aux'] tr:last-child td .row").val());
+        }
+        var ro     = row+1;
+        delRow  = "delRow_aux(this)";
 
         var class_produk = 'kode_produk_'+ro;
+        var produk       = 'nama_produk'+ro;
         var class_uom    = 'uom_'+ro;
         var row    = '<tr class="num">'
-                    + '<td></td>'
+                    + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
                     + '<td  class="min-width-200">'
                         + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
-                        + '<input type="hidden" class="form-control input-sm nama_produk" name="nama_produk" id="nama_produk"></td>'
+                        + '<input type="text" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
                     + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" value="'+qty+'"></td>'
                     + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
-                    + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="tnote">'+reff_note+'</textarea></td>'
-                    + '<td class="width-50" align="center"><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
+                    + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff">'+reff_note+'</textarea></td>'
+                    + '<td class="width-50" align="center"><a onclick="'+delRow+'"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
                     + '</tr>';
 
 
@@ -410,8 +413,9 @@
         //$("#components tbody tr").eq(index + 1).find(".add, .edit").toggle();
         $('[data-toggle="tooltip"]').tooltip();
 
-        var sel_produk = $('#table_aux tbody[id="tbody_aux"] tr .'+class_produk);
-        var sel_uom = $('#table_aux tbody[id="tbody_aux"] tr .'+class_uom);
+        var sel_produk  = $('#table_aux tbody[id="tbody_aux"] tr .'+class_produk);
+        var sel_uom     = $('#table_aux tbody[id="tbody_aux"] tr .'+class_uom);
+        var produk_hide = $('#table_aux tbody[id="tbody_aux"] tr .'+produk);
 
         if(data==true){
             //untuk event selected select2 nama_produk
@@ -465,8 +469,7 @@
                 type: "POST",
                 data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
                 success: function(data){
-                    $('.nama_produk').val(data.nama_produk);
-                    //$('#qty').val(data.qty);
+                    produk_hide.val(data.nama_produk);
                     //untuk event selected select2 uom
                     var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
                     sel_uom.empty().append($newOptionuom).trigger('change');
@@ -488,7 +491,6 @@
                     type : "POST",
                     url : "<?php echo base_url();?>lab/dti/get_uom_select2",
                     data : function(params){
-
                     return{
                         prod:params.term,
                     };
@@ -514,14 +516,53 @@
 
     };
 
-    function delRow(r){	  
-	    var i = r.parentNode.parentNode.rowIndex;
-        alert(i);
-	  	document.getElementById("table_dyest").deleteRow(i);
-	}
+    // hapus row
+    function delRow_dye(r){		
+        var i = r.parentNode.parentNode.rowIndex;
+        document.getElementById("table_dyest").deleteRow(i);
+    }
+
+    function delRow_aux(r){		
+        var i = r.parentNode.parentNode.rowIndex;
+        document.getElementById("table_aux").deleteRow(i);
+    }
     
     //klik button simpan
     $('#btn-simpan').click(function(){
+
+
+      var arr   = new Array();
+      var arr2  = new Array();
+      var id_warna  = '<?php echo $id_warna?>';
+      var id_varian = '<?php echo $id_varian?>';
+      var nama_warna = '<?php echo $color->nama_warna?>';
+
+      $("#table_dyest tbody[id='tbody_dye'] .kode_produk").each(function(index, element) {
+					if ($(element).val()!=="") {
+						arr.push({
+							//0 : no++,
+							kode_produk :$(element).val(),
+							nama_produk :$(element).parents("tr").find("#nama_produk").val(),
+							qty 		    :$(element).parents("tr").find("#qty").val(),
+							uom 		    :$(element).parents("tr").find("#uom").val(),
+							reff_note 	:$(element).parents("tr").find("#reff").val(),
+						});
+					}
+			}); 
+
+      $("#table_aux tbody[id='tbody_aux'] .kode_produk").each(function(index, element) {
+					if ($(element).val()!=="") {
+						arr2.push({
+							//0 : no++,
+							kode_produk :$(element).val(),
+							nama_produk :$(element).parents("tr").find("#nama_produk").val(),
+							qty 		    :$(element).parents("tr").find("#qty").val(),
+							uom 		    :$(element).parents("tr").find("#uom").val(),
+							reff_note 	:$(element).parents("tr").find("#reff").val(),
+						});
+					}
+			}); 
+
       $('#btn-simpan').button('loading');
       please_wait(function(){});
       $.ajax({
@@ -537,8 +578,13 @@
                 warna      : $('#warna').val(),
                 note       : $('#note').val(),
                 kode_warna : $('#kode_warna').val(),
-                status     : 'tambah'
-
+                arr_dye    : JSON.stringify(arr),
+                arr_aux    : JSON.stringify(arr2),
+                id_warna   : id_warna,
+                id_varian  : id_varian,
+                nama_warna : nama_warna,
+                status     : 'tambah',
+                duplicate  : true
           },success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis

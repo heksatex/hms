@@ -180,24 +180,29 @@ class M_lab extends CI_Model
 		return $this->db->query("SELECT * FROM warna_items where id_warna = '$id_warna' AND type_obat = '$tipe_obat' ")->result();
 	}
 
+	public function get_data_dye_aux_varians_by_code($id_warna,$tipe_obat,$varians)
+	{
+		return $this->db->query("SELECT * FROM warna_items where id_warna = '$id_warna' AND type_obat = '$tipe_obat' AND id_warna_varian = '$varians' ")->result();
+	}
+
 	public function update_color($id_warna,$notes,$kode_warna)
 	{
 		return $this->db->query("UPDATE warna SET notes = '$notes', kode_warna = '$kode_warna' WHERE id = '$id_warna' ");
 	}
 
-	public function save_dye_aux($id_warna,$kode_produk,$nama_produk,$qty,$uom,$reff_note,$tipe_obat)
+	public function save_dye_aux($id_warna,$kode_produk,$nama_produk,$qty,$uom,$reff_note,$tipe_obat,$id_warna_varian)
 	{
 
-		$row = $this->db->query("SELECT max(row_order) as ro FROM warna_items WHERE id_warna = '$id_warna' AND type_obat = '$tipe_obat'")->row_array();
+		$row = $this->db->query("SELECT max(row_order) as ro FROM warna_items WHERE id_warna = '$id_warna' AND type_obat = '$tipe_obat' AND id_warna_varian = '$id_warna_varian'")->row_array();
 		$row_order  = $row['ro'] + 1;
 
-		return $this->db->query("INSERT INTO warna_items (id_warna,type_obat,kode_produk,nama_produk,qty,uom,reff_note,row_order) VALUES 
-								('$id_warna','$tipe_obat','$kode_produk','$nama_produk','$qty','$uom','$reff_note','$row_order')");
+		return $this->db->query("INSERT INTO warna_items (id_warna,type_obat,kode_produk,nama_produk,qty,uom,reff_note,row_order,id_warna_varian) VALUES 
+								('$id_warna','$tipe_obat','$kode_produk','$nama_produk','$qty','$uom','$reff_note','$row_order','$id_warna_varian')");
 	}
 
-	public function update_dye_aux($id_warna,$kode_produk,$qty,$uom,$reff_note,$tipe_obat,$row_order)
+	public function update_dye_aux($id_warna,$kode_produk,$qty,$uom,$reff_note,$tipe_obat,$row_order,$id_warna_varian)
 	{
-		return $this->db->query("UPDATE warna_items SET qty = '$qty', uom = '$uom', reff_note = '$reff_note' WHERE id_warna = '$id_warna' AND kode_produk = '$kode_produk' AND type_obat = '$tipe_obat' AND row_order = '$row_order' ");
+		return $this->db->query("UPDATE warna_items SET qty = '$qty', uom = '$uom', reff_note = '$reff_note' WHERE id_warna = '$id_warna' AND kode_produk = '$kode_produk' AND type_obat = '$tipe_obat' AND row_order = '$row_order' AND id_warna_varian  ='$id_warna_varian' ");
 	}
 
 	public function delete_dye_aux($id_warna,$row_order,$type_obat)
@@ -205,14 +210,12 @@ class M_lab extends CI_Model
 		return $this->db->query("DELETE FROM warna_items WHERE id_warna = '$id_warna' AND type_obat = '$type_obat' AND row_order = '$row_order'");
 	}
 
-	
-
 	public function get_list_dye_by_name($name,$tipe)
 	{
 		$id_category = $this->cek_id_category_by_nama($tipe);
 		return $this->db->query("SELECT kode_produk, nama_produk, uom 
 								FROM  mst_produk 
-								WHERE (nama_produk LIKE '%$name%' OR kode_produk LIKE '%$name%') AND id_category IN ('".$id_category."') LIMIT 10")->result_array();
+								WHERE (nama_produk LIKE '%$name%' OR kode_produk LIKE '%$name%') AND id_category IN ('".$id_category."') LIMIT 100")->result_array();
 	}
 
 	public function get_data_dye_by_kode($kode_produk,$tipe)
@@ -244,9 +247,9 @@ class M_lab extends CI_Model
 		return $this->db->query("UPDATE warna SET status  = '$status' WHERE id = '$id_warna'");
 	}
 
-	public function cek_prod($id_warna,$kode_produk)
+	public function cek_prod($id_warna,$kode_produk,$id_warna_varian)
 	{
-		return $this->db->query("SELECT nama_produk FROM warna_items WHERE id_warna = '$id_warna' AND kode_produk = '$kode_produk'");
+		return $this->db->query("SELECT nama_produk FROM warna_items WHERE id_warna = '$id_warna' AND kode_produk = '$kode_produk' AND id_warna_varian = '$id_warna_varian'");
 	}
 
 	// new Query
@@ -295,5 +298,57 @@ class M_lab extends CI_Model
 								WHERE id_warna = '$id_warna' AND kode_produk = '$kode_produk' AND row_order = '$row_order'");
 	}
 
-	
+	public function get_dye_aux_row($id_warna,$kode_produk,$row_order,$tipe_obat,$id_warna_varian)
+	{
+		return $this->db->query("SELECT kode_produk, nama_produk, qty, uom, reff_note, row_order, type_obat, id_warna
+								FROM warna_items 
+								WHERE id_warna = '$id_warna' AND kode_produk = '$kode_produk' AND row_order = '$row_order' AND type_obat = '$tipe_obat' AND id_warna_varian = '$id_warna_varian'");
+	}
+
+	public function get_list_varian_warna_by_id($id_warna)
+	{
+		return $this->db->query("SELECT id,id_warna,nama_varian FROM warna_varian WHERE id_warna = '$id_warna' ORDER BY nama_varian asc")->result();
+	}
+
+	public function get_first_varian_by_id($id_warna)
+	{
+		$query =  $this->db->query("SELECT id FROM warna_varian where id_warna  = '$id_warna' ORDER by id asc LIMIT 1")->row_array();
+		return $query['id'];
+	}
+
+	public function get_nama_varian_by_id($id)
+	{
+		$query = $this->db->query("SELECT nama_varian FROM warna_varian WHERE id = '$id'")->row_array();
+		return $query['nama_varian'];
+	}
+
+	public function get_items_dti_by_first_varian($id_warna,$type_obat)
+	{
+		return $this->db->query("SELECT id_warna, id_warna_varian, type_obat, kode_produk, nama_produk, qty, uom, reff_note, row_order
+								FROM warna_items 
+								WHERE id_warna = '$id_warna' AND type_obat = '$type_obat' 
+								AND id_warna_varian = (SELECT id FROM warna_varian where id_warna = '$id_warna' ORDER BY  id  DESC LIMIT 1)")->result();
+	}
+
+	public function get_last_varian_by_id($id_warna)
+	{
+		$query  =  $this->db->query("SELECT nama_varian FROM warna_varian where id_warna = '$id_warna' ORDER BY id DESC LIMIT 1")->row_array();
+		return $query['nama_varian'];
+	}	
+
+	public function save_new_varian_by_id_warna($new_varian,$id_warna)
+	{
+		$this->db->query("INSERT INTO warna_varian (id_warna,nama_varian) value ('$id_warna','$new_varian') ");
+	}
+
+	public function get_id_new_varian_by_kode($id_warna,$varian)
+	{
+		$query = $this->db->query("SELECT id FROM warna_varian where id_warna = '$id_warna' AND nama_varian = '$varian'")->row();
+		return $query->id;
+	}
+
+	public function simpan_warna_items_batch($sql)
+	{
+		return $this->db->query("INSERT INTO warna_items (id_warna,id_warna_varian,type_obat,kode_produk,nama_produk,qty,uom,reff_note,row_order) values $sql");
+	}
 }

@@ -47,26 +47,37 @@ class Joblistfinishing extends MY_Controller
             }else{
                 $nama_status = $field->status;
             }
-            $category_kain  = " AND mc.nama_category LIKE '%kain hasil%' ";
-            $status_kain    = $this->cek_status_kain($field->kode,$category_kain);
-            $category_resep = " AND mc.nama_category IN ('DYE','AUX') ";
-            $status_resep   = $this->cek_status_kain($field->kode,$category_resep);
+            
+            //$category_resep = " AND mc.nama_category IN ('DYE','AUX') ";
+            //$status_resep   = $this->cek_status_kain($field->kode,$category_resep);
+            
 
-            if($status_kain == 'Draft'  || $status_kain == 'Cancel'){
+            // get Link and status Kain
+
+            //$category_kain  = " AND mc.nama_category LIKE '%kain hasil%' ";
+            //$status_kain    = $this->cek_status_kain($field->kode,$category_kain);
+
+            $method         = $id_dept.'|IN';
+            $kain           = $this->get_kode_in_kain($field->origin,$method);
+            $kode_in_kain   = $kain[0];
+            $status_kain    = $kain[1];
+
+            if($status_kain == 'draft'  || $status_kain == 'cancel'){
                 $color      = "style='color: red' !important";
                 $alias_stat_kain = 'Belum Tersedia';
-            }else if($status_kain == 'Ready'|| $status_kain == 'Done'){
-                $color      = "style='color: green' !important";
+            }else if($status_kain == 'ready'){
+                $color      = "style='color: blue' !important";
+                $alias_stat_kain = 'Harus Diterima';
+            }else if( $status_kain == 'done'){
+                $color      = "style='color: Green' !important";
                 $alias_stat_kain = 'Tersedia';
             }else{
                 $color = '';
                 $alias_stat_kain = '';
             }
 
-            $method         = $id_dept.'|IN';
-            $kode_in_kain   = $this->get_kode_in_kain($field->origin,$method);
             $kode_in_kain_enc = encrypt_url($kode_in_kain);
-            $link_kain      = '<a href="'.base_url('warehouse/penerimaanbarang/edit/'.$kode_in_kain_enc).'" target="_blank" data-toggle="tooltip" title="No Dye IN :'.$kode_in_kain.'"" '.$color.'>'.$alias_stat_kain.'</a>';
+            $link_kain      = '<a href="'.base_url('warehouse/penerimaanbarang/edit/'.$kode_in_kain_enc).'" target="_blank" data-toggle="tooltip" title="No FIN IN :'.$kode_in_kain.'"" '.$color.'>'.$alias_stat_kain.'</a>';
             
             if($nama_status == 'Draft'){
                 $color3      = "style='color: red' !important";
@@ -91,7 +102,7 @@ class Joblistfinishing extends MY_Controller
             }
 
             $kode_out_mg_enc = encrypt_url($out_mg[0]);
-            $link_out      = '<a href="'.base_url('warehouse/pengirimanbarang/edit/'.$kode_out_mg_enc).'" target="_blank" data-toggle="tooltip" title="No Dye Out :'.$out_mg[0].'"" '.$color4.'>'.$status_out.'</a>';
+            $link_out      = '<a href="'.base_url('warehouse/pengirimanbarang/edit/'.$kode_out_mg_enc).'" target="_blank" data-toggle="tooltip" title="No FIN Out :'.$out_mg[0].'"" '.$color4.'>'.$status_out.'</a>';
 
             /*
             $kode_produk    = $field->kode_produk;
@@ -198,12 +209,11 @@ class Joblistfinishing extends MY_Controller
 
     function get_kode_in_kain($origin,$method)
     {
-
         // get kode in 
         $kode     = $this->m_joblistfinishing->get_link_kain_by_kode($origin,$method)->row_array();
         $kode_in  = $kode['kode'];
-        //$kode_encrypt = encrypt_url($kode_in);
-        return $kode_in;
+        $status   = $kode['status'];
+        return array($kode_in,$status);
 
     }
 

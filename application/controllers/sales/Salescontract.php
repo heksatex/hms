@@ -729,6 +729,52 @@ class Salescontract extends MY_Controller
 
     }
 
+
+    public function update_status_color_lines()
+    {
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+          // session habis
+          $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+            $sub_menu  = $this->uri->segment(2);
+            $username  = addslashes($this->session->userdata('username')); 
+
+            $sales_order  = addslashes($this->input->post('sales_order'));
+            $row_order    = $this->input->post('row_order');
+            $value        = $this->input->post('value');
+            $ow           = $this->input->post('ow');
+            $tgl          = date('Y-m-d H:i:s');
+
+            $items = $this->m_sales->cek_item_color_lines_by_kode($sales_order,$row_order)->row_array();
+
+            if(empty($items['sales_order'])){
+              $callback = array('status' => 'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else{
+
+              // update status sales Color Lines
+              $this->m_sales->update_status_color_line_by_row($sales_order,$row_order,$value,$ow);
+
+              if($value == 't'){
+                $status = $ow.' Tidak Aktif';
+              }else{
+                $status = $ow.' OW Tidak Aktif';
+              }
+
+              $jenis_log   = "edit";
+              $note_log    = "Update Status | ".$status;
+              $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+
+              $callback = array('status' => 'success','message' => ' Status Berhasil di Rubah!', 'icon' =>'fa fa-check', 'type' => 'success');
+            }
+
+
+        }
+
+        echo json_encode($callback);
+    }
+
     /* Finish COLOR LINES */
 
 

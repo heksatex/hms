@@ -17,6 +17,9 @@
       margin: 10px 0px 10px 0px;
       border-radius: 5px;
     }
+    .lebar2  {
+        width:40% !important;
+    }
   </style>
 
 </head>
@@ -214,6 +217,12 @@
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Varian </label></div>
+                <div class="col-xs-8">
+                  <input type="text" class="form-control input-sm highlight" name="varian_warna" id="varian_warna"  value="<?php echo $list->nama_varian;?>" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                </div>                                    
+              </div>
+              <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4 "> <div class="box-color" style="background-color: <?php echo $list->kode_warna;?>"></div></div>
                   <div class="col-xs-8 col-md-8" id="ta">
                       <textarea class="form-control input-sm" name="notes_dti" id="notes_dti" readonly="readonly"><?php echo $list->notes_dti; ?></textarea>
@@ -229,7 +238,7 @@
                 <div class="col-xs-4"><label>Start Time </label></div>
                 <div class="col-xs-8 col-md-8">
                   <div class='input-group date' id='datetimepicker3' >
-                    <input type='text' class="form-control input-sm" name="start" id="start"  value="<?php echo $list->start_time;?>" readonly="readonly" />
+                    <input type='text' class="form-control input-sm" name="start" id="start"  value="<?php echo $list->start_time;?>" />
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar" disabled="true" ></span>
                     </span>
@@ -738,7 +747,7 @@
 <!--/. Site wrapper -->
 
 <?php $this->load->view("admin/_partials/js.php") ?>
-
+<!--script src="https://rawgit.com/RobinHerbots/jquery.inputmask/3.x/dist/jquery.inputmask.bundle.js"></script-->
 <script type="text/javascript">
 
    // show after refresh close modal
@@ -755,7 +764,15 @@
             ignoreReadonly: true
         });     
   });
-
+/*
+  $('#start').inputmask("datetime",{
+    mask: "y-mm-dd h:s", 
+    //placeholder: "yyyy-mm-dd hh:mm:ii", 
+    //leapday: "-02-29", 
+    separator: "-", 
+    //alias: "dd-mm-yyyy"
+  });
+*/
   function refresh_mo(){
     $("#tab_1").load(location.href + " #tab_1");
     $("#tab_2").load(location.href + " #tab_2");             
@@ -768,8 +785,6 @@
   $(document).on('click','#btn-cancel-edit', function(e){
     $('#mc').select2({});
     $("#mo").load(location.href + " #mo>*");
-
-
     readonly_textfield();//refresh form/btn
     
   });
@@ -812,6 +827,12 @@
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm');
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch');
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('tambah_quant');
+    $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('request_resep');
+    $("#tambah_data .modal-dialog ").removeClass('lebar2');
+    //replace id btn_request
+    $("#tambah_data .modal-dialog .modal-content .modal-footer #btn_request").attr('id',"btn-tambah");
+    $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").text("Simpan");
+
     readonly_textfield();
     refresh_mo();
   });
@@ -1186,81 +1207,50 @@
     });
   }
 
-  //klik button request
-  $("#btn-request").unbind( "click" );
+
+  //modal request resep
   $('#btn-request').click(function(){
 
-    var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
-
     var status = $('#status').val();
+    var move_id = '<?php echo $move_id_rm['move_id'];?>';
     if(status == 'done'){
       alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
     }else if(status == 'cancel'){
       alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+    /*
+    }else if(status == 'draft'){
+      alert_modal_warning('Maaf, Product belum ready !');
+    */
     }else{
 
-      bootbox.dialog({
-        message: "Apakah Anda yakin ingin Request Resep Obat ?",
-        title  : "<i class='fa fa-gear'></i> Request Resep Obat !",
-        buttons: {
-          danger: {
-              label    : "Yes ",
-              className: "btn-primary btn-sm",
-              callback : function() {
-                please_wait(function(){});
-                $.ajax({
-                  dataType: "JSON",
-                  url     : '<?php echo site_url('manufacturing/mO/request_obat') ?>',
-                  type    : "POST",
-                  data    : {id_warna:$('#id_warna').val(), kode:$('#kode').val(), deptid:deptid, origin: $('#origin').val()},
-                  success: function(data){
-                    if(data.sesi=='habis'){
-                        //alert jika session habis
-                        alert_modal_warning(data.message);
-                        window.location.replace('../index');
-                    }else if(data.status == 'failed'){
-                        unblockUI( function() {});
-                        alert_modal_warning(data.message);
-                        $("#status_bar").load(location.href + " #status_bar");
-                        $("#table_aux").load(location.href + " #table_aux");
-                        $("#table_dyest").load(location.href + " #table_dyest");
-                        $('#btn-request').button('reset');
-                    }else{
-                         //jika berhasil disimpan/diubah
-                        unblockUI( function() {
-                            setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                        });
-                        $("#foot").load(location.href + " #foot");
-                        $("#status_bar").load(location.href + " #status_bar");
-                        $("#table_aux").load(location.href + " #table_aux");
-                        $("#table_dyest").load(location.href + " #table_dyest");
-                        //$(".highlight").prop("readonly", false);
-                        $("#mo").load(location.href + " #mo");
-                        $('#btn-request').button('reset');
-                    }
+      $("#tambah_data").modal({
+          show: true,
+          backdrop: 'static'
+      })
+     var deptid = "<?php echo $list->dept_id; ?>"
 
-                  },error: function (xhr, ajaxOptions, thrownError){
-                    alert(xhr.responseText);
-                    setTimeout($.unblockUI, 1000); 
-                    unblockUI( function(){});
-                    $('#btn-request').button('reset');
-                  }
-                });
-              }
-          },
-          success: {
-                label    : "No",
-                className: "btn-default  btn-sm",
-                callback : function() {
-                  $('.bootbox').modal('hide');
-                }
-          }
-        }
-      });
+      $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('request_resep');
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+      
+      //replace id btn tambah
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('id',"btn_request");
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn_request").text("Proses");
+
+      $("#tambah_data .modal-dialog ").addClass('lebar2');
+
+      $(".request_resep").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $('.modal-title').text('Pilih Varian Warna');
+        $.post('<?php echo site_url()?>manufacturing/mO/request_obat_modal',
+          {id_warna:$('#id_warna').val(), kode:$('#kode').val(), deptid:deptid, origin: $('#origin').val()},
+        ).done(function(html){
+        setTimeout(function() {
+              $(".request_resep").html(html);  
+            },1000);
+          $("#tambah_data .modal-dialog .modal-content .modal-footer #btn_request").attr('disabled',false);
+        });
+
     }
   });
-
-  
 
   //klik button cek stock
   $("#btn-stok").unbind( "click" );

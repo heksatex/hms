@@ -173,10 +173,11 @@ class M_mo extends CI_Model
 
 	public function get_data_by_code($kode)
 	{
-		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, hd.nama_handling, w.nama_warna, w.kode_warna, w.notes as notes_dti, mrp.program, mrp.gramasi
+		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, hd.nama_handling, w.nama_warna, w.kode_warna, w.notes as notes_dti, mrp.program, mrp.gramasi, wv.id as id_warna_varian, wv.nama_varian
 								  FROM mrp_production mrp 
 								  LEFT join  mst_handling hd ON mrp.id_handling = hd.id 
 								  LEFT JOIN warna w ON mrp.id_warna = w.id
+								  LEFT JOIN warna_varian wv ON w.id = wv.id_warna AND wv.id = mrp.id_warna_varian
 								  where mrp.kode = '".$kode."' ");
 		return $query->row();
 	}
@@ -324,7 +325,7 @@ class M_mo extends CI_Model
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
 								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk							
 								INNER JOIN warna w ON m.id_warna = w.id
-								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk
+								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk AND m.id_warna_varian = wi.id_warna_varian
 								WHERE rm.kode = '$kode' AND mp.id_category IN ('12') 
 								order by rm.row_order")->result();
    }
@@ -336,7 +337,7 @@ class M_mo extends CI_Model
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
 								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk							
 								INNER JOIN warna w ON m.id_warna = w.id
-								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk
+								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk AND m.id_warna_varian = wi.id_warna_varian
 								WHERE rm.kode = '$kode' AND mp.id_category IN ('11')
 								order by rm.row_order")->result();
    }
@@ -347,9 +348,9 @@ class M_mo extends CI_Model
 								WHERE nama_route = '$route' ORDER BY row_order ")->result();
 	}
 
-	public function get_warna_items_by_warna($warna)
+	public function get_warna_items_by_warna($warna,$varian)
 	{
-		return $this->db->query("SELECT * FROM warna_items WHERE id_warna = '$warna' order by type_obat,row_order")->result();
+		return $this->db->query("SELECT * FROM warna_items WHERE id_warna = '$warna' AND id_warna_varian = '$varian' order by type_obat,row_order")->result();
 	}
 
 
@@ -801,6 +802,11 @@ class M_mo extends CI_Model
 								INNER JOIN mst_category  as mc ON mp.id_category = mc.id
 								WHERE smi.move_id = '$move_id' AND mc.nama_category LIKE '%kain%'");
     }
+
+	public function get_list_varian_by_id($id_warna)
+	{
+		return $this->db->query("SELECT id, id_warna, nama_varian FROM warna_varian where id_warna = '$id_warna' ORDER BY id asc")->result();
+	}
 
 
 }

@@ -6,7 +6,7 @@ class M_joblistgrgout extends CI_Model
 {
 	
 	//var $table 		  = 'pengiriman_barang';
-	var $column_order = array(null, 'pb.kode', 'tanggal', 'pb.origin', 'reff_picking', 'pbi.nama_produk', 'target_mtr', 'mtr', 'kg', 'gl', 'nama_status');
+	var $column_order = array(null, 'pb.kode', 'tanggal', 'pb.origin', 'reff_picking', 'pbi.nama_produk',  'target_mtr', 'mtr', 'kg', 'gl', 'nama_status','nama_warna');
 	var $column_search= array( 'pb.kode', 'tanggal', 'pb.origin', 'reff_picking', 'pbi.nama_produk', 'pbi.qty', 'nama_status');
 	var $order  	  = array('tanggal' => 'asc');
 
@@ -42,8 +42,12 @@ class M_joblistgrgout extends CI_Model
             $this->db->like('pbi.nama_produk', $this->input->post('produk'));
         }
 
+
+
 		//$this->db->from($this->table);
-		$this->db->select("pb.kode, pb.tanggal, pb.origin,  pb.reff_picking, pb.status, pb.reff_note, pb.move_id, mmss.nama_status, sm.method, pbi.nama_produk, pbi.qty as target_mtr, (SELECT IFNULL(0,sum(qty)) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as mtr, (SELECT IFNULL(0,sum(qty2)) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as kg,(SELECT count(nama_produk) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as gl");
+		$this->db->select("pb.kode, pb.tanggal, pb.origin,  pb.reff_picking, pb.status, pb.reff_note, pb.move_id, mmss.nama_status, sm.method, pbi.nama_produk, pbi.qty as target_mtr, (SELECT IFNULL(sum(smi.qty),0 )  FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as mtr, (SELECT IFNULL(sum(smi.qty2),0 )  FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as kg,(SELECT count(nama_produk) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as gl, (SELECT w.nama_warna FROM color_order_detail as cod 
+		INNER JOIN warna as w ON cod.id_warna = w.id
+			WHERE cod.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',2),'|',-1) AND cod.row_order  = SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3),'|',-1)) as nama_warna");
 		$this->db->from("pengiriman_barang pb");
 		$this->db->join("pengiriman_barang_items pbi", "pbi.kode=pb.kode", "left");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
@@ -108,7 +112,9 @@ class M_joblistgrgout extends CI_Model
 	public function count_all($id_dept,$mmss)
 	{	
 		//$this->db->from($this->table);
-		$this->db->select("pb.kode, pb.tanggal, pb.origin,  pb.reff_picking, pb.status, pb.reff_note, pb.move_id, mmss.nama_status, sm.method, pbi.nama_produk, pbi.qty as target_mtr, (SELECT IFNULL(0,sum(qty)) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as mtr, (SELECT IFNULL(0,sum(qty2)) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as kg,(SELECT count(nama_produk) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as gl");
+		$this->db->select("pb.kode, pb.tanggal, pb.origin,  pb.reff_picking, pb.status, pb.reff_note, pb.move_id, mmss.nama_status, sm.method, pbi.nama_produk, pbi.qty as target_mtr, (SELECT IFNULL(0,sum(qty)) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as mtr, (SELECT IFNULL(0,sum(qty2)) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as kg,(SELECT count(nama_produk) FROM stock_move_items smi WHERE smi.move_id = pb.move_id AND smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as gl, (SELECT w.nama_warna FROM color_order_detail as cod 
+		INNER JOIN warna as w ON cod.id_warna = w.id
+			WHERE cod.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',2),'|',-1) AND cod.row_order  = SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3),'|',-1)) as nama_warna");
 		$this->db->from("pengiriman_barang pb");
 		$this->db->join("pengiriman_barang_items pbi", "pbi.kode=pb.kode", "left");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");

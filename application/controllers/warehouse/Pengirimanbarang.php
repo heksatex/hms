@@ -312,6 +312,19 @@ class Pengirimanbarang extends MY_Controller
         $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
         $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
 
+        // get warna untuk greige out()
+        if($list->dept_id == 'GRG'){
+          $origin = $list->origin;
+          $origin_ex  = explode("|",$origin);
+          $kode_co    = $origin_ex[1];
+          $row_order  = $origin_ex[2];
+
+          $get_w      = $this->m_pengirimanBarang->get_warna_by_co($kode_co,$row_order)->row_array();
+          $data['warna']  = $get_w['nama_warna'];
+        }else{
+          $data['warana'] = '';
+        }
+
         $qc            = $this->m_pengirimanBarang->get_quality_control_by_kode($kode_decrypt,$list->dept_id)->row();
         if(!empty($qc)){
           $data['qc_1']  = $qc->qc_1;
@@ -330,7 +343,7 @@ class Pengirimanbarang extends MY_Controller
 
         if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
           $data['show_qc']   = true;
-        }else if($cek_dept['dept'] == 'QC'){
+        }else if($cek_dept['dept'] == 'QC' OR $cek_dept['dept'] == 'PPIC'){
           $data['show_qc']  = true;
         }else{
           $data['show_qc'] = false;

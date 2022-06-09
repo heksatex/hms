@@ -131,7 +131,14 @@
                     <textarea class="form-control input-sm" name="reff_pick" id="reff_pick" readonly="readonly" ><?php echo $list->reff_picking; ?></textarea>
                   </div>
                 </div>
-             
+                <?php if($list->dept_id == 'GRG'){?>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Warna </label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <input type='text' class="form-control input-sm" name="warna" id="warna" value="<?php echo $warna;?>" readonly="readonly" />
+                  </div>
+                </div>
+                <?php }?>
               </div>
 
             </div>

@@ -150,12 +150,12 @@
                       <th>Origin</th>
                       <th>Reff Picking</th>
                       <th>Product</th>
+                      <th>Warna</th>
                       <th>Target Mtr</th>
                       <th>Mtr</th>
                       <th>Kg</th>
                       <th>GL</th>
                       <th>Status</th>
-                      <th>Action</th>
                     </tr>
                   </thead>
                 </table>
@@ -226,17 +226,19 @@
  
             "columnDefs": [
               { 
-                  "targets": [ 0 ], 
-                  "orderable": false, 
+                "targets": [ 0 ], 
+                "orderable": false, 
               },
-              { 
-                  "targets": [ 11 ], 
-                  "orderable": false, 
-              },
-             {
+              {
                 "targets" : 4,
                  render: function (data, type, full, meta) {
-                        return "<div class='text-wrap width-160'>" + data + "</div>";
+                        return "<div class='text-wrap width-150'>" + data + "</div>";
+                }
+              },
+              {
+                "targets" : 5,
+                 render: function (data, type, full, meta) {
+                        return "<div class='text-wrap width-150'>" + data + "</div>";
                 }
               },
             ],
@@ -251,7 +253,7 @@
  
     });
 
-
+/*
     function kirim_barang(kode,move_id,method,origin,id_dept,status){
 
       if(status == 'cancel'){
@@ -324,6 +326,7 @@
     }
 
     }
+    */
 
 </script>
 

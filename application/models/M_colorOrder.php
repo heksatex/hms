@@ -226,7 +226,7 @@ class M_colorOrder extends CI_Model
 	function get_datatables2()
 	{
 		$this->_get_datatables2_query();
-		$this->db->where("a.status", 'product_generated');
+		$this->db->where("a.status", 'waiting_color');
 		$this->db->where_not_in("b.ow", '');
 		$this->db->where('a.sales_order NOT IN (SELECT kode_sc FROM color_order)', NULL, FALSE);
 
@@ -239,7 +239,7 @@ class M_colorOrder extends CI_Model
 	function count_filtered2()
 	{
 		$this->_get_datatables2_query();
-		$this->db->where("a.status", 'product_generated');
+		$this->db->where("a.status", 'waiting_color');
 		$this->db->where_not_in("b.ow", '');
 		$this->db->where('a.sales_order NOT IN (SELECT kode_sc FROM color_order)', NULL, FALSE);
 		$query = $this->db->get();
@@ -253,7 +253,7 @@ class M_colorOrder extends CI_Model
 		$this->db->from("sales_contract a");
 		$this->db->join("sales_color_line b","a.sales_order = b.sales_order","inner");
 		$this->db->join("mst_sales_group msg","a.sales_group = msg.kode_sales_group","INNER");
-		$this->db->where("a.status", 'product_generated');
+		$this->db->where("a.status", 'waiting_color');
 		$this->db->where_not_in("b.ow", '');
 		$this->db->where('a.sales_order NOT IN (SELECT kode_sc FROM color_order)', NULL, FALSE);
 		return $this->db->count_all_results();
