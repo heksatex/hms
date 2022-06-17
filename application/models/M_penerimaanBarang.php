@@ -6,8 +6,8 @@ class M_penerimaanBarang extends CI_Model
 {
 	
 	//var $table 		  = 'penerimaan_barang';
-	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'tanggal_jt', 'lokasi_tujuan','reff_picking','reff_note', 'nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'tanggal_jt',  'lokasi_tujuan','reff_picking','reff_note', 'nama_status');
+	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'origin', 'lokasi_tujuan','reff_picking','reff_note', 'nama_status');
+	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'origin',  'lokasi_tujuan','reff_picking','reff_note', 'nama_status');
 	var $order  	  = array('kode' => 'desc');
 
 	var $table3  	    = 'stock_quant';
@@ -37,7 +37,7 @@ class M_penerimaanBarang extends CI_Model
 
 		//$this->db->from($this->table);
 
-		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status");
+		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status, pb.origin");
 		$this->db->from("penerimaan_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
 
@@ -406,6 +406,27 @@ class M_penerimaanBarang extends CI_Model
 		$query = $this->db->get('penerimaan_barang_tmp');
 		return $query->num_rows();
 		
+	}
+
+	public function get_type_mo_dept_id_mrp_production_by_kode($kode_mo)
+	{
+		$query = $this->db->query("SELECT mrp.dept_id, dept.type_mo
+									FROM mrp_production mrp 
+									INNER JOIN departemen dept ON mrp.dept_id =dept.kode 
+									where mrp.kode in ($kode_mo) ")->row_array();
+		return $query;
+	}
+
+	public function cek_mrp_production_rm_target_by_kode($kode_mo)
+	{
+		return $this->db->query("SELECT status FROM mrp_production_rm_target where kode in ($kode_mo) AND status IN ('draft','cancel') ");
+	}
+
+	public function cek_stock_move_items_penerimaan_barang_by_move_id($move_id)
+	{
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get('stock_move_items');
+		return $query->num_rows();
 	}
 
  

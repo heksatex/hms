@@ -17,7 +17,28 @@
         margin: 10 0px;
         min-width:  24px;
     }
+
+    .div_box{
+      padding-top: 5px;
+    }
+    
+    .box-header-qc{
+      padding : 5px !important;
+    }
+    
   </style>
+
+  <?php 
+    if($smove['method'] == 'GRG|OUT'){
+    ?>
+    <style>
+      button[id="btn-kirim"]{/*untuk hidden button kirim saat pengiriman GRG */
+       display: none;
+      }
+    </style>
+  <?php 
+    }
+  ?>
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini">
@@ -77,7 +98,7 @@
           </div>
         </div>
         <div class="box-body">
-          <form class="form-horizontal">
+          <form class="form-horizontal"  id="form_out">
             <div class="form-group">                  
               <div class="col-md-12" >
                 <div id="alert"></div>
@@ -110,7 +131,14 @@
                     <textarea class="form-control input-sm" name="reff_pick" id="reff_pick" readonly="readonly" ><?php echo $list->reff_picking; ?></textarea>
                   </div>
                 </div>
-             
+                <?php if($list->dept_id == 'GRG'){?>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Warna </label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <input type='text' class="form-control input-sm" name="warna" id="warna" value="<?php echo $warna;?>" readonly="readonly" />
+                  </div>
+                </div>
+                <?php }?>
               </div>
 
             </div>
@@ -146,11 +174,58 @@
                     <textarea class="form-control input-sm" name="note" id="note" ><?php echo $list->reff_note; ?></textarea>
                   </div>                                    
                 </div>
+                <br>
+                <?php  if($show_qc == true AND !empty($data_qc) AND  $akses_menu > 0){?>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label></label></div>
+
+                  <div class="col-xs-8 div_box">
+                    <div class="box box-default box-solid ">
+                      <div class="box-header box-header-qc">
+                        <h3 class="box-title">Quality Control</h3>
+                      </div>
+                      <div class="box-body">
+                        <?php 
+                       
+                          if(!empty($qc_1)) {
+                            $check_qc_1 = "";
+                            if($list->qc_1 == 'true'){
+                              $check_qc_1= "checked";
+                            }
+                          ?>
+                              
+                          <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-12"><label><input type="checkbox"  name="qc_1" id="qc_1" onchange="qualityControl(this,'qc_1')" <?php echo $check_qc_1;?> > <?php echo $qc_1;?> </label></div>
+                          </div>
+                          <?php }?>
+
+                          <?php if(!empty($qc_2)) {
+                            $check_qc_2 = "";
+                            if($list->qc_2 == 'true'){
+                              $check_qc_2= "checked";
+                            }
+                            ?>
+                          <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-12"><label><input type="checkbox"  name="qc_2" id="qc_2" onchange="qualityControl(this,'qc_2')"  <?php echo $check_qc_2; ?>> <?php echo $qc_2;?> </label></div>
+                          </div>
+                          <?php }
+                       
+                      ?>
+                      </div>
+                      <?php if($list->status !='ready' ){ ?>
+                        <div class="overlay">
+                        </div>
+                      <?php } ?>
+                    </div>
+                  </div>
+
+                </div>
+              <?php }?>
 
               </div>
             </div>
+          </form>
 
- 
             <div class="row">
               <div class="col-md-12">
                 <!-- Custom Tabs -->
@@ -185,11 +260,8 @@
                               <tr class="num">
                                 <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order."^|".$row->kode_produk."^|".$smove['move_id']."^|".$row->origin_prod?>"></td>
                                 <td><?php echo $row->kode_produk;?></td>
-                                <td>
-                                  <?php if($smove['method']!="GRG|OUT" OR $row->status_barang=='done'){echo $row->nama_produk;}else{?>
-                                  <a href="javascript:void(0)" onclick="tambah('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>')"><?php echo $row->nama_produk?></a>
-                                  <?php }?>
-                                  <?php if($row->status_barang == 'done' OR $row->status_barang == 'cancel'){echo "";}else{?>
+                                <td> <?php echo $row->nama_produk?></a>
+                                  <?php if($row->status_barang == 'done' OR $row->status_barang == 'cancel' OR $akses_menu == 0){echo "";}else{?>
                                    <a href="javascript:void(0)" onclick="tambah_quant('<?php echo htmlentities($row->nama_produk); ?>','<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>','<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                   <?php }?>
@@ -269,8 +341,10 @@
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                 <td><?php echo $row->quant_id?></td>
                                 <td class="no" align="center" >
-                                 <a onclick="hapus('<?php  echo $list->kode ?>','<?php  echo $list->move_id ?>','<?php  echo $row->kode_produk ?>','<?php  echo htmlentities($row->nama_produk) ?>', '<?php  echo $row->quant_id ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>', '<?php  echo $row->origin_prod ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
-                                 </a>                               
+                                  <?php if($akses_menu > 0){?>
+                                    <a onclick="hapus('<?php  echo $list->kode ?>','<?php  echo $list->move_id ?>','<?php  echo $row->kode_produk ?>','<?php  echo htmlentities($row->nama_produk) ?>', '<?php  echo $row->quant_id ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>', '<?php  echo $row->origin_prod ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
+                                    </a>                               
+                                  <?php }?>
                                </td>
                               </tr>
                             <?php 
@@ -358,7 +432,6 @@
               <!-- /.col -->
           </div>
 
-          </form>
         </div>
         <!-- /.box-body -->
       </div>
@@ -449,6 +522,51 @@
       $("#tgl_btn").load(location.href + " #tgl_btn"); 
   }
 
+  // function onchange quality control
+  function qualityControl(element,id){
+    //alert(element.checked);
+    var baseUrl     = '<?php echo base_url(); ?>';
+    var deptid      = "<?php echo $list->dept_id; ?>";
+    var qc_ke       = id;
+    var value       = element.checked;
+
+    $.ajax({
+         type: "POST",
+         dataType: "json",
+         url :'<?php echo base_url('warehouse/pengirimanbarang/quality_control_out')?>',
+         data: {kode:$('#kode').val(), deptid:deptid, qc_ke:qc_ke, value:value
+          },success: function(response){
+            if(response.sesi == "habis"){
+              //alert jika session habis
+              alert_modal_warning(response.message);             
+              window.location.href = baseUrl;//replace ke halaman login
+            }else if(response.status == "failed"){
+              if(response.alert == "modal"){
+                alert_modal_warning(response.message);             
+              }else{
+                alert_notify(response.icon,response.message,response.type,function(){});
+              }
+
+              if(value == true){
+                $("#"+qc_ke).prop("checked", false);
+              }else{
+                $("#"+qc_ke).prop("checked", true);
+              }
+              
+            }else{
+              alert_notify(response.icon,response.message,response.type,function(){});
+            }
+            refresh_div_out();
+            $("#form_out").load(location.href + " #form_out>*");
+
+          },error: function (xhr, ajaxOptions, thrownError) { 
+            alert(xhr.responseText);
+            $("#form_out").load(location.href + " #form_out>*");
+          }
+      });
+    
+  }
+
   //untuk hapus details item
   function hapus(kode,move_id,kode_produk,nama_produk,quant_id,row_order,status,origin_prod)
   {
@@ -485,7 +603,7 @@
                         }else{
                           refresh_div_out();                
                           alert_notify(response.icon,response.message,response.type,function(){});
-                          parent.fadeOut('slow');
+                          $("#form_out").load(location.href + " #form_out>*");
                         }
                       })
                 }
@@ -539,6 +657,7 @@
               unblockUI( function() {});
               refresh_div_out();
               $('#btn-simpan').button('reset');
+              $("#form_out").load(location.href + " #form_out>*");
             }else{
               //jika berhasil disimpan/diubah
               unblockUI( function() {
@@ -546,6 +665,7 @@
               });
               refresh_div_out();
               $('#btn-simpan').button('reset');
+              $("#form_out").load(location.href + " #form_out>*");
             }
 
           },error: function (xhr, ajaxOptions, thrownError) { 
@@ -603,6 +723,7 @@
               refresh_div_out();
               $('#btn-stok').button('reset');            
             }
+            $("#form_out").load(location.href + " #form_out>*");
 
           },error: function (xhr, ajaxOptions, thrownError) { 
             alert(xhr.responseText);
@@ -678,6 +799,7 @@
                         refresh_div_out();                     
                         $('#btn-kirim').button('reset');
                       }
+                      $("#form_out").load(location.href + " #form_out>*");
                     })
               }
           },
@@ -910,6 +1032,7 @@
                             refresh_div_out();
                             $(".add-new").show();                   
                             alert_notify(data.icon,data.message,data.type,function(){});
+                            $("#form_out").load(location.href + " #form_out>*");
                          }
                       },
                       error: function (xhr, ajaxOptions, thrownError){
@@ -929,6 +1052,79 @@
         }
         });
     });
+
+  //klik button batal pengiriman barang
+  $("#btn-cancel").unbind( "click" );
+  $(document).on('click','#btn-cancel',function(e){
+      var move_id = '<?php echo $smove['move_id'];?>';
+      var status  = $('#status').val();
+      var method  = '<?php echo $smove['method'];?>';
+      var deptid  = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
+         
+      if(status == 'cancel'){
+        var message = 'Maaf, Data Sudah dibatalkan !';
+        alert_modal_warning(message);
+        
+      }else if(status=='done'){
+        var message = 'Maaf, Data tidak bisa dibatalkan, Data Sudah Terkirim !';
+        alert_modal_warning(message);
+
+      }else{
+        bootbox.dialog({
+        message: "Anda yakin ingin membatalkan Pengiriman Barang ?",
+        title: "<i class='glyphicon glyphicon-trash'></i> Cancel !",
+        buttons: {
+          danger: {
+              label    : "Yes ",
+              className: "btn-primary btn-sm",
+              callback : function() {
+                    please_wait(function(){});
+                    $('#btn-cancel').button('loading');
+                    $.ajax({
+                          type: 'POST',
+                          dataType : 'json',
+                          url  : "<?php echo site_url('warehouse/pengirimanbarang/batal_pengiriman_barang')?>",
+                          data : {kode:$('#kode').val(), move_id:move_id, deptid:deptid},
+                          error: function (xhr, ajaxOptions, thrownError) { 
+                          alert(xhr.responseText);
+                          $('#btn-cancel').button('reset');
+                          unblockUI( function(){});
+                          refresh_div_out();
+                        }
+                    })
+                    .done(function(response){
+                      if(response.sesi == 'habis'){//jika session habis
+                        alert_modal_warning(response.message);
+                        window.location.replace('../index');
+                      }else if(response.status == 'failed' ){
+                        
+                        unblockUI( function(){});
+                        alert_modal_warning(response.message);                      
+                        refresh_div_out();                 
+                        $('#btn-cancel').button('reset');
+                      }else{
+                        
+                        unblockUI( function() {
+                          setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
+                        });
+                        refresh_div_out();                     
+                        $('#btn-cancel').button('reset');
+                      }
+                      $("#form_out").load(location.href + " #form_out>*");
+                    })
+              }
+          },
+          success: {
+                label    : "No",
+                className: "btn-default  btn-sm",
+                callback : function() {
+                $('.bootbox').modal('hide');
+                }
+          }
+        }
+      });
+    }
+  });
 
     //modal mode print
     $(document).on('click','#btn-print',function(e){

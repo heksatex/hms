@@ -140,6 +140,7 @@
                   $('#tambah_data').modal('hide');
                   $('#btn-tambah').button('reset');
                   alert_notify(data.icon,data.message,data.type,function(){});
+                  $("#form_out").load(location.href + " #form_out>*");
                 }
 
               },error: function (xhr, ajaxOptions, thrownError) {

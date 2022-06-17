@@ -11,8 +11,11 @@
 
   <!-- main -header -->
   <header class="main-header">
-   <?php $this->load->view("admin/_partials/main-menu.php") ?>
-   <?php $this->load->view("admin/_partials/topbar.php") ?>
+    <?php $this->load->view("admin/_partials/main-menu.php") ?>
+    <?php
+      $data['deptid']     = $id_dept;
+      $this->load->view("admin/_partials/topbar.php",$data)
+    ?>
   </header>
 
   <!-- Menu Side Bar -->
@@ -97,22 +100,6 @@
                   <div class="col-xs-4"><label>Buyer Code </label></div>
                   <div class="col-xs-8">
                     <input type="text" class="form-control input-sm" name="buyer_code" id="buyer_code" readonly="readonly" />
-                  </div>                                    
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Handling</label></div>
-                  <div class="col-xs-8">
-                    <select class="form-control input-sm" name="handling" id="handling" />
-                      <?php foreach ($handling as $row) {?>
-                         <option><?php echo $row->nama;?></option>
-                      <?php }?>
-                    </select>
-                  </div>                                    
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Lebar Jadi</label></div>
-                  <div class="col-xs-8">
-                    <input type="text" class="form-control input-sm" name="lbr_jadi" id="lbr_jadi" />
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -215,9 +202,6 @@
                 note       : $('#note').val(),
                 tgl        : $('#tgl').val(),
                 route      : $('#route').val(),
-                lbr_jadi   : $('#lbr_jadi').val(),
-                handling   : $('#handling').val(),
-
           },success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis
@@ -227,7 +211,7 @@
             {
                 //jika ada form belum keiisi
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type, function(){}); }, 1000);
                 });
                  document.getElementById(data.field).focus();
             }
@@ -254,12 +238,7 @@
 
           }
       });
-        window.setTimeout(function() {
-       $(".alert").fadeTo(500, 0).slideUp(500, function(){
-        $(this).remove(); });
-      }, 3000);
     });
-
 
     //klik button Batal
     $('#btn-cancel').click(function(){

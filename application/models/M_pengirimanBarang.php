@@ -6,8 +6,8 @@ class M_pengirimanBarang extends CI_Model
 {
 	
 	//var $table 		  = 'pengiriman_barang';
-	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'tanggal_jt','lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'tanggal_jt', 'lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
+	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'origin','lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
+	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'origin', 'lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
 	var $order  	  = array('kode' => 'desc');
 
 	var $table2  	    = 'stock_kain_greige';
@@ -49,7 +49,7 @@ class M_pengirimanBarang extends CI_Model
         }
 
 		//$this->db->from($this->table);
-		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status");
+		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status, pb.origin");
 		$this->db->from("pengiriman_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
 
@@ -345,17 +345,18 @@ class M_pengirimanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lokasi_fisik
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lokasi_fisik, tmp.valid
 								 FROM stock_move_items smi 
 								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
+								 LEFT JOIN pengiriman_barang_tmp tmp ON pb.kode = tmp.kode AND smi.lot = tmp.lot
 								 Where pb.kode = '$kode' 
 								 ORDER BY smi.row_order")->result();
 	}
 
 	public function get_stock_move_items_by_kode_print($kode,$dept_id)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lebar_greige, smi.uom_lebar_greige, sq.nama_grade
 								 FROM stock_move_items smi 
 								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
@@ -436,12 +437,14 @@ class M_pengirimanBarang extends CI_Model
 								 WHERE pb.kode = '$kode'");
 	}
 
+	/*
 	public function cek_valid_lokasi_lot_by_move_id($move_id)
 	{
 		return $this->db->query("SELECT move_id,lot,kode_lokasi FROM stock_kain_greige skg 
 								 INNER JOIN stock_move_items smi ON skg.barcode_id = smi.lot
 								 WHERE smi.move_id = '$move_id' AND kode_lokasi IN ('ADJ','GOUT','TRB','TRD','JAC')");
 	}
+	*/	
 
     public function get_kode_mo_pengiriman_barang_by_move_id($move_id)
 	{	
@@ -540,6 +543,158 @@ class M_pengirimanBarang extends CI_Model
 	{
 		return $this->db->query("SELECT move_id FROM stock_move WHERE method = '$method' AND origin = '$origin' AND status NOT IN ('$status','$status2') ");
 	}
+
+
+	public function simpan_pengiriman_barang_tmp($kode,$quant_id,$move_id,$kode_produk,$lot,$valid,$tgl)
+	{
+		return $this->db->query("INSERT INTO pengiriman_barang_tmp (kode,quant_id,move_id,kode_produk,lot,valid,valid_date) VALUES ('$kode','$quant_id','$move_id','$kode_produk','$lot','$valid','$tgl')");
+	}
+
+	public function get_count_valid_scan_by_kode($kode)
+	{
+		$this->db->SELECT('kode');
+		$this->db->FROM('pengiriman_barang_tmp');
+		$this->db->where('kode', $kode);
+		$this->db->where('valid', 't');
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function get_count_all_scan_by_kode($move_id)
+	{
+		$this->db->SELECT('move_id');
+		$this->db->FROM('stock_move_items');
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function cek_scan_by_lot($kode,$lot)
+	{
+		return $this->db->query("SELECT lot FROM pengiriman_barang_tmp WHERE kode = '$kode' AND lot = '$lot'");
+	}
+
+	public function get_list_stock_move_items_by_lot($move_id,$lot,$status)
+	{
+		return $this->db->query("SELECT * FROM stock_move_items where move_id = '$move_id' AND lot = '$lot' AND status = '$status'")->result();
+	}
+
+	public function cek_pengiriman_barang_tmp_by_kode($kode)
+	{
+		$this->db->where('kode', $kode);
+		$query = $this->db->get('pengiriman_barang_tmp');
+		return $query->num_rows();
+	}
+
+	public function get_nama_warna_by_origin($kode_co, $row_order)
+	{
+		return $this->db->query("SELECT cod.id_warna, w.id, w.nama_warna
+								FROM  color_order_detail cod
+								INNER JOIN warna w ON cod.id_warna = w.id 
+								Where kode_co ='".$kode_co."' AND row_order = '".$row_order."'");
+	}
+
+	public function get_route_by_origin($origin)
+	{
+		return $this->db->query("SELECT distinct method FROM stock_move where origin = '$origin'")->result();
+	}
+
+	public function get_route_by_origin_method($origin,$method)
+	{
+		
+		return $this->db->query("SELECT move_id, method FROM stock_move where origin = '$origin' AND method = '$method' ")->result();
+	}
+
+	public function get_kode_out_by_move_id($move_id)
+	{
+		$query = $this->db->query("SELECT kode FROM pengiriman_barang where move_id = '$move_id'")->row_array();
+		return $query['kode'];
+	}
+
+	public function get_kode_in_by_move_id($move_id)
+	{
+		$query = $this->db->query("SELECT kode FROM penerimaan_barang where move_id = '$move_id'")->row_array();
+		return $query['kode'];
+	}
+
+	public function get_kode_mrp_by_move_id($move_id)
+	{
+		$query = $this->db->query("SELECT distinct kode FROM mrp_production_rm_target where move_id = '$move_id'")->row_array();
+		return $query['kode'];
+	}
+
+	public function get_kode_mrp_production_rm_target_by_move_id($move_id)
+	{
+		return $this->db->query("SELECT distinct(kode) FROM mrp_production_rm_target WHERE move_id = '$move_id' ");
+	}
+
+
+	public function get_type_mo_dept_id_mrp_production_by_kode($kode_mo)
+	{
+		$query = $this->db->query("SELECT mrp.dept_id, dept.type_mo
+									FROM mrp_production mrp 
+									INNER JOIN departemen dept ON mrp.dept_id =dept.kode 
+									where mrp.kode in ($kode_mo) ")->row_array();
+		return $query;
+	}
+
+	public function cek_mrp_production_rm_target_by_kode($kode_mo)
+	{
+		return $this->db->query("SELECT status FROM mrp_production_rm_target where kode in ($kode_mo) AND status IN ('draft','cancel') ");
+	}
+
+	public function get_quality_control_by_kode($kode,$dept_id)
+	{
+		return $this->db->query("SELECT qc.dept_id, qc.qc_1, qc.qc_2
+								FROM pengiriman_barang as pb
+								INNER JOIN quality_control as qc ON pb.dept_id = qc.dept_id
+								WHERE qc.dept_id = '$dept_id' AND pb.kode = '$kode'");
+	}
+
+	public function update_quality_control($kode,$qc_ke,$value)
+	{
+		return $this->db->query("UPDATE pengiriman_barang set $qc_ke = '$value' WHERE kode = '$kode'");
+	}
+
+	public function get_nama_qc_by_dept($dept_id,$qc_ke)
+	{
+		return $this->db->query("SELECT $qc_ke as qc FROM quality_control WHERE dept_id = '$dept_id' ");
+	}
+
+	public function cek_quality_control_by_dept($dept_id)
+	{
+		$this->db->select('dept_id, qc_1, qc_2');
+		$this->db->where('dept_id',$dept_id);
+		$query = $this->db->get('quality_control');
+		return $query;
+	}
+
+
+	public function cek_qc_pengiriman_barang_departemen_by_kode($kode,$qc_ke)
+	{
+		return $this->db->query("SELECT $qc_ke as qc FROM pengiriman_barang WHERE kode = '$kode'");
+	}
+
+	public function cek_qc_item_by_dept($dept_id,$qc_ke)
+	{
+		return $this->db->query("SELECT $qc_ke as qc FROM quality_control WHERE dept_id = '$dept_id'");
+	}
+
+	public function cek_stock_move_items_pengiriman_barang_by_move_id($move_id)
+	{
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get('stock_move_items');
+		return $query->num_rows();
+	}
+
+	public function get_warna_by_co($kode_co,$row_order)
+	{
+		return $this->db->query("SELECT w.nama_warna 
+								FROM color_order_detail as cod 
+								INNER JOIN warna as w ON cod.id_warna = w.id
+								WHERE cod.kode_co = '$kode_co' AND cod.row_order  = '$row_order' ");
+	}
+
   
 }
 

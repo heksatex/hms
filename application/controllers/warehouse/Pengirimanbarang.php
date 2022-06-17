@@ -11,7 +11,6 @@ class Pengirimanbarang extends MY_Controller
 		$this->is_loggedin();//cek apakah user sudah login
 		$this->load->model("_module");//load modul global
 		$this->load->model("m_pengirimanBarang");///load model pengiriman barang
-
 	}
 
 	public function index()
@@ -107,6 +106,24 @@ class Pengirimanbarang extends MY_Controller
 		$this->load->view('warehouse/v_pengiriman_barang',$data);
 	}
 
+  public function Finbrushing()
+	{
+		$data['id_dept']='FBR';
+		$this->load->view('warehouse/v_pengiriman_barang',$data);
+	}
+
+  public function Padding()
+	{
+		$data['id_dept']='PAD';
+		$this->load->view('warehouse/v_pengiriman_barang',$data);
+	}
+
+  public function Setting()
+	{
+		$data['id_dept']='SET';
+		$this->load->view('warehouse/v_pengiriman_barang',$data);
+	}
+
 	public function Inspecting2()
 	{
 		$data['id_dept']='INS2';
@@ -170,7 +187,7 @@ class Pengirimanbarang extends MY_Controller
           $row[] = '<a href="'.base_url('warehouse/pengirimanbarang/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
           $row[] = $field->tanggal;
           $row[] = $field->tanggal_transaksi;
-          $row[] = $field->tanggal_jt;
+          $row[] = $field->origin;
           $row[] = $field->lokasi_tujuan;
           $row[] = $field->reff_picking;
           $row[] = $reff_note;
@@ -307,6 +324,49 @@ class Pengirimanbarang extends MY_Controller
         $data['smi'] = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode_decrypt);
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($list->dept_id)->row_array();
 
+        // cek priv akses menu
+        $sub_menu           = $this->uri->segment(2);
+        $username           = $this->session->userdata('username'); 
+        $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
+
+        // get warna untuk greige out()
+        if($list->dept_id == 'GRG'){
+          $origin = $list->origin;
+          $origin_ex  = explode("|",$origin);
+          $kode_co    = $origin_ex[1];
+          $row_order  = $origin_ex[2];
+
+          $get_w      = $this->m_pengirimanBarang->get_warna_by_co($kode_co,$row_order)->row_array();
+          $data['warna']  = $get_w['nama_warna'];
+        }else{
+          $data['warana'] = '';
+        }
+
+        $qc            = $this->m_pengirimanBarang->get_quality_control_by_kode($kode_decrypt,$list->dept_id)->row();
+        if(!empty($qc)){
+          $data['qc_1']  = $qc->qc_1;
+          $data['qc_2']  = $qc->qc_2;
+        }else{
+          $data['qc_1']  = "";
+          $data['qc_2']  = "";
+        }
+        $data['data_qc'] = $qc;
+
+
+        // cek level akses by user
+        $level_akses = $this->_module->get_level_akses_by_user($username)->row_array();
+        // cek departemen by user
+        $cek_dept = $this->_module->cek_departemen_by_user($username)->row_array();
+
+        if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
+          $data['show_qc']   = true;
+        }else if($cek_dept['dept'] == 'QC' OR $cek_dept['dept'] == 'PPIC'){
+          $data['show_qc']  = true;
+        }else{
+          $data['show_qc'] = false;
+        }
+        
         if(empty($data["list"])){
           show_404();
         }else{
@@ -319,9 +379,19 @@ class Pengirimanbarang extends MY_Controller
     {   
         if(!isset($kode)) show_404();
         $kode_decrypt   = decrypt_url($kode);
-        $data["list"]   = $this->m_pengirimanBarang->get_data_by_code($kode_decrypt);
-        $data["move_id"]= $this->m_pengirimanBarang->get_move_id_by_kode($kode_decrypt)->row_array();
+        $list           = $this->m_pengirimanBarang->get_data_by_code($kode_decrypt);
+        $data["list"]   = $list;
+        $smi            = $this->m_pengirimanBarang->get_move_id_by_kode($kode_decrypt)->row_array();
+        $data["move_id"]= $smi;
         $data['items']  = $this->m_pengirimanBarang->get_stock_move_items_by_kode($kode_decrypt);
+        $data['count']  = $this->m_pengirimanBarang->get_count_valid_scan_by_kode($kode_decrypt);
+        $data['count_all'] = $this->m_pengirimanBarang->get_count_all_scan_by_kode($smi['move_id']);
+
+        // cek priv akses menu
+        $sub_menu           = $this->uri->segment(2);
+        $username           = $this->session->userdata('username'); 
+        $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
 
         if(empty($data["list"])){
           show_404();
@@ -943,8 +1013,10 @@ class Pengirimanbarang extends MY_Controller
     {
         $kode        = $this->input->post('kode');
         $move_id     = $this->input->post('move_id');
+        $deptid      = $this->input->post('deptid');
+        $origin      = $this->input->post('origin');
         $method      = $this->input->post('method');
-        $origin      = $this->input->post('origin');       
+        $mode        = $this->input->post('mode');// scan mode / list mode       
         $sql_stock_move_items_batch = "";
         $tgl         = date('Y-m-d H:i:s');
         $status_done = 'done';
@@ -962,19 +1034,60 @@ class Pengirimanbarang extends MY_Controller
         $where6      = "";
         $case7       = "";
         $where7      = "";
+        $case8       = "";
+        $where8      = "";
+        $whereMo     = "";
+        $whereQuant  = "";
 
         //cek lokasi valid lot
-        $cek_lot  = $this->m_pengirimanBarang->cek_valid_lokasi_lot_by_move_id($move_id)->row_array();
-        $sub_menu = $this->uri->segment(2);
-        $username = addslashes($this->session->userdata('username')); 
-        $nu       = $this->_module->get_nama_user($username)->row_array();
-        $nama_user= $nu['nama'];
-        $deptid   = $this->input->post('deptid');
-
+        //$cek_lot  = $this->m_pengirimanBarang->cek_valid_lokasi_lot_by_move_id($move_id)->row_array();
+        
         if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
-            // session habis
+          // session habis
             $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
-        }else{
+          }else{
+
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username')); 
+            $nu       = $this->_module->get_nama_user($username)->row_array();
+            $nama_user= $nu['nama'];
+
+            // cek jika mode scan
+            $cek_tmp = $this->m_pengirimanBarang->cek_pengiriman_barang_tmp_by_kode($kode);
+            // get jml semua lot yg akan di scan
+            $count_all_lot = $this->m_pengirimanBarang->get_count_all_scan_by_kode($move_id);
+            // get jml lot yg sudah di scan
+            $count_lot_scan  = $this->m_pengirimanBarang->get_count_valid_scan_by_kode($kode);
+
+            // cek dept id apakah terdapat quality control
+            $cek_qc_dept = $this->m_pengirimanBarang->cek_quality_control_by_dept($deptid)->num_rows();
+            //$cek_qc_dept = $cek_qc->num_rows();
+            //$cek_qc_dept2 = $cek_qc->row_array();
+            $qc_out   ='false';
+            $nama_qc  = '';
+
+            if($cek_qc_dept > 0 ){
+              // cek apakah qc_1 atau/dan qc_2 telah dilakukan
+              $qc_item = array('qc_1','qc_2');
+              foreach($qc_item as $items){
+                  // cek qc items 
+                  $cek_qc_item = $this->m_pengirimanBarang->cek_qc_item_by_dept($deptid,$items)->row_array();
+
+                  if(!empty($cek_qc_item['qc'])){
+                    $cek_qc = $this->m_pengirimanBarang->cek_qc_pengiriman_barang_departemen_by_kode($kode,$items)->row_array();
+                    if($cek_qc['qc'] == 'true'){// jika sudah di QC
+                      //$nama_qc .= $cek_qc_item['qc'].', ';
+                      $qc_out  = 'true';
+                    }else{ // jika belum di QC
+                      $nama_qc .= $cek_qc_item['qc'].' & ';
+                      $qc_out ='false';
+                    }
+                  }
+              }
+              $nama_qc = rtrim($nama_qc,' & ');
+              
+            }
+
             //cek status terkirim ?
             $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
             if($cek_kirim['status'] == 'draft'){
@@ -983,12 +1096,22 @@ class Pengirimanbarang extends MY_Controller
                 $callback = array('status' => 'ada', 'message'=>'Maaf, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }elseif($cek_kirim['status'] == 'cancel'){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if($cek_tmp == 0 AND $mode == 'scan'){
+                $callback = array('status' => 'failed', 'message'=>'Barcode belum di Scan, Silahkan Scan Barcode terlebih dahulu !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if($count_all_lot != $count_lot_scan AND $mode =='scan' AND $method == 'GRG|OUT' ){
+              $callback = array('status' => 'failed', 'message'=>'Barcode Harus di Scan Semua  !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+
+            }else if($cek_qc_dept > 0 AND $qc_out == 'false' ){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa Dikirim, sebelum dilakukan Quality Control (QC) " '.$nama_qc.' " !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+           
+              /*
             }elseif(!empty($cek_lot['lot']) AND  $method == 'GRG|OUT'){  //lokasi lot tidak valid
                 $callback = array('status' => 'not_valid', 'message'=>'Maaf, Lokasi  Lot "'.$cek_lot['lot'].'" tidak valid !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                */
                // break;
             }else{
                     //lock tabel 
-                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE');
+                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE');
             
                     //lokasi tujuan 
                     $lokasi = $this->m_pengirimanBarang->get_location_by_move_id($move_id)->row_array();                    
@@ -1064,7 +1187,8 @@ class Pengirimanbarang extends MY_Controller
                                         $loop_sm2 =false;
                                     }
 
-                                    if($ex_mt == 'CON' AND $con_next == true){
+                                    //if($ex_mt == 'CON' AND $con_next == true){
+                                    if($ex_mt == 'CON' AND $ex_deptid != $deptid){// terapaki sementara jalur OBAt ke DYE
 
                                         //get  origin_prod by move id, kode_produk
                                         $get_origin_prod = $this->m_pengirimanBarang->get_origin_prod_mrp_production_by_kode($row['move_id'],addslashes($val->kode_produk))->row_array();
@@ -1072,10 +1196,11 @@ class Pengirimanbarang extends MY_Controller
                                         $loop_sm2 =false;
                                                
                                     }
-
+                                    /*
                                     if($ex_deptid == $deptid AND $ex_mt == 'CON'){
                                         $con_next = true;
                                     }
+                                    */
 
                                 }elseif($loop_sm2 == false){
                                     break;//paksa keluar looping
@@ -1104,6 +1229,7 @@ class Pengirimanbarang extends MY_Controller
                                 //update status stock move,stock move dan stock move produk  penerimaan brg = ready
                                 $case3  .= "when move_id = '".$move_id."' then '".$status."'";
                                 $where3 .= "'".$move_id."',";
+                                $whereQuant .= "'".addslashes($val->quant_id)."',"; //quant id
 
                                 //update stock move 
                                 $get_kode_in = $this->m_pengirimanBarang->get_kode_penerimaan_by_move_id($move_id)->row_array();
@@ -1115,9 +1241,20 @@ class Pengirimanbarang extends MY_Controller
                                   
                                 //cek jika method stock move tujuan nya IN
                                 $mthd = explode("|",$querysm_tujuan['method']);
-                                $ex_mthd = $mthd[1];
+                                $ex_mthd   = $mthd[1];
+                                $ex_deptid = $mt[0];
                                 if($ex_mthd == 'IN'){ // jika stock move tujuanya IN maka loop_sm ==false
                                     $loop_sm = false;
+                                }
+
+                                // jika mthod CON dan ex_deptid nya != deptid OUT
+                                if($ex_mthd == 'CON' AND $ex_deptid != $deptid){
+
+                                  ///get kode MO by move id 
+                                  $mrp = $this->m_pengirimanBarang->get_kode_mrp_production_rm_target_by_move_id($move_id)->row_array();
+                                  $case8  .= "when origin_prod = '".addslashes($origin_prod)."' then '".$status."'";
+                                  $where8 .= "'".addslashes($origin_prod)."',";
+                                  $whereMo = "'".$mrp['kode']."',";
                                 }
                                   
                             }else{
@@ -1147,7 +1284,6 @@ class Pengirimanbarang extends MY_Controller
                         $case7 .= "when quant_id = '".$val->quant_id."' then '".$origin."'";
                         $where7.= "'".$val->quant_id."',";
 
-
                     }//end foreach
 
                     
@@ -1172,7 +1308,12 @@ class Pengirimanbarang extends MY_Controller
                      $this->_module->update_perbatch($sql_update_stock_quant_move_id);
 
                      $where7 = rtrim($where7, ',');// update reserve origin di hapus
-                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET  lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
+                     if($method == 'GRG|OUT'){
+                       $reserve_origin = " reserve_origin =(case ".$case7." end), ";
+                     }else{
+                       $reserve_origin = "";
+                     }
+                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET $reserve_origin lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
                      $this->_module->update_perbatch($sql_update_stock_quant_reserve_origin);
 
                     if(!empty($case3) AND !empty($where3)){
@@ -1185,6 +1326,40 @@ class Pengirimanbarang extends MY_Controller
                       $where3 = rtrim($where3, ',');
                       $sql_update_stock_move_produk  = "UPDATE stock_move_produk SET status =(case ".$case3." end) WHERE  move_id in (".$where3.") ";
                       $this->_module->update_perbatch($sql_update_stock_move_produk);
+
+
+                      //update status = ready
+                      $where3 = rtrim($where3, ',');
+                      $whereQuant = rtrim($whereQuant, ',');
+                      $sql_update_stock_move_items  = "UPDATE stock_move_items SET status =(case ".$case3." end) WHERE  move_id in (".$where3.") AND quant_id in (".$whereQuant.") ";
+                      $this->_module->update_perbatch($sql_update_stock_move_items);
+
+                      //update status=ready untuk MO tujuan
+                      if(!empty($where8) AND !empty($case8)){
+
+                        $where8 = rtrim($where8, ',');
+                        $whereMo = rtrim($whereMo, ',');
+                        $sql_update_mrp_rm_target  = "UPDATE mrp_production_rm_target SET status =(case ".$case8." end) WHERE  origin_prod in (".$where8.") AND kode in (".$whereMo.") ";
+                        $this->_module->update_perbatch($sql_update_mrp_rm_target);
+
+                        $update_status = true;
+
+                        $cek_mrp = $this->m_pengirimanBarang->get_type_mo_dept_id_mrp_production_by_kode($whereMo);
+                        if( $cek_mrp['type_mo'] == 'colouring' ){
+                            // cek status mrp_rm yg sama dengan draft dan cancel
+                            $cek_mrp_rm = $this->m_pengirimanBarang->cek_mrp_production_rm_target_by_kode($whereMo)->num_rows();
+                            if($cek_mrp_rm > 0 ){
+                                $update_status = false;
+                            }
+                        }
+
+                        if($update_status == true) {
+                            $sql_update_mrp_production  = "UPDATE mrp_production SET status ='ready' WHERE  kode in (".$whereMo.") "; 
+                            $this->_module->update_perbatch($sql_update_mrp_production);
+                        }
+
+                      }
+
                     }
 
                     if(!empty($case4) AND !empty($where4)){
@@ -1198,12 +1373,13 @@ class Pengirimanbarang extends MY_Controller
                        $sql_update_penerimaan_barang_items  = "UPDATE penerimaan_barang_items SET status_barang =(case ".$case4." end) WHERE  kode in (".$where4.") ";
                        $this->_module->update_perbatch($sql_update_penerimaan_barang_items); 
                     }
-                    
+                    /*
                     $qty2   = $this->m_pengirimanBarang->get_qty2_by_kode($move_id)->row_array();
 
                     //update berat di mrp production
                     $sql_update_berat = "UPDATE mrp_production set berat = '".$qty2['jml_qty2']."' WHERE origin = '".$origin."' AND dept_id = 'DYE'";
                     $this->_module->update_perbatch($sql_update_berat);
+                    */
 
                      /*
                      //update lokasi lot jadi GOUT di stock kain greige
@@ -1391,6 +1567,75 @@ class Pengirimanbarang extends MY_Controller
         echo json_encode($callback);
     }
 
+    public function batal_pengiriman_barang()
+    {
+
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+         // session habis
+          $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+          $sub_menu  = $this->uri->segment(2);
+          $username  = addslashes($this->session->userdata('username')); 
+
+          $kode     = $this->input->post('kode');
+          $move_id  = $this->input->post('move_id');
+          $deptid   = $this->input->post('deptid');
+
+          $tgl         = date('Y-m-d H:i:s');
+          $status_cancel = 'cancel';
+
+          // cek item pengiriman_barang by move id
+          $smi_out = $this->m_pengirimanBarang->cek_stock_move_items_pengiriman_barang_by_move_id($move_id);
+          
+
+          //cek status terkirim ?
+          $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
+          if($cek_kirim['status'] == 'done'){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa dibatalkan, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+          }elseif($cek_kirim['status'] == 'cancel'){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+              
+          }elseif($smi_out > 0){
+              $callback = array('status' => 'failed', 'message'=>'Maaf, Data tidak bisa dibatalkan, Harap Hapus terlebih dahulu details Produk / Lot !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+
+          }else{
+            
+              // lock table
+              $this->_module->lock_tabel('pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_move WRITE, stock_move_produk WRITE' );
+
+              // batal pengiriman_brang
+              $sql_update_status_pengiriman = "UPDATE pengiriman_barang SET status = '".$status_cancel."' WHERE kode = '".$kode."' ";
+              $this->_module->update_perbatch($sql_update_status_pengiriman);
+
+              // batal pengiriman_barang items
+              $sql_update_status_pengiriman_items = "UPDATE pengiriman_barang_items SET status_barang = '".$status_cancel."' WHERE kode = '".$kode."' ";
+              $this->_module->update_perbatch($sql_update_status_pengiriman_items);
+              
+              // batal stock_move, stock_move_produk
+              $sql_update_status_stock_move = "UPDATE stock_move SET status = '".$status_cancel."' WHERE move_id = '".$move_id."' ";
+              $this->_module->update_perbatch($sql_update_status_stock_move);
+
+              $sql_update_status_stock_move_produk = "UPDATE stock_move_produk SET status = '".$status_cancel."' WHERE move_id = '".$move_id."' ";
+              $this->_module->update_perbatch($sql_update_status_stock_move_produk);
+
+              // unlock table
+              $this->_module->unlock_tabel();
+
+              $jenis_log   = "cancel";
+              $note_log    = "Batal Pengiriman Barang ";
+              $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+              
+              $callback = array('status' => 'success', 'message'=>'Data Pengiriman Barang Berhasil di batalkan !', 'icon' => 'fa fa-check', 'type'=>'success');
+          }
+
+
+        }
+
+        echo json_encode($callback);
+        
+
+    }
    
     public function cek_stok()
     {
@@ -1800,222 +2045,838 @@ class Pengirimanbarang extends MY_Controller
 
     }
 
+    function valid_barcode_out()
+    {
+
+        if (empty($this->session->userdata('username'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username')); 
+
+            $deptid      = $this->input->post('deptid');
+            $kode        = addslashes($this->input->post('kode'));
+            $txtbarcode  = $this->input->post('txtbarcode');
+            $tgl         = date('Y-m-d H:i:s');
+
+            // lock table
+            $this->_module->lock_tabel('stock_move as sm WRITE, stock_move_items WRITE, pengiriman_barang as pb WRITE, pengiriman_barang_tmp WRITE, pengiriman_barang WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE');
+
+            //cek status terkirim ?
+            $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
+            if($cek_kirim['status'] == 'draft'){
+                $callback = array('status' => 'ada', 'message'=>'Maaf, Product yang akan di Scan belum ready !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }elseif($cek_kirim['status'] == 'done'){
+                $callback = array('status' => 'ada', 'message'=>'Maaf, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if($cek_kirim['status'] == 'cancel'){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else{ 
+                // cek lo apa sudah di scan / belum
+                $ck_scan = $this->m_pengirimanBarang->cek_scan_by_lot($kode,$txtbarcode)->row_array();
+                if(!empty($ck_scan['lot'])){// jika tidak koosong
+                    $callback = array('status' => 'failed', 'message'=>'Barcode '.$txtbarcode.' Sudah di Scan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else{
+
+                    $mv = $this->m_pengirimanBarang->get_move_id_by_kode($kode)->row_array();
+
+                    // get list tmp pengirimanan barang by lot yg ready
+                    $tmp   = $this->m_pengirimanBarang->get_list_stock_move_items_by_lot($mv['move_id'],$txtbarcode,'ready');
+                    $empty = true;
+                    foreach($tmp as $row){
+                        $empty  = false;
+                        // insert to pengiriman barang tmp
+                        $this->m_pengirimanBarang->simpan_pengiriman_barang_tmp($kode,$row->quant_id,$mv['move_id'],$row->kode_produk,$row->lot,'t',$tgl);
+                    }
+
+                    if($empty == true ){
+                        $callback = array('status' => 'failed', 'message'=>'Barcode '.$txtbarcode.' Tidak valid  !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    }else{
+
+                        $jenis_log   = "edit";
+                        $note_log    = "Scan Barcode ".$txtbarcode;
+                        $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+
+                        $callback = array('status' => 'success', 'message'=>'Barcode '.$txtbarcode.' Valid Scan !', 'icon' => 'fa fa-check', 'type'=>'success');   
+                    }
+                }
+            }
+
+            //unlock table            
+            $this->_module->unlock_tabel();
+
+        }
+        echo json_encode($callback);
+    }
+
+    public function quality_control_out()
+    {
+      if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+        // session habis
+        $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+      }else{
+
+        $sub_menu = $this->uri->segment(2);
+        $username = addslashes($this->session->userdata('username'));
+        $deptid     = $this->input->post('deptid');
+        $kode       = addslashes($this->input->post('kode'));
+        $qc_ke      = addslashes($this->input->post('qc_ke'));// ex qc_1, qc_2 harus sama dengan table
+        $value      = $this->input->post('value');
+
+        //cek status terkirim ?
+        $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
+        if($cek_kirim['status'] == 'done'){
+             $callback = array('status' => 'failed', 'alert'=>'modal', 'message'=>'Maaf, QC tidak bisa dilakukan, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+        }else if($cek_kirim['status'] == 'cancel'){
+             $callback = array('status' => 'failed','alert'=>'modal', 'message'=>'Maaf, QC tidak bisa dilakukan, Data Pengiriman Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+        }else if($cek_kirim['status'] == 'draft'){
+          $callback = array('status' => 'failed', 'alert'=>'notify', 'message'=>'Maaf, QC tidak bisa dilakukan, status data pengiriman masih draft !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+
+        }else{
+
+            // update qc pengiriman Barang 
+            $this->m_pengirimanBarang->update_quality_control($kode,$qc_ke,$value);
+
+            // get caption
+            $get = $this->m_pengirimanBarang->get_nama_qc_by_dept($deptid,$qc_ke)->row();
+            $gets = $get->qc;
+            
+            if($value == 'true'){
+              $note= "QC ".$gets." telah dilakukan ";
+            }else{
+              $note= "QC ".$gets." dibatalkan ";
+            }
+            
+            $jenis_log   = "edit";
+            $note_log    = $note;
+            $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+
+            $callback = array('status' => 'success', 'message'=>$note, 'icon' => 'fa fa-check', 'type'=>'success');   
+        }
+
+      }
+
+      echo json_encode($callback);
+    }
+
 
     function print_pengiriman_barang()
     {
+      if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+        // session habis
+        print_r('Waktu And Telah Habis, Silahkan Login Kembali !');
 
-        $this->load->library('Pdf');//load library pdf
-
+      }else{
         $dept_id  = $this->input->get('departemen');
         $kode     = $this->input->get('kode');
         
-        $origin              = '';
-        $tanggal             = '';
-        $reff_picking        = '';
-        $tanggal_transaksi   = '';
-        $tanggal_jt           = '';
-
-		    $dept    = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
-        $head    = $this->m_pengirimanBarang->get_data_by_code_print($kode,$dept_id);
-        
-        if(!empty($head)){
-          $kode     = $head->kode;
-          $origin   = $head->origin;
-          $tanggal  = $head->tanggal;
-          $reff_picking      = $head->reff_picking;
-          $tanggal_transaksi = $head->tanggal_transaksi;
-          $tanggal_jt        = $head->tanggal_jt;
+        if($dept_id == 'GRG'){
+          $jenis_log  = "done";
+          $note_log   = "Print Pengiriman Barang Greige (GREIGE OUT)";
+          $sub_menu   = $this->uri->segment(2);
+          $username   = addslashes($this->session->userdata('username')); 
+          $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$dept_id);
+          $this->print_pengiriman_barang_greige($dept_id,$kode);
+        }else{
+          $this->print_pengiriman_barang_all($dept_id,$kode);
         }
 
-			  $nama_dept = strtoupper($dept['nama']);
-			  $pdf = new PDF_Code128('P','mm','A4');
-	      //$pdf = new PDF_Code128('l','mm',array(210,148.5));
+      }
 
-	  		$pdf->SetMargins(0,0,0);
-	      $pdf->SetAutoPageBreak(False);
-	      $pdf->AddPage();
-	      $pdf->setTitle('Pengiriman Barang : '.$nama_dept);
+    }
 
-	      $pdf->SetFont('Arial','B',9,'C');
-	      $pdf->Cell(0,10,'PENGIRIMAN BARANG '.$nama_dept,0,0,'C');
 
-        $pdf->SetFont('Arial','',7,'C');
+    function print_pengiriman_barang_greige($departemen,$kode)
+    {
+      $this->load->library('Pdf');//load library pdf
 
-		    $pdf->setXY(160,3);
-        $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
-        $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+      $dept_id  = $departemen;
+      $kode     = $kode;
 
-        $pdf->SetFont('Arial','B',8,'C');
+      $origin              = '';
+      $tanggal             = '';
+      $reff_picking        = '';
+      $tanggal_transaksi   = '';
+      $tanggal_jt          = '';
+      $kode_co             = '';
+      $row_co              = '';
 
-         // caption kiri
-        $pdf->setXY(5,10);
-        $pdf->Multicell(15,4,'Kode ',0,'L');
+      $dept    = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
+      $head    = $this->m_pengirimanBarang->get_data_by_code_print($kode,$dept_id);
+      
+      if(!empty($head)){
+        $kode     = $head->kode;
+        $origin   = $head->origin;
+        $tanggal  = $head->tanggal;
+        $reff_picking      = $head->reff_picking;
+        $tanggal_transaksi = $head->tanggal_transaksi;
+        $tanggal_jt        = $head->tanggal_jt;
+        $reff_note         = $head->reff_note;
+        $orgn    = explode("|",$origin);
+        $sc      = $orgn[0];
+        $kode_co = $orgn[1];
+        $row_co  = $orgn[2];
 
-        $pdf->setXY(5,13);
-        $pdf->Multicell(15,4,'Tgl.buat ',0,'L');
+        //get marketing by SC
+        $sales_group      = $this->_module->get_sales_group_by_sales_order($sc);
+        $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sales_group);
 
-        $pdf->setXY(5,16);
-        $pdf->Multicell(15,4,'Origin ',0,'L');
+      }
 
-        $pdf->setXY(19, 10);
-        $pdf->Multicell(5, 4, ':', 0, 'L');
-        $pdf->setXY(19, 13);
-        $pdf->Multicell(5, 4, ':', 0, 'L');
-        $pdf->setXY(19, 16);
-        $pdf->Multicell(5, 4, ':', 0, 'L');
-          
-         // isi kiri
-         $pdf->SetFont('Arial','',8,'C');
+      $nama_dept = strtoupper($dept['nama']);
+      $pdf       = new PDF_Code128('P','mm',array(216,330));// letter
+      //$pdf = new PDF_Code128('L','mm',array(215,139));
+      ///$pdf = new PDF_Code128('L','mm',array(216,165));// half letter
 
-         $pdf->setXY(20,10);
-         $pdf->Multicell(40,4,$kode,0,'L');
-         $pdf->setXY(20,13);
-         $pdf->Multicell(40,4,$tanggal,0,'L');
-         $pdf->setXY(20,16);
-         $pdf->Multicell(70,4,$origin,0,'L');
+      $pdf->SetMargins(0,0,0);
+      $pdf->SetAutoPageBreak(False);
+      $pdf->AddPage();
+      $pdf->setTitle('Pengiriman Barang : '.$nama_dept);
+//      $this->Cell(0,10,'Page '.$this->PageNo(),0,0,'C');
 
-         $pdf->SetFont('Arial','B',8,'C');
-        // caption tengah
-        $pdf->setXY(60,10);
-        $pdf->Multicell(25,4,'Reff Picking ',0,'L');
-        $pdf->setXY(60,13);
-        $pdf->Multicell(25,4,'Tgl.kirim ',0,'L');
-        $pdf->setXY(60,16);
-        $pdf->Multicell(25,4,'Tgl.Jatuh Tempo ',0,'L');
+      $pdf->SetFont('Arial','B',10,'C');
+      $pdf->Cell(0,10,'PENGIRIMAN BARANG '.$nama_dept,0,0,'C');
+      
+      $pdf->SetFont('Arial','',7,'C');
 
-        $pdf->setXY(85, 10);
-        $pdf->Multicell(5, 4, ':', 0, 'L');
-        $pdf->setXY(85, 13);
-        $pdf->Multicell(5, 4, ':', 0, 'L');
-        $pdf->setXY(85, 16);
-        $pdf->Multicell(5, 4, ':', 0, 'L');
-          
-         // isi tengah
-         $pdf->SetFont('Arial','',8,'C');
+      $pdf->setXY(5,3);
+      $pdf->AliasNbPages('{totalPages}');
+      $pdf->Multicell(30,4, "Page " . $pdf->PageNo() . "/{totalPages}", 0,'L');
 
-         $pdf->setXY(86,10);
-         $pdf->Multicell(60,4,$reff_picking,0,'L');
-         $pdf->setXY(86,13);
-         $pdf->Multicell(40,4,$tanggal_transaksi,0,'L');
-         $pdf->setXY(86,16);
-         $pdf->Multicell(70,4,$tanggal_jt,0,'L');
-     
+      $pdf->setXY(160,3);
+      $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+      $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
 
-        // header table product
-        $pdf->SetFont('Arial','B',8,'C');
-        $pdf->setXY(5,23);
-        $pdf->Multicell(52,4,'Produk',0,'L');
+      // info no Greige Out
+      $pdf->SetFont('Arial','B',20,'C');
+      $pdf->setXY(130,10);
+      $pdf->Multicell(75,5, $kode, 0,'R');
 
-        $pdf->setXY(5,27);
-        $pdf->Cell(7, 5, 'No.', 1, 0, 'L');
-        $pdf->Cell(20, 5, 'Kode Produk', 1, 0, 'C');
-        $pdf->Cell(70, 5, 'Nama Produk', 1, 0, 'C');
-        $pdf->Cell(25, 5, 'Qty', 1, 0, 'R');
-        $pdf->Cell(10, 5, 'Uom', 1, 0, 'C');
-        $pdf->Cell(18, 5, 'Tersedia', 1, 0, 'C');
+      // get warna by origin
+      $get_w  = $this->m_pengirimanBarang->get_nama_warna_by_origin($kode_co,$row_co)->row_array();
+      $nama_warna = $get_w['nama_warna'];
+      
+      // Info Warna
+      $pdf->SetFont('Arial','B',10,'C');
+      $pdf->setXY(5,10);
+      $pdf->Multicell(70,4,$nama_warna,0,'L');
 
+
+      $pdf->SetFont('Arial','B',8,'C');
+      
+      $pdf->setXY(5,20);
+      $pdf->Multicell(17,4,'Tgl.dibuat ',0,'L');
+      $pdf->setXY(5,24);
+      $pdf->Multicell(17,4,'Tgl.Kirim ',0,'L');
+      $pdf->setXY(5,28);
+      $pdf->Multicell(17,4,'Marketing ',0,'L');
+
+      $pdf->setXY(21, 20);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->setXY(21, 24);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->setXY(21, 28);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+
+      // isi kiri
+      $pdf->SetFont('Arial','',8,'C');
+      $pdf->setXY(22,20);
+      $pdf->Multicell(40,4,$tanggal,0,'L');
+      $pdf->setXY(22,24);
+      $pdf->Multicell(70,4,$tanggal_transaksi,0,'L');
+      $pdf->setXY(22,28);
+      $pdf->Multicell(70,4,$nama_sales_group,0,'L');
+    
+      //  note header
+      $pdf->SetFont('Arial','B',8,'C');
+      $pdf->setXY(100,20);
+      $pdf->Multicell(25,4,'Origin ',0,'L');
+      $pdf->setXY(100,24);
+      $pdf->Multicell(17,4,'Reff Note',0,'L');
+      $pdf->setXY(120, 20);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->setXY(120, 24);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+
+      $pdf->SetFont('Arial','',8,'C');
+      // isi note
+      $pdf->setXY(121,20);
+      $pdf->Multicell(85,4,$origin,0,'L');
+      $pdf->setXY(121,24);
+      $pdf->Multicell(85,4,$reff_note,0,'L');
+
+      $x    = 5;
+      $y    = 23;
+      $y    = $y+5;
+
+      // header table details
+      $pdf->SetFont('Arial','B',8,'C');
+      //$pdf->setXY(5,$y);
+      //$pdf->Multicell(52,4,'Produk',0,'L');
+      
+      $pdf->setXY(5,$y+5);
+      $pdf->Cell(7, 7, 'No.', 1, 0, 'L');
+      $pdf->Cell(65, 7, 'Nama Produk', 1, 0, 'C');
+      $pdf->Cell(38, 7, 'KP/Lot', 1, 0, 'C');
+      $pdf->Cell(10, 7, 'Grade', 1, 0, 'R');
+      $pdf->Cell(20, 7, 'Qty', 1, 0, 'R');
+      $pdf->Cell(18, 7, 'Qty2', 1, 0, 'R');
+      $pdf->Cell(18, 7, 'Lbr.Greige', 1, 0, 'R');
+      $pdf->Cell(20, 7, 'Lbr.Jadi', 1, 1, 'R');
+      
+      // details
+      $smi  = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode,$dept_id);
+      $x    = 5;
+      $y    = $y+10;
+      $no   = 1;
+      $gulung   = 0;
+      $tot_qty1 = 0;
+      $tot_qty2 = 0;
+      foreach($smi as $row){
         
-        // products
-        $items = $this->m_pengirimanBarang->get_list_pengiriman_barang_print($kode,$dept_id);
-        $x    = 5;
-        $y    = 32;
-        $no   = 1;
-        foreach($items as $row){
-          
-          // set font tbody =
+          // set font tbody 
           $pdf->SetFont('Arial','',8,'C');
 
-            $pdf->setXY($x, $y);
-            $pdf->Multicell(7, 5, $no, 1,'L');
-            $pdf->setXY($x+7, $y);
-            $pdf->Multicell(20, 5, $this->custom_char_out($row->kode_produk,8), 1,'L');
-            $pdf->setXY($x+27, $y);
-            $pdf->Multicell(70, 5, $this->custom_char_out($row->nama_produk,45), 1,'L');
-            $pdf->setXY($x+97, $y);
-            $pdf->Multicell(25, 5, number_format($row->qty,2), 1,'R');
-            $pdf->setXY($x+122, $y);
-            $pdf->Multicell(10, 5, $this->custom_char_out($row->uom,3), 1,'L');
-            $pdf->setXY($x+132, $y);
-            $pdf->Multicell(18, 5, number_format($row->sum_qty,2), 1,'R');
-            
-            $no++;
-            $y = $y + 5;
+          $cellWidth =65; //lebar sel
+          $cellHeight=5; //tinggi sel satu baris normal
+          $nama_produk = $row->nama_produk;
 
-            if($y>290 ){
-	            $pdf->AddPage();
-              $y = 7;
-              $pdf->SetFont('Arial','',7,'C');
-              $pdf->setXY(160,3);
-              $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
-              $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+          if($pdf->GetStringWidth($nama_produk) < $cellWidth){
+              // jika tidak
+              $line =1;
+          }else{
+
+            	//jika ya, maka hitung ketinggian yang dibutuhkan untuk sel akan dirapikan
+              //dengan memisahkan teks agar sesuai dengan lebar sel
+              //lalu hitung berapa banyak baris yang dibutuhkan agar teks pas dengan sel
+              $textLength =strlen($nama_produk);	//total panjang teks
+              $errMargin  =5;		//margin kesalahan lebar sel, untuk jaga-jaga
+              $startChar  =0;		//posisi awal karakter untuk setiap baris
+              $maxChar    =0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+              $textArray  =array();	//untuk menampung data untuk setiap baris
+              $tmpString  ="";		//untuk menampung teks untuk setiap baris (sementara)
               
-            }
-        }
+              while($startChar < $textLength){ //perulangan sampai akhir teks
+                //perulangan sampai karakter maksimum tercapai
+                while( 
+                $pdf->GetStringWidth( $tmpString ) < ($cellWidth-$errMargin) &&
+                ($startChar+$maxChar) < $textLength ) {
+                  $maxChar++;
+                  $tmpString=substr($nama_produk,$startChar,$maxChar);
+                }
+                //pindahkan ke baris berikutnya
+                $startChar=$startChar+$maxChar;
+                //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                array_push($textArray,$tmpString);
+                //reset variabel penampung
+                $maxChar  =0;
+                $tmpString='';
+                
+              }
+              //dapatkan jumlah baris
+              $line=count($textArray);
+              
+          }
 
-        $y = $y+5;
+          //tulis cellnya
+          $pdf->SetFillColor(255,255,255);
+          $pdf->Cell(5,($line * $cellHeight),'',0,0,'',true); //sesuaikan ketinggian dengan jumlah garis
+          $pdf->Cell(7,($line * $cellHeight),$no,1,0,'L'); 
 
-        // header table details
-        $pdf->SetFont('Arial','B',8,'C');
-        $pdf->setXY(5,$y);
-        $pdf->Multicell(52,4,'Detail Produk',0,'L');
+          //memanfaatkan MultiCell sebagai ganti Cell
+          //atur posisi xy untuk sel berikutnya menjadi di sebelahnya.
+          //ingat posisi x dan y sebelum menulis MultiCell
+          $xPos=$pdf->GetX();
+          $yPos=$pdf->GetY();
+          $pdf->Multicell($cellWidth,$cellHeight,$nama_produk,1,'L');
 
-        $pdf->setXY(5,$y+5);
-        $pdf->Cell(7, 5, 'No.', 1, 0, 'L');
-        $pdf->Cell(20, 5, 'Kode Produk', 1, 0, 'C');
-        $pdf->Cell(70, 5, 'Nama Produk', 1, 0, 'C');
-        $pdf->Cell(30, 5, 'Lot', 1, 0, 'C');
-        $pdf->Cell(15, 5, 'Qty', 1, 0, 'R');
-        $pdf->Cell(10, 5, 'Uom', 1, 0, 'L');
-        $pdf->Cell(10, 5, 'Qty2', 1, 0, 'R');
-        $pdf->Cell(10, 5, 'Uom2', 1, 0, 'L');
-        $pdf->Cell(28, 5, 'Reff Note', 1, 0, 'C');
+          //kembalikan posisi untuk sel berikutnya di samping MultiCell 
+          //dan offset x dengan lebar  MultiCell
+          $pdf->SetXY($xPos + $cellWidth , $yPos);
+          $pdf->Cell(38,($line * $cellHeight),$row->lot,1,1); 
+          
+          $pdf->SetXY($xPos + 38 + $cellWidth , $yPos);
+          $pdf->Multicell(10,($line * $cellHeight),'A',1,'C');
 
-        // details
-        $smi  = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode,$dept_id);
-        $x    = 5;
-        $y    = $y+10;
-        $no   = 1;
-        foreach($smi as $row){
+          $pdf->SetXY($xPos + 48 + $cellWidth , $yPos);
+          $pdf->Multicell(20,($line * $cellHeight),number_format($row->qty,2).' '.$row->uom,1,'R');
 
-            // set font tbody 
+          $pdf->SetXY($xPos + 68 + $cellWidth , $yPos);
+          $pdf->Multicell(18,($line * $cellHeight),number_format($row->qty2,2).' '.$row->uom2,1,'R');
+
+          $pdf->SetXY($xPos + 86 + $cellWidth , $yPos);
+          $pdf->Multicell(18,($line * $cellHeight),$row->lebar_greige.' '.$row->uom_lebar_greige,1,'R');
+
+          $pdf->SetXY($xPos + 104 + $cellWidth , $yPos);
+          $pdf->Multicell(20,($line * $cellHeight),$row->lebar_jadi.' '.$row->uom_lebar_jadi,1,'R');
+
+          $no++;
+          $gulung++;
+          $tot_qty1= $tot_qty1 + $row->qty;
+          $tot_qty2= $tot_qty2 + $row->qty2;
+         
+
+          if($pdf->GetY() > 100){ // jika Y lebih dari 120 maka buat Halaman Baru
+
+            $pdf->SetMargins(0,0,0);
+            $pdf->SetAutoPageBreak(False);
+            $pdf->AddPage();
+            //$pdf->setTitle('Pengiriman Barang : '.$nama_dept);
+            $xPos = $xPos + 5;
+            
+            $pdf->SetFont('Arial','B',10,'C');
+            $pdf->Cell(0,10,'PENGIRIMAN BARANG '.$nama_dept,0,0,'C');
+            
+            $pdf->SetFont('Arial','',7,'C');
+      
+            $pdf->setXY(5,3);
+            $pdf->AliasNbPages('{totalPages}');
+            $pdf->Multicell(30,4, "Page " . $pdf->PageNo() . "/{totalPages}", 0,'L');
+      
+            $pdf->setXY(160,3);
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+      
+            // info no Greige Out
+            $pdf->SetFont('Arial','B',20,'C');
+            $pdf->setXY(130,10);
+            $pdf->Multicell(75,5, $kode, 0,'R');
+      
+            // get warna by origin
+            $get_w  = $this->m_pengirimanBarang->get_nama_warna_by_origin($kode_co,$row_co)->row_array();
+            $nama_warna = $get_w['nama_warna'];
+            
+            // Info Warna
+            $pdf->SetFont('Arial','B',10,'C');
+            $pdf->setXY(5,10);
+            $pdf->Multicell(70,4,$nama_warna,0,'L');
+      
+      
+            $pdf->SetFont('Arial','B',8,'C');
+            
+            $pdf->setXY(5,20);
+            $pdf->Multicell(17,4,'Tgl.dibuat ',0,'L');
+            $pdf->setXY(5,24);
+            $pdf->Multicell(17,4,'Tgl.Kirim ',0,'L');
+            $pdf->setXY(5,28);
+            $pdf->Multicell(17,4,'Marketing ',0,'L');
+      
+            $pdf->setXY(21, 20);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(21, 24);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(21, 28);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+      
+            // isi kiri
             $pdf->SetFont('Arial','',8,'C');
-            
-            $pdf->setXY($x, $y);
-            $pdf->Multicell(7, 5, $no, 1,'L');
-            $pdf->setXY($x+7, $y);
-            $pdf->Multicell(20, 5, $this->custom_char_out($row->kode_produk,8), 1,'L');
-            $pdf->setXY($x+27, $y);
-            $pdf->Multicell(70, 5,  $this->custom_char_out($row->nama_produk,45), 1,'L');
-            $pdf->setXY($x+97, $y);
-            $pdf->Multicell(30, 5, $row->lot, 1,'L');
-            $pdf->setXY($x+127, $y);
-            $pdf->Multicell(15, 5, number_format($row->qty,2), 1,'R');
-            $pdf->setXY($x+142, $y);
-            $pdf->Multicell(10, 5, $row->uom, 1,'L');
-            $pdf->setXY($x+152, $y);
-            $pdf->Multicell(10, 5, round($row->qty2,2), 1,'R');
-            $pdf->setXY($x+162, $y);
-            $pdf->Multicell(10, 5, $row->uom2, 1,'L');
-            $pdf->setXY($x+172, $y);
-            $pdf->Multicell(28, 5, $this->custom_char_out($row->reff_note,10), 1,'L');
-            
-            $no++;
-            $y=$y+5;
+            $pdf->setXY(22,20);
+            $pdf->Multicell(40,4,$tanggal,0,'L');
+            $pdf->setXY(22,24);
+            $pdf->Multicell(70,4,$tanggal_transaksi.' '.$pdf->GetX(),0,'L');
+            $pdf->setXY(22,28);
+            $pdf->Multicell(70,4,$nama_sales_group,0,'L');
+          
+            //  note header
+            $pdf->SetFont('Arial','B',8,'C');
+            $pdf->setXY(100,20);
+            $pdf->Multicell(25,4,'Origin ',0,'L');
+            $pdf->setXY(100,24);
+            $pdf->Multicell(17,4,'Reff Note',0,'L');
+            $pdf->setXY(120, 20);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(120, 24);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+      
+            // isi note
+            $pdf->setXY(121,20);
+            $pdf->Multicell(85,4,$origin,0,'L');
+            $pdf->setXY(121,24);
+            $pdf->Multicell(85,4,$reff_note ,0,'L');
+            $pdf->setXY(121,28);
+            $pdf->Multicell(85,5,'',0,'L');
+      
+            $y    = 25;
+            $y    = $y+5;
+            $yPos = $pdf->GetY() + 10;
+            //Pos=10;
+          }
 
-            if($y>290 ){
-	            $pdf->AddPage();
-              $y = 7;
-              $pdf->SetFont('Arial','',7,'C');
-              $pdf->setXY(160,3);
-              $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
-              $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
-              
-            }
+      }
 
+      $pdf->SetFont('Arial','B',8,'C');
+
+      $xPos=$pdf->GetX();
+      $yPos=$pdf->GetY();
+      $pdf->SetXY($xPos +5 , $yPos);
+      $pdf->Multicell(72,$cellHeight,$pdf->GetY() > 100,1,'C');
+
+      // isi gulung
+      $pdf->SetXY($xPos +77 , $yPos);
+      $pdf->Multicell(48,$cellHeight,' ',1,'C');
+
+      $pdf->SetXY($xPos +77 , $yPos);
+      $pdf->Multicell(10,$cellHeight,$no-1,0,'R');
+
+      $pdf->SetFont('Arial','',8,'C');
+      $pdf->SetXY($xPos +87 , $yPos);
+      $pdf->Multicell(15,$cellHeight,'Gulung ',0,'L');
+
+      // isi qty1
+      $pdf->SetXY($xPos +125 , $yPos);
+      $pdf->Multicell(20,$cellHeight,' ',1,'C');
+
+      $pdf->SetFont('Arial','B',8,'C');
+      $pdf->SetXY($xPos +125 , $yPos);
+      $pdf->Multicell(15,$cellHeight,number_format($tot_qty1,2),0,'R');
+
+      $pdf->SetFont('Arial','',8,'C');
+      $pdf->SetXY($xPos +139 , $yPos);
+      $pdf->Multicell(8,$cellHeight,'Mtr',0,'L');
+
+      // isi qty2
+      $pdf->SetXY($xPos +145 , $yPos);
+      $pdf->Multicell(18,$cellHeight,' ',1,'C');
+
+      $pdf->SetFont('Arial','B',8,'C');
+      $pdf->SetXY($xPos +144 , $yPos);
+      $pdf->Multicell(15,$cellHeight,number_format($tot_qty2,2),0,'R');
+
+      $pdf->SetFont('Arial','',8,'C');
+      $pdf->SetXY($xPos +158 , $yPos);
+      $pdf->Multicell(8,$cellHeight,'Kg',0,'L');
+
+      // empty lbr
+      $pdf->SetXY($xPos + 163 , $yPos);
+      $pdf->Multicell(38,$cellHeight,' ',1,'C');
+
+      $pdf->SetFont('Arial','B',10,'C');
+
+      $xPos=$pdf->GetX();
+      $yPos=$pdf->GetY();
+      $pdf->SetXY($xPos +5 , $yPos);
+      $pdf->Multicell(72,$cellHeight,'Route Color Order : ',0,'L');
+
+      $pdf->SetFont('Arial','',8,'C');
+
+      $xx = 5;
+      $var_yPost  = true;
+      
+      $route = $this->m_pengirimanBarang->get_route_by_origin($origin);
+      $xPos=$pdf->GetX(5);
+      $kotak = 1;
+      $baris_kotak = 0;
+      $baris_kotak_loop = 0;
+      foreach($route as $routes){
+        if($var_yPost == true){
+          $yPos=$pdf->GetY();
         }
 
-	      $pdf->Output();
+        $mthd = explode("|",$routes->method);
+        $method = $mthd[1];
+        $dept_id =$mthd[0];
 
+        if($method == 'OUT'){
+            $mthd_routes = $this->m_pengirimanBarang->get_route_by_origin_method($origin,$routes->method);
+            $yPost = $yPos;
+            foreach($mthd_routes as $mr){
+              $pdf->SetXY($xPos + $xx , $yPost);
+              $nm = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
+              $kode = $this->m_pengirimanBarang->get_kode_out_by_move_id($mr->move_id);
+              $pdf->Multicell(35,4,$nm['nama'].' '.$method.' ['.$kode.']',1,'');
+              $var_yPost = false;
+              $yPost = $yPost + 9;
+              $baris_kotak_loop++;
+            }
+            $yPos=$yPos;
+            $xx = $xx + 35;
+            $pdf->SetXY($xPos +  $xx, $yPos);
+            $pdf->Multicell(5,$cellHeight + 4,'->',0,'C');
+            $xx = $xx + 5;
+          }else if($method == 'CON'){
+
+            $mthd_routes = $this->m_pengirimanBarang->get_route_by_origin_method($origin,$routes->method);
+            $yPost = $yPos;
+            foreach($mthd_routes as $mr){
+              $pdf->SetXY($xPos + $xx , $yPost);
+              $nm = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
+              $kode = $this->m_pengirimanBarang->get_kode_mrp_by_move_id($mr->move_id);
+              $pdf->Multicell(35,4,'MG '.$nm['nama'].' ['.$kode.']',1,'');
+              $var_yPost = false;
+              $yPost = $yPost +9;
+              $baris_kotak_loop++;
+            }
+            $yPos=$yPos;
+            $xx = $xx + 35;
+            $pdf->SetXY($xPos +  $xx, $yPos);
+            $pdf->Multicell(5,$cellHeight + 4,'->',0,'C');
+            $xx = $xx + 5;
+          //$var_yPost = true;
+          }else if($method == 'IN'){
+
+            $mthd_routes = $this->m_pengirimanBarang->get_route_by_origin_method($origin,$routes->method);
+            $yPost = $yPos;
+            foreach($mthd_routes as $mr){
+              $pdf->SetXY($xPos + $xx , $yPost);
+              $nm = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
+              $kode = $this->m_pengirimanBarang->get_kode_in_by_move_id($mr->move_id);
+              $pdf->Multicell(35,4,$nm['nama'].' '.$method.' ['.$kode.']',1,'');
+              $var_yPost = false;
+              $yPost = $yPost +9;
+              $baris_kotak_loop++;
+            }
+            $yPos=$yPos;
+            $xx = $xx + 35;
+            $pdf->SetXY($xPos +  $xx, $yPos);
+            $pdf->Multicell(5,$cellHeight + 4,'->',0,'C');
+            $xx = $xx + 5;
+          }
+          if($method != 'PROD'){
+            $kotak++;
+          }
+
+          if($baris_kotak_loop > $baris_kotak ){
+            $baris_kotak = $baris_kotak_loop;
+            $baris_kotak_loop = 0;
+          }
+          
+        if($kotak == 6){
+          $yPos = $yPost + (1 * $baris_kotak);
+          $xPos = 0;
+          $pdf->SetXY($xPos , $yPos);
+          $var_yPost = false;
+          $xx = 5;
+          $kotak = 1;
+        }
+
+      }
+
+      $yPos=$yPos;
+      $xx = $xx;
+      $pdf->SetXY($xPos + $xx , $yPos);
+      $pdf->SetFillColor(255);
+      $pdf->Multicell(8,$cellHeight + 4,'END',1,'C');
+      $xx = $xx + 5;
+
+      $pdf->Output();
+
+    }
+
+    function print_pengiriman_barang_all($departemen,$kode)
+    {
+      
+      $this->load->library('Pdf');//load library pdf
+
+      $dept_id  = $departemen;
+      $kode     = $kode;
+      
+      $origin              = '';
+      $tanggal             = '';
+      $reff_picking        = '';
+      $tanggal_transaksi   = '';
+      $tanggal_jt           = '';
+
+      $dept    = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
+      $head    = $this->m_pengirimanBarang->get_data_by_code_print($kode,$dept_id);
+      
+      if(!empty($head)){
+        $kode     = $head->kode;
+        $origin   = $head->origin;
+        $tanggal  = $head->tanggal;
+        $reff_picking      = $head->reff_picking;
+        $tanggal_transaksi = $head->tanggal_transaksi;
+        $tanggal_jt        = $head->tanggal_jt;
+      }
+
+      $nama_dept = strtoupper($dept['nama']);
+      $pdf = new PDF_Code128('P','mm','A4');
+      //$pdf = new PDF_Code128('l','mm',array(210,148.5));
+
+      $pdf->SetMargins(0,0,0);
+      $pdf->SetAutoPageBreak(False);
+      $pdf->AddPage();
+      $pdf->setTitle('Pengiriman Barang : '.$nama_dept);
+
+      $pdf->SetFont('Arial','B',9,'C');
+      $pdf->Cell(0,10,'PENGIRIMAN BARANG '.$nama_dept,0,0,'C');
+
+      $pdf->SetFont('Arial','',7,'C');
+
+      $pdf->setXY(160,3);
+      $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+      $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+
+      $pdf->SetFont('Arial','B',8,'C');
+
+       // caption kiri
+      $pdf->setXY(5,10);
+      $pdf->Multicell(15,4,'Kode ',0,'L');
+
+      $pdf->setXY(5,13);
+      $pdf->Multicell(15,4,'Tgl.buat ',0,'L');
+
+      $pdf->setXY(5,16);
+      $pdf->Multicell(15,4,'Origin ',0,'L');
+
+      $pdf->setXY(19, 10);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->setXY(19, 13);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->setXY(19, 16);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+        
+       // isi kiri
+       $pdf->SetFont('Arial','',8,'C');
+
+       $pdf->setXY(20,10);
+       $pdf->Multicell(40,4,$kode,0,'L');
+       $pdf->setXY(20,13);
+       $pdf->Multicell(40,4,$tanggal,0,'L');
+       $pdf->setXY(20,16);
+       $pdf->Multicell(70,4,$origin,0,'L');
+
+       $pdf->SetFont('Arial','B',8,'C');
+      // caption tengah
+      $pdf->setXY(60,10);
+      $pdf->Multicell(25,4,'Reff Picking ',0,'L');
+      $pdf->setXY(60,13);
+      $pdf->Multicell(25,4,'Tgl.kirim ',0,'L');
+      $pdf->setXY(60,16);
+      $pdf->Multicell(25,4,'Tgl.Jatuh Tempo ',0,'L');
+
+      $pdf->setXY(85, 10);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->setXY(85, 13);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->setXY(85, 16);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+        
+       // isi tengah
+       $pdf->SetFont('Arial','',8,'C');
+
+       $pdf->setXY(86,10);
+       $pdf->Multicell(60,4,$reff_picking,0,'L');
+       $pdf->setXY(86,13);
+       $pdf->Multicell(40,4,$tanggal_transaksi,0,'L');
+       $pdf->setXY(86,16);
+       $pdf->Multicell(70,4,$tanggal_jt,0,'L');
+   
+
+      // header table product
+      $pdf->SetFont('Arial','B',8,'C');
+      $pdf->setXY(5,23);
+      $pdf->Multicell(52,4,'Produk',0,'L');
+
+      $pdf->setXY(5,27);
+      $pdf->Cell(7, 5, 'No.', 1, 0, 'L');
+      $pdf->Cell(20, 5, 'Kode Produk', 1, 0, 'C');
+      $pdf->Cell(70, 5, 'Nama Produk', 1, 0, 'C');
+      $pdf->Cell(25, 5, 'Qty', 1, 0, 'R');
+      $pdf->Cell(10, 5, 'Uom', 1, 0, 'C');
+      $pdf->Cell(18, 5, 'Tersedia', 1, 0, 'C');
+
+      
+      // products
+      $items = $this->m_pengirimanBarang->get_list_pengiriman_barang_print($kode,$dept_id);
+      $x    = 5;
+      $y    = 32;
+      $no   = 1;
+      foreach($items as $row){
+        
+        // set font tbody =
+        $pdf->SetFont('Arial','',8,'C');
+
+          $pdf->setXY($x, $y);
+          $pdf->Multicell(7, 5, $no, 1,'L');
+          $pdf->setXY($x+7, $y);
+          $pdf->Multicell(20, 5, $this->custom_char_out($row->kode_produk,8), 1,'L');
+          $pdf->setXY($x+27, $y);
+          $pdf->Multicell(70, 5, $this->custom_char_out($row->nama_produk,45), 1,'L');
+          $pdf->setXY($x+97, $y);
+          $pdf->Multicell(25, 5, number_format($row->qty,2), 1,'R');
+          $pdf->setXY($x+122, $y);
+          $pdf->Multicell(10, 5, $this->custom_char_out($row->uom,3), 1,'L');
+          $pdf->setXY($x+132, $y);
+          $pdf->Multicell(18, 5, number_format($row->sum_qty,2), 1,'R');
+          
+          $no++;
+          $y = $y + 5;
+
+          if($y>290 ){
+            $pdf->AddPage();
+            $y = 7;
+            $pdf->SetFont('Arial','',7,'C');
+            $pdf->setXY(160,3);
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+            
+          }
+      }
+
+      $y = $y+5;
+
+      // header table details
+      $pdf->SetFont('Arial','B',8,'C');
+      $pdf->setXY(5,$y);
+      $pdf->Multicell(52,4,'Detail Produk',0,'L');
+
+      $pdf->setXY(5,$y+5);
+      $pdf->Cell(7, 5, 'No.', 1, 0, 'L');
+      $pdf->Cell(20, 5, 'Kode Produk', 1, 0, 'C');
+      $pdf->Cell(70, 5, 'Nama Produk', 1, 0, 'C');
+      $pdf->Cell(30, 5, 'Lot', 1, 0, 'C');
+      $pdf->Cell(15, 5, 'Qty', 1, 0, 'R');
+      $pdf->Cell(10, 5, 'Uom', 1, 0, 'L');
+      $pdf->Cell(10, 5, 'Qty2', 1, 0, 'R');
+      $pdf->Cell(10, 5, 'Uom2', 1, 0, 'L');
+      $pdf->Cell(28, 5, 'Reff Note', 1, 0, 'C');
+
+      // details
+      $smi  = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode,$dept_id);
+      $x    = 5;
+      $y    = $y+10;
+      $no   = 1;
+      foreach($smi as $row){
+
+          // set font tbody 
+          $pdf->SetFont('Arial','',8,'C');
+          
+          $pdf->setXY($x, $y);
+          $pdf->Multicell(7, 5, $no, 1,'L');
+          $pdf->setXY($x+7, $y);
+          $pdf->Multicell(20, 5, $this->custom_char_out($row->kode_produk,8), 1,'L');
+          $pdf->setXY($x+27, $y);
+          $pdf->Multicell(70, 5,  $this->custom_char_out($row->nama_produk,45), 1,'L');
+          $pdf->setXY($x+97, $y);
+          $pdf->Multicell(30, 5, $row->lot, 1,'L');
+          $pdf->setXY($x+127, $y);
+          $pdf->Multicell(15, 5, number_format($row->qty,2), 1,'R');
+          $pdf->setXY($x+142, $y);
+          $pdf->Multicell(10, 5, $row->uom, 1,'L');
+          $pdf->setXY($x+152, $y);
+          $pdf->Multicell(10, 5, round($row->qty2,2), 1,'R');
+          $pdf->setXY($x+162, $y);
+          $pdf->Multicell(10, 5, $row->uom2, 1,'L');
+          $pdf->setXY($x+172, $y);
+          $pdf->Multicell(28, 5, $this->custom_char_out($row->reff_note,10), 1,'L');
+          
+          $no++;
+          $y=$y+5;
+
+          if($y>290 ){
+            $pdf->AddPage();
+            $y = 7;
+            $pdf->SetFont('Arial','',7,'C');
+            $pdf->setXY(160,3);
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+            
+          }
+
+      }
+
+      $pdf->Output();
     }
 
 

@@ -7,13 +7,19 @@
         <thead>
           <tr>
             <th class="no">No</th>
+            <th>OW</th>
+            <th>Tgl.OW</th>
             <th>Product</th>
             <th>Color</th>
             <th>Qty</th>
             <th>Uom</th>
+            <th>Lebar Jadi</th>
+            <th>Handling</th>
+            <th>Gramasi</th>
+            <th>Route</th>
+            <th>Piece Info</th>
             <th>Reff Notes</th>
-            <th>All <input type="checkbox" id="checkAll"/></th>
-          </tr>
+            <th width="50px"></th>
         </thead>
         <tbody>
           
@@ -28,6 +34,9 @@
     $(document).ready(function() {
         //datatables
         table = $('#example2').DataTable({ 
+           "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-5'><'col-sm-7'p>>",
             "processing": true, 
             "serverSide": true, 
             "order": [], 
@@ -45,44 +54,57 @@
            
             "columnDefs": [
               {
-               'targets':6,
-               'data' : 7,
-               'searchable':false,
-               'orderable':false,
-               'className': 'text-center',
-               'render': function (data, type, full, meta){
-                 return '<input type="checkbox" class="checkitem" value="' + data + '">';
-                }
+               'targets':13,
+               'data' : 13,
+                'checkboxes': {
+                  'selectRow': true
+                },
+                'createdCell':  function (td, cellData, rowData, row, col){
+                   var rowId = rowData[13];
+                },
               },
               {
-                "visible": false, "targets": 7 
+                "visible": false,  "orderable": false, 
               },
               { 
                 "targets": [0], 
                 "orderable": false, 
               },
-            ]
+            ],
+             "select": {
+              'style': 'multi'
+            },
+            'rowCallback': function(row, data, dataIndex){
+               // Get row ID
+               var rowId = data[13];
+               // If row ID is in the list of selected row IDs
+            }
         });
  
     });
 
+  /*
   //checked All
   $('#checkAll').change(function(){
     $('.checkitem').prop("checked", $(this).prop("checked"))
   });
+  */
 
   //simpan color details ketika button simpan di klik
   $("#btn-tambah").unbind( "click" );
   $('#btn-tambah').click(function(){
     
+      var myCheckboxes = table.column(13).checkboxes.selected();
+      var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
-      var myCheckboxes = new Array();
-        $(".checkitem:checked").each(function() {
-           myCheckboxes.push($(this).val());
+
+        $.each(myCheckboxes, function(index, rowId){        
+          myCheckboxes_arr.push(rowId);
         });
-        countchek = myCheckboxes.length;
+
+        countchek = myCheckboxes_arr.length;
         
-        if(myCheckboxes == ''){
+        if(myCheckboxes_arr == ''){
           alert_modal_warning(message);
 
         }else{
@@ -91,7 +113,11 @@
               type: "POST",
               url :'<?php echo base_url('ppic/colororder/save_color_detail_modal')?>',
               dataType: 'JSON',
-              data: 'txtso='+$("#txtso").val()+'&txtco='+$("#txtco").val()+'&checkbox='+myCheckboxes+'&countchek='+countchek,
+              data    : { txtso : $("#txtso").val(),
+                          txtco : $("#txtco").val(),
+                          checkbox: myCheckboxes_arr,
+                          countchek:countchek
+                        },
               success: function(data){
                 if(data.sesi=='habis'){
                   //alert jika session habis
@@ -102,7 +128,8 @@
                  $('#tambah_data').modal('hide');
                  $('#btn-tambah').button('reset');
                  $("#foot").load(location.href + " #foot");
-                  alert_notify(data.icon,data.message,data.type);
+                 $("#status_bar").load(location.href + " #status_bar");
+                  alert_notify(data.icon,data.message,data.type,function(){});
                 }
 
               },error: function (xhr, ajaxOptions, thrownError) {

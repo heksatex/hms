@@ -97,7 +97,7 @@
                   <th>Kode</th>
                   <th>Tanggal</th>
                   <th>Tanggal Kirim</th>
-                  <th>Tanggal Jatuh Tempo</th>
+                  <th>Origin</th>
                   <th>Lokasi Tujuan</th>
                   <th>Reff Picking</th>
                   <th>Reff Note</th>

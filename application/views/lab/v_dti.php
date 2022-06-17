@@ -12,7 +12,10 @@
   <!-- main -header -->
   <header class="main-header">
    <?php $this->load->view("admin/_partials/main-menu.php") ?>
-   <?php $this->load->view("admin/_partials/topbar.php") ?>
+    <?php
+      $data['deptid']     = $id_dept;
+      $this->load->view("admin/_partials/topbar.php",$data)
+    ?>
   </header>
 
   <!-- Menu Side Bar -->
@@ -36,8 +39,8 @@
               <thead>
                 <tr>
                   <th class="no">No</th>
-                  <th>Warna</th>
-                  <th>Tanggal</th>
+                  <th>Nama Warna</th>
+                  <th>Tanggal dibuat</th>
                   <th>Status</th>
                   <th>Notes</th>
                 </tr>

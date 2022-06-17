@@ -788,9 +788,11 @@ class Productionorder extends MY_Controller
 
     	                  $tgl_jt  =  date('Y-m-d H:i:s', strtotime(-$leadtime_dept.' days', strtotime($schedule_date)));
 
-    	                  $source_location = $method_dept."/Stock";
+    	                  //$source_location = $method_dept."/Stock";
+                          $loc      = $this->_module->get_nama_dept_by_kode($method_dept)->row_array();
+                          $location = $loc['stock_location'];
     	                  //sql simpan mrp_production
-    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$source_location."','".$source_location."','".$method_dept."','draft','','".$nama_user."','".addslashes($lebar_greige)."','".addslashes($uom_lebar_greige)."','".addslashes($lebar_jadi)."','".addslashes($uom_lebar_jadi)."'), ";
+    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$location."','".$location."','".$method_dept."','draft','','".$nama_user."','".addslashes($lebar_greige)."','".addslashes($uom_lebar_greige)."','".addslashes($lebar_jadi)."','".addslashes($uom_lebar_jadi)."'), ";
 
                            //get mms kode berdasarkan dept_id
                           $mms = $this->_module->get_kode_sub_menu_deptid('mO',$method_dept)->row_array();

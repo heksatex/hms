@@ -784,10 +784,10 @@
 						+ '</tr>';
 						$('#tabel_produksi tbody').append(html);			
 						
-						var $option = $("<option selected></option>").val('<?php echo $lbr_produk->uom_lebar_greige;?>').text('<?php echo $lbr_produk->uom_lebar_greige;?>');
+						var $option = $("<option selected></option>").val(uom_lbr_greige).text(uom_lbr_greige);
             			$('.'+row).append($option).trigger('change');
 
-						var $option2 = $("<option selected></option>").val('<?php echo $lbr_produk->uom_lebar_jadi;?>').text('<?php echo $lbr_produk->uom_lebar_jadi;?>');
+						var $option2 = $("<option selected></option>").val(uom_lbr_jadi).text(uom_lbr_jadi);
             			$('.'+row2).append($option2).trigger('change');
 
 						row_order_rm++;

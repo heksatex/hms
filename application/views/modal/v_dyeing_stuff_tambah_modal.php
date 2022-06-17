@@ -7,6 +7,7 @@
         <div class="col-xs-8">
           <input type="text" name="warna" id="warna" class="form-control input-sm"  readonly="readonly" value="<?php echo $warna?>">
          	<input type="hidden" name="tipe" id="tipe" class="form-control input-sm"  readonly="readonly" value="<?php echo $tipe_obat?>">
+          <input type="hidden" name="id_warna" id="id_warna" class="form-control input-sm"  readonly="readonly" value="<?php echo $id_warna?>">
         </div>  
       </div>
       <div class="col-md-12 col-xs-12">
@@ -17,16 +18,6 @@
   		  </div>  
   		</div>
       <div class="col-md-12 col-xs-12">
-        <div class="col-xs-4"><label>Reff Notes </label></div>
-          <div class="col-xs-8">
-            <textarea type="text" class="form-control input-sm" name="reff_note" id="reff_note"  ></textarea>
-          </div>                                    
-      </div>
-    </div>
-  </div>
-  <div class="form-group">
-  	<div class="col-md-6">
-  	  <div class="col-md-12 col-xs-12">
   		  <div class="col-xs-4"><label>Qty (%)</label></div>
   		  <div class="col-xs-8">
   		    <input type="text" name="txtQty" id="txtQty" class="form-control input-sm" onkeyup="validAngka(this)"/>
@@ -35,9 +26,25 @@
   		<div class="col-md-12 col-xs-12">
   		  <div class="col-xs-4"><label>uom</label></div>
   		  <div class="col-xs-8">
-  		   	<input name="txtUom" id="txtUom" class="form-control input-sm" readonly="readonly">
+            <select class="form-control input-sm" name="txtUom" id="txtUom" >
+                    <option value=""></option>
+                    <?php foreach ($uom as $row) {
+                            echo "<option value='".$row->short."'>".$row->short."</option>";
+                          }
+                    ?>
+            </select>
   		  </div>  
   		</div>
+    </div>
+  </div>
+  <div class="form-group">
+  	<div class="col-md-6">
+      <div class="col-md-12 col-xs-12">
+        <div class="col-xs-4"><label>Reff Notes </label></div>
+          <div class="col-xs-8">
+            <textarea type="text" class="form-control input-sm" name="reff_note" id="reff_note"  ></textarea>
+          </div>                                    
+      </div>
   	</div>
   </div>
 </form>
@@ -61,7 +68,7 @@
             $.each(data, function(index,item){
                 results.push({
                     id:item.kode_produk,
-                    text:item.nama_produk
+                    text:'['+item.kode_produk+'] '+item.nama_produk
                 });
             });
             return {
@@ -100,6 +107,7 @@
       a.value = a.value.substring(0,a.value.length-1000);
     }
   }
+  
 
   //simpan data
   $("#btn-tambah").unbind( "click" );
@@ -116,6 +124,8 @@
                  txtUom      : $('#txtUom').val(),
                  reff_note   : $('#reff_note').val(),
                  tipe_obat   : $('#tipe').val(),
+                 id_warna    : $('#id_warna').val(),
+                 row_order   :'',
                   },
           success: function(data){
             if(data.sesi=='habis'){
@@ -132,9 +142,10 @@
                 $('#btn-tambah').button('reset');
                 $("#table_dyest").load(location.href + " #table_dyest");
                 $("#table_aux").load(location.href + " #table_aux");
-                $("#foot").load(location.href + " #foot");                   
+                $("#foot").load(location.href + " #foot");    
+                $("#status_head").load(location.href + " #status_head");
                 $('#tambah_data').modal('hide');
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
              }
           },
           error: function (xhr, ajaxOptions, thrownError)

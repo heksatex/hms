@@ -423,7 +423,8 @@ class Procurementpurchase extends MY_Controller
                 $sql_out_items_batch = "";
                 $sm_row              = 1; 
                 $source_move         = ""; 
-                $i                   = 1; //set count kode out                         
+                $i                   = 1; //set count kode out
+                $arr_kode           = [];                         
 
                 $last_move   = $this->_module->get_kode_stock_move();
                 $move_id     = "SM".$last_move; //Set kode stock_move
@@ -538,7 +539,10 @@ class Procurementpurchase extends MY_Controller
                 $method        = $warehouse.'|'.$method_action;
                 $output_location = $this->_module->get_output_location_by_kode('RCV')->row_array();
                 $lokasi_dari   = $output_location['output_location'];
-                $lokasi_tujuan = $warehouse.'/Stock';
+                $loc      = $this->_module->get_nama_dept_by_kode($warehouse)->row_array();
+                $lokasi_tujuan = $loc['stock_location'];
+                
+                //$lokasi_tujuan = $warehouse.'/Stock';
                 $method_dept   = $warehouse;            
 
                 $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','draft','1','".$source_move."'), ";                  

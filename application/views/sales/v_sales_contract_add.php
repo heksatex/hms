@@ -50,7 +50,7 @@
 
               <div class="col-md-6">
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Sales Order</label></div>
+                  <div class="col-xs-4"><label>Sales Contract</label></div>
                   <div class="col-xs-8">
                     <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly" />
                     <input type="hidden" class="form-control input-sm" name="sales_order_en" id="sales_order_en" readonly="readonly" />

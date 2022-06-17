@@ -5,7 +5,7 @@
               <thead>
                 <tr>
                   <th class="no">No</th>
-                  <th>SO</th>
+                  <th>Sales Order</th>
                   <th>Buyer kode</th>
                   <th>Marketing</th>
                 </tr>
