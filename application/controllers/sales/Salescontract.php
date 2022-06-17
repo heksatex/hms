@@ -215,6 +215,7 @@ class Salescontract extends MY_Controller
         $data["tax"]           = $this->m_sales->get_list_tax();
         $data["list_uom"]      = $this->_module->get_list_uom();
         $data['handling']      = $this->_module->get_list_handling();
+        $data['route']         = $this->_module->get_list_route_co();
 
         if(empty($data["salescontract"])){
           show_404();
@@ -567,12 +568,14 @@ class Salescontract extends MY_Controller
           $color_name   = addslashes($this->input->post('color_name'));
           $qty          = $this->input->post('qty');
           $uom          = addslashes($this->input->post('uom'));
-          $piece_info   = $this->input->post('piece_info');
+          $piece_info   = addslashes($this->input->post('piece_info'));
           $row          = $this->input->post('row_order');
           $handling     = $this->input->post('handling');
+          $route_co     = $this->input->post('route_co');
           $gramasi      = $this->input->post('gramasi');
           $lebar_jadi   = $this->input->post('lebar_jadi');
           $uom_lebar_jadi   = $this->input->post('uom_lebar_jadi');
+          $reff_note    = addslashes($this->input->post('reff_note'));
           $date         = date('Y-m-d H:i:s');
 
           if(!empty($handling)){
@@ -596,6 +599,14 @@ class Salescontract extends MY_Controller
 
           }else{
 
+            if(!empty($route_co)){
+                // get nama route co
+                $route = $this->_module->get_nama_route_by_kode($route_co)->row_array();
+                $nama_route = $route['nama'];
+            }else{
+                $nama_route = '';
+            }
+
             if(!empty($row)){//update details
 
               // cek apakah sudah terbentuk OW atau belum 
@@ -606,9 +617,9 @@ class Salescontract extends MY_Controller
 
               }else{
                 
-                $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi);
+                $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note);
                 $jenis_log   = "edit";
-                $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$gramasi." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
+                $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling."| ".$nama_route." | ".$gramasi." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note;
                 $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                 $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 
@@ -618,7 +629,7 @@ class Salescontract extends MY_Controller
               
               $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
               $row_order = $ro['row_order']+1;
-              $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi);
+              $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note);
               
               // cek status sales_contract
               $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
@@ -628,7 +639,7 @@ class Salescontract extends MY_Controller
               }
               
               $jenis_log   = "edit";
-              $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info;
+              $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note;
               $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
               $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                       
@@ -758,6 +769,8 @@ class Salescontract extends MY_Controller
 
               if($value == 't'){
                 $status = $ow.' Tidak Aktif';
+              }else if($value == 'ng'){
+                $status = 'Not Good';
               }else{
                 $status = $ow.' OW Tidak Aktif';
               }

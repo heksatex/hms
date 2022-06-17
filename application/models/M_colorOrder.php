@@ -16,8 +16,8 @@ class M_colorOrder extends CI_Model
 	var $order2  	    = array('a.create_date' => 'desc');
 
 	//var $table3 	    = 'sales_color_line';
-	var $column_order3  = array(null, 'ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'piece_info');
-	var $column_search3 = array('ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info');
+	var $column_order3  = array(null, 'ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'nama_route','piece_info','reff_notes');
+	var $column_search3 = array('ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info', 'nama_route', 'reff_notes');
 	var $order3  	    = array('tanggal_ow' => 'asc');
 
 
@@ -148,7 +148,7 @@ class M_colorOrder extends CI_Model
 	{
 		$query = $this->db->query("SELECT a.kode_co, a.ow, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.status, a.row_order, 
 												 b.kode as kode_route,b.nama as route_co,
-												 a.id_warna, c.nama_warna, c.kode_warna, a.id_handling, d.nama_handling, a.lebar_jadi, a.uom_lebar_jadi, a.gramasi
+												 a.id_warna, c.nama_warna, c.kode_warna, a.id_handling, d.nama_handling, a.lebar_jadi, a.uom_lebar_jadi, a.gramasi, a.reff_notes_mkt
 									FROM color_order_detail a 
 									LEFT JOIN route_co b ON a.route_co = b.kode
 									LEFT JOIN warna c ON a.id_warna = c.id
@@ -264,10 +264,11 @@ class M_colorOrder extends CI_Model
 	{
 		
 		//$this->db->from($this->table3);
-		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling, a.gramasi");
+		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling, a.gramasi, a.route_co, rc.nama as nama_route, a.reff_notes");
 		$this->db->from("sales_color_line a");
 		$this->db->JOIN("warna b", "a.id_warna = b.id", "LEFT");
 		$this->db->JOIN("mst_handling c", "a.id_handling =  c.id", "LEFT");
+		$this->db->JOIN("route_co rc","rc.kode = a.route_co","LEFT");
 
 		$i = 0;
 	
@@ -346,11 +347,11 @@ class M_colorOrder extends CI_Model
 
 	}
 
-	public function simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff,$status,$row_order,$route_co,$id_handling,$gramasi,$lebar_jadi,$uom_lebar_jadi)
+	public function simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff,$status,$row_order,$route_co,$id_handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$reff_mkt)
 	{
 		$tgl = date('Y-m-d H:i:s');
-		return $this->db->query("INSERT INTO color_order_detail (kode_co, tanggal, ow, kode_produk, nama_produk, id_warna, qty, uom, reff_notes, status, row_order, route_co,id_handling,gramasi,lebar_jadi,uom_lebar_jadi) 
-								values ('$kode_co','$tgl','$ow','$kode_produk','$nama_produk','$id_warna','$qty','$uom','$reff','$status','$row_order','$route_co','$id_handling','$gramasi','$lebar_jadi','$uom_lebar_jadi') ");
+		return $this->db->query("INSERT INTO color_order_detail (kode_co, tanggal, ow, kode_produk, nama_produk, id_warna, qty, uom, reff_notes, status, row_order, route_co,id_handling,gramasi,lebar_jadi,uom_lebar_jadi,reff_notes_mkt) 
+								values ('$kode_co','$tgl','$ow','$kode_produk','$nama_produk','$id_warna','$qty','$uom','$reff','$status','$row_order','$route_co','$id_handling','$gramasi','$lebar_jadi','$uom_lebar_jadi','$reff_mkt') ");
 	}
 
 	public function update_one_is_approve_color_lines($sales_order, $id_warna, $is_approve, $row_order)
@@ -388,7 +389,7 @@ class M_colorOrder extends CI_Model
 	{
 		return $this->db->query("SELECT *
 								FROM mrp_route mr								
-								WHERE mr.nama_route = '$route' ORDER BY row_order ")->result();
+								WHERE mr.nama_route = '$route' ORDER BY row_order asc ")->result();
 	}
 
 	public function get_nama_dept_by_kode($kode)
@@ -415,7 +416,7 @@ class M_colorOrder extends CI_Model
 		if(empty($result->nom)){
 			$no   = 1;
 		}else{
-     		$no   = (int)$result->nom + 1;
+     		$no   = (int)$result->nom ;
 		}
 		//$kode = 'MF'.$no;
 		return $no;

@@ -371,13 +371,13 @@
 
     //This check if the tab is active
     if (tab.parent().hasClass('active')) {
-        alert('the tab with the content id ' +   + ' is visible');
+        //alert('the tab with the content id is visible');
     } else {
-      alert('the tab with the content id ' + contentId + ' is NOT visible');
+      //alert('the tab with the content id ' + contentId + ' is NOT visible');
     }
 
   });
-  */
+    */
   
   // reload items dti
   function reloadItems(id_varian){
@@ -437,14 +437,63 @@
 
   }
 
+  var unsaved = false;
   // show tab
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       var id_varian = $(this).attr('varian');
 
+      var activeTab   = $(e.target);
       var previousTab = $(e.relatedTarget);
-      previousTab.parent().hasClass('active');
+      //activeTabPane   = $(activeTab.attr('href'))
+      //previousTabPane = $(previousTab.attr('href'));
 
-      reloadItems(id_varian);
+      //Save clicked element to variable
+      //var clickedTab = previousTab.attr("href");
+      //alert(clickedTab)
+
+      //Remove class active
+      activeTab.parent().removeClass('active');
+
+      //Add Active class to clicked tab
+      //var a = previousTab.parent().hasClass('active');
+              
+      if(unsaved){
+        var dialog = bootbox.dialog({
+          title: "<i class='fa fa-warning'></i> Warning !",
+          message: "<p>Simpan terlebih dahulu Varian yang telah anda tambahkan atau tinggalkan tanpa menyimpan Varian yang telah anda tambahkan </p>",
+          size: 'medium',
+          buttons: {
+            ok: {
+              label: "Yes",
+              className: 'btn-primary btn-sm',
+              callback: function(){
+                console.log('Custom OK clicked');
+                // clear varian yg telah ditambahkan
+                activeTab.parent().addClass('active');
+                // hapus tab list tambah varian
+                tabAddVar = previousTab.attr("href");
+                $('#tab-list li a[href="'+tabAddVar+'"]').remove();
+                reloadItems(id_varian);
+                $('#tab-list li:last').remove();
+                $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
+                unsaved = false;
+              }
+            },
+            cancel: {
+                label: "No",
+                className: 'btn-default btn-sm',
+                callback: function(){
+                  // active tambah varian
+                  previousTab.parent().addClass('active');
+                }
+            },
+          }
+        });
+      }else{
+        reloadItems(id_varian);
+        activeTab.parent().addClass('active');
+      }
+
   })
 
 /*
@@ -543,6 +592,8 @@
               $('#table_aux tbody').remove();
           },
           success: function(data){
+
+              unsaved = true;
               var row = '';
               // add items DYE
               // new tab varian
@@ -585,13 +636,16 @@
 
   // batal tambah varian baru
   $('#tab-list').on('click', '.close', function() {
+        unsaved = false;
         var tabID = $(this).parents('a').attr('href');
         $(this).parents('li').remove();
         $(tabID).remove();
 
         //display first tab
-        var tabFirst = $('#tab-list a:first');
+        var tabFirst = $('#tab-list li a:first');
         tabFirst.tab('show');
+        tabFirst.parent().addClass('active');
+
         $('#tab-list li:last').remove();
         // show btn plus
         $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
@@ -721,7 +775,7 @@
                     + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
                     + '<td  class="min-width-200">'
                         + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
-                        + '<input type="text" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
+                        + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
                     + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" value="'+qty+'"></td>'
                     + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
                     + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff">'+reff_note+'</textarea></td>'

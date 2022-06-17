@@ -607,7 +607,7 @@ class Dti extends MY_Controller
             $this->m_lab->update_status_warna($id_warna,'ready');
             $callback    = array('status'=>'success', 'message' => 'Generate Warna Berhasil !',  'icon' =>'fa fa-check', 'type' => 'success');
             
-            $jenis_log   = "ready";
+            $jenis_log   = "edit";
             $note_log    = "Generated" ;
             $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
 

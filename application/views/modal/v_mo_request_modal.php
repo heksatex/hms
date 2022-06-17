@@ -74,6 +74,7 @@
                         $("#table_aux").load(location.href + " #table_aux");
                         $("#table_dyest").load(location.href + " #table_dyest");
                         $('#btn_request').button('reset');
+	                 	    $('#tambah_data').modal('hide');
 
                     }else{
                          //jika berhasil disimpan/diubah

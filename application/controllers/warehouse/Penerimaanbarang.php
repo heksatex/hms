@@ -107,6 +107,24 @@ class Penerimaanbarang extends MY_Controller
         $this->load->view('warehouse/v_penerimaan_barang',$data);
     }
 
+    public function Finbrushing()
+    {
+        $data['id_dept']='FBR';
+        $this->load->view('warehouse/v_penerimaan_barang',$data);
+    }
+
+    public function Padding()
+    {
+        $data['id_dept']='PAD';
+        $this->load->view('warehouse/v_penerimaan_barang',$data);
+    }
+
+    public function Setting()
+    {
+        $data['id_dept']='SET';
+        $this->load->view('warehouse/v_penerimaan_barang',$data);
+    }
+
     public function Inspecting2()
     {
         $data['id_dept']='INS2';

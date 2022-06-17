@@ -33,6 +33,8 @@ class ListOW extends MY_Controller
         	$kode_co_encrypt = encrypt_url($field->kode_co);
             if($field->status_scl == 't'){
                 $status_scl = 'Aktif';
+            }else if($field->status_scl == 'ng'){
+                $status_scl = 'Not Good';
             }else{
                 $status_scl = 'Tidak Aktif';
             }
@@ -168,12 +170,20 @@ class ListOW extends MY_Controller
         $list = $this->m_listOW->get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna);
         foreach($list as $val){
 
+            if($val->status_scl == 't'){
+                $status_scl = 'Aktif';
+            }else if($val->status_scl == 'ng'){
+                $status_scl = 'Not Good';
+            }else{
+                $status_scl = 'Tidak Aktif';
+            }
+
             $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
 			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->sales_order);
 			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->nama_sales_group);
 			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->ow);
 			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->tanggal_ow);
-			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->status_scl);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $status_scl);
 			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->nama_produk);
 			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->nama_warna);
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);

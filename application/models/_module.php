@@ -789,4 +789,14 @@ class _module extends CI_Model
 		return $this->db->query("SELECT dept FROM user where username = '$username' ");
 	}
 
+	public function get_list_route_co()
+	{
+		return $this->db->query("SELECT kode, nama FROM route_co ORDER BY kode ")->result();
+	}
+
+	public function get_nama_route_by_kode($kode)
+	{
+		return $this->db->query("SELECT nama FROM route_co WHERE kode  = '$kode'");
+	}
+
 }

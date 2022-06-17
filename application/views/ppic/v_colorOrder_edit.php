@@ -151,6 +151,7 @@
                             <th class="style">Lebar Jadi</th>
                             <th class="style">Route</th>
                             <th class="style">Reff Notes</th>
+                            <th class="style">Reff Notes Mkt</th>
                             <th class="style">Status</th>
                             <th class="style"></th>
                             <th class="style"></th>
@@ -180,6 +181,7 @@
                                 <td><?php echo $row->lebar_jadi.' '.$row->uom_lebar_jadi?></td>
                                 <td><?php echo $row->route_co?></td>
                                 <td><?php echo $row->reff_notes?></td>
+                                <td><?php echo $row->reff_notes_mkt?></td>
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                 <td width="50px"><i class="box-color" style="background-color:<?php echo $row->kode_warna; ?>"></i></td>
                                 <td  align="center" >

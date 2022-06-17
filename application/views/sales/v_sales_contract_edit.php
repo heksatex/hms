@@ -349,12 +349,14 @@
 	                            <th class="style" width="150px">Color</th>
 	                            <th class="style" width="150px">Color Name</th>
                               <th class="style" width="100px">Finishing</th>
+                              <th class="style" width="100px">Route CO</th>
                               <th class="style" width="80px">Gramasi</th>
 	                            <th class="style" width="80px" style="text-align: right;">Qty</th>
 	                            <th class="style" width="80px" >Uom</th>
 	                            <th class="style" width="150px" >Piece Info</th>
 	                            <th class="style" width="120px">Lebar Jadi</th>
 	                            <th class="style" width="100px">Uom Lbr Jadi</th>
+	                            <th class="style" width="150px">Reff Notes</th>
 	                            <th class="style" width="80px" >OW</th>
 	                            <th class="style" >Status</th>
 	                            <th class="style" width="50px"></th>
@@ -372,20 +374,24 @@
                                     <td class="text-wrap" data-content="edit" data-id="color"   data-name="Color" data-isi="<?php echo $row->id_warna;?>" data-isi2="<?php echo $row->nama_warna;?>"><?php echo $row->nama_warna?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Color Name" data-id="color_name"  data-isi="<?php echo $row->color_alias_name;?>"><?php echo htmlentities($row->color_alias_name)?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Finishing" data-id="handling"  data-isi="<?php echo $row->id_handling;?>"><?php echo $row->nama_handling?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Route CO" data-id="route_co"  data-isi="<?php echo $row->route_co;?>"><?php echo $row->nama_route_co?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Gramasi" data-id="gramasi"  data-isi="<?php echo $row->gramasi;?>"><?php echo $row->gramasi?></td>
                                     <td align="right" data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>"><?php echo $row->qty?></td>
                                     <td ><?php echo $row->uom?></td>
                                     <td class="text-wrap width-150" data-content="edit" data-name="Piece Info" data-id="piece_info" data-isi="<?php echo $row->piece_info;?>"><?php echo htmlentities($row->piece_info)?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Lebar Jadi" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
                                     <td class="text-wrap width-80"  data-content="edit" data-name="Uom Lebar Jadi" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" ><?php echo $row->uom_lebar_jadi?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Reff Note" data-id="reff_notes"  data-isi="<?php echo htmlentities($row->reff_notes);?>"><?php echo $row->reff_notes?></td>
                                     <td ><?php echo $row->ow?></td>
                                     <td style="min-width:80px;" >
                                         <?php if(!empty($row->ow)){ ?>
                                         <select class="form-control input-sm status_scl" id="status_scl" name="status_scl" sc="<?php echo $row->sales_order;?>" row_order="<?php echo $row->row_order;?>" ow="<?php echo $row->ow;?>" >
-                                          <?php $arr_stat = array('t','f');
+                                          <?php $arr_stat = array('t','f','ng');
                                                 foreach($arr_stat as $stats){
                                                   if($stats == 't'){
                                                     $status = 'Aktif';
+                                                  }else if($stats == 'ng'){
+                                                    $status = 'Not Good';
                                                   }else{
                                                     $status = 'Tidak Aktif';
                                                   }
@@ -1057,13 +1063,16 @@
           + '<td><textarea type="text" class="form-control input-sm description_color set_textarea  width-150" onkeyup="textAreaAdjust(this)"  name="Description" id="description_color"></textarea><input type="hidden" class="form-control input-sm prodhidd_color" name="prodhidd" id="prodhidd_color"></td>'
           + '<td><select type="text" class="form-control input-sm color width-150" name="Color" id="color"></select></td>'
           + '<td><textarea type="text" class="form-control input-sm  width-150 set_textarea" onkeyup="textAreaAdjust(this)"  name="Color Name" id="color_name"></textarea></td>'
-          + '<td><select type="text" class="form-control input-sm  width-100" name="Finishing" id="handling" ><option value=""></option><?php foreach($handling as $row){?><option value="<?php echo $row->id; ?>"><?php echo $row->nama_handling;?></option>"<?php }?></select></td>'
+          + '<td><select type="text" class="form-control input-sm  width-100 handling" name="Finishing" id="handling" ><option value=""></option><?php foreach($handling as $row){?><option value="<?php echo $row->id; ?>"><?php echo $row->nama_handling;?></option>"<?php }?></select></td>'
+          + '<td><select type="text" class="form-control input-sm  width-100 route_co" name="Route CO" id="route_co" ><option value=""></option><?php foreach($route as $row){?><option value="<?php echo $row->kode; ?>"><?php echo $row->nama;?></option>"<?php }?></select></td>' 
           + '<td><input type="text" class="form-control input-sm width-100" name="Gramasi" id="gramasi" onkeyup="validAngka(this)"></td>'
           + '<td><input type="text" class="form-control input-sm width-100" name="Qty" id="qty" onkeyup="validAngka(this)"></td>'
           + '<td><input type="text" class="form-control input-sm uom_color width-50" name="Uom" id="uom" readonly></td>'
           + '<td><textarea type="text" class="form-control  input-sm width-100 set_textarea" onkeyup="textAreaAdjust(this)"  name="Piece Info" id="piece_info"></textarea></td>'
           + '<td class=""><input type="text" class="form-control input-sm width-100 lebar_jadi" name="Lebar Jadi" id="lebar_jadi" ></td>'
-          + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_jadi" name="Uom Lebar Jadi" id="uom_lebar_jadi"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
+          + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_jadi" name="Uom Lebar Jadi" id="uom_lebar_jadi"><option value=""></option><?php 
+          foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
+          + '<td><textarea type="text" class="form-control  input-sm width-100 set_textarea" onkeyup="textAreaAdjust(this)"  name="Reff Notes" id="reff_notes"></textarea></td>'
           + '<td></td>'
           + '<td><button type="button" class="btn btn-primary btn-xs add-color-lines width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit-color-lines" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal-color-lines width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
           + '</tr>';
@@ -1071,6 +1080,15 @@
         $('#color_lines tbody').append(row);
         $("#color_lines tbody tr").eq(index + 1).find(".add-color-lines, .edit-color-lines").toggle();
         $('[data-toggle="tooltip"]').tooltip();
+
+        // select 2 handling/finishing
+        $('.handling').select2({});
+
+        // select 2 handling/finishing
+         $('.uom_lebar_jadi').select2({});
+
+        // select 2 route co
+         $('.route_co').select2({});
 
         //select 2 product
         $('.prod_color').select2({
@@ -1195,6 +1213,11 @@
           empty2 = true;
         }
 
+        if(!$(this).val() && $(this).attr('name')=='Route CO'){
+          alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+          empty2 = true;
+        }
+
         if(!$(this).val() && $(this).attr('name')=='Gramasi'){
           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
           empty2 = true;
@@ -1208,7 +1231,7 @@
 
       // validasi untuk inputan textbox
       input.each(function(){
-        if(!$(this).val() && $(this).attr('name')!='Piece Info'){
+        if(!$(this).val() && $(this).attr('name')!='Piece Info' || !$(this).val() && $(this).attr('name')!='Reff Notes'){
           alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
           //break;
@@ -1223,12 +1246,14 @@
         var color       = $(this).parents("tr").find("#color").val();
         var color_name  = $(this).parents("tr").find("#color_name").val();
         var handling    = $(this).parents("tr").find("#handling").val();
+        var route_co    = $(this).parents("tr").find("#route_co").val();
         var gramasi     = $(this).parents("tr").find("#gramasi").val();
         var qty         = $(this).parents("tr").find("#qty").val();
         var uom         = $(this).parents("tr").find("#uom").val();
         var piece_info  = $(this).parents("tr").find("#piece_info").val();
         var lebar_jadi  = $(this).parents("tr").find("#lebar_jadi").val();
         var uom_lebar_jadi  = $(this).parents("tr").find("#uom_lebar_jadi").val();
+        var reff_note   = $(this).parents("tr").find("#reff_notes").val();
         var row_order   = $(this).parents("tr").find("#row_order").val();
         //var dat = $(this).parents("tr").find('input[type="text"]').val();
               
@@ -1242,6 +1267,7 @@
                 color       : color,
                 color_name  : color_name,
                 handling    : handling,
+                route_co    : route_co,
                 gramasi     : gramasi,
                 desc        : desc, 
                 qty         : qty,
@@ -1249,6 +1275,7 @@
                 piece_info  : piece_info,
                 lebar_jadi  : lebar_jadi,
                 uom_lebar_jadi  : uom_lebar_jadi,
+                reff_note   : reff_note,
                 row_order   : row_order  },
           success: function(data){
             if(data.sesi=='habis'){
@@ -1454,6 +1481,36 @@
             $(this).html('<select type="text" class="form-control input-sm width-80 '+handling_row+'"  id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'"></select>');
             $('.'+handling_row).append(option).trigger('change');
 
+            $('.'+handling_row).select2({});
+
+          }else if($(this).attr('data-id') == 'route_co'){
+
+            var obj_route = new Array();
+            <?php 
+              foreach($route as $key ){
+            ?>
+                  obj_route.push({id:"<?php echo $key->kode?>", nama:"<?php echo $key->nama;?>"});
+            <?php 
+              }
+            ?>
+
+            var value_option  = $(this).attr('data-isi');
+            route_co_row      = $(this).attr('data-id')+row_order;
+
+            var option = '<option value=""></option>';
+            $.each(obj_route, function(index,val){
+                  if(obj_route[index].id == value_option ){
+                    option += "<option selected value='"+obj_route[index].id+"'>"+obj_route[index].nama+"</option>";
+                  }else{
+                    option += "<option value='"+obj_route[index].id+"'>"+obj_route[index].nama+"</option>";
+                  }
+            });
+
+            $(this).html('<select type="text" class="form-control input-sm width-100 '+route_co_row+'"  id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'"></select>');
+            $('.'+route_co_row).append(option).trigger('change');
+
+            $('.'+route_co_row).select2({});
+
           }else if($(this).attr('data-id') == 'uom_lebar_jadi'){
 
             var value_option  = $(this).attr('data-isi');
@@ -1480,8 +1537,9 @@
             $(this).html('<select type="text" class="form-control input-sm width-80 '+uom_lbr_row+'"  id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'"></select>');
 
             $('.'+uom_lbr_row).append(option).trigger('change');
+            $('.'+uom_lbr_row).select2({});
 
-          }else if($(this).attr('data-id')=='description_color' || $(this).attr('data-id') == 'color_name' || $(this).attr('data-id') =='piece_info' ){
+          }else if($(this).attr('data-id')=='description_color' || $(this).attr('data-id') == 'color_name' || $(this).attr('data-id') =='piece_info' || $(this).attr('data-id') =='reff_notes' ){
             
             $(this).html('<textarea type="text" onkeyup="textAreaAdjust(this)" class="form-control input-sm set_textarea width-150" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
 

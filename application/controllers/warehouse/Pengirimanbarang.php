@@ -106,6 +106,24 @@ class Pengirimanbarang extends MY_Controller
 		$this->load->view('warehouse/v_pengiriman_barang',$data);
 	}
 
+  public function Finbrushing()
+	{
+		$data['id_dept']='FBR';
+		$this->load->view('warehouse/v_pengiriman_barang',$data);
+	}
+
+  public function Padding()
+	{
+		$data['id_dept']='PAD';
+		$this->load->view('warehouse/v_pengiriman_barang',$data);
+	}
+
+  public function Setting()
+	{
+		$data['id_dept']='SET';
+		$this->load->view('warehouse/v_pengiriman_barang',$data);
+	}
+
 	public function Inspecting2()
 	{
 		$data['id_dept']='INS2';
@@ -2207,8 +2225,9 @@ class Pengirimanbarang extends MY_Controller
       }
 
       $nama_dept = strtoupper($dept['nama']);
-      //$pdf = new PDF_Code128('P','mm','A4');
-      $pdf = new PDF_Code128('L','mm',array(215,139));
+      $pdf       = new PDF_Code128('P','mm',array(216,330));// letter
+      //$pdf = new PDF_Code128('L','mm',array(215,139));
+      ///$pdf = new PDF_Code128('L','mm',array(216,165));// half letter
 
       $pdf->SetMargins(0,0,0);
       $pdf->SetAutoPageBreak(False);
@@ -2546,7 +2565,7 @@ class Pengirimanbarang extends MY_Controller
       
       $route = $this->m_pengirimanBarang->get_route_by_origin($origin);
       $xPos=$pdf->GetX(5);
-      $kotak = 0;
+      $kotak = 1;
       $baris_kotak = 0;
       $baris_kotak_loop = 0;
       foreach($route as $routes){
@@ -2613,8 +2632,10 @@ class Pengirimanbarang extends MY_Controller
             $pdf->Multicell(5,$cellHeight + 4,'->',0,'C');
             $xx = $xx + 5;
           }
-          $kotak++;
-          
+          if($method != 'PROD'){
+            $kotak++;
+          }
+
           if($baris_kotak_loop > $baris_kotak ){
             $baris_kotak = $baris_kotak_loop;
             $baris_kotak_loop = 0;
@@ -2626,6 +2647,7 @@ class Pengirimanbarang extends MY_Controller
           $pdf->SetXY($xPos , $yPos);
           $var_yPost = false;
           $xx = 5;
+          $kotak = 1;
         }
 
       }

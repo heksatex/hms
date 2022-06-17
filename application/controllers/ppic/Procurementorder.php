@@ -678,9 +678,11 @@ class Procurementorder extends MY_Controller
     	                
     	                  $tgl_jt  =  date('Y-m-d H:i:s', strtotime(-$leadtime_dept.' days', strtotime($schedule_date)));
 
-    	                  $source_location = $method_dept."/Stock";
+    	                  //$source_location = $method_dept."/Stock";
+                          $loc      = $this->_module->get_nama_dept_by_kode($method_dept)->row_array();
+                          $location = $loc['stock_location'];
     	                  //sql simpan mrp_production
-    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$source_location."','".$source_location."','".$method_dept."','draft','','".$nama_user."','','','',''), ";
+    	                  $sql_mrp_prod_batch .= "('".$kode_mo."','".$tgl."','".$origin."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','".$tgl_jt."','".addslashes($reff_notes)."','".$kode_bom."','".$tgl."','".$tgl."','".$location."','".$location."','".$method_dept."','draft','','".$nama_user."','','','',''), ";
 
                            //get mms kode berdasarkan dept_id
                           $mms = $this->_module->get_kode_sub_menu_deptid('mO',$method_dept)->row_array();
@@ -782,7 +784,9 @@ class Procurementorder extends MY_Controller
     	            
     	            if(!empty($product_supp_row)){
     		            $origin2       = $sales_order.'|'.$kode_production_order.'|'.$product_supp_row;
-    		            $lokasi_tujuan = $warehouse.'/Stock';
+    		            //$lokasi_tujuan = $warehouse.'/Stock';
+                        $loc           = $this->_module->get_nama_dept_by_kode($warehouse)->row_array();
+                        $lokasi_tujuan = $loc['stock_location'];
     		            $kd_in = $this->_module->get_kode_in_by_origin($lokasi_tujuan,$origin2)->row_array();
     		            if(!empty($kd_in['kode'])){
     		             	$reff_picking = $kode_out.'|'.$kd_in['kode'];

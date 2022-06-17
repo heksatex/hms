@@ -89,11 +89,12 @@ class Colororder extends MY_Controller
                   'type' => 'danger' );    
           }elseif(empty($tgl)){
               $callback = array('status' => 'failed', 'field' => 'tgl', 'message' => 'Tanggal Harus Diisi !', 'icon' =>'fa fa-warning', 
-                  'type' => 'danger' );    
+                  'type' => 'danger' ); 
+          /*   
           }elseif(empty($route)){
               $callback = array('status' => 'failed', 'field' => 'route', 'message' => 'Route Harus Diisi !', 'icon' =>'fa fa-warning', 
                   'type' => 'danger' );    
-          
+          */
           }else{
               if(empty($kode_co)){//jika kode co kosong, aksinya simpan data
                   $kode['kode_co'] =  $this->m_colorOrder->kode_co();
@@ -359,10 +360,10 @@ class Colororder extends MY_Controller
                             $uom           = $nama_dept['uom_1'];
                             $uom_2         = $nama_dept['uom_2'];
                             $status_produk = 't';
-
-                            $sql_insert_batch .= "('".$kode_prod."','".$product_fullname."','".$tgl."', '".$lebar_jadi."','".$uom_lebar_jadi."','".$kategori_produk."','".$bom_true_false."','".$type_produk."','".$uom."','".$uom_2."','".$status_produk."'), ";
+                            
                             $last_number = $last_number + 1;
                             $kode_prod    = "MF".$last_number;
+                            $sql_insert_batch .= "('".$kode_prod."','".$product_fullname."','".$tgl."', '".$lebar_jadi."','".$uom_lebar_jadi."','".$kategori_produk."','".$bom_true_false."','".$type_produk."','".$uom."','".$uom_2."','".$status_produk."'), ";
 
                           }else{
                             $kode_prod = $cek_prod2['kode_produk'];
@@ -1133,7 +1134,9 @@ class Colororder extends MY_Controller
             $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
             $row[] = $field->nama_handling;
             $row[] = $field->gramasi;
+            $row[] = $field->nama_route;
             $row[] = $field->piece_info;
+            $row[] = $field->reff_notes;
             $row[] = $field->row_order;
             //$row[] = '';//buat checkbox
             //$row[] = htmlentities($field->nama_produk)."|".$field->kode_warna."|".$field->qty."|".$field->uom."|".$field->piece_info."|^";
@@ -1166,8 +1169,8 @@ class Colororder extends MY_Controller
             $cl_id    = $this->input->post('checkbox');// isi row_order sales color line
             $countchek= $this->input->post('countchek');
             $ro       = $this->m_colorOrder->get_row_order_color_detail($kode_co)->row_array();
-            $route    = $this->m_colorOrder->get_default_route_co_by_kode($kode_co)->row_array();
-            $route_co = $route['route'];
+            //$route    = $this->m_colorOrder->get_default_route_co_by_kode($kode_co)->row_array();
+            //$route_co = $route['route'];
             $row_order  = $ro['jml'] + 1;
             $is_approve = 't';
 
@@ -1186,9 +1189,11 @@ class Colororder extends MY_Controller
               $id_handling = $items['id_handling'];
               $gramasi     = $items['gramasi'];
               $reff_notes  = addslashes($items['piece_info']);
+              $reff_notes_mkt = addslashes($items['reff_notes']);
               $row_color_line = $items['row_order'];
+              $route_co    = $items['route_co'];
 
-              $this->m_colorOrder->simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff_notes,'draft', $row_order,$route_co,$id_handling,$gramasi,$lebar_jadi,$uom_lebar_jadi); 
+              $this->m_colorOrder->simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff_notes,'draft', $row_order,$route_co,$id_handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$reff_notes_mkt); 
               $row_order++;
               $this->m_colorOrder->update_one_is_approve_color_lines($so,$id_warna,$is_approve,$row_color_line);
             }

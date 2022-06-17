@@ -110,6 +110,7 @@
                                     <option value="">All</option>
                                     <option value="draft">Draft</option>
                                     <option value="ready">Ready</option>
+                                    <option value="done">Done</option>
                                 </select>
                             </div>
                           </div>

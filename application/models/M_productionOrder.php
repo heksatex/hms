@@ -232,7 +232,7 @@ class M_productionOrder extends CI_Model
 	{
 		return $this->db->query("SELECT kode_bom, nama_bom 
 								FROM  bom 
-								WHERE nama_bom LIKE '%$nama_bom%' AND nama_produk = '$nama_produk' LIMIT 10")->result_array();
+								WHERE nama_bom LIKE '%$nama_bom%' AND nama_produk = '$nama_produk' LIMIT 200")->result_array();
 	}
 
 	public function get_nama_bom_by_kode_bom($kode_bom)

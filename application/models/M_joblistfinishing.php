@@ -44,7 +44,7 @@ class M_joblistfinishing extends CI_Model
 		$this->db->from("mrp_production mrp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
 		$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
-		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
+		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","left");
 		$this->db->join("pengiriman_barang pb", "pb.move_id = sm.move_id","left");
 
 		$i = 0;
@@ -114,7 +114,7 @@ class M_joblistfinishing extends CI_Model
 		$this->db->from("mrp_production mrp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
 		$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
-		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
+		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","left");
 		$this->db->join("pengiriman_barang pb", "pb.move_id = sm.move_id","left");
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		$this->db->where('mrp.dept_id',$id_dept);
