@@ -120,9 +120,9 @@
 
                           </tr>
                           <tr id="bawah">
-                            <th class='style' style="text-align: center;">Mtr</th>
-                            <th class='style' style="text-align: center;">Kg</th>
-                            <th class='style' style="text-align: center;">Gl</th>
+                            <th class='style' style="text-align: center;">Qty1</th>
+                            <th class='style' style="text-align: center;">Qty2</th>
+                            <th class='style' style="text-align: center;">Pcs</th>
                             <th class='style' style="text-align: center;">A</th>
                             <th class='style' style="text-align: center;">B</th>
                             <th class='style' style="text-align: center;">C</th>

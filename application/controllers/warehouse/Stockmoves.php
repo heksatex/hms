@@ -186,6 +186,7 @@ class Stockmoves extends MY_Controller
                 $grouping1  = $this->grouping_sm_1_params($data_grouping,$where,$id_dept,$kolom_order,$order);
                 $dataRecord = $grouping1[0];
                 $tmp_arr_group = $grouping1[1];
+                $jml_group     = $grouping1[2];
                 $group_ke  = 1;
 
             }elseif (count($data_grouping) == 2) {
@@ -193,13 +194,15 @@ class Stockmoves extends MY_Controller
                 $dataRecord = $grouping2;
                 $dataRecord = $grouping2[0];
                 $tmp_arr_group = $grouping2[1];
+                $jml_group     = $grouping2[2];
                 $group_ke  = 1;
             }
        
             $name_total = "Total Group : ";
-            $allcount   = count($data_grouping);
+            //$allcount   = count($data_grouping);
+            $allcount   = $jml_group;
             $pagination = '';
-             $group     = true;
+            $group     = true;
 
         }else{
 
@@ -524,6 +527,7 @@ class Stockmoves extends MY_Controller
         }
 
         $tmp_arr_group = [];
+        $jml_group     = 0;
 
         $group1   = $this->m_stockMoves->get_list_stock_moves_grouping($groupBy,$where1);
         foreach ($group1 as $gp1) {
@@ -539,7 +543,7 @@ class Stockmoves extends MY_Controller
             $row .= "</tr>";
             $ro++;
             $row .= "</tbody>";
-
+            $jml_group++;
             $tmp_arr_group[] = array('tbody_id' => $group, 'by'=> $by,'value' => $gp1->nama_field);
             /*
             $row .= "<tbody id='".$group."' class='collapse child'>";
@@ -580,7 +584,7 @@ class Stockmoves extends MY_Controller
            */ 
 
         }
-        return array($row,$tmp_arr_group);
+        return array($row,$tmp_arr_group,$jml_group);
     }
 
     function grouping_sm_2_params($arr_grouping,$where,$id_dept,$kolom_order,$order){
