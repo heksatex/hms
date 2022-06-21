@@ -52,7 +52,6 @@
 
     .li-adv:hover{
        background-color: #f2dede;
-       color: 
     }
 
     /* < CSS advanced search */
@@ -116,7 +115,7 @@
                 <div class="col-md-6">
                   <div class="col-md-4">
                     <label>
-                      <div id='total_record'></div>
+                      <div id='total_record'>Total Data : 0</div>
                     </label>
                   </div>
                   <div class="col-md-8">
@@ -284,9 +283,15 @@
                     <th class='style'><!--a class="column_sort" id="status" data-order="desc" href="javascript:void(0)"-->Status</a></th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                    <tr>
+                      <td colspan="16" align="center">Tidak ada Data</td>
+                    </tr>
+                </tbody>
             </table>
-
+            <div id="example1_processing" class="table_processing" style="display: none">
+              Processing...
+            </div>                                
           </div>
 
         </div>
@@ -509,8 +514,8 @@
 
     // event jika caption ditambahkan di texbox
     $('#tags').on('itemAdded', function(event){
-     // alert('added belum '+JSON.stringify(arr_filter));
-      please_wait(function(){});
+
+      //please_wait(function(){});
       var check_arr_filter = false;
       var check_arr_group  = false;
       var check_favorite_arr_filter   = false;
@@ -584,7 +589,7 @@
       }
 
       //alert('added sudah '+JSON.stringify(arr_filter));
-      unblockUI( function() {});
+      //unblockUI( function() {});
       
     });
 
@@ -667,6 +672,8 @@
         if(filter == true && empty_value == false){
           $("#example1 tbody").remove();
           $('#btn-filter').button('loading');
+          $("#example1_processing").css('display','');// show loading processing in table
+          please_wait(function(){});
           $.ajax({
               type: "POST",
               dataType: "JSON",
@@ -675,12 +682,14 @@
               success : function(data){
                     $('#pagination').html(data.pagination);
                     $('#total_record').html(data.total_record);
+                    var empty = true;
 
                     if(arr_grouping.length > 0 ){//jika arr_grouping ny terisi
                       $("#example1").append(data.record);
                     }else{
                       var tbody = $("<tbody />");
                       $.each(data.record, function(key, value) {
+                        empty = false;
                         var tr = $("<tr class='' id='"+key+"' />")
                         $.each(value, function(k, v) {
                           //alert('append')
@@ -694,7 +703,15 @@
                       });
                       $("#example1").append(tbody);
                     }
+                    $("#example1_processing").css('display','none');// hidden loading processing in table
+
                     $('#btn-filter').button('reset');
+
+                    if(empty == true && arr_grouping.length == 0){
+                      var tr = $("<tr>").append($("<td colspan='16' align='center'>").text('Tidak ada Data'));
+                      tbody.append(tr);
+                      $("#example1").append(tbody);
+                    }
 
                     $.each(data.dataArr, function(key, val) {
                       //$('[data-role="tags-input"]').tagsinput("add", {"value": val.caption, "text": val.caption, "continent" : "Europe"});
@@ -705,6 +722,8 @@
               },error: function (jqXHR, textStatus, errorThrown){
                 alert(jqXHR.responseText);
                 $('#btn-filter').button('reset');
+                $("#example1_processing").css('display','none');// hidden loading processing in table
+                unblockUI( function() {});
               }
           });
         
@@ -720,10 +739,10 @@
 
     //event if item caption removed in textbox
     $('#tags').on('itemRemoved', function(event){
-      please_wait(function(){});
+      //please_wait(function(){});
       var caption = event.item;//item removed
       removeArray(caption,'remove');
-      unblockUI( function() {});
+      //unblockUI( function() {});
     });
 
 
@@ -877,6 +896,9 @@
 
     function creationGroup(){
 
+      please_wait(function(){});
+      $("#example1_processing").css('display','');// show loading processing in table
+
       var id_dept ='<?php  echo $id_dept;?>';
       var html    = '';
       tmp_arr_group = [];
@@ -894,16 +916,27 @@
           tmp_arr_group1.push(data.tmp_arr_group);
           tmp_arr_group.push({'group_ke': data.group_ke, 'record':data.tmp_arr_group});
           tmp_arr_group1 = [];
+          $("#example1_processing").css('display','none');// hidden loading processing in table
+          unblockUI( function() {});
+
+          if(data.record == ''){
+            var tr = $("<tr>").append($("<td colspan='16' align='center'>").text('Tidak ada Data'));
+            tbody.append(tr);
+            $("#example1").append(tbody);
+          }
 
         },error: function (jqXHR, textStatus, errorThrown){
-          alert(jqXHR.responseText);
+          //alert(jqXHR.responseText);
+          alert('Error Create Group');
+          $("#example1_processing").css('display','none');// hidden loading processing in table
+          unblockUI( function() {});
         }
       });
     }
 
 
+    //createPagination(0);
     //jika next page ,isi akan rubah lagi
-    createPagination(0);
     $('#pagination').on('click','a',function(e){
       
       e.preventDefault(); 
@@ -916,10 +949,12 @@
    
     function createPagination(pageNum){
       $("#example1 tbody").remove();
+      $("#example1_processing").css('display','');// show loading processing in table
       // alert('tes');
       var page = '';
       // alert('check arr '+JSON.stringify(arr_filter));
       var id_dept ='<?php  echo $id_dept;?>';
+      please_wait(function(){});
 
       $.ajax({
         type : 'POST',
@@ -931,7 +966,9 @@
           $('#total_record').html(data.total_record);
           ///alert('berhasil2')
           var tbody = $("<tbody id='0'/>");
+          var empty = true;
           $.each(data.record, function(key, value) {
+            empty = false;
             var tr = $("<tr class='' id='"+key+"' />")
             $.each(value, function(k, v) {
               //alert('append')
@@ -941,13 +978,23 @@
                   })[0].outerHTML
               );
                tbody.append(tr);
-            })
+            }
+            )
           });
+          if(empty){
+            var tr = $("<tr>").append($("<td colspan='16' align='center'>").text('Tidak ada Data'));
+            tbody.append(tr);
+          }
+         $("#example1_processing").css('display','none');// hidden loading processing in table
 
          $("#example1").append(tbody);
+         unblockUI( function() {});
+
         },error: function (jqXHR, textStatus, errorThrown){
           //alert(jqXHR.responseText);
           alert('Error Load Items');
+          $("#example1_processing").css('display','none');// hidden loading processing in table
+          unblockUI( function() {});
         }
       });
     }

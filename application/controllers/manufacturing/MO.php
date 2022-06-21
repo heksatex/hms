@@ -1219,7 +1219,7 @@ class MO extends MY_Controller
             $hasil_produksi = FALSE;
 
             //lock table
-            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE');
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE');
 
 
             //get last quant id
@@ -2319,17 +2319,25 @@ class MO extends MY_Controller
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Diubah, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else{
 
-                if($berat == '0'  AND $type_mo == 'colouring' ){
-                     $callback = array('status' => 'failed', 'field' => 'berat', 'message' => 'Berat Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
-                $air    = $this->input->post('air');
-                }else if($air == '0' AND $type_mo == 'colouring'){
-                     $callback = array('status' => 'failed', 'field' => 'air', 'message' => 'Air Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
+                if(($air == '0' OR empty($air))  AND $type_mo == 'colouring' AND ($deptid == 'FIN' OR $deptid =='DYE')){
+                    if($air == '0'){
+                        $callback = array('status' => 'failed', 'field' => 'air', 'message' => 'Air Harus Lebih dari 0 !', 'icon' =>'fa fa-warning',   'type' => 'danger' );    
+                    }else{
+                        $callback = array('status' => 'failed', 'field' => 'air', 'message' => 'Air Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
+                    }
+                }else if(($berat == '0' OR empty($berat)) AND $type_mo == 'colouring' AND ($deptid == 'FIN' OR $deptid =='DYE')){
+                    if($berat == '0'){
+                        $callback = array('status' => 'failed', 'field' => 'berat', 'message' => 'Berat Harus Lebih dari 0 !', 'icon'=>'fa fa-warning','type' => 'danger' );    
+                    }else{
+                        $callback = array('status' => 'failed', 'field' => 'berat', 'message' => 'Berat Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
+                    }
+
                 }else if(empty($start)){
-                     $callback = array('status' => 'failed', 'field' => 'start', 'message' => 'Start Time Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
+                    $callback = array('status' => 'failed', 'field' => 'start', 'message' => 'Start Time Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else if(empty($finish)){
-                     $callback = array('status' => 'failed', 'field' => 'finish', 'message' => 'Finish Time Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
+                    $callback = array('status' => 'failed', 'field' => 'finish', 'message' => 'Finish Time Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else if(empty($reff_note)){
-                     $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Reff Note Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
+                    $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Reff Note Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else if(empty($mesin)){
                      $callback = array('status' => 'failed', 'field' => 'mc', 'message' => 'No Mesin Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else if(empty($type_production)){

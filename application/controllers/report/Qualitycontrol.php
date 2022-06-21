@@ -202,7 +202,7 @@ class Qualitycontrol extends MY_Controller
 			)
 		);
 
-		$table_head_columns = array('No', 'Mesin', 'Product/Corak', 'Standar Mtr', 'Standar Kg', 'RPM', 'Total Produksi', 'Mtr', 'Kg', 'Gl', 'Efisiensi (%)', 'Grade', 'A', 'B', 'C', 'Keterangan');
+		$table_head_columns = array('No', 'Mesin', 'Product/Corak', 'Standar Mtr', 'Standar Kg', 'RPM', 'Total Produksi', 'Qty1', 'Qty2', 'Pcs', 'Efisiensi (%)', 'Grade', 'A', 'B', 'C', 'Keterangan');
 
 		$column = 0;
 		$merge  = TRUE;
