@@ -1,7 +1,7 @@
 
 <form class="form-horizontal">
-	<div class="col-md-6">
-		<div class="form-group">
+  <div class="form-group">
+    <div class="col-md-6">
        <div class="col-md-12 col-xs-12">
             <div class="col-xs-4"><label>OW</label></div>
             <div class="col-xs-8">
@@ -55,15 +55,34 @@
             </select>
           </div>  
         </div>
+        <div class="col-md-12 col-xs-12">
+            <div class="col-xs-4"><label>Gramasi</label></div>
+            <div class="col-xs-8">
+                <input type="text" name="gramasi" id="gramasi" class="form-control input-sm"   value="<?php echo $get['gramasi'] ?>" >
+            </div>  
+        </div>
       
 		</div>
-	</div>
-	<div class="form-group">
-		<div class="col-md-6">
+
+    <div class="col-md-6">
+     
       <div class="col-md-12 col-xs-12">
-          <div class="col-xs-4"><label>Gramasi</label></div>
-          <div class="col-xs-8">
-             	<input type="text" name="gramasi" id="gramasi" class="form-control input-sm"   value="<?php echo $get['gramasi'] ?>" >
+          <div class="col-xs-4"><label>Lebar Jadi</label></div>
+          <div class="col-xs-5">
+              <input type="text" name="lebar_jadi" id="lebar_jadi" class="form-control input-sm" value="<?php echo $get['lebar_jadi'] ?>" />
+          </div>  
+          <div class="col-xs-3">
+              <select class="form-control input-sm" name="uom_lebar_jadi" id="uom_lebar_jadi" >
+                  <option value=""></option>
+                  <?php foreach ($uom as $row) {
+                          if($row->short == $get['uom_lebar_jadi']){
+                              echo "<option selected value='".$row->short."'>".$row->short."</option>";
+                          }else{
+                              echo "<option value='".$row->short."'>".$row->short."</option>";
+                          }
+                        }
+                  ?>
+              </select>
           </div>  
       </div>
       <div class="col-md-12 col-xs-12">
@@ -102,27 +121,40 @@
                 }?>
             </select>
           </div>  
-        </div>
-			<div class="col-md-12 col-xs-12">
-	      <div class="col-xs-4"><label>Reff Notes</label></div>
-	        <div class="col-xs-8">
-	          <textarea  type="text" class="form-control input-sm"  name="reff" id="reff"  ><?php echo $get['reff_notes'] ?></textarea>
-	        </div>  
-	      </div>
-	      <div class="col-md-12 col-xs-12">
-	        <div class="col-xs-4"><label>Status</label></div>
-	        <div class="col-xs-8">
-	          <input type="text" name="status" id="status" class="form-control input-sm"  value="<?php echo $get['status'] ?>" readonly="readonly"/>
-	        </div>  
-	      </div>
-		</div>
-	</div>
+      </div>
+      <div class="col-md-12 col-xs-12">
+        <div class="col-xs-4"><label>Reff Notes</label></div>
+            <div class="col-xs-8">
+              <textarea  type="text" class="form-control input-sm ta set_textarea"  name="reff" id="reff"  ><?php echo $get['reff_notes'] ?></textarea>
+            </div>  
+      </div>
+      <div class="col-md-12 col-xs-12">
+          <div class="col-xs-4"><label>Reff Notes</label></div>
+          <div class="col-xs-8">
+            <textarea  type="text" class="form-control input-sm ta set_textarea"  name="reff_mkt" id="reff_mkt" readonly="readonly"  ><?php echo $get['reff_notes_mkt'] ?></textarea>
+
+          </div>  
+      </div>
+      <div class="col-md-12 col-xs-12">
+          <div class="col-xs-4"><label>Status</label></div>
+          <div class="col-xs-8">
+            <input type="text" name="status" id="status" class="form-control input-sm"  value="<?php echo $get['status'] ?>" readonly="readonly"/>
+          </div>  
+      </div>
+
+    </div><!-- col-md-6 -->
+      
+	</div><!-- form group-->
+	
 </form>
 
 <style type="text/css">
   .error{
     border:  1px solid red;
   } 
+  .set_textarea{
+      resize: vertical;
+  }
 </style>
 
 <script type="text/javascript">
@@ -140,6 +172,12 @@
       alert_notify('fa fa-warning','Maaf, Inputan Hanya Berupa Angka !','danger',function(){});
     }
   }
+
+  //untuk mengatur lebar textarea sesuai value yang ada
+  $('.ta').on( 'change keyup keydown paste cut', 'textarea', function (){
+    $(this).height(0).height(this.scrollHeight);
+  }).find( 'textarea' ).change();
+
   /*
   // validasi lebar jadi
   function validationNumber(a){

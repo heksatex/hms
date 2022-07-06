@@ -324,7 +324,7 @@ class Dti extends MY_Controller
           $this->_module->unlock_tabel();
           
           $callback    = array('status'=>'success', 'message' => 'Varian Warna Baru Berhasil disimpan',  'icon' =>'fa fa-check', 'type' => 'success', 'id_varian' =>$id_var);
-          $jenis_log   = "edit";
+          $jenis_log   = "create";
           $note_log    = "Tambah Data Warna Varian  ".$new_var."  ".$note_dye."  ".$note_aux ;
           $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
 
@@ -430,6 +430,7 @@ class Dti extends MY_Controller
 
         $id_warna  = addslashes($this->input->post('id_warna'));
         $kode_produk= addslashes($this->input->post('kode_produk'));
+        $kode_produk_before = addslashes($this->input->post('kode_produk_before'));
         $nama_produk= addslashes($this->input->post('produk'));
         $qty       = $this->input->post('qty');
         $uom       = addslashes($this->input->post('uom'));
@@ -446,8 +447,10 @@ class Dti extends MY_Controller
          $callback = array('message' => 'Qty Harus Diisi !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
        }elseif(empty($uom)){
          $callback = array('message' => 'Uom Harus Diisi !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
+        /*
        }elseif(!empty($cek_prod['nama_produk']) AND empty($row_order)){
          $callback = array('message' => 'Maaf, Product "'.$nama_produk.'" sudah diinput !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
+        */
        }else{
 
           // get nama varian by id_varian 90
@@ -456,19 +459,19 @@ class Dti extends MY_Controller
               
             $this->m_lab->save_dye_aux($id_warna,$kode_produk,$nama_produk,$qty,$uom,$reff_note,$tipe_obat,$id_warna_varian);
             $callback    = array('status'=>'success', 'message' => 'Data Berhasil Disimpan !',  'icon' =>'fa fa-check', 'type' => 'success');
-            $jenis_log   = "edit";
+            $jenis_log   = "create";
             $note_log    = "Tambah Data Varian[".$nama_varian."] | ".$kode_produk." ".$nama_produk."  ".$qty." ".$uom."  ".$reff_note ;
             $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
 
           }else{// update dye /aux
 
-            // get obat by kode ()
-            $get = $this->m_lab->get_dye_aux_row($id_warna,$kode_produk,$row_order,$tipe_obat,$id_warna_varian)->row_array();
+            // get obat by kode () sebelumnya
+            $get = $this->m_lab->get_dye_aux_row($id_warna,$kode_produk_before,$row_order,$tipe_obat,$id_warna_varian)->row_array();
 
             // item sebelumnya 
             $before = $get['kode_produk'].' '.$get['nama_produk'].' '.$get['qty'].' '.$get['uom'].' '.$get['reff_note'].' | -> |';
 
-            $this->m_lab->update_dye_aux($id_warna,$kode_produk,$qty,$uom,$reff_note,$tipe_obat,$row_order,$id_warna_varian);
+            $this->m_lab->update_dye_aux($id_warna,$kode_produk,$nama_produk,$kode_produk_before,$qty,$uom,$reff_note,$tipe_obat,$row_order,$id_warna_varian);
             $callback    = array('status'=>'success', 'message' => 'Data Berhasil Disimpan !',  'icon' =>'fa fa-check', 'type' => 'success');
             $jenis_log   = "edit";
             $note_log    = "Edit Data Varian[".$nama_varian."] | ".$before.' '.$kode_produk." ".$nama_produk."  ".$qty." ".$uom."  ".$reff_note ;

@@ -728,7 +728,7 @@
                 $('#tab-list li:last').remove();
                 // show btn plus
                 $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
-              
+                unsaved = true;
             }
           },
           error: function (xhr, ajaxOptions, thrownError){
@@ -1038,6 +1038,7 @@
         var tipe_obat     = $(this).attr('type_obat');
         var id_warna      = "<?php echo $color->id; ?>";
         var kode_produk   = $(this).parents("tr").find("#product").val();
+        var kode_produk_before   = $(this).parents("tr").find("#prodBefore").val();
         var produk        = $(this).parents("tr").find("#prodhidd").val();
         var qty           = $(this).parents("tr").find("#qty").val();
         var uom           = $(this).parents("tr").find("#uom").val();
@@ -1049,6 +1050,7 @@
           type: "POST",
           data: {id_warna   : id_warna, 
                 kode_produk : kode_produk,
+                kode_produk_before : kode_produk_before,
                 produk      : produk,
                 qty         : qty,
                 uom         : uom,
@@ -1108,8 +1110,9 @@
 
             class_sel2_prod   = table+'sel2_prod'+row_order;
             class_nama_produk = table+'nama_produk'+row_order;
+            kode_prd_before   = table+'kode_prod'+row_order;
 
-            $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+' " id="product" name="Product" ></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="'+ $(this).attr('data-id2') +'"> ');
+            $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+' " id="product" name="Product" ></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="'+ $(this).attr('data-id2') +'"> ' + '<input type="hidden"  class="form-control '+kode_prd_before+' " value="' + htmlentities_script($(this).attr('data-isi')) + '" id="prodBefore"> ');
 
             var $newOption = $("<option></option>").val(kode_produk).text(nama_produk);
             $('.sel2_bom'+row_order).empty().append($newOption).trigger('change');

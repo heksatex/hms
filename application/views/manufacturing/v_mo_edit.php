@@ -170,13 +170,13 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Air (Ltr) </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm highlight" name="air" id="air" value="<?php echo $list->air;?>"  onkeyup="highlight(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                  <input type="text" class="form-control input-sm " name="air" id="air" value="<?php echo $list->air;?>"  onkeyup="validAngka(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Berat (Kg) </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm highlight" name="berat" id="berat"  value="<?php echo $list->berat;?>" onkeyup="highlight(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                  <input type="text" class="form-control input-sm " name="berat" id="berat"  value="<?php echo $list->berat;?>" onkeyup="validAngka(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
@@ -200,13 +200,13 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Gramasi </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm highlight" name="gramasi" id="gramasi"  value="<?php echo $list->gramasi;?>" onkeyup="highlight(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                  <input type="text" class="form-control input-sm " name="gramasi" id="gramasi"  value="<?php echo $list->gramasi;?>" onkeyup="validAngka(this)" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Program </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm highlight" name="program" id="program"  value="<?php echo $list->program;?>" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                  <input type="text" class="form-control input-sm " name="program" id="program"  value="<?php echo $list->program;?>" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
@@ -219,7 +219,7 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Varian </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm highlight" name="varian_warna" id="varian_warna"  value="<?php echo $list->nama_varian;?>" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
+                  <input type="text" class="form-control input-sm " name="varian_warna" id="varian_warna"  value="<?php echo $list->nama_varian;?>" <?php if($disable == "yes") echo 'readonly="readonly"';?>  readonly="readonly" >
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
@@ -238,7 +238,7 @@
                 <div class="col-xs-4"><label>Start Time </label></div>
                 <div class="col-xs-8 col-md-8">
                   <div class='input-group date' id='datetimepicker3' >
-                    <input type='text' class="form-control input-sm" name="start" id="start"  value="<?php echo $list->start_time;?>" />
+                    <input type='text' class="form-control input-sm" name="start" id="start"  value="<?php echo $list->start_time;?>" disabled/>
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar" disabled="true" ></span>
                     </span>
@@ -249,7 +249,7 @@
                 <div class="col-xs-4"><label>Finish Time </label></div>
                 <div class="col-xs-8 col-md-8">
                   <div class='input-group date' id='datetimepicker4' >
-                    <input type='text' class="form-control input-sm" name="finish" id="finish"  value="<?php echo $list->finish_time;?>" readonly="readonly" />
+                    <input type='text' class="form-control input-sm" name="finish" id="finish"  value="<?php echo $list->finish_time;?>" disabled />
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -501,7 +501,7 @@
                                 <tr class="num">
                                   <td></td>
                                   <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
-                                  <td><?php echo $row->qty_asli?></td>
+                                  <td><?php echo $row->persen?></td>
                                   <td align="right"><?php echo number_format($row->qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
@@ -540,7 +540,7 @@
                                 <tr class="num">
                                   <td></td>
                                   <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
-                                  <td><?php echo $row->qty_asli?></td>
+                                  <td><?php echo $row->persen?></td>
                                   <td align="right"><?php echo number_format($row->qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
@@ -748,29 +748,42 @@
 
 <?php $this->load->view("admin/_partials/js.php") ?>
 <!--script src="https://rawgit.com/RobinHerbots/jquery.inputmask/3.x/dist/jquery.inputmask.bundle.js"></script-->
+<!--script type="text/javascript" src="<?php echo base_url('dist/inputmask/jquery.inputmask.js') ?>"></script-->
+<!--script type="text/javascript" src="<?php echo base_url('dist/inputmask/inputmask.js') ?>"></script-->
+
 <script type="text/javascript">
 
    // show after refresh close modal
-   $(document).on('click','#datetimepicker4',function (e) {
+  $(document).on('click','#datetimepicker3',function (e) {
+       $('#datetimepicker3').datetimepicker({
+             format : 'YYYY-MM-DD HH:mm:ss',
+             ignoreReadonly: true
+         });     
+  });
+   
+  $(document).on('click','#datetimepicker4',function (e) {
       $('#datetimepicker4').datetimepicker({
             format : 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
         });
   });
 
-  $(document).on('click','#datetimepicker3',function (e) {
-      $('#datetimepicker3').datetimepicker({
-            format : 'YYYY-MM-DD HH:mm:ss',
-            ignoreReadonly: true
-        });     
+  $('#start').inputmask("datetime",{
+      mask: "y-2-1 h:s:s", 
+      //placeholder: "yyyy-mm-dd hh:mm:ss", 
+      placeholder: "yyyy-mm-dd hh:mm:ss",
+      //leapday: "-02-29", 
+      separator: "-", 
+      alias: "yyyy/mm/dd"
   });
 /*
-  $('#start').inputmask("datetime",{
-    mask: "y-mm-dd h:s", 
-    //placeholder: "yyyy-mm-dd hh:mm:ii", 
-    //leapday: "-02-29", 
-    separator: "-", 
-    //alias: "dd-mm-yyyy"
+  $('#finishs').inputmask("datetime",{
+      mask: "y-2-1 h:s:s", 
+      //placeholder: "yyyy-mm-dd hh:mm:ss", 
+      placeholder: "yyyy-mm-dd hh:mm:ss",
+      leapday: "-02-29", 
+      separator: "-", 
+      alias: "yyyy/mm/dd"
   });
 */
   function refresh_mo(){
@@ -817,6 +830,8 @@
     $('#uom_lebar_jadi_mo').attr('disabled', true);
     $('#uom_lebar_greige_mo').attr('disabled', true);
     $('#handling').attr('disabled', true);
+    $('#start').attr('disabled', true);
+    $('#finish').attr('disabled', true);
 
   }
 
@@ -956,6 +971,8 @@
     $('#uom_lebar_jadi_mo').attr('disabled', false).attr('id','uom_lebar_jadi_mo');
     $('#uom_lebar_greige_mo').attr('disabled', false).attr('id','uom_lebar_greige_mo');
     $('#handling').attr('disabled', false).attr('id','handling');
+    $('#start').attr('disabled', false).attr('id','start');;
+    $('#finish').attr('disabled', false).attr('id','finish');;
 
   });
 
@@ -1029,12 +1046,13 @@
     }    
   }
 
+  /*
   //highlight form
   function highlight(a){
     $(a).css("border","1px solid red");
     validAngka(a);
   }
-
+  */
 
   //open modal rekam cacat lot
   function rekam_cacat(deptid,quant_id,lot){ 
@@ -1380,7 +1398,6 @@
               $('#btn-simpan').button('reset');
               readonly_textfield();
               refresh_mo();
-              $('.highlight').css("borderColor", "");//clear css highlight
             }
 
           },error: function (xhr, ajaxOptions, thrownError) { 

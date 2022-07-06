@@ -122,7 +122,8 @@ class Stock extends MY_Controller
     	    							  'lebar_jadi'  => $row->lebar_jadi.' '.$row->uom_lebar_jadi,
     	    							  'sales_order' => $row->sales_order,
     	    							  'sales_group' => $row->nama_sales_group,
-    	    							  'umur_produk' => $row->umur
+                                          'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
+    	    							  'umur_produk' => $row->umur,
     	    							);
     	    	}
 
@@ -238,7 +239,8 @@ class Stock extends MY_Controller
     	    						  'lebar_jadi'  => $row->lebar_jadi.' '.$row->uom_lebar_jadi,
                                       'sales_order' => $row->sales_order,
                                       'sales_group' => $row->nama_sales_group,
-                                      'umur_produk'   => $row->umur
+                                      'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
+                                      'umur_produk' => $row->umur
                                     );
             }
             $allcount  = $this->m_stock->get_record_stock($where_lokasi,$where_result);
@@ -329,6 +331,14 @@ class Stock extends MY_Controller
 
                         $nama_field = " (datediff(now(), sq.move_date) ) ";
                         
+                    }else if($row['nama_field'] == 'opname'){ 
+                        if($row['value'] == 'done'){
+                            $isi = " > 0";
+                        }else{
+                            $isi = " <= 0";
+                        }
+                        $nama_field = "sq.qty_opname";
+
                     }else{
                         $isi        = "LIKE '%".addslashes($row['value'])."%' ";
                         $nama_field = $this->declaration_name_field($row['nama_field']);
@@ -429,7 +439,7 @@ class Stock extends MY_Controller
 		$object->getActiveSheet()->mergeCells('A1:L1');
 
         //bold huruf
-        $object->getActiveSheet()->getStyle("A1:T4")->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle("A1:V4")->getFont()->setBold(true);
 
         // Border 
 		$styleArray = array(
@@ -442,7 +452,7 @@ class Stock extends MY_Controller
 
 
         // header table
-        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -452,7 +462,7 @@ class Stock extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -486,7 +496,9 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->uom_lebar_jadi);
             $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->sales_order);
             $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->nama_sales_group);
-            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->umur);
+            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->qty_opname);
+            $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->uom_opname);
+            $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->umur);
 
              //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -510,6 +522,8 @@ class Stock extends MY_Controller
 			$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('T'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('V'.$rowCount)->applyFromArray($styleArray);
 
             $rowCount++;
 

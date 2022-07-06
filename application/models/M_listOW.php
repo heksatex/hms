@@ -5,8 +5,8 @@
 class M_listOW extends CI_Model
 {
 	
-	var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'ms.nama_status', 'co.kode_co',null);
-	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group');
+	var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'ms.nama_status', 'scl.piece_info','scl.reff_notes','co.kode_co',null);
+	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group', 'scl.piece_info','scl.reff_notes');
 	var $order  	  = array('scl.tanggal_ow' => 'asc');
 
     
@@ -53,7 +53,7 @@ class M_listOW extends CI_Model
 
         $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
         (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-        co.kode_co");
+        co.kode_co, scl.piece_info, scl.reff_notes");
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");
@@ -302,7 +302,7 @@ class M_listOW extends CI_Model
 
         $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
         (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-        co.kode_co");
+        co.kode_co, scl.piece_info, scl.reff_notes");
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");
@@ -312,6 +312,7 @@ class M_listOW extends CI_Model
              INNER JOIN color_order_detail as cod ON cod.kode_co = co.kode_co GROUP BY cod.ow)  co", "scl.sales_order = co.kode_sc AND co.ow = scl.ow", "left");
 
         $this->db->where('scl.ow <>"" ');
+        $this->db->order_by("scl.tanggal_ow"," ASC");
 		$query = $this->db->get();
 		return $query->result();
     }

@@ -52,6 +52,8 @@ class ListOW extends MY_Controller
             $row[] = number_format($field->qty,2).' '.$field->uom;
             $row[] = number_format($field->tot_qty1,2);
             $row[] = $field->nama_status;
+            $row[] = $field->piece_info;
+            $row[] = $field->reff_notes;
             //$row[] = $field->kode_co;
             $row[] = '<a href="'.base_url('ppic/colororder/edit/'.$kode_co_encrypt).'" target="_blank" data-togle="tooltip" title="Lihat Color Order">'.$field->kode_co.'</a>';
             if(!empty($field->kode_co)){
@@ -146,7 +148,7 @@ class ListOW extends MY_Controller
         $object->getActiveSheet()->mergeCells('C3:F3');
 
         //bold huruf
-		$object->getActiveSheet()->getStyle("A1:M5")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:O5")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -158,7 +160,7 @@ class ListOW extends MY_Controller
 		);	
 
         // header table
-    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'DTI','CO');
+    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'DTI','Piece Info','Reff Notes','CO');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);  
@@ -190,6 +192,8 @@ class ListOW extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->tot_qty1);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->nama_status);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->piece_info);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->reff_notes);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->kode_co);
             $rowCount++;
         }

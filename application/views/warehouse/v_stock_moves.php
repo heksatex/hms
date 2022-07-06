@@ -703,9 +703,10 @@
                       });
                       $("#example1").append(tbody);
                     }
-                    $("#example1_processing").css('display','none');// hidden loading processing in table
-
+                    
                     $('#btn-filter').button('reset');
+                    $("#example1_processing").css('display','none');// hidden loading processing in table
+                    unblockUI( function() {});
 
                     if(empty == true && arr_grouping.length == 0){
                       var tr = $("<tr>").append($("<td colspan='16' align='center'>").text('Tidak ada Data'));

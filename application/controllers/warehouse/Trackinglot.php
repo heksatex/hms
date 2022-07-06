@@ -30,6 +30,7 @@ class Trackinglot extends MY_Controller
         $txtlot         = $this->input->post('txtlot');
         $result_info    = [];
         $result_record  = [];
+        $result_tmp     = [];
 
         $get = $this->m_trackingLot->get_data_info_by_lot($txtlot);
         $jml_barcode = $this->m_trackingLot->get_count_data_info_by_lot($txtlot);

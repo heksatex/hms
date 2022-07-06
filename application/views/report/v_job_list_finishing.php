@@ -143,8 +143,6 @@
                       <th>Status Kain</th>
                       <th>Status Obat</th>
                       <th>Status MG</th>
-                      <th>QC Finishing</th>
-                      <th>Finishing Out</th>
                     </tr>
                   </thead>
                 </table>
@@ -190,7 +188,8 @@
             "processing": true, 
             "serverSide": true, 
             "order": [2, "asc"], 
-
+            "aLengthMenu": [[10,20], [10,20]],
+            "iDisplayLength": 10,
             "paging": true,
             "lengthChange": true,
             "searching": true,
@@ -222,14 +221,6 @@
               },
               { 
                   "targets": [ 6 ], 
-                  "orderable": false, 
-              },
-              { 
-                  "targets": [ 8 ], 
-                  "orderable": false, 
-              },
-              { 
-                  "targets": [ 9 ], 
                   "orderable": false, 
               },
             ],

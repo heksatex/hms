@@ -211,7 +211,7 @@ class M_penerimaanBarang extends CI_Model
 	public function get_list_penerimaan_barang($kode)
 	{
 		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,
-								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk) as sum_qty
+								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' ORDER BY row_order")->result();
@@ -220,7 +220,7 @@ class M_penerimaanBarang extends CI_Model
 	public function get_list_penerimaan_barang_print($kode,$dept_id)
 	{
 		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,
-								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk) as sum_qty
+								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' AND pb.dept_id = '$dept_id' ORDER BY row_order")->result();
@@ -305,6 +305,7 @@ class M_penerimaanBarang extends CI_Model
 
 	}
 
+	/*
 	public function get_kode_mo_penerimaan_barang_by_move_id($move_id)
 	{	
 		return $this->db->query("SELECT sm.move_id, rm.move_id,rm.kode
@@ -312,6 +313,21 @@ class M_penerimaanBarang extends CI_Model
 								INNER JOIN mrp_production_rm_target rm ON sm.move_id =rm.move_id
 								WHERE sm.source_move LIKE '%$move_id%' LIMIT 1");
 	}
+	*/
+	
+	public function cek_move_id_by_kode($origin,$method)
+	{
+		return $this->db->query("SELECT move_id FROM stock_move WHERE origin = '$origin' AND method = '$method'");
+	}
+	public function get_kode_mrp_by_move_id($move_id)
+	{
+		return $this->db->query("SELECT DISTINCT rm.kode, mrp.dept_id, d.nama
+								FROM mrp_production_rm_target as rm
+								INNER JOIN mrp_production as mrp ON rm.kode= mrp.kode
+								INNER JOIN departemen as d ON mrp.dept_id = d.kode
+								where move_id = '$move_id'");
+	}
+
 
 	public function get_qty_penerimaan_barang_items_by_kode($kode,$kode_produk)
     {
@@ -427,6 +443,29 @@ class M_penerimaanBarang extends CI_Model
 		$this->db->where('move_id', $move_id);
 		$query = $this->db->get('stock_move_items');
 		return $query->num_rows();
+	}
+
+	public function cek_jml_produk_sama_penerimaan_barang_by_kode($kode,$kode_produk)
+	{
+		return $this->db->query("SELECT count(kode_produk) as tot 
+								FROM penerimaan_barang_items   
+								where kode = '$kode' AND  kode_produk = '$kode_produk'
+								GROUP BY kode_produk
+								having COUNT(kode_produk) > 1 ");
+	}
+
+	public function get_qty_produk_penerimaan_by_kode_origin($kode,$kode_produk,$origin_prod)
+	{
+		$query =  $this->db->query("SELECT qty FROM penerimaan_barang_items where kode = '$kode' AND kode_produk = '$kode_produk' AND origin_prod = '$origin_prod'")->row_array()
+		;
+		return $query['qty'];
+	}
+
+	public function get_qty_produk_penerimaan_by_kode($kode,$kode_produk)
+	{
+		$query =  $this->db->query("SELECT qty FROM penerimaan_barang_items where kode = '$kode' AND kode_produk = '$kode_produk'")->row_array()
+		;
+		return $query['qty'];
 	}
 
  

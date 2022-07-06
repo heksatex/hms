@@ -205,6 +205,7 @@
                       <option value="lokasi_fisik">Lokasi Fisik</option>
                       <option value="sales_order">Sales Contract [SC]</option>
                       <option value="sales_group">Marketing</option>
+                      <option value="opname">Status Opname</option>
                     </select>
                   </div>
                   <div id='f_search'>
@@ -380,6 +381,7 @@
                               <th  class='style min-width-100' ><a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)">Lbr Jadi</th>
                               <th  class='style min-width-80' ><a class="column_sort" id="sales_order" data-order="desc" href="javascript:void(0)">SC</th>
                               <th  class='style min-width-100' ><a class="column_sort" id="sales_group" data-order="desc" href="javascript:void(0)">Marketing</th>
+                              <th  class='style min-width-100' ><a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)">Qty Opname</th>
                               <th  class='style' >Umur (Hari)</th>
                             </tr>
                           </thead>
@@ -558,6 +560,8 @@
       field = 'Sales Contract';
     }else if(field == 'sales_group'){
       field = 'Marketing';
+    }else if(field == 'opname'){
+      field  = 'Status Opname'
     }
     return field;
   }
@@ -587,6 +591,15 @@
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
           value += "<option value=''>-- Pilih Marketing --</option>";
           value += "<?php foreach($mst_sales_group as $row){ echo "<option value='".$row->kode_sales_group."'>".$row->nama_sales_group."</option>";} ?>";
+          value += "</select>";
+          value += '</div>';
+          $('#f_search').html(value);
+    }else if(value == 'opname'){
+      var value = '<div class="col-md-6"> ';
+          value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
+          value += "<option value=''>-- Status Opname --</option>";
+          value += "<option value='done'>Sudah Opname</option>";
+          value += "<option value='draft'>Belum Opname</option>";
           value += "</select>";
           value += '</div>';
           $('#f_search').html(value);
@@ -638,7 +651,7 @@
           }else if(cmbOperator == '>'){
             caption_sparate ='Older Than';
           }
-        }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group'){
+        }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname'){
           caption_sparate = '=';
         }else{
           caption_sparate = 'LIKE';
@@ -651,6 +664,12 @@
             }
           });
           caption_value = name_sales_group;
+        }else if(cmbSearch == 'opname'){
+          if(search == 'done'){
+            caption_value = 'Sudah Opname';
+          }else{
+            caption_value = 'Belum Opname';
+          }
         }else{
           caption_value = search;
         }
@@ -971,6 +990,7 @@
                                 $("<td align='right'>").text(value.lebar_jadi),
                                 $("<td>").text(value.sales_order),
                                 $("<td>").text(value.sales_group),
+                                $("<td>").text(value.qty_opname),
                                 $("<td>").text(value.umur_produk),
                       );
                       tbody.append(tr);
@@ -1089,6 +1109,7 @@
                                   $("<td align='right'>").text(value.lebar_jadi),
                                   $("<td>").text(value.sales_order),
                                   $("<td>").text(value.sales_group),
+                                  $("<td>").text(value.qty_opname),
                                   $("<td>").text(value.umur_produk),
                        );
                       tbody.append(tr);
@@ -1282,6 +1303,7 @@
                       $("<td align='right'>").text(value.lebar_jadi),
                       $("<td>").text(value.sales_order),
                       $("<td>").text(value.sales_group),
+                      $("<td>").text(value.qty_opname),
                       $("<td>").text(value.umur_produk),
             );    
             tbody.append(tr);
