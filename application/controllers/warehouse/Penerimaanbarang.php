@@ -196,9 +196,20 @@ class Penerimaanbarang extends MY_Controller
         $data["items"] = $this->m_penerimaanBarang->get_list_penerimaan_barang($kode_decrypt);
         $move          = $this->m_penerimaanBarang->get_stock_move_by_kode($kode_decrypt)->row_array();
         $data['smove'] =  $move;
-        $data['mo']    = $this->m_penerimaanBarang->get_kode_mo_penerimaan_barang_by_move_id($move['move_id'])->row_array();
         $data['smi'] = $this->m_penerimaanBarang->get_stock_move_items_by_kode($kode_decrypt);
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($list->dept_id)->row_array();
+        
+        // cek apakah benar move_id_next adalah CON
+        $method        = $list->dept_id.'|CON';
+        $cek_move_mrp  = $this->m_penerimaanBarang->cek_move_id_by_kode($list->origin,$method)->row_array();
+        if(!empty($cek_move_mrp)){
+            $data['mo']    = $this->m_penerimaanBarang->get_kode_mrp_by_move_id($cek_move_mrp['move_id'])->row_array();
+        }else{
+            $data['mo']    = '';
+        }
+
+        // cek type mo
+        $data['type_mo'] = $this->_module->cek_type_mo_by_dept($list->dept_id);
 
         // cek priv akses menu
         $sub_menu           = $this->uri->segment(2);
@@ -362,10 +373,11 @@ class Penerimaanbarang extends MY_Controller
                     }
 
                     foreach ($querysm as $val) {
-                        $loop_sm     = true;
-                        $sm_pasangan = true;
-                        $move_id     = $val->move_id;
-                        $quant_id    = $val->quant_id;
+                        $loop_sm            = true;
+                        $sm_pasangan        = true;
+                        $move_id            = $val->move_id;
+                        $origin_prod_smi    = $val->origin_prod;
+                        $quant_id           = $val->quant_id;
 
                         //sebanyak stock_move tujuanya ada
                         while ($loop_sm) {
@@ -390,10 +402,15 @@ class Penerimaanbarang extends MY_Controller
 
                                     if($ex_mt == 'CON' AND $ex_deptid == $deptid){
 
-                                        //get  origin_prod by move id, kode_produk
-                                        $get_origin_prod = $this->m_mo->get_origin_prod_mrp_production_by_kode($row['move_id'],addslashes($val->kode_produk))->row_array();
-                                        $origin_prod_tj = $get_origin_prod['origin_prod'];
-                                        $loop_sm =false;
+                                        if(!empty($origin_prod_smi)){
+                                            $origin_prod_tj = $origin_prod_smi;
+                                        }else{
+                                            //get  origin_prod by move id, kode_produk
+                                            $get_origin_prod = $this->m_mo->get_origin_prod_mrp_production_by_kode($row['move_id'],addslashes($val->kode_produk))->row_array();
+                                            $origin_prod_tj = $get_origin_prod['origin_prod'];
+                                            $loop_sm =false;
+                                        }
+
                                            
                                     }
                                    
@@ -610,16 +627,26 @@ class Penerimaanbarang extends MY_Controller
                     foreach ($list as $row) {
                         $kode_produk = $row->kode_produk;
                         $qty         = $row->qty;
+                        $origin_prod = $row->origin_prod;
                         
-                        $qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id_in,addslashes($kode_produk))->row_array();
+                        //$qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id_in,addslashes($kode_produk))->row_array();
+
+                        // cek apakah terdapat kode_produk yg lebih dari 1
+                        $cek_jml_produk_sama = $this->m_penerimaanBarang->cek_jml_produk_sama_penerimaan_barang_by_kode($kode,$kode_produk)->num_rows();
+                        if($cek_jml_produk_sama > 0){// where ditambah origin_prod
+                            $qty_smi = $this->_module->get_qty_stock_move_items_by_kode_origin($move_id_in,addslashes($kode_produk),$origin_prod)->row_array();
+                        }else{
+                           //cek qty produk di stock_move_items apa masih kurang dengan target qty di pengiriman barang items
+                           $qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id_in,addslashes($kode_produk))->row_array();
+                        }
 
                         if($qty_smi['sum_qty']<$qty and !empty($qty_smi['sum_qty'])){//jika qty di stock_move_items kurang dari qty di penerimaan barang items
                             $backorder = true;
                             $qty_back = $qty-$qty_smi['sum_qty'];
                             //simpan ke penermaan_barang_items
-                            $sql_in_items_batch   .= "('".$kode_in."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$in_row."'), ";
+                            $sql_in_items_batch   .= "('".$kode_in."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$in_row."','".addslashes($origin_prod)."'), ";
                             //simpan ke stock move produk 
-                            $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$in_row."',''), ";                          
+                            $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$in_row."','".addslashes($origin_prod)."'), ";               
                             $in_row++;
                         }
 
@@ -676,7 +703,7 @@ class Penerimaanbarang extends MY_Controller
                             $this->_module->simpan_penerimaan_batch($sql_in_batch);
 
                             $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
-                            $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
+                            $this->_module->simpan_penerimaan_items_batch_origin_prod($sql_in_items_batch);
 
                             $sql_log_history_in = rtrim($sql_log_history_in, ', ');
                             $this->_module->simpan_log_history_batch($sql_log_history_in);                   
@@ -1281,7 +1308,17 @@ class Penerimaanbarang extends MY_Controller
                         $start = $this->_module->get_last_quant_id();
                      
                         //cek qty produk di stock_move_items apa masih kurang dengan target qty di penerimaan barang items
-                        $qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id,addslashes($kode_produk))->row_array();
+                        //$qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id,addslashes($kode_produk))->row_array();
+                        
+                        // cek apakah terdapat kode_produk yg lebih dari 1
+                        $cek_jml_produk_sama = $this->m_penerimaanBarang->cek_jml_produk_sama_penerimaan_barang_by_kode($kode,$kode_produk)->num_rows();
+                        if($cek_jml_produk_sama > 0){// where ditambah origin_prod
+                            $qty_smi = $this->_module->get_qty_stock_move_items_by_kode_origin($move_id,addslashes($kode_produk),$origin_prod)->row_array();
+                        }else{
+                           //cek qty produk di stock_move_items apa masih kurang dengan target qty di pengiriman barang items
+                           $qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id,addslashes($kode_produk))->row_array();
+                        }
+
                         $kebutuhan_qty = $qty - $qty_smi['sum_qty'];
 
                         if($kebutuhan_qty > 0){//jika kebutuhan_qty > 0

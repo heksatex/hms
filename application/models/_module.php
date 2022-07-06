@@ -204,6 +204,12 @@ class _module extends CI_Model
 								values $sql ");
 	}
 
+	public function simpan_penerimaan_items_batch_origin_prod($sql)
+	{
+		return $this->db->query("INSERT INTO penerimaan_barang_items  (kode,kode_produk,nama_produk,qty,uom,status_barang,row_order,origin_prod) 
+								values $sql ");
+	}
+
 	public function simpan_pengiriman_batch($sql)
 	{
 		return $this->db->query("INSERT INTO pengiriman_barang (kode,tanggal,tanggal_transaksi,tanggal_jt,reff_note,status,dept_id,origin,move_id,lokasi_dari,lokasi_tujuan)  VALUES $sql");
@@ -375,6 +381,11 @@ class _module extends CI_Model
    		return $this->db->query("SELECT sum(qty) as sum_qty FROM stock_move_items  	WHERE  move_id = '$move_id' And kode_produk = '$kode_produk' ");
     }
 
+	public function get_qty_stock_move_items_by_kode_origin($move_id,$kode_produk,$origin_prod)
+    {
+   		return $this->db->query("SELECT sum(qty) as sum_qty FROM stock_move_items  	WHERE  move_id = '$move_id' And kode_produk = '$kode_produk' AND origin_prod = '$origin_prod'");
+    }
+
      public function get_qty_stock_move_items_mo_by_kode($move_id,$origin_prod,$status)
     {
     	if(!empty($status)){
@@ -478,6 +489,11 @@ class _module extends CI_Model
 	public function update_status_stock_move_produk($move_id, $kode_produk, $status)
 	{
 		return $this->db->query("UPDATE stock_move_produk SET status = '$status' WHERE move_id = '$move_id' AND kode_produk = '$kode_produk'");
+	}
+
+	public function update_status_stock_move_produk_origin_prod($move_id, $kode_produk, $status,$origin_prod)
+	{
+		return $this->db->query("UPDATE stock_move_produk SET status = '$status' WHERE move_id = '$move_id' AND kode_produk = '$kode_produk' AND origin_prod = '$origin_prod'");
 	}
 
 	public function update_status_stock_move_produk_full($move_id,$status)
@@ -797,6 +813,12 @@ class _module extends CI_Model
 	public function get_nama_route_by_kode($kode)
 	{
 		return $this->db->query("SELECT nama FROM route_co WHERE kode  = '$kode'");
+	}
+
+	public function cek_type_mo_by_dept($kode)
+	{
+		$query =  $this->db->query("SELECT type_mo FROM departemen WHERE kode = '$kode'")->row_array();
+		return $query['type_mo'];
 	}
 
 }

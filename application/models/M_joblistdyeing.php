@@ -18,7 +18,7 @@ class M_joblistdyeing extends CI_Model
 		$this->load->model('_module');
 	}
 
-	private function _get_datatables_query()
+	private function _get_datatables_query($id_dept)
 	{	
 		
 		//add custom filter here
@@ -39,13 +39,13 @@ class M_joblistdyeing extends CI_Model
             $this->db->like('mrp.nama_produk', $this->input->post('produk'));
         }
 
-		//$this->db->from($this->table);
 		$this->db->select(" mrp.kode, mrp.dept_id, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.status, mmss.nama_status ");
-		$this->db->from("mrp_production mrp");		
+		$this->db->from('mrp_production mrp');		
+		$this->db->join("(SELECT * FROM mrp_production where dept_id = '".$id_dept."' AND status IN ('draft', 'ready') )as mrp2","mrp2.kode = mrp.kode AND mrp2.dept_id = mrp.dept_id AND mrp2.status = mrp.status","inner");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
-		$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
-		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
-		$this->db->join("pengiriman_barang pb", "pb.move_id = sm.move_id","left");
+		//$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
+		//$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
+		//$this->db->join("pengiriman_barang pb", "pb.origin = mrp.origin AND pb.dept_id = '".$id_dept."'","inner");
 
 		$i = 0;
 	
@@ -83,11 +83,11 @@ class M_joblistdyeing extends CI_Model
 
 	function get_datatables($id_dept,$mmss)
 	{
-		$this->_get_datatables_query();
-		$this->db->where('mrp.dept_id',$id_dept);
+		$this->_get_datatables_query($id_dept);
+		//$this->db->where('mrp.dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$where = "(mrp.status IN ('ready','draft')  OR pb.status IN ('ready','draft'))";
-		$this->db->where($where);
+		//$where = "pb.status IN ('ready','draft')";
+		//$this->db->where($where);
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
@@ -96,31 +96,29 @@ class M_joblistdyeing extends CI_Model
 
 	function count_filtered($id_dept,$mmss)
 	{
-		$this->db->where('mrp.dept_id',$id_dept);
+		//$this->db->where('mrp.dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$where = "(mrp.status IN ('ready','draft')  OR pb.status IN ('ready','draft'))";
-		$this->db->where($where);
-		$this->_get_datatables_query();
+		//$where = "pb.status IN ('ready','draft')";
+		//$this->db->where($where);
+		$this->_get_datatables_query($id_dept);
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
 	public function count_all($id_dept,$mmss)
 	{	
-		//$this->db->from($this->table);
-		$this->db->select("mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.status, mmss.nama_status");
-		$this->db->from("mrp_production mrp");
+		$this->db->select(" mrp.kode, mrp.dept_id, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.status, mmss.nama_status ");
+		$this->db->from('mrp_production mrp');		
+		$this->db->join("(SELECT * FROM mrp_production where dept_id = '".$id_dept."' AND status IN ('draft', 'ready') ) as mrp2","mrp2.kode = mrp.kode AND mrp2.dept_id = mrp.dept_id AND mrp2.status = mrp.status","inner");	
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
-		$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
-		$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
-		$this->db->join("pengiriman_barang pb", "pb.move_id = sm.move_id","left");
+		//$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
+		//$this->db->join("pengiriman_barang pb", "pb.origin = mrp.origin AND pb.dept_id = '".$id_dept."'","inner");
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$this->db->where('mrp.dept_id',$id_dept);
-		$where = "(mrp.status IN ('ready','draft')  OR pb.status IN ('ready','draft'))";
-		$this->db->where($where);
+		//$this->db->where('mrp.dept_id',$id_dept);
+		//$where = "pb.status IN ('ready','draft')";
+		//$this->db->where($where);
 		return $this->db->count_all_results();
 	}
-
 
 
 	public function cek_item_rm_target($kode,$category)

@@ -180,6 +180,8 @@
                       <th>Qty</th>
                       <th>Stock.GRG [Qty1]</th>
                       <th>DTI</th>
+                      <th>Piece Info</th>
+                      <th>Reff Note</th>
                       <th>CO</th>
                       <th></th>
                     </tr>
@@ -294,7 +296,7 @@
                   "orderable": false, 
                 },
                 { 
-                  "targets": [12], 
+                  "targets": [14], 
                   "orderable": false, 
                 },
                 { 

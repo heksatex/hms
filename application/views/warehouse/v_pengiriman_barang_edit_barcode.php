@@ -119,6 +119,7 @@
                       <th class="style" style="text-align: right;">Qty2</th>
                       <th class="style">uom2</th>
                       <th class="style">Lot</th>
+                      <th class="style">Lokasi Fisik</th>
                       <th class="style">Reff Note</th>
                       <th class="style">Status</th>
                       <th class="style">Quant Id</th>
@@ -142,6 +143,7 @@
                         <td  align="right"><?php echo $row->qty2?></td>
                         <td><?php echo $row->uom2?></td>
                         <td><?php echo $row->lot?>
+                        <td><?php echo $row->lokasi_fisik?>
                         <td><?php echo $row->reff_note?></td>
                             <!--input type="hidden" name="lot"  id="lot" value="<?php echo $row->lot?>">
                             <input type="hidden" name="valid" id="valid" value="0" style="width: 20px;"></td-->

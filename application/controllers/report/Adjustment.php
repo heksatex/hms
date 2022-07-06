@@ -50,7 +50,10 @@ class Adjustment extends MY_Controller
 
 			}
 
-			$callback = array('record'   => $dataRecord);
+			$total = $this->m_reportAdjustment->get_jml_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai);
+			
+			$callback = array('record'   => $dataRecord, 'total_lot' =>'<label>: '.$total.'</label>');
+
 		}else{
 			$data_isi    = $this->input->post('data_isi');
 
@@ -82,8 +85,8 @@ class Adjustment extends MY_Controller
     {
 
     	$this->load->library('excel');
-		$tgldari   = date('Y-m-d',strtotime($this->input->post('tgldari')));
-		$tglsampai = date('Y-m-d',strtotime($this->input->post('tglsampai')));
+		$tgldari   = date('Y-m-d 00:00:00',strtotime($this->input->post('tgldari')));
+		$tglsampai = date('Y-m-d 23:59:59',strtotime($this->input->post('tglsampai')));
 		$id_dept   = $this->input->post('departemen');
 		$dept    = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
 		$kode_lokasi = $dept['stock_location'];// example WRD/Stock
@@ -110,8 +113,15 @@ class Adjustment extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('C4', ': '.tgl_indo(date('d-m-Y',strtotime($tgldari))).' - '.tgl_indo(date('d-m-Y',strtotime($tglsampai)) ));
 		$object->getActiveSheet()->mergeCells('C4:F4');
 
+		$total = $this->m_reportAdjustment->get_jml_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai);
+		// set total lot
+		$object->getActiveSheet()->SetCellValue('A5', 'Total Lot');
+		$object->getActiveSheet()->mergeCells('A5:B5');
+ 		$object->getActiveSheet()->SetCellValue('C5', ': '.$total);
+		$object->getActiveSheet()->mergeCells('C5:D5');
+
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:K6")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:K7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -127,7 +137,7 @@ class Adjustment extends MY_Controller
 
 		foreach ($table_head_columns as $field) {
 			# code...
-	    	$object->getActiveSheet()->setCellValueByColumnAndRow($column, 6, $field);  
+	    	$object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $field);  
 	    	$column++;
 		}
 
@@ -150,14 +160,14 @@ class Adjustment extends MY_Controller
 		$index_header = array('A','B','C','D','E','F','G','H','I','J','K');
 		// set border header
 		foreach ($index_header as $val) {
-			$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
-	        $object->getActiveSheet()->getStyle($val.'6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
+	        $object->getActiveSheet()->getStyle($val.'7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 		}
 
 		$tgl_dari   = date('Y-m-d 00:00:00',strtotime($tgldari));
 		$tgl_sampai = date('Y-m-d 23:59:59',strtotime($tglsampai));
-		$rowCount   = 7;
+		$rowCount   = 8;
 		$no         = 1;
 
 		$head = $this->m_reportAdjustment->get_list_group_nama_produk_by_kode($kode_lokasi,$tgldari,$tglsampai)->result();

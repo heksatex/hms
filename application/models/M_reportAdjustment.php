@@ -28,4 +28,14 @@ class M_reportAdjustment extends CI_Model
 								ORDER BY mp.nama_produk asc");
 	}
 
+	public function get_jml_item_adjustment_by_kode($lokasi, $tgl_dari, $tgl_sampai)
+	{
+		$query =  $this->db->query("SELECT  count(lot) as tot_lot
+								FROM adjustment_items b 
+								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
+								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk
+								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done'")->row_array();
+		return $query['tot_lot'];
+	}
+
 }

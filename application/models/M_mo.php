@@ -320,24 +320,20 @@ class M_mo extends CI_Model
 
    public function get_dyeing_stuff($kode)
    {
-     	return $this->db->query("SELECT rm.kode_produk, rm.nama_produk, rm.qty, rm.uom,  rm.status, wi.qty as qty_asli, wi.reff_note
+     	return $this->db->query("SELECT rm.kode_produk, rm.nama_produk, rm.qty, rm.uom,  rm.status, rm.persen, rm.reff_note
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
-								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk							
-								INNER JOIN warna w ON m.id_warna = w.id
-								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk AND m.id_warna_varian = wi.id_warna_varian
+								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk				
 								WHERE rm.kode = '$kode' AND mp.id_category IN ('12') 
 								order by rm.row_order")->result();
    }
 
    public function get_aux($kode)
    {
-   		return $this->db->query("SELECT rm.kode_produk, rm.nama_produk, rm.qty, rm.uom,  rm.status, wi.qty as qty_asli,wi.reff_note
+   		return $this->db->query("SELECT rm.kode_produk, rm.nama_produk, rm.qty, rm.uom,  rm.status,  rm.persen, rm.reff_note
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mrp_production m ON rm.kode = m.kode 
-								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk							
-								INNER JOIN warna w ON m.id_warna = w.id
-								LEFT JOIN warna_items wi ON w.id = wi.id_warna AND rm.kode_produk = wi.kode_produk AND m.id_warna_varian = wi.id_warna_varian
+								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
 								WHERE rm.kode = '$kode' AND mp.id_category IN ('11')
 								order by rm.row_order")->result();
    }
@@ -426,7 +422,7 @@ class M_mo extends CI_Model
 
 	public function save_obat($sql)
 	{
-		return $this->db->query("INSERT INTO mrp_production_rm_target (kode,move_id,kode_produk,nama_produk,qty,uom,row_order,origin_prod,status) 
+		return $this->db->query("INSERT INTO mrp_production_rm_target (kode,move_id,kode_produk,nama_produk,qty,uom,row_order,origin_prod,status,persen,reff_note) 
 								values $sql ");
 	} 
 
@@ -806,6 +802,16 @@ class M_mo extends CI_Model
 	public function get_list_varian_by_id($id_warna)
 	{
 		return $this->db->query("SELECT id, id_warna, nama_varian FROM warna_varian where id_warna = '$id_warna' ORDER BY id asc")->result();
+	}
+
+	public function cek_mesin_by_dept_id($dept_id)
+	{
+		return $this->db->query("SELECT mc_id,nama_mesin FROM mesin where dept_id = '$dept_id'");
+	}
+
+	public function cek_mesin_by_mrp($kode)
+	{
+		return $this->db->query("SELECT mc_id FROM mrp_production where kode = '$kode'");
 	}
 
 

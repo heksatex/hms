@@ -9,15 +9,15 @@ class M_colorOrder extends CI_Model
 	//var $table 		  = 'color_order';
 	var $column_order = array(null, 'kode_co', 'tanggal', 'kode_sc','buyer_code', 'status', 'notes');
 	var $column_search= array('kode_co', 'tanggal', 'kode_sc','buyer_code', 'status', 'notes');
-	var $order  	  = array('kode_co' => 'desc');
+	var $order  	  = array('tanggal' => 'desc');
 
 	var $column_order2  = array(null, 'a.sales_order', 'a.buyer_code', 'msg.nama_sales_group');
 	var $column_search2 = array('a.sales_order', 'a.buyer_code', 'msg.nama_sales_group');
 	var $order2  	    = array('a.create_date' => 'desc');
 
 	//var $table3 	    = 'sales_color_line';
-	var $column_order3  = array(null, 'ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'nama_route','piece_info','reff_notes');
-	var $column_search3 = array('ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info', 'nama_route', 'reff_notes');
+	var $column_order3  = array(null, 'ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'rc.nama','piece_info','reff_notes');
+	var $column_search3 = array('ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info', 'rc.nama', 'reff_notes');
 	var $order3  	    = array('tanggal_ow' => 'asc');
 
 
@@ -372,7 +372,7 @@ class M_colorOrder extends CI_Model
 
 	public function get_color_detail_by_id($kode_co, $row_order)
 	{
-		return $this->db->query("SELECT a.kode_co, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.status, a.row_order, a.ow, a.route_co, a.lebar_jadi, a.uom_lebar_jadi, a.id_handling, a.id_warna, b.nama_warna, a.gramasi
+		return $this->db->query("SELECT a.kode_co, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.reff_notes_mkt, a.status, a.row_order, a.ow, a.route_co, a.lebar_jadi, a.uom_lebar_jadi, a.id_handling, a.id_warna, b.nama_warna, a.gramasi
 								 FROM color_order_detail a 
 								 LEFT JOIN warna b ON a.id_warna = b.id 
 								 WHERE a.kode_co = '$kode_co' AND a.row_order = '$row_order' ");

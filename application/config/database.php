@@ -68,7 +68,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | make active.  By default there is only one group (the 'default' group).
 |
 | The $query_builder variables lets you determine whether or not to load
-| the query builder class.
+| the query builder class.git s
 */
 $active_group = 'default';
 $query_builder = TRUE;
@@ -78,7 +78,7 @@ $db['default'] = array(
 	'hostname' => '10.10.0.1',
 	'username' => 'root',
 	'password' => 'toor',
-	'database' => 'hmsdb',
+	'database' => 'hmsdb_bak',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,

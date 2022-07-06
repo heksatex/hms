@@ -293,7 +293,25 @@
                               </div>
                             </div>
                             <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-4"><label>MO </label></div>
+                              <div class="col-xs-4">
+                                <label>
+                                  <?php 
+                                  if($type_mo == 'colouring'){
+                                    if(!empty($mo['nama'])){
+                                      echo 'MG '.$mo['nama'];
+                                    }else{
+                                      echo 'MG';
+                                    }
+                                  }else{
+                                    if(!empty($mo['nama'])){
+                                      echo 'MO '.$mo['nama'];
+                                    }else{
+                                      echo 'MO';
+                                    }
+                                  }
+                                  ?>
+                                </label>
+                              </div>
                               <div class="col-xs-8 col-md-8">
                                  <?php
                                  if(!empty($mo['kode'])){

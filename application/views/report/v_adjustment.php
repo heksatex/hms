@@ -85,6 +85,14 @@
                       </div>                                    
                   </div>
                 </div>
+                <div class="form-group">
+                  <div class="col-md-12">
+                    <div class="col-md-2"><label>Total Lot</label></div>
+                    <div class="col-md-4" id="total_lot">
+                        <label>: 0</label>
+                    </div>                                    
+                  </div>
+                </div>
                
               </div>
               <div class="col-md-4">
@@ -222,7 +230,7 @@
                 url : "<?php echo site_url('report/adjustment/loadData')?>",
                 data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, load:'header'},
                 success: function(data){
-
+                  $("#total_lot").val(data.tot_lot);;
                   let no    = 1;
                   let empty = true;
                   let icon  = '';

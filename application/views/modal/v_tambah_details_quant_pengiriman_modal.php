@@ -17,6 +17,7 @@
               <th>Lot</th>
               <th>Qty</th>
               <th>Qty2</th>
+              <th>Lokasi Fisik</th>
               <th>Reff Note</th>
               <th></th>
             </tr>
@@ -51,8 +52,8 @@
            
             "columnDefs": [
               {
-               'targets':7,
-               'data' : 7,
+               'targets':8,
+               'data' : 8,
                /*
                'searchable':false,
                'orderable':false,
@@ -62,7 +63,7 @@
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[7];
+                   var rowId = rowData[8];
                 }, 
               },
               { 
@@ -75,7 +76,7 @@
             },
             'rowCallback': function(row, data, dataIndex){
                // Get row ID
-               var rowId = data[7];
+               var rowId = data[8];
                // If row ID is in the list of selected row IDs
             }
         });
@@ -92,7 +93,7 @@
 
   //simpan details ketika button simpan di klik
   $("#btn-tambah").off("click").on("click",function(e) {
-      var myCheckboxes = table.column(7).checkboxes.selected();
+      var myCheckboxes = table.column(8).checkboxes.selected();
       var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
 
@@ -127,7 +128,7 @@
                   window.location.replace('../index');
                   $('#btn-tambah').button('reset');
 
-                }else if(data.status == 'kosong'){                     
+                }else if(data.status == 'kosong' || data.status == 'failed'){                     
                   alert_modal_warning(data.message);
                   $('#btn-tambah').button('reset');
 

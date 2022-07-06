@@ -1088,18 +1088,37 @@ class MO extends MY_Controller
                     $move_rm_obat = $this->m_mo->get_move_id_rm_target_obat_by_kode($kode)->row_array();
                     $move_rm_obat = $move_rm_obat['move_id'];
 
-                    $sql_update_status_stock_move_obat = "UPDATE stock_move SET status = 'done' Where move_id = '".$move_rm_obat."'";
-                    $this->_module->update_perbatch($sql_update_status_stock_move_obat); 
-
-                    $sql_update_status_stock_move_items_obat = "UPDATE stock_move_items SET status = 'done' Where move_id = '".$move_rm_obat."'";
-                    $this->_module->update_perbatch($sql_update_status_stock_move_items_obat); 
-
-                    $sql_update_status_stock_move_produk_obat = "UPDATE stock_move_produk SET status = 'done' Where move_id = '".$move_rm_obat."'";
-                    $this->_module->update_perbatch($sql_update_status_stock_move_produk_obat);
+                    if(!empty($move_rm_obat)){
                     
-                    $sql_update_status_mrp_production_rm_target_obat = "UPDATE mrp_production_rm_target SET status = 'done' Where move_id = '".$move_rm_obat."' AND kode = '".$kode."' ";
-                    $this->_module->update_perbatch($sql_update_status_mrp_production_rm_target_obat);
+                        //lokasi tujuan rm obat setelah poduksi
+                        $lokasi_tujuan_rm_obat = $this->_module->get_location_by_move_id($move_rm_obat)->row_array();
 
+                        $get_smi_obat = $this->_module->get_stock_move_items_by_move_id($move_rm_obat);
+                        $where_sq_obat = "";
+                        foreach($get_smi_obat as $sobat){
+                            $where_sq_obat  .= "'".$sobat->quant_id."',";
+                        }
+                        
+                        // update lokasi rm obat di stock_quant by id
+                        if(!empty($where_sq_obat)){
+                        
+                            $where_sq_obat = rtrim($where_sq_obat, ',');
+                            $sql_update_lokasi_rm_obat  = "UPDATE stock_quant SET lokasi = '".$lokasi_tujuan_rm_obat['lokasi_tujuan']."', move_date = '".$tgl."' WHERE  quant_id in (".$where_sq_obat.") ";
+                            $this->_module->update_perbatch($sql_update_lokasi_rm_obat);
+                        }
+
+                        $sql_update_status_stock_move_obat = "UPDATE stock_move SET status = 'done' Where move_id = '".$move_rm_obat."'";
+                        $this->_module->update_perbatch($sql_update_status_stock_move_obat); 
+
+                        $sql_update_status_stock_move_items_obat = "UPDATE stock_move_items SET status = 'done' Where move_id = '".$move_rm_obat."'";
+                        $this->_module->update_perbatch($sql_update_status_stock_move_items_obat); 
+
+                        $sql_update_status_stock_move_produk_obat = "UPDATE stock_move_produk SET status = 'done' Where move_id = '".$move_rm_obat."'";
+                        $this->_module->update_perbatch($sql_update_status_stock_move_produk_obat);
+                        
+                        $sql_update_status_mrp_production_rm_target_obat = "UPDATE mrp_production_rm_target SET status = 'done' Where move_id = '".$move_rm_obat."' AND kode = '".$kode."' ";
+                        $this->_module->update_perbatch($sql_update_status_mrp_production_rm_target_obat);
+                    }
                 }
             }
            
@@ -1995,6 +2014,8 @@ class MO extends MY_Controller
                             $where2                     = "";
                             $case3                      = "";
                             $where3                     = "";
+                            $case4                      = "";
+                            $where4                     = "";
                             $sql_rm_target_batch        = "";
                             $arr_kode[]                 = "";
                             $kode_out[]                 = "";
@@ -2004,7 +2025,8 @@ class MO extends MY_Controller
                             $route = $this->m_mo->get_route_warna('obat_dyeing');
                             $kode_warna  = $this->m_mo->get_warna_items_by_warna($warna,$varian);
                             $get_row = $this->m_mo->get_row_order_rm_target($kode)->row_array();//get last_order di mrp rm target
-                            $rm_row  = $get_row['row']+1;
+                            //$rm_row  = $get_row['row']+1;
+                            $rm_row   = 1;
                             $ba      = $this->m_mo->get_berat_air_by_kode($kode)->row_array();
                             $sm_row  = 1;///stock move row_order
                             $empty_item = TRUE;
@@ -2050,6 +2072,11 @@ class MO extends MY_Controller
                                     $note_log = $kode_out.' | '.$origin;
                                     $date_log = date('Y-m-d H:i:s');
                                     $sql_log_history_out .= "('".$date_log."','".$mms_kode."','".$kode_out."','create','".$note_log."','".$nama_user."'), ";
+
+                                    //upddate pengiriman reff picking
+                                    $reff_picking_out = $kode_out."|".$deptid;
+                                    $case4  .= "when kode = '".$kode_out."' then '".$reff_picking_out."'";
+                                    $where4 .= "'".$kode_out."',";
     	                 
 
                                 }else if($method_action =='IN'){//penerimaan barang
@@ -2110,7 +2137,8 @@ class MO extends MY_Controller
                                     if($method_action =='CON'){
                                         $origin_prod = $kode_prod.'_'.$last_num_origin;
                                     }else{
-                                        $origin_prod = '';
+                                        $origin_prod = $kode_prod.'_'.$last_num_origin;
+                                        //$origin_prod = '';
                                     }
 
                                     //stock move produk
@@ -2118,7 +2146,8 @@ class MO extends MY_Controller
 
                                     if($method_action == 'OUT'){//pengiriman barang
 
-                                        $sql_out_items_batch .= "('".$kode_out."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."',''), ";
+                                        $sql_out_items_batch .= "('".$kode_out."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."','".$origin_prod."'), ";
+                                        $last_num_origin = $last_num_origin + 1;
 
                                         //update reff notes pengiriman 
                                         $case2  .= "when kode = '".$kode_out."' then '".$reff_notes."'";
@@ -2133,7 +2162,7 @@ class MO extends MY_Controller
 
                                     }else if($method_action =='CON'){
 
-                                        $sql_rm_target_batch  .= "('".$kode."','".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','".$rm_row."','".$origin_prod."','draft'), ";
+                                        $sql_rm_target_batch  .= "('".$kode."','".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','".$rm_row."','".$origin_prod."','draft','".$qty."','".$reff_notes."'), ";
                                         //rm + 1
                                         $rm_row =  $rm_row  + 1;
                                         $last_num_origin = $last_num_origin + 1;
@@ -2176,6 +2205,11 @@ class MO extends MY_Controller
                                   
                                   $sql_log_history_out = rtrim($sql_log_history_out, ', ');
                                   $this->_module->simpan_log_history_batch($sql_log_history_out);
+
+                                  $where4 = rtrim($where4, ',');
+                                  $sql_update_reff_picking_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case4." end) WHERE  kode in (".$where4.") ";
+                                  $this->_module->update_reff_batch($sql_update_reff_picking_out_batch);
+                                  $sql_update_reff_picking_out_batch = "";
                                 }
                                 
                                 if(!empty($sql_in_batch)){
@@ -2184,7 +2218,7 @@ class MO extends MY_Controller
 
                                   $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
                                   $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
-
+                                    
                                   $where = rtrim($where, ',');
                                   $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
                                   $this->_module->update_reff_batch($sql_update_reff_out_batch);
@@ -2340,7 +2374,7 @@ class MO extends MY_Controller
                     $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Reff Note Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else if(empty($mesin)){
                      $callback = array('status' => 'failed', 'field' => 'mc', 'message' => 'No Mesin Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
-                }else if(empty($type_production)){
+                }else if(empty($type_production) AND $type_mo == 'manufaktur'){
                     $callback = array('status' => 'failed', 'field' => 'type_production', 'message' => 'Type Production Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                 }else if(!empty($cek_request['origin'])  AND $type_mo == 'colouring' AND $air_not_same == 'true'){
                     $callback = array('status' => 'failed', 'field' => 'berat', 'message' => 'Air  tidak bisa dirubah, karena sudah Request Resep !'.$list->air.' '.number_format($air,2).' '.$cek_request['origin'], 'icon' =>'fa fa-warning',    'type' => 'danger' );    
@@ -2458,7 +2492,7 @@ class MO extends MY_Controller
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Tidak Bisa Cek Stok, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else{
                     //lock tabel
-                    $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_rm_target rm WRITE, stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE'  );
+                    $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_rm_target rm WRITE, stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE, mesin  WRITE'  );
 
                     //get row order stock_move_items
                     $row_order  = $this->_module->get_row_order_stock_move_items_by_kode($move_id);
@@ -2691,6 +2725,7 @@ class MO extends MY_Controller
 
                     }// end foreach list mrp_production_rm_target
 
+                    $note_update_mc = '';
                     // jika mo Dyeing maka update field berat
                     if($type_mo == 'colouring'){
                         $qty2   = $this->m_mo->get_qty2_smi_kain_by_kode($move_id)->row_array();
@@ -2698,8 +2733,18 @@ class MO extends MY_Controller
                         //update berat di mrp production
                         $sql_update_berat = "UPDATE mrp_production set berat = '".$qty2['jml_qty2']."' WHERE kode = '".$kode."' ";
                         $this->_module->update_perbatch($sql_update_berat);
+
+                        // update ketika mesin MG berjumlah 1
+                        $jml_mc    = $this->m_mo->cek_mesin_by_dept_id($deptid)->num_rows();
+                        $cek_mc_mg = $this->m_mo->cek_mesin_by_mrp($kode)->row_array();
+                        if($jml_mc == 1 AND empty($cek_mc_mg['mc_id'])){
+                            //update mrp
+                            $get_mc = $this->m_mo->cek_mesin_by_dept_id($deptid)->row_array();
+                            $sql_update_mesin_mg = "UPDATE mrp_production set mc_id = '".$get_mc['mc_id']."' WHERE kode = '".$kode."' ";
+                            $this->_module->update_perbatch($sql_update_mesin_mg);
+                            $note_update_mc = ' No Mesin Update -> '.$get_mc['nama_mesin'];
+                        }
                     }
-                
 
                     $sql_stock_quant_batch = "";
                     $sql_stock_move_items_batch="";
@@ -2809,14 +2854,18 @@ class MO extends MY_Controller
                       $jenis_log   = "edit";
                       $note_log    = '';
                       if($history == true or $updt_consum == true ){
-                        $note_log    = "Cek Stok";
+                        $note_log    = "Cek Stok ".$note_update_mc;
                       }
                       if($history_split == true){
-                        $note_log    = "Cek Stok Split ";
+                        $note_log    = "Cek Stok Split ".$note_update_mc;
                       }
-                       if($history == true AND $history_split == true){
-                        $note_log  = "Cek Stok dan Cek Stok Split";
+                      if($history == true AND $history_split == true){
+                        $note_log  = "Cek Stok dan Cek Stok Split ".$note_update_mc;
                       }
+                      $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+                    }else if(!empty($note_update_mc)){
+                      $jenis_log   = "edit";
+                      $note_log    = $note_update_mc;
                       $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
                     }
                
@@ -2839,6 +2888,10 @@ class MO extends MY_Controller
         $username           = $this->session->userdata('username'); 
         $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$deptid)->row_array();
         $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
+
+        // cek level akses by user
+        $level_akses = $this->_module->get_level_akses_by_user($username)->row_array();
+        $data['level']       = $level_akses['level'];
         
         $data['kode']        = $kode_mo;
         $data['deptid']      = $deptid;

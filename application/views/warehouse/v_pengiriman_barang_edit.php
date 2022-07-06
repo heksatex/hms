@@ -315,6 +315,7 @@
                               <th class="style" style="text-align: right;">Lbr.Greige</th>
                               <th class="style" style="text-align: right;">Lbr.Jadi</th>
                             <?php }?>
+                            <th class="style">Lokasi Fisik</th>
                             <th class="style">Reff Note</th>
                             <th class="style">Status</th>
                             <th class="style">Quant Id</th>
@@ -337,6 +338,7 @@
                                   <td align="right"><?php echo $row->lebar_greige.' '.$row->uom_lebar_greige;?></td>
                                   <td align="right"><?php echo $row->lebar_jadi.' '.$row->uom_lebar_jadi;?></td>
                                 <?php }?>
+                                <td><?php echo $row->lokasi_fisik?></td>
                                 <td><?php echo $row->reff_note?></td>
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                 <td><?php echo $row->quant_id?></td>
