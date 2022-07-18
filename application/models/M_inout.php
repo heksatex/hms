@@ -54,4 +54,52 @@ class M_inout extends CI_Model
 
     }
 
+
+    public function get_list_pengiriman_harian_by_kode_get_in($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1)
+    {
+        $status     = '';
+        if(!empty($status1)){
+            $status     .= " AND pb.status IN (".$status1.") ";
+        }
+        $where_dept = '';
+        if(!empty($dept_tujuan)){
+            $where_dept = " AND SUBSTRING_INDEX(pb.reff_picking,'|',1) LIKE '%$dept_tujuan%' ";
+
+        }
+
+
+        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status
+                                FROM pengiriman_barang pb
+                                INNER JOIN stock_move_items smi ON smi.move_id = pb.move_id
+                                INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
+                                WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
+                                AND SUBSTRING_INDEX(pb.reff_picking,'|',-1) = '$dept_id'  $where_dept  $status
+                                ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
+
+    }
+
+
+    public function get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$dept_id,$dept_dari,$status1)
+    {
+        $status     = '';
+        if(!empty($status1)){
+            $status     .= " AND pb.status IN (".$status1.") ";
+        }
+        $where_dept = '';
+        if(!empty($dept_dari)){
+            $where_dept = " AND SUBSTRING_INDEX(pb.reff_picking,'|',-1) LIKE '%$dept_dari%' ";
+
+        }
+
+
+        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status
+                                FROM penerimaan_barang pb
+                                INNER JOIN stock_move_items smi ON smi.move_id = pb.move_id
+                                INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
+                                WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
+                                AND SUBSTRING_INDEX(pb.reff_picking,'|',1) = '$dept_id'  $where_dept  $status
+                                ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
+
+    }
+
 }

@@ -25,6 +25,10 @@
     .select2-container{
       border-color: red !important;
     }
+    
+    .min-width-100{
+      min-width: 100px;
+    }
 
     /*
     @media screen and (max-width: 767px) {
@@ -177,11 +181,10 @@
                           ?>
                             <tr style="color:<?php echo $color;?>">
                               
-                              <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order."^|".$row->quant_id."^|".$row->kode_produk."^|".htmlentities($row->nama_produk)."^|".htmlentities($row->lot)."^|".$row->uom."^|".$row->qty_data."^|".$row->qty_adjustment."^|".$row->uom2."^|".$row->qty_data2."^|".$row->qty_adjustment2;?>" data-isi2="<?php echo $row->row_order; ?>"><?php echo $no++.".";?></td>
-                              
-                              <td class="text-wrap width-400" ><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
+                              <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>" data-isi2="<?php echo $row->quant_id?>" ><?php echo $no++.".";?></td>
+                              <td class="text-wrap width-400" data-content="edit" data-id="kode_produk" data-isi="<?php echo htmlentities($row->kode_produk) ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk) ?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
 
-                              <td class="text-wrap width-300" ><?php echo $row->lot?></a></td>
+                              <td class="text-wrap width-300" data-content="edit" data-id="lot" data-isi="<?php echo htmlentities($row->lot) ?>" ><?php echo $row->lot?></a></td>
 
                               <td class="text-wrap width-100" ><?php echo $row->uom?></a></td>
 
@@ -189,7 +192,7 @@
 
                               <td class="text-wrap width-200" data-content="edit" data-id="qtyadjustment" data-isi="<?php echo $row->qty_adjustment ?>" ><?php echo $row->qty_adjustment?></a></td>
 
-                              <td class="text-wrap width-100" ><?php echo $row->uom2?></a></td>
+                              <td class="text-wrap width-100" data-content="edit" data-id="uom2adjustment" data-isi="<?php echo $row->uom2 ?>" ><?php echo $row->uom2?></a></td>
 
                               <td class="text-wrap width-200" ><?php echo $row->qty_data2?></a></td>
 
@@ -572,13 +575,100 @@
 
   // Edit row on edit button click
   $(document).on("click", ".edit", function(){  
+    var quant = 'FALSE';
       $(this).parents("tr").find("td[data-content='edit']").each(function(){
+
+
+        if($(this).attr('data-isi2') != 0 && $(this).attr('data-id')=="row_order"){
+          quant = 'TRUE';
+        }
+
         if($(this).attr('data-id')=="row_order"){
-          $(this).html('<input type="hidden"  class="form-control" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> ');        
+            $(this).html('<input type="hidden"  class="form-control" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> ');        
+
+            row_order = $(this).attr('data-isi');
+            
+        }else if($(this).attr('data-id')=='kode_produk' && quant == 'FALSE'){
+
+            var kode_produk = ($(this).attr('data-isi'));
+            var nama_produk = ($(this).attr('data-isi2'));
+
+            class_sel2_prod = 't_sel2_prod'+row_order;
+            class_nama_produk = 'e_nama_produk'+row_order;
+            //alert(class_sel2_prod);
+            //select 2 nama produk dan textfield kode_produknya
+            $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+' min-width-100" id="tproduct" name="Product" ></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + $(this).attr('data-isi2') + '" id="t'+ $(this).attr('data-id2') +'"> ');
+
+            //var $newOption = $("<option></option>").val(kode_produk).text(nama_produk);
+            //$('.t_sel2_prod'+row_order).empty().append($newOption).trigger('change');
+
+            //var $newOption = $("<option></option>").val(kode_produk).text(nama_produk);
+            //$('.t_sel2_prod'+row_order).append("<option value ='"+kode_produk+"' selected)[MF118] "+nama_produk+"</option>");
+            custom_nama = '['+kode_produk+'] '+nama_produk;
+            $newOption = new Option(custom_nama, kode_produk, true, true);
+            $('.t_sel2_prod'+row_order).append($newOption).trigger('change');
+            //select 2 product
+            $('.t_sel2_prod'+row_order).select2({
+              allowClear: true,
+              placeholder: "",
+              ajax:{
+                    dataType: 'JSON',
+                    type : "POST",
+                    url : "<?php echo base_url();?>warehouse/adjustment/get_produk_adjustment_select2",
+                    data : function(params){
+                      return{
+                        prod:params.term,
+                      };
+                    }, 
+                    processResults:function(data){
+                      var results = [];
+
+                      $.each(data, function(index,item){
+                          results.push({
+                              id:item.kode_produk,
+                              text:'['+item.kode_produk+'] '+item.nama_produk
+                          });
+                      });
+                      return {
+                        results:results
+                      };
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                    //  alert('Error data');
+                    //  alert(xhr.responseText);
+                    }
+              }
+            });
+
+            $('.t_sel2_prod'+row_order).change(function(){
+                $.ajax({
+                      dataType: "JSON",
+                      url : '<?php echo site_url('warehouse/adjustment/get_produk_by_id') ?>',
+                      type: "POST",
+                      data: {kode_produk: $(this).parents("tr").find("#tproduct").val() },
+                      success: function(data){
+                        $('.e_nama_produk'+row_order).val(data.nama_produk);
+                        //$('.e_').val('1');
+                        //$('.uom').val(data.uom);
+
+                        var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
+                        $(".e_uom"+row_order).empty().append($newOptionuom).trigger('change');
+                      },
+                      error: function (xhr, ajaxOptions, thrownError){
+                        alert('Error data');
+                        alert(xhr.responseText);
+                      }
+                });
+            });
+
+
+        }else if($(this).attr('data-id')=='lot' && quant == 'FALSE'){
+          $(this).html('<input type="text"  class="form-control input-sm min-width-100" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" > ');
+
         }else if($(this).attr('data-id')=='qtyadjustment'){
           $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
-        }else if($(this).attr('data-id')=='qtyadjustment2'){
-          $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)" readonly> ');        
+        }else if($(this).attr('data-id')=='qtyadjustment2'&& quant == 'FALSE' ){
+          $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)" > ');        
         }
       });  
       $(this).parents("tr").find(".add, .edit").toggle();

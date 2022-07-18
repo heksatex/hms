@@ -385,7 +385,7 @@
                                     <td ><?php echo $row->ow?></td>
                                     <td style="min-width:80px;" >
                                         <?php if(!empty($row->ow)){ ?>
-                                        <select class="form-control input-sm status_scl" id="status_scl" name="status_scl" sc="<?php echo $row->sales_order;?>" row_order="<?php echo $row->row_order;?>" ow="<?php echo $row->ow;?>" >
+                                        <select class="form-control input-sm status_scl" id="status_scl" name="status_scl" sc="<?php echo $row->sales_order;?>" row_order="<?php echo $row->row_order;?>" ow="<?php echo $row->ow;?>" kode_produk="<?php echo htmlentities($row->kode_produk);?>", qty="<?php echo $row->qty?>" >
                                           <?php $arr_stat = array('t','f','ng');
                                                 foreach($arr_stat as $stats){
                                                   if($stats == 't'){
@@ -577,6 +577,8 @@
     var row_order   = $(this).attr('row_order');
     var value       = $(this).val();
     var ow          = $(this).attr('ow');
+    var qty         = $(this).attr('qty');
+    var kode_produk = $(this).attr('kode_produk');
     $.ajax({
           dataType: "JSON",
           url : '<?php echo site_url('sales/salescontract/update_status_color_lines') ?>',
@@ -584,14 +586,18 @@
           data: {sales_order  : sales_order, 
                 row_order     : row_order,
                 ow            : ow,
+                kode_produk   : kode_produk,
+                qty           : qty,
                 value         : value},
           success: function(data){
             if(data.sesi=='habis'){
                 //alert jika session habis
                 alert_modal_warning(data.message);
                 window.location.replace('../index');
+            }else if(data.status == 'failed'){
+              $("#tab_2").load(location.href + " #tab_2");
+                alert_modal_warning(data.message);
             }else{
-                $("#tab_2").load(location.href + " #tab_2");
                 $("#foot").load(location.href + " #foot");
                 //$("#total").load(location.href + " #total");
                 alert_notify(data.icon,data.message,data.type,function(){});
@@ -1283,7 +1289,7 @@
                 alert_modal_warning(data.message);
                 window.location.replace('../index');
             }else if(data.status == 'failed'){
-              alert_modal_warning(data.message);
+                alert_modal_warning(data.message);
             }else{
                 $("#tab_2").load(location.href + " #tab_2");
                 $("#foot").load(location.href + " #foot");
@@ -1729,24 +1735,24 @@
     });
 
 
-  //modal mode print
-  $(document).on('click','#btn-print',function(e){
-      e.preventDefault();
-      var kode = $('#kode').val();
-      $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $("#print_data").modal({
-          show: true,
-          backdrop: 'static'
-      });
-      $('.modal-title').text('Pilih Bahasa ?');
-       var  so = '<?php echo $salescontract->sales_order?>';
-      $.post('<?php echo site_url()?>sales/salescontract/mode_print_modal',
-        { so : so},
-          function(html){
-            setTimeout(function() {$(".print_data").html(html);  },1000);
-        }   
-      );
-  });
+    //modal mode print
+    $(document).on('click','#btn-print',function(e){
+        e.preventDefault();
+        var kode = $('#kode').val();
+        $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $("#print_data").modal({
+            show: true,
+            backdrop: 'static'
+        });
+        $('.modal-title').text('Pilih Bahasa ?');
+        var  so = '<?php echo $salescontract->sales_order?>';
+        $.post('<?php echo site_url()?>sales/salescontract/mode_print_modal',
+          { so : so},
+            function(html){
+              setTimeout(function() {$(".print_data").html(html);  },1000);
+          }   
+        );
+    });
 
     //klik button confirm contract
     $(document).on('click','#btn-confirm',function(e){
@@ -1951,6 +1957,7 @@
          data: {tanggal    : $('#tgl_modal').val(),
                 warna      : $('#warna').val(),
                 note       : $('#notes').val(),
+                sales_group: $('#sales_group').val(),
                 status     : 'tambah'
 
           },success: function(data){

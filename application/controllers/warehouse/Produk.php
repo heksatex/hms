@@ -193,6 +193,7 @@ class Produk extends MY_Controller
     if(!isset($id)) show_404();
         $kode_decrypt     = decrypt_url($id);
         $data['id_dept']  ='MPROD';
+        $data['mms']      = $this->_module->get_data_mms_for_log_history('MPROD');// get mms by dept untuk log history
         $data['produk']   = $this->m_produk->get_produk_by_kode($kode_decrypt);
         $data['uom']      = $this->m_produk->get_list_uom();
         $data['category'] = $this->m_produk->get_list_category();

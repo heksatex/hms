@@ -230,7 +230,7 @@
                 url : "<?php echo site_url('report/adjustment/loadData')?>",
                 data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, load:'header'},
                 success: function(data){
-                  $("#total_lot").val(data.tot_lot);;
+                  $("#total_lot").html(data.total_lot);;
                   let no    = 1;
                   let empty = true;
                   let icon  = '';

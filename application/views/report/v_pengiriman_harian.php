@@ -379,9 +379,15 @@
 
                     $.each(data.record, function(key, value){
                         empty = false;
+                        if(value.out == 'Yes'){
+                          link = '<a href="<?=base_url()?>warehouse/pengirimanbarang/edit/'+value.kode_enc+'" data-toggle="tooltip" title="Lihat Pengiriman Barang" target="_blank">'+value.kode+'</a>'
+                        }else{
+                          link = '<a href="<?=base_url()?>warehouse/penerimaanbarang/edit/'+value.kode_enc+'" data-toggle="tooltip" title="Lihat Penerimaan Barang" target="_blank">'+value.kode+'</a>'
+                        }
+
                         var tr = $("<tr>").append(
                                  $("<td>").text(no++),
-                                 $("<td>").html('<a href="<?=base_url()?>warehouse/pengirimanbarang/edit/'+value.kode_enc+'" data-toggle="tooltip" title="Lihat Pengiriman Barang" target="_blank">'+value.kode+'</a>'),
+                                 $("<td>").html(link),
                                  $("<td>").text(value.tgl_kirim),
                                  $("<td>").text(value.origin),
                                  $("<td>").text(value.reff_picking),

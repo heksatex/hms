@@ -6,6 +6,11 @@
   <!-- color picker -->
   <link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/colorpicker/bootstrap-colorpicker.min.css') ?>">
   <style type="text/css">
+
+    button[id="btn-edit"]{/*untuk hidden button edit di top bar */
+      display: none;
+    }
+
     .div1 {
       width: 100%;
       border: 1px solid;
@@ -94,8 +99,25 @@
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Notes </label></div>
-                  <div class="col-xs-8">
+                  <div class="col-xs-8 ta">
                     <textarea type="text" class="form-control input-sm" name="note" id="note"><?php echo  $color->notes?></textarea>
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Marketing </label></div>
+                  <div class="col-xs-8">
+                    <select type="text" class="form-control input-sm" name="sales_group" id="sales_group"  style="width:100% !important"> 
+                      <option value="">-- Pilih Marketing --</option>
+                          <?php 
+                            foreach ($mst_sales_group as $val) {
+                                if($val->kode_sales_group == $color->sales_group){
+                                  echo "<option value='".$val->kode_sales_group."' selected>".$val->nama_sales_group."</option>";
+                                }else{
+                                  echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
+                                }
+                            }
+                          ?>
+                    </select>
                   </div>                                    
                 </div>
                 
@@ -184,6 +206,16 @@
                         </table>
                       </div>
                       <!-- Tabel AUX -->
+                      <!-- notes DTI Varian-->
+                      <div class="col-md-8 col-xs-12">
+                          <br>
+                          <div class="col-xs-4"><label>Notes Varian </label></div>
+                          <div class="col-md-6 col-xs-8 ta" id="ta">
+                            <textarea type="text" class="form-control input-sm" name="note_varian" id="note_varian"><?php echo  $notes?></textarea>
+                            <br>
+                          </div>  
+                      </div>     
+
                     </div>
                     <!-- /.tab-pane -->
               
@@ -222,12 +254,18 @@
         $('#content_colors')[0].style.backgroundColor = e.color.toHex();
     });
 
+    //untuk mengatur lebar textarea sesuai value yang ada
+    $('.ta').on( 'change keyup keydown paste cut', 'textarea', function (){
+      $(this).height(0).height(this.scrollHeight);
+    }).find( 'textarea' ).change();
+
+
     //validasi qty
-	function validAngka(a){
-	    if(!/^[0-9.]+$/.test(a.value)){
-	        a.value = a.value.substring(0,a.value.length-1000);
-	    }
-	}
+    function validAngka(a){
+        if(!/^[0-9.]+$/.test(a.value)){
+            a.value = a.value.substring(0,a.value.length-1000);
+        }
+    }
 
     <?php 
             $no = 1;
@@ -257,7 +295,7 @@
                     + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
                     + '<td  class="min-width-200">'
                         + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
-                        + '<input type="text" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
+                        + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
                     + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" value="'+qty+'"></td>'
                     + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
                     + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff">'+reff_note+'</textarea></td>'
@@ -401,7 +439,7 @@
                     + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
                     + '<td  class="min-width-200">'
                         + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
-                        + '<input type="text" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
+                        + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
                     + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" value="'+qty+'"></td>'
                     + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
                     + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff">'+reff_note+'</textarea></td>'
@@ -578,6 +616,8 @@
                 warna      : $('#warna').val(),
                 note       : $('#note').val(),
                 kode_warna : $('#kode_warna').val(),
+                sales_group: $('#sales_group').val(),
+                note_varian: $('#note_varian').val(),
                 arr_dye    : JSON.stringify(arr),
                 arr_aux    : JSON.stringify(arr2),
                 id_warna   : id_warna,

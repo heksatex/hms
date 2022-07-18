@@ -61,9 +61,12 @@ class Joblistqcfinishing extends MY_Controller
             $status_mg     = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'" target="_blank" data-toggle="tooltip" title="MG '.$mrp_dept.' : '.$kode_mrp.'" '.$color3.'>'.$nama_status.'</a>';
 
             $method          = $pb_dept.'|OUT';
-            $out_mg          = $this->get_kode_out_mg($field->origin,$method);
-            $kode_out_mg     = $out_mg['0'];
-            $status_out      = $out_mg['1'];
+            //$out_mg          = $this->get_kode_out_mg($field->origin,$method);
+            //$kode_out_mg     = $out_mg['0'];
+            //$status_out      = $out_mg['1'];
+
+            $kode_out_mg     = "";
+            $status_out      = "";
 
             // bandingin kode Out asli dan dari out_mg
             if($kode_out_mg != $field->pb_kode){
@@ -125,6 +128,7 @@ class Joblistqcfinishing extends MY_Controller
             }else{
                 $checkbox_qc = '';
             }
+            
 
 
             $no++;

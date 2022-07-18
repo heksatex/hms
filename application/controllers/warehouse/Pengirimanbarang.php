@@ -1642,11 +1642,20 @@ class Pengirimanbarang extends MY_Controller
 
                     //unlock table
                     $this->_module->unlock_tabel();
+                    
+                    $jenis_log   = "done";
+                    $note_log    = "Kirim Data Barang ";
+                    $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+                    if($backorder == true){
+                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success', 'backorder' => 'yes', 'message2'=> 'Akan terbentuk Backorder dengan No '.$kode_out);
+                    }else{
+                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success');
 
+                    }     
+                    
                     if($deptid ==  'GRG'){
 
                       // insert to  tabel print greige out
-              
                       $arr_insert = [];
                       $smi        = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode,$deptid);
                       $num        = 1;
@@ -1821,16 +1830,6 @@ class Pengirimanbarang extends MY_Controller
                       }
               
                     }
-                    
-                    $jenis_log   = "done";
-                    $note_log    = "Kirim Data Barang ";
-                    $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
-                    if($backorder == true){
-                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success', 'backorder' => 'yes', 'message2'=> 'Akan terbentuk Backorder dengan No '.$kode_out);
-                    }else{
-                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success');
-
-                    }              
 
             }//else cek stock move items
 

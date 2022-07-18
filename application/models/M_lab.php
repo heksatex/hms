@@ -6,8 +6,8 @@
 class M_lab extends CI_Model
 {
 	//var $table 		  = 'warna';
-	var $column_order = array(null, 'nama_warna', 'tanggal', 'status', 'notes');
-	var $column_search= array('nama_warna', 'tanggal', 'status', 'notes');
+	var $column_order = array(null, 'nama_warna', 'tanggal', 'status','nama_sales_group','tot_varian', 'notes');
+	var $column_search= array('nama_warna', 'tanggal', 'status', 'notes','nama_sales_group');
 	var $order  	  = array('tanggal' => 'desc');
 
 	var $column_order2 = array(null, 'mrp.kode', 'mrp.tanggal', 'mc.nama_mesin', 'ms.nama_status', 'mrp.origin');
@@ -16,10 +16,29 @@ class M_lab extends CI_Model
 
 	private function _get_datatables_query()
 	{
+
+		if($this->input->post('warna'))
+        {
+            $this->db->like('w.nama_warna', $this->input->post('warna'));
+        }
+        if($this->input->post('status'))
+        {
+            $this->db->like('w.status', $this->input->post('status'));
+        }
+        if($this->input->post('notes'))
+        {
+            $this->db->like('w.notes', $this->input->post('notes'));
+        }
+        if($this->input->post('marketing'))
+        {
+            $this->db->like('msg.kode_sales_group', $this->input->post('marketing'));
+        }
 		
 		//$this->db->from($this->table);
-		$this->db->select("w.id,w.nama_warna,w.tanggal,w.status,w.notes, mmss.nama_status");
+		$this->db->select("w.id,w.nama_warna,w.tanggal,w.status,w.notes, mmss.nama_status, msg.nama_sales_group, 
+						(SELECT count(id) as tot_var FROM warna_varian WHERE id_warna = w.id) as tot_varian");
 		$this->db->from("warna w");
+		$this->db->join("mst_sales_group msg", "msg.kode_sales_group=w.sales_group", "left");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=w.status", "inner");
 
 		$i = 0;
@@ -77,8 +96,9 @@ class M_lab extends CI_Model
 	public function count_all($mmss)
 	{
 		//$this->db->from($this->table);
-		$this->db->select("w.nama_warna,w.tanggal,w.status,w.notes, mmss.nama_status");
+		$this->db->select("w.nama_warna,w.tanggal,w.status,w.notes, mmss.nama_status,(SELECT count(id) as tot_var FROM warna_varian WHERE id_warna = w.id) as tot_varian");
 		$this->db->from("warna w");
+		$this->db->join("mst_sales_group msg", "msg.kode_sales_group=w.sales_group", "left");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=w.status", "inner");
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		return $this->db->count_all_results();
@@ -165,9 +185,9 @@ class M_lab extends CI_Model
 		return $this->db->query("SELECT nama_warna FROM warna where nama_warna = '$warna'");
 	}
 
-	public function save_color($warna,$tanggal,$notes,$status,$kode_warna)
+	public function save_color($warna,$tanggal,$notes,$status,$kode_warna,$sales_group)
 	{
-		return $this->db->query("INSERT INTO warna (nama_warna,tanggal,notes,status,kode_warna) VALUES ('$warna','$tanggal','$notes','$status','$kode_warna')");
+		return $this->db->query("INSERT INTO warna (nama_warna,tanggal,notes,status,kode_warna,sales_group) VALUES ('$warna','$tanggal','$notes','$status','$kode_warna','$sales_group')");
 	}
 
 	public function get_data_color_by_code($id_warna)
@@ -182,12 +202,12 @@ class M_lab extends CI_Model
 
 	public function get_data_dye_aux_varians_by_code($id_warna,$tipe_obat,$varians)
 	{
-		return $this->db->query("SELECT * FROM warna_items where id_warna = '$id_warna' AND type_obat = '$tipe_obat' AND id_warna_varian = '$varians' ")->result();
+		return $this->db->query("SELECT * FROM warna_items where id_warna = '$id_warna' AND type_obat = '$tipe_obat' AND id_warna_varian = '$varians' Order by row_order  ")->result();
 	}
 
-	public function update_color($id_warna,$notes,$kode_warna)
+	public function update_color($id_warna,$notes,$kode_warna,$sales_group)
 	{
-		return $this->db->query("UPDATE warna SET notes = '$notes', kode_warna = '$kode_warna' WHERE id = '$id_warna' ");
+		return $this->db->query("UPDATE warna SET notes = '$notes', kode_warna = '$kode_warna', sales_group = '$sales_group' WHERE id = '$id_warna' ");
 	}
 
 	public function save_dye_aux($id_warna,$kode_produk,$nama_produk,$qty,$uom,$reff_note,$tipe_obat,$id_warna_varian)
@@ -215,7 +235,7 @@ class M_lab extends CI_Model
 		$id_category = $this->cek_id_category_by_nama($tipe);
 		return $this->db->query("SELECT kode_produk, nama_produk, uom 
 								FROM  mst_produk 
-								WHERE (nama_produk LIKE '%$name%' OR kode_produk LIKE '%$name%') AND id_category IN ('".$id_category."') LIMIT 100")->result_array();
+								WHERE (nama_produk LIKE '%$name%' OR kode_produk LIKE '%$name%') AND id_category IN ('".$id_category."') AND status_produk = 't' LIMIT 100")->result_array();
 	}
 
 	public function get_data_dye_by_kode($kode_produk,$tipe)
@@ -231,7 +251,7 @@ class M_lab extends CI_Model
 		$id_category = $this->cek_id_category_by_nama($tipe);
 		return $this->db->query("SELECT kode_produk, nama_produk, uom 
 								FROM  mst_produk 
-								WHERE (nama_produk LIKE '%$name%' OR kode_produk LIKE '%$name%') AND id_category IN ('".$id_category."') LIMIT 10")->result_array();
+								WHERE (nama_produk LIKE '%$name%' OR kode_produk LIKE '%$name%') AND id_category IN ('".$id_category."') AND status_produk = 't'  LIMIT 100")->result_array();
 	}
 
 	public function get_data_aux_by_kode($kode_produk,$tipe)
@@ -327,7 +347,7 @@ class M_lab extends CI_Model
 		return $this->db->query("SELECT id_warna, id_warna_varian, type_obat, kode_produk, nama_produk, qty, uom, reff_note, row_order
 								FROM warna_items 
 								WHERE id_warna = '$id_warna' AND type_obat = '$type_obat' 
-								AND id_warna_varian = (SELECT id FROM warna_varian where id_warna = '$id_warna' ORDER BY  id  DESC LIMIT 1)")->result();
+								AND id_warna_varian = (SELECT id FROM warna_varian where id_warna = '$id_warna' ORDER BY  id  DESC LIMIT 1) ORDER BY row_order ")->result();
 	}
 
 	public function get_last_varian_by_id($id_warna)
@@ -336,9 +356,9 @@ class M_lab extends CI_Model
 		return $query['nama_varian'];
 	}	
 
-	public function save_new_varian_by_id_warna($new_varian,$id_warna)
+	public function save_new_varian_by_id_warna($new_varian,$id_warna,$notes_varian)
 	{
-		$this->db->query("INSERT INTO warna_varian (id_warna,nama_varian) value ('$id_warna','$new_varian') ");
+		$this->db->query("INSERT INTO warna_varian (id_warna,nama_varian,notes_varian) value ('$id_warna','$new_varian','$notes_varian') ");
 	}
 
 	public function get_id_new_varian_by_kode($id_warna,$varian)
@@ -350,5 +370,27 @@ class M_lab extends CI_Model
 	public function simpan_warna_items_batch($sql)
 	{
 		return $this->db->query("INSERT INTO warna_items (id_warna,id_warna_varian,type_obat,kode_produk,nama_produk,qty,uom,reff_note,row_order) values $sql");
+	}
+
+	public function get_note_varian_by_id($id_varian)
+	{
+		$query = $this->db->query("SELECT notes_varian FROM warna_varian where id= '$id_varian'")->row();
+		return $query->notes_varian;
+	}
+
+	public function get_note_varian_last_by_id($id_warna)
+	{
+		$query = $this->db->query("SELECT notes_varian FROM warna_varian where id_warna= '$id_warna' ORDER BY id DESC LIMIT 1")->row();
+		return $query->notes_varian;
+	}
+
+	public function update_note_varian_by_varian($id_warna,$id_varian,$notes_varian)
+	{
+		$this->db->query("UPDATE warna_varian SET notes_varian  = '$notes_varian' WHERE id = '$id_varian' AND id_warna = $id_warna");
+	}
+
+	public function delete_warna_item_by_kode($id_warna,$id_varian)
+	{
+		$this->db->query("DELETE FROM warna_items WHERE id_warna = '$id_warna' AND id_warna_varian = '$id_varian' ");
 	}
 }

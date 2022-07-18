@@ -7,6 +7,10 @@
   <link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/colorpicker/bootstrap-colorpicker.min.css') ?>">
   <style type="text/css">
 
+    button[id="btn-simpan"],button[id="btn-cancel"]{/*untuk hidden button simpan/cancel di top bar */
+      display: none;
+    }
+
     table.table td .add {
         display: none;
     }
@@ -144,7 +148,7 @@
           <h3 class="box-title"><b><?php echo $color->nama_warna;?></b></h3>
         </div>
         <div class="box-body">
-            <form class="form-horizontal">
+            <form class="form-horizontal" id="form_edit">
             <div class="form-group">                  
               <div class="col-md-12" >
                 <div id="alert"></div>
@@ -169,8 +173,25 @@
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Notes </label></div>
-                  <div class="col-xs-8" id="ta">
-                    <textarea type="text" class="form-control input-sm" name="note" id="note"  ><?php echo $color->notes?></textarea>
+                  <div class="col-xs-8 ta" id="ta">
+                    <textarea type="text" class="form-control input-sm" name="note" id="note"  readonly="readonly"  ><?php echo $color->notes?></textarea>
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Marketing </label></div>
+                  <div class="col-xs-8">
+                    <select type="text" class="form-control input-sm" name="sales_group" id="sales_group"  style="width:100% !important" disabled> 
+                      <option value="">-- Pilih Marketing --</option>
+                          <?php 
+                            foreach ($mst_sales_group as $val) {
+                                if($val->kode_sales_group == $color->sales_group){
+                                  echo "<option value='".$val->kode_sales_group."' selected>".$val->nama_sales_group."</option>";
+                                }else{
+                                  echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
+                                }
+                            }
+                          ?>
+                    </select>
                   </div>                                    
                 </div>
               </div>
@@ -179,9 +200,9 @@
                   <div class="col-xs-4"><label>Kode Warna </label></div>
                   <div class="col-xs-8 col-md-8">
                     <div class="input-group my-colorpicker" id="my-colorpicker">
-                      <input type="text" class="form-control input-sm" id="kode_warna" name="kode_warna"  value="<?php echo $color->kode_warna?>">
-                      <span class="input-group-addon" id='groupColor'>
-                           <i id="wstyle" ></i>
+                      <input type="text" class="form-control input-sm" id="kode_warna" name="kode_warna"  value="<?php echo $color->kode_warna?>" readonly="readonly" >
+                      <span class="input-group-addon" id='groupColor' >
+                          <i id="wstyle"></i>
                       </span>
                     </div>
                   </div>                                    
@@ -206,6 +227,7 @@
                 </div>
               </div>
             </div>
+            </form>
 
             <div class="row">
               <div class="col-md-12">
@@ -252,7 +274,6 @@
                               <tfoot>
                                 <tr>
                                   <td colspan="6">
-                                    <a href="javascript:void(0)" class="add-new" type_obat="DYE"><i class="fa fa-plus"></i> Tambah Data</a>
                                   </td>
                                 </tr>
                               </tfoot>
@@ -282,7 +303,6 @@
                               <tfoot>
                                 <tr>
                                   <td colspan="6">
-                                    <a href="javascript:void(0)" class="add-new" type_obat="AUX"><i class="fa fa-plus"></i> Tambah Data</a>
                                   </td>
                                 </tr>
                               </tfoot>
@@ -292,6 +312,16 @@
                             </div>
                           </div>
                           <!-- Tabel AUX -->
+                          <!-- notes DTI Varian-->
+                          <div class="col-md-8 col-xs-12">
+                            <br>
+                            <div class="col-xs-4"><label>Notes Varian </label></div>
+                            <div class="col-md-6 col-xs-8 ta" id="ta">
+                              <textarea type="text" class="form-control input-sm" name="note_varian" id="note_varian" readonly="readonly" ></textarea>
+                                <br>
+                              </div>  
+                          </div>                                  
+                            
                         </div>
 
                   </div>
@@ -302,7 +332,6 @@
               <!-- /.col -->
             </div>
            
-          </form>
         </div>
         <!-- /.box-body -->
       </div>
@@ -338,7 +367,7 @@
   });
 
   //untuk mengatur lebar textarea sesuai value yang ada
-  $('#ta').on( 'change keyup keydown paste cut', 'textarea', function (){
+  $('.ta').on( 'change keyup keydown paste cut', 'textarea', function (){
     $(this).height(0).height(this.scrollHeight);
   }).find( 'textarea' ).change();
 
@@ -360,6 +389,128 @@
   function htmlentities_script(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
+
+  var unsaved = false;
+  var unsaved2 = false;
+
+  //untuk editable textfield 
+  $(document).on('click','#btn-edit', function(e){
+    
+    $("#btn-simpan").show();//tampilkan btn-simpan
+    $("#btn-edit").hide();//sembuyikan btn-edit
+    $("#btn-generate").hide();//sembuyikan btn-generate
+    $("#btn-duplicate").hide();//sembuyikan btn-duplicate
+    $("#btn-print").hide();//sembuyikan btn-print
+
+    $("#btn-cancel").attr('id','btn-cancel-edit');// ubah id btn-cancel jadi btn-cancel-edit
+    $("#note").attr("readonly", false);
+    $("#note_varian").attr("readonly", false);
+    $('#sales_group').attr('disabled', false).attr('id', 'sales_group');
+    $("#kode_warna").attr("readonly", false);
+
+    var id_varian = $('#tab-list li.active a[data-toggle="tab"] ').attr('varian');
+    var id_warna  = "<?php echo $color->id;?>";
+
+    $.ajax({
+          url : '<?php echo site_url('lab/dti/get_items_dti_for_edit') ?>',
+          type: "POST",
+          dataType : "JSON",
+          data: {id_warna:id_warna, id_varian:id_varian},
+          beforeSend: function(e) {
+              $('#table_dyest tbody').remove();
+              $('#table_aux tbody').remove();
+          },
+          success: function(data){
+              unsaved  = true;
+              unsaved2 =  true;
+              var row = '';
+              $('#table_dyest').append("<tbody id='tbody_dye'></tbody>");
+              $.each(data.record1, function(key, value) {
+                  tambah_baris(true,'table_dyest',value.kode_produk,value.nama_produk ,value.qty, value.uom, value.reff_note);
+              });
+              
+              $('#table_aux').append("<tbody id='tbody_aux'></tbody>");
+              $.each(data.record2, function(key, value) {
+                  tambah_baris(true,'table_aux',value.kode_produk,value.nama_produk ,value.qty, value.uom, value.reff_note);
+              });
+
+              $('#tab-list li:last').remove();
+
+              // replace tfoot
+              $('#table_dyest tfoot tr').remove();
+              event = "tambah_baris(false,'table_dyest','','','','','')";
+              var tr ='<tr><td colspan="6"> <a href="javascript:void(0)" onclick="'+event+'"><i class="fa fa-plus"></i> Tambah Data</a></td></tr>';
+              $('#table_dyest tfoot').append(tr);
+
+              $('#table_aux tfoot tr').remove();
+              event = "tambah_baris(false,'table_aux','','','','','')";
+              var tr ='<tr><td colspan="6"> <a href="javascript:void(0)" onclick="'+event+'"><i class="fa fa-plus"></i> Tambah Data</a></td></tr>';
+              $('#table_aux tfoot').append(tr);
+              
+          },
+          error: function (xhr, ajaxOptions, thrownError){
+              alert('Error data');
+              alert(xhr.responseText);
+          }
+
+      });
+
+  });
+
+  // ketika simpan/cancel edit
+  function reloadForm(id_varian){
+      $("#btn-simpan").hide();//sembuyikan btn-simpan
+      $("#btn-edit").show();//tampilkan btn-edit
+      $("#btn-generate").show();//tampilkan btn-generate
+      $("#btn-duplicate").show();//tampilkan btn-duplicate
+      $("#btn-print").show();//tampilkan btn-print
+
+      $("#btn-cancel-edit").attr('id','btn-cancel');// ubah id btn-cancel-edit jadi btn-cancel
+      $("#note").attr("readonly", true);
+      $("#note_varian").attr("readonly", true);
+      $('#sales_group').attr('disabled', true)
+      $("#kode_warna").attr("readonly", true);
+
+      $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
+      reloadItems(id_varian);
+      unsaved  = false;
+      unsaved2 = false;
+      $("#form_edit").load(location.href + " #form_edit>*");
+      $(".my-colorpicker").colorpicker();
+  }
+
+
+  $(document).on('click','#btn-cancel-edit', function(e){
+
+    var id_varian = $('#tab-list li.active a[data-toggle="tab"] ').attr('varian');
+    //alert(id_varian)
+    //alert(unsaved2);
+    if(unsaved){
+        var dialog = bootbox.dialog({
+          title: "<i class='fa fa-warning'></i> Warning !",
+          message: "<p>Tinggalkan perubahan yang belum anda simpan </p>",
+          size: 'medium',
+          buttons: {
+            ok: {
+              label: "Yes",
+              className: 'btn-primary btn-sm',
+              callback: function(){
+                reloadForm(id_varian)
+              }
+            },
+            cancel: {
+                label: "No",
+                className: 'btn-default btn-sm',
+                callback: function(){
+                }
+            },
+          }
+        });
+      }else{
+        reloadItems(id_varian);
+      }
+
+  });
 
   /*
   $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
@@ -399,8 +550,8 @@
               $("#example2_processing").css('display','none'); 
 
               $('#table_aux tfoot tr').remove();
-              var tr ='<tr><td colspan="6"> <a href="javascript:void(0)" class="add-new" type_obat="AUX"><i class="fa fa-plus"></i> Tambah Data</a></td></tr>';
-              $('#table_aux tfoot').append(tr);
+              //var tr ='<tr><td colspan="6"> <a href="javascript:void(0)" class="add-new" type_obat="AUX"><i class="fa fa-plus"></i> Tambah Data</a></td></tr>';
+              //$('#table_aux tfoot').append(tr);
               
           },
           error: function (xhr, ajaxOptions, thrownError){
@@ -426,8 +577,27 @@
               $("#example1_processing").css('display','none');
 
               $('#table_dyest tfoot tr').remove();
-              var tr ='<tr><td colspan="6"> <a href="javascript:void(0)" class="add-new" type_obat="DYE"><i class="fa fa-plus"></i> Tambah Data</a></td></tr>';
-              $('#table_dyest tfoot').append(tr); 
+              //var tr ='<tr><td colspan="6"> <a href="javascript:void(0)" class="add-new" type_obat="DYE"><i class="fa fa-plus"></i> Tambah Data</a></td></tr>';
+              //$('#table_dyest tfoot').append(tr); 
+          },
+          error: function (xhr, ajaxOptions, thrownError){
+              alert('Error data');
+              alert(xhr.responseText);
+          }
+        });
+
+
+        $.ajax({
+          url : '<?php echo site_url('lab/dti/get_note_varian') ?>',
+          type: "POST",
+          dataType: "json",
+          data: {id_warna   : id_warna, 
+                id_varian   : id_varian,  },
+          beforeSend: function(e) {
+              $('#note_varian').val();
+          },
+          success: function(data){
+              setTimeout(function() {$('#note_varian').val(data.isi);  });
           },
           error: function (xhr, ajaxOptions, thrownError){
               alert('Error data');
@@ -437,7 +607,7 @@
 
   }
 
-  var unsaved = false;
+  
   // show tab
   $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       var id_varian = $(this).attr('varian');
@@ -447,10 +617,6 @@
       //activeTabPane   = $(activeTab.attr('href'))
       //previousTabPane = $(previousTab.attr('href'));
 
-      //Save clicked element to variable
-      //var clickedTab = previousTab.attr("href");
-      //alert(clickedTab)
-
       //Remove class active
       activeTab.parent().removeClass('active');
 
@@ -458,9 +624,16 @@
       //var a = previousTab.parent().hasClass('active');
               
       if(unsaved){
+
+        if(unsaved2){
+          var message2 =  "<p>Tinggalkan perubahan yang belum anda simpan </p>";
+        }else{
+          var message2 =  "<p>Simpan terlebih dahulu Varian yang telah anda tambahkan atau tinggalkan tanpa menyimpan Varian yang telah anda tambahkan </p>";
+        }
+
         var dialog = bootbox.dialog({
           title: "<i class='fa fa-warning'></i> Warning !",
-          message: "<p>Simpan terlebih dahulu Varian yang telah anda tambahkan atau tinggalkan tanpa menyimpan Varian yang telah anda tambahkan </p>",
+          message: message2,
           size: 'medium',
           buttons: {
             ok: {
@@ -472,10 +645,15 @@
                 activeTab.parent().addClass('active');
                 // hapus tab list tambah varian
                 tabAddVar = previousTab.attr("href");
-                $('#tab-list li a[href="'+tabAddVar+'"]').remove();
-                reloadItems(id_varian);
-                $('#tab-list li:last').remove();
+                if(unsaved2){
+                  reloadForm(id_varian);
+                }else{
+                  $('#tab-list li a[href="'+tabAddVar+'"]').remove();
+                  reloadItems(id_varian);
+                }
+                $('#tab-list li:last button[type="button"]').remove();
                 $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
+                $('#btn-edit').show();
                 unsaved = false;
               }
             },
@@ -623,6 +801,9 @@
               event = "tambah_baris(false,'table_aux','','','','','')";
               var tr ='<tr><td colspan="6"> <a href="javascript:void(0)" onclick="'+event+'"><i class="fa fa-plus"></i> Tambah Data</a></td></tr>';
               $('#table_aux tfoot').append(tr);
+
+              // hidden btn 
+              $('#btn-edit').hide();
               
           },
           error: function (xhr, ajaxOptions, thrownError){
@@ -631,6 +812,24 @@
           }
 
       });
+
+      $.ajax({
+          url : '<?php echo site_url('lab/dti/get_note_varian') ?>',
+          type: "POST",
+          dataType: "json",
+          data: {id_warna   : id_warna, 
+                id_varian   : '',  },
+          beforeSend: function(e) {
+              $('#note_varian').val();
+          },
+          success: function(data){
+              setTimeout(function() {$('#note_varian').val(data.isi);  });
+          },
+          error: function (xhr, ajaxOptions, thrownError){
+              alert('Error data');
+              alert(xhr.responseText);
+          }
+        });
 
   });
 
@@ -649,6 +848,7 @@
         $('#tab-list li:last').remove();
         // show btn plus
         $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
+        $('#btn-edit').show();
   });
 
    // hapus row
@@ -760,7 +960,7 @@
           if(index== -1){
             row = 0;
           }else{
-            row  = parseInt($("#table_dyest tbody[id='tbody_dye'] tr:last-child td .row").val());
+            row  = parseInt($("#table_aux tbody[id='tbody_aux'] tr:last-child td .row").val());
           }
           delRow  = "delRow_aux(this)";
         }
@@ -826,8 +1026,7 @@
                     };
                 },
                 error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
-                    alert(xhr.responseText);
+                    console.log(xhr.responseText);
                 }
             }
         });
@@ -848,8 +1047,7 @@
                     sel_uom.empty().append($newOptionuom).trigger('change');
                 },
                 error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
-                    alert(xhr.responseText);
+                    console.log(xhr.responseText);
                 }
             });
         });
@@ -882,8 +1080,8 @@
                         };
                     },
                     error: function (xhr, ajaxOptions, thrownError){
-                        alert('Error data');
-                        alert(xhr.responseText);
+                        //alert('Error data');
+                        console.log(xhr.responseText);
                     }
             }
         });
@@ -967,7 +1165,7 @@
                     $(id_table+' tbody tr .prodhidd').val(data.nama_produk);
                   },
                   error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
+                    //alert('Error data');
                     alert(xhr.responseText);
                   }
             });
@@ -1082,7 +1280,8 @@
       }   
     });
 
-    // Edit row on edit button click
+    /*
+    // Edit row on edit button click di OFF kan
     $(document).on("click", ".edit", function(){  
 
         var type = $(this).attr('type_obat');
@@ -1195,7 +1394,7 @@
         $(".add-new").hide();
      
     });
-
+    */
 
   //---- FINISH DYEING STUFF / AUX --- //
 
@@ -1203,8 +1402,38 @@
   //klik button simpan
   $("#btn-simpan").unbind( "click" );
   $('#btn-simpan').click(function(){
-    $('#btn-simpan').button('loading');
+
     var id   = '<?php echo $color->id; ?>';
+    var id_varian = $('#tab-list li.active a[data-toggle="tab"] ').attr('varian');
+    var arr   = new Array();
+    var arr2  = new Array();
+
+    $("#table_dyest tbody[id='tbody_dye'] .kode_produk").each(function(index, element) {
+					if ($(element).val()!=="") {
+						arr.push({
+							//0 : no++,
+							kode_produk :$(element).val(),
+							nama_produk :$(element).parents("tr").find("#nama_produk").val(),
+							qty 		    :$(element).parents("tr").find("#qty").val(),
+							uom 		    :$(element).parents("tr").find("#uom").val(),
+							reff_note 	:$(element).parents("tr").find("#reff").val(),
+						});
+					}
+		}); 
+
+    $("#table_aux tbody[id='tbody_aux'] .kode_produk").each(function(index, element) {
+					if ($(element).val()!=="") {
+						arr2.push({
+							//0 : no++,
+							kode_produk :$(element).val(),
+							nama_produk :$(element).parents("tr").find("#nama_produk").val(),
+							qty 		    :$(element).parents("tr").find("#qty").val(),
+							uom 		    :$(element).parents("tr").find("#uom").val(),
+							reff_note 	:$(element).parents("tr").find("#reff").val(),
+						});
+					}
+		})
+    $('#btn-simpan').button('loading');
     please_wait(function(){});
       $.ajax({
          type: "POST",
@@ -1217,10 +1446,15 @@
          },
          data: {tanggal    : $('#tgl').val(),
                 id         : id,
+                id_varian  : id_varian,
                 note       : $('#note').val(),
                 warna      : $('#warna').val(),
                 kode_warna : $('#kode_warna').val(),
+                sales_group : $('#sales_group').val(),
+                note_varian : $('#note_varian').val(),
                 status     : 'edit',
+                arr_dye    : JSON.stringify(arr),
+                arr_aux    : JSON.stringify(arr2),
 
           },success: function(data){
             if(data.sesi == "habis"){
@@ -1241,7 +1475,8 @@
               $("#foot").load(location.href + " #foot");
             }
             $("#status_head").load(location.href + " #status_head");
-             $('#btn-simpan').button('reset');
+            $('#btn-simpan').button('reset');
+            reloadForm(id_varian)
           },error: function (xhr, ajaxOptions, thrownError) { 
             alert(xhr.responseText);
             setTimeout($.unblockUI, 1000); 

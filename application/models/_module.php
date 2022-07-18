@@ -126,7 +126,7 @@ class _module extends CI_Model
 	public function get_kode_mo()
 	{
 		$kode="MO".date("y") .  date("m");
-        $result=$this->db->query("SELECT kode FROM mrp_production WHERE month(tanggal)='" . date("m") . "' AND year(tanggal)='" . date("Y") . "' ORDER BY RIGHT(kode,5) DESC LIMIT 1");
+        $result=$this->db->query("SELECT kode FROM mrp_production WHERE month(tanggal)='" . date("m") . "' AND year(tanggal)='" . date("Y") . "' AND kode LIKE '%MO%' ORDER BY RIGHT(kode,5) DESC LIMIT 1");
         if ($result->num_rows()>0){
             $row=$result->row();
             $dgt=substr($row->kode,-5)+1;
@@ -260,7 +260,7 @@ class _module extends CI_Model
 
 	public function cek_nama_product($produk)
 	{
-		return $this->db->query("SELECT kode_produk, nama_produk,uom FROM mst_produk where nama_produk = '$produk'");
+		return $this->db->query("SELECT kode_produk, nama_produk,uom, status_produk FROM mst_produk where nama_produk = '$produk'");
 	}
 
 	public function cek_produk_by_kode_produk($kode_produk)
@@ -291,7 +291,7 @@ class _module extends CI_Model
 
 	public function simpan_mrp_production_rm_target_batch($sql)
 	{
-		return $this->db->query("INSERT INTO mrp_production_rm_target (kode,move_id,kode_produk,nama_produk,qty,uom,row_order,origin_prod,status) values $sql");
+		return $this->db->query("INSERT INTO mrp_production_rm_target (kode,move_id,kode_produk,nama_produk,qty,uom,row_order,origin_prod,status,reff_note) values $sql");
 	}
 
 	public function simpan_mrp_production_fg_target_batch($sql)
@@ -301,7 +301,7 @@ class _module extends CI_Model
 
 	public function get_bom_items_by_kode($kode_bom,$qty_bom,$qty_pd)
 	{
-		return $this->db->query("SELECT bi.kode_produk,bi.nama_produk,(bi.qty/'$qty_bom')*$qty_pd as qty_bom_items, bi.uom 
+		return $this->db->query("SELECT bi.kode_produk,bi.nama_produk,(bi.qty/'$qty_bom')*$qty_pd as qty_bom_items, bi.uom, bi.note
 								FROM bom_items bi 
 								INNER JOIN mst_produk mp ON bi.kode_produk = mp.kode_produk
 								WHERE mp.type = 'stockable' AND bi.kode_bom = '$kode_bom' ORDER BY row_order");
@@ -309,7 +309,7 @@ class _module extends CI_Model
 
 	public function get_bom_items_all_by_kode($kode_bom,$qty_bom,$qty_pd)
 	{
-		return $this->db->query("SELECT kode_produk,nama_produk,(qty/'$qty_bom')*$qty_pd as qty_bom_items, uom 
+		return $this->db->query("SELECT kode_produk,nama_produk,(qty/'$qty_bom')*$qty_pd as qty_bom_items, uom, note
 								FROM bom_items
 								WHERE kode_bom = '$kode_bom' ORDER BY row_order");
 	}

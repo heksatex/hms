@@ -104,7 +104,7 @@ class M_receivinginmanual extends CI_Model
 								    INNER JOIN product_uom ON stock_move.product_uom = product_uom.id
 									INNER JOIN product_template ON product_template.id = product_product.product_tmpl_id	
 									INNER JOIN product_category ON product_template.categ_id = product_category.id
-									LEFT JOIN stock_pack_operation ON stock_pack_operation.picking_id = stock_picking.id
+									LEFT JOIN stock_pack_operation ON stock_pack_operation.picking_id = stock_picking.id AND product_product.id = stock_pack_operation.product_id
 									LEFT JOIN stock_production_lot ON stock_production_lot.id = stock_pack_operation.lot_id
 								     WHERE
 								    stock_picking.name = '$no_receiving' ORDER BY product_product.name_template");

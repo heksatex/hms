@@ -1248,7 +1248,7 @@
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
                         $row += "<td colspan='4'>"+value.grouping+"</td>";
-                        $row += "<td align='right'>"+value.qty1+"</td>";
+                        $row += "<td align='right'>"+value.qty+"</td>";
                         $row += "<td align='right'>"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "<td colspan='2' ></td>";

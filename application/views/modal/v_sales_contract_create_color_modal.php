@@ -21,6 +21,7 @@
 				<div class="col-xs-4"><label>Warna</label></div>
 				<div class="col-xs-8">
                     <input type="text" class="form-control input-sm" name="warna" id="warna"/>
+					<input type="hidden"  class="form-control input-sm" name="sales_group" id="sales_group" value="<?php echo $sales_group?>">
 				</div>
 			</div>
 		</div>		

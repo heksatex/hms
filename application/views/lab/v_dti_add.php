@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,6 +5,11 @@
   <!-- color picker -->
   <link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/colorpicker/bootstrap-colorpicker.min.css') ?>">
   <style type="text/css">
+
+    button[id="btn-edit"]{/*untuk hidden button edit di top bar */
+      display: none;
+    }
+
     .div1 {
       width: 100%;
       border: 1px solid;
@@ -71,22 +75,34 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Tanggal dibuat </label></div>
                   <div class="col-xs-8 col-md-8">
-                      <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly" value="<?php echo date('Y-m-d h:i:s')?>" />
+                      <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly" value="<?php echo date('Y-m-d h:i:s')?>" >
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Nama Warna </label></div>
                   <div class="col-xs-8">
-                    <input type="text" class="form-control input-sm" name="warna" id="warna"/>
+                    <input type="text" class="form-control input-sm" name="warna" id="warna">
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Notes </label></div>
-                  <div class="col-xs-8">
+                  <div class="col-xs-8 ta">
                     <textarea type="text" class="form-control input-sm" name="note" id="note"></textarea>
                   </div>                                    
                 </div>
-                
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Marketing </label></div>
+                  <div class="col-xs-8">
+                    <select type="text" class="form-control input-sm" name="sales_group" id="sales_group"  style="width:100% !important"> 
+                      <option value="">-- Pilih Marketing --</option>
+                          <?php 
+                              foreach ($mst_sales_group as $val) {
+                                echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
+                             }
+                          ?>
+                    </select>
+                  </div>                                    
+                </div>
               </div>
 
               <div class="col-md-6">
@@ -141,6 +157,12 @@
   $('.my-colorpicker').colorpicker().on('changeColor', function (e) {
       $('#content_colors')[0].style.backgroundColor = e.color.toHex();
   });
+
+  //untuk mengatur lebar textarea sesuai value yang ada
+  $('.ta').on( 'change keyup keydown paste cut', 'textarea', function (){
+    $(this).height(0).height(this.scrollHeight);
+  }).find( 'textarea' ).change();
+
 
   function get_default(){
     $('#kode_warna').val('');

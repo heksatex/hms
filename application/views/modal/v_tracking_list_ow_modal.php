@@ -55,22 +55,40 @@
     </div>
 
     <div class="col-xs-12 col-md-6 add-title">
-        <label>List Color Order By OW</label>
+        <label>List Pemartaian By OW</label>
     </div>
     <br>
 
     <div class="panel-group" id="accordion">
     <?php 
+        $num = 1;
+        $last_done ='';
         foreach($list as $cod){
             if($cod->nama_status != 'Draft'){
+
+                if(!empty($cod->last_method)){
+                    //explode
+                    $ex_mth = explode("|",$cod->last_method);
+                    //cek nama departemen
+                    $dept= $this->_module->get_nama_dept_by_kode($ex_mth[0])->row_array();
+                    if($ex_mth[1]== 'IN'){
+                        $last_done = '( Penerimaan '.$dept['nama'].' )';
+                    }else if($ex_mth[1] == 'OUT'){
+                        $last_done = '( Pengiriman  '.$dept['nama'].' )';
+                    }else{
+                        $last_done = '( MG '.$dept['nama'].' )';
+                    }
+                }
+
                 $href     = 'collapse'.$cod->row_order;
                 $id_panel = 'panel'.$cod->row_order;
-                $panel_title   = "<a data-toggle='collapse' title='Lihat Route OW' data-parent='#accordion' href='#".$href."' >".$cod->nama_produk .' '.number_format($cod->qty,2).' '.$cod->uom .' - '.$cod->nama_status." ( ".$cod->route_co." )</a>";
+                $panel_title   = "<a data-toggle='collapse' title='Lihat Route OW' data-parent='#accordion' href='#".$href."' >".$num.". ".$cod->nama_produk .' '.number_format($cod->qty,2).' '.$cod->uom .' - '.$cod->nama_status." ( ".$cod->route_co." ) ".$last_done."</a>";
             }else{
                 $href           = '';
                 $id_panel       = '';
-                $panel_title    = "<p data-toggle='tooltip' title='Route OW Belum Terbentuk' style='margin:0px'>".$cod->nama_produk .' '.number_format($cod->qty,2).' '.$cod->uom .' - '.$cod->nama_status." ( ".$cod->route_co." )</p>";
+                $panel_title    = "<p data-toggle='tooltip' title='Route OW Belum Terbentuk' style='margin:0px'>".$num.". ".$cod->nama_produk .' '.number_format($cod->qty,2).' '.$cod->uom .' - '.$cod->nama_status." ( ".$cod->route_co." )</p>";
             }
+            $num++;
     ?>
         <div class="panel panel-default" id="<?php echo $id_panel;?>" row="<?php echo $cod->row_order;?>">
             <div class="panel-heading">

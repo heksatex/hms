@@ -44,7 +44,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>Penerimaan Harian</b></h3>
+          <h3 class="box-title"><b>Pengiriman Greige</b></h3>
         </div>
         <div class="box-body">
            
@@ -181,13 +181,13 @@
   var d     = new Date();
   var month = d.getMonth();
   var day   = d.getDate();
-  var day_1 = d.getDate()-1;
+  var day_1 = d.getDate();
   var year  = d.getFullYear();
 
   // set date tgldari
   $('#tgldari').datetimepicker({
       
-      defaultDate : new Date(year, month, day_1, 07, 00, 00),
+      defaultDate : new Date(year, month, day_1, 00, 00, 00),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       //maxDate: new Date(),
@@ -195,7 +195,7 @@
 
   // set date tglsampai
   $('#tglsampai').datetimepicker({
-      defaultDate : new Date(year, month, day, 07, 00, 00),
+      defaultDate : new Date(year, month, day, 23, 59, 59),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       //maxDate: new Date(),

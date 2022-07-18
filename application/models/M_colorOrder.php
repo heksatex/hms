@@ -26,7 +26,7 @@ class M_colorOrder extends CI_Model
 		parent::__construct();
 		$this->load->database('default', TRUE);
 		$this->load->model('_module');
-		$this->db2 = $this->load->database('odoo',TRUE);
+		//$this->db2 = $this->load->database('odoo',TRUE);
 	}
 
 	private function _get_datatables_query()
@@ -330,21 +330,6 @@ class M_colorOrder extends CI_Model
 		$this->db->where_not_in("ow", '');
 		$this->_get_datatables3_query();
 		return $this->db->count_all_results();
-	}
-
-	public function list_detail_color($so)
-	{
-		
-		return $this->db2->query("SELECT scli.product_id prod_id, pp.name_template as product, pc.id colorid, 
-									pc.name as color, scl.qty, pu.name as uom, scl.piece_info as reff
-								FROM sale_order so
-								INNER JOIN sale_color_line scl ON so.id=scl.order_id
-								INNER JOIN product_color pc ON scl.color_id=pc.id
-								INNER JOIN product_uom pu ON scl.product_uom_id=pu.id
-								INNER JOIN sale_contract_line scli ON scli.id =  scl.contract_line_id
-								INNER JOIN product_product pp ON scli.product_id = pp.id
-								WHERE so.name='$so'")->result();
-
 	}
 
 	public function simpan_color_detail($kode_co,$ow,$kode_produk,$nama_produk,$id_warna,$qty,$uom,$reff,$status,$row_order,$route_co,$id_handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$reff_mkt)

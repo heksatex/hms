@@ -173,7 +173,7 @@ class M_mo extends CI_Model
 
 	public function get_data_by_code($kode)
 	{
-		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, hd.nama_handling, w.nama_warna, w.kode_warna, w.notes as notes_dti, mrp.program, mrp.gramasi, wv.id as id_warna_varian, wv.nama_varian
+		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, hd.nama_handling, w.nama_warna, w.kode_warna, wv.notes_varian as notes_varian, mrp.program, mrp.gramasi, wv.id as id_warna_varian, wv.nama_varian
 								  FROM mrp_production mrp 
 								  LEFT join  mst_handling hd ON mrp.id_handling = hd.id 
 								  LEFT JOIN warna w ON mrp.id_warna = w.id
@@ -578,11 +578,14 @@ class M_mo extends CI_Model
 		$dgt_nol= $rs['dgt_nol'];
 		$length = $rs['length'];
 		
-		$result = $this->db->query("SELECT lot FROM stock_quant  WHERE lot LIKE '$lot_prefix%'  ORDER BY RIGHT(lot,$length) DESC LIMIT 1 ");
+		//$result = $this->db->query("SELECT lot FROM stock_quant  WHERE lot LIKE '$lot_prefix%'  ORDER BY RIGHT(lot,$length) DESC LIMIT 1 ");
+		$result  = $this->db->query("SELECT lot, MID(lot,length('$lot_prefix')+1,length(lot)-length('$lot_prefix'))  as last
+									FROM stock_quant WHERE lot LIKE '$lot_prefix%' 
+									ORDER BY length(left(last ,$length)) DESC, last DESC limit 1");
 
 		if ($result->num_rows()>0){
             $row=$result->row();
-            $dgt=substr($row->lot,-$length)+1;
+            $dgt=$row->last+1;
         }else{
             $dgt="1";
         }

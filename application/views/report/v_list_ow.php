@@ -155,6 +155,47 @@
                                 <input type="text" class="form-control input-sm" name="warna" id="warna" >
                             </div>
                           </div>
+                          <div class="form-group">
+                            <div class="col-md-5">
+                              <label>Status OW </label>
+                            </div>
+                            <div class="col-md-7">
+                                  <select class="form-control input-sm" id="status_ow" name="status_ow" >
+                                    <?php $arr_stat = array('','t','f','ng');
+                                          foreach($arr_stat as $stats){
+                                            if($stats == 't'){
+                                              $status = 'Aktif';
+                                            }else if($stats == 'ng'){
+                                              $status = 'Not Good';
+                                            }else if($stats == 'f'){
+                                              $status = 'Tidak Aktif';
+                                            }else{
+                                              $status = 'All';
+                                            }
+                                            if($stats == 't'){
+                                              echo '<option value="'.$stats.'" selected>'.$status.'</option>';
+                                            }else{
+                                              echo '<option value="'.$stats.'">'.$status.'</option>';
+                                            }
+                                          }
+                                    ?>
+                                  </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group">
+                            <div class="col-md-5">
+                              <label>No.OW </label>
+                            </div>
+                            <div class="col-md-7">
+                                <select type="text" class="form-control inpt-sm" name="no_ow" id="no_ow"> 
+                                  <option value=''>All</option>
+                                  <option value='t' selected> Ada</option>
+                                  <option value='f'>Tidak Ada</option>
+                                </select>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -179,6 +220,10 @@
                       <th>Warna</th>
                       <th>Qty</th>
                       <th>Stock.GRG [Qty1]</th>
+                      <th>Gramasi</th>
+                      <th>Finishing</th>
+                      <th>Route</th>
+                      <th>L.Jadi</th>
                       <th>DTI</th>
                       <th>Piece Info</th>
                       <th>Reff Note</th>
@@ -245,7 +290,7 @@
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-5'><'col-sm-7'p>>",
             "aLengthMenu": [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, "All"]],
-            "iDisplayLength": 1000,
+            "iDisplayLength": 50,
             "paging": true,
             "lengthChange": true,
             "searching": true,
@@ -257,7 +302,7 @@
     });
     
  
-    function fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group){
+    function fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow){
         //datatables
         $('#example1').DataTable({ 
             "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
@@ -267,7 +312,7 @@
             "serverSide": true, 
             "order": [4, "asc"], 
             "aLengthMenu": [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, "All"]],
-            "iDisplayLength": 1000,
+            "iDisplayLength": 50,
 
             "paging": true,
             "lengthChange": true,
@@ -279,7 +324,7 @@
             "ajax": {
                 "url": "<?php echo site_url('report/listOW/get_data')?>",
                 "type": "POST",
-                 "data": function ( data ) {
+                "data": function ( data ) {
                     data.tgl_dari     = tgl_dari;
                     data.tgl_sampai   = tgl_sampai;
                     data.sc     = sc;
@@ -287,7 +332,9 @@
                     data.produk = produk;
                     data.warna  = warna;
                     data.sales_group  = sales_group;
-                }
+                    data.no_ow  = no_ow;
+                    data.status_ow  = status_ow;
+                },
             },
  
             "columnDefs": [
@@ -296,7 +343,7 @@
                   "orderable": false, 
                 },
                 { 
-                  "targets": [14], 
+                  "targets": [18], 
                   "orderable": false, 
                 },
                 { 
@@ -306,7 +353,7 @@
                 { 
                   "targets": [ 8 ], 
                   "className": 'text-right', 
-                  "width" : 50,
+                  "width" : 80,
                 },
                 { 
                   "targets": [ 9 ], 
@@ -329,8 +376,14 @@
         var produk      = $('#produk').val();
         var warna       = $('#warna').val();
         var sales_group = $('#sales_group').val();
+        var no_ow       = $('#no_ow').val();
+        var status_ow   = $('#status_ow').val();
 
-        fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group);
+        if(tgl_dari == '' || tgl_sampai == ''){
+          alert_modal_warning('Periode Tanggal Harus diisi !');
+        }else{
+          fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow);
+        }
           //table.ajax.reload( function(){
         $('#btn-filter').button('reset');
           //});  //just reload table

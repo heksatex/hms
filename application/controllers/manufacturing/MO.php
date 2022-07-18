@@ -360,8 +360,12 @@ class MO extends MY_Controller
                 }else{
                     $dept_prefix = $deptid;
                 }
-
-                $lot_prefix  = 'KP/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
+                if($list->type_production == 'Proofing'){
+                    $awal = 'PF';
+                }else{
+                    $awal = 'KP';
+                }
+                $lot_prefix  = $awal.'/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
             }
         }else{
             $lot_prefix  = $this->input->post('lot_prefix');       

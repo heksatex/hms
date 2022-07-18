@@ -225,7 +225,7 @@
               <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4 "> <div class="box-color" style="background-color: <?php echo $list->kode_warna;?>"></div></div>
                   <div class="col-xs-8 col-md-8" id="ta">
-                      <textarea class="form-control input-sm" name="notes_dti" id="notes_dti" readonly="readonly"><?php echo $list->notes_dti; ?></textarea>
+                      <textarea class="form-control input-sm" name="notes_varian" id="notes_varian" readonly="readonly"><?php echo $list->notes_varian; ?></textarea>
                   </div>                                    
               </div>
 
@@ -767,7 +767,8 @@
             ignoreReadonly: true
         });
   });
-
+  
+  /*
   $('#start').inputmask("datetime",{
       mask: "y-2-1 h:s:s", 
       //placeholder: "yyyy-mm-dd hh:mm:ss", 
@@ -776,7 +777,6 @@
       separator: "-", 
       alias: "yyyy/mm/dd"
   });
-/*
   $('#finishs').inputmask("datetime",{
       mask: "y-2-1 h:s:s", 
       //placeholder: "yyyy-mm-dd hh:mm:ss", 
