@@ -423,7 +423,7 @@ class Dti extends MY_Controller
           $row           = 1;
           foreach($array_aux as $aux){
             $sql_dti_items .= "('".$id_warna."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
-            $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$dye['uom'].' '.addslashes($aux['reff_note']). ', ';
+            $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
 
             $row++;
           }
@@ -628,7 +628,7 @@ class Dti extends MY_Controller
         $id_warna_varian   = $this->input->post('id_warna_varian');
         $nama_varian = $this->m_lab->get_nama_varian_by_id($id_warna_varian);
 
-        $this->m_lab->delete_dye_aux($id_warna,$row_order,$type_obat);
+        $this->m_lab->delete_dye_aux($id_warna,$row_order,$type_obat,$id_warna_varian);
         $callback    = array('status'=>'success', 'message' => 'Data Berhasil Dihapus !',  'icon' =>'fa fa-check', 'type' => 'success');
 
         $jenis_log   = "cancel";

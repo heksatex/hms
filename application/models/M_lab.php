@@ -225,9 +225,9 @@ class M_lab extends CI_Model
 		return $this->db->query("UPDATE warna_items SET kode_produk = '$kode_produk', nama_produk = '$nama_produk', qty = '$qty', uom = '$uom', reff_note = '$reff_note' WHERE id_warna = '$id_warna' AND kode_produk = '$kode_produk_before' AND type_obat = '$tipe_obat' AND row_order = '$row_order' AND id_warna_varian  ='$id_warna_varian' ");
 	}
 
-	public function delete_dye_aux($id_warna,$row_order,$type_obat)
+	public function delete_dye_aux($id_warna,$row_order,$type_obat,$id_warna_varian)
 	{
-		return $this->db->query("DELETE FROM warna_items WHERE id_warna = '$id_warna' AND type_obat = '$type_obat' AND row_order = '$row_order'");
+		return $this->db->query("DELETE FROM warna_items WHERE id_warna = '$id_warna' AND type_obat = '$type_obat' AND row_order = '$row_order' AND id_warna_Varian = '$id_warna_varian'");
 	}
 
 	public function get_list_dye_by_name($name,$tipe)

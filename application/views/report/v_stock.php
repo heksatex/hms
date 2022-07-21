@@ -198,6 +198,7 @@
                   <div class="col-md-3">
                     <select class="form-control input-sm" name="cmbSearch" id="cmbSearch">
                       <option value="umur">Umur</option>
+                      <option value="kode_produk">Kode Produk</option>
                       <option value="nama_produk">Nama Produk</option>
                       <option value="lot">Lot</option>
                       <option value="nama_grade">Grade</option>
@@ -615,8 +616,15 @@
           value += '</div>';
           $('#f_search').html(value);
     }else{
-      var value = '<div class="col-md-6"> ';
-          value += ' <input type="text" class="form-control input-sm" id="search" name="search" >';
+      var value = '<div class="col-md-3"> ';
+          value +=  '<select class="form-control input-sm" name="cmbOperator" id="cmbOperator">';
+          value +=  '<option value="LIKE">LIKE</option>'
+          value +=  '<option value="NOT LIKE">NOT LIKE</option>'
+          value +=  '<option value="=">=</option>'
+          value += "</select>";
+          value += '</div>';
+          value += '<div class="col-md-3">';
+          value += '<input type="text" class="form-control input-sm" id="search" name="search" >';
           value += '</div>';
           $('#f_search').html(value);
     }

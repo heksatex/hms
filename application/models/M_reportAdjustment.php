@@ -8,7 +8,7 @@ class M_reportAdjustment extends CI_Model
 	
 	public function get_list_group_nama_produk_by_kode($lokasi, $tgl_dari, $tgl_sampai)
 	{
-		return $this->db->query("SELECT b.kode_produk, mp.nama_produk, count(lot) as tot_lot, IFNULL(sum(qty_move),0) as tot_qty_move , IFNULL(sum(qty_adjustment2),0) tot_qty2, mp.uom,mp.uom_2
+		return $this->db->query("SELECT b.kode_produk, mp.nama_produk, count(lot) as tot_lot, IFNULL(sum(b.qty_move),0) as tot_qty_move , IFNULL(sum(b.qty_adjustment),0) tot_qty1_adj, IFNULL(sum(b.qty_adjustment2),0) tot_qty2_adj, mp.uom,mp.uom_2
 								FROM adjustment_items b 
 								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
 								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk
@@ -20,7 +20,7 @@ class M_reportAdjustment extends CI_Model
 	public function get_list_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai,$data_isi)
 	{
 		return $this->db->query("SELECT b.kode_adjustment, a.create_date, b.kode_produk, mp.nama_produk, 
-											 b.lot, b.qty_move, b.uom, b.qty_adjustment2, b.uom2, a.nama_user, a.note
+											 b.lot, b.qty_move, b.uom, b.qty_adjustment, b.qty_adjustment2, b.uom2, a.nama_user, a.note
 								FROM adjustment_items b 
 								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
 								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk

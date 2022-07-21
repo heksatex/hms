@@ -175,28 +175,27 @@
                         <tbody>
                           <?php
                             $no = 1;
-                            $color = '';
+                           
                             foreach ($details as $row) {
-                             //if($row->status == 'cancel') $color = 'red'; else $color = '';
                           ?>
-                            <tr style="color:<?php echo $color;?>">
+                            <tr >
                               
                               <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>" data-isi2="<?php echo $row->quant_id?>" ><?php echo $no++.".";?></td>
-                              <td class="text-wrap width-400" data-content="edit" data-id="kode_produk" data-isi="<?php echo htmlentities($row->kode_produk) ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk) ?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
+                              <td class="text-wrap width-400" data-content="edit" data-id="kode_produk" data-isi="<?php echo htmlentities($row->kode_produk) ?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk) ?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
 
-                              <td class="text-wrap width-300" data-content="edit" data-id="lot" data-isi="<?php echo htmlentities($row->lot) ?>" ><?php echo $row->lot?></a></td>
+                              <td class="text-wrap width-300" data-content="edit" data-name="Lot" data-id="lot" data-isi="<?php echo htmlentities($row->lot) ?>" ><?php echo $row->lot?></a></td>
 
-                              <td class="text-wrap width-100" ><?php echo $row->uom?></a></td>
+                              <td class="text-wrap width-100" data-content="edit" data-name="Uom" data-id="uom" data-isi="<?php echo $row->uom ?>" ><?php echo $row->uom?></a></td>
 
                               <td class="text-wrap width-200" ><?php echo $row->qty_data?></a></td>
 
-                              <td class="text-wrap width-200" data-content="edit" data-id="qtyadjustment" data-isi="<?php echo $row->qty_adjustment ?>" ><?php echo $row->qty_adjustment?></a></td>
+                              <td class="text-wrap width-200" data-content="edit" data-name="Qty Adjustment" data-id="qtyadjustment" data-isi="<?php echo $row->qty_adjustment ?>" ><?php echo $row->qty_adjustment?></a></td>
 
-                              <td class="text-wrap width-100" data-content="edit" data-id="uom2adjustment" data-isi="<?php echo $row->uom2 ?>" ><?php echo $row->uom2?></a></td>
+                              <td class="text-wrap width-100" data-content="edit" data-name="Uom2" data-id="uom2" data-isi="<?php echo $row->uom2 ?>" ><?php echo $row->uom2?></a></td>
 
                               <td class="text-wrap width-200" ><?php echo $row->qty_data2?></a></td>
 
-                              <td class="text-wrap width-200" data-content="edit" data-id="qtyadjustment2" data-isi="<?php echo $row->qty_adjustment2 ?>" ><?php echo $row->qty_adjustment2?></a></td>
+                              <td class="text-wrap width-200" data-content="edit" data-name="Qty Adjustment2"  data-id="qtyadjustment2" data-isi="<?php echo $row->qty_adjustment2 ?>" ><?php echo $row->qty_adjustment2?></a></td>
 
                               <td class="text-wrap width-200" ><?php echo $row->move_id?></a></td>
                               <td class="text-wrap width-200" ><?php echo $row->qty_move?></a></td>
@@ -204,8 +203,8 @@
                               <td class="width-200" align="center">
                                 <?php if($adjustment->status == 'draft'){?>
                                 <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" ><i class="fa fa-save"></i></a>               
-                                <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;   margin-right: 24px;"><i class="fa fa-edit"></i></a>
-                                <a href="javascript:void(0)" class="delete" title="Hapus" data-toggle="tooltip"><i class="fa fa-trash" style="color: red"></i></a>
+                                <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107; margin-right: 24px;"><i class="fa fa-edit"></i></a>
+                                <a href="javascript:void(0)" class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red"></i></a>
                                 <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;"><i class="fa fa-close"></i></a>
                                 <?php }?>
                               </td>
@@ -293,14 +292,14 @@
     var index = $("#tableadjustment tbody tr:last-child").index();
     var row   ='<tr class="">'
           + '<td></td>'
-          + '<td style="min-width:170px;"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'          
+          + '<td style="min-width:170px;"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select></select><input type="text" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'          
           + '<td style="min-width:100px;"><input type="text" class="form-control input-sm lot" name="Lot" id="lot"></td>'
           + '<td class="width-150"><input type="text" class="form-control input-sm uom" name="Uom" id="uom" readonly></td>'          
           + '<td></td>'          
-          + '<td class="width-200"><input type="text" class="form-control input-sm qtyadjustment" name="QtyAdjustment" id="qtyadjustment"  onkeyup="validAngka(this)" ></td>'
+          + '<td class="width-200"><input type="text" class="form-control input-sm qtyadjustment" name="Qty Adjustment" id="qtyadjustment"  onkeyup="validAngka(this)" ></td>'
           + '<td style="min-width:80px;"><select type="text" class="form-control input-sm uom2" name="Uom2" id="uom2"></select></select></td>'          
           + '<td class="width-200"></td>'          
-          + '<td class="width-200"><input type="text" class="form-control input-sm qtyadjustment2" name="QtyAdjustment2" id="qtyadjustment2"  onkeyup="validAngka(this)" ></td>'
+          + '<td class="width-200"><input type="text" class="form-control input-sm qtyadjustment2" name="Qty Adjustment2" id="qtyadjustment2"  onkeyup="validAngka(this)" ></td>'
           + '<td></td>'
           + '<td></td>'
           + '<td align="center"><button type="button" class="btn btn-primary btn-xs add width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
@@ -357,6 +356,9 @@
                     //$('.qtystock').val(data.qty_data);
                     //$('.qtyadjustment').val(data.qty_data);
                     $('.uom').val(data.uom);
+                    $('.uom2').val(data.uom2);
+                    $newOption = $("<option></option>").val(data.uom2).text(data.uom2);
+                    $('.uom2').empty().append($newOption).trigger('change');
                   },
                   error: function (xhr, ajaxOptions, thrownError){
                     alert('Error data');
@@ -392,8 +394,8 @@
                   };
                 },
                 error: function (xhr, ajaxOptions, thrownError){
-                  alert('Error data');
-                  alert(xhr.responseText);
+                  //alert('Error data');
+                  //alert(xhr.responseText);
                 }
           }
         });       
@@ -447,6 +449,25 @@
     var empty = false;
     var input = $(this).parents("tr").find('input[type="text"]');
 
+    var empty2 = false;
+    var select = $(this).parents("tr").find('select[type="text"]');
+
+
+    //validasi tidak boleh kosong select2
+    select.each(function(){
+        if(!$(this).val() && $(this).attr('name')=='Product' ){
+          alert_notify('fa fa-warning',' Nama Produk Harus Diisi !','danger');
+          empty2 = true;
+        }
+
+        if(!$(this).val() && $(this).attr('name')=='Uom' ){
+          alert_notify('fa fa-warning',' Uom  Harus Diisi !','danger');
+          empty2 = true;
+        }
+        
+    });
+
+
     // validasi untuk inputan textbox
     input.each(function(){
       if(!$(this).val()){
@@ -467,6 +488,7 @@
       var qty_data2         = $(this).parents("tr").find("#qtystock2").val();
       var qty_adjustment2   = $(this).parents("tr").find("#qtyadjustment2").val();
       var row_order         = $(this).parents("tr").find("#row_order").val();
+      var quant_id          = $(this).parents("tr").find("#quant_id").val();
 
       $.ajax({
         dataType: "JSON",
@@ -482,6 +504,7 @@
               uom2              : uom2,
               qty_data2         : qty_data2,
               qty_adjustment2   : qty_adjustment2,
+              quant_id          : quant_id,
               row_order         : row_order},
         success: function(data){
           if(data.sesi=='habis'){
@@ -584,10 +607,10 @@
         }
 
         if($(this).attr('data-id')=="row_order"){
-            $(this).html('<input type="hidden"  class="form-control" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> ');        
+            $(this).html('<input type="hidden"  class="form-control" value="' + ($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> <input type="hidden"  class="form-control quant_id" value="' + ($(this).attr('data-isi2')) + '" id="quant_id">');    
 
             row_order = $(this).attr('data-isi');
-            
+                    
         }else if($(this).attr('data-id')=='kode_produk' && quant == 'FALSE'){
 
             var kode_produk = ($(this).attr('data-isi'));
@@ -595,15 +618,8 @@
 
             class_sel2_prod = 't_sel2_prod'+row_order;
             class_nama_produk = 'e_nama_produk'+row_order;
-            //alert(class_sel2_prod);
-            //select 2 nama produk dan textfield kode_produknya
-            $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+' min-width-100" id="tproduct" name="Product" ></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + $(this).attr('data-isi2') + '" id="t'+ $(this).attr('data-id2') +'"> ');
+            $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+'" id="product" name="Product" style="min-width:150px !important;"></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + $(this).attr('data-isi2') + '" id="'+ $(this).attr('data-id2') +'"> ');
 
-            //var $newOption = $("<option></option>").val(kode_produk).text(nama_produk);
-            //$('.t_sel2_prod'+row_order).empty().append($newOption).trigger('change');
-
-            //var $newOption = $("<option></option>").val(kode_produk).text(nama_produk);
-            //$('.t_sel2_prod'+row_order).append("<option value ='"+kode_produk+"' selected)[MF118] "+nama_produk+"</option>");
             custom_nama = '['+kode_produk+'] '+nama_produk;
             $newOption = new Option(custom_nama, kode_produk, true, true);
             $('.t_sel2_prod'+row_order).append($newOption).trigger('change');
@@ -645,14 +661,16 @@
                       dataType: "JSON",
                       url : '<?php echo site_url('warehouse/adjustment/get_produk_by_id') ?>',
                       type: "POST",
-                      data: {kode_produk: $(this).parents("tr").find("#tproduct").val() },
+                      data: {kode_produk: $(".t_sel2_prod"+row_order).val() },
                       success: function(data){
                         $('.e_nama_produk'+row_order).val(data.nama_produk);
                         //$('.e_').val('1');
                         //$('.uom').val(data.uom);
-
                         var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
                         $(".e_uom"+row_order).empty().append($newOptionuom).trigger('change');
+
+                        var $newOptionuom2 = $("<option></option>").val(data.uom2).text(data.uom2);
+                        $(".e_uom2"+row_order).empty().append($newOptionuom2).trigger('change');
                       },
                       error: function (xhr, ajaxOptions, thrownError){
                         alert('Error data');
@@ -661,12 +679,91 @@
                 });
             });
 
-
         }else if($(this).attr('data-id')=='lot' && quant == 'FALSE'){
-          $(this).html('<input type="text"  class="form-control input-sm min-width-100" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" > ');
+          $(this).html('<input type="text"  class="form-control input-sm " value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'"  style="min-width:100px !important;"> ');
+        }else if($(this).attr('data-id')=='uom' && quant == 'FALSE'){
+
+          class_uom = 'e_uom'+row_order;
+
+          $(this).html('<select type="text"  class="form-control input-sm '+class_uom+'" id="'+ $(this).attr('data-id') +'" name="Uom" style="min-width:60px !important;"> ></select> ');
+
+          var $newOptionuom = $("<option></option>").val($(this).attr('data-isi') ).text($(this).attr('data-isi') );
+          $(".e_uom"+row_order).empty().append($newOptionuom).trigger('change');
+
+          $('.e_uom'+row_order).select2({
+          allowClear: true,
+          placeholder: "",
+          ajax:{
+                dataType: 'JSON',
+                type : "POST",
+                url : "<?php echo base_url();?>ppic/billofmaterials/get_uom_select2",
+                data : function(params){
+
+                  return{
+                    prod:params.term,
+                  };
+                }, 
+                processResults:function(data){
+                  var results = [];
+                  $.each(data, function(index,item){
+                    results.push({
+                        id:item.short,
+                        text:item.short
+                    });
+                  });
+                  return {
+                    results:results
+                  };
+                },
+                error: function (xhr, ajaxOptions, thrownError){
+                  //alert('Error data');
+                  //alert(xhr.responseText);
+                }
+          }
+          }); 
 
         }else if($(this).attr('data-id')=='qtyadjustment'){
           $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+        }else if($(this).attr('data-id')=='uom2' && quant == 'FALSE'){
+          class_uom = 'e_uom2'+row_order;
+
+          $(this).html('<select type="text"  class="form-control input-sm '+class_uom+'" id="'+ $(this).attr('data-id') +'" name="Uom2" style="min-width:60px !important;"> ></select> ');
+
+          var $newOptionuom = $("<option></option>").val($(this).attr('data-isi') ).text($(this).attr('data-isi') );
+          $(".e_uom2"+row_order).empty().append($newOptionuom).trigger('change');
+
+          $('.e_uom2'+row_order).select2({
+          allowClear: true,
+          placeholder: "",
+          ajax:{
+                dataType: 'JSON',
+                type : "POST",
+                url : "<?php echo base_url();?>ppic/billofmaterials/get_uom_select2",
+                data : function(params){
+
+                  return{
+                    prod:params.term,
+                  };
+                }, 
+                processResults:function(data){
+                  var results = [];
+                  $.each(data, function(index,item){
+                    results.push({
+                        id:item.short,
+                        text:item.short
+                    });
+                  });
+                  return {
+                    results:results
+                  };
+                },
+                error: function (xhr, ajaxOptions, thrownError){
+                  //alert('Error data');
+                  //alert(xhr.responseText);
+                }
+          }
+          }); 
+
         }else if($(this).attr('data-id')=='qtyadjustment2'&& quant == 'FALSE' ){
           $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)" > ');        
         }
@@ -681,7 +778,7 @@
   $(document).on("click", ".delete", function(){ 
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
       if($(this).attr('data-id')=="row_order"){
-        $(this).html('<input type="hidden" class="form-control" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> ');
+        $(this).html('<input type="hidden" class="form-control" value="' + ($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> ');
       }
     });
 

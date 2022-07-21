@@ -120,6 +120,7 @@
                               <th  class='style' >UoM</th>
                               <th  class='style' >Qty2</th>
                               <th  class='style' >UoM2</th>
+                              <th  class='style' >Qty Move</th>
                               <th  class='style' style="min-width: 80px">User</th>
                               <th  class='style' style="min-width: 100px">Notes</th>
                             </tr>
@@ -251,6 +252,7 @@
                                $("<td>").text(value.uom),
                                $("<td align='right'>").text(value.qty2),
                                $("<td>").text(value.uom2),
+                               $("<td align='right'>").text(value.qty_move),
                     );
                     no++;
                     tbody = $("<tbody id='"+group+"'>").append(tr);
@@ -336,6 +338,7 @@
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td align='right'>"+value.qty_move+"</td>";
                           row += "<td>"+value.user+"</td>";
                           row += "<td>"+value.note+"</td>";
                           row += "</tr>";

@@ -648,8 +648,8 @@
 	                  };
 	                },
 	                error: function (xhr, ajaxOptions, thrownError){
-	                  alert('Error data');
-	                  alert(xhr.responseText);
+	                  //alert('Error data');
+	                  //alert(xhr.responseText);
 	                }
 	          }
 	        });
