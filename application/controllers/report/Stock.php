@@ -340,7 +340,18 @@ class Stock extends MY_Controller
                         $nama_field = "sq.qty_opname";
 
                     }else{
-                        $isi        = "LIKE '%".addslashes($row['value'])."%' ";
+
+                        if($row['operator'] == 'LIKE'){
+                            $isi        = "LIKE '%".addslashes($row['value'])."%' ";
+                        }else if($row['operator'] == 'NOT LIKE'){
+                            $isi        = "NOT LIKE '%".addslashes($row['value'])."%' ";
+                        }else if($row['operator'] == '!='){
+                            $isi        = "!= '".addslashes($row['value'])."' ";
+                        }else{
+                            $isi        = "= '".addslashes($row['value'])."' ";
+                        }
+
+                        //$isi        = "LIKE '%".addslashes($row['value'])."%' ";
                         $nama_field = $this->declaration_name_field($row['nama_field']);
                     }
                     

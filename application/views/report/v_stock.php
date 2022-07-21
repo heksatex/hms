@@ -621,6 +621,7 @@
           value +=  '<option value="LIKE">LIKE</option>'
           value +=  '<option value="NOT LIKE">NOT LIKE</option>'
           value +=  '<option value="=">=</option>'
+          value +=  '<option value="!=">!=</option>'
           value += "</select>";
           value += '</div>';
           value += '<div class="col-md-3">';
@@ -662,7 +663,7 @@
         }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname'){
           caption_sparate = '=';
         }else{
-          caption_sparate = 'LIKE';
+          caption_sparate = cmbOperator;// ex LIKE, NOT LIKE, =, !=
         }
 
         if(cmbSearch == 'sales_group'){
