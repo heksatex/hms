@@ -366,8 +366,15 @@
                             <?php 
                                   $no = 1;
                                   foreach ($details_color_lines as $row) {
+                                    if($row->status == 'f'){
+                                      $style = 'style="color:red"';
+                                    }else if($row->status == 'ng'){
+                                      $style = 'style="color:blue"';
+                                    }else{
+                                      $style = '';
+                                    }
                                 ?>
-                                  <tr class="num">
+                                  <tr class="num" <?php echo $style; ?>>
                                     <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>" data-isi2="<?php echo $row->ow;?>"></td>
                                     <td class="text-wrap width-150"><?php echo $row->nama_produk?></td>
                                     <td class="text-wrap width-150" data-content="edit" data-name="Description" data-id="description_color" data-isi="<?php echo htmlentities($row->description);?>"><?php echo $row->description?></td>
@@ -599,6 +606,7 @@
                 alert_modal_warning(data.message);
             }else{
                 $("#foot").load(location.href + " #foot");
+                $("#tab_2").load(location.href + " #tab_2");
                 //$("#total").load(location.href + " #total");
                 alert_notify(data.icon,data.message,data.type,function(){});
              }
@@ -1295,10 +1303,10 @@
                 $("#foot").load(location.href + " #foot");
                 $(".add-new-color-lines").show();                   
                 alert_notify(data.icon,data.message,data.type,function(){});
+                refresh_tab_and_div();
             }
             $("#ref_status").load(location.href + " #ref_status");
             $("#btn-header").load(location.href + " #btn-header");
-            refresh_tab_and_div();
 
           },
           error: function (xhr, ajaxOptions, thrownError){
