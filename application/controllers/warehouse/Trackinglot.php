@@ -110,6 +110,20 @@ class Trackinglot extends MY_Controller
                                     );
                 }
 
+                // adjustment
+                $adj = $this->m_trackingLot->get_adjustment_by_lot($txtlot);
+                foreach($adj as $adjs){
+                  $kode_encrypt = encrypt_url($adjs->kode_adjustment);
+                  $result_record[] = array('tanggal' => $adjs->create_date, 
+                                    'kode'    => $adjs->kode_adjustment,
+                                    'link'     => 'warehouse/adjustment/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Adjustment di  '.$adjs->lokasi_adjustment.' dari '.round($adjs->qty_data,2).' '.$adjs->uom.' menjadi '.round($adjs->qty_adjustment,2).' '.$adjs->uom,
+                                    'status'      => $adjs->nama_status,
+                                    'user'        => $adjs->nama_user,
+                                    );
+                }
+
+
                 // arsort($result_record);
                 $result_record  =  $this->urutkan($result_record);
                 $sql_insert     = '';
@@ -119,13 +133,13 @@ class Trackinglot extends MY_Controller
                 
                 if(!empty($sql_insert)){
                   $sql_insert = rtrim($sql_insert, ', ');
-                $this->m_trackingLot->insert_tmp_tracking_lot_batch($sql_insert);
-                
-                $result_tmp = $this->m_trackingLot->get_tmp_tracking_lot_by_lot($txtlot);
-              }
+                  $this->m_trackingLot->insert_tmp_tracking_lot_batch($sql_insert);
+                  
+                  $result_tmp = $this->m_trackingLot->get_tmp_tracking_lot_by_lot($txtlot);
+                }
               
-              // delete tmp_tracking_by_lot()
-              $this->m_trackingLot->delete_tmp_tracking_lot_by_lot($txtlot);
+                // delete tmp_tracking_by_lot()
+                $this->m_trackingLot->delete_tmp_tracking_lot_by_lot($txtlot);
 
                 $callback = array('status' => 'success', 'message' => 'Data Barcode / Lot ditemukan !', 'icon' =>'fa fa-check', 'type' => 'success', 'info' => $result_info, 'record' => $result_tmp);
             }else{

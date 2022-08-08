@@ -553,9 +553,12 @@
 
   <footer class="main-footer">
    <?php $this->load->view("admin/_partials/modal.php") ?>
-              
     <div id="foot">
-      <?php $this->load->view("admin/_partials/footer.php") ?>
+     <?php 
+        $data['kode'] =  $produk->kode_produk;
+        $data['mms']  =  $mms->kode;
+        $this->load->view("admin/_partials/footer.php",$data) 
+     ?>
     </div>
   </footer>
 

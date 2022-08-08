@@ -60,8 +60,30 @@ class Pengirimanharian extends MY_Controller
 								'qty1'			=> number_format($row->qty,2).' '.$row->uom,
 								'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
 								'status'		=> $nama_status,
-								'reff_note'		=> $row->reff_note
+								'reff_note'		=> $row->reff_note,
+								'out'           => 'Yes'
 
+			);
+			$total++;
+		}
+
+		$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$departemen,$dept_tujuan,$status);
+		foreach($list as $row){
+			$nama_status = $this->_module->get_mst_status_by_kode($row->status);
+        	$kode_encrypt = encrypt_url($row->kode);
+			$dataRecord[] = array('kode' 		=> $row->kode,
+								'kode_enc'      => $kode_encrypt,
+								'tgl_kirim' 	=> $row->tanggal_transaksi,
+								'origin'		=> $row->origin,
+								'reff_picking' 	=> $row->reff_picking,
+								'kode_produk'	=> $row->kode_produk,
+								'nama_produk'	=> $row->nama_produk,
+								'lot'			=> $row->lot,
+								'qty1'			=> number_format($row->qty,2).' '.$row->uom,
+								'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
+								'status'		=> $nama_status,
+								'reff_note'		=> $row->reff_note,
+								'out'           => 'No'
 			);
 			$total++;
 		}
@@ -216,6 +238,52 @@ class Pengirimanharian extends MY_Controller
 			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 
 			$rowCount++;
+		}
+
+		// tbody
+		$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_get_out($tgldari,$tglsampai,$departemen,$dept_tujuan,$status);
+		foreach($list as $row){
+				$nama_status = $this->_module->get_mst_status_by_kode($row->status);
+	
+				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
+				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
+				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->lot);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->qty);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->qty2);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
+				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $nama_status);
+				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->reff_note);
+	
+				// set wrapText
+				$object->getActiveSheet()->getStyle('B'.$rowCount.':B'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('N'.$rowCount.':N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+	
+				//set border true
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+	
+				$rowCount++;
 		}
 
 		$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  

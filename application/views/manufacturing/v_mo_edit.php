@@ -20,6 +20,34 @@
     .lebar2  {
         width:40% !important;
     }
+
+    table.table td .cancel {
+        display: none;
+        color : red;
+        margin: 10 0px;
+        min-width:  24px;
+    }
+
+    table.table td .add {
+        display: none;
+    }
+
+    .min-width-200{
+        min-width: 200px;;
+    }
+
+    .min-width-100{
+        min-width: 100px;
+    }
+
+    .min-width-80{
+        min-width: 80px;;
+    }
+
+    .width-btn {
+      width: 54px !important;
+    }
+
   </style>
 
 </head>
@@ -225,7 +253,7 @@
               <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4 "> <div class="box-color" style="background-color: <?php echo $list->kode_warna;?>"></div></div>
                   <div class="col-xs-8 col-md-8" id="ta">
-                      <textarea class="form-control input-sm" name="notes_dti" id="notes_dti" readonly="readonly"><?php echo $list->notes_dti; ?></textarea>
+                      <textarea class="form-control input-sm" name="notes_varian" id="notes_varian" readonly="readonly"><?php echo $list->notes_varian; ?></textarea>
                   </div>                                    
               </div>
 
@@ -406,7 +434,7 @@
                                   </td>
                                   <td align="right"><?php echo number_format($qty_rm_sisa,2)?></td>
                                   <td><?php echo $row->uom?></td>
-                                  <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty) AND $row->status == 'ready')echo number_format($row->sum_qty,2); if($row->status == 'cancel') echo number_format($row->sum_qty_cancel,2); ?></td>
+                                  <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty) AND $row->status == 'ready')echo number_format($row->sum_qty,2); if($row->status == 'cancel' AND $row->sum_qty_cancel > 0) echo number_format($row->sum_qty_cancel,2); ?></td>
                                   <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                   <td><?php echo $row->reff?></td>
                                   <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0){?>
@@ -495,7 +523,7 @@
                             </tr>
                             <tbody>
                               <?php
-                               if(!empty($dystuff)){
+                              if(!empty($dystuff)){
                                 foreach ($dystuff as $row) {
                               ?>
                                 <tr class="num">
@@ -506,9 +534,7 @@
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
                                   <td><?php echo $row->reff_note?></td>
-                                  <!--td>
-                                    <a onclick=""  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
-                                  </td-->
+                                 
                                 </tr>
                               <?php 
                                 }
@@ -534,7 +560,7 @@
                             </tr>
                             <tbody>
                               <?php
-                                if(!empty($aux)){
+                              if(!empty($aux)){
                                 foreach ($aux as $row) {
                               ?>
                                 <tr class="num">
@@ -545,9 +571,6 @@
                                   <td><?php echo $row->uom?></td>
                                   <td><?php echo $row->status?></td>
                                   <td><?php echo $row->reff_note?></td>
-                                  <!--td>
-                                    <a onclick=""  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
-                                  </td-->
                                 </tr>
                               <?php 
                                 }
@@ -561,6 +584,137 @@
                         </div>
                       </div>
                       <!--/.obat-->
+
+                      <!--Additional--> 
+                      <div class="col-md-12">
+                        <div class="box box-primary">
+                          <div class="box-header with-border">
+                            <h3 class="box-title"><b>Additional</b></h3>
+                            <?php 
+                            if($list->dept_id=='DYE' AND $akses_menu >0){
+                              if(!empty($menu)){  ?>
+                                <div class=" pull-right text-right">
+                                  <button class="btn btn-primary btn-sm" id="btn-request-add" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Request Additional</button>
+                                </div>
+                              <?php 
+                              }
+                            }?>
+                          </div>
+                        <div class="box-body">
+                        <!-- Tabel Kiri -->
+                        <div class="col-md-6 table-responsive">
+                          <table class="table table-condesed table-hover rlstable" width="100%" id ="table_dyest_add">
+                            <label>Dyeing Stuff</label>
+                            <tr>
+                              <th class="style no">No.</th>
+                              <th class="style">Product</th>
+                              <th class="style" style="text-align: right;">Qty</th>
+                              <th class="style">uom</th>
+                              <th class="style">Status</th>
+                              <th class="style">reff</th>
+                              <th class="style"></th>
+                            </tr>
+                            <tbody id="tbody_dye">
+                              <?php
+                              if(!empty($dystuff_add)){
+                                foreach ($dystuff_add as $row) {
+                              ?>
+                                <tr class="num">
+                                  <td data-content="edit" data-id="row_order"  data-isi="<?php echo $row->row_order; ?>" data-id2="origin_prod"  data-isi2="<?php echo htmlentities($row->origin_prod); ?>"></td>
+                                  <td data-content="edit" data-id="kode_produk" data-isi="<?php echo htmlentities($row->kode_produk); ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk); ?>" ><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                  <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
+                                  <td data-content="edit" data-id="uom" data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
+                                  <td><?php echo $row->status?></td>
+                                  <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_note);?>"><?php echo $row->reff_note?></td>
+                                  <td style="text-align: center; width:50px">
+                                    <?php if($row->status == 'draft' AND $row->move_id == ''){?>
+                                            <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="DYE"><i class="fa fa-save"></i></a>
+                                            <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="DYE"><i class="fa fa-edit"></i></a>
+                                            <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
+                                            <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="DYE" ><i class="fa fa-close"></i></a>
+                                    <?php }?> 
+                                  </td>
+                                </tr>
+                              <?php 
+                                }
+                              }
+                              ?>
+                            </tbody>
+                            <?php if($list->status == 'draft' or $list->status =='ready'){ ?>
+                            <tfoot>
+                              <tr>
+                                <td colspan="6"> 
+                                  <a href="javascript:void(0)" class="add-new-rm" onclick="tambah_baris_add(false,'table_dyest_add','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
+                                </td>
+                              </tr>
+                            </tfoot>
+                            <?php } ?>
+                          </table>
+                          <div class="example1_processing table_processing" style="display: none">
+                              Processing...
+                          </div>
+                        </div>
+                        <!-- Tabel Kiri -->
+
+                        <!-- Tabel Kanan -->
+                        <div class="col-md-6 table-responsive">
+                          <table class="table table-condesed table-hover rlstable" width="100%" id ="table_aux_add">
+                            <label>Auxiliary</label>
+                            <tr>
+                              <th class="style no">No.</th>
+                              <th class="style">Product</th>
+                              <th class="style" style="text-align: right;">Qty</th>
+                              <th class="style">uom</th>
+                              <th class="style">Status</th>
+                              <th class="style">reff</th>
+                              <th class="style"></th>
+                            </tr>
+                            <tbody id="tbody_aux">
+                              <?php
+                              if(!empty($aux_add)){
+                                foreach ($aux_add as $row) {
+                              ?>
+                                <tr class="num">
+                                  <td data-content="edit" data-id="row_order"  data-isi="<?php echo $row->row_order; ?>" data-id2="origin_prod"  data-isi2="<?php echo htmlentities($row->origin_prod);?>"></td>
+                                  <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk; ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk); ?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                  <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
+                                  <td data-content="edit" data-id="uom" data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
+                                  <td><?php echo $row->status?></td>
+                                  <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_note);?>"><?php echo $row->reff_note?></td>
+                                  <td style="text-align: center; width:50px">
+                                    <?php if($row->status == 'draft' AND $row->move_id == ''){?>
+                                            <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-save"></i></a>
+                                            <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="AUX"><i class="fa fa-edit"></i></a>
+                                            <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
+                                            <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-close"></i></a>
+                                    <?php }?> 
+                                  </td>
+                                </tr>
+                              <?php 
+                                }
+                              }
+                              ?>
+                            </tbody>
+                            <?php if($list->status == 'draft' or $list->status =='ready'){ ?>
+                            <tfoot>
+                              <tr>
+                                <td colspan="6"> 
+                                  <a href="javascript:void(0)" class="add-new-rm" onclick="tambah_baris_add(false,'table_aux_add','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
+                                </td>
+                              </tr>
+                            </tfoot>
+                            <?php } ?>
+                          </table>
+                          <div  class="example1_processing table_processing" style="display: none">
+                              Processing...
+                          </div>
+                        </div>
+                         <!--/.Tabel Kanan -->
+                        </div>
+                        </div>
+                      </div>
+                      <!--/.Additional-->
+
                     <?php }?>
 
                     </div>
@@ -738,6 +892,12 @@
     </div>
   </footer>
 
+  <style type="text/css">
+	.error{
+		border:  1px solid red !important;
+	}  
+  </style>
+
   <div id="load_modal">
     <!-- Load Partial Modal -->
    <?php $this->load->view("admin/_partials/modal.php") ?>
@@ -745,14 +905,10 @@
 
 </div>
 <!--/. Site wrapper -->
-
 <?php $this->load->view("admin/_partials/js.php") ?>
-<!--script src="https://rawgit.com/RobinHerbots/jquery.inputmask/3.x/dist/jquery.inputmask.bundle.js"></script-->
-<!--script type="text/javascript" src="<?php echo base_url('dist/inputmask/jquery.inputmask.js') ?>"></script-->
-<!--script type="text/javascript" src="<?php echo base_url('dist/inputmask/inputmask.js') ?>"></script-->
 
 <script type="text/javascript">
-
+  
    // show after refresh close modal
   $(document).on('click','#datetimepicker3',function (e) {
        $('#datetimepicker3').datetimepicker({
@@ -767,17 +923,17 @@
             ignoreReadonly: true
         });
   });
-
+  
   $('#start').inputmask("datetime",{
-      mask: "y-2-1 h:s:s", 
-      //placeholder: "yyyy-mm-dd hh:mm:ss", 
-      placeholder: "yyyy-mm-dd hh:mm:ss",
-      //leapday: "-02-29", 
-      separator: "-", 
-      alias: "yyyy/mm/dd"
+    mask: "y-2-1 h:s:s", 
+    //placeholder: "yyyy-mm-dd hh:mm:ss", 
+    placeholder: "yyyy-mm-dd hh:mm:ss",
+    leapday: "-02-29", 
+    separator: "-", 
+    alias: "yyyy/mm/dd"
   });
-/*
-  $('#finishs').inputmask("datetime",{
+  
+  $('#finish').inputmask("datetime",{
       mask: "y-2-1 h:s:s", 
       //placeholder: "yyyy-mm-dd hh:mm:ss", 
       placeholder: "yyyy-mm-dd hh:mm:ss",
@@ -785,7 +941,7 @@
       separator: "-", 
       alias: "yyyy/mm/dd"
   });
-*/
+
   function refresh_mo(){
     $("#tab_1").load(location.href + " #tab_1");
     $("#tab_2").load(location.href + " #tab_2");             
@@ -793,6 +949,7 @@
     $("#foot").load(location.href + " #foot");
     $("#status_bar").load(location.href + " #status_bar");
   }
+  
 
   //btn-cancel-edit ketika tidak jadi untuk edit data
   $(document).on('click','#btn-cancel-edit', function(e){
@@ -995,26 +1152,6 @@
        );
   });
 
-  // modal tambah data
-  $(".add").unbind( "click" );
-  $(document).on('click','.add',function(e){
-      e.preventDefault();
-      var kode = $('#kode').val();
-      //$('[name="kode1"]').val(kode);
-      $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $("#tambah_data").modal({
-          show: true,
-          backdrop: 'static'
-      });
-      $('.modal-title').text('Tambah Data');
-      $.post('<?php echo site_url()?>manufacturing/mO/tambah_rm',
-        { kode : $('#kode').val(),},
-          function(html){
-            setTimeout(function() {$(".tambah_data").html(html);  },1000);
-        }   
-      );
-  });
-
 
   // klik btn print 
   $(document).on('click',"#btn-print-barcode",function(e){
@@ -1044,6 +1181,11 @@
     if(!/^[0-9.]+$/.test(a.value)){
       a.value = a.value.substring(0,a.value.length-1000);
     }    
+  }
+
+  //html entities javascript
+  function htmlentities_script(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   /*
@@ -1398,6 +1540,7 @@
               $('#btn-simpan').button('reset');
               readonly_textfield();
               refresh_mo();
+              $("#mo").load(location.href + " #mo>*");
             }
 
           },error: function (xhr, ajaxOptions, thrownError) { 
@@ -1473,9 +1616,577 @@
   });
 
 
-  $(document).on("click","#btn-tambah-produksi-batch",function(e){
-    alert('tes');
+
+  //## StartAdditional >> 
+
+  // tambah baris
+  function tambah_baris_add(data,table,kode_produk,nama_produk,qty,uom,reff_note){
+
+    var tambah = true;
+    $(".add-new-rm").hide();
+    if(table == 'table_dyest_add'){
+      var index  = $("#table_dyest_add tbody[id='tbody_dye'] tr:last-child").index();
+      if(index== -1){
+        row = 0;
+      }else{
+        row  = parseInt($("#table_dyest_add tbody[id='tbody_dye'] tr:last-child td .row").val());
+      }
+
+      tbody_id        = 'tbody_dye';
+      link_get_list   = "get_list_dye";
+      delRow          = "delRow_dye(this)";
+      type_obat       = 'DYE';
+
+      tbl  = "#table_dyest_add tbody[id='tbody_dye'] ";
+
+    }else{
+      var index  = $("#table_aux_add tbody[id='tbody_aux'] tr:last-child").index();
+      if(index== -1){
+        row = 0;
+      }else{
+        row  = parseInt($("#table_aux_add tbody[id='tbody_aux'] tr:last-child td .row").val());
+      }
+      delRow          = "delRow_aux(this)";
+      tbody_id        = 'tbody_aux';
+      link_get_list   = "get_list_aux";
+      type_obat       = 'AUX'
+
+      tbl  = "#table_aux_add tbody[id='tbody_aux'] ";
+    }
+
+    if(tambah){
+
+        var ro           = row+1;
+        var class_produk = 'kode_produk_'+ro;
+        var produk       = 'nama_produk'+ro;
+        var class_uom    = 'uom_'+ro;
+        var row        = '<tr class="num">'
+                    + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
+                    + '<td  class="min-width-200">'
+                        + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
+                        + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
+                    + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)"   value="'+qty+'"></td>'
+                    + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
+                    + '<td></td>'
+                    + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff" >'+reff_note+'</textarea></td>'
+                    + '<td class="width-50" align="center">'
+                        + '<button type="button" class="btn btn-primary btn-xs add width-btn" title="Simpan" data-toggle="tooltip" type_obat="'+type_obat+'">Simpan</button>'
+                        + '<a class="edit" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a>'
+                        + '<button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
+                    + '</td>'
+                    + '</tr>';
+
+        $('#'+table+' tbody[id="'+tbody_id+'"] ').append(row);
+        $('#'+table+' tbody[id="'+tbody_id+'"] tr ').eq(index+1).find(".add, .edit").toggle();
+        $('[data-toggle="tooltip"]').tooltip();
+
+        //n_qty[inx_n_qty+1].focus();
+        
+        var sel_produk = $('#'+table+' tbody[id="'+tbody_id+'"] tr .'+class_produk);
+        var sel_uom    = $('#'+table+' tbody[id="'+tbody_id+'"] tr .'+class_uom);
+        var produk_hide= $('#'+table+' tbody[id="'+tbody_id+'"] tr .'+produk);
+
+        if(data==true){
+            //untuk event selected select2 nama_produk
+            custom_nama = '['+kode_produk+'] '+nama_produk;
+            var $newOption = $("<option></option>").val(kode_produk).text(custom_nama);
+            sel_produk.empty().append($newOption).trigger('change');
+
+            var $newOption2 = $("<option></option>").val(uom).text(uom);
+            sel_uom.empty().append($newOption2).trigger('change');
+
+        }
+
+        //select 2 product
+        sel_produk.select2({
+            ajax:{
+                dataType: 'JSON',
+                type : "POST",
+                url : "<?php echo base_url();?>lab/dti/"+link_get_list,
+                //delay : 250,
+                data : function(params){
+                    return{
+                    prod:params.term
+                    };
+                }, 
+                processResults:function(data){
+                    var results = [];
+
+                    $.each(data, function(index,item){
+                        results.push({
+                            id:item.kode_produk,
+                            text:'['+item.kode_produk+'] '+item.nama_produk
+                        });
+                    });
+                    return {
+                    results:results
+                    };
+                },
+                error: function (xhr, ajaxOptions, thrownError){
+                    console.log(xhr.responseText);
+                }
+            }
+        });
+
+        //jika nama produk diubah
+        sel_produk.change(function(){
+            
+            $.ajax({
+                dataType: "JSON",
+                url : '<?php echo site_url('lab/dti/get_prod_by_id') ?>',
+                type: "POST",
+                data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
+                success: function(data){
+                    produk_hide.val(data.nama_produk);
+                    //$('#qty').val(data.qty);
+                    //untuk event selected select2 uom
+                    var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
+                    sel_uom.empty().append($newOptionuom).trigger('change');
+                },
+                error: function (xhr, ajaxOptions, thrownError){
+                    console.log(xhr.responseText);
+                }
+            });
+        });
+
+        
+        //select 2 uom
+        sel_uom.select2({
+            allowClear: true,
+            placeholder: "",
+            ajax:{
+                    dataType: 'JSON',
+                    type : "POST",
+                    url : "<?php echo base_url();?>lab/dti/get_uom_select2",
+                    data : function(params){
+
+                        return{
+                            prod:params.term,
+                        };
+                    }, 
+                    processResults:function(data){
+                        var results = [];
+                        $.each(data, function(index,item){
+                            results.push({
+                                id:item.short,
+                                text:item.short
+                            });
+                        });
+                        return {
+                            results:results
+                        };
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                        //alert('Error data');
+                        console.log(xhr.responseText);
+                    }
+            }
+        });
+
+    }
+
+  }
+
+
+    // hapus row
+  $(document).on("click", ".batal", function(){
+    $(".add-new-rm").show();
+    $("#foot").load(location.href + " #foot");
+    $("#status_head").load(location.href + " #status_head");
+    $("#table_dyest_add").load(location.href + " #table_dyest_add");
+    $("#table_aux_add").load(location.href + " #table_aux_add");
+  }); 
+
+
+  $(document).on("click", ".cancel", function(){
+    $(".add-new-rm").show();
+    $("#foot").load(location.href + " #foot");
+    $("#status_head").load(location.href + " #status_head");
+    $("#table_dyest_add").load(location.href + " #table_dyest_add");
+    $("#table_aux_add").load(location.href + " #table_aux_add");
+  });    
+
+
+  $(document).on('click','.add',function(e){
+    e.preventDefault();
+
+    var empty = false;
+    var input = $(this).parents("tr").find('input[type="text"]');
+
+    var empty2 = false;
+    var select = $(this).parents("tr").find('select[name="Product"]');
+
+    var empty3 = false;
+    var select2 = $(this).parents("tr").find('select[name="Uom"]');
+
+    //validasi product tidak boleh kosong
+    select.each(function(index,value){
+      if(!$(this).val() && $(this).attr('name')=='Product' ){
+        alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
+        $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+        empty2 = true;
+      }else{
+        $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+      }
+    });
+
+    //validasi qty tidak boleh kosong
+    select2.each(function(index,value){
+      if(!$(this).val() && $(this).attr('name')=='Uom' ){
+        alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
+        $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+        empty3 = true;
+      }else{
+        $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+      }
+    });
+
+
+    // validasi untuk inputan textbox
+    input.each(function(){
+      if(!$(this).val() && $(this).attr('name')!='reff'){
+        alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
+        empty = true;
+        $(this).addClass('error'); 
+      }else{
+        $(this).removeClass('error'); 
+      }
+    });
+
+    if(!empty && !empty2 && !empty3){
+      var btn_loading   = $(this);
+      btn_loading.button('loading');
+      var type_obat     = $(this).attr('type_obat');
+      var kode_produk   = $(this).parents("tr").find("#kode_produk").val();
+      var produk        = $(this).parents("tr").find("#nama_produk").val();
+      var qty           = $(this).parents("tr").find("#qty").val();
+      var uom           = $(this).parents("tr").find("#uom").val();
+      var reff          = $(this).parents("tr").find("#reff").val();
+      var row_order     = $(this).parents("tr").find("#row_order").val();
+      var origin_prod   = $(this).parents("tr").find("#origin_prod").val();
+      $.ajax({
+        dataType: "JSON",
+        url :'<?php echo base_url('manufacturing/mO/simpan_rm_additional')?>',
+        type: "POST",
+        data: {kode       : $('#kode').val(),
+              kode_produk : kode_produk,
+              produk      : produk,
+              qty         : qty,
+              uom         : uom,
+              reff        : reff,
+              type_obat   : type_obat,
+              origin_prod   : origin_prod,
+              row_order   : row_order, },
+        beforeSend: function(e) {
+            $(".example1_processing").css('display','block');
+          
+        },
+        success: function(data){
+          if(data.sesi=='habis'){
+              //alert jika session habis
+              alert_modal_warning(data.message);
+              window.location.replace('../index');
+          }else if(data.status == 'failed2'){
+              alert_modal_warning(data.message);
+          }else if(data.status == 'failed'){
+              alert_notify(data.icon,data.message,data.type,function(){});
+          }else{
+              alert_notify(data.icon,data.message,data.type,function(){});
+          }
+          $(".add-new-rm").show();                   
+          $("#foot").load(location.href + " #foot");
+          $("#status_head").load(location.href + " #status_head");
+          $("#table_dyest_add").load(location.href + " #table_dyest_add");
+          $("#table_aux_add").load(location.href + " #table_aux_add");
+          $(".example1_processing").css('display','none'); 
+          btn_loading.button('loading');
+
+        },
+        error: function (xhr, ajaxOptions, thrownError){
+          btn_loading.button('loading');
+          $(".example1_processing").css('display','none'); 
+          alert('Error Simpan Additional');
+          alert(xhr.responseText);
+        }
+      });
+    } 
   });
+
+    $(document).on("click", ".edit", function(){  
+
+      var type = $(this).attr('type_obat');
+      if(type =='DYE'){
+        id_table = "#table_dyest_add";
+        link_get_list   = "get_list_dye";
+        link_get_data   = "get_data_dye";
+        table           = "dye";
+        tbody_id        = 'tbody_dye';
+      }else{
+        id_table = "#table_aux_add";
+        link_get_list   = "get_list_aux";
+        link_get_data   = "get_data_aux";
+        tbody_id        = 'tbody_aux';
+        table           = "aux";
+      }
+
+      $(this).parents("tr").find("td[data-content='edit']").each(function(){
+        if($(this).attr('data-id')=="row_order"){
+          $(this).html('<input type="hidden"  class="form-control" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> <input type="hidden" class="form_control"  value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="'+ $(this).attr('data-id2')+'"> ');
+          row_order = $(this).attr('data-isi');
+
+        }else if($(this).attr('data-id')=="kode_produk"){
+          
+          var kode_produk = $(this).attr('data-isi');
+          var nama_produk = $(this).attr('data-isi2');
+
+          class_sel2_prod   = table+'sel2_prod'+row_order;
+          class_nama_produk = table+'nama_produk'+row_order;
+
+          $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+' " id="kode_produk" name="Product" style="min-width:100px !important"></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="'+ $(this).attr('data-id2') +'"> ');
+
+          custom_nama = '['+kode_produk+'] '+nama_produk;
+          $newOption = new Option(custom_nama, kode_produk, true, true);
+          $('.'+class_sel2_prod).append($newOption).trigger('change');
+
+          $('.'+class_sel2_prod).select2({
+            ajax:{
+                  dataType: 'JSON',
+                  type : "POST",
+                  url : "<?php echo base_url();?>lab/dti/"+link_get_list,
+                  //delay : 250,
+                  data : function(params){
+                    return{
+                      prod:params.term
+                    };
+                  }, 
+                  processResults:function(data){
+                    var results = [];
+
+                    $.each(data, function(index,item){
+                        results.push({
+                            id:item.kode_produk,
+                            text:'['+item.kode_produk+'] '+item.nama_produk
+                        });
+                    });
+                    return {
+                      results:results
+                    };
+                  },
+                  error: function (xhr, ajaxOptions, thrownError){
+                    //alert('Error data');
+                    //alert(xhr.responseText);
+                  }
+            }
+          });
+
+          $('.'+class_sel2_prod).change(function(){
+              var this1 = $(this);
+              $.ajax({
+                    dataType: "JSON",
+                    url : "<?php echo base_url();?>lab/dti/"+link_get_data,
+                    type: "POST",
+                    data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
+                    success: function(data){
+                      this1.parents('tr').find("td #nama_produk").val(data.nama_produk);
+                      this1.parents('tr').find("td #uom").val(data.uom);
+                      //$(this).parent('tr').find('tr td .'+class_nama_produk).val(data.nama_produk);
+                      //$(id_table+' tbody[id="'+tbody_id+'"] tr .uom'+row_order).val(data.uom);
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                      alert('Error data');
+                      alert(xhr.responseText);
+                    }
+              });
+          });
+                
+        }else if($(this).attr('data-id')=='qty'){
+          $(this).html('<input type="text"  class="form-control input-sm min-width-80" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+        }else if($(this).attr('data-id')=='uom'){
+
+          var value_option  = $(this).attr('data-isi');
+          var uom           = $(this).attr('data-id')+row_order;
+
+          $(this).html('<select type="text" class="form-control input-sm  min-width-80 '+uom+'"  id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'"></select>');
+
+          var $option = $("<option selected></option>").val(value_option).text(value_option);
+          $(id_table+' tbody[id="'+tbody_id+'"] tr .uom'+row_order).append($option).trigger('change');
+
+          $(id_table+' tbody[id="'+tbody_id+'"] tr .uom'+row_order).append('<?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?>').trigger('change');
+
+        }else if($(this).attr('data-id')=="reff"){
+          $(this).html('<textarea type="text" onkeyup="textAreaAdjust(this)" class="form-control min-width-80 input-sm" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
+        }
+
+      });  
+
+      $(this).parents("tr").find(".add, .edit").toggle();
+      $(this).parents("tr").find(".cancel, .delete").toggle();
+      $(".add-new-rm").hide();
+
+    });
+
+    // hapus rm 
+    $(document).on("click", ".delete", function(){ 
+      $(this).parents("tr").find("td[data-content='edit']").each(function(){
+        if($(this).attr('data-id')=="row_order"){
+          $(this).html('<input type="hidden" class="form-control" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id')+'"> <input type="hidden" class="form_control"  value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="'+ $(this).attr('data-id2')+'"> ');
+        }
+      });
+      var icon_loading= $(this);
+      var kode        =  $("#kode").val();
+      var origin_prod =  $("#origin_prod").val();
+      var row_order   = $(this).parents("tr").find("#row_order").val();  
+      bootbox.dialog({
+        message: "Apakah Anda ingin menghapus data ?",
+        title: "<i class='glyphicon glyphicon-trash'></i> Delete !",
+        buttons: {
+          danger: {
+              label    : "Yes ",
+              className: "btn-primary btn-sm",
+              callback : function() {
+                  $.ajax({
+                      dataType: "JSON",
+                      url : '<?php echo site_url('manufacturing/mO/hapus_rm') ?>',
+                      type: "POST",
+                      beforeSend: function(e) {
+                        icon_loading.button('loading');
+                      },
+                      data: {kode : kode, 
+                            origin_prod :origin_prod,
+                            row_order : row_order  },
+                      success: function(data){
+                        if(data.sesi=='habis'){
+                            //alert jika session habis
+                            alert_modal_warning(data.message);
+                            window.location.replace('../index');
+                        }else if(data.status == 'failed'){
+                            alert_modal_warning(data.message);
+                        }else{
+                            alert_notify(data.icon,data.message,data.type,function(){});
+                        }
+
+                        $("#foot").load(location.href + " #foot");
+                        $("#status_head").load(location.href + " #status_head");
+                        $("#table_dyest_add").load(location.href + " #table_dyest_add");
+                        $("#table_aux_add").load(location.href + " #table_aux_add");
+                        $(".example1_processing").css('display','none'); 
+                        icon_loading.button('reset');
+
+                      },
+                      error: function (xhr, ajaxOptions, thrownError){
+                        alert('Error data');
+                        alert(xhr.responseText);
+                        icon_loading.button('reset');
+                      }
+                    });
+              }
+          },
+          success: {
+                label    : "No",
+                className: "btn-default  btn-sm",
+                callback : function() {
+                  $('.bootbox').modal('hide');
+                }
+          }
+        }
+      });
+    });
+
+    //request additional
+    $(document).on('click',"#btn-request-add",function(e){
+
+      var status = $('#status').val();
+      if(status == 'done'){
+        alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+      }else if(status == 'cancel'){
+        alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+
+      }else{
+
+        var deptid    = "<?php echo $list->dept_id; ?>";
+        var origin_mo = "<?php echo $list->origin;?>";
+        var kode = "<?php echo $list->kode;?>";
+        bootbox.dialog({
+          message: "Apakah Anda yakin ingin Request Additional ?" ,
+          title:  "<i class='fa fa-gear'></i> Request Additional !",
+          buttons: {
+            danger: {
+                label    : "Yes ",
+                className: "btn-primary btn-sm",
+                callback : function() {
+                  please_wait(function(){});
+                    $.ajax({
+                        dataType: "JSON",
+                        url : '<?php echo site_url('manufacturing/mO/request_additional') ?>',
+                        type: "POST",
+                        data: {kode      : kode,
+                              origin_mo : origin_mo, 
+                              deptid : deptid  },
+                        success: function(data){
+                          if(data.sesi=='habis'){
+                              //alert jika session habis
+                              alert_modal_warning(data.message);
+                              window.location.replace('../index');
+                          }else if(data.status == 'failed'){
+                              unblockUI( function() {});
+                              alert_modal_warning(data.message);
+                              refresh_mo();
+                          }else{
+                              unblockUI( function() {
+                                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                              });
+                              refresh_mo();
+                          }
+                        },
+                        error: function (xhr, ajaxOptions, thrownError){
+                          alert('Error data');
+                          alert(xhr.responseText);
+                          unblockUI( function() {});
+                        }
+                      });
+                }
+            },
+            success: {
+                  label    : "No",
+                  className: "btn-default  btn-sm",
+                  callback : function() {
+                    $('.bootbox').modal('hide');
+                  }
+            }
+          }
+        });
+
+      }
+    });
+
+    //modal mode print
+    $(document).on('click','#btn-print',function(e){
+      var dept_id = '<?php echo $list->dept_id?>';
+      if(dept_id == 'DYE'){
+
+        e.preventDefault();
+        $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $("#print_data").modal({
+          show: true,
+          backdrop: 'static'
+        });
+        $('.modal-title').text('Pilih Tipe Dokumen yang akan di Print ?');
+        var deptid  = "<?php echo $list->dept_id; ?>";
+        var kode    = "<?php echo $list->kode;?>";
+        $.post('<?php echo site_url()?>manufacturing/mO/print_mo_modal',
+        { kode:kode, deptid:deptid},
+        function(html){
+          setTimeout(function() {$(".print_data").html(html);  },1000);
+        }   
+        );
+      }
+
+    });  
+
+  //## << Finish Additional 
+ 
+
+
 
 
 </script>

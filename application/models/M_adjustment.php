@@ -182,12 +182,12 @@ class M_adjustment extends CI_Model
 
 	public function get_produk_by_id($kode_produk)
 	{
-		return $this->db->query("SELECT kode_produk, nama_produk, uom FROM  mst_produk WHERE kode_produk = '$kode_produk' AND type = 'stockable' ");
+		return $this->db->query("SELECT kode_produk, nama_produk, uom, uom_2 FROM  mst_produk WHERE kode_produk = '$kode_produk' AND type = 'stockable' ");
 	}
 
 	public function get_list_produk_adjustment($name)
 	{
-		return $this->db->query("SELECT kode_produk, nama_produk, uom FROM  mst_produk 	WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%'  and type = 'stockable' AND status_produk = 't' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
+		return $this->db->query("SELECT kode_produk, nama_produk, uom, uom_2 FROM  mst_produk 	WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%'  and type = 'stockable' AND status_produk = 't' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
 	}
 
 	public function get_total_qty_stock_quant_by_produk_lokasi($kode_produk,$kode_lokasi)
@@ -218,6 +218,14 @@ class M_adjustment extends CI_Model
   	{
     return $this->db->query("UPDATE adjustment_items SET qty_adjustment = '$qty_adjustment', qty_adjustment2 = '$qty_adjustment2' WHERE kode_adjustment = '$kode_adjustment' AND row_order = '$row_order'");
   	}
+
+	public function update_adjustment_items2($kode_adjustment,$kode_produk, $lot, $uom,$qty_adjustment,$uom2,$qty_adjustment2,$row_order)
+  	{
+    return $this->db->query("UPDATE adjustment_items SET kode_produk = '$kode_produk', lot = '$lot', uom = '$uom', qty_adjustment = '$qty_adjustment',
+							 uom2 = '$uom2', qty_adjustment2 = '$qty_adjustment2' 
+							WHERE kode_adjustment = '$kode_adjustment' AND row_order = '$row_order'");
+  	}
+
 
   	public function delete_adjustment_items($kode_adjustment,$row_order)
 	{
@@ -308,6 +316,14 @@ class M_adjustment extends CI_Model
 		$this->db->WHERE('mpfg.quant_id',$quant_id);
 		$this->db->WHERE_IN('mp.destination_location',$result['kode_lokasi']);
 		return $this->db->get();
+	}
+
+	public function get_adjustment_items_by_row($kode_adjustment,$row_order)
+	{
+		return $this->db->query("SELECT adji.quant_id, adji.kode_produk, adji.lot, adji.uom, adji.qty_data, adji.qty_adjustment, adji.uom2, adji.qty_data2, adji.qty_adjustment2, adji.move_id, mp.nama_produk
+								FROM adjustment_items  as adji
+								INNER JOIN mst_produk as mp ON mp.kode_produk = adji.kode_produk
+								WHERE adji.kode_adjustment = '$kode_adjustment' AND adji.row_order = '$row_order' ");
 	}
 
 }

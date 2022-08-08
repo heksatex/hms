@@ -626,22 +626,49 @@ class Salescontract extends MY_Controller
               }
                 
             }else{//simpan data baru
-              
-              $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
-              $row_order = $ro['row_order']+1;
-              $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note);
-              
-              // cek status sales_contract
-              $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
 
-              if($is_approve_null > 0){
-                $this->m_sales->update_status_sales_contract($kode,'waiting_color');
+              // cek qty by produk qty contract line
+              $cq_contract_lines = $this->m_sales->cek_qty_contract_lines_by_produk($kode,$kode_prod);
+
+              // cek qty by produk qty color line
+              $cq_color_lines = $this->m_sales->cek_qty_color_lines_by_produk($kode,$kode_prod);
+
+              if($cq_color_lines <= $cq_contract_lines){
+
+                // ditambah dengan qty colorlines yang akan diinput
+                $tot_qty_color_line_new = $cq_color_lines + $qty;
+
+                if($tot_qty_color_line_new <= $cq_contract_lines ){ // boleh insert
+
+                  $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
+                  $row_order = $ro['row_order']+1;
+                  $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note);
+                  
+                  // cek status sales_contract
+                  $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
+    
+                  if($is_approve_null > 0){
+                    $this->m_sales->update_status_sales_contract($kode,'waiting_color');
+                  }
+                  
+                  $jenis_log   = "edit";
+                  $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note;
+                  $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
+                  $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+                }else{
+
+                  $sisa_qty_insert_color_lines = $cq_contract_lines - $cq_color_lines;// cek sisa qty yang bisa insert ke color lines
+                  $callback = array('status' => 'failed','message' => 'Qty Color Line melebihi dari target Contract Lines, Sisa Qty yang bisa diinputkan ke Color Line tersisa '.$sisa_qty_insert_color_lines.' '.$uom.' lagi', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+                }
+
+              }else{
+
+                $callback = array('status' => 'failed','message' => 'Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
               }
               
-              $jenis_log   = "edit";
-              $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note;
-              $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
-              $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                       
             }
         }
@@ -755,6 +782,8 @@ class Salescontract extends MY_Controller
             $row_order    = $this->input->post('row_order');
             $value        = $this->input->post('value');
             $ow           = $this->input->post('ow');
+            $kode_produk  = $this->input->post('kode_produk');
+            $qty          = $this->input->post('qty');
             $tgl          = date('Y-m-d H:i:s');
 
             $items = $this->m_sales->cek_item_color_lines_by_kode($sales_order,$row_order)->row_array();
@@ -764,22 +793,43 @@ class Salescontract extends MY_Controller
 
             }else{
 
-              // update status sales Color Lines
-              $this->m_sales->update_status_color_line_by_row($sales_order,$row_order,$value,$ow);
-
               if($value == 't'){
-                $status = $ow.' Tidak Aktif';
+                $status = $ow.' Aktif';
               }else if($value == 'ng'){
-                $status = 'Not Good';
+                $status = $ow.' Not Good';
               }else{
-                $status = $ow.' OW Tidak Aktif';
+                $status = $ow.' Tidak Aktif';
               }
+              $lebih_target = false;
+              if($value == 't'){
+                // cek qty by produk qty contract line
+                $cq_contract_lines = $this->m_sales->cek_qty_contract_lines_by_produk($sales_order,$kode_produk);
+  
+                // cek qty by produk qty color line
+                $cq_color_lines = $this->m_sales->cek_qty_color_lines_by_produk($sales_order,$kode_produk);
+  
+                if($cq_color_lines > $cq_contract_lines){
+                  $lebih_target = true;  
+                  $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                }
 
-              $jenis_log   = "edit";
-              $note_log    = "Update Status | ".$status;
-              $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+                // tambah qty yg akan di aktifkan
+                $tot_qty_color_line_new = $cq_color_lines + $qty;
+                if($tot_qty_color_line_new > $cq_contract_lines ){ 
+                  $lebih_target = true;  
+                  $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                }
 
-              $callback = array('status' => 'success','message' => ' Status Berhasil di Rubah!', 'icon' =>'fa fa-check', 'type' => 'success');
+              }
+              if($lebih_target == false){
+                // update status sales Color Lines
+                $this->m_sales->update_status_color_line_by_row($sales_order,$row_order,$value,$ow);
+
+                $jenis_log   = "edit";
+                $note_log    = "Update Status | ".$status;
+                $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+                $callback = array('status' => 'success','message' => ' Status Berhasil di Rubah!', 'icon' =>'fa fa-check', 'type' => 'success');
+              }
             }
 
 
@@ -795,7 +845,16 @@ class Salescontract extends MY_Controller
 
     public function create_color_modal()
     {
-        return $this->load->view('modal/v_sales_contract_create_color_modal');
+      if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+        // session habis
+        print_r('Waktu And Telah Habis, Silahkan Login Kembali !');
+      }else{
+        $username  = addslashes($this->session->userdata('username')); 
+        $sales = $this->m_sales->cek_sales_group_by_username($username)->row_array();
+        $data['sales_group'] = $sales['sales_group'];
+        return $this->load->view('modal/v_sales_contract_create_color_modal',$data);
+        
+      }
     }
 
     public function mode_print_modal()
@@ -815,6 +874,8 @@ class Salescontract extends MY_Controller
         $sc   = $this->m_sales->get_data_by_kode($so);
         $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
         $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
+        $state   = $this->m_sales->get_partner_states_by_kode($cust->invoice_city)->row_array();// id_state
+        $country = $this->m_sales->get_partner_country_by_kode($cust->invoice_city)->row_array();// id_country
         $inisial_sales_group = $this->_module->get_inisial_sales_Group_by_kode($sc->sales_group);
 
     		$pdf = new FPDF('p','mm','legal');
@@ -828,18 +889,18 @@ class Salescontract extends MY_Controller
     		$pdf->SetFont('Arial','B',10);
     		// mencetak string
     		$pdf->Cell(185,7,'Faktur dan Alamat Pengiriman',0,1,'L');
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(100,5,$sc->customer_name,0,1,'L');
-    		$pdf->Cell(100,5,$cust->invoice_street,0,1,'L');
-    		$pdf->Cell(190,5,$cust->invoice_city." ".$cust->invoice_zip,0,1,'L');
-    		$pdf->Cell(190,5,$cust->invoice_state,0,1,'L');
+        $pdf->Multicell(100,4,$cust->invoice_street,0, 'L');
+    		$pdf->Cell(190,5,$country['name']." ".$cust->invoice_zip,0,1,'L');
+    		$pdf->Cell(190,5,$state['name'],0,1,'L');
 
     		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
 
     		$pdf->SetFont('Arial','b',20);
     		$pdf->Cell(190,7,'Order '.$sc->sales_order,0,1,'L');
 
-    		$pdf->SetFont('Arial','B',9);
+    		$pdf->SetFont('Arial','B',10);
     		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
     		if(!empty($sc->reference)){
          
@@ -849,7 +910,7 @@ class Salescontract extends MY_Controller
     		$pdf->Cell(15,0.5,' Salesperson :',0,0, 'L');
     		$pdf->Cell(10,4,'',0,1);//Buat Jarak ke bawah
 
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		$tgl_trans  =  date('d-m-Y ', strtotime($sc->create_date)); 
     		if(!empty($sc->reference)){
     			$pdf->Cell(47,0.5,$sc->reference,0,0, 'L');
@@ -859,7 +920,7 @@ class Salescontract extends MY_Controller
     		$pdf->Cell(15,0.5,$inisial_sales_group,0,0, 'L');
     		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
     		$pdf->Cell(60,0.5,'Dengan Hormat, ',0,0, 'L');
@@ -957,25 +1018,25 @@ class Salescontract extends MY_Controller
   		// Memberikan space kebawah agar tidak terlalu rapat
   		$pdf->Cell(10,10,'',0,1);
   		//FOOTER
-  		$pdf->SetFont('Arial','B',9);
-  		$pdf->Cell(33,0.5,'Tanggal Pengiriman :',0,0, 'L');
+  		$pdf->SetFont('Arial','B',10);
+  		$pdf->Cell(37,0.5,'Tanggal Pengiriman :',0,0, 'L');
   		$pdf->SetFont('Arial','',9);
   		$pdf->Cell(15,0.5,$sc->delivery_date,0,0, 'L');
   		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
 
       if(!empty($pay->nama)){
-  		$pdf->SetFont('Arial','B',9);
-  		$pdf->Cell(33,0.5,'Metode Pembayaran :',0,0, 'L');
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','B',10);
+  		$pdf->Cell(37,0.5,'Metode Pembayaran :',0,0, 'L');
+  		$pdf->SetFont('Arial','',10);
   		$pdf->Cell(15,0.5,$pay->nama,0,0, 'L');
   		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
       }
 
 
-  		$pdf->SetFont('Arial','B',9);
+  		$pdf->SetFont('Arial','B',10);
   		$pdf->Cell(38,0.5,'Bank :',0,0, 'L');
   		$pdf->Cell(10,5,'',0,1);
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','',10);
   		
   		$breaks = array("<br />","<br>","<br/>"); 
       $bank  = str_ireplace($breaks, "\n", nl2br(htmlspecialchars($sc->bank)));
@@ -983,7 +1044,7 @@ class Salescontract extends MY_Controller
   		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
 	  	
 	  	if(!empty($sc->clause)){
-  			$pdf->SetFont('Arial','B',9);  
+  			$pdf->SetFont('Arial','B',10);  
   			$pdf->Cell(13,0.5,'Clause :',0,0, 'L');
   			$pdf->SetFont('Arial','',9);
   			$pdf->Cell(15,0.5,$sc->clause,0,0, 'L');
@@ -991,9 +1052,9 @@ class Salescontract extends MY_Controller
 	  	}
 
 	  	if(!empty($sc->note)){
-  			$pdf->SetFont('Arial','B',9);  
+  			$pdf->SetFont('Arial','B',10);  
   			$pdf->Cell(14,4,'Catatan :',0,0, 'L');
-  			$pdf->SetFont('Arial','',9);
+  			$pdf->SetFont('Arial','',10);
         $pdf->Multicell(0,4,$sc->note,0, 'L');
   			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
   			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
@@ -1001,7 +1062,7 @@ class Salescontract extends MY_Controller
        
   		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
        
-  		$pdf->SetFont('Arial','B',9);  
+  		$pdf->SetFont('Arial','B',10);  
   		$pdf->Cell(15,0,'');
   		$pdf->Cell(60,0.5,'Menyatakan Setuju, ',0,0, 'c');
   		$pdf->Cell(50,0,'');
@@ -1025,9 +1086,9 @@ class Salescontract extends MY_Controller
 
 		    $pdf->Cell(5,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
-		  	$pdf->SetFont('Arial','B',9);
+		  	$pdf->SetFont('Arial','B',10);
 		    $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
-  			$pdf->SetFont('Arial','',9);
+  			$pdf->SetFont('Arial','',10);
   		}
 
   		// Geser Ke Kanan 35mm
@@ -1042,6 +1103,8 @@ class Salescontract extends MY_Controller
       $sc   = $this->m_sales->get_data_by_kode($so);
       $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
       $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
+      $state   = $this->m_sales->get_partner_states_by_kode($cust->invoice_city)->row_array();// id_state
+      $country = $this->m_sales->get_partner_country_by_kode($cust->invoice_city)->row_array();// id_country
       $inisial_sales_group = $this->_module->get_inisial_sales_Group_by_kode($sc->sales_group);
 
 
@@ -1056,18 +1119,18 @@ class Salescontract extends MY_Controller
   		$pdf->SetFont('Arial','B',10);
   		// mencetak string
   		$pdf->Cell(185,7,'Invoice',0,1,'L');
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','',10);
   		$pdf->Cell(100,5,$sc->customer_name,0,1,'L');
-  		$pdf->Cell(100,5,$cust->invoice_street,0,1,'L');
-  		$pdf->Cell(190,5,$cust->invoice_city." ".$cust->invoice_zip,0,1,'L');
-  		$pdf->Cell(190,5,$cust->invoice_state,0,1,'L');
+  		$pdf->Multicell(100,4,$cust->invoice_street,0, 'L');
+  		$pdf->Cell(190,5,$country['name']." ".$cust->invoice_zip,0,1,'L');
+    	$pdf->Cell(190,5,$state['name'],0,1,'L');
 
   		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
 
   		$pdf->SetFont('Arial','b',20);
   		$pdf->Cell(190,7,'Order '.$sc->sales_order,0,1,'L');
 
-  		$pdf->SetFont('Arial','B',9);
+  		$pdf->SetFont('Arial','B',10);
   		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
   		if(!empty($sc->reference)){
   			$pdf->Cell(47,0.5,'Reference :',0,0, 'L');
@@ -1076,7 +1139,7 @@ class Salescontract extends MY_Controller
   		$pdf->Cell(15,0.5,' Salesperson :',0,0, 'L');
   		$pdf->Cell(10,4,'',0,1);//Buat Jarak ke bawah
 
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','',10);
   		$tgl_trans  =  date('d-m-Y ', strtotime($sc->create_date)); 
   		if(!empty($sc->reference)){
   			$pdf->Cell(47,0.5,$sc->reference,0,0, 'L');
@@ -1176,25 +1239,25 @@ class Salescontract extends MY_Controller
     		// Memberikan space kebawah agar tidak terlalu rapat
     		$pdf->Cell(10,10,'',0,1);
     		//FOOTER
-    		$pdf->SetFont('Arial','B',9);
-    		$pdf->Cell(23,0.5,'Delivery Date :',0,0, 'L');
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','B',10);
+    		$pdf->Cell(25,0.5,'Delivery Date :',0,0, 'L');
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(15,0.5,$sc->delivery_date,0,0, 'L');
     		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
 
         if(!empty($pay->nama)){          
-    		$pdf->SetFont('Arial','B',9);
-    		$pdf->Cell(24,0.5,'Payment Term :',0,0, 'L');
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','B',10);
+    		$pdf->Cell(28,0.5,'Payment Term :',0,0, 'L');
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(15,0.5,$pay->nama,0,0, 'L');
     		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
         }
 
 
-    		$pdf->SetFont('Arial','B',9);
+    		$pdf->SetFont('Arial','B',10);
     		$pdf->Cell(38,0.5,'Bank :',0,0, 'L');
     		$pdf->Cell(10,5,'',0,1);
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		
     		$breaks = array("<br />","<br>","<br/>"); 
         $bank  = str_ireplace($breaks, "\n", nl2br(htmlspecialchars($sc->bank)));
@@ -1202,17 +1265,17 @@ class Salescontract extends MY_Controller
     		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
     	  	
     	  if(!empty($sc->clause)){
-    			$pdf->SetFont('Arial','B',9);  
+    			$pdf->SetFont('Arial','B',10);  
     			$pdf->Cell(13,0.5,'Clause :',0,0, 'L');
-    			$pdf->SetFont('Arial','',9);
+    			$pdf->SetFont('Arial','',10);
     			$pdf->Cell(15,0.5,$sc->clause,0,0, 'L');
     			$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
     	  	}
 
     	  if(!empty($sc->note)){
-    			$pdf->SetFont('Arial','B',9);  
+    			$pdf->SetFont('Arial','B',10);  
     			$pdf->Cell(10,4,'Note :',0,0, 'L');
-    			$pdf->SetFont('Arial','',9);
+    			$pdf->SetFont('Arial','',10);
     			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
           $pdf->Multicell(0,4,$sc->note,0, 'L');
     			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
@@ -1220,7 +1283,7 @@ class Salescontract extends MY_Controller
 
         $pdf->Cell(10,5,'',0,1);//ENTER ke bawah
 
-    		$pdf->SetFont('Arial','B',9);  
+    		$pdf->SetFont('Arial','B',10);  
     		$pdf->Cell(60,0.5,'We hereby confirm and accept this contract of sales, ',0,0, 'c');
     		$pdf->Cell(65,0,'');
     		$pdf->Cell(60,0.5,' PT.Heksatex Indah,  ',0,0, 'c');
@@ -1243,9 +1306,9 @@ class Salescontract extends MY_Controller
 
     		  $pdf->Cell(5,0,'',0,0);
     		  $pdf->Cell(20,0,'',0,0);
-    			$pdf->SetFont('Arial','B',9);
+    			$pdf->SetFont('Arial','B',10);
     		  $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
-    			$pdf->SetFont('Arial','',9);
+    			$pdf->SetFont('Arial','',10);
     		}
 
     		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah

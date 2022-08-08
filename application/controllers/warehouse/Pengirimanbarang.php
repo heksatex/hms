@@ -333,7 +333,7 @@ class Pengirimanbarang extends MY_Controller
         $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
 
         // get warna untuk greige out()
-        if($list->dept_id == 'GRG'){
+        if($list->dept_id == 'GRG' AND $list->origin != ''){
           $origin = $list->origin;
           $origin_ex  = explode("|",$origin);
           $kode_co    = $origin_ex[1];
@@ -342,7 +342,7 @@ class Pengirimanbarang extends MY_Controller
           $get_w      = $this->m_pengirimanBarang->get_warna_by_co($kode_co,$row_order)->row_array();
           $data['warna']  = $get_w['nama_warna'];
         }else{
-          $data['warana'] = '';
+          $data['warna'] = '';
         }
 
         $qc            = $this->m_pengirimanBarang->get_quality_control_by_kode($kode_decrypt,$list->dept_id)->row();
@@ -994,10 +994,13 @@ class Pengirimanbarang extends MY_Controller
             $status_brg = 'draft';
             
             //lock tabel
-            $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE' );
+            $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, pengiriman_barang_tmp WRITE' );
             
             //delete stock move item dan update reserve move jadi kosong
             $this->_module->delete_details_items($move_id,$quant_id,$row_order);
+
+            // delete pengiriman_barang tmp
+            $this->m_pengirimanBarang->delete_pengiriman_barang_tmp($kode,$move_id,$quant_id);
 
             // cek apakah terdapat kode_produk yg lebih dari 1
             $cek_jml_produk_sama = $this->m_pengirimanBarang->cek_jml_produk_sama_pengiriman_barang_by_kode($kode,$kode_produk)->num_rows();
@@ -1185,7 +1188,7 @@ class Pengirimanbarang extends MY_Controller
                // break;
             }else{
                     //lock tabel 
-                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE');
+                    $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE, departemen WRITE');
             
                     //lokasi tujuan 
                     $lokasi = $this->m_pengirimanBarang->get_location_by_move_id($move_id)->row_array();                    
@@ -1438,9 +1441,16 @@ class Pengirimanbarang extends MY_Controller
                             }
                         }
 
+                        $cek_rm = $this->_module->cek_status_mrp_rm_target_additional_move_id_kosong_by_kode($whereMo)->num_rows();
+                        if($cek_rm > 0){
+                          $update_status = false;
+                        }else{
+                          $update_status = true;
+                        }
+                        
                         if($update_status == true) {
-                            $sql_update_mrp_production  = "UPDATE mrp_production SET status ='ready' WHERE  kode in (".$whereMo.") "; 
-                            $this->_module->update_perbatch($sql_update_mrp_production);
+                              $sql_update_mrp_production  = "UPDATE mrp_production SET status ='ready' WHERE  kode in (".$whereMo.") "; 
+                              $this->_module->update_perbatch($sql_update_mrp_production);
                         }
 
                       }
@@ -1612,7 +1622,19 @@ class Pengirimanbarang extends MY_Controller
                           $kode_in = $this->_module->get_kode_penerimaan_barang_by_move_id($cek_sm['move_id'])->row_array();
 
                           //update reff picking pengiriman_barang
-                          $reff_picking_out_baru = $kode_out.'|'.$kode_in['kode'];                                                    
+                          if(!empty($kode['kode'])){
+                            $reff_picking_out_baru = $kode_out.'|'.$kode_in['kode'];   
+                            
+                          }else{
+                            // harus nya lokasi tujuanya langsung ke lokasi stock, example DYE/Stock
+                            $dept_tujuan = $this->_module->get_kode_departemen_by_stock_location($lokasi_tujuan);// jika lokasi tujuan transit pasti tidak di temukan
+                            if(!empty($dept_tujuan)){
+                              $reff_picking_out_baru = $kode_out.'|'.$dept_tujuan;   
+                            }else{
+                              $reff_picking_out_baru = $kode_out.'|';   
+                            }
+                          }
+                          
                           $sql_update_reff_picking_out = "UPDATE pengiriman_barang SET reff_picking = '$reff_picking_out_baru' WHERE kode = '$kode_out'";
                           $this->_module->update_perbatch($sql_update_reff_picking_out);  
                           //get reff_picking_penerimaan by kode_In['kode']
@@ -1642,11 +1664,20 @@ class Pengirimanbarang extends MY_Controller
 
                     //unlock table
                     $this->_module->unlock_tabel();
+                    
+                    $jenis_log   = "done";
+                    $note_log    = "Kirim Data Barang ";
+                    $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+                    if($backorder == true){
+                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success', 'backorder' => 'yes', 'message2'=> 'Akan terbentuk Backorder dengan No '.$kode_out);
+                    }else{
+                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success');
 
-                    if($deptid ==  'GRG'){
+                    }     
+                    
+                    if($deptid ==  'GRG' AND $origin != ''){
 
                       // insert to  tabel print greige out
-              
                       $arr_insert = [];
                       $smi        = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode,$deptid);
                       $num        = 1;
@@ -1821,16 +1852,6 @@ class Pengirimanbarang extends MY_Controller
                       }
               
                     }
-                    
-                    $jenis_log   = "done";
-                    $note_log    = "Kirim Data Barang ";
-                    $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
-                    if($backorder == true){
-                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success', 'backorder' => 'yes', 'message2'=> 'Akan terbentuk Backorder dengan No '.$kode_out);
-                    }else{
-                        $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success');
-
-                    }              
 
             }//else cek stock move items
 

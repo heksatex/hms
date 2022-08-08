@@ -42,10 +42,12 @@ class Adjustment extends MY_Controller
 									  'kode_produk' => $val->kode_produk,
 									  'nama_produk' => '['.$val->kode_produk.'] '.$val->nama_produk,
 									  'tot_lot'     => $val->tot_lot,
-									  'qty'         => $val->tot_qty_move,
+									  'qty_stock'   => $val->tot_qty_stock,
+									  'qty'         => $val->tot_qty1_adj,
 									  'uom'         => $val->uom,
-									  'qty2'        => $val->tot_qty2,
-									  'uom2'        => $val->uom_2
+									  'qty2'        => $val->tot_qty2_adj,
+									  'uom2'        => $val->uom_2,
+									  'qty_move'    => $val->tot_qty_move
 							);
 
 			}
@@ -63,11 +65,13 @@ class Adjustment extends MY_Controller
 				$dataItems[] = array( 'kode_adjustment' => $val->kode_adjustment,
 									  'tanggal'     => $val->create_date,
 									  'nama_produk' => '['.$val->kode_produk.'] '.$val->nama_produk,
-									  'lot'     => $val->lot,
-									  'qty'         => $val->qty_move,
+									  'lot'     	=> $val->lot,
+									  'qty_stock'   => $val->qty_data,
+									  'qty'         => $val->qty_adjustment,
 									  'uom'         => $val->uom,
 									  'qty2'        => $val->qty_adjustment2,
 									  'uom2'        => $val->uom2,
+									  'qty_move'    => $val->qty_move,
 									  'user'        => $val->nama_user,
 									  'note'        => $val->note
 
@@ -121,7 +125,7 @@ class Adjustment extends MY_Controller
 		$object->getActiveSheet()->mergeCells('C5:D5');
 
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:K7")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:M7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -133,7 +137,7 @@ class Adjustment extends MY_Controller
 		);	
 
 		$column = 0;
-		$table_head_columns = array('No','Kode Adjustment','Tanggal','Product','Lot','Qty','UoM','Qty2','UoM2','User','Notes');
+		$table_head_columns = array('No','Kode Adjustment','Tanggal','Product','Lot','Qty Stock','Qty Adj','UoM','Qty2','UoM2','Qty Move','User','Notes');
 
 		foreach ($table_head_columns as $field) {
 			# code...
@@ -149,15 +153,17 @@ class Adjustment extends MY_Controller
 		$object->getSheet(0)->getColumnDimension('D')->setAutoSize(true);
 		$object->getSheet(0)->getColumnDimension('E')->SetWidth(21);
 		$object->getSheet(0)->getColumnDimension('F')->SetWidth(15);
-		$object->getSheet(0)->getColumnDimension('G')->SetWidth(10);
-		$object->getSheet(0)->getColumnDimension('H')->SetWidth(15);
-		$object->getSheet(0)->getColumnDimension('I')->SetWidth(10);
-		$object->getSheet(0)->getColumnDimension('J')->SetWidth(15);
-		$object->getSheet(0)->getColumnDimension('K')->SetWidth(17);
+		$object->getSheet(0)->getColumnDimension('G')->SetWidth(15);
+		$object->getSheet(0)->getColumnDimension('H')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('I')->SetWidth(15);
+		$object->getSheet(0)->getColumnDimension('J')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('K')->SetWidth(15);
+		$object->getSheet(0)->getColumnDimension('L')->SetWidth(17);
+		$object->getSheet(0)->getColumnDimension('M')->SetWidth(17);
 
 
 		// set border
-		$index_header = array('A','B','C','D','E','F','G','H','I','J','K');
+		$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
 		// set border header
 		foreach ($index_header as $val) {
 			$object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
@@ -176,19 +182,23 @@ class Adjustment extends MY_Controller
 			$kode_produk  =  $hd->kode_produk;
 			$nama_produk = '['.$hd->kode_produk.'] '.$hd->nama_produk;
 			$tot_lot     = $hd->tot_lot;
-			$tot_qty     = $hd->tot_qty_move;
-			$tot_qty2    = $hd->tot_qty2;
+			$tot_qty_stock= $hd->tot_qty_stock;
+			$tot_qty     = $hd->tot_qty1_adj;
+			$tot_qty2    = $hd->tot_qty2_adj;
 			$uom         = $hd->uom;
 			$uom2        = $hd->uom_2;
+			$tot_qty_move= $hd->tot_qty_move;
 
 
 			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($no));
 			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $nama_produk);
 			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $tot_lot);
-			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $tot_qty);
-			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $uom);
-			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $tot_qty2);
-			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $uom2);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $tot_qty_stock);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $tot_qty);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $uom);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $tot_qty2);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $uom2);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $tot_qty_move);
 
 
 			// set bold
@@ -199,13 +209,13 @@ class Adjustment extends MY_Controller
 			$object->getActiveSheet()->getStyle("G".$rowCount)->getFont()->setBold(TRUE);
 			$object->getActiveSheet()->getStyle("H".$rowCount)->getFont()->setBold(TRUE);
 			$object->getActiveSheet()->getStyle("I".$rowCount)->getFont()->setBold(TRUE);
+			$object->getActiveSheet()->getStyle("J".$rowCount)->getFont()->setBold(TRUE);
+			$object->getActiveSheet()->getStyle("K".$rowCount)->getFont()->setBold(TRUE);
 
 			// set align enter
 	        $object->getActiveSheet()->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 	        $object->getActiveSheet()->getStyle('D'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 	        $object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-	        $object->getActiveSheet()->getStyle('F'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-	        $object->getActiveSheet()->getStyle('H'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
 			$rowCount++;
 
@@ -217,12 +227,14 @@ class Adjustment extends MY_Controller
 				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->kode_adjustment);
 				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->create_date);
 				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lot);
-				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->qty_move);
-				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->uom);
-				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->qty_adjustment2);
-				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->uom2);
-				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->nama_user);
-				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->note);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->qty_data);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_adjustment);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->uom);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty_adjustment2);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom2);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty_move);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->nama_user);
+				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->note);
 
 				// set align
 		        $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);

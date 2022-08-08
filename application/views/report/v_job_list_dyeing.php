@@ -192,7 +192,7 @@
             "iDisplayLength": 10,
             "paging": true,
             "lengthChange": true,
-            "searching": true,
+            "searching": false,
             "ordering": true,
             "info": true,
             "autoWidth": false,

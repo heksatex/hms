@@ -835,6 +835,72 @@ class Stockquants extends MY_Controller
         echo json_encode($callback);
     }
 
+
+    public function mode_print_modal()
+    {
+    	$quant_id   = $this->input->post('quant_id');
+        $data['quant_id'] =$quant_id;
+        return $this->load->view('modal/v_stock_quant_print_modal', $data);
+    }
+
+
+    function print_knitting()
+    {
+       
+        $id       = $this->input->get('quant_id');
+        $quant_id = decrypt_url($id);
+
+        $sq       = $this->_module->get_stock_quant_by_id($quant_id)->row_array();
+        
+        if($sq){
+            $barcode  = $sq['lot'];
+            $nama_grade  = $sq['nama_grade'];
+
+            $this->load->library('Pdf');//load library pdf
+
+            $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
+
+            $pdf->AddPage();
+
+                $pdf->SetFont('Arial','B',25,'C');
+                $pdf->setXY(10,8);
+                $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 1
+                //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
+
+                $pdf->SetFont('Arial','B',40);
+                $pdf->setXY(120,5);
+                $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+                //$pdf->Cell(0,3,$nama_grade,0,1);//grade
+                
+                $pdf->Code128(30,18,$barcode,110,23,'C');//barcode 1       
+                
+                
+                $pdf->Line(20, 47, 170, 47); // garis tengah
+                //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
+
+                $pdf->SetFont('Arial','B',25,'C');
+                $pdf->setXY(10,54);
+                $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
+                //$pdf->Cell(100,30,$barcode,0,0,'R');
+
+                $pdf->SetFont('Arial','B',40);
+                $pdf->setXY(120,51);
+                $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+                //$pdf->Cell(0,27,$nama_grade,0,1);//grade
+
+                $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
+
+                $pdf->Line(170,3,170,100);//vertical
+
+            $pdf->Output();
+
+        }else{
+            print_r('Maaf, Lot Tidak ditemukan !');
+        }
+    }
+
+
+
  
 
 }

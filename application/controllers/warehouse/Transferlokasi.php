@@ -441,12 +441,19 @@ class Transferlokasi extends MY_Controller
 	   		// cek status 
 	    	$tl  = $this->m_transferLokasi->get_transfer_lokasi_by_kode($kode_tl);
 
+			// cek user yg membuat transfer lokasi
+			$nama_user  = $this->_module->get_nama_user($username)->row_array();
+			$status_tl  = " IN ('draft','ready')";
+			$cek_tl_user = $this->m_transferLokasi->cek_transfer_lokasi_by_user($nama_user['nama'],$status_tl)->num_rows();
+
 	    	if($tl->status == 'done'){
                 $callback = array('status' => 'failed','message' => 'Maaf, Status Transfer Lokasi Sudah Done !', 'icon' =>'fa fa-check', 'type' => 'danger');
             }else if($tl->status == 'cancel'){
                 $callback = array('status' => 'failed','message' => 'Maaf, Transfer Lokasi telah dibatalkan !', 'icon' =>'fa fa-check', 'type' => 'danger');
             }else if(!$tli){
 				$callback = array('status' => 'failed','message' => 'Barcode yang akan di Transfer Lokasi masih kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
+	   		}else if($cek_tl_user == 0){
+				$callback = array('status' => 'failed','message' => 'Maaf, Transfer Lokasi hanya bisa di Transfer Lokasi kan oleh User yang membuat Transfer Lokasi Tersebut !', 'icon' =>'fa fa-check', 'type' => 'danger');
 	   		}else{
 
 		    	//lock table

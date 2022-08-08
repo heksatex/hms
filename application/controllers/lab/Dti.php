@@ -16,6 +16,7 @@ class Dti extends MY_Controller
 	public function index()
 	{
 		$data['id_dept']='DTI';
+		$data['mst_sales_group'] = $this->_module->get_list_sales_group();
 		$this->load->view('lab/v_dti', $data);
 	}
 
@@ -34,6 +35,8 @@ class Dti extends MY_Controller
             $row[] = '<a href="'.base_url('lab/dti/edit/'.$kode_encrypt).'">'.$field->nama_warna.'</a>';
             $row[] = $field->tanggal;
             $row[] = $field->nama_status;
+            $row[] = $field->nama_sales_group;
+            $row[] = $field->tot_varian;
             $row[] = $field->notes;
  
             $data[] = $row;
@@ -55,10 +58,12 @@ class Dti extends MY_Controller
     $id_warna         = $this->input->get('id_warna');
     $id_varian        = $this->input->get('id_varian');
     $duplicate        = $this->input->get('duplicate');
+		$data['mst_sales_group'] = $this->_module->get_list_sales_group();
     if($duplicate == 'true'){
       $color            = $this->m_lab->get_data_color_by_code($id_warna);
       $data['dyest']    = $this->m_lab->get_data_dye_aux_varians_by_code($id_warna,'DYE',$id_varian);
       $data['aux']      = $this->m_lab->get_data_dye_aux_varians_by_code($id_warna,'AUX',$id_varian);
+      $data['notes']    = $this->m_lab->get_note_varian_by_id($id_varian);
       $data['color']    = $color;
       $data['id_warna']   = $id_warna;
       $data['id_varian']  = $id_varian;
@@ -87,28 +92,129 @@ class Dti extends MY_Controller
 			$id         = $this->input->post('id');
 			$tanggal    = date('Y-m-d H:i:s');
       $notes      = addslashes($this->input->post('note'));
+			$note_varian = addslashes($this->input->post('note_varian'));
       $kode_warna = addslashes($this->input->post('kode_warna'));
+     
+      $sales_group = addslashes($this->input->post('sales_group'));
 			$status     = addslashes($this->input->post('status'));
       $status2    = $this->input->post('status2');// status head draft/requested
 			$duplicate  = addslashes($this->input->post('duplicate'));
 
-			     if(empty($warna) AND empty($id)){
-                $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Warna Harus Diisi !'.$id, 'icon' =>'fa fa-warning', 
-                  'type' => 'danger'  );    
+      $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sales_group);
+
+			      if(empty($warna) AND empty($id)){
+             $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Warna Harus Diisi !', 'icon' =>'fa fa-warning', 
+             'type' => 'danger'  );    
+          	}else if(empty($warna)){
+              $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Warna Harus Diisi !', 'icon' =>'fa fa-warning', 
+              'type' => 'danger'  );    
           	}else if(empty($notes)){
               $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Notes Harus Diisi !', 'icon' =>'fa fa-warning', 
-                  'type' => 'danger'  );    
+              'type' => 'danger'  );    
           	}else{
-            	//cek warna apa sudah ada apa belum
+              //cek warna apa sudah ada apa belum
             	$cek = $this->m_lab->cek_color_by_color($warna)->row_array();
               if(!empty($cek['nama_warna']) AND $status == 'tambah'){
                   $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Warna Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
 
               }else if(!empty($cek['nama_warna'])){
-              		//update notes
-                  $this->m_lab->update_color($id,$notes,$kode_warna);
+
+                  $id_varian  = addslashes($this->input->post('id_varian'));
+
+                  // lock tabel
+                  $this->_module->lock_tabel('warna WRITE,warna_items WRITE, warna_varian WRITE');
+
+              		//update  Header
+                  $this->m_lab->update_color($id,$notes,$kode_warna,$sales_group);
+
+                  // update note varian
+                  $this->m_lab->update_note_varian_by_varian($id,$id_varian,$note_varian);
+
+                  
+                  $nama_varian = $this->m_lab->get_nama_varian_by_id($id_varian);
+                  $note_log_varian = "";
+                  $note_log_varian .=  "<br> <b> Edit Varian [".$nama_varian."] </b>";
+                  $note_log_varian .=  "<br> Notes Varian -> ".$note_varian;
+
+                  // get dti sebelum di edit
+                  $items_dye    = $this->m_lab->get_data_dye_aux_varians_by_code($id,'DYE',$id_varian);
+                  $note_log_dye = "";
+                  $num          = 1;
+                  foreach($items_dye as $dyes){
+                      $note_log_dye .= '('.$num.') '.$dyes->kode_produk." ".$dyes->nama_produk." ".$dyes->qty." ".$dyes->uom." ".$dyes->reff_note." ";
+                      $num++;
+                  }
+
+                  $items_aux    = $this->m_lab->get_data_dye_aux_varians_by_code($id,'AUX',$id_varian);
+                  $num          = 1;
+                  $note_log_aux = "";
+                  foreach($items_aux as $dyes){
+                      $note_log_aux .= '('.$num.') '.$dyes->kode_produk." ".$dyes->nama_produk." ".$dyes->qty." ".$dyes->uom." ".$dyes->reff_note." ";
+                      $num++;
+                  }
+
+                  // hapus warna item by varian
+                  $this->m_lab->delete_warna_item_by_kode($id,$id_varian);
+
+                  $array_dye    = json_decode($this->input->post('arr_dye'),true); 
+                  $array_aux    = json_decode($this->input->post('arr_aux'),true); 
+                
+                  // simpan warna item baru by new varian, id_warna
+                  $row           = 1;
+                  $sql_dti_items = "";
+                  $note_dye      = "";
+                  $note_aux      = "";
+                  foreach($array_dye as $dye){
+                    $sql_dti_items .= "('".$id."', '".$id_varian."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
+                    $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
+                    $row++;
+                  }
+                  $row           = 1;
+                  foreach($array_aux as $aux){
+                    $sql_dti_items .= "('".$id."', '".$id_varian."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
+                    $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
+
+                    $row++;
+                  }
+
+                  if(!empty($note_dye) OR !empty($note_log_dye)){
+                    $note_dye = rtrim($note_dye,', ');
+                    $note_dye = '<br> Dyeing Stuff : '.$note_log_dye.' <b> -> </b>'.$note_dye;
+                  }else{
+                    $note_dye = "";
+                  }
+
+                  if(!empty($note_aux) OR !empty($note_log_aux)){
+                    $note_aux = rtrim($note_aux,', ');
+                    $note_aux = '<br> Auxiliary :  '.$note_log_aux.' <b> -> </b>'.$note_aux;
+                  }else{
+                    $note_aux = "";
+                  }
+
+
+                  // simpan dti item batch
+                  if(!empty($sql_dti_items)){
+                    $sql_dti_items = rtrim($sql_dti_items, ', ');
+                    $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
+                    
+                  }
+
+                   //cek item warna (DYE, FIN)
+                  $cek_item = $this->m_lab->cek_item_dye_aux_by_id_warna($id)->num_rows();
+                  $note_status_head  = '';
+                  if($cek_item == 0){
+
+                    $head = $this->m_lab->get_data_color_by_code($id);
+                    // update head jadi draft
+                    $this->m_lab->update_status_warna($id,'draft');
+                    $note_status_head = ' <br> Update Status warna '.$head->status.' -> draft';
+                  }
+
+                  // unlock warna
+                  $this->_module->unlock_tabel();
+                  
                   $jenis_log   = "edit";
-                  $note_log    = $warna." | ".$notes." | ".$kode_warna;
+                  $note_log    = $warna." | ".$notes." | ".$kode_warna.' | '.$nama_sales_group." | ".$note_log_varian." ".$note_dye." ".$note_aux." ".$note_status_head;
                   $this->_module->gen_history($sub_menu, $id, $jenis_log, $note_log, $username);
                   $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                   
@@ -126,10 +232,10 @@ class Dti extends MY_Controller
                 $last_id = $this->m_lab->get_last_id_warna();
 
           			//insert warna
-          			$this->m_lab->save_color($warna,$tanggal,$notes,$status_head,$kode_warna);
+          			$this->m_lab->save_color($warna,$tanggal,$notes,$status_head,$kode_warna,$sales_group);
 
                 // insert varian A
-                $this->m_lab->save_new_varian_by_id_warna('A',$last_id);
+                $this->m_lab->save_new_varian_by_id_warna('A',$last_id,$note_varian);
 
                 if($duplicate == 'true'){// jika simpan duplicate warna
                     
@@ -156,19 +262,19 @@ class Dti extends MY_Controller
                     $row           = 1;
                     foreach($array_aux as $aux){
                       $sql_dti_items .= "('".$last_id."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
-                      $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$dye['uom'].' '.addslashes($aux['reff_note']). ', ';
+                      $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
 
                       $row++;
                     }
 
                     if(!empty($note_dye)){
                       $note_dye = rtrim($note_dye,', ');
-                      $note_dye = '| Dyeing Stuff -> '.$note_dye;
+                      $note_dye = '<br> Dyeing Stuff -> '.$note_dye;
                     }
 
                     if(!empty($note_aux)){
                       $note_aux = rtrim($note_aux,', ');
-                      $note_aux = '| Auxiliary -> '.$note_aux;
+                      $note_aux = '<br> Auxiliary -> '.$note_aux;
                     }
 
                     // simpan dti item batch
@@ -178,7 +284,7 @@ class Dti extends MY_Controller
                     }
                     $note_logs = 'Duplicate dari Warna '.$nama_warna_before.' Varian ['.$nama_varian.'] '.$note_dye.' '.$note_aux;
                 }else{
-                    $note_logs    = $warna." | ".$notes." | ".$kode_warna;
+                    $note_logs    = $warna." | ".$notes." | ".$kode_warna." | ".$nama_sales_group;
                 }
 
                 // unlock warna
@@ -208,6 +314,7 @@ class Dti extends MY_Controller
         $data['dyest']    = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'DYE');
         $data['aux']      = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'AUX');
         $data['uom']      = $this->_module->get_list_uom();
+    		$data['mst_sales_group'] = $this->_module->get_list_sales_group();
         $data['varian']   = $this->m_lab->get_list_varian_warna_by_id($kode_decrypt);
         $data['first_varian'] = $this->m_lab->get_first_varian_by_id($kode_decrypt);
         return $this->load->view('lab/v_dti_edit',$data);
@@ -223,11 +330,28 @@ class Dti extends MY_Controller
         return $this->load->view('lab/v_dti_edit_tab', $data);
   }
 
+  function get_note_varian()
+  {
+      $id_varian = $this->input->post('id_varian');
+      $id_warna  = $this->input->post('id_warna');
+
+      //get note varian
+      if(!empty($id_varian)){
+        $notes = $this->m_lab->get_note_varian_by_id($id_varian);
+      }else{
+        $notes = $this->m_lab->get_note_varian_last_by_id($id_warna);
+      }
+
+      $callback = array('status' => 'success', 'message' => 'Berhasil !', 'isi' => $notes, 'icon' =>'fa fa-check', 'type' => 'success');
+      echo json_encode($callback);
+  }
+
   public function get_items_dti()
   {
         $id_warna  = $this->input->post('id_warna');
-        $items_dye = $this->m_lab->get_items_dti_by_first_varian($id_warna,'DYE');
-        $items_aux = $this->m_lab->get_items_dti_by_first_varian($id_warna,'AUX');
+        $id_varian = $this->input->post('id_varian');
+        $items_dye = $this->m_lab->get_items_dti_by_varian($id_warna,'DYE',$id_varian);
+        $items_aux = $this->m_lab->get_items_dti_by_varian($id_warna,'AUX',$id_varian);
         $last_var  = $this->m_lab->get_last_varian_by_id($id_warna);
         $alpha     = range('A','Z');
         $last      = FALSE;
@@ -248,6 +372,19 @@ class Dti extends MY_Controller
         echo json_encode($callback);
   } 
 
+  public function get_items_dti_for_edit()
+  {
+        $id_warna  = $this->input->post('id_warna');
+        $id_varian = $this->input->post('id_varian');
+
+        $items_dye = $this->m_lab->get_data_dye_aux_varians_by_code($id_warna,'DYE',$id_varian);
+        $items_aux = $this->m_lab->get_data_dye_aux_varians_by_code($id_warna,'AUX',$id_varian);
+        
+        $callback = array('status' => 'success', 'record1' => $items_dye, 'record2' => $items_aux);
+
+        echo json_encode($callback);
+  } 
+
   public function simpan_varian()
   {
       if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
@@ -260,6 +397,7 @@ class Dti extends MY_Controller
           $id_warna    = $this->input->post('id_warna');
           $array_dye    = json_decode($this->input->post('arr_dye'),true); 
           $array_aux    = json_decode($this->input->post('arr_aux'),true); 
+          $notes_varian = $this->input->post('note_varian');
 
           // lock tabel
           $this->_module->lock_tabel('warna WRITE,warna_items WRITE, warna_varian WRITE');
@@ -269,6 +407,7 @@ class Dti extends MY_Controller
           $alpha     = range('A','Z');
           $last      = FALSE;
           $new_var   = '';
+          
           foreach($alpha as $alp){
   
             if($last == TRUE){
@@ -280,55 +419,62 @@ class Dti extends MY_Controller
             }
           }
 
-          // simpan varian baru by id_warna
-          $this->m_lab->save_new_varian_by_id_warna($new_var,$id_warna);
+          if($new_var == ''){ // jika varian A-z sudah ada
+            //unlock table
+            $this->_module->unlock_tabel();
 
-          // get id_varian baru
-          $id_var = $this->m_lab->get_id_new_varian_by_kode($id_warna,$new_var);
+            $callback = array('message' => 'Maaf, Varian tidak bisa ditambah lagi !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
+          }else{
+            
+            // simpan varian baru by id_warna
+            $this->m_lab->save_new_varian_by_id_warna($new_var,$id_warna,$notes_varian);
 
-          // simpan warna item baru by new varian, id_warna
-          $row           = 1;
-          $sql_dti_items = "";
-          $note_dye      = "";
-          $note_aux      = "";
-          foreach($array_dye as $dye){
-            $sql_dti_items .= "('".$id_warna."', '".$id_var."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
-            $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
-            $row++;
+            // get id_varian baru
+            $id_var = $this->m_lab->get_id_new_varian_by_kode($id_warna,$new_var);
+
+            // simpan warna item baru by new varian, id_warna
+            $row           = 1;
+            $sql_dti_items = "";
+            $note_dye      = "";
+            $note_aux      = "";
+            foreach($array_dye as $dye){
+              $sql_dti_items .= "('".$id_warna."', '".$id_var."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
+              $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
+              $row++;
+            }
+            $row           = 1;
+            foreach($array_aux as $aux){
+              $sql_dti_items .= "('".$id_warna."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
+              $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
+
+              $row++;
+            }
+
+            if(!empty($note_dye)){
+              $note_dye = rtrim($note_dye,', ');
+              $note_dye = '| Dyeing Stuff -> '.$note_dye;
+            }
+
+            if(!empty($note_aux)){
+              $note_aux = rtrim($note_aux,', ');
+              $note_aux = '| Auxiliary -> '.$note_aux;
+            }
+
+            // simpan dti item batch
+            if(!empty($sql_dti_items)){
+              $sql_dti_items = rtrim($sql_dti_items, ', ');
+              $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
+            }
+            
+            //unlock table
+            $this->_module->unlock_tabel();
+            
+            $callback    = array('status'=>'success', 'message' => 'Varian Warna Baru Berhasil disimpan',  'icon' =>'fa fa-check', 'type' => 'success', 'id_varian' =>$id_var);
+            $jenis_log   = "create";
+            $note_log    = "Tambah Data Warna Varian  ".$new_var."  ".$note_dye."  ".$note_aux. " <br> Notes Varian -> ".$notes_varian ;
+            $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+
           }
-          $row           = 1;
-          foreach($array_aux as $aux){
-            $sql_dti_items .= "('".$id_warna."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
-            $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$dye['uom'].' '.addslashes($aux['reff_note']). ', ';
-
-            $row++;
-          }
-
-          if(!empty($note_dye)){
-            $note_dye = rtrim($note_dye,', ');
-            $note_dye = '| Dyeing Stuff -> '.$note_dye;
-          }
-
-          if(!empty($note_aux)){
-            $note_aux = rtrim($note_aux,', ');
-            $note_aux = '| Auxiliary -> '.$note_aux;
-          }
-
-          // simpan dti item batch
-          if(!empty($sql_dti_items)){
-            $sql_dti_items = rtrim($sql_dti_items, ', ');
-            $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
-          }
-          
-          //unlock table
-          $this->_module->unlock_tabel();
-          
-          $callback    = array('status'=>'success', 'message' => 'Varian Warna Baru Berhasil disimpan',  'icon' =>'fa fa-check', 'type' => 'success', 'id_varian' =>$id_var);
-          $jenis_log   = "create";
-          $note_log    = "Tambah Data Warna Varian  ".$new_var."  ".$note_dye."  ".$note_aux ;
-          $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
-
-
 
       }
 
@@ -442,7 +588,7 @@ class Dti extends MY_Controller
         $cek_prod  = $this->m_lab->cek_prod($id_warna,$kode_produk,$id_warna_varian)->row_array();
 
         if(empty($nama_produk)){
-          $callback = array('message' => 'Product Harus Diisi !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
+         $callback = array('message' => 'Product Harus Diisi !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
        }elseif(empty($qty)){
          $callback = array('message' => 'Qty Harus Diisi !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
        }elseif(empty($uom)){
@@ -504,7 +650,7 @@ class Dti extends MY_Controller
         $id_warna_varian   = $this->input->post('id_warna_varian');
         $nama_varian = $this->m_lab->get_nama_varian_by_id($id_warna_varian);
 
-        $this->m_lab->delete_dye_aux($id_warna,$row_order,$type_obat);
+        $this->m_lab->delete_dye_aux($id_warna,$row_order,$type_obat,$id_warna_varian);
         $callback    = array('status'=>'success', 'message' => 'Data Berhasil Dihapus !',  'icon' =>'fa fa-check', 'type' => 'success');
 
         $jenis_log   = "cancel";
@@ -637,6 +783,7 @@ class Dti extends MY_Controller
           $row[] = $field->tanggal;
           $row[] = $field->origin;
           $row[] = $field->nama_mesin;
+          $row[] = $field->nama_varian;
           $row[] = $field->nama_status;
           $data[] = $row;
       }
@@ -664,7 +811,8 @@ class Dti extends MY_Controller
       print_r('Id Warna tidak ditemukan !');
     }else{
 
-      $header    = $this->m_lab->get_data_color_by_code($id_warna);
+      $header       = $this->m_lab->get_data_color_by_code($id_warna);
+      $notes_varian = $this->m_lab->get_note_varian_by_id($id_varian);
       //$items_dye = $this->m_lab->get_data_dye_aux_by_code($id_warna,'DYE');
       //$items_aux = $this->m_lab->get_data_dye_aux_by_code($id_warna,'AUX');
 
@@ -684,65 +832,74 @@ class Dti extends MY_Controller
       $pdf->setTitle('Print Out DTI');
 
       // judul
-      $pdf->SetFont('Arial','B',12,'C');
-      $pdf->Cell(0,10,'Dyeing Techinal Information (DTI)',0,0,'C');
+      $pdf->SetFont('Arial','B',15,'C');
+      $pdf->Cell(0,20,'Dyeing Techinal Information (DTI)',0,0,'C');
 
       // tgl cetak
       $pdf->SetFont('Arial','',7,'C');
-      $pdf->setXY(160,3);
+      $pdf->setXY(160,10);
       $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
       $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
 
       // Info Warna
-      $pdf->SetFont('Arial','B',12,'C');
-      $pdf->setXY(15,10);
+      $pdf->SetFont('Arial','B',15,'C');
+      $pdf->setXY(15,15);
       $pdf->Multicell(100,4,$header->nama_warna,0,'L');
 
-      // info Varian
-      $pdf->SetFont('Arial','B',8,'C');
-      $pdf->setXY(130,10);
-      $pdf->Multicell(25,4,'Varian  ',0,'L');
-      $pdf->setXY(150, 10);
-      $pdf->Multicell(5, 4, ':', 0, 'L');
-      $pdf->SetFont('Arial','B',25,'C');
-      $pdf->setXY(151,10);
-      $pdf->Multicell(20,10,$nama_varian,0,'L');
-
-      $pdf->SetFont('Arial','B',8,'C');
+      $pdf->SetFont('Arial','B',10,'C');
       
-      $pdf->setXY(15,20);
-      $pdf->Multicell(17,4,'Tgl.dibuat ',0,'L');
-      $pdf->setXY(15,24);
-      $pdf->Multicell(17,4,'Notes ',0,'L');
+      $pdf->setXY(15,25);
+      $pdf->Multicell(22,4,'Tgl.dibuat ',0,'L');
+      $pdf->setXY(15,29);
+      $pdf->Multicell(25,4,'Notes Varian ',0,'L');
      
-      $pdf->setXY(31, 20);
+      $pdf->setXY(40, 25);
       $pdf->Multicell(5, 4, ':', 0, 'L');
-      $pdf->setXY(31, 24);
+      $pdf->setXY(40, 29);
       $pdf->Multicell(5, 4, ':', 0, 'L');
-      $pdf->setXY(31, 28);
+      $pdf->setXY(40, 28);
   
-      $pdf->SetFont('Arial','',8,'C');
-      $pdf->setXY(32,20);
-      $pdf->Multicell(40,4,$header->tanggal,0,'L');
-      $pdf->setXY(32,24);
-      $pdf->Multicell(70,4,$header->notes,0,'L');
+      $pdf->SetFont('Arial','',9,'C');
+      $pdf->setXY(41,25);
+      $pdf->Multicell(40,4,tgl_indo(date('d-m-Y H:i:s', strtotime($header->tanggal))),0,'L');
+      $pdf->setXY(41,29);
+      $pdf->Multicell(70,4,$notes_varian,0,'L');
 
       $yPos_kiri=$pdf->GetY();
+      
+      // info Varian
+      $pdf->SetFont('Arial','B',10,'C');
+      $pdf->setXY(130,25);
+      $pdf->Multicell(25,4,'Varian  ',0,'L');
+      $pdf->setXY(152, 25);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+      $pdf->SetFont('Arial','B',25,'C');
+      $pdf->setXY(153,20);
+      $pdf->Multicell(20,10,$nama_varian,0,'L');
 
-
-      $pdf->SetFont('Arial','B',8,'C');
-      $pdf->setXY(130,20);
+      $pdf->SetFont('Arial','B',10,'C');
+      $pdf->setXY(130,29);
       $pdf->Multicell(25,4,'Kode Warna ',0,'L');
-      $pdf->setXY(150, 20);
+      $pdf->setXY(152, 29);
       $pdf->Multicell(5, 4, ':', 0, 'L');
 
-      $pdf->SetFont('Arial','',8,'C');
-      $pdf->setXY(151,20);
+      $pdf->SetFont('Arial','',10,'C');
+      $pdf->setXY(153,29);
       $pdf->Multicell(40,4,$header->kode_warna,0,'L');
 
-      $pdf->SetFont('Arial','',8,'C');
-      $pdf->setXY(130,24);
-      $pdf->Multicell(60,20,'Sample Warna / Kain',1,'C');
+      // info Marketing
+      $pdf->SetFont('Arial','B',10,'C');
+      $pdf->setXY(130,34);
+      $pdf->Multicell(25,4,'Marketing ',0,'L');
+      $pdf->setXY(152, 34);
+      $pdf->Multicell(5, 4, ':', 0, 'L');
+
+      $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($header->sales_group);
+
+      $pdf->SetFont('Arial','',10,'C');
+      $pdf->setXY(153,34);
+      $pdf->Multicell(40,4,$nama_sales_group,0,'L');
+
 
       $yPos_kanan=$pdf->GetY();
 
@@ -752,14 +909,14 @@ class Dti extends MY_Controller
         $yPos = $yPos_kanan;
       }
       $xPos=$pdf->GetX();
-      $pdf->SetFont('Arial','B',8,'C');
+      $pdf->SetFont('Arial','B',10,'C');
 
       $pdf->setXY($xPos + 15, $yPos + 4);
       $pdf->Cell(10, 7, 'No. ', 1, 0, 'L');
       $pdf->Cell(20, 7, 'Kode ', 1, 0, 'C');
       $pdf->Cell(75, 7, 'Nama Produk', 1, 0, 'C');
-      $pdf->Cell(20, 7, 'Qty', 1, 0, 'R');
-      $pdf->Cell(50, 7, 'Reff Notes', 1, 0, 'C');
+      $pdf->Cell(25, 7, 'Qty', 1, 0, 'R');
+      $pdf->Cell(45, 7, 'Reff Notes', 1, 0, 'C');
 
       $y      = $pdf->GetY() + 7;
       $x      = 15;
@@ -769,26 +926,26 @@ class Dti extends MY_Controller
 
         $pdf->setXY($x, $y);
         if($no_dye == 1){
-          $pdf->SetFont('Arial','B',8,'C');
-          $pdf->Multicell(175, 5, 'Dyeing Stuff (%)', 1,'C');
-          $y = $y + 5;
+          $pdf->SetFont('Arial','B',10,'C');
+          $pdf->Multicell(175, 7, 'Dyeing Stuff (%)', 1,'C');
+          $y = $y + 7;
           $x = 15;
         }
         $pdf->setXY($x, $y);
 
-        $pdf->SetFont('Arial','',8,'C');
-        $pdf->Multicell(10, 5, $no_dye.'.', 1,'L');
+        $pdf->SetFont('Arial','',10,'C');
+        $pdf->Multicell(10, 7, $no_dye.'.', 1,'L');
         $pdf->setXY($x+10, $y);
-        $pdf->Multicell(20, 5, $dye->kode_produk, 1,'C');
+        $pdf->Multicell(20, 7, $dye->kode_produk, 1,'C');
         $pdf->setXY($x+30, $y);
-        $pdf->Multicell(75, 5, $dye->nama_produk, 1,'L');
+        $pdf->Multicell(75, 7, $dye->nama_produk, 1,'L');
         $pdf->setXY($x+105, $y);
-        $pdf->Multicell(20, 5, $dye->qty.' '.$dye->uom, 1,'R');
-        $pdf->setXY($x+125, $y);
-        $pdf->Multicell(50, 5, $dye->reff_note, 1,'L');
+        $pdf->Multicell(25, 7, $dye->qty.' '.$dye->uom, 1,'R');
+        $pdf->setXY($x+130, $y);
+        $pdf->Multicell(45, 7, $dye->reff_note, 1,'L');
 
         $no_dye++;
-        $y = $y + 5;
+        $y = $y + 7;
 
       }
 
@@ -798,37 +955,38 @@ class Dti extends MY_Controller
 
         $pdf->setXY($x, $y);
         if($no_aux == 1){
-          $pdf->SetFont('Arial','B',8,'C');
-          $pdf->Multicell(175, 5, 'Auxiliary (g/L)', 1,'C');
-          $y = $y + 5;
+          $pdf->SetFont('Arial','B',10,'C');
+          $pdf->Multicell(175, 7, 'Auxiliary (g/L)', 1,'C');
+          $y = $y + 7;
           $x = 15;
         }
         $pdf->setXY($x, $y);
 
-        $pdf->SetFont('Arial','',8,'C');
-        $pdf->Multicell(10, 5, $no_aux.'.', 1,'L');
+        $pdf->SetFont('Arial','',10,'C');
+        $pdf->Multicell(10, 7, $no_aux.'.', 1,'L');
         $pdf->setXY($x+10, $y);
-        $pdf->Multicell(20, 5, $aux->kode_produk, 1,'C');
+        $pdf->Multicell(20, 7, $aux->kode_produk, 1,'C');
         $pdf->setXY($x+30, $y);
-        $pdf->Multicell(75, 5, $aux->nama_produk, 1,'L');
+        $pdf->Multicell(75, 7, $aux->nama_produk, 1,'L');
         $pdf->setXY($x+105, $y);
-        $pdf->Multicell(20, 5, $aux->qty.' '.$aux->uom, 1,'R');
-        $pdf->setXY($x+125, $y);
-        $pdf->Multicell(50, 5, $aux->reff_note, 1,'L');
+        $pdf->Multicell(25, 7, $aux->qty.' '.$aux->uom, 1,'R');
+        $pdf->setXY($x+130, $y);
+        $pdf->Multicell(45, 7, $aux->reff_note, 1,'L');
 
         $no_aux++;
-        $y = $y + 5;
+        $y = $y + 7;
 
       }
 
       // ttd box
       $xPos=$pdf->GetX();
       $yPos=$pdf->GetY();
+      $pdf->SetFont('Arial','B',10,'C');
 
       $pdf->setXY($x, $y+8);
-      $pdf->Multicell(20, 5, 'LAB', 1,'C');
+      $pdf->Multicell(20, 5, 'ADM', 1,'C');
       $pdf->setXY($x+20, $y+8);
-      $pdf->Multicell(20, 5, 'PPIC', 1,'C');
+      $pdf->Multicell(20, 5, 'RECIPER', 1,'C');
       $pdf->setXY($x+40, $y+8);
       $pdf->Multicell(20, 5, 'KABAG', 1,'C');
 
@@ -839,6 +997,11 @@ class Dti extends MY_Controller
       $pdf->setXY($x+40, $y+13);
       $pdf->Multicell(20, 8, '', 1,'C');
 
+      /*
+      $pdf->SetFont('Arial','',8,'C');
+      $pdf->setXY(130,$yPos+8);
+      $pdf->Multicell(60,20,'Sample Warna / Kain',1,'C');
+      */
       $pdf->Output();
     }
 

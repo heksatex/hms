@@ -266,8 +266,6 @@
 
 
 <script type="text/javascript">
-  //$('#uom2').select2({});
-
 
   //klik button simpan
   $('#btn-simpan').click(function(){
@@ -326,7 +324,28 @@
       });
   });
 
-
+    //modal mode print
+  $(document).on('click','#btn-print',function(e){
+      e.preventDefault();
+      var quant_id = "<?php echo $list->quant_id; ?>";
+      var lot = "<?php echo $list->lot; ?>";
+      if(lot == ''){
+        alert_modal_warning('Maaf, Anda tidak bisa Print Barcode dikarenakan Lot nya Kosong !');
+      }else{
+        $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $("#print_data").modal({
+          show: true,
+          backdrop: 'static'
+        });
+        $('.modal-title').text('Pilih Design Barcode ?');
+        $.post('<?php echo site_url()?>warehouse/stockquants/mode_print_modal',
+        { quant_id:quant_id},
+        function(html){
+          setTimeout(function() {$(".print_data").html(html);  },1000);
+        }   
+        );
+      }
+  });
 
 
 </script>

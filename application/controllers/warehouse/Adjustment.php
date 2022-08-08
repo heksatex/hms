@@ -96,6 +96,9 @@ class Adjustment extends MY_Controller
       }else if(empty($kode_lokasi)){
         $callback = array('status' => 'failed', 'field' => 'kode_lokasi', 'message' => 'Kode Lokasi Harus Diisi !', 'icon' =>'fa fa-warning', 
         'type' => 'danger'  );         
+      }else if(empty($note)){
+        $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Notes Harus Diisi / Alasan membuat Adjustment !', 'icon' =>'fa fa-warning', 
+        'type' => 'danger'  );         
       }else{
         //cek kode adjustment apa sudah ada apa belum
         $cek = $this->m_adjustment->cek_adjustment_by_kode($kode_adjustment)->row_array();
@@ -171,7 +174,7 @@ class Adjustment extends MY_Controller
     $kode_lokasi = addslashes($this->input->post('kode_lokasi'));
     $result      = $this->m_adjustment->get_produk_by_id($kode_produk)->row_array();
     $qty_data    = $this->m_adjustment->get_total_qty_stock_quant_by_produk_lokasi($kode_produk,$kode_lokasi);
-    $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'],'qty_data'=>$qty_data->total);
+    $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'], 'uom2'=>$result['uom_2'], 'qty_data'=>$qty_data->total);
     echo json_encode($callback);
   }
 
@@ -338,44 +341,74 @@ class Adjustment extends MY_Controller
       $qty_data2        = $this->input->post('qty_data2');
       $qty_adjustment2  = $this->input->post('qty_adjustment2'); 
 
-      $row1         = $this->input->post('row_order'); 
-      $data         = explode("^|",$row1);
-      $row          = $data[0];
+      $row              = $this->input->post('row_order'); 
+      $quant_id         = $this->input->post('quant_id'); 
 
+      //$data         = explode("^|",$row1);
+      //$row          = $data[0];
       $cek_status = $this->m_adjustment->cek_status_adjustment($kode_adjustment,'')->row_array();
       
       if(empty($kode_adjustment) && empty($row) ){
         $callback = array('status' => 'success','message' => 'Data Gagal Dihapus !', 'icon' =>'fa fa-warning', 'type' => 'danger');
       }else if($cek_status['status'] == 'done'){
-          $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Disimpan, Status Adjustment Sudah Done !', 'icon' =>'fa fa-check', 'type' => 'danger');
+        $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Disimpan, Status Adjustment Sudah Done !', 'icon' =>'fa fa-check', 'type' => 'danger');
       }else if($cek_status['status'] == 'cancel'){
-          $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Disimpan, Status Adjustment Sudah Batal !', 'icon' =>'fa fa-check', 'type' => 'danger');
+        $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Disimpan, Status Adjustment Sudah Batal !', 'icon' =>'fa fa-check', 'type' => 'danger');
       }else{
-        if(!empty($row)){//update details
 
+        // lock table
+        $this->_module->lock_tabel('adjustment WRITE, adjustment_items WRITE, adjustment_items as adji WRITE, mst_produk as mp WRITE');
+        
+        if(!empty($row)){//update details
+          /*
           $quant_id     = $data[1];
           $kode_produk  = $data[2];
           $produk       = addslashes($data[3]);
           $lot          = addslashes($data[4]);
           $uom          = $data[5];
-          $qty_data     = $data[6];
+          $q
+          ty_data     = $data[6];
+         */ 
 
-          $this->m_adjustment->update_adjustment_items($kode_adjustment,$row,$qty_adjustment,$qty_adjustment2);
+         // get adjustment items
+         $get = $this->m_adjustment->get_adjustment_items_by_row($kode_adjustment,$row)->row_array();
+
+         if($quant_id == 0){
+
+              $this->m_adjustment->update_adjustment_items2($kode_adjustment,$kode_produk, $lot, $uom,$qty_adjustment,$uom2,$qty_adjustment2,$row);
+              // produk before
+              $note_      = $get['kode_produk'].' |'.$get['nama_produk'].' | '.$get['lot'].' | '.$get['qty_adjustment'].' '.$get['uom'].' | '.$get['qty_adjustment2'].' '.$get['uom2'].'  -> '.$kode_produk.' | '.$produk." | ".$lot." |  ".$qty_adjustment."  | ".$uom." |  ".$qty_adjustment2."  | ".$uom2;;
+              $note_log   = "Edit data Details | ".$kode_adjustment." Baris Ke ".$row." <br> ".$note_;
+              
+         }else{
+              $this->m_adjustment->update_adjustment_items($kode_adjustment,$row,$qty_adjustment,$qty_adjustment2);
+              // produk before
+              $note_      = $get['kode_produk'].' '.$get['nama_produk'].' '.$get['lot'].' '.$get['qty_adjustment'].' -> '.$get['kode_produk'].' |'.$get['nama_produk']." ".$lot."  ".$qty_adjustment;
+              $note_log   = "Edit data Details | ".$kode_adjustment." Baris Ke ".$row." <br> ".$note_;
+         }
+
+          // unlock table
+          $this->_module->unlock_tabel();
+
           $jenis_log   = "edit";
-          $note_log    = "Edit data Details | ".$kode_adjustment." | ".$produk." | ".$lot." | ".$qty_data." | ".$qty_adjustment." | ".$row;
           $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 
         }else{//simpan data baru
 
-          $ro  = $this->m_adjustment->get_row_order_adjustment_items($kode_adjustment)->row_array();
-          $row_order = $ro['row_order']+1;
+          $ro          = $this->m_adjustment->get_row_order_adjustment_items($kode_adjustment)->row_array();
+          $row_order   = $ro['row_order']+1;
           $this->m_adjustment->save_adjustment_items($kode_adjustment,$kode_produk,$lot,$uom,$qty_data,$qty_adjustment,$uom2,$qty_data2,$qty_adjustment2,$row_order);
+
+           // unlock table
+           $this->_module->unlock_tabel();
+
           $jenis_log   = "edit";
           $note_log    = "Tambah data Details | ".$kode_adjustment." | ".$produk." | ".$lot." | ".$qty_data." | ".$qty_adjustment;
           $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
         }
+
       }
 
 
@@ -395,7 +428,7 @@ class Adjustment extends MY_Controller
 
       $kode_adjustment = addslashes($this->input->post('kode_adjustment'));
       $row  = $this->input->post('row_order');
-
+      /*
       $data = explode("^|",$row);
       $row_order    = $data[0];      
       $quant_id     = $data[1];      
@@ -405,21 +438,32 @@ class Adjustment extends MY_Controller
       $uom          = addslashes($data[5]);
       $qty_data     = $data[6];
       $qty_adjustment = $data[7];
-
+      */
+      
       $cek_status = $this->m_adjustment->cek_status_adjustment($kode_adjustment,'')->row_array();
       
       if(empty($kode_adjustment) && empty($row) ){
         $callback = array('status' => 'success','message' => 'Data Gagal Dihapus !', 'icon' =>'fa fa-warning', 'type' => 'danger');
       }else if($cek_status['status'] == 'done'){
-          $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Dihapus, Status Adjustment Sudah Done !', 'icon' =>'fa fa-check', 'type' => 'danger');
+        $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Dihapus, Status Adjustment Sudah Done !', 'icon' =>'fa fa-check', 'type' => 'danger');
       }else if($cek_status['status'] == 'cancel'){
-          $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Dihapus, Status Adjustment Sudah Batal !', 'icon' =>'fa fa-check', 'type' => 'danger');
+        $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa Dihapus, Status Adjustment Sudah Batal !', 'icon' =>'fa fa-check', 'type' => 'danger');
       }else{
-        $this->m_adjustment->delete_adjustment_items($kode_adjustment,$row_order);
+        
+        // lock table
+        $this->_module->lock_tabel('adjustment WRITE, adjustment_items WRITE, adjustment_items as adji WRITE, mst_produk as mp WRITE');
+
+        // get adjustment items
+        $get = $this->m_adjustment->get_adjustment_items_by_row($kode_adjustment,$row)->row_array();
+
+        $this->m_adjustment->delete_adjustment_items($kode_adjustment,$row);
+
+        // unlock table
+        $this->_module->unlock_tabel();
         
         $callback = array('status' => 'success','message' => 'Data Berhasil Dihapus !', 'icon' =>'fa fa-check', 'type' => 'success');
         $jenis_log   = "delete";        
-        $note_log    = "Hapus data Details | ".$kode_adjustment." | ".$produk." | ".$lot." | ".$qty_data." | ".$qty_adjustment." | ".$row_order;
+        $note_log    = "Hapus data Details Baris Ke ".$row." | ".$kode_adjustment." | ".$get['kode_produk']." | ".$get['nama_produk']." | ".$get['lot']." | ".$get['qty_data']." ".$get['uom']." ".$get['qty_adjustment']." | ".$get['qty_data2']." ".$get['uom2']." ".$get['qty_adjustment2'];
         $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
       }
 

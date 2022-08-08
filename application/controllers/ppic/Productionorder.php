@@ -525,6 +525,12 @@ class Productionorder extends MY_Controller
                 $produk_empty       = FALSE;
                 $bom_empty          = FALSE;
                 $generate_produk    = FALSE;
+                $produk_tidak_aktif = FALSE;
+                $nama_produk_tidak_aktif = '';
+                $produk_bom_tidak_aktif  = FALSE;
+                $nama_produk_arr_bi     = '';
+                $produk_bom_item_tidak_aktif = FALSE;
+                $nama_produk_arr_bi2    = '';
                 $nama_bom           = '';
                 $nama_produk_empty  = '';
 
@@ -534,11 +540,11 @@ class Productionorder extends MY_Controller
       				
       				//unlock table
     	            $this->_module->unlock_tabel();
-            	}else if($stat_produk['status_produk']== 'f'){
+            	}else if($stat_produk['status_produk']!= 't'){
                     $callback = array('status' => 'success','message' => 'Maaf, Status Produk tidak aktif', 'icon' =>'fa fa-warning', 'type' => 'danger');
       				
                     //unlock table
-                  $this->_module->unlock_tabel();
+                    $this->_module->unlock_tabel();
                 }else{
 
     	        	$last_move   = $this->_module->get_kode_stock_move();
@@ -571,77 +577,113 @@ class Productionorder extends MY_Controller
     	                $cek_prod2 = $this->_module->cek_nama_product(addslashes($product_fullname))->row_array();//get kode_produk
 
     	                if(!empty($cek_prod2['nama_produk'])){
-    	                   $kode_prod = addslashes($cek_prod2['kode_produk']);
+                            if($cek_prod2['status_produk'] == 't'){
 
-                            if(stripos($product_fullname, "Jacquard") !== FALSE OR stripos($product_fullname, "Tricot") !== FALSE ){
+                                $kode_prod = addslashes($cek_prod2['kode_produk']);
 
-                                //cek bom by kode_bom
-                                $cek_bom_set = $this->_module->cek_bom_by_kode_bom($kode_bom_set)->row_array();
-                                if(!empty($cek_bom_set['kode_bom'])){
-                                    $qty_bom_set = $cek_bom_set['qty'];
+                                if(stripos($product_fullname, "Jacquard") !== FALSE OR stripos($product_fullname, "Tricot") !== FALSE ){
 
-                                    $bi = $this->_module->get_bom_items_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
-                                    $arr_bi = $bi->result_array();
+                                    //cek bom by kode_bom
+                                    $cek_bom_set = $this->_module->cek_bom_by_kode_bom($kode_bom_set)->row_array();
+                                    if(!empty($cek_bom_set['kode_bom'])){
+                                        $qty_bom_set = $cek_bom_set['qty'];
 
-                                    $bi2 = $this->_module->get_bom_items_all_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
-                                    $arr_bi2 = $bi2->result_array();
+                                        $bi = $this->_module->get_bom_items_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
+                                        $arr_bi = $bi->result_array();
 
-                                    if(empty($arr_bi) or empty($arr_bi2)){
-                                        $bom_empty = TRUE;
-                                    }  
+                                        $bi2 = $this->_module->get_bom_items_all_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
+                                        $arr_bi2 = $bi2->result_array();
+
+                                    
+                                        if(empty($arr_bi) or empty($arr_bi2)){
+                                            $bom_empty = TRUE;
+                                        }  
+
+                                    }else{
+                                        // cek bom = 1 atau 0
+                                        // cek apa produk harus ada bom atau tidak ?
+                                        $bom_required  = $this->_module->cek_required_bom_by_kode_produk($kode_prod)->row_array();
+                                    
+                                        if($bom_required['bom'] == 1){ // cek jika bom = 1 atau harus ada bom
+                                            $bom_empty = TRUE;
+                                        }
+                                    }
 
                                 }else{
-                                   // cek bom = 1 atau 0
-                                   // cek apa produk harus ada bom atau tidak ?
-                                   $bom_required  = $this->_module->cek_required_bom_by_kode_produk($kode_prod)->row_array();
-                                   
-                                   if($bom_required['bom'] == 1){ // cek jika bom = 1 atau harus ada bom
-                                        $bom_empty = TRUE;
-                                   }
-                               }
+
+                                    //-> start untuk bom yg bukan dalam kurung jacquard/tricot
+                                    /*
+                                    cek bom berdasarkan kode_prod
+                                    jika ada
+                                        ambil produk di bom items untuk dijadikan kode_prod_rm
+                                    */ 
+                                    $cek_bom = $this->_module->cek_bom($kode_prod)->row_array();
+                                    if(!empty($cek_bom['kode_bom'])){
+                                        $qty_bom = $cek_bom['qty'];
+
+                                        $bi = $this->_module->get_bom_items_by_kode($cek_bom['kode_bom'],$qty_bom,$qty);
+                                        $arr_bi = $bi->result_array();
+
+                                        $bi2 = $this->_module->get_bom_items_all_by_kode($cek_bom['kode_bom'],$qty_bom,$qty);
+                                        $arr_bi2 = $bi2->result_array();
+
+                                        if(empty($arr_bi) or empty($arr_bi2)){
+                                            $bom_empty = TRUE;
+                                        }  
+                                                                
+                                    }else{
+                                        // cek bom = 1 atau 0
+                                        // cek apa produk harus ada bom atau tidak ?
+                                        $bom_required  = $this->_module->cek_required_bom_by_kode_produk($kode_prod)->row_array();
+                                        
+                                        if($bom_required['bom'] == 1){ // cek jika bom = 1 atau harus ada bom
+                                            $bom_empty = TRUE;
+                                        }
+                                    }
+                                }
+
+                                // end --<
+
+                                $kode_prod_rm = $kode_prod;
+                                $nama_prod_rm = $product_fullname;
+
+                                if(!empty($arr_bi) ){
+
+                                    foreach($arr_bi as $arr_bis){ // cek apakah terdapat produk yang tidak aktif
+                                        $stat_produk_bi = $this->_module->get_status_aktif_by_produk(addslashes($arr_bis['kode_produk']))->row_array();
+                                        if($stat_produk_bi['status_produk'] != 't'){
+                                            //$produk_bom_tidak_aktif = TRUE;
+                                            $nama_produk_arr_bi    .= $arr_bis['nama_produk'].', ';
+                                        }
+                                    }
+                                }
+
+                                if(!empty($arr_bi2)){
+
+                                    foreach($arr_bi2 as $arr_bi2s){ // cek apakah terdapat produk yang tidak aktif
+                                        $stat_produk_bi2 = $this->_module->get_status_aktif_by_produk(addslashes($arr_bi2s['kode_produk']))->row_array();
+                                        if($stat_produk_bi2['status_produk'] != 't'){
+                                            $produk_bom_item_tidak_aktif = TRUE;
+                                            $nama_produk_arr_bi2    .= $arr_bi2s['nama_produk'].', ';
+                                        }
+                                    }
+                                }
+
 
                             }else{
-
-                               //-> start untuk bom yg bukan dalam kurung jacquard/tricot
-        	                   /*
-        	                   cek bom berdasarkan kode_prod
-        	                   jika ada
-        	                     ambil produk di bom items untuk dijadikan kode_prod_rm
-        	                   */ 
-        	                   $cek_bom = $this->_module->cek_bom($kode_prod)->row_array();
-        	                   if(!empty($cek_bom['kode_bom'])){
-        	                   		$qty_bom = $cek_bom['qty'];
-
-        	                   		$bi = $this->_module->get_bom_items_by_kode($cek_bom['kode_bom'],$qty_bom,$qty);
-        	                   		$arr_bi = $bi->result_array();
-
-        	                   		$bi2 = $this->_module->get_bom_items_all_by_kode($cek_bom['kode_bom'],$qty_bom,$qty);
-        	                   		$arr_bi2 = $bi2->result_array();
-
-                                    if(empty($arr_bi) or empty($arr_bi2)){
-                                        $bom_empty = TRUE;
-                                    }  
-                                      	                  
-        	                   }else{
-                                   // cek bom = 1 atau 0
-                                   // cek apa produk harus ada bom atau tidak ?
-                                   $bom_required  = $this->_module->cek_required_bom_by_kode_produk($kode_prod)->row_array();
-                                   
-                                   if($bom_required['bom'] == 1){ // cek jika bom = 1 atau harus ada bom
-                                        $bom_empty = TRUE;
-                                   }
-                               }
+                                $produk_tidak_aktif = TRUE;
                             }
-
-                           // end --<
-
-    	                   $kode_prod_rm = $kode_prod;
-    	                   $nama_prod_rm = $product_fullname; 
 
     	                }else{
                             $produk_empty        = TRUE;
                             $generate_produk     = FALSE;
                             $nama_produk_empty  .= $product_fullname.', ';
+                            break;
+                        }
+
+                        // jika produk tidak aktif 
+                        if($produk_tidak_aktif == TRUE){
+                            $nama_produk_tidak_aktif .= $product_fullname.', ';
                             break;
                         }
 
@@ -652,8 +694,14 @@ class Productionorder extends MY_Controller
                             break;
                         }
 
+                        // jika produk bom / bom items  tidak aktif
+                        if($produk_bom_tidak_aktif == TRUE || $produk_bom_item_tidak_aktif == TRUE){
+                            break;
+                        }
+
+
                         //jalankan jika produk dan bom nya ada
-                        if($produk_empty == FALSE AND $bom_empty == FALSE){
+                        if($produk_empty == FALSE AND $bom_empty == FALSE AND $produk_tidak_aktif == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE){
 
                         $generate_produk = TRUE;
     	           
@@ -811,7 +859,7 @@ class Productionorder extends MY_Controller
     	                  foreach ($arr_bi2 as $rm) {
     	                    //sql simpan mrp production rm target
                             $origin_prod = $rm['kode_produk'].'_'.$rm_row;
-    	                    $sql_mrp_prod_rm_batch .= "('".$kode_mo."','".$move_id_rm."','".addslashes($rm['kode_produk'])."','".addslashes($rm['nama_produk'])."','".$rm['qty_bom_items']."','".addslashes($rm['uom'])."','".$rm_row."','".addslashes($origin_prod)."','draft'), "; 
+    	                    $sql_mrp_prod_rm_batch .= "('".$kode_mo."','".$move_id_rm."','".addslashes($rm['kode_produk'])."','".addslashes($rm['nama_produk'])."','".$rm['qty_bom_items']."','".addslashes($rm['uom'])."','".$rm_row."','".addslashes($origin_prod)."','draft','".addslashes($rm['note'])."'), "; 
     	              		$rm_row = $rm_row  + 1;
     	                  }
 
@@ -948,7 +996,13 @@ class Productionorder extends MY_Controller
 
     	                  $tgl_jt  =  date('Y-m-d H:i:s', strtotime(-$leadtime_dept.' days', strtotime($schedule_date)));
 
-    	                  $reff_picking_in = $kode_out."|".$kode_in;
+                          if(empty($kode_out)){// jika terdapat route out nya ga ada maka In terakhir di reff_picking ditambahkan dept_id departemen sebelumnya (MO) contoh route Tricot
+                            $kode_out_asli = $dept_id_dari;
+                          }else{
+                            $kode_out_asli = $kode_out;
+                          }
+
+    	                  $reff_picking_in = $kode_out_asli."|".$kode_in;
     	                  $sql_in_batch   .= "('".$kode_in."','".$tgl."','".$tgl."','".$tgl_jt."','".addslashes($reff_notes)."','draft','".$method_dept."','".$origin."','".$move_id."','".$reff_picking_in."','".$lokasi_dari."','".$lokasi_tujuan."'), "; 
 
     	                  $in_row=1;
@@ -1027,13 +1081,25 @@ class Productionorder extends MY_Controller
 
                     }// end if cek produk generate
 
-                    if($produk_empty == TRUE OR $bom_empty == TRUE OR $generate_produk == FALSE){
+                    if($produk_empty == TRUE OR $bom_empty == TRUE OR $generate_produk == FALSE OR $produk_tidak_aktif == TRUE OR $produk_bom_tidak_aktif == TRUE OR $produk_bom_item_tidak_aktif == TRUE ){
                         if($produk_empty == TRUE){
                             $nama_produk_empty = rtrim($nama_produk_empty, ', ');
                             $callback = array('status' => 'failed','message' => 'Maaf, Produk '.$nama_produk_empty.' Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                        }else if($produk_tidak_aktif == TRUE){
+                            $nama_produk_tidak_aktif  = rtrim($nama_produk_tidak_aktif,', ');
+                            $callback = array('status' => 'failed','message' => 'Maaf, Produk '.$nama_produk_tidak_aktif.' Tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                         }else if($bom_empty == TRUE){
                             $nama_bom  = rtrim($nama_bom,', ');
                             $callback = array('status' => 'failed','message' => 'Maaf, Bill of Materials (BOM) '.$nama_bom.' Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+                        }else if($produk_bom_tidak_aktif == TRUE){
+                            $nama_produk_arr_bi  = rtrim($nama_produk_arr_bi,', ');
+                            $callback = array('status' => 'failed','message' =>'Maaf, Produk BOM '.$nama_produk_arr_bi.' Tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+                        }else if($produk_bom_item_tidak_aktif == TRUE){
+                            $nama_produk_arr_bi2  = rtrim($nama_produk_arr_bi2,', ');
+                            $callback = array('status' => 'failed','message' => 'Maaf, Produk BOM Items '.$nama_produk_arr_bi2.' Tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
                         }else{
                             $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                         }
@@ -1237,11 +1303,11 @@ class Productionorder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_mrp_production);
 
                             // update mrp_production_rm_target
-                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_mrp_production_rm_target);
 
                             // update mrp_production_fg_target 
-                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_mrp_production_fg_target);
 
 
@@ -1286,11 +1352,11 @@ class Productionorder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_stock_move);
 
                             // update stock_move_items
-                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_stock_move_items);
 
                             // update stock_move_produk
-                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") AND status NOT IN ('done')  ";
                             $this->_module->update_reff_batch($sql_update_stock_move_produk);
                             
 

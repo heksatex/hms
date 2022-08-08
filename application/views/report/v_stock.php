@@ -198,6 +198,7 @@
                   <div class="col-md-3">
                     <select class="form-control input-sm" name="cmbSearch" id="cmbSearch">
                       <option value="umur">Umur</option>
+                      <option value="kode_produk">Kode Produk</option>
                       <option value="nama_produk">Nama Produk</option>
                       <option value="lot">Lot</option>
                       <option value="nama_grade">Grade</option>
@@ -262,16 +263,16 @@
                                 </div>
                             </div>
                             <div class="form-group" style="margin-bottom: 0px;">
-                            <div class="col-12 col-sm-3 col-md-3">
-                              <span class="fa fa-database"></span> <label>Group By</label>
+                              <div class="col-12 col-sm-3 col-md-3">
+                                <span class="fa fa-database"></span> <label>Group By</label>
+                              </div>
+                              <div class="col-12 col-sm-8 col-md-8" id="groupBy">
+                                <li onclick="groupBy('nama_produk','Nama Produk',0)" class="li-adv" data-index="0" >Nama Produk</li>
+                                <li onclick="groupBy('lokasi','Lokasi',1)" class="li-adv" data-index="1">Lokasi</li>
+                                <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',2)" class="li-adv" data-index="2">Lokasi Fisik</li>
+                                <li onclick="groupBy('nama_grade','Grade',3)" class="li-adv" data-index="3">Grade</li>
+                              </div>
                             </div>
-                            <div class="col-12 col-sm-8 col-md-8" id="groupBy">
-                              <li onclick="groupBy('nama_produk','Nama Produk',0)" class="li-adv" data-index="0" >Nama Produk</li>
-                              <li onclick="groupBy('lokasi','Lokasi',1)" class="li-adv" data-index="1">Lokasi</li>
-                              <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',2)" class="li-adv" data-index="2">Lokasi Fisik</li>
-                              <li onclick="groupBy('nama_grade','Grade',3)" class="li-adv" data-index="3">Grade</li>
-                            </div>
-                          </div>
 
                         </div>
                         <!-- /. kiri -->
@@ -476,39 +477,6 @@
   }
 
 
-  //select 2 Departementy
-  $('#departemen').select2({
-      allowClear: true,
-      placeholder: "Select Departemen",
-      ajax:{
-            dataType: 'JSON',
-            type : "POST",
-            url : "<?php echo base_url();?>report/efisiensi/get_departement_select2",
-            //delay : 250,
-            data : function(params){
-              return{
-                nama:params.term,
-              };
-            }, 
-            processResults:function(data){
-              var results = [];
-              $.each(data, function(index,item){
-                results.push({
-                    id:item.kode,
-                    text:item.nama
-                });
-              });
-              return {
-                results:results
-              };
-            },
-            error: function (xhr, ajaxOptions, thrownError){
-              //alert('Error data');
-              //alert(xhr.responseText);
-            }
-      }
-    });
-
   var arr_filter    = [];
   var arr_group     = [];
   var tmp_arr_group = [];
@@ -572,7 +540,7 @@
     if(value == 'lokasi'){
       var value = '<div class="col-md-6"> ';
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
-          value += "<option value=''>-- Pilih Lokasi Stock --</option>";
+          value += "<option value='kosong'>-- Pilih Lokasi Stock --</option>";
           value += "<?php foreach($warehouse as $row){ echo "<option>".$row->stock_location."</option>";} ?>";
           value += "</select>";
           value += '</div>';
@@ -581,7 +549,7 @@
     }else if(value == 'nama_grade'){
       var value = '<div class="col-md-6"> ';
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
-          value += "<option value=''>Pilih Grade</option>";
+          value += "<option value='kosong'>Pilih Grade</option>";
           value += "<?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";} ?>";
           value += "</select>";
           value += '</div>';
@@ -589,7 +557,7 @@
     }else if(value == 'sales_group'){
       var value = '<div class="col-md-6"> ';
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
-          value += "<option value=''>-- Pilih Marketing --</option>";
+          value += "<option value='kosong'>-- Pilih Marketing --</option>";
           value += "<?php foreach($mst_sales_group as $row){ echo "<option value='".$row->kode_sales_group."'>".$row->nama_sales_group."</option>";} ?>";
           value += "</select>";
           value += '</div>';
@@ -597,7 +565,7 @@
     }else if(value == 'opname'){
       var value = '<div class="col-md-6"> ';
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
-          value += "<option value=''>-- Status Opname --</option>";
+          value += "<option value='kosong'>-- Status Opname --</option>";
           value += "<option value='done'>Sudah Opname</option>";
           value += "<option value='draft'>Belum Opname</option>";
           value += "</select>";
@@ -615,8 +583,16 @@
           value += '</div>';
           $('#f_search').html(value);
     }else{
-      var value = '<div class="col-md-6"> ';
-          value += ' <input type="text" class="form-control input-sm" id="search" name="search" >';
+      var value = '<div class="col-md-3"> ';
+          value +=  '<select class="form-control input-sm" name="cmbOperator" id="cmbOperator">';
+          value +=  '<option value="LIKE">LIKE</option>'
+          value +=  '<option value="NOT LIKE">NOT LIKE</option>'
+          value +=  '<option value="=">=</option>'
+          value +=  '<option value="!=">!=</option>'
+          value += "</select>";
+          value += '</div>';
+          value += '<div class="col-md-3">';
+          value += '<input type="text" class="form-control input-sm" id="search" name="search" >';
           value += '</div>';
           $('#f_search').html(value);
     }
@@ -642,9 +618,7 @@
       $("#example1_processing").css('display',''); 
 
       if(search != ''){
-        // add to array 
-        arr_filter.push({type:'search', nama_field:cmbSearch, operator:cmbOperator,  value:search, id:id});
-
+        
         if(cmbSearch == 'umur'){
           if(cmbOperator == '<'){
             caption_sparate ='Newer Than';
@@ -653,10 +627,14 @@
           }
         }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname'){
           caption_sparate = '=';
+          cmbOperator     = '=';
         }else{
-          caption_sparate = 'LIKE';
+          caption_sparate = cmbOperator;// ex LIKE, NOT LIKE, =, !=
         }
 
+        // add to array 
+        arr_filter.push({type:'search', nama_field:cmbSearch, operator:cmbOperator,  value:search, id:id});
+        
         if(cmbSearch == 'sales_group'){
           $.each(obj_sales, function(index,isi){
             if(obj_sales[index].kode == search){
@@ -1234,7 +1212,8 @@
           },
           success:function(data){
             //alert('berhasil');
-
+            $('#pagination').html(data.pagination);
+            
             if(data.group == true){
                   empty = false;
 
@@ -1248,7 +1227,7 @@
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
                         $row += "<td colspan='4'>"+value.grouping+"</td>";
-                        $row += "<td align='right'>"+value.qty1+"</td>";
+                        $row += "<td align='right'>"+value.qty+"</td>";
                         $row += "<td align='right'>"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "<td colspan='2' ></td>";

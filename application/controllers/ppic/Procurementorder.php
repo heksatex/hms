@@ -457,9 +457,15 @@ class Procurementorder extends MY_Controller
               	/*--Get ROUTE produk by kode_produk--*/
             	$jen_route  = $this->_module->get_jenis_route_product(addslashes($kode_produk))->row_array();
 
+                $stat_produk = $this->_module->get_status_aktif_by_produk(addslashes($kode_produk))->row_array();// status produk aktif/tidak
+
                 $produk_route_empty = FALSE;
                 $bom_empty          = FALSE;
                 $generate_produk    = FALSE;
+                $produk_bom_tidak_aktif  = FALSE;
+                $nama_produk_arr_bi     = '';
+                $produk_bom_item_tidak_aktif = FALSE;
+                $nama_produk_arr_bi2    = '';
                 $nama_produk_empty  = '';
                 $nama_bom           = '';
 
@@ -469,6 +475,11 @@ class Procurementorder extends MY_Controller
       				
       				//unlock table
     	            $this->_module->unlock_tabel();
+                }else if($stat_produk['status_produk']!= 't'){
+                    $callback = array('status' => 'success','message' => 'Maaf, Status Produk tidak aktif', 'icon' =>'fa fa-warning', 'type' => 'danger');
+      				
+                    //unlock table
+                    $this->_module->unlock_tabel();
             	}else{
             	
     	        	$last_move   = $this->_module->get_kode_stock_move();
@@ -534,6 +545,30 @@ class Procurementorder extends MY_Controller
 
     	                   $kode_prod_rm = $kode_prod;
     	                   $nama_prod_rm = $nama_prod; 
+
+                           if(!empty($arr_bi) ){
+
+                                foreach($arr_bi as $arr_bis){ // cek apakah terdapat produk yang tidak aktif
+                                    $stat_produk_bi = $this->_module->get_status_aktif_by_produk(addslashes($arr_bis['kode_produk']))->row_array();
+                                    if($stat_produk_bi['status_produk'] != 't'){
+                                        $produk_bom_tidak_aktif = TRUE;
+                                        $nama_produk_arr_bi    .= $arr_bis['nama_produk'].', ';
+                                    }
+                                }
+                            }
+
+                            if(!empty($arr_bi2)){
+
+                                foreach($arr_bi2 as $arr_bi2s){ // cek apakah terdapat produk yang tidak aktif
+                                    $stat_produk_bi2 = $this->_module->get_status_aktif_by_produk(addslashes($arr_bi2s['kode_produk']))->row_array();
+                                    if($stat_produk_bi2['status_produk'] != 't'){
+                                        $produk_bom_item_tidak_aktif = TRUE;
+                                        $nama_produk_arr_bi2    .= $arr_bi2s['nama_produk'].', ';
+                                    }
+                                }
+                            }
+
+
     	                }else{
                             $produk_route_empty  = TRUE;
                             $generate_produk     = FALSE;
@@ -547,8 +582,14 @@ class Procurementorder extends MY_Controller
                             break;
                         }
 
+                        // jika produk bom / bom items  tidak aktif
+                        if($produk_bom_tidak_aktif == TRUE || $produk_bom_item_tidak_aktif == TRUE){
+                            break;
+                        }
+
+
                         //jalankan jika produk dan bom nya ada
-                        if($produk_route_empty == FALSE AND $bom_empty == FALSE){
+                        if($produk_route_empty == FALSE AND $bom_empty == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE){
 
                         $generate_produk = TRUE;		                
     	           
@@ -701,7 +742,7 @@ class Procurementorder extends MY_Controller
     	                  foreach ($arr_bi2 as $rm) {
     	                    //sql simpan mrp production rm target
                             $origin_prod = $rm['kode_produk'].'_'.$rm_row;
-    	                    $sql_mrp_prod_rm_batch .= "('".$kode_mo."','".$move_id_rm."','".addslashes($rm['kode_produk'])."','".addslashes($rm['nama_produk'])."','".$rm['qty_bom_items']."','".addslashes($rm['uom'])."','".$rm_row."','".addslashes($origin_prod)."','draft'), "; 
+    	                    $sql_mrp_prod_rm_batch .= "('".$kode_mo."','".$move_id_rm."','".addslashes($rm['kode_produk'])."','".addslashes($rm['nama_produk'])."','".$rm['qty_bom_items']."','".addslashes($rm['uom'])."','".$rm_row."','".addslashes($origin_prod)."','draft','".addslashes($rm['note'])."'), "; 
     	              		$rm_row = $rm_row  + 1;
     	                  }
 
@@ -853,8 +894,14 @@ class Procurementorder extends MY_Controller
 
     	                  $tgl_jt  =  date('Y-m-d H:i:s', strtotime(-$leadtime_dept.' days', strtotime($schedule_date)));
 
+                          if(empty($kode_out)){// jika terdapat route out nya ga ada maka In terakhir di reff_picking ditambahkan dept_id departemen sebelumnya (MO) contoh route Tricot
+                            $kode_out_asli = $dept_id_dari;
+                          }else{
+                            $kode_out_asli = $kode_out;
+                          }
+
     	                 // $tgl_jt    = date('Y-m-d H:i:s');
-    	                  $reff_picking_in = $kode_out."|".$kode_in;
+    	                  $reff_picking_in = $kode_out_asli."|".$kode_in;
     	                  $sql_in_batch   .= "('".$kode_in."','".$tgl."','".$tgl."','".$tgl_jt."','".addslashes($reff_notes)."','draft','".$method_dept."','".$origin."','".$move_id."','".$reff_picking_in."','".$lokasi_dari."','".$lokasi_tujuan."'), "; 
 
     	                  $in_row=1;
@@ -933,11 +980,18 @@ class Procurementorder extends MY_Controller
     	            $callback = array('status' => 'success','message' => 'Generate Data Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
                     }// end if cek produk generate
 
-                    if($produk_route_empty == TRUE OR $bom_empty == TRUE OR $generate_produk == FALSE){
+                    if($produk_route_empty == TRUE OR $bom_empty == TRUE OR $generate_produk == FALSE OR $produk_bom_tidak_aktif == TRUE OR $produk_bom_item_tidak_aktif == TRUE){
                         if($produk_route_empty == TRUE){
                             $callback = array('status' => 'failed','message' => 'Maaf, Produk Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                         }else if($bom_empty == TRUE){
                             $callback = array('status' => 'failed','message' => 'Maaf, Bill of Materials (BOM) Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                        }else if($produk_bom_tidak_aktif == TRUE){
+                            $nama_produk_arr_bi  = rtrim($nama_produk_arr_bi,', ');
+                            $callback = array('status' => 'failed','message' =>'Maaf, Produk BOM '.$nama_produk_arr_bi.' Tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+                        }else if($produk_bom_item_tidak_aktif == TRUE){
+                            $nama_produk_arr_bi2  = rtrim($nama_produk_arr_bi2,', ');
+                            $callback = array('status' => 'failed','message' => 'Maaf, Produk BOM Items '.$nama_produk_arr_bi2.' Tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                         }else{
                             $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                         }
@@ -1134,11 +1188,11 @@ class Procurementorder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_mrp_production);
 
                             // update mrp_production_rm_target
-                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done')";
                             $this->_module->update_reff_batch($sql_update_mrp_production_rm_target);
 
                             // update mrp_production_fg_target 
-                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_mrp_production_fg_target);
 
 
@@ -1183,11 +1237,11 @@ class Procurementorder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_stock_move);
 
                             // update stock_move_items
-                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.")  AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_stock_move_items);
 
                             // update stock_move_produk
-                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_stock_move_produk);
                             
 

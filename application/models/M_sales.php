@@ -384,6 +384,16 @@ class M_sales extends CI_Model
 								LIMIT 1");
 	}
 
+	public function get_partner_states_by_kode($id)
+	{
+		return $this->db->query("SELECT * FROM partner_states WHERE id = '$id'");
+	}
+
+	public function get_partner_country_by_kode($id)
+	{
+		return $this->db->query("SELECT * FROM partner_country WHERE id = '$id'");
+	}
+
 	
 	/* >> Approve Color  */
 	
@@ -457,8 +467,8 @@ class M_sales extends CI_Model
 
     public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note)
 	{
-		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi,route_co,reff_notes)
-			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi','$route_co','$reff_note')");
+		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi,route_co,reff_notes,tanggal_ow)
+			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi','$route_co','$reff_note','$date')");
 	}
 
 	public function delete_color_lines_detail($sales_order,$row_order)
@@ -498,6 +508,18 @@ class M_sales extends CI_Model
 	public function update_status_color_line_by_row($sales_order,$row_order,$value,$ow)
 	{
 		return $this->db->query("UPDATE sales_color_line SET status = '$value' WHERE sales_order = '$sales_order' and row_order = '$row_order' AND ow = '$ow' ");
+	}
+
+	public function cek_qty_contract_lines_by_produk($sales_order,$kode_produk)
+	{
+		$query =  $this->db->query("SELECT sum(qty) as tot_qty  FROM sales_contract_items WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' GROUP BY kode_produk ")->row_array();
+		return $query['tot_qty'];
+	}
+
+	public function cek_qty_color_lines_by_produk($sales_order,$kode_produk)
+	{
+		$query =  $this->db->query("SELECT sum(qty) as tot_qty  FROM sales_color_line WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND status = 't' GROUP BY kode_produk ")->row_array();
+		return $query['tot_qty'];
 	}
 
 	/* COLOR LINES << */

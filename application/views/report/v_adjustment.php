@@ -116,10 +116,12 @@
                               <th  class='style' style="min-width: 80px">Tanggal</th>
                               <th  class='style' style="min-width: 150px">Nama Produk</th>
                               <th  class='style' style="min-width: 80px">Lot</th>
-                              <th  class='style' >Qty</th>
+                              <th  class='style' >Qty Stock</th>
+                              <th  class='style' >Qty Adj</th>
                               <th  class='style' >UoM</th>
                               <th  class='style' >Qty2</th>
                               <th  class='style' >UoM2</th>
+                              <th  class='style' >Qty Move</th>
                               <th  class='style' style="min-width: 80px">User</th>
                               <th  class='style' style="min-width: 100px">Notes</th>
                             </tr>
@@ -230,7 +232,7 @@
                 url : "<?php echo site_url('report/adjustment/loadData')?>",
                 data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, load:'header'},
                 success: function(data){
-                  $("#total_lot").val(data.tot_lot);;
+                  $("#total_lot").html(data.total_lot);;
                   let no    = 1;
                   let empty = true;
                   let icon  = '';
@@ -247,10 +249,12 @@
                                $("<td>").text(''),
                                $("<td>").text(value.nama_produk),
                                $("<td>").text(value.tot_lot),
+                               $("<td align='right'>").text(value.qty_stock),
                                $("<td align='right'>").text(value.qty),
                                $("<td>").text(value.uom),
                                $("<td align='right'>").text(value.qty2),
                                $("<td>").text(value.uom2),
+                               $("<td align='right'>").text(value.qty_move),
                     );
                     no++;
                     tbody = $("<tbody id='"+group+"'>").append(tr);
@@ -332,10 +336,12 @@
                           row += "<td>"+value.tanggal+"</td>";
                           row += "<td></td>";
                           row += "<td>"+value.lot+"</td>";
+                          row += "<td align='right' >"+value.qty_stock+"</td>";
                           row += "<td align='right' >"+value.qty+"</td>";
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td align='right'>"+value.qty_move+"</td>";
                           row += "<td>"+value.user+"</td>";
                           row += "<td>"+value.note+"</td>";
                           row += "</tr>";

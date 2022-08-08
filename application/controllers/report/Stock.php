@@ -267,7 +267,7 @@ class Stock extends MY_Controller
                 $row .= "<td></td>";
                 $row .= "<td class='show collapsed group1'  href='#' data-content='edit' data-isi='".$gp2->nama_field."' data-group='".$by2."' data-tbody='".$id."' group-ke='".$group_ke_next."'' data-root='".$groupOf."' node-root='No' style='cursor:pointer;'><i class='glyphicon glyphicon-plus'></td>";
                 $row .= "<td colspan='4'>".$gp2->grouping."</td>";
-                $row .= "<td align='right'colspan='2'>Qty1 = ".number_format($gp2->tot_qty,2)."</td>";
+                $row .= "<td align='right' colspan='2'>Qty1 = ".number_format($gp2->tot_qty,2)."</td>";
                 $row .= "<td align='right'colspan='2'>Qty2 = ".number_format($gp2->tot_qty2,2)."</td>";
                 $row .= "<td colspan='3' class='list_pagination'></td>";
                 $row .= "</tr>";
@@ -340,7 +340,18 @@ class Stock extends MY_Controller
                         $nama_field = "sq.qty_opname";
 
                     }else{
-                        $isi        = "LIKE '%".addslashes($row['value'])."%' ";
+
+                        if($row['operator'] == 'LIKE'){
+                            $isi        = "LIKE '%".addslashes($row['value'])."%' ";
+                        }else if($row['operator'] == 'NOT LIKE'){
+                            $isi        = "NOT LIKE '%".addslashes($row['value'])."%' ";
+                        }else if($row['operator'] == '!='){
+                            $isi        = "!= '".addslashes($row['value'])."' ";
+                        }else{
+                            $isi        = "= '".addslashes($row['value'])."' ";
+                        }
+
+                        //$isi        = "LIKE '%".addslashes($row['value'])."%' ";
                         $nama_field = $this->declaration_name_field($row['nama_field']);
                     }
                     

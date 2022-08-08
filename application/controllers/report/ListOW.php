@@ -51,9 +51,14 @@ class ListOW extends MY_Controller
             $row[] = $field->nama_warna;
             $row[] = number_format($field->qty,2).' '.$field->uom;
             $row[] = number_format($field->tot_qty1,2);
+            $row[] = $field->gramasi;
+            $row[] = $field->nama_handling;
+            $row[] = $field->nama_route;
+            $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
             $row[] = $field->nama_status;
             $row[] = $field->piece_info;
             $row[] = $field->reff_notes;
+            $row[] = $field->delivery_date;
             //$row[] = $field->kode_co;
             $row[] = '<a href="'.base_url('ppic/colororder/edit/'.$kode_co_encrypt).'" target="_blank" data-togle="tooltip" title="Lihat Color Order">'.$field->kode_co.'</a>';
             if(!empty($field->kode_co)){
@@ -61,6 +66,7 @@ class ListOW extends MY_Controller
             }else{
                 $row[] = '';
             }
+            $row[] = $field->status_scl;
             
             $data[] = $row;
             
@@ -94,7 +100,7 @@ class ListOW extends MY_Controller
         $data['qty']         = number_format($get['qty'],2).' '.$get['uom'];
 
         // get color order by ow
-        $data['list']       = $this->m_listOW->get_color_order_detail_by_OW($kode_co,$ow)->result();
+        $data['list']       = $this->m_listOW->get_color_order_detail_by_OW($kode_co,$ow,$sales_order)->result();
         //$data['route']      = $this->m_pengirimanBarang->get_route_by_origin($origin);
 
         return $this->load->view('modal/v_tracking_list_ow_modal', $data);
@@ -128,6 +134,8 @@ class ListOW extends MY_Controller
 		$ow             = $this->input->post('ow');
 		$produk         = $this->input->post('produk');
 		$warna          = $this->input->post('warna');
+		$status_ow      = $this->input->post('status_ow');
+		$no_ow          = $this->input->post('no_ow');
 
         $this->load->library('excel');
         $object = new PHPExcel();
@@ -148,7 +156,7 @@ class ListOW extends MY_Controller
         $object->getActiveSheet()->mergeCells('C3:F3');
 
         //bold huruf
-		$object->getActiveSheet()->getStyle("A1:O5")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:T5")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -160,7 +168,7 @@ class ListOW extends MY_Controller
 		);	
 
         // header table
-    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'DTI','Piece Info','Reff Notes','CO');
+    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'Gramasi','Finishing', 'Route', 'L.Jadi','DTI','Piece Info','Reff Notes','Delivery Date','CO');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);  
@@ -169,7 +177,7 @@ class ListOW extends MY_Controller
 
         $num   = 1;
         $rowCount = 6;
-        $list = $this->m_listOW->get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna);
+        $list = $this->m_listOW->get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow);
         foreach($list as $val){
 
             if($val->status_scl == 't'){
@@ -191,10 +199,15 @@ class ListOW extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
 			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->tot_qty1);
-			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->nama_status);
-			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->piece_info);
-			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->reff_notes);
-			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->kode_co);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->gramasi);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_handling);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->nama_route);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_jadi.' '.$val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->nama_status);
+			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->piece_info);
+			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->reff_notes);
+			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->delivery_date);
+			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->kode_co);
             $rowCount++;
         }
 

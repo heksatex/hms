@@ -74,7 +74,7 @@
 
      /*css untuk modal mode print data */
     @media screen and (min-width: 768px) {
-     .lebar_mode .modal-dialog  {width:20%;}
+     .lebar_mode .modal-dialog  {width:40%;}
     }
 
     /*create auto number di tabel*/

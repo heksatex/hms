@@ -81,7 +81,7 @@ class M_bom extends CI_Model
 		*/
 		return $this->db->query("SELECT kode_produk, nama_produk, uom
 									FROM  mst_produk 
-									WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%' AND status_produk = 't' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
+									WHERE CONCAT(kode_produk,nama_produk)  LIKE '%$name%' AND status_produk = 't' ORDER BY bom,nama_produk LIMIT 500  ")->result_array();
 	}
 
 	public function get_list_uom_select2_by_prod($name)

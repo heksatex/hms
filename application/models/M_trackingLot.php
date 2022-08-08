@@ -59,6 +59,16 @@ class M_trackinglot extends CI_Model
                                 WHERE tli.lot = '$lot' AND tl.status = 'done'  ")->result();
     }
 
+    function get_adjustment_by_lot($lot){
+        return $this->db->query("SELECT adj.kode_adjustment, adj.create_date, adj.lokasi_adjustment, adj.note, adj.nama_user,
+                                adji.lot, adji.qty_move, adji.qty_data, adji.qty_adjustment,adji.uom, 
+                                ms.nama_status
+                                FROM adjustment adj
+                                INNER JOIN adjustment_items adji ON adj.kode_adjustment = adji.kode_adjustment 
+                                INNER JOIN mst_status ms ON adj.status = ms.kode
+                                WHERE adji.lot = '$lot' AND adj.status = 'done'  ")->result();
+    }
+
 
     public function insert_tmp_tracking_lot_batch($sql)
 	{

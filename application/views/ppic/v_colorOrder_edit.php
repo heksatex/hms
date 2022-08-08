@@ -150,7 +150,7 @@
                             <th class="style">Gramasi</th>
                             <th class="style">Lebar Jadi</th>
                             <th class="style">Route</th>
-                            <th class="style">Reff Notes</th>
+                            <th class="style">Reff Notes PPIC</th>
                             <th class="style">Reff Notes Mkt</th>
                             <th class="style">Status</th>
                             <th class="style"></th>
@@ -162,8 +162,9 @@
                             <?php
                               $no = 1;
                               foreach ($detail as $row) {
+                                if($row->status == 'cancel') $color = 'red'; else $color = '';
                             ?>
-                              <tr class="num">
+                              <tr class="num" style="color:<?php echo $color;?>">
                                 <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order ?>" ></td>
                                 <td><?php echo $row->ow?></td>
                                 <td class="width-120">

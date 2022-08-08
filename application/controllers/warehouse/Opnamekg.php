@@ -180,11 +180,17 @@ class Opnamekg extends MY_Controller
                     $callback = array('status' => 'failed', 'field' => 'txtlot', 'message' => 'Lokasi Barcode / Lot ( '.$lot.' ) tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );
 
                 }else{
+                    // lock table
+                    $this->_module->lock_tabel('opname_kg WRITE');
+                    
                     // get kode opname kg
                     $kode = $this->m_opnameKg->get_kode_opname();
 
                     // insert opname kg ke tbl opname_kg
                     $this->m_opnameKg->save_opname_kg($kode, $tanggal, $quant_id, $kode_produk, $nama_produk, $lot, $qty_opname, $uom_opname,$qty, $uom_qty, $qty2, $uom_qty2, $dept_id, $lokasi_fisik, $nama_user['nama'] );
+
+                    // unlock tabel
+	                $this->_module->unlock_tabel();
 
                     // update qty opname, uom_opname di stock_quant
                     $this->m_opnameKg->update_qty_opname_stock_quant_by_quant_id($quant_id,$qty_opname,$uom_opname);

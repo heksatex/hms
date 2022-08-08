@@ -44,11 +44,11 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>Penerimaan Harian</b></h3>
+          <h3 class="box-title"><b>Pengiriman Greige</b></h3>
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/penerimaanharian/export_excel_in">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/pengirimangreige/export_excel">
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12"> 
@@ -79,31 +79,15 @@
                 <div class="form-group">
                   <div class="col-md-12"> 
                     <div class="col-md-2">
-                      <label>Departemen </label>
+                        <label>View </label>
                     </div>
-                    <div class="col-md-4">
-                      <select type="text" class="form-control input-sm" name="departemen" id="departemen" required="">
-                      </select>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Detail">
+                      <label for="detail">Detail</label>
                     </div>
-                    <div class="col-md-1">
-                        <label>Dari</label>
-                    </div>
-                    <div class="col-md-4">
-                      <select type="text" class="form-control input-sm" name="dari" id="dari" >
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <div class="col-md-12"> 
-                    <div class="col-md-2 col-sm-2">
-                      <label>Status </label>
-                    </div>
-                    <div class="col-xs-4 col-sm-3 col-md-2">
-                        <label><input type="checkbox" name="status[]" value="ready" checked> Ready </label>
-                    </div>
-                    <div class="col-xs-4 col-sm-3 col-md-2">
-                        <label><input type="checkbox" name="status[]"  value="done" checked> Done </label>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Global" checked="checked">
+                      <label for="global">Global</label>
                     </div>
                   </div>
                 </div>
@@ -111,8 +95,16 @@
                   <div class="col-md-12">
                     <div class="col-md-4">
                       <label>
-                          <div id='total_record'>Total Lot : 0</div>
+                          <div id='total_record'>Total Data : 0</div>
                       </label>
+                    </div>
+                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                          <label style="cursor:pointer;">
+                            <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                             Advanced 
+                          </label>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -122,6 +114,87 @@
                 <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
               </div>
               <br>
+
+              <div class="col-md-12">
+                   <div class="panel panel-default" style="margin-bottom: 0px;">
+                    <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                      <div class="panel-body" style="padding: 5px">
+                        <div class="form-group col-md-12" style="margin-bottom:0px">
+                          <div class="col-md-5" >
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Dept Tujuan </label>
+                              </div>
+                              <div class="col-md-7">
+                                <select type="text" class="form-control input-sm" name="tujuan" id="tujuan"  style="width:100% !important">
+                                <option value="">-- Pilih Departemen --</option>
+                                    <?php 
+                                      foreach ($warehouse as $val) {
+                                          echo "<option value='".$val->kode."'>".$val->nama."</option>";
+                                      }
+                                    ?>
+                                </select>
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Status </label>
+                              </div>
+                              <div class="col-xs-4 col-sm-3 col-md-3">
+                                  <label><input type="checkbox" name="status[]" value="ready"> Ready </label>
+                              </div>
+                              <div class="col-xs-4 col-sm-3 col-md-3">
+                                  <label><input type="checkbox" name="status[]"  value="done" checked> Done </label>
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Marketing </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <select type="text" class="form-control input-sm" name="sales_group" id="sales_group"  style="width:100% !important"> 
+                                    <option value="">-- Pilih Marketing --</option>
+                                    <?php 
+                                      foreach ($mst_sales_group as $val) {
+                                          echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
+                                      }
+                                    ?>
+                                  </select>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-5">
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Kode </label>
+                              </div>
+                              <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="kode" id="kode" placeholder="GRG OUT">
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Corak </label>
+                              </div>
+                              <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="corak" id="corak" placeholder="Corak / Nama Produk">
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Warna </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="warna" id="warna" >
+                              </div>
+                            </div> 
+                          </div>
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              </div>
             </form>
 
             <!-- table -->
@@ -134,22 +207,23 @@
                           <thead>
                             <tr>
                               <th  class="style no" >No. </th>
-                              <th  class='style'>Kode</th>
+                              <th  class='style' style="min-width: 80px">Kode</th>
                               <th  class='style' style="min-width: 80px">Tgl Kirim</th>
                               <th  class='style'>Origin</th>
-                              <th  class='style' style="min-width: 150px">Reff Picking</th>
+                              <th  class='style'>Marketing</th>
                               <th  class='style'>Kode Produk</th>
                               <th  class='style' style="min-width: 150px">Nama Produk</th>
-                              <th  class='style' style="min-width: 150px">Lot</th>
-                              <th  class='style'>Qty1</th>
-                              <th  class='style'>Qty2</th>
+                              <th  class='style' style="min-width: 150px">Warna</th>
+                              <th  class='style' id="head_lot">Lot</th>
+                              <th  class='style' style="min-width: 80px">Qty1</th>
+                              <th  class='style' style="min-width: 80px">Qty2</th>
                               <th  class='style'>Status</th>
-                              <th  class='style'>Reff Note</th>
+                              <th  class='style' style="min-width: 80px">Reff Note</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="11" align="center">Tidak ada Data</td>
+                              <td colspan="12" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -181,13 +255,13 @@
   var d     = new Date();
   var month = d.getMonth();
   var day   = d.getDate();
-  var day_1 = d.getDate()-1;
+  var day_1 = d.getDate();
   var year  = d.getFullYear();
 
   // set date tgldari
   $('#tgldari').datetimepicker({
       
-      defaultDate : new Date(year, month, day_1, 07, 00, 00),
+      defaultDate : new Date(year, month, day_1, 00, 00, 00),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       //maxDate: new Date(),
@@ -195,7 +269,7 @@
 
   // set date tglsampai
   $('#tglsampai').datetimepicker({
-      defaultDate : new Date(year, month, day, 07, 00, 00),
+      defaultDate : new Date(year, month, day, 23, 59, 59),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       //maxDate: new Date(),
@@ -209,72 +283,9 @@
     }
   });
 
-  //select 2 Departement
-  $('#departemen').select2({
-      allowClear: true,
-      placeholder: "Select Departemen",
-      ajax: {
-        dataType: 'JSON',
-        type: "POST",
-        url: "<?php echo base_url(); ?>report/penerimaanharian/get_departement_select2",
-        //delay : 250,
-        data: function(params) {
-          return {
-            nama: params.term,
-          };
-        },
-        processResults: function(data) {
-          var results = [];
-          $.each(data, function(index, item) {
-            results.push({
-              id: item.kode,
-              text: item.nama
-            });
-          });
-          return {
-            results: results
-          };
-        },
-        error: function(xhr, ajaxOptions, thrownError) {
-          //alert('Error data');
-          //alert(xhr.responseText);
-        }
-      }
-  });
+  $('#sales_group').select2({});
 
-  //select 2 Departement
-  $('#dari').select2({
-      allowClear: true,
-      placeholder: "Select Departemen",
-      ajax: {
-        dataType: 'JSON',
-        type: "POST",
-        url: "<?php echo base_url(); ?>report/penerimaanharian/get_departement_select2",
-        //delay : 250,
-        data: function(params) {
-          return {
-            nama: params.term,
-          };
-        },
-        processResults: function(data) {
-          var results = [];
-          $.each(data, function(index, item) {
-            results.push({
-              id: item.kode,
-              text: item.nama
-            });
-          });
-          return {
-            results: results
-          };
-        },
-        error: function(xhr, ajaxOptions, thrownError) {
-          //alert('Error data');
-          //alert(xhr.responseText);
-        }
-      }
-  });
-
+  $('#tujuan').select2({});
 
   // cek selisih saatu submit excel
   $('#frm_periode').submit(function(){
@@ -316,8 +327,11 @@
 
       tgldari    = $('#tgldari').val();
       tglsampai  = $('#tglsampai').val();
-      departemen = $('#departemen').val();
-      dept_dari  = $('#dari').val();
+      tujuan     = $('#tujuan').val();
+      kode       = $('#kode').val();
+      sales_group= $('#sales_group').val();
+      warna      = $('#warna').val();
+      corak      = $('#corak').val();
       tgldari_2     = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2   = $('#tglsampai').data("DateTimePicker").date();
 
@@ -332,6 +346,16 @@
 
       }).get();
 
+      var radio_view= false;
+      var radio_arr = new Array(); 
+
+      var radio_arr = $('input[name="view[]"]').map(function(e, i) {
+            if(this.checked == true){
+                check_status = true;
+              return i.value;
+            }
+
+      }).get();
 
       // cek selisi tanggal
       var timeDiff = 0;
@@ -340,14 +364,7 @@
       }
       selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
 
-      if(tgldari == '' || tglsampai == ''){
-
-        alert_modal_warning('Periode Tanggal Harus diisi !');
-
-      }else if (departemen == null) {
-        alert_modal_warning('Departemen Harus diisi !');
-
-      }else if (checkboxes_arr.length == 0) {
+      if (checkboxes_arr.length == 0) {
         alert_modal_warning('Status Harus Dipilih Salah satu !');
 
       }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
@@ -364,16 +381,23 @@
           $.ajax({
                 type: "POST",
                 dataType : "JSON",
-                url : "<?php echo site_url('report/penerimaanharian/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr},
+                url : "<?php echo site_url('report/pengirimangreige/loadData')?>",
+                data: {tgldari:tgldari, tglsampai:tglsampai, tujuan:tujuan, kode:kode, sales_group:sales_group, warna:warna, corak:corak, status_arr:checkboxes_arr, view_arr:radio_arr},
                 success: function(data){
 
                   if(data.status == 'failed'){
-                    $('#total_record').html('Total Lot : 0');
+                    $('#total_record').html('Total Data : 0');
                     alert_modal_warning(data.message);
                   }else{
 
                     $('#total_record').html(data.total_record);
+                    if(data.view == 'Global'){
+                      $('#head_lot').html('Total Lot');
+                      width_lot = "style='min-width: 50px !important'; text-align:right";
+                    }else{
+                      $('#head_lot').html('Lot');;
+                      width_lot = "style='min-width: 150px !important'";
+                    }
 
                     let tbody = $("<tbody />");
                     let no    = 1;
@@ -381,21 +405,16 @@
 
                     $.each(data.record, function(key, value){
                         empty = false;
-                        if(value.in == 'Yes'){
-                          link = '<a href="<?=base_url()?>warehouse/penerimaanbarang/edit/'+value.kode_enc+'" data-toggle="tooltip" title="Lihat Penerimaan Barang" target="_blank">'+value.kode+'</a>'
-                        }else{
-                          link = '<a href="<?=base_url()?>warehouse/pengirimanbarang/edit/'+value.kode_enc+'" data-toggle="tooltip" title="Lihat Pengiriman Barang" target="_blank">'+value.kode+'</a>'
-                        }
-
                         var tr = $("<tr>").append(
                                  $("<td>").text(no++),
-                                 $("<td>").html(link),
+                                 $("<td>").text(value.kode),
                                  $("<td>").text(value.tgl_kirim),
                                  $("<td>").text(value.origin),
-                                 $("<td>").text(value.reff_picking),
+                                 $("<td>").text(value.marketing),
                                  $("<td>").text(value.kode_produk),
                                  $("<td>").text(value.nama_produk),
-                                 $("<td>").text(value.lot),
+                                 $("<td>").text(value.nama_warna),
+                                 $("<td "+width_lot+">").text(value.lot),
                                  $("<td align='right'>").text(value.qty1),
                                  $("<td align='right'>").text(value.qty2),
                                  $("<td>").text(value.status),
@@ -404,7 +423,7 @@
                         tbody.append(tr);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='11' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);
@@ -417,6 +436,7 @@
                   alert(jqXHR.responseText);
                   //alert('error data');
                   $('#btn-generate').button('reset');
+                  $("#example1_processing").css('display','none'); // hidden loading
                 }
           });
       }

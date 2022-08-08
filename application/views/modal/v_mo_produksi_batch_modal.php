@@ -564,15 +564,15 @@
 		    html='<tr class="num">'
 		    + '<td></td>'
 		    + '<td width="150px">'
-		      +'<select type="text" class="form-control input-sm wproduk" name="wtxtproduct" id="wtxtproduct"></select>'
+		      +'<select type="text" class="form-control input-sm width-200 wproduk" name="wtxtproduct" id="wtxtproduct"></select>'
 		      +'<input type="hidden" name="wtxtnameproduct" id="wtxtnameproduct"  class="form-control input-sm wnameproduct"  readonly="readonly"></td>'
 
-		    + '<td><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm wtxtlot" value="'+lot_prefix_next+'" onkeypress="enter_waste(event);"></td>'
-		    + '<td><input type="text" name="wtxtqty"  id="wtxtqty" class="form-control input-sm wtxtqty" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this)"></td>'
-		    + '<td><input type="text" name="wtxtuom"  id="wtxtuom" class="form-control input-sm wtxtuom" value="<?php echo $uom_1;?>"  readonly="readonly"></td>'
-		    + '<td><input type="text" name="wtxtqty2" id="wtxtqty2" class="form-control input-sm" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this)"></td>'
-		    + '<td><input type="text" name="wtxtuom2"  id="wtxtuom2" class="form-control input-sm wtxtuom2" value="<?php echo $uom_2?>"  readonly="readonly"></td>'
-		    + '<td><input type="text" name="wreff_note" id="wreff_note" class="form-control input-sm" onkeypress="enter_waste(event);"/></td>'
+		    + '<td><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-150 wtxtlot" value="'+lot_prefix_next+'" onkeypress="enter_waste(event);"></td>'
+		    + '<td><input type="text" name="wtxtqty"  id="wtxtqty" class="form-control input-sm width-80 wtxtqty" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this)"></td>'
+		    + '<td><input type="text" name="wtxtuom"  id="wtxtuom" class="form-control input-sm width-80 wtxtuom" value="<?php echo $uom_1;?>"  readonly="readonly"></td>'
+		    + '<td><input type="text" name="wtxtqty2" id="wtxtqty2" class="form-control input-sm width-80" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this)"></td>'
+		    + '<td><input type="text" name="wtxtuom2"  id="wtxtuom2" class="form-control input-sm width-80 wtxtuom2" value="<?php echo $uom_2?>"  readonly="readonly"></td>'
+		    + '<td><input type="text" name="wreff_note" id="wreff_note" class="form-control input-sm width-150 " onkeypress="enter_waste(event);"/></td>'
 		    + '<td><a onclick="delRow_waste(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
 		    + '</tr>';
 		    $('#tabel_produksi_waste tbody').append(html);
@@ -648,15 +648,14 @@
 	                  };
 	                },
 	                error: function (xhr, ajaxOptions, thrownError){
-	                  alert('Error data');
-	                  alert(xhr.responseText);
+	                  //alert('Error data');
+	                  //alert(xhr.responseText);
 	                }
 	          }
 	        });
 
 
 	        $(".wproduk").change(function(){
-
 
 	        	kode_produk = '<?php echo $kode_produk ?>'; // kode_produk jadi
 	        	kode_produk_select =  $(this).parents("tr").find("#wtxtproduct").val();
@@ -796,16 +795,19 @@
 								
 			});
 
-			
+			var in_qty =0;
 			$('.qty_konsum').each(function(index,item){
 				qty_smi     = $(item).parents("tr").find('#qty_smi').val();
 				//set value qty dikonsumsi
+				in_qty = in_qty + parseFloat(qty_smi);
 				$(item).eq(0).val(qty_smi);
 			});
+			$('#in_qty').val(in_qty);
+
 			//alert ketik salin konsumsi bahan selesai
 			alert_notify('fa fa-check','Salin Konsumsi Bahan berhasil !','success',function(){});
 			$("#btn-copy").prop('disabled',true);
-			total();
+			//total();
 
 			//cek untuk lot double
 			$(".txtlot").each(function(){

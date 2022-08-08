@@ -487,10 +487,9 @@ class M_pengirimanBarang extends CI_Model
 
 	public function get_list_produk_pengirimanbarang_by_stock($nama_produk,$lokasi)
 	{
-		return $this->db->query("SELECT DISTINCT mp.kode_produk, mp.nama_produk, mp.uom
-								FROM  mst_produk mp
-								INNER JOIN stock_quant sq ON mp.kode_produk = sq.kode_produk
-								WHERE CONCAT(mp.kode_produk,mp.nama_produk)  LIKE '%$nama_produk%' and mp.type = 'stockable' AND sq.lokasi = '$lokasi' AND sq.reserve_move = '' AND mp.status_produk = 't' ORDER BY bom,nama_produk LIMIT 50  ")->result_array();
+		return $this->db->query("SELECT sq.kode_produk, sq.nama_produk, sq.uom
+								FROM stock_quant sq								
+								WHERE CONCAT(sq.kode_produk,sq.nama_produk)  LIKE '%$nama_produk%' AND sq.lokasi = '$lokasi' AND sq.reserve_move = '' AND sq.kode_produk IN (SELECT kode_produk FROM mst_produk WHERE type='stockable' AND status_produk='t') GROUP BY sq.kode_produk LIMIT 50  ")->result_array();
 	}
 
 	public function get_produk_pengiriman_barang_by_kode_produk($kode_produk)
@@ -726,6 +725,11 @@ class M_pengirimanBarang extends CI_Model
 		$query =  $this->db->query("SELECT qty FROM pengiriman_barang_items where kode = '$kode' AND kode_produk = '$kode_produk'")->row_array()
 		;
 		return $query['qty'];
+	}
+
+	public function delete_pengiriman_barang_tmp($kode,$move_id,$quant_id)
+	{
+		$this->db->query("DELETE FROM pengiriman_barang_tmp WHERE kode = '$kode' AND move_id = '$move_id' AND quant_id = '$quant_id' ");
 	}
 	
 
