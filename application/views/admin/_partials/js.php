@@ -1,5 +1,7 @@
 <!-- jQuery 2.2.3 -->
 <script src="<?php echo base_url('plugins/jQuery/jquery-2.2.3.min.js') ?>"></script>
+<!-- Input Mask-->
+<script type="text/javascript" src="<?php echo base_url('dist/inputmask/jquery.inputmask.bundle.js') ?>"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="<?php echo base_url('bootstrap/js/bootstrap.min.js') ?>"></script>
 <!-- SlimScroll -->

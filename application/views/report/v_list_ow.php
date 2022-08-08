@@ -227,7 +227,9 @@
                       <th>DTI</th>
                       <th>Piece Info</th>
                       <th>Reff Note</th>
+                      <th>Delivery Date</th>
                       <th>CO</th>
+                      <th></th>
                       <th></th>
                     </tr>
                   </thead>
@@ -297,7 +299,16 @@
             "ordering": true,
             "info": true,
             "autoWidth": false,
-            
+            "columnDefs": [
+                { 
+                  "targets": [19], 
+                  "orderable": false, 
+                },
+                { 
+                  "targets": [20], 
+                  "visible": false, 
+                },
+              ]
         });
     });
     
@@ -334,6 +345,10 @@
                     data.sales_group  = sales_group;
                     data.no_ow  = no_ow;
                     data.status_ow  = status_ow;
+                },beforeSend: function () {
+                  //please_wait(function(){});
+                }, complete: function () {
+                  //unblockUI( function(){});
                 },
             },
  
@@ -343,8 +358,16 @@
                   "orderable": false, 
                 },
                 { 
-                  "targets": [18], 
+                  "targets": [6], 
+                  "visible": false, 
+                },
+                { 
+                  "targets": [19], 
                   "orderable": false, 
+                },
+                { 
+                  "targets": [20], 
+                  "visible": false, 
                 },
                 { 
                   "targets": [ 6 ], 
@@ -361,6 +384,13 @@
                 },
              
             ],
+            "createdRow": function( row, data, dataIndex ) {
+              if (data[20] == 'f' ){          
+                $(row).css("color","red");
+              }else if(data[20]=='ng'){
+                $(row).css("color","blue");
+              }
+            },
         });
 
     }

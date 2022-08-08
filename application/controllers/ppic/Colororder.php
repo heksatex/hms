@@ -274,6 +274,7 @@ class Colororder extends MY_Controller
                     /*----------------------------------
                       Generate Produk Setelah Greige
                     ----------------------------------*/
+                    
                     $cod         = $this->m_colorOrder->get_color_order_details_by_row($kode_co,$row);
                     $last_number = $this->m_colorOrder->get_kode_product();
                     $kode_prod   = "MF".$last_number; //set kode produk
@@ -288,6 +289,9 @@ class Colororder extends MY_Controller
                     $dgt         = substr("00000" . $last_mo,-5);            
                     $kode_mo     = "MG".date("y") .  date("m"). $dgt;
 
+                    $head        = $this->m_colorOrder->get_data_by_code($kode_co);
+                    $buyer_code  = "Buyer Code = ".$head->buyer_code ." | ";
+
                     foreach ($cod as $val) {
 
                       $kode_prod_rm = $val->kode_produk;
@@ -296,7 +300,7 @@ class Colororder extends MY_Controller
                       $row_order_cod= $val->row_order; // row order color order details
                       $qty          = $val->qty;
                       $uom          = $val->uom;
-                      $reff_notes   = $val->reff_notes;
+                      $reff_notes   = $buyer_code.' '.$val->reff_notes;
                       $route_co     = $val->route_co;
                       $ow           = $val->ow;
                       $kode_sc      = $val->kode_sc;
@@ -606,7 +610,14 @@ class Colororder extends MY_Controller
                       $this->_module->simpan_log_history_batch($sql_log_history_mrp);
                       
                     }
-                    
+
+                    // update reff_notes by row
+                    $this->m_colorOrder->update_reff_notes_color_order_items_by_row($kode_co,$row,addslashes($reff_notes));
+
+                    $jenis_log   = "edit";
+                    $note_log    = "Update Reff Notes | ".$reff_notes;
+                    $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);
+
 
                     //update detail items jadi generate
                     $this->m_colorOrder->update_status_color_order_items($kode_co,$row,'generated');
@@ -837,11 +848,11 @@ class Colororder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_mrp_production);
 
                             // update mrp_production_rm_target
-                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done')";
                             $this->_module->update_reff_batch($sql_update_mrp_production_rm_target);
 
                             // update mrp_production_fg_target 
-                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done')";
                             $this->_module->update_reff_batch($sql_update_mrp_production_fg_target);
 
 
@@ -886,11 +897,11 @@ class Colororder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_stock_move);
 
                             // update stock_move_items
-                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_stock_move_items);
 
                             // update stock_move_produk
-                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") AND status NOT IN ('done')";
                             $this->_module->update_reff_batch($sql_update_stock_move_produk);
                             
 
@@ -1127,6 +1138,7 @@ class Colororder extends MY_Controller
             $row[] = $no.".";
             $row[] = $field->ow;
             $row[] = $field->tanggal_ow;
+            $row[] = $field->status_scl;
             $row[] = $field->nama_produk;
             $row[] = $field->nama_warna;
             $row[] = $field->qty;
@@ -1138,6 +1150,7 @@ class Colororder extends MY_Controller
             $row[] = $field->piece_info;
             $row[] = $field->reff_notes;
             $row[] = $field->row_order;
+            $row[] = $field->status;
             //$row[] = '';//buat checkbox
             //$row[] = htmlentities($field->nama_produk)."|".$field->kode_warna."|".$field->qty."|".$field->uom."|".$field->piece_info."|^";
             $data[] = $row;

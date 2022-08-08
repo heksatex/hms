@@ -659,7 +659,7 @@ class Salescontract extends MY_Controller
                 }else{
 
                   $sisa_qty_insert_color_lines = $cq_contract_lines - $cq_color_lines;// cek sisa qty yang bisa insert ke color lines
-                  $callback = array('status' => 'failed','message' => 'Qty Color Line Melebihi dari Target Contract Lines, Sisa Qty yang bisa diinputkan ke Color Line tersisa sebanyak '.$sisa_qty_insert_color_lines.' '.$uom, 'icon' =>'fa fa-warning', 'type' => 'danger');
+                  $callback = array('status' => 'failed','message' => 'Qty Color Line melebihi dari target Contract Lines, Sisa Qty yang bisa diinputkan ke Color Line tersisa '.$sisa_qty_insert_color_lines.' '.$uom.' lagi', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
                 }
 
@@ -796,9 +796,9 @@ class Salescontract extends MY_Controller
               if($value == 't'){
                 $status = $ow.' Aktif';
               }else if($value == 'ng'){
-                $status = 'Not Good';
+                $status = $ow.' Not Good';
               }else{
-                $status = $ow.' OW Tidak Aktif';
+                $status = $ow.' Tidak Aktif';
               }
               $lebih_target = false;
               if($value == 't'){
@@ -889,7 +889,7 @@ class Salescontract extends MY_Controller
     		$pdf->SetFont('Arial','B',10);
     		// mencetak string
     		$pdf->Cell(185,7,'Faktur dan Alamat Pengiriman',0,1,'L');
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(100,5,$sc->customer_name,0,1,'L');
         $pdf->Multicell(100,4,$cust->invoice_street,0, 'L');
     		$pdf->Cell(190,5,$country['name']." ".$cust->invoice_zip,0,1,'L');
@@ -900,7 +900,7 @@ class Salescontract extends MY_Controller
     		$pdf->SetFont('Arial','b',20);
     		$pdf->Cell(190,7,'Order '.$sc->sales_order,0,1,'L');
 
-    		$pdf->SetFont('Arial','B',9);
+    		$pdf->SetFont('Arial','B',10);
     		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
     		if(!empty($sc->reference)){
          
@@ -910,7 +910,7 @@ class Salescontract extends MY_Controller
     		$pdf->Cell(15,0.5,' Salesperson :',0,0, 'L');
     		$pdf->Cell(10,4,'',0,1);//Buat Jarak ke bawah
 
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		$tgl_trans  =  date('d-m-Y ', strtotime($sc->create_date)); 
     		if(!empty($sc->reference)){
     			$pdf->Cell(47,0.5,$sc->reference,0,0, 'L');
@@ -920,7 +920,7 @@ class Salescontract extends MY_Controller
     		$pdf->Cell(15,0.5,$inisial_sales_group,0,0, 'L');
     		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
     		$pdf->Cell(60,0.5,'Dengan Hormat, ',0,0, 'L');
@@ -1018,25 +1018,25 @@ class Salescontract extends MY_Controller
   		// Memberikan space kebawah agar tidak terlalu rapat
   		$pdf->Cell(10,10,'',0,1);
   		//FOOTER
-  		$pdf->SetFont('Arial','B',9);
-  		$pdf->Cell(33,0.5,'Tanggal Pengiriman :',0,0, 'L');
+  		$pdf->SetFont('Arial','B',10);
+  		$pdf->Cell(37,0.5,'Tanggal Pengiriman :',0,0, 'L');
   		$pdf->SetFont('Arial','',9);
   		$pdf->Cell(15,0.5,$sc->delivery_date,0,0, 'L');
   		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
 
       if(!empty($pay->nama)){
-  		$pdf->SetFont('Arial','B',9);
-  		$pdf->Cell(33,0.5,'Metode Pembayaran :',0,0, 'L');
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','B',10);
+  		$pdf->Cell(37,0.5,'Metode Pembayaran :',0,0, 'L');
+  		$pdf->SetFont('Arial','',10);
   		$pdf->Cell(15,0.5,$pay->nama,0,0, 'L');
   		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
       }
 
 
-  		$pdf->SetFont('Arial','B',9);
+  		$pdf->SetFont('Arial','B',10);
   		$pdf->Cell(38,0.5,'Bank :',0,0, 'L');
   		$pdf->Cell(10,5,'',0,1);
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','',10);
   		
   		$breaks = array("<br />","<br>","<br/>"); 
       $bank  = str_ireplace($breaks, "\n", nl2br(htmlspecialchars($sc->bank)));
@@ -1044,7 +1044,7 @@ class Salescontract extends MY_Controller
   		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
 	  	
 	  	if(!empty($sc->clause)){
-  			$pdf->SetFont('Arial','B',9);  
+  			$pdf->SetFont('Arial','B',10);  
   			$pdf->Cell(13,0.5,'Clause :',0,0, 'L');
   			$pdf->SetFont('Arial','',9);
   			$pdf->Cell(15,0.5,$sc->clause,0,0, 'L');
@@ -1052,9 +1052,9 @@ class Salescontract extends MY_Controller
 	  	}
 
 	  	if(!empty($sc->note)){
-  			$pdf->SetFont('Arial','B',9);  
+  			$pdf->SetFont('Arial','B',10);  
   			$pdf->Cell(14,4,'Catatan :',0,0, 'L');
-  			$pdf->SetFont('Arial','',9);
+  			$pdf->SetFont('Arial','',10);
         $pdf->Multicell(0,4,$sc->note,0, 'L');
   			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
   			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
@@ -1062,7 +1062,7 @@ class Salescontract extends MY_Controller
        
   		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
        
-  		$pdf->SetFont('Arial','B',9);  
+  		$pdf->SetFont('Arial','B',10);  
   		$pdf->Cell(15,0,'');
   		$pdf->Cell(60,0.5,'Menyatakan Setuju, ',0,0, 'c');
   		$pdf->Cell(50,0,'');
@@ -1086,9 +1086,9 @@ class Salescontract extends MY_Controller
 
 		    $pdf->Cell(5,0,'',0,0);
 		    $pdf->Cell(20,0,'',0,0);
-		  	$pdf->SetFont('Arial','B',9);
+		  	$pdf->SetFont('Arial','B',10);
 		    $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
-  			$pdf->SetFont('Arial','',9);
+  			$pdf->SetFont('Arial','',10);
   		}
 
   		// Geser Ke Kanan 35mm
@@ -1119,7 +1119,7 @@ class Salescontract extends MY_Controller
   		$pdf->SetFont('Arial','B',10);
   		// mencetak string
   		$pdf->Cell(185,7,'Invoice',0,1,'L');
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','',10);
   		$pdf->Cell(100,5,$sc->customer_name,0,1,'L');
   		$pdf->Multicell(100,4,$cust->invoice_street,0, 'L');
   		$pdf->Cell(190,5,$country['name']." ".$cust->invoice_zip,0,1,'L');
@@ -1130,7 +1130,7 @@ class Salescontract extends MY_Controller
   		$pdf->SetFont('Arial','b',20);
   		$pdf->Cell(190,7,'Order '.$sc->sales_order,0,1,'L');
 
-  		$pdf->SetFont('Arial','B',9);
+  		$pdf->SetFont('Arial','B',10);
   		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
   		if(!empty($sc->reference)){
   			$pdf->Cell(47,0.5,'Reference :',0,0, 'L');
@@ -1139,7 +1139,7 @@ class Salescontract extends MY_Controller
   		$pdf->Cell(15,0.5,' Salesperson :',0,0, 'L');
   		$pdf->Cell(10,4,'',0,1);//Buat Jarak ke bawah
 
-  		$pdf->SetFont('Arial','',9);
+  		$pdf->SetFont('Arial','',10);
   		$tgl_trans  =  date('d-m-Y ', strtotime($sc->create_date)); 
   		if(!empty($sc->reference)){
   			$pdf->Cell(47,0.5,$sc->reference,0,0, 'L');
@@ -1239,25 +1239,25 @@ class Salescontract extends MY_Controller
     		// Memberikan space kebawah agar tidak terlalu rapat
     		$pdf->Cell(10,10,'',0,1);
     		//FOOTER
-    		$pdf->SetFont('Arial','B',9);
-    		$pdf->Cell(23,0.5,'Delivery Date :',0,0, 'L');
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','B',10);
+    		$pdf->Cell(25,0.5,'Delivery Date :',0,0, 'L');
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(15,0.5,$sc->delivery_date,0,0, 'L');
     		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
 
         if(!empty($pay->nama)){          
-    		$pdf->SetFont('Arial','B',9);
-    		$pdf->Cell(24,0.5,'Payment Term :',0,0, 'L');
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','B',10);
+    		$pdf->Cell(28,0.5,'Payment Term :',0,0, 'L');
+    		$pdf->SetFont('Arial','',10);
     		$pdf->Cell(15,0.5,$pay->nama,0,0, 'L');
     		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
         }
 
 
-    		$pdf->SetFont('Arial','B',9);
+    		$pdf->SetFont('Arial','B',10);
     		$pdf->Cell(38,0.5,'Bank :',0,0, 'L');
     		$pdf->Cell(10,5,'',0,1);
-    		$pdf->SetFont('Arial','',9);
+    		$pdf->SetFont('Arial','',10);
     		
     		$breaks = array("<br />","<br>","<br/>"); 
         $bank  = str_ireplace($breaks, "\n", nl2br(htmlspecialchars($sc->bank)));
@@ -1265,17 +1265,17 @@ class Salescontract extends MY_Controller
     		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
     	  	
     	  if(!empty($sc->clause)){
-    			$pdf->SetFont('Arial','B',9);  
+    			$pdf->SetFont('Arial','B',10);  
     			$pdf->Cell(13,0.5,'Clause :',0,0, 'L');
-    			$pdf->SetFont('Arial','',9);
+    			$pdf->SetFont('Arial','',10);
     			$pdf->Cell(15,0.5,$sc->clause,0,0, 'L');
     			$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
     	  	}
 
     	  if(!empty($sc->note)){
-    			$pdf->SetFont('Arial','B',9);  
+    			$pdf->SetFont('Arial','B',10);  
     			$pdf->Cell(10,4,'Note :',0,0, 'L');
-    			$pdf->SetFont('Arial','',9);
+    			$pdf->SetFont('Arial','',10);
     			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
           $pdf->Multicell(0,4,$sc->note,0, 'L');
     			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
@@ -1283,7 +1283,7 @@ class Salescontract extends MY_Controller
 
         $pdf->Cell(10,5,'',0,1);//ENTER ke bawah
 
-    		$pdf->SetFont('Arial','B',9);  
+    		$pdf->SetFont('Arial','B',10);  
     		$pdf->Cell(60,0.5,'We hereby confirm and accept this contract of sales, ',0,0, 'c');
     		$pdf->Cell(65,0,'');
     		$pdf->Cell(60,0.5,' PT.Heksatex Indah,  ',0,0, 'c');
@@ -1306,9 +1306,9 @@ class Salescontract extends MY_Controller
 
     		  $pdf->Cell(5,0,'',0,0);
     		  $pdf->Cell(20,0,'',0,0);
-    			$pdf->SetFont('Arial','B',9);
+    			$pdf->SetFont('Arial','B',10);
     		  $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
-    			$pdf->SetFont('Arial','',9);
+    			$pdf->SetFont('Arial','',10);
     		}
 
     		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah

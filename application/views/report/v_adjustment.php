@@ -116,7 +116,8 @@
                               <th  class='style' style="min-width: 80px">Tanggal</th>
                               <th  class='style' style="min-width: 150px">Nama Produk</th>
                               <th  class='style' style="min-width: 80px">Lot</th>
-                              <th  class='style' >Qty</th>
+                              <th  class='style' >Qty Stock</th>
+                              <th  class='style' >Qty Adj</th>
                               <th  class='style' >UoM</th>
                               <th  class='style' >Qty2</th>
                               <th  class='style' >UoM2</th>
@@ -248,6 +249,7 @@
                                $("<td>").text(''),
                                $("<td>").text(value.nama_produk),
                                $("<td>").text(value.tot_lot),
+                               $("<td align='right'>").text(value.qty_stock),
                                $("<td align='right'>").text(value.qty),
                                $("<td>").text(value.uom),
                                $("<td align='right'>").text(value.qty2),
@@ -334,6 +336,7 @@
                           row += "<td>"+value.tanggal+"</td>";
                           row += "<td></td>";
                           row += "<td>"+value.lot+"</td>";
+                          row += "<td align='right' >"+value.qty_stock+"</td>";
                           row += "<td align='right' >"+value.qty+"</td>";
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";

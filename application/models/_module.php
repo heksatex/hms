@@ -653,7 +653,7 @@ class _module extends CI_Model
 	{
 		return $this->db->query("SELECT mrp.kode, mrp.tanggal,mrp.dept_id,mrp.status,mrp.reff_note,mrp.origin, 
 								 d.nama as departemen, mrp.qty as qty_target, 
-								 (SELECT sum(qty) FROM stock_move_items WHERE move_id = (SELECT move_id FROM mrp_production_fg_target fg WHERE fg.kode = mrp.kode) ) as qty_tersedia
+								 (SELECT sum(qty) FROM stock_move_items WHERE move_id = (SELECT move_id FROM mrp_production_fg_target fg WHERE fg.kode = mrp.kode) AND kode_produk = mrp.kode_produk) as qty_tersedia
 								 FROM mrp_production mrp
 								 INNER JOIN departemen d ON mrp.dept_id = d.kode 
 								 where mrp.origin = '$origin'  ORDER BY mrp.tanggal, mrp.kode desc")->result();
@@ -819,6 +819,17 @@ class _module extends CI_Model
 	{
 		$query =  $this->db->query("SELECT type_mo FROM departemen WHERE kode = '$kode'")->row_array();
 		return $query['type_mo'];
+	}
+
+	public function get_kode_departemen_by_stock_location($stock)
+	{
+		$query = $this->db->query("SELECT kode FROM departemen where stock_location = '$stock'")->row_array();
+		return $query['kode'];
+	}
+
+	public function cek_status_mrp_rm_target_additional_move_id_kosong_by_kode($whereMo)
+	{
+		return $this->db->query("SELECT kode,status FROM mrp_production_rm_target where kode in (".$whereMo.") AND move_id != '' AND additional = 't' AND status IN ('draft','cancel') ");
 	}
 
 }

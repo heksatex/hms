@@ -16,8 +16,8 @@ class M_colorOrder extends CI_Model
 	var $order2  	    = array('a.create_date' => 'desc');
 
 	//var $table3 	    = 'sales_color_line';
-	var $column_order3  = array(null, 'ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'rc.nama','piece_info','reff_notes');
-	var $column_search3 = array('ow','tanggal_ow','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info', 'rc.nama', 'reff_notes');
+	var $column_order3  = array(null, 'ow','tanggal_ow','ms.nama_status','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'rc.nama','piece_info','reff_notes');
+	var $column_search3 = array('ow','tanggal_ow','ms.nama_status','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info', 'rc.nama', 'reff_notes');
 	var $order3  	    = array('tanggal_ow' => 'asc');
 
 
@@ -264,8 +264,9 @@ class M_colorOrder extends CI_Model
 	{
 		
 		//$this->db->from($this->table3);
-		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling, a.gramasi, a.route_co, rc.nama as nama_route, a.reff_notes");
+		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling, a.gramasi, a.route_co, rc.nama as nama_route, a.reff_notes, ms.nama_status as status_scl, a.status");
 		$this->db->from("sales_color_line a");
+		$this->db->JOIN("mst_status ms", "a.status = ms.kode", "INNER");
 		$this->db->JOIN("warna b", "a.id_warna = b.id", "LEFT");
 		$this->db->JOIN("mst_handling c", "a.id_handling =  c.id", "LEFT");
 		$this->db->JOIN("route_co rc","rc.kode = a.route_co","LEFT");
@@ -664,6 +665,11 @@ class M_colorOrder extends CI_Model
 	{
 		return $this->db->query("SELECT * FROM color_order_detail WHERE kode_co = '$kode_co' $status ");
 
+	}
+
+	public function update_reff_notes_color_order_items_by_row($kode_co,$row_order,$reff_notes)
+	{
+		return $this->db->query("UPDATE color_order_detail SET reff_notes = '$reff_notes'  WHERE kode_co = '$kode_co' AND row_order = '$row_order' ");
 	}
 
 

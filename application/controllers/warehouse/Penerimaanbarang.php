@@ -338,11 +338,12 @@ class Penerimaanbarang extends MY_Controller
                 $callback = array('status' => 'ada', 'message'=>'Maaf, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if($cek_kirim['status'] == 'cancel'){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-            }else if($cek_tmp == 0 AND $mode == 'scan'){
+            //}else if(($cek_tmp == 0 AND $deptid =='GRG' ) OR ($mode == 'scan' AND $cek_tmp == 0)){
+            }else if($cek_tmp == 0 AND  $mode == 'scan'){
                 $callback = array('status' => 'failed', 'message'=>'Barcode belum di Scan, Silahkan Scan Barcode terlebih dahulu !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else{    
                     //lock table
-                    $this->_module->lock_tabel('stock_move WRITE, stock_move_produk WRITE, stock_move_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, stock_quant WRITE, departemen d WRITE, pengiriman_barang WRITE, log_history WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, penerimaan_barang_tmp WRITE, stock_move_items  as smi WRITE, penerimaan_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE');
+                    $this->_module->lock_tabel('stock_move WRITE, stock_move_produk WRITE, stock_move_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, stock_quant WRITE, departemen d WRITE, pengiriman_barang WRITE, log_history WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, penerimaan_barang_tmp WRITE, stock_move_items  as smi WRITE, penerimaan_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE, departemen WRITE');
                 
                     //lokasi tujuan 
                     $lokasi = $this->m_penerimaanBarang->get_location_by_move_id($move_id)->row_array();
@@ -543,6 +544,13 @@ class Penerimaanbarang extends MY_Controller
                                 if($cek_mrp_rm > 0 ){
                                     $update_status = false;
                                 }
+                            }
+
+                            $cek_rm = $this->_module->cek_status_mrp_rm_target_additional_move_id_kosong_by_kode($whereMo)->num_rows();
+                            if($cek_rm > 0){
+                              $update_status = false;
+                            }else{
+                              $update_status = true;
                             }
 
                             if($update_status == true) {
@@ -772,7 +780,20 @@ class Penerimaanbarang extends MY_Controller
                                    $kode_out = $this->_module->get_kode_pengiriman_barang_by_move_id($mvid['move_id'])->row_array();
                                    //$case7 .= "when move_id = '".$mvid['move_id']."' then '".$kode_out['kode'].'|'.$kode_in."' ";
                                    //$where7 .= "'".$mvid['move_id']."',";
-                                   $reff_picking_baru = $kode_out['kode'].'|'.$kode_in;
+                                   
+                                   if(!empty($kode_out['kode'])){
+                                        $reff_picking_baru = $kode_out['kode'].'|'.$kode_in;
+                                   }else{
+                                        //$reff_picking_baru = $kode_out['kode'].'|'.$kode_in;
+
+                                        $dept_dari = $this->_module->get_kode_departemen_by_stock_location($lokasi_dari);// jika lokasi tujuan transit pasti tidak di temukan
+                                        if(!empty($dept_dari)){
+                                          $reff_picking_baru = $dept_dari.'|'.$kode_in; 
+                                        }else{
+                                          $reff_picking_baru = '|'.$kode_in;   
+                                        }
+                                   }
+
                                    $move_id_out   = $mvid['move_id'];
                                 }
                             }

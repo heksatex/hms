@@ -9,6 +9,7 @@
                 <th>Tanggal dibuat</th>
                 <th>Origin</th>
                 <th>Mesin</th>
+                <th>Nama Varian</th>
                 <th>Status</th>
             </tr>
           </thead>

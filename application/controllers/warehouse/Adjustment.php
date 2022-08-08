@@ -96,6 +96,9 @@ class Adjustment extends MY_Controller
       }else if(empty($kode_lokasi)){
         $callback = array('status' => 'failed', 'field' => 'kode_lokasi', 'message' => 'Kode Lokasi Harus Diisi !', 'icon' =>'fa fa-warning', 
         'type' => 'danger'  );         
+      }else if(empty($note)){
+        $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Notes Harus Diisi / Alasan membuat Adjustment !', 'icon' =>'fa fa-warning', 
+        'type' => 'danger'  );         
       }else{
         //cek kode adjustment apa sudah ada apa belum
         $cek = $this->m_adjustment->cek_adjustment_by_kode($kode_adjustment)->row_array();

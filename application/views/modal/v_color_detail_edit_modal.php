@@ -123,13 +123,13 @@
           </div>  
       </div>
       <div class="col-md-12 col-xs-12">
-        <div class="col-xs-4"><label>Reff Notes</label></div>
+        <div class="col-xs-4"><label>Reff Notes PPIC</label></div>
             <div class="col-xs-8">
               <textarea  type="text" class="form-control input-sm ta set_textarea"  name="reff" id="reff"  ><?php echo $get['reff_notes'] ?></textarea>
             </div>  
       </div>
       <div class="col-md-12 col-xs-12">
-          <div class="col-xs-4"><label>Reff Notes</label></div>
+          <div class="col-xs-4"><label>Reff Notes MKT</label></div>
           <div class="col-xs-8">
             <textarea  type="text" class="form-control input-sm ta set_textarea"  name="reff_mkt" id="reff_mkt" readonly="readonly"  ><?php echo $get['reff_notes_mkt'] ?></textarea>
 

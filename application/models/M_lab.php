@@ -10,8 +10,8 @@ class M_lab extends CI_Model
 	var $column_search= array('nama_warna', 'tanggal', 'status', 'notes','nama_sales_group');
 	var $order  	  = array('tanggal' => 'desc');
 
-	var $column_order2 = array(null, 'mrp.kode', 'mrp.tanggal', 'mc.nama_mesin', 'ms.nama_status', 'mrp.origin');
-	var $column_search2= array('mrp.kode', 'mrp.tanggal', 'mc.nama_mesin', 'ms.nama_status','mrp.origin');
+	var $column_order2 = array(null, 'mrp.kode', 'mrp.tanggal', 'mc.nama_mesin','wv.nama_varian', 'ms.nama_status', 'mrp.origin');
+	var $column_search2= array('mrp.kode', 'mrp.tanggal', 'mc.nama_mesin', 'wv.nama_varian','ms.nama_status','mrp.origin');
 	var $order2  	  = array('mrp.tanggal' => 'desc');
 
 	private function _get_datatables_query()
@@ -107,9 +107,10 @@ class M_lab extends CI_Model
 	private function _get_datatables_query2()
 	{
 		
-		$this->db->select("w.id, w.nama_warna, mrp.kode, mrp.dept_id, mrp.status, mrp.tanggal, mc.nama_mesin, ms.nama_status, mrp.origin");
+		$this->db->select("w.id, w.nama_warna, mrp.kode, mrp.dept_id, mrp.status, mrp.tanggal, mc.nama_mesin, ms.nama_status, mrp.origin, wv.nama_varian");
 		$this->db->from("warna w");
 		$this->db->join("mrp_production mrp", "w.id=mrp.id_warna", "inner");
+		$this->db->join("warna_varian wv", "wv.id = mrp.id_warna_varian","left");
 		$this->db->join("mst_status ms", "mrp.status=ms.kode", "inner");
 		$this->db->join("mesin mc", "mrp.mc_id=mc.mc_id", "left");
 
@@ -173,6 +174,7 @@ class M_lab extends CI_Model
 		$this->db->select("w.id, w.nama_warna, mrp.kode, mrp.dept_id, mrp.status, mrp.tanggal, mc.nama_mesin, ms.nama_status, mrp.origin");
 		$this->db->from("warna w");
 		$this->db->join("mrp_production mrp", "w.id=mrp.id_warna", "inner");
+		$this->db->join("warna_varian wv", "wv.id = mrp.id_warna_varian","left");
 		$this->db->join("mst_status ms", "mrp.status=ms.kode", "inner");
 		$this->db->join("mesin mc", "mrp.mc_id=mc.mc_id", "left");
 		$this->db->where("w.id", $id_warna);
@@ -342,12 +344,12 @@ class M_lab extends CI_Model
 		return $query['nama_varian'];
 	}
 
-	public function get_items_dti_by_first_varian($id_warna,$type_obat)
+	public function get_items_dti_by_varian($id_warna,$type_obat,$id_varian)
 	{
 		return $this->db->query("SELECT id_warna, id_warna_varian, type_obat, kode_produk, nama_produk, qty, uom, reff_note, row_order
 								FROM warna_items 
 								WHERE id_warna = '$id_warna' AND type_obat = '$type_obat' 
-								AND id_warna_varian = (SELECT id FROM warna_varian where id_warna = '$id_warna' ORDER BY  id  DESC LIMIT 1) ORDER BY row_order ")->result();
+								AND id_warna_varian = '$id_varian' ORDER BY row_order ")->result();
 	}
 
 	public function get_last_varian_by_id($id_warna)

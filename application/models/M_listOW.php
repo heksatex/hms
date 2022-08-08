@@ -5,8 +5,8 @@
 class M_listOW extends CI_Model
 {
 	
-	var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','ms.nama_status', 'scl.piece_info','scl.reff_notes','co.kode_co',null);
-	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group', 'scl.piece_info','scl.reff_notes', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi',);
+	var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','ms.nama_status', 'scl.piece_info','scl.reff_notes','sc.delivery_date ','co.kode_co',null);
+	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group', 'scl.piece_info','scl.reff_notes', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','sc.delivery_date ');
 	var $order  	  = array('scl.tanggal_ow' => 'asc');
 
     
@@ -67,7 +67,7 @@ class M_listOW extends CI_Model
 
         $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
         (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-        co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route ");
+        co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, sc.delivery_date ");
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");
@@ -250,7 +250,7 @@ class M_listOW extends CI_Model
 
     public function get_detail_items_mo($move_id)
 	{
-		return $this->db->query("SELECT mrp.kode, mrp.tanggal,mrp.dept_id,mrp.status,mrp.reff_note,mrp.origin, ms.nama_status,
+		return $this->db->query("SELECT mrp.kode, mrp.tanggal,mrp.dept_id,mrp.status,mrp.reff_note,mrp.origin, ms.nama_status,mrp.finish_time, mrp.start_time,
                                 d.nama as departemen, mrp.qty as qty_target                                
                                 FROM mrp_production mrp
                                 INNER JOIN departemen d ON mrp.dept_id = d.kode 
@@ -351,7 +351,7 @@ class M_listOW extends CI_Model
 
         $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
         (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-        co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route ");
+        co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, sc.delivery_date");
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");

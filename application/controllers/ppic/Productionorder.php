@@ -1303,11 +1303,11 @@ class Productionorder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_mrp_production);
 
                             // update mrp_production_rm_target
-                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_mrp_production_rm_target);
 
                             // update mrp_production_fg_target 
-                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") ";
+                            $sql_update_mrp_production_fg_target = "UPDATE mrp_production_fg_target SET status =(case ".$case." end) WHERE  kode in (".$where.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_mrp_production_fg_target);
 
 
@@ -1352,11 +1352,11 @@ class Productionorder extends MY_Controller
                             $this->_module->update_reff_batch($sql_update_stock_move);
 
                             // update stock_move_items
-                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") AND status NOT IN ('done') ";
                             $this->_module->update_reff_batch($sql_update_stock_move_items);
 
                             // update stock_move_produk
-                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") ";
+                            $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case4." end) WHERE  move_id in (".$where4.") AND status NOT IN ('done')  ";
                             $this->_module->update_reff_batch($sql_update_stock_move_produk);
                             
 

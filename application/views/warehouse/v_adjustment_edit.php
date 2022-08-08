@@ -292,7 +292,7 @@
     var index = $("#tableadjustment tbody tr:last-child").index();
     var row   ='<tr class="">'
           + '<td></td>'
-          + '<td style="min-width:170px;"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select></select><input type="text" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'          
+          + '<td style="min-width:170px;"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'          
           + '<td style="min-width:100px;"><input type="text" class="form-control input-sm lot" name="Lot" id="lot"></td>'
           + '<td class="width-150"><input type="text" class="form-control input-sm uom" name="Uom" id="uom" readonly></td>'          
           + '<td></td>'          

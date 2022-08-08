@@ -9,6 +9,7 @@
             <th class="no">No</th>
             <th>OW</th>
             <th>Tgl.OW</th>
+            <th>Status OW</th>
             <th>Product</th>
             <th>Color</th>
             <th>Qty</th>
@@ -20,6 +21,7 @@
             <th>Piece Info</th>
             <th>Reff Notes</th>
             <th width="50px"></th>
+            <th></th>
         </thead>
         <tbody>
           
@@ -54,17 +56,18 @@
            
             "columnDefs": [
               {
-               'targets':13,
-               'data' : 13,
+               'targets':14,
+               'data' : 14,
                 'checkboxes': {
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[13];
+                   var rowId = rowData[15];
+                   if(rowId == 'f'){  
+                      this.api().cell(td).checkboxes.disable();
+                   }
                 },
-              },
-              {
-                "visible": false,  "orderable": false, 
+               
               },
               { 
                 "targets": [0], 
@@ -74,10 +77,19 @@
              "select": {
               'style': 'multi'
             },
+            "createdRow": function( row, data, dataIndex ) {
+              if (data[15]== 'f'){          
+                $(row).css("color","red");
+              }else if(data[15] == 'ng'){
+                $(row).css("color","blue");
+              }
+            },
             'rowCallback': function(row, data, dataIndex){
-               // Get row ID
-               var rowId = data[13];
-               // If row ID is in the list of selected row IDs
+                // Get row ID
+                var rowId = data[3];
+                if (rowId.includes('Tidak') == true){     
+                  $(row).find('input[type="checkbox"]').prop('disabled', true);
+                }
             }
         });
  
@@ -94,7 +106,7 @@
   $("#btn-tambah").unbind( "click" );
   $('#btn-tambah').click(function(){
     
-      var myCheckboxes = table.column(13).checkboxes.selected();
+      var myCheckboxes = table.column(14).checkboxes.selected();
       var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
 

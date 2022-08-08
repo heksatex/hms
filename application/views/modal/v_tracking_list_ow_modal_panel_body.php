@@ -41,7 +41,7 @@
                                             if($method == 'OUT'){
                                                 $outs   = $this->m_listOW->get_detail_pengiriman($mr->move_id);
                                                 if(!empty($outs)){
-                                                    $tgl    = tgl_indo($outs->tanggal);
+                                                    $tgl  = tgl_indo(date('d-m-Y H:i:s',strtotime($outs->tanggal_transaksi)));
                                                     $header =  "Pengiriman Barang ".$outs->departemen.' ( '.$outs->kode.' )';
                                                     if($outs->status =='draft'){
                                                         $status =  '<span class="label bg-black">'.$outs->nama_status.'</span>';
@@ -60,7 +60,7 @@
                                             }else if($method == 'IN'){
                                                 $in   = $this->m_listOW->get_detail_penerimaan($mr->move_id);
                                                 if(!empty($in)){
-                                                    $tgl    = tgl_indo($in->tanggal);
+                                                    $tgl  = tgl_indo(date('d-m-Y H:i:s',strtotime($in->tanggal_transaksi)));
                                                     $header =  "Penerimaan Barang ".$in->departemen.' ( '.$in->kode.' )';
                                                     if($in->status =='draft'){
                                                         $status =  '<span class="label bg-black">'.$in->nama_status.'</span>';
@@ -79,7 +79,7 @@
                                             }else if($method == 'PROD'){
                                                 $mrp    = $this->m_listOW->get_detail_items_mo($mr->move_id);
                                                 if(!empty($mrp)){
-                                                    $tgl    = tgl_indo($mrp->tanggal);
+                                                    $tgl  = tgl_indo(date('d-m-Y H:i:s',strtotime($mrp->start_time)));
                                                     $header =  "Manufacturing Order Group ".$mrp->departemen.' ( '.$mrp->kode.' )';
                                                     if($mrp->status =='draft'){
                                                         $status =  '<span class="label bg-black">'.$mrp->nama_status.'</span>';
