@@ -1622,7 +1622,7 @@ class Pengirimanbarang extends MY_Controller
                           $kode_in = $this->_module->get_kode_penerimaan_barang_by_move_id($cek_sm['move_id'])->row_array();
 
                           //update reff picking pengiriman_barang
-                          if(!empty($kode['kode'])){
+                          if(!empty($kode_in['kode'])){
                             $reff_picking_out_baru = $kode_out.'|'.$kode_in['kode'];   
                             
                           }else{
