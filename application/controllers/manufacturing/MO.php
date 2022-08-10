@@ -971,7 +971,7 @@ class MO extends MY_Controller
             $y      = $pdf->GetY() + 7;
             $x      = 10;
             $no_dye = 1;
-            $type   = '11';
+            $type   = '12';
             $items_dye   = $this->m_mo->get_list_rm_target_obat_by_move($kode,$move_id,$type);
       
             foreach($items_dye as $dye){
@@ -1004,7 +1004,7 @@ class MO extends MY_Controller
             }
       
             $no_aux = 1;
-            $type   = '12';
+            $type   = '11';
             $items_aux   = $this->m_mo->get_list_rm_target_obat_by_move($kode,$move_id,$type);
       
             foreach($items_aux as $aux){
@@ -1109,7 +1109,7 @@ class MO extends MY_Controller
             foreach($items_aux as $aux){
                 $isi .= '02';// step numer aux 02
                 $isi .= str_pad($aux->kode_produk,8);
-                $isi .= str_pad($$aux->qty,10," ",STR_PAD_LEFT);
+                $isi .= str_pad($aux->qty,10," ",STR_PAD_LEFT);
                 $isi .= substr($nama_mesin,0,6);
                 $isi .= 0;
                 $isi .= "\r\n";

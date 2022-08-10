@@ -375,7 +375,7 @@
                                     }
                                 ?>
                                   <tr class="num" <?php echo $style; ?>>
-                                    <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>" data-isi2="<?php echo $row->ow;?>"></td>
+                                    <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>" data-isi2="<?php echo $row->ow;?>" data-id3="product" data-isi3="<?php echo $row->kode_produk;?>"></td>
                                     <td class="text-wrap width-150"><?php echo $row->nama_produk?></td>
                                     <td class="text-wrap width-150" data-content="edit" data-name="Description" data-id="description_color" data-isi="<?php echo htmlentities($row->description);?>"><?php echo $row->description?></td>
                                     <td class="text-wrap" data-content="edit" data-id="color"   data-name="Color" data-isi="<?php echo $row->id_warna;?>" data-isi2="<?php echo $row->nama_warna;?>"><?php echo $row->nama_warna?></td>
@@ -576,6 +576,19 @@
     $("#foot").load(location.href + " #foot");
     $("#total").load(location.href + " #total");
   }
+
+  // untuk focus after select2 close
+  $(document).on('focus', '.select2', function (e) {
+    if (e.originalEvent) {
+        var s2element = $(this).siblings('select');
+        s2element.select2('open');
+
+        // Set focus back to select2 element on closing.
+        s2element.on('select2:closing', function (e) {
+            s2element.select2('focus');
+        });
+    }
+  });
 
   // untuk ubah status sales color line aktif/tidak aktif
   $(document).on("change", ".status_scl", function(){
@@ -1151,7 +1164,10 @@
                   $('.description_color').val(data.nama_produk);
                   $('.uom_color').val(data.uom);
                   $('.lebar_jadi').val(data.lebar_jadi);
-                  $('.uom_lebar_jadi').val(data.uom_lebar_jadi);
+                  //$('.uom_lebar_jadi').val(data.uom_lebar_jadi);
+                  var $newOptionuom = $("<option></option>").val(data.uom_lebar_jadi).text(data.uom_lebar_jadi);
+                  $(".uom_lebar_jadi").empty().append($newOptionuom).trigger('change');
+
                 },
                 error: function (xhr, ajaxOptions, thrownError){
                 //  alert('Error data');
@@ -1413,7 +1429,7 @@
 
         $(this).parents("tr").find("td[data-content='edit']").each(function(){
           if($(this).attr('data-id')=="row_order"){
-            $(this).html('<input type="hidden"  class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
+            $(this).html('<input type="hidden"  class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> <input type="hidden"  class="form-control" value="' + htmlentities_script($(this).attr('data-isi3')) + '" id="'+ $(this).attr('data-id3') +'"> ');
             row_order = $(this).attr('data-isi');
 
           }else if($(this).attr('data-id')=='qty' || $(this).attr('data-id')=='gramasi'){

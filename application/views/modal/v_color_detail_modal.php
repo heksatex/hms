@@ -56,6 +56,10 @@
            
             "columnDefs": [
               {
+               'targets':15,
+               'visible': false,
+              },
+              {
                'targets':14,
                'data' : 14,
                 'checkboxes': {

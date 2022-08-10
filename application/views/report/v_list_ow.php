@@ -358,10 +358,6 @@
                   "orderable": false, 
                 },
                 { 
-                  "targets": [6], 
-                  "visible": false, 
-                },
-                { 
                   "targets": [19], 
                   "orderable": false, 
                 },
