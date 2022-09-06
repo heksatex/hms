@@ -105,12 +105,17 @@ class M_orderPlanning extends CI_Model
 
 	public function cek_due_date_sales_conctract_items_by_kode($sales_order)
 	{
-		return $this->db->query("SELECT * FROM sales_contract_items WHERE sales_order = '$sales_order' AND due_date is NULL ");
+		return $this->db->query("SELECT * FROM sales_contract_items WHERE sales_order = '$sales_order' AND ( due_date is NULL or due_date = '')  ");
 	}
 
 	public function cek_sales_contract_items_by_kode($sales_order,$kode_produk,$row_order)
 	{
 		$query = $this->db->query("SELECT kode_produk FROM sales_contract_items WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order= '$row_order'");
 		return $query->row_array();
+	}
+
+	public function update_due_date_to_empty($sales_order)
+	{
+		$this->db->query("UPDATE sales_contract_items SET due_date = null WHERE sales_order = '$sales_order'");
 	}
 }

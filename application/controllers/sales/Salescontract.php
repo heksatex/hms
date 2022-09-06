@@ -576,6 +576,7 @@ class Salescontract extends MY_Controller
           $lebar_jadi   = $this->input->post('lebar_jadi');
           $uom_lebar_jadi   = $this->input->post('uom_lebar_jadi');
           $reff_note    = addslashes($this->input->post('reff_note'));
+          $delivery_date= addslashes($this->input->post('delivery_date'));
           $date         = date('Y-m-d H:i:s');
 
           if(!empty($handling)){
@@ -632,9 +633,9 @@ class Salescontract extends MY_Controller
                 
                 if($tot_qty_color_line_new <= $cq_contract_lines OR $cek_uom > 0){
                   
-                  $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note);
+                  $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date);
                   $jenis_log   = "edit";
-                  $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling."| ".$nama_route." | ".$gramasi." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note;
+                  $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling."| ".$nama_route." | ".$gramasi." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date;
                   $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                   $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                 }else{
@@ -664,7 +665,7 @@ class Salescontract extends MY_Controller
 
                   $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
                   $row_order = $ro['row_order']+1;
-                  $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note);
+                  $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date);
                   
                   // cek status sales_contract
                   $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
@@ -674,7 +675,7 @@ class Salescontract extends MY_Controller
                   }
                   
                   $jenis_log   = "edit";
-                  $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note;
+                  $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date;
                   $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                   $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 
@@ -837,7 +838,7 @@ class Salescontract extends MY_Controller
   
                 if($cq_color_lines > $cq_contract_lines){
                   $lebih_target = true;  
-                  $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                  $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines1', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }
 
                 // tambah qty yg akan di aktifkan
@@ -848,7 +849,7 @@ class Salescontract extends MY_Controller
                 }
 
               }
-              if($lebih_target == false){
+              if($lebih_target == false ){
                 // update status sales Color Lines
                 $this->m_sales->update_status_color_line_by_row($sales_order,$row_order,$value,$ow);
 
@@ -980,8 +981,8 @@ class Salescontract extends MY_Controller
         	$pdf->Cell(65,6,$row->description,0,0,'LR');
           $pdf->Cell(20,6,number_format($row->qty,2),0,0,'R');
           $pdf->Cell(20,6,$row->uom,0,0);
-          $pdf->Cell(30,6,number_format($row->price,4),0,0,'R');
-          $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),4),0,1,'R'); 
+          $pdf->Cell(30,6,number_format($row->price,2),0,0,'R');
+          $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),2),0,1,'R'); 
         }
 				
 			  $pdf->Cell(10,2,'',0,1);
@@ -999,7 +1000,7 @@ class Salescontract extends MY_Controller
 		    $pdf->SetFont('Arial','B',9);
 		    $pdf->Cell(25,0,'Sub Total',0,'L');
 			  $pdf->SetFont('Arial','',9);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->untaxed_value,4),0,0,'R'); 
+		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->untaxed_value,2),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
 		    $pdf->Cell(60,0,'',0,0);
@@ -1023,7 +1024,7 @@ class Salescontract extends MY_Controller
 		    $pdf->Cell(20,0,'',0,0);
 		  	$pdf->SetFont('Arial','',9);
 		    $pdf->Cell(25,0,$info_ppn,0,0);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,4),0,0,'R'); 
+		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,2),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
 		  	$pdf->Cell(60,0,'',0,0);
@@ -1039,7 +1040,7 @@ class Salescontract extends MY_Controller
 		  	$pdf->SetFont('Arial','B',9);
 		    $pdf->Cell(25,0,'Total',0,0);
 		  	$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->total_value,4),0,0,'R'); 
+		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->total_value,2),0,0,'R'); 
 
 
   		// Memberikan space kebawah agar tidak terlalu rapat
@@ -1201,8 +1202,8 @@ class Salescontract extends MY_Controller
         	$pdf->Cell(65,6,$row->description,0,0,'LR');
 		    $pdf->Cell(20,6,number_format($row->qty,2),0,0,'R');
 		    $pdf->Cell(20,6,$row->uom,0,0);
-		    $pdf->Cell(30,6,number_format($row->price,4),0,0,'R');
-		    $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),4),0,1,'R'); 
+		    $pdf->Cell(30,6,number_format($row->price,2),0,0,'R');
+		    $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),2),0,1,'R'); 
         }
 				
 	  		$pdf->Cell(10,2,'',0,1);
@@ -1220,7 +1221,7 @@ class Salescontract extends MY_Controller
 		    $pdf->SetFont('Arial','B',9);
 		    $pdf->Cell(25,0,'Sub Total',0,'L');
 	   		$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->untaxed_value,4),0,0,'R'); 
+		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->untaxed_value,2),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
 		    $pdf->Cell(60,0,'',0,0);
@@ -1244,7 +1245,7 @@ class Salescontract extends MY_Controller
 		    $pdf->Cell(20,0,'',0,0);
 	   		$pdf->SetFont('Arial','',9);
 		    $pdf->Cell(25,0,$info_ppn,0,0);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,4),0,0,'R'); 
+		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,2),0,0,'R'); 
 
 		  	$pdf->Cell(10,2,'',0,1);
 	   		$pdf->Cell(60,0,'',0,0);
@@ -1260,7 +1261,7 @@ class Salescontract extends MY_Controller
 		  	$pdf->SetFont('Arial','B',9);
 		    $pdf->Cell(25,0,'Total',0,0);
 		  	$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->total_value,4),0,0,'R'); 
+		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->total_value,2),0,0,'R'); 
 
 
     		// Memberikan space kebawah agar tidak terlalu rapat

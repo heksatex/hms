@@ -5,8 +5,8 @@
  */
 class M_procurementOrder extends CI_Model
 {
-	var $column_order = array(null, 'kode_proc', 'create_date','schedule_date','sales_order', 'priority','nama','notes','nama_status');
-	var $column_search= array('kode_proc', 'create_date', 'schedule_date', 'sales_order', 'priority','nama','notes','nama_status');
+	var $column_order = array(null, 'kode_proc', 'create_date','schedule_date','ms.nama_status','show_sales_order','sales_order', 'priority','nama','notes','mmss.nama_status');
+	var $column_search= array('kode_proc', 'create_date', 'ms.nama_status','show_sales_order','schedule_date', 'sales_order', 'priority','nama','notes','mmss.nama_status');
 	var $order  	  = array('create_date' => 'desc');
 
 	var $table2        = 'production_order';
@@ -25,9 +25,10 @@ class M_procurementOrder extends CI_Model
 	{	
 
 
-	    $this->db->select("prc.kode_proc,prc.create_date,prc.schedule_date,prc.sales_order,prc.priority,prc.warehouse, prc.notes, prc.status, mmss.nama_status, d.nama as nama_dept");
+	    $this->db->select("prc.kode_proc,prc.create_date,prc.schedule_date,prc.sales_order,prc.priority,prc.warehouse, prc.notes, prc.status, mmss.nama_status, d.nama as nama_dept, prc.show_sales_order, ms.nama_status as type");
 		$this->db->from("procurement_order prc");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=prc.status", "inner");
+		$this->db->join("mst_status ms", "ms.kode=prc.type", "inner");
 		$this->db->join("departemen d", "d.kode=prc.warehouse", "inner");
 		
 
@@ -171,9 +172,9 @@ class M_procurementOrder extends CI_Model
 		return $kode;
 	}
 
-	public function simpan($kode, $tgl, $schedule_date, $note, $sales_order, $kode_prod, $priority, $warehouse, $status)
+	public function simpan($kode, $tgl, $schedule_date, $note, $sales_order, $kode_prod, $priority, $warehouse, $status,$type,$show_sc)
 	{
-		return $this->db->query("INSERT INTO procurement_order (kode_proc,create_date,schedule_date,sales_order,kode_prod,priority,warehouse,notes,status) values ('$kode','$tgl','$schedule_date','$sales_order','$kode_prod','$priority','$warehouse','$note','$status')");
+		return $this->db->query("INSERT INTO procurement_order (kode_proc,create_date,schedule_date,sales_order,kode_prod,priority,warehouse,notes,status,type,show_sales_order) values ('$kode','$tgl','$schedule_date','$sales_order','$kode_prod','$priority','$warehouse','$note','$status','$type','$show_sc')");
 	}
 
 	public function ubah($kode_proc, $tgl, $note, $priority, $warehouse)
@@ -259,6 +260,23 @@ class M_procurementOrder extends CI_Model
 	public function cek_warehouse_procurement_order_by_kode($kode_proc)
 	{
 		return $this->db->query("SELECT warehouse FROM procurement_order WHERE kode_proc ='$kode_proc'");
+	}
+
+	public function get_data_items_by_row($kode,$row_order)
+	{
+		return $this->db->query("SELECT kode_proc,kode_produk,nama_produk,schedule_date, qty, uom,reff_notes, status,row_order FROM procurement_order_items where kode_proc = '$kode' AND row_order = '$row_order' ");
+	}
+
+	public function cek_type_procurement_order_by_kode($kode)
+	{
+		$result =  $this->db->query("SELECT type FROM procurement_order WHERE kode_proc = '$kode'")->row();
+		return $result->type;
+	}
+
+	public function cek_show_sales_order_by_kode($kode)
+	{
+		$result =  $this->db->query("SELECT show_sales_order FROM procurement_order WHERE kode_proc = '$kode'")->row();
+		return $result->show_sales_order;
 	}
 
 

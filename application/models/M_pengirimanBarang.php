@@ -279,7 +279,9 @@ class M_pengirimanBarang extends CI_Model
 		$cek_dept = $this->_module->cek_departement_by_kode($dept_id)->row_array();
 		$cek_type = $this->cek_type_created($kode)->row_array();
 		if($cek_dept['type_dept'] == 'manufaktur' AND $cek_type['type_created'] == 0){
-			$this->db->where('reserve_origin',$origin);	
+			//$this->db->where('reserve_origin',$origin);	
+			$where = "( reserve_origin='".$origin."' OR reserve_origin LIKE '%MTS%' )";
+			$this->db->where($where);
 		}
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);

@@ -6,13 +6,17 @@
 class M_lab extends CI_Model
 {
 	//var $table 		  = 'warna';
-	var $column_order = array(null, 'nama_warna', 'tanggal', 'status','nama_sales_group','tot_varian', 'notes');
+	var $column_order = array(null, 'nama_warna', 'tanggal', 'status','nama_sales_group','tot_varian', null,'notes');
 	var $column_search= array('nama_warna', 'tanggal', 'status', 'notes','nama_sales_group');
 	var $order  	  = array('tanggal' => 'desc');
 
 	var $column_order2 = array(null, 'mrp.kode', 'mrp.tanggal', 'mc.nama_mesin','wv.nama_varian', 'ms.nama_status', 'mrp.origin');
 	var $column_search2= array('mrp.kode', 'mrp.tanggal', 'mc.nama_mesin', 'wv.nama_varian','ms.nama_status','mrp.origin');
 	var $order2  	  = array('mrp.tanggal' => 'desc');
+
+	var $column_order3 = array(null,  'msg.nama_sales_group', 'scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk','ms.nama_status');
+	var $column_search3= array('msg.nama_sales_group', 'scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk','ms.nama_status');
+	var $order3  	  = array('scl.tanggal_ow' => 'desc');
 
 	private function _get_datatables_query()
 	{
@@ -143,7 +147,7 @@ class M_lab extends CI_Model
 		} 
 		else if(isset($this->order))
 		{
-			$order = $this->order;
+			$order = $this->order2;
 			$this->db->order_by(key($order), $order[key($order)]);
 		}
 	}
@@ -179,6 +183,81 @@ class M_lab extends CI_Model
 		$this->db->join("mesin mc", "mrp.mc_id=mc.mc_id", "left");
 		$this->db->where("w.id", $id_warna);
 		$this->db->where("mrp.dept_id", $dept_id);
+		return $this->db->count_all_results();
+	}
+
+	private function _get_datatables_query3()
+	{
+		
+		$this->db->select("scl.sales_order, scl.ow, scl.tanggal_ow, scl.status, scl.nama_produk,msg.nama_sales_group, ms.nama_status");
+		$this->db->from("sales_color_line scl");
+		$this->db->join("sales_contract sc", "scl.sales_order = sc.sales_order", "inner");
+		$this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group","inner");
+		$this->db->join("mst_status ms", "scl.status = ms.kode", "inner");
+
+		$i = 0;
+	
+		foreach ($this->column_search3 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search3) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order3[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order))
+		{
+			$order = $this->order3;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables3($id_warna)
+	{
+		$this->_get_datatables_query3();
+		$this->db->where("scl.id_warna", $id_warna);
+		$this->db->where("scl.ow <>'' ");
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered3($id_warna)
+	{
+		$this->_get_datatables_query3();
+		$this->db->where("scl.id_warna", $id_warna);
+		$this->db->where("scl.ow <>'' ");
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all3($id_warna)
+	{
+		$this->db->select("scl.sales_order, scl.ow, scl.tanggal_ow, scl.status, scl.nama_produk,msg.nama_sales_group, ms.nama_status");
+		$this->db->from("sales_color_line scl");
+		$this->db->join("sales_contract sc", "scl.sales_order = sc.sales_order", "inner");
+		$this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group","inner");
+		$this->db->join("mst_status ms", "scl.status = ms.kode", "inner");
+		$this->db->where("scl.id_warna", $id_warna);
+		$this->db->where("scl.ow <>'' ");
 		return $this->db->count_all_results();
 	}
 
@@ -394,5 +473,16 @@ class M_lab extends CI_Model
 	public function delete_warna_item_by_kode($id_warna,$id_varian)
 	{
 		$this->db->query("DELETE FROM warna_items WHERE id_warna = '$id_warna' AND id_warna_varian = '$id_varian' ");
+	}
+
+	public function cek_status_dti_by_id($id_warna)
+	{
+		$query = $this->db->query("SELECT status FROM warna where id = '$id_warna'")->row();
+		return $query->status;
+	}
+
+	public function cek_dti_in_mrp_production($id_warna)
+	{
+		return $this->db->query("SELECT id_warna FROM mrp_production WHERe id_warna = '$id_warna'")->num_rows();
 	}
 }

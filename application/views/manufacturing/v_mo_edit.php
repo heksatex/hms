@@ -143,7 +143,7 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Qty </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm" name="qty" id="qty"  value="<?php echo $list->qty; echo ' '.$list->uom;?>"  readonly="readonly"   />
+                  <input type="text" class="form-control input-sm" name="qty" id="qty"  value="<?php echo number_format($list->qty,2); echo ' '.$list->uom;?>"  readonly="readonly"   />
                 </div>                                    
               </div>
               <div class="col-md-12 col-xs-12">
@@ -385,6 +385,7 @@
                   </ul>
                   <div class="tab-content"><br>
                     <div class="tab-pane active" id="tab_1">
+                    
                        <?php //untuk hitung qty sisa fg 
                         $qty = $list->qty;
                         $qty_fg  = $total_fg->total_qty;
@@ -478,7 +479,7 @@
                                 <tr class="num">
                                   <td></td>
                                   <td>
-                                    <a href="javascript:void(0)" onclick="view_rm_hasil('<?php echo $list->kode; ?>','<?php echo ($row->kode_produk); ?>', '<?php echo htmlentities($row->nama_produk)?>')"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a>
+                                    <a href="javascript:void(0)" onclick="view_rm_hasil('<?php echo $list->kode; ?>','<?php echo ($row->kode_produk); ?>', '<?php echo htmlentities($row->nama_produk)?>','rm')"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a>
                                   </td>
                                   <td align="right"><?php echo number_format($row->tot_qty,2)?></td>
                                   <td><?php echo $row->uom?></td>
@@ -501,89 +502,90 @@
                       <!--/.bahan baku-->
                       <?php if($type_mo['type_mo']=='colouring') {//cek type_mo 
                       ?>
-                      <!--obat--> 
-                      <div class="col-md-12">
-                        <div class="box box-primary">
-                          <div class="box-header with-border">
-                            <h3 class="box-title"><b>Obat</b></h3>
+                        <!--obat--> 
+                        <div class="col-md-12">
+                          <div class="box box-primary">
+                            <div class="box-header with-border">
+                              <h3 class="box-title"><b>Obat</b></h3>
+                            </div>
+                          <div class="box-body">
+                          <!-- Tabel Kiri -->
+                          <div class="col-md-6 table-responsive">
+                            <table class="table table-condesed table-hover rlstable" width="100%" id ="table_dyest">
+                              <label>Dyeing Stuff</label>
+                              <tr>
+                                <th class="style no">No.</th>
+                                <th class="style">Product</th>
+                                <th class="style">%</th>
+                                <th class="style" style="text-align: right;">Qty</th>
+                                <th class="style">uom</th>
+                                <th class="style">Status</th>
+                                <th class="style">reff</th>
+                              </tr>
+                              <tbody>
+                                <?php
+                                if(!empty($dystuff)){
+                                  foreach ($dystuff as $row) {
+                                ?>
+                                  <tr class="num">
+                                    <td></td>
+                                    <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                    <td><?php echo $row->persen?></td>
+                                    <td align="right"><?php echo number_format($row->qty,2)?></td>
+                                    <td><?php echo $row->uom?></td>
+                                    <td><?php echo $row->status?></td>
+                                    <td><?php echo $row->reff_note?></td>
+                                  
+                                  </tr>
+                                <?php 
+                                  }
+                                }
+                                ?>
+                              </tbody>
+                            </table>
                           </div>
-                        <div class="box-body">
-                        <!-- Tabel Kiri -->
-                        <div class="col-md-6 table-responsive">
-                          <table class="table table-condesed table-hover rlstable" width="100%" id ="table_dyest">
-                            <label>Dyeing Stuff</label>
-                            <tr>
-                              <th class="style no">No.</th>
-                              <th class="style">Product</th>
-                              <th class="style">%</th>
-                              <th class="style" style="text-align: right;">Qty</th>
-                              <th class="style">uom</th>
-                              <th class="style">Status</th>
-                              <th class="style">reff</th>
-                            </tr>
-                            <tbody>
-                              <?php
-                              if(!empty($dystuff)){
-                                foreach ($dystuff as $row) {
-                              ?>
-                                <tr class="num">
-                                  <td></td>
-                                  <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
-                                  <td><?php echo $row->persen?></td>
-                                  <td align="right"><?php echo number_format($row->qty,2)?></td>
-                                  <td><?php echo $row->uom?></td>
-                                  <td><?php echo $row->status?></td>
-                                  <td><?php echo $row->reff_note?></td>
-                                 
-                                </tr>
-                              <?php 
-                                }
-                              }
-                              ?>
-                            </tbody>
-                          </table>
-                        </div>
-                        <!-- Tabel Kiri -->
+                          <!-- Tabel Kiri -->
 
-                        <!-- Tabel Kanan -->
-                        <div class="col-md-6 table-responsive">
-                          <table class="table table-condesed table-hover rlstable" width="100%" id ="table_aux">
-                            <label>Auxiliary</label>
-                            <tr>
-                              <th class="style no">No.</th>
-                              <th class="style">Product</th>
-                              <th class="style">g/L</th>
-                              <th class="style" style="text-align: right;">Qty</th>
-                              <th class="style">uom</th>
-                              <th class="style">Status</th>
-                              <th class="style">reff</th>
-                            </tr>
-                            <tbody>
-                              <?php
-                              if(!empty($aux)){
-                                foreach ($aux as $row) {
-                              ?>
-                                <tr class="num">
-                                  <td></td>
-                                  <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
-                                  <td><?php echo $row->persen?></td>
-                                  <td align="right"><?php echo number_format($row->qty,2)?></td>
-                                  <td><?php echo $row->uom?></td>
-                                  <td><?php echo $row->status?></td>
-                                  <td><?php echo $row->reff_note?></td>
-                                </tr>
-                              <?php 
+                          <!-- Tabel Kanan -->
+                          <div class="col-md-6 table-responsive">
+                            <table class="table table-condesed table-hover rlstable" width="100%" id ="table_aux">
+                              <label>Auxiliary</label>
+                              <tr>
+                                <th class="style no">No.</th>
+                                <th class="style">Product</th>
+                                <th class="style">g/L</th>
+                                <th class="style" style="text-align: right;">Qty</th>
+                                <th class="style">uom</th>
+                                <th class="style">Status</th>
+                                <th class="style">reff</th>
+                              </tr>
+                              <tbody>
+                                <?php
+                                if(!empty($aux)){
+                                  foreach ($aux as $row) {
+                                ?>
+                                  <tr class="num">
+                                    <td></td>
+                                    <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                    <td><?php echo $row->persen?></td>
+                                    <td align="right"><?php echo number_format($row->qty,2)?></td>
+                                    <td><?php echo $row->uom?></td>
+                                    <td><?php echo $row->status?></td>
+                                    <td><?php echo $row->reff_note?></td>
+                                  </tr>
+                                <?php 
+                                  }
                                 }
-                              }
-                              ?>
-                            </tbody>
-                          </table>
+                                ?>
+                              </tbody>
+                            </table>
+                          </div>
+                          <!--/.Tabel Kanan -->
+                          </div>
+                          </div>
                         </div>
-                         <!--/.Tabel Kanan -->
-                        </div>
-                        </div>
-                      </div>
-                      <!--/.obat-->
+                        <!--/.obat-->
+                      <?php }?>
 
                       <!--Additional--> 
                       <div class="col-md-12">
@@ -591,7 +593,7 @@
                           <div class="box-header with-border">
                             <h3 class="box-title"><b>Additional</b></h3>
                             <?php 
-                            if($list->dept_id=='DYE' AND $akses_menu >0){
+                            if( $akses_menu >0 AND ($type_mo['type_mo'] !='colouring' or $type_mo['type_mo'] !='knitting') ){
                               if(!empty($menu)){  ?>
                                 <div class=" pull-right text-right">
                                   <button class="btn btn-primary btn-sm" id="btn-request-add" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Request Additional</button>
@@ -600,122 +602,252 @@
                               }
                             }?>
                           </div>
-                        <div class="box-body">
-                        <!-- Tabel Kiri -->
-                        <div class="col-md-6 table-responsive">
-                          <table class="table table-condesed table-hover rlstable" width="100%" id ="table_dyest_add">
-                            <label>Dyeing Stuff</label>
-                            <tr>
-                              <th class="style no">No.</th>
-                              <th class="style">Product</th>
-                              <th class="style" style="text-align: right;">Qty</th>
-                              <th class="style">uom</th>
-                              <th class="style">Status</th>
-                              <th class="style">reff</th>
-                              <th class="style"></th>
-                            </tr>
-                            <tbody id="tbody_dye">
-                              <?php
-                              if(!empty($dystuff_add)){
-                                foreach ($dystuff_add as $row) {
-                              ?>
-                                <tr class="num">
-                                  <td data-content="edit" data-id="row_order"  data-isi="<?php echo $row->row_order; ?>" data-id2="origin_prod"  data-isi2="<?php echo htmlentities($row->origin_prod); ?>"></td>
-                                  <td data-content="edit" data-id="kode_produk" data-isi="<?php echo htmlentities($row->kode_produk); ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk); ?>" ><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
-                                  <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
-                                  <td data-content="edit" data-id="uom" data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
-                                  <td><?php echo $row->status?></td>
-                                  <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_note);?>"><?php echo $row->reff_note?></td>
-                                  <td style="text-align: center; width:50px">
-                                    <?php if($row->status == 'draft' AND $row->move_id == ''){?>
-                                            <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="DYE"><i class="fa fa-save"></i></a>
-                                            <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="DYE"><i class="fa fa-edit"></i></a>
-                                            <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
-                                            <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="DYE" ><i class="fa fa-close"></i></a>
-                                    <?php }?> 
-                                  </td>
-                                </tr>
-                              <?php 
-                                }
-                              }
-                              ?>
-                            </tbody>
-                            <?php if($list->status == 'draft' or $list->status =='ready'){ ?>
-                            <tfoot>
-                              <tr>
-                                <td colspan="6"> 
-                                  <a href="javascript:void(0)" class="add-new-rm" onclick="tambah_baris_add(false,'table_dyest_add','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
-                                </td>
-                              </tr>
-                            </tfoot>
-                            <?php } ?>
-                          </table>
-                          <div class="example1_processing table_processing" style="display: none">
-                              Processing...
-                          </div>
-                        </div>
-                        <!-- Tabel Kiri -->
+                          <div class="box-body" id="tbody_additional">
 
-                        <!-- Tabel Kanan -->
-                        <div class="col-md-6 table-responsive">
-                          <table class="table table-condesed table-hover rlstable" width="100%" id ="table_aux_add">
-                            <label>Auxiliary</label>
-                            <tr>
-                              <th class="style no">No.</th>
-                              <th class="style">Product</th>
-                              <th class="style" style="text-align: right;">Qty</th>
-                              <th class="style">uom</th>
-                              <th class="style">Status</th>
-                              <th class="style">reff</th>
-                              <th class="style"></th>
-                            </tr>
-                            <tbody id="tbody_aux">
-                              <?php
-                              if(!empty($aux_add)){
-                                foreach ($aux_add as $row) {
-                              ?>
-                                <tr class="num">
-                                  <td data-content="edit" data-id="row_order"  data-isi="<?php echo $row->row_order; ?>" data-id2="origin_prod"  data-isi2="<?php echo htmlentities($row->origin_prod);?>"></td>
-                                  <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk; ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk); ?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
-                                  <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
-                                  <td data-content="edit" data-id="uom" data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
-                                  <td><?php echo $row->status?></td>
-                                  <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_note);?>"><?php echo $row->reff_note?></td>
-                                  <td style="text-align: center; width:50px">
-                                    <?php if($row->status == 'draft' AND $row->move_id == ''){?>
-                                            <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-save"></i></a>
-                                            <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="AUX"><i class="fa fa-edit"></i></a>
-                                            <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
-                                            <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-close"></i></a>
-                                    <?php }?> 
-                                  </td>
-                                </tr>
+                            <div  class="row">
+                            <?php 
+                            if($type_mo['type_mo']=='knitting') {//cek type_mo 
+                            ?>
+                              <!-- Tabel Kiri -->
+                              <div class="col-md-6 table-responsive">
+                                <table class="table table-condesed table-hover rlstable" width="100%" id ="table_rm_add">
+                                  <label>Akan dikonsumsi</label>
+                                  <tr>
+                                    <th class="style no">No.</th>
+                                    <th class="style">Product</th>
+                                    <th class="style" style="text-align: right;">Qty</th>
+                                    <th class="style">uom</th>
+                                    <th class="style">Tersedia</th>
+                                    <th class="style">Status</th>
+                                    <th class="style">reff</th>
+                                    <th class="style"></th>
+                                  </tr>
+                                  <tbody id="tbody_rm_add">
+                                    <?php
+                                    if(!empty($rm_add)){
+                                      foreach ($rm_add as $row) {
+                                        
+                                        $sisa        = $row->qty-$row->sum_qty_done;
+                                        $qty_rm_sisa = $sisa;
+                                        if(round($row->sum_qty,2) > round($sisa,2)){$color = 'red';}elseif(round($row->sum_qty,2) < round($sisa,2)){$color = 'blue';}else{$color = '';}
+                                    ?>
+                                      <tr class="num">
+                                        <td data-content="edit" data-id="row_order"  data-isi="<?php echo $row->row_order; ?>" data-id2="origin_prod"  data-isi2="<?php echo htmlentities($row->origin_prod); ?>"></td>
+                                        <td data-content="edit" data-id="kode_produk" data-isi="<?php echo htmlentities($row->kode_produk); ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk); ?>" >
+                                          <?php if($row->type == 'stockable'){?>
+                                              <a href="javascript:void(0)" onclick="view_quant('<?php echo $list->kode; ?>','<?php echo htmlentities($row->origin_prod); ?>','<?php echo $row->move_id ?>','<?php echo $row->kode_produk?>','<?php echo htmlentities($row->nama_produk)?>')"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a>
+                                            <?php }else{
+                                                echo '['.$row->kode_produk.'] '.$row->nama_produk;
+                                            }?>
+                                        </td>
+                                        <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($qty_rm_sisa,2)?></td>
+                                        <td data-content="edit" data-id="uom" data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
+                                        <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty) AND $row->status == 'ready')echo number_format($row->sum_qty,2); if($row->status == 'cancel' AND $row->sum_qty_cancel > 0) echo number_format($row->sum_qty_cancel,2); ?></td>
+                                        <td><?php echo $row->status?></td>
+                                        <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_note);?>"><?php echo $row->reff_note?></td>
+                                        <td style="text-align: center; width:50px">
+                                          <?php if($row->status == 'draft' AND $row->move_id == ''){?>
+                                                  <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="rm"><i class="fa fa-save"></i></a>
+                                                  <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="rm"><i class="fa fa-edit"></i></a>
+                                                  <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
+                                                  <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="rm" ><i class="fa fa-close"></i></a>
+                                          <?php }else if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0 AND $row->move_id != ''){?>
+                                                <a href="javascript:void(0)" onclick="tambah_quant('<?php echo $row->kode_produk ?>','<?php echo $row->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
+                                                <span class="glyphicon  glyphicon-share"></span></a>
+                                          <?php
+                                                }
+                                          ?> 
+                                        </td>
+                                      </tr>
+                                    <?php 
+                                      }
+                                    }
+                                    ?>
+                                  </tbody>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0){ ?>
+                                  <tfoot>
+                                    <tr>
+                                      <td colspan="6"> 
+                                        <a href="javascript:void(0)" class="add-new-rm" onclick="tambah_baris_add(false,'table_rm_add','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
+                                      </td>
+                                    </tr>
+                                  </tfoot>
+                                  <?php } ?>
+                                </table>
+                                <div class="example1_processing table_processing" style="display: none">
+                                    Processing...
+                                </div>
+                              </div>
+                              <!-- Tabel Kiri -->
                               <?php 
-                                }
                               }
                               ?>
-                            </tbody>
-                            <?php if($list->status == 'draft' or $list->status =='ready'){ ?>
-                            <tfoot>
-                              <tr>
-                                <td colspan="6"> 
-                                  <a href="javascript:void(0)" class="add-new-rm" onclick="tambah_baris_add(false,'table_aux_add','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
-                                </td>
-                              </tr>
-                            </tfoot>
-                            <?php } ?>
-                          </table>
-                          <div  class="example1_processing table_processing" style="display: none">
-                              Processing...
+                                <!-- Tabel Kanan -->
+                              <div class="col-md-6 table-responsiv pull-right " >
+                                <table class="table table-condesed table-hover rlstable" width="100%" id ="table_rm_hasil">
+                                  <label>Sudah dikonsumsi</label>
+                                  <tr>
+                                    <th class="style no">No.</th>
+                                    <th class="style">Product</th>
+                                    <th class="style" style="text-align: right;">Qty</th>
+                                    <th class="style">uom</th>
+                                    <th class="style" style="text-align: right;">Qty2</th>
+                                    <th class="style">uom2</th>
+                                    <!--th class="style"></th-->
+                                  </tr>
+                                  <tbody>
+                                    <?php
+                                      foreach ($hasil_rm_add as $row) {
+                                    ?>
+                                      <tr class="num">
+                                        <td></td>
+                                        <td>
+                                          <a href="javascript:void(0)" onclick="view_rm_hasil('<?php echo $list->kode; ?>','<?php echo ($row->kode_produk); ?>', '<?php echo htmlentities($row->nama_produk)?>','add')"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a>
+                                        </td>
+                                        <td align="right"><?php echo number_format($row->tot_qty,2)?></td>
+                                        <td><?php echo $row->uom?></td>
+                                        <td align="right"><?php echo number_format($row->tot_qty2,2)?></td>
+                                        <td><?php echo $row->uom2?></td>
+                                        <!--td>
+                                          <a onclick="hapus('<?php  echo $row->kode ?>', '<?php  echo htmlentities($row->nama_produk) ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
+                                        </td-->
+                                      </tr>
+                                    <?php 
+                                      }
+                                    ?>
+                                  </tbody>
+                                </table>
+                              </div>
+                              <!--/.Tabel Kanan -->  
+                              </div>
+                          
+
+                            <?php 
+                            if($type_mo['type_mo']=='colouring') {//cek type_mo 
+                            ?>
+                              <div  class="row">
+                              <!-- Obat >> -->
+                              <!-- Tabel Kiri -->
+                              <div class="col-md-6 table-responsive">
+                                <table class="table table-condesed table-hover rlstable" width="100%" id ="table_dyest_add">
+                                  <label>Dyeing Stuff</label>
+                                  <tr>
+                                    <th class="style no">No.</th>
+                                    <th class="style">Product</th>
+                                    <th class="style" style="text-align: right;">Qty</th>
+                                    <th class="style">uom</th>
+                                    <th class="style">Status</th>
+                                    <th class="style">reff</th>
+                                    <th class="style"></th>
+                                  </tr>
+                                  <tbody id="tbody_dye">
+                                    <?php
+                                    if(!empty($dystuff_add)){
+                                      foreach ($dystuff_add as $row) {
+                                    ?>
+                                      <tr class="num">
+                                        <td data-content="edit" data-id="row_order"  data-isi="<?php echo $row->row_order; ?>" data-id2="origin_prod"  data-isi2="<?php echo htmlentities($row->origin_prod); ?>"></td>
+                                        <td data-content="edit" data-id="kode_produk" data-isi="<?php echo htmlentities($row->kode_produk); ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk); ?>" ><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                        <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
+                                        <td data-content="edit" data-id="uom" data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
+                                        <td><?php echo $row->status?></td>
+                                        <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_note);?>"><?php echo $row->reff_note?></td>
+                                        <td style="text-align: center; width:50px">
+                                          <?php if($row->status == 'draft' AND $row->move_id == ''){?>
+                                                  <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="DYE"><i class="fa fa-save"></i></a>
+                                                  <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="DYE"><i class="fa fa-edit"></i></a>
+                                                  <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
+                                                  <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="DYE" ><i class="fa fa-close"></i></a>
+                                          <?php }?> 
+                                        </td>
+                                      </tr>
+                                    <?php 
+                                      }
+                                    }
+                                    ?>
+                                  </tbody>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0){ ?>
+                                  <tfoot>
+                                    <tr>
+                                      <td colspan="6"> 
+                                        <a href="javascript:void(0)" class="add-new-rm" onclick="tambah_baris_add(false,'table_dyest_add','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
+                                      </td>
+                                    </tr>
+                                  </tfoot>
+                                  <?php } ?>
+                                </table>
+                                <div class="example1_processing table_processing" style="display: none">
+                                    Processing...
+                                </div>
+                              </div>
+                              <!-- Tabel Kiri -->
+
+                              <!-- Tabel Kanan -->
+                              <div class="col-md-6 table-responsive">
+                                <table class="table table-condesed table-hover rlstable" width="100%" id ="table_aux_add">
+                                  <label>Auxiliary</label>
+                                  <tr>
+                                    <th class="style no">No.</th>
+                                    <th class="style">Product</th>
+                                    <th class="style" style="text-align: right;">Qty</th>
+                                    <th class="style">uom</th>
+                                    <th class="style">Status</th>
+                                    <th class="style">reff</th>
+                                    <th class="style"></th>
+                                  </tr>
+                                  <tbody id="tbody_aux">
+                                    <?php
+                                    if(!empty($aux_add)){
+                                      foreach ($aux_add as $row) {
+                                    ?>
+                                      <tr class="num">
+                                        <td data-content="edit" data-id="row_order"  data-isi="<?php echo $row->row_order; ?>" data-id2="origin_prod"  data-isi2="<?php echo htmlentities($row->origin_prod);?>"></td>
+                                        <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk; ?>" data-id2="nama_produk" data-isi2="<?php echo htmlentities($row->nama_produk); ?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></td>
+                                        <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
+                                        <td data-content="edit" data-id="uom" data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
+                                        <td><?php echo $row->status?></td>
+                                        <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_note);?>"><?php echo $row->reff_note?></td>
+                                        <td style="text-align: center; width:50px">
+                                          <?php if($row->status == 'draft' AND $row->move_id == ''){?>
+                                                  <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-save"></i></a>
+                                                  <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="AUX"><i class="fa fa-edit"></i></a>
+                                                  <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
+                                                  <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-close"></i></a>
+                                          <?php }?> 
+                                        </td>
+                                      </tr>
+                                    <?php 
+                                      }
+                                    }
+                                    ?>
+                                  </tbody>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready') AND $akses_menu >0){ ?>
+                                  <tfoot>
+                                    <tr>
+                                      <td colspan="6"> 
+                                        <a href="javascript:void(0)" class="add-new-rm" onclick="tambah_baris_add(false,'table_aux_add','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
+                                      </td>
+                                    </tr>
+                                  </tfoot>
+                                  <?php } ?>
+                                </table>
+                                <div  class="example1_processing table_processing" style="display: none">
+                                    Processing...
+                                </div>
+                              </div>
+                              <!--/.Tabel Kanan -->
+                              <!-- Obat << -->
+                              </div>
+                            <?php 
+                            }
+                            ?>
+
                           </div>
-                        </div>
-                         <!--/.Tabel Kanan -->
-                        </div>
                         </div>
                       </div>
                       <!--/.Additional-->
 
-                    <?php }?>
+                  
 
                     </div>
                     <!-- /.tab-pane -->
@@ -908,6 +1040,26 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
+
+  
+  // untuk focus after select2 close
+  $(document).on('focus', '.select2', function (e) {
+    if (e.originalEvent) {
+        var s2element = $(this).siblings('select');
+        s2element.select2('open');
+
+        // Set focus back to select2 element on closing.
+        s2element.on('select2:closing', function (e) {
+            s2element.select2('focus');
+        });
+    }
+  });
+
+  //auto height in textarea
+  function textAreaAdjust(o) {
+    o.style.height = "1px";
+    o.style.height = (25+o.scrollHeight)+"px";
+  }
   
    // show after refresh close modal
   $(document).on('click','#datetimepicker3',function (e) {
@@ -1009,6 +1161,11 @@
     refresh_mo();
   });
 
+  // ketika modal view data close maka button nya ubah btn tutup saja
+  $("#view_data").on('hidden.bs.modal', function(){
+    $("#view_data .modal-dialog .modal-content .modal-footer").html('<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+  });
+
   //select 2 no mesin 
   $('#mc').select2({});
   // setting lot prefix TRI< JAC
@@ -1032,26 +1189,28 @@
     $(this).height(0).height(this.scrollHeight);
   }).find( 'textarea' ).change();
   
-   //modal view quant tiap produk (stock move items)
+  //modal view quant tiap produk (stock move items)
   function view_quant(kode,origin_prod,move_id,kode_produk,nama_produk){
       $("#view_data").modal({
           show: true,
           backdrop: 'static'
       })
-     var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
+      var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
       $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $("#view_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-waste" class="btn btn-primary btn-sm"> Waste Data</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+
       $('.modal-title').text('View Quant');
         $.post('<?php echo site_url()?>manufacturing/mO/view_mo_quant_modal',
-          {kode : kode, move_id : move_id, deptid:deptid, origin_prod : origin_prod, kode_produk:kode_produk, nama_produk:nama_produk},
+          {kode:kode, move_id:move_id, deptid:deptid, origin_prod:origin_prod, kode_produk:kode_produk, nama_produk:nama_produk},
           function(html){
             setTimeout(function() {$(".view_body").html(html);  },1000);
           }   
-       );
+      );
   }
 
   //untuk tambah details dari tabel stock quant
   function tambah_quant(kode_produk,move_id,origin_prod){   
-      var status = "<?php echo $list->status;?>";
+      var status = $('#status').val();
       if(status == 'done'){
          alert_modal_warning('Maaf, Anda tidak bisa tambah Quant, Proses Produksi telah Selesai ! ');
       }else{
@@ -1078,7 +1237,7 @@
       }
   }
 
-  function view_rm_hasil(kode,kode_produk,nama_produk){
+  function view_rm_hasil(kode,kode_produk,nama_produk,tipe){
       $("#view_data").modal({
           show: true,
           backdrop: 'static'
@@ -1087,7 +1246,7 @@
       $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $('.modal-title').text('View Sudah dikonsumsi');
         $.post('<?php echo site_url()?>manufacturing/mO/view_mo_rm_hasil',
-          {kode : kode, kode_produk : kode_produk, nama_produk : nama_produk},
+          {kode:kode, kode_produk:kode_produk, nama_produk:nama_produk,tipe:tipe},
           function(html){
             setTimeout(function() {$(".view_body").html(html);  },1000);
           }   
@@ -1234,7 +1393,7 @@
      
       var kode   = $("#kode").val();
       var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
-      var move_id = '<?php echo $move_id_rm['move_id'];?>';
+      //var move_id = '<?php echo $move_id_rm['move_id'];?>';
       var move_id_fg = '<?php echo $move_id_fg['move_id'];?>';
       var qty  = '<?php echo $list->qty?>';
       $("#tambah_data").modal({
@@ -1255,7 +1414,7 @@
           uom_qty_sisa    : $('#uom_qty_sisa').val(), 
           deptid      : deptid, 
           kode        : kode,
-          move_id     : move_id, 
+          //move_id     : move_id, 
           move_id_fg  : move_id_fg, 
           qty         : $('#qty_prod').val(),  
           origin      : $('#origin').val(),
@@ -1291,7 +1450,7 @@
      
       var kode   = $("#kode").val();
       var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
-      var move_id = '<?php echo $move_id_rm['move_id'];?>';
+      //var move_id = '<?php echo $move_id_rm['move_id'];?>';
       var move_id_fg = '<?php echo $move_id_fg['move_id'];?>';
       var qty  = '<?php echo $list->qty?>';
       $("#tambah_data").modal({
@@ -1311,7 +1470,6 @@
           uom_qty_sisa    : $('#uom_qty_sisa').val(), 
           deptid      : deptid, 
           kode        : kode,
-          move_id     : move_id, 
           move_id_fg  : move_id_fg, 
           qty         : $('#qty_prod').val(),  
           origin      : $('#origin').val(),
@@ -1372,7 +1530,6 @@
   $('#btn-request').click(function(){
 
     var status = $('#status').val();
-    var move_id = '<?php echo $move_id_rm['move_id'];?>';
     if(status == 'done'){
       alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
     }else if(status == 'cancel'){
@@ -1420,7 +1577,7 @@
     var type_mo = "<?php echo $type_mo['type_mo'];?>";// untuk menentukan origin
     $('#btn-stok').button('loading');
     please_wait(function(){});
-    var move_id = '<?php echo $move_id_rm['move_id'];?>';
+    //var move_id = '<?php echo $move_id_rm['move_id'];?>';
     var baseUrl = '<?php echo base_url(); ?>';
       $.ajax({
          type: "POST",
@@ -1431,7 +1588,7 @@
                 e.overrideMimeType("application/json;charset=UTF-8");
             }
          },
-         data: {move_id : move_id, kode : $('#kode').val(), deptid : deptid, origin : $('#origin').val(), lokasi : lokasi, type_mo:type_mo 
+         data: {kode : $('#kode').val(), deptid : deptid, origin : $('#origin').val(), lokasi : lokasi, type_mo:type_mo 
           },success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis
@@ -1557,7 +1714,7 @@
   $("#btn-done").unbind( "click" );
   $('#btn-done').click(function(){
     var status = $('#status').val();
-    var move_id = '<?php echo $move_id_rm['move_id'];?>';
+    //var move_id = '<?php echo $move_id_rm['move_id'];?>';
     if(status == 'done'){
       alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
     }else if(status == 'cancel'){
@@ -1584,8 +1741,7 @@
            },
             data: {kode   : $('#kode').val(),              
                    deptid : deptid,   
-                   qty_target : qty_target,
-                   move_id : move_id          
+                   qty_target : qty_target,             
             },success: function(data){
               if(data.sesi == "habis"){
                 //alert jika session habis
@@ -1633,25 +1789,39 @@
       }
 
       tbody_id        = 'tbody_dye';
-      link_get_list   = "get_list_dye";
-      delRow          = "delRow_dye(this)";
+      link_get_list   = "lab/dti/get_list_dye";
+      link_get_prod   = "lab/dti/get_prod_by_id";
       type_obat       = 'DYE';
 
       tbl  = "#table_dyest_add tbody[id='tbody_dye'] ";
 
-    }else{
+    }else if(table == 'table_aux_add'){
       var index  = $("#table_aux_add tbody[id='tbody_aux'] tr:last-child").index();
       if(index== -1){
         row = 0;
       }else{
         row  = parseInt($("#table_aux_add tbody[id='tbody_aux'] tr:last-child td .row").val());
       }
-      delRow          = "delRow_aux(this)";
       tbody_id        = 'tbody_aux';
-      link_get_list   = "get_list_aux";
+      link_get_list   = "lab/dti/get_list_aux";
+      link_get_prod   = "lab/dti/get_prod_by_id";
       type_obat       = 'AUX'
 
       tbl  = "#table_aux_add tbody[id='tbody_aux'] ";
+    }else{
+      var index  = $("#table_rm_add tbody[id='tbody_rm_add'] tr:last-child").index();
+      if(index== -1){
+        row = 0;
+      }else{
+        row  = parseInt($("#table_rm_add tbody[id='tbody_rm_add'] tr:last-child td .row").val());
+      }
+      tbody_id        = 'tbody_rm_add';
+      link_get_list   = "manufacturing/mO/get_list_produk_rm_select2";
+      link_get_prod   = "manufacturing/mO/get_produk_rm_by_id";
+      type_obat       = 'rm'
+
+      tbl  = "#table_rm_add tbody[id='tbody_rm_add'] ";
+      
     }
 
     if(tambah){
@@ -1702,7 +1872,7 @@
             ajax:{
                 dataType: 'JSON',
                 type : "POST",
-                url : "<?php echo base_url();?>lab/dti/"+link_get_list,
+                url : "<?php echo base_url();?>"+link_get_list,
                 //delay : 250,
                 data : function(params){
                     return{
@@ -1733,7 +1903,7 @@
             
             $.ajax({
                 dataType: "JSON",
-                url : '<?php echo site_url('lab/dti/get_prod_by_id') ?>',
+                url : "<?php echo base_url();?>"+link_get_prod,
                 type: "POST",
                 data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
                 success: function(data){
@@ -1793,17 +1963,15 @@
     $(".add-new-rm").show();
     $("#foot").load(location.href + " #foot");
     $("#status_head").load(location.href + " #status_head");
-    $("#table_dyest_add").load(location.href + " #table_dyest_add");
-    $("#table_aux_add").load(location.href + " #table_aux_add");
-  }); 
+    $("#tbody_additional").load(location.href + " #tbody_additional");
 
+  }); 
 
   $(document).on("click", ".cancel", function(){
     $(".add-new-rm").show();
     $("#foot").load(location.href + " #foot");
     $("#status_head").load(location.href + " #status_head");
-    $("#table_dyest_add").load(location.href + " #table_dyest_add");
-    $("#table_aux_add").load(location.href + " #table_aux_add");
+    $("#tbody_additional").load(location.href + " #tbody_additional");
   });    
 
 
@@ -1879,7 +2047,6 @@
               row_order   : row_order, },
         beforeSend: function(e) {
             $(".example1_processing").css('display','block');
-          
         },
         success: function(data){
           if(data.sesi=='habis'){
@@ -1890,17 +2057,16 @@
               alert_modal_warning(data.message);
           }else if(data.status == 'failed'){
               alert_notify(data.icon,data.message,data.type,function(){});
+              btn_loading.button('loading');
           }else{
               alert_notify(data.icon,data.message,data.type,function(){});
+              btn_loading.button('loading');
           }
           $(".add-new-rm").show();                   
           $("#foot").load(location.href + " #foot");
           $("#status_head").load(location.href + " #status_head");
-          $("#table_dyest_add").load(location.href + " #table_dyest_add");
-          $("#table_aux_add").load(location.href + " #table_aux_add");
+          $("#tbody_additional").load(location.href + " #tbody_additional");
           $(".example1_processing").css('display','none'); 
-          btn_loading.button('loading');
-
         },
         error: function (xhr, ajaxOptions, thrownError){
           btn_loading.button('loading');
@@ -1917,16 +2083,22 @@
       var type = $(this).attr('type_obat');
       if(type =='DYE'){
         id_table = "#table_dyest_add";
-        link_get_list   = "get_list_dye";
-        link_get_data   = "get_data_dye";
+        link_get_list   = "lab/dti/get_list_dye";
+        link_get_data   = "lab/dti/get_data_dye";
         table           = "dye";
         tbody_id        = 'tbody_dye';
-      }else{
+      }else if(type =='AUX'){
         id_table = "#table_aux_add";
-        link_get_list   = "get_list_aux";
-        link_get_data   = "get_data_aux";
+        link_get_list   = "lab/dti/get_list_aux";
+        link_get_data   = "lab/dti/get_data_aux";
         tbody_id        = 'tbody_aux';
         table           = "aux";
+      }else{
+        id_table        = "#table_rm_add";
+        link_get_list   = "manufacturing/mO/get_list_produk_rm_select2";
+        link_get_data   = "manufacturing/mO/get_produk_rm_by_id";
+        tbody_id        = 'tbody_rm_add';
+        table           = "rm";
       }
 
       $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -1952,7 +2124,7 @@
             ajax:{
                   dataType: 'JSON',
                   type : "POST",
-                  url : "<?php echo base_url();?>lab/dti/"+link_get_list,
+                  url : "<?php echo base_url();?>"+link_get_list,
                   //delay : 250,
                   data : function(params){
                     return{
@@ -1983,7 +2155,7 @@
               var this1 = $(this);
               $.ajax({
                     dataType: "JSON",
-                    url : "<?php echo base_url();?>lab/dti/"+link_get_data,
+                    url : "<?php echo base_url();?>"+link_get_data,
                     type: "POST",
                     data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
                     success: function(data){
@@ -2067,8 +2239,7 @@
 
                         $("#foot").load(location.href + " #foot");
                         $("#status_head").load(location.href + " #status_head");
-                        $("#table_dyest_add").load(location.href + " #table_dyest_add");
-                        $("#table_aux_add").load(location.href + " #table_aux_add");
+                        $("#tbody_additional").load(location.href + " #tbody_additional");
                         $(".example1_processing").css('display','none'); 
                         icon_loading.button('reset');
 

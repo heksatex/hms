@@ -308,10 +308,10 @@
 
   // set date tglsampai
   $('#tglsampai').datetimepicker({
-      defaultDate : new Date(),
+      defaultDate : new Date(year, month, day, 23, 59, 59),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
-      maxDate: new Date(),
+      maxDate: new Date(year, month, day, 23, 59, 59),
   });
 
    // disable enter

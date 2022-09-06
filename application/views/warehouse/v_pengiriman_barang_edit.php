@@ -587,24 +587,30 @@
                 label    : "Yes ",
                 className: "btn-primary btn-sm",
                 callback : function() {
+                      please_wait(function(){});
                       $.ajax({
                             dataType: "json",
                             type: 'POST',
                             url : "<?php echo site_url('warehouse/pengirimanbarang/hapus_details_items')?>",
                             data : {kode : kode, move_id : move_id, kode_produk : kode_produk, nama_produk : nama_produk, quant_id : quant_id, row_order : row_order, deptid : deptid, origin_prod : origin_prod },
                             error: function (xhr, ajaxOptions, thrownError) { 
-                            alert(xhr.responseText);
+                              alert(xhr.responseText);
+                              unblockUI( function() {});   
                             }
                       }).done(function(response){
                         if(response.sesi == 'habis'){
                           alert_modal_warning(response.message);
                           window.location = baseUrl;//replace ke halaman login
+                          unblockUI( function() {});   
                         }else if(response.status == 'failed'){
                           alert_modal_warning(response.message);
-                          refresh_div_out();                
+                          refresh_div_out();             
+                          unblockUI( function() {});   
                         }else{
-                          refresh_div_out();                
-                          alert_notify(response.icon,response.message,response.type,function(){});
+                          refresh_div_out();          
+                          unblockUI( function() {
+                            setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                          });      
                           $("#form_out").load(location.href + " #form_out>*");
                         }
                       })
@@ -645,7 +651,8 @@
             if(data.sesi == "habis"){
               //alert jika session habis
               alert_modal_warning(data.message);             
-              ///window.location.href = baseUrl;//replace ke halaman login
+              unblockUI( function(){});
+              window.location.href = baseUrl;//replace ke halaman login
             }else if(data.status == "failed"){
               //jika ada form belum keisi
               unblockUI( function() {
@@ -944,7 +951,9 @@
         var qty   = $(this).parents("tr").find("#qty").val();
         var uom   = $(this).parents("tr").find("#uom").val();
         var row_order = $(this).parents("tr").find("#row_order").val();
-        
+        var this1  = $(this);
+        this1.button('loading');
+        please_wait(function(){});
         $.ajax({
           dataType: "JSON",
           url : '<?php echo site_url('warehouse/pengirimanbarang/simpan_product_pengiriman_barang') ?>',
@@ -960,17 +969,25 @@
                 //alert jika session habis
                 alert_modal_warning(data.message);
                 window.location.replace('../index');
+                unblockUI( function(){});
+                this1.button('reset');
             }else if(data.status == 'failed'){
                 alert_modal_warning(data.message);
                 refresh_div_out();
+                this1.button('reset');
+                unblockUI( function(){});
             }else{
-                 refresh_div_out();
+                refresh_div_out();
                 $(".add-new").show();                   
-                alert_notify(data.icon,data.message,data.type,function(){});
+                unblockUI( function() {
+                  setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
+                });
+                refresh_div_out();
              }
           },
           error: function (xhr, ajaxOptions, thrownError){
             alert('Error Simpan Produk');
+            unblockUI( function(){});
             //alert(xhr.responseText);
           }
         });
@@ -1017,6 +1034,7 @@
               label    : "Yes ",
               className: "btn-primary btn-sm",
               callback : function() {
+                  please_wait(function(){});
                   $.ajax({
                       dataType: "JSON",
                       url : '<?php echo site_url('warehouse/pengirimanbarang/hapus_products_pengiriman_barang') ?>',
@@ -1027,19 +1045,24 @@
                             //alert jika session habis
                             alert_modal_warning(data.message);
                             window.location.replace('../index');
+                            unblockUI( function(){});
                         }else if(data.status == 'failed'){
                             alert_modal_warning(data.message);
                             refresh_div_out();
+                            unblockUI( function(){});
                         }else{
                             refresh_div_out();
                             $(".add-new").show();                   
-                            alert_notify(data.icon,data.message,data.type,function(){});
+                            unblockUI( function() {
+                              setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
+                            });
                             $("#form_out").load(location.href + " #form_out>*");
                          }
                       },
                       error: function (xhr, ajaxOptions, thrownError){
                         //alert('Error Hapus Produk');
                         alert(xhr.responseText);
+                        unblockUI( function(){});
                       }
                     });
               }
@@ -1098,6 +1121,7 @@
                       if(response.sesi == 'habis'){//jika session habis
                         alert_modal_warning(response.message);
                         window.location.replace('../index');
+                        unblockUI( function(){});
                       }else if(response.status == 'failed' ){
                         
                         unblockUI( function(){});

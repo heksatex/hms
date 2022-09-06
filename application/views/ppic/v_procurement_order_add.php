@@ -69,61 +69,102 @@
                     <textarea type="text" class="form-control input-sm" name="note" id="note"></textarea>
                   </div>                                    
                 </div>
+
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Type </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <input type="radio" id="mto" name="type[]" value="mto">
+                      <label for="mto">Make to Order</label>
+                    </div>
+                    <div class="col-xs-12 col-sm-3 col-md-12">
+                      <input type="radio" id="mts" name="type[]" value="mts">
+                      <label for="mst">Make to Stock </label>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <input type="radio" id="pengiriman" name="type[]" value="pengiriman">
+                      <label for="pengiriman">Pengiriman</label>
+                    </div>
+                  </div>                                    
+                </div>
+
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Sales Order </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <input type="radio" id="sc_true" name="sc[]" value="yes">
+                      <label for="yes">Yes</label>
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <input type="radio" id="sc_false" name="sc[]" value="no">
+                      <label for="no">No</label>
+                    </div>
+                  </div>                                    
+                </div>
+
               </div>
 
               <div class="col-md-6">
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Schedule Date </label></div>
-                  <div class="col-xs-8 col-md-8">
-                    <div class='input-group date' id='tanggal' >
-                      <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly"  />
-                      <span class="input-group-addon">
-                          <span class="glyphicon glyphicon-calendar"></span>
-                      </span>
+
+                <span id="show_type" style="display: none;">
+                  <div class="col-md-12 col-xs-12">
+                    <div class="col-xs-4"><label>Schedule Date </label></div>
+                    <div class="col-xs-8 col-md-8">
+                      <div class='input-group date' id='tanggal' >
+                        <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly"  />
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                      </div>
+                    </div>                                    
+                  </div>
+
+                  <span id="show_sc" style="display: inline;">
+                    <div class="col-md-12 col-xs-12">
+                      <div class="col-xs-4"><label>Production Order </label></div>
+                      <div class="col-xs-8">
+                        <div class='input-group'>
+                          <input type="text" class="form-control input-sm" name="kode_prod" id="kode_prod" readonly="readonly" />
+                          <span class="input-group-addon">
+                              <a href="#" class="sc"><span class="glyphicon  glyphicon-share"></span></a>
+                          </span>
+                        </div>
+                      </div>                                    
                     </div>
-                  </div>                                    
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Production Order </label></div>
-                  <div class="col-xs-8">
-                    <div class='input-group'>
-                      <input type="text" class="form-control input-sm" name="kode_prod" id="kode_prod" readonly="readonly" />
-                       <span class="input-group-addon">
-                          <a href="#" class="sc"><span class="glyphicon  glyphicon-share"></span></a>
-                      </span>
+                    <div class="col-md-12 col-xs-12">
+                      <div class="col-xs-4"><label>Sales Order </label></div>
+                      <div class="col-xs-8 col-md-8">
+                          <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly" />
+                      </div>                                    
                     </div>
-                  </div>                                    
+                  </span>
+
+                  <div class="col-md-12 col-xs-12">
+                    <div class="col-xs-4"><label id="label_dept">Departement Tujuan</label></div>
+                    <div class="col-xs-8">
+                      <select class="form-control input-sm" name="warehouse" id="warehouse" />
+                      <option value="">Pilih Warehouse</option>
+                        <?php foreach ($warehouse as $row) {?>
+                          <option value='<?php echo $row->kode; ?>'><?php echo $row->nama;?></option>
+                        <?php  }?>
+                      </select>
+                    </div>                                    
+                  </div>
+                  <div class="col-md-12 col-xs-12">
+                    <div class="col-xs-4"><label>Priority </label></div>
+                    <div class="col-xs-8">
+                      <select class="form-control input-sm" name="priority" id="priority" />
+                      <option value="">Pilih Priority</option>
+                      <option>Not Urgent</option>
+                      <option>Normal</option>
+                      <option>Urgent</option>
+                      <option>Very Urgent</option>
+                      </select>
+                    </div>                                    
+                  </div>
                 </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Sales Order </label></div>
-                  <div class="col-xs-8 col-md-8">
-                      <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly" />
-                  </div>                                    
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Departement Tujuan</label></div>
-                  <div class="col-xs-8">
-                    <select class="form-control input-sm" name="warehouse" id="warehouse" />
-                    <option value="">Pilih Warehouse</option>
-                      <?php foreach ($warehouse as $row) {?>
-                         <option value='<?php echo $row->kode; ?>'><?php echo $row->nama;?></option>
-                      <?php  }?>
-                    </select>
-                  </div>                                    
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Priority </label></div>
-                  <div class="col-xs-8">
-                    <select class="form-control input-sm" name="priority" id="priority" />
-                    <option value="">Pilih Priority</option>
-                    <option>Not Urgent</option>
-                    <option>Normal</option>
-                    <option>Urgent</option>
-                    <option>Very Urgent</option>
-                    </select>
-                  </div>                                    
-                </div>
-              </div>
+              </span>
+
             </div>
            
           </form>
@@ -176,10 +217,85 @@
       $('#view_data').modal('hide');
   });
 
+  $(document).on("change", "input[name='type[]']", function(){
+        checkTampil('type');
+  });
+
+  $(document).on("change", "input[name='sc[]']", function(){
+        checkTampil('sc');
+  });
+
+  function checkTampil(show){
+      if(show == 'type'){
+      //var radio_arr = new Array(); 
+      var radio_type = $('input[name="type[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+
+      if(radio_type == 'mts'){
+        $('input[name="sc[]"]').prop("checked", false);
+        $('#sc_true').prop("disabled", false).attr('id','sc_true');
+        $('#sc_false').prop("disabled", false).attr('id','sc_false');
+        $('#show_type').hide();
+        $('#label_dept').html('Departemen');
+        
+      }else if(radio_type == "pengiriman"){
+        $('input[name="sc[]"]').prop("checked", false);
+        $('#sc_true').prop("disabled", false).attr('id','sc_true');
+        $('#sc_false').prop("disabled", false).attr('id','sc_false');
+        $('#show_type').hide();
+        $('#label_dept').html('Departemen Tujuan');
+
+      }else if(radio_type == "mto"){ // Make to Stock
+        $('#sc_true').prop("checked", true);
+        $('input[name="sc[]"]').prop("disabled", true);
+        $('#show_type').show();
+        $('#show_sc').show();
+        $('#label_dept').html('Departemen Tujuan');
+      }
+      $('#kode_prod').val('');
+      $('#sales_order').val('');
+
+    }else if(show == 'sc'){
+
+      var radio_type_2 = $('input[name="sc[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+      
+      if(radio_type_2 == 'yes'){
+        $('#show_type').show();
+        $('#show_sc').show();
+
+      }else if(radio_type_2 == 'no'){
+        $('#show_type').show();
+        $('#show_sc').hide();
+        $('#kode_prod').val('');
+        $('#sales_order').val('');
+      }
+    }
+  }
 
 
   //klik button simpan
-    $('#btn-simpan').click(function(){
+  $('#btn-simpan').click(function(){
+
+      var radio_type = $('input[name="type[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+
+      var radio_type_2 = $('input[name="sc[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+
+
       $('#btn-simpan').button('loading');
       please_wait(function(){});
       $.ajax({
@@ -198,6 +314,8 @@
                 sales_order : $('#sales_order').val(),
                 priority    : $('#priority').val(),
                 warehouse   : $('#warehouse').val(),
+                type        : radio_type,
+                show_sc     : radio_type_2,
 
           },success: function(data){
             if(data.sesi == "habis"){
@@ -207,9 +325,10 @@
             }else if(data.status == "failed"){
                 //jika ada form belum keiisi
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
-                 document.getElementById(data.field).focus();
+                document.getElementById(data.field).focus();
+
             }else{
              //jika berhasil disimpan/diubah
               $('#kode_proc').val(data.isi);
@@ -217,7 +336,6 @@
               unblockUI( function() {
                 setTimeout(function() { 
                   alert_notify(data.icon,data.message,data.type, function(){
-                   
                   window.location.replace('edit/'+$('#kode_proc_en').val());
                 },1000); 
                 });

@@ -107,6 +107,7 @@
 
         }else{          
           $('#btn-tambah').button('loading');
+          please_wait(function(){});
           $.ajax({
               type: "POST",
               url :'<?php echo base_url('warehouse/pengirimanbarang/save_details_quant_modal')?>',
@@ -127,11 +128,11 @@
                   alert_modal_warning(data.message);
                   window.location.replace('../index');
                   $('#btn-tambah').button('reset');
-
+                  unblockUI( function() {});   
                 }else if(data.status == 'kosong' || data.status == 'failed'){                     
                   alert_modal_warning(data.message);
                   $('#btn-tambah').button('reset');
-
+                  unblockUI( function() {});   
                 }else{
                   $("#table_prod").load(location.href + " #table_prod");
                   $("#table_items").load(location.href + " #table_items");
@@ -140,13 +141,16 @@
                   $("#foot").load(location.href + " #foot");
                   $('#tambah_data').modal('hide');
                   $('#btn-tambah').button('reset');
-                  alert_notify(data.icon,data.message,data.type,function(){});
+                  unblockUI( function() {
+                      setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                  }); 
                   $("#form_out").load(location.href + " #form_out>*");
                 }
 
               },error: function (xhr, ajaxOptions, thrownError) {
-              alert(xhr.responseText);
-             $('#btn-tambah').button('reset');
+                alert(xhr.responseText);
+                $('#btn-tambah').button('reset');
+                unblockUI( function() {});   
             }
           });
           

@@ -107,6 +107,11 @@
                   "orderable": false, 
               },
               {
+                "className" : "text-right",
+                 render: $.fn.dataTable.render.number(',', '.', 2, ''),
+                "targets"   : [4]
+              },
+              {
                 "targets" : 6,
                  render: function (data, type, full, meta) {
                         return "<div class='text-wrap width-300'>" + data + "</div>";

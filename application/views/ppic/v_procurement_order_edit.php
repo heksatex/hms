@@ -101,6 +101,69 @@
                     <textarea type="text" class="form-control input-sm" name="note" id="note"><?php echo $procurementorder->notes?></textarea>
                   </div>                                    
                 </div>
+
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Type </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <?php 
+                        $checked_type = "";
+                        if($procurementorder->type == 'mto'){  
+                          $checked_type = "checked";
+                        }
+                      ?>
+                      <input type="radio" id="mto" name="type[]" value="mto"  <?php echo $checked_type;?> disabled >
+                      <label for="mto">Make to Order</label>
+                    </div>
+                    <div class="col-xs-12 col-sm-3 col-md-12">
+                      <?php 
+                        $checked_type2 = "";
+                        if($procurementorder->type == 'mts'){  
+                          $checked_type2 = "checked";
+                        }
+                      ?>
+                      <input type="radio" id="mts" name="type[]" value="mts" <?php echo $checked_type2;?> disabled >
+                      <label for="mst">Make to Stock</label>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <?php 
+                        $checked_type3 = "";
+                        if($procurementorder->type == 'pengiriman'){  
+                          $checked_type3 = "checked";
+                        }
+                      ?>
+                      <input type="radio" id="pengiriman" name="type[]" value="pengiriman" <?php echo $checked_type3;?> disabled >
+                      <label for="pengiriman">Pengiriman</label>
+                    </div>
+                  </div>                                    
+                </div>
+
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Sales Order </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <?php 
+                        $checked = "";
+                        if($procurementorder->show_sales_order == 'yes'){  
+                          $checked = "checked";
+                        }
+                      ?>
+                      <input type="radio" id="sc_true" name="sc[]" value="yes"  <?php echo $checked;?> disabled  >
+                      <label for="yes">Yes</label>
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <?php 
+                        $checked2 = "";
+                        if($procurementorder->show_sales_order == 'no'){  
+                          $checked2 = "checked";
+                        }
+                      ?>
+                        <input type="radio" id="sc_false" name="sc[]" value="no" <?php echo $checked2;?> disabled >
+                      <label for="no">No</label>
+                    </div>
+                  </div>                                    
+                </div>
+
               </div>
               <!-- /.col-md-6 -->
 
@@ -111,6 +174,7 @@
                     <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly" value="<?php echo $procurementorder->schedule_date?>" />
                   </div>                                    
                 </div>
+                <?php if($procurementorder->show_sales_order == 'yes'){ ?>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Production Order</label></div>
                   <div class="col-xs-8">
@@ -122,9 +186,16 @@
                   <div class="col-xs-8">
                     <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly"  value="<?php echo $procurementorder->sales_order?>"/>
                   </div>                                    
-                </div>        
+                </div> 
+                <?php } ?>
                 <div  class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Departement Tujuan</label></div>
+                  <?php if($procurementorder->type == 'mts'){
+                    $label_dept = 'Departemen';
+                  }else{
+                    $label_dept = 'Departemen Tujuan';
+                  }
+                  ?>
+                  <div class="col-xs-4"><label><?php echo $label_dept;?></label></div>
                   <div class="col-xs-8">
                     <select class="form-control input-sm" name="warehouse" id="warehouse" />
                       <?php
@@ -212,7 +283,7 @@
                                 if($row->status == 'cancel') $color = 'red'; else $color = '';
                             ?>
                               <tr style="color:<?php echo $color;?>">
-                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order."^|".$row->kode_produk."^|".htmlentities($row->nama_produk)."^|".$row->qty."^|".$row->uom."^|".htmlentities($row->reff_notes)."^|".$row->schedule_date."^|".$procurementorder->sales_order."^|".$procurementorder->kode_prod."^|".$procurementorder->warehouse;?>"><?php echo $no++.".";?></td>
+                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>"><?php echo $no++.".";?></td>
                                 <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a></td>
                                 <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date;?>"><?php echo $row->schedule_date?></td>
                                 <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
@@ -323,10 +394,10 @@
     var index = $("#procurements tbody tr:last-child").index();
     var row   ='<tr class="">'
           + '<td></td>'
-          + '<td><select type="text" class="form-control input-sm width-150 prod" name="Product" id="product"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
+          + '<td><select type="text" class="form-control input-sm prod" name="Product" id="product" style="min-width:150px;"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
           + '<td><div class="input-group date width-150" id="sch_date" ><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
           + '<td><input type="text" class="form-control input-sm width-100 qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>'
-          + '<td><input type="text" class="form-control input-sm width-50 uom" name="Uom" id="uom"></td>'
+          + '<td><select type="text" class="form-control input-sm width-80 uom" name="Uom" id="uom"><option value=""></option><?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
           + '<td><textarea type="text" class="form-control input-sm width-150" name="reff" id="reff"></textarea></td>'
           + '<td></td>'
           + '<td align="center"><button type="button" class="btn btn-primary btn-xs add width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
@@ -464,7 +535,8 @@
         var reff  = $(this).parents("tr").find("#reff").val();
         var row_order = $(this).parents("tr").find("#row_order").val();
         //alert(qty);
-        
+        var btn_load = $(this);
+        btn_load.button('loading');
         $.ajax({
           dataType: "JSON",
           url : '<?php echo site_url('ppic/procurementorder/simpan_detail_procurement_order') ?>',
@@ -488,12 +560,14 @@
             }else{
                 refresh_procurement();
                 $(".add-new").show();                   
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
              }
+             btn_load.button('reset');
           },
           error: function (xhr, ajaxOptions, thrownError){
             alert('Error data');
             alert(xhr.responseText);
+            btn_load.button('reset');
           }
         });
         
@@ -565,6 +639,7 @@
       });
       var kode  =  "<?php echo $procurementorder->kode_proc; ?>";
       var row_order = $(this).parents("tr").find("#row_order").val();  
+      var btn_load = $(this);
       bootbox.dialog({
         message: "Apakah Anda ingin menghapus data ?",
         title: "<i class='glyphicon glyphicon-trash'></i> Delete !",
@@ -579,6 +654,9 @@
                       type: "POST",
                       data: {kode : kode, 
                             row_order : row_order  },
+                      beforeSend : function(){
+                          btn_load.button('loading');
+                      },
                       success: function(data){
                         if(data.sesi=='habis'){
                             //alert jika session habis
@@ -590,12 +668,14 @@
                         }else{
                             refresh_procurement();
                             $(".add-new").show();                   
-                            alert_notify(data.icon,data.message,data.type);
+                            alert_notify(data.icon,data.message,data.type,function(){});
                          }
+                          btn_load.button('reset');
                       },
                       error: function (xhr, ajaxOptions, thrownError){
                         alert('Error data');
                         alert(xhr.responseText);
+                        btn_load.button('reset');
                       }
                     });
               }
@@ -650,7 +730,7 @@
                     }else{
                         refresh_procurement();
                         unblockUI( function() {
-                        setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                        setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                         });
                         //$(this).parents("tr").find(".btn-generate").button("reset");
                      }
@@ -716,7 +796,7 @@
                     }else{
                         refresh_procurement();
                         unblockUI( function() {
-                          setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                          setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                         });
                      }
                   },
@@ -748,6 +828,24 @@
 
       e.preventDefault();
 
+      $('#sc_true').attr('id','sc_true');
+      $('#sc_false').attr('id','sc_false');
+      $('#mts').attr('id','mts');
+      $('#mto').attr('id','mto');
+      $('#pengiriman').attr('id','pengiriman');
+
+      var radio_type = $('input[name="type[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+
+      var radio_type_2 = $('input[name="sc[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+
       $('#btn-simpan').button('loading');
       please_wait(function(){});
       $.ajax({
@@ -766,6 +864,8 @@
                 sales_order : $('#sales_order').val(),
                 priority    : $('#priority').val(),
                 warehouse   : $('#warehouse').val(),
+                type        : radio_type,
+                show_sc     : radio_type_2,
 
           },success: function(data){
             if(data.sesi == "habis"){
@@ -776,14 +876,14 @@
                 //jika ada form belum keiisi
                 refresh_procurement();
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
                  document.getElementById(data.field).focus();
             }else{
                 //jika berhasil disimpan/diubah
                 refresh_procurement();
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
             }
             $('#btn-simpan').button('reset');
