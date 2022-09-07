@@ -7,7 +7,7 @@
   <link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/colorpicker/bootstrap-colorpicker.min.css') ?>">
   <style type="text/css">
 
-    button[id="btn-simpan"],button[id="btn-cancel"]{/*untuk hidden button simpan/cancel di top bar */
+    button[id="btn-simpan"],button[id="btn-active"],button[id="btn-edit"],button[id="btn-duplicate"],button[id="btn-generate"],button[id="btn-cancel"]{/*untuk hidden button di top bar */
       display: none;
     }
 
@@ -222,13 +222,18 @@
                   <div class="col-xs-4"><label></label></div>
                   <div class="col-xs-8 col-md-8">
                     <ul class="bs-glyphicons">
-                      <li class="pointer" onclick="cek_history_dti('<?php echo $color->id ?>', '<?php echo $color->nama_warna?>')" data-toggle="tooltip" title="Lihat History DTI">
+                      <li class="pointer" onclick="cek_history_dti('<?php echo $color->id ?>', '<?php echo $color->nama_warna?>')" data-toggle="tooltip" title="Lihat History MG">
                         <span class="glyphicon glyphicon-cog"></span>            
-                        <span class="glyphicon-class">History DTI</span>
-                      </li>                        
+                        <span class="glyphicon-class">History DTI List MG</span>
+                      </li>                     
+                      <li class="pointer" onclick="history_list_OW('<?php echo $color->id ?>')" data-toggle="tooltip" title="Lihat History MG">
+                        <span class="glyphicon glyphicon-cog"></span>            
+                        <span class="glyphicon-class">History DTI List OW</span>
+                      </li>                      
                     </ul>
                   </div>
                 </div>
+                
               </div>
             </div>
             </form>
@@ -253,7 +258,11 @@
                         $loop++;
                     }
                     ?>
-                    <li id="btn_tabs"><button type="button" id="add-varian" class='btn btn-primary btn-sm' title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>
+                    <li id="btn_tabs">
+                      <?php if($color->status != 'cancel'){?>
+                      <button type="button" id="add-varian" class='btn btn-primary btn-sm' title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button>
+                      <?php } ?>
+                    </li>
                   </ul>
                   <div class="tab-content"><br>
                   
@@ -320,8 +329,8 @@
                           <div class="col-md-8 col-xs-12">
                             <br>
                             <div class="col-xs-4"><label>Notes Varian </label></div>
-                            <div class="col-md-6 col-xs-8 ta" id="ta">
-                              <textarea type="text" class="form-control input-sm" name="note_varian" id="note_varian" readonly="readonly" ></textarea>
+                            <div class="col-md-6 col-xs-8 " id="ta">
+                              <textarea type="text" class="form-control input-sm" name="note_varian" id="note_varian" readonly="readonly"  ></textarea>
                                 <br>
                               </div>  
                           </div>                                  
@@ -332,7 +341,7 @@
                   <!-- /.tab-content -->
                 </div>
                 <!-- nav-tabs-custom -->
-              </div>
+              </div> 
               <!-- /.col -->
             </div>
            
@@ -370,13 +379,6 @@
 <script src="<?php echo site_url('plugins/colorpicker/bootstrap-colorpicker.min.js') ?>"></script>
 
 <script type="text/javascript">
-
-  $('tr').click(function(){
-    var col = this.cellIndex,
-      row = this.parentNode.rowIndex;
-    alert("row no:"+row+"col no :"+col);
-  });
-
 
   $(".my-colorpicker").colorpicker();
 
@@ -420,7 +422,17 @@
         });
     }
   });
-  
+ 
+  var status = $('#status').val();
+  if(status == 'cancel'){
+    $("#btn-cancel").hide();
+    $("#btn-active").show();
+  }else{
+    $("#btn-generate").show();
+    $("#btn-duplicate").show();
+    $("#btn-edit").show();
+    $("#btn-cancel").show();
+  }
 
   var unsaved = false;
   var unsaved2 = false;
@@ -433,6 +445,7 @@
     $("#btn-generate").hide();//sembuyikan btn-generate
     $("#btn-duplicate").hide();//sembuyikan btn-duplicate
     $("#btn-print").hide();//sembuyikan btn-print
+    $("#btn-active").hide();//sembuyikan btn-print
 
     $("#btn-cancel").attr('id','btn-cancel-edit');// ubah id btn-cancel jadi btn-cancel-edit
     $("#note").attr("readonly", false);
@@ -525,7 +538,7 @@
     //alert(unsaved2);
     if(unsaved){
         var dialog = bootbox.dialog({
-          title: "<i class='fa fa-warning'></i> Warning !",
+          title: "<font color='red'><i class='fa fa-warning'></i></font> Warning !",
           message: "<p>Tinggalkan perubahan yang belum anda simpan </p>",
           size: 'medium',
           buttons: {
@@ -670,7 +683,7 @@
         }
 
         var dialog = bootbox.dialog({
-          title: "<i class='fa fa-warning'></i> Warning !",
+          title: "<font color='red'><i class='fa fa-warning'></i></font> Warning !",
           message: message2,
           size: 'medium',
           buttons: {
@@ -755,7 +768,6 @@
   // edit dyeing stuff / aux
   function edit(caption, row_order, kode_produk, nama_produk)
   {
-      //$("#edit_data").modal('show');
       var id_warna = '<?php echo $color->id?>';
       var warna    = '<?php echo $color->nama_warna?>';
       $("#edit_data").modal({
@@ -784,7 +796,7 @@
           backdrop: 'static'
       })
       $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $('.modal-title').text('History DTI ( '+nama_warna+')' );
+      $('.modal-title').text('History DTI List MG ( '+nama_warna+')' );
       $.post('<?php echo site_url()?>lab/dti/view_history_dti',
           {id_warna : id_warna},
           function(html){
@@ -792,6 +804,22 @@
           }   
       );
   }
+
+  // cek list ow yang sesuai DTI
+  function history_list_OW(id_warna, nama_warna){
+        $("#view_data").modal({
+            show: true,
+            backdrop: 'static'
+        });
+        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('History DTI List OW ' );
+        $.post('<?php echo site_url()?>lab/dti/view_history_ow',
+            {id_warna : id_warna},
+            function(html){
+              setTimeout(function() {$(".view_body").html(html);  },1000);
+            }   
+        );
+    }
 
   // tambah varian warna
   $(document).on("click", "#add-varian", function(e){
@@ -1818,7 +1846,7 @@
               $("#status_bar").load(location.href + " #status_bar");
             }
             $("#status_head").load(location.href + " #status_head");
-             $('#btn-generate').button('reset');
+            $('#btn-generate').button('reset');
           },error: function (xhr, ajaxOptions, thrownError) { 
             alert(xhr.responseText);
             $('#btn-generate').button('reset');
@@ -1912,6 +1940,117 @@
 	    }
 	}
 
+
+  $(document).on('click','#btn-cancel', function(e){
+    var status = $('#status').val();
+    if(status == 'cancel'){
+      alert_modal_warning('DTI sudah dibatalkan !');
+    }else{
+      var id_warna   = '<?php echo $color->id; ?>';
+      var dialog = bootbox.dialog({
+          title : "<font color='red'><i class='fa fa-warning'></i></font> Warning !",
+          message: "<p>Apakah anda yakin ingin membatalkan DTI ?</p>",
+          size: 'medium',
+          buttons: {
+            ok: {
+              label: "Yes",
+              className: 'btn-primary btn-sm',
+              callback: function(){
+                    $("#btn-cancel").button('loading');
+                    $.ajax({
+                          type: 'POST',
+                          dataType: "json",
+                          url : "<?php echo site_url('lab/dti/cancel_dti')?>",
+                          data : {id_warna:id_warna},
+                    })
+                    .done(function(response){
+                      if(response.sesi == 'habis'){
+                        alert_modal_warning(response.message);
+                        window.location.replace(baseUrl);//replace ke halaman login
+                      }else if(response.status =='failed'){
+                        alert_modal_warning(response.message);
+                      }else{
+                        $("#foot").load(location.href + " #foot");              
+                        $("#status_head").load(location.href + " #status_head");     
+                        $("#status_bar").load(location.href + " #status_bar");     
+                        $("#btn_tabs").load(location.href + " #btn_tabs");     
+                        alert_notify(response.icon,response.message,response.type,function(){});
+                        $("#btn-generate").hide();
+                        $("#btn-duplicate").hide();
+                        $("#btn-edit").hide();
+                        $("#btn-cancel").hide();
+                        $("#btn-active").show();
+                      }
+                      $("#btn-cancel").button('reset');
+                    })
+              }
+            },
+            cancel: {
+                label: "No",
+                className: 'btn-default btn-sm',
+                callback: function(){
+                }
+            },
+          }
+      });
+    }
+  });
+
+
+  $(document).on('click','#btn-active', function(e){
+    var status = $('#status').val();
+    if(status != 'cancel'){
+      alert_modal_warning('DTI sudah di aktifkan !');
+    }else{
+      var id_warna   = '<?php echo $color->id; ?>';
+      var dialog = bootbox.dialog({
+          title : "<font color='red'><i class='fa fa-warning'></i></font> Warning !",
+          message: "<p>Apakah anda yakin ingin mengaktifkan kembali DTI ?</p>",
+          size: 'medium',
+          buttons: {
+            ok: {
+              label: "Yes",
+              className: 'btn-primary btn-sm',
+              callback: function(){
+                    $("#btn-active").button('loading');
+                    $.ajax({
+                          type: 'POST',
+                          dataType: "json",
+                          url : "<?php echo site_url('lab/dti/active_dti')?>",
+                          data : {id_warna:id_warna},
+                    })
+                    .done(function(response){
+                      if(response.sesi == 'habis'){
+                        alert_modal_warning(response.message);
+                        window.location.replace(baseUrl);//replace ke halaman login
+                      }else if(response.status =='failed'){
+                        alert_modal_warning(response.message);
+                      }else{
+                        $("#foot").load(location.href + " #foot");              
+                        $("#status_head").load(location.href + " #status_head");     
+                        $("#status_bar").load(location.href + " #status_bar"); 
+                        $("#btn_tabs").load(location.href + " #btn_tabs");     
+                        alert_notify(response.icon,response.message,response.type,function(){});
+                        $("#btn-generate").show();
+                        $("#btn-duplicate").show();
+                        $("#btn-edit").show();
+                        $("#btn-cancel").show();
+                        $("#btn-active").hide();
+                      }
+                      $("#btn-active").button('reset');
+                    })
+              }
+            },
+            cancel: {
+                label: "No",
+                className: 'btn-default btn-sm',
+                callback: function(){
+                }
+            },
+          }
+      });
+    }
+  });
 
 
 </script>

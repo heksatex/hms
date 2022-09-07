@@ -197,11 +197,12 @@
 						<td align="right"><?php echo number_format($row->qty,2)?></td>
 						<td><?php echo $row->uom;?></td>
 						<td>
-							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>">
+							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)">
 							<input type="hidden" name="jml_produk"  id="jml_produk" class="form-control input-sm jml_produk" value="<?php echo $row->jml_produk ?>">
 							<input type="hidden" name="qty_rm"  id="qty_rm" class="form-control input-sm qty_rm" value="<?php echo $row->qty_rm ?>">
 							<input type="hidden" name="quant_id"  id="quant_id" class="form-control input-sm quant_id" value="<?php echo $row->quant_id ?>">
 							<input type="hidden" name="move_id"  id="move_id" class="form-control input-sm move_id" value="<?php echo $row->move_id ?>">
+							<input type="hidden" name="additional"  id="additional" class="form-control input-sm additional" value="<?php echo $row->additional ?>">
 							<input type="hidden" name="origin_prod"  id="origin_prod" class="form-control input-sm origin_prod" value="<?php echo $row->origin_prod ?>">
 							<input type="hidden" name="kode_produk"  id="kode_produk" class="form-control input-sm kode_produk" value="<?php echo $row->kode_produk ?>">
 							<input type="hidden" name="nama_produk"  id="nama_produk" class="form-control input-sm nama_produk" value="<?php echo htmlentities($row->nama_produk) ?>">
@@ -250,6 +251,13 @@
 	        a.value = a.value.substring(0,a.value.length-1000);
 	    }
 	    total();
+	}
+
+	//validasi qty
+	function validAngka2(a){
+	    if(!/^[0-9.]+$/.test(a.value)){
+	        a.value = a.value.substring(0,a.value.length-1000);
+	    }
 	}
 
 	// validasi kp double
@@ -422,6 +430,7 @@
 						qty_konsum  : $(item).parents("tr").find('#qty_konsum').val(),
 						quant_id 	: $(item).parents("tr").find('#quant_id').val(),
 						move_id 	: $(item).parents("tr").find('#move_id').val(),
+						additional 	: $(item).parents("tr").find('#additional').val(),
 						kode_produk : $(item).parents("tr").find('#kode_produk').val(),
 						nama_produk : $(item).parents("tr").find('#nama_produk').val(),
 						qty_smi     : $(item).parents("tr").find('#qty_smi').val(),
@@ -459,7 +468,7 @@
 			if(kode_produk == '' || nama_produk == '' || lot == ''){
 				alert('Maaf, Produk Lot / Hasil Produksi Masih Kosong !');
 			}else{
-				
+				please_wait(function(){});
 			    $('#btn-tambah').button('loading');
 			    $.ajax({
 			        dataType: "JSON",
@@ -489,7 +498,16 @@
 			              //alert jika session habis
 			              alert_modal_warning(data.message);
 			              window.location.replace('../index');
-			            }else{
+						  unblockUI( function(){});
+						}else if(data.status == "failed"){
+			              $("#status_bar").load(location.href + " #status_bar");
+			              $("#tab_1").load(location.href + " #tab_1");
+			              $("#tab_2").load(location.href + " #tab_2");             
+			              $("#foot").load(location.href + " #foot");
+			              $('#btn-tambah').button('reset');
+			              alert(data.message);
+						  unblockUI( function(){});
+			           	}else{
 			              //jika berhasil disimpan
 			              $("#status_bar").load(location.href + " #status_bar");
 			              $("#tab_1").load(location.href + " #tab_1");
@@ -501,7 +519,9 @@
 			              if(data.double == 'yes'){
 			              	alert_modal_warning(data.message2);
 			              }
-			              alert_notify(data.icon,data.message,data.type,function(){});
+			              unblockUI( function(){
+							setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+						  });
 			            }
 
 						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm');
@@ -509,6 +529,7 @@
 			        },error: function (jqXHR, textStatus, errorThrown){
 			          alert(jqXHR.responseText);
 			          $('#btn-tambah').button('reset');
+					  unblockUI( function(){});
 			        }
 			    });
 			    

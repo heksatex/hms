@@ -233,61 +233,154 @@
   $(document).on('click','#btn-confirm-date',function(){
     var status = $('#status').val();
     if(status == 'waiting_date'){
+      bootbox.dialog({
+	          message: "Apakah Anda ingin melakukan Confirm Date ?",
+	          title: "Confirm Date !",
+	          buttons: {
+	            danger: {
+	                label    : "Yes ",
+	                className: "btn-primary btn-sm",
+	                callback : function() {
+                            $('#btn-confirm-date').button('loading');
+                            please_wait(function(){});
+                            $.ajax({
+                              type: "POST",
+                              dataType: "json",
+                              url :'<?php echo base_url('ppic/orderplanning/confirm_date')?>',
+                              beforeSend: function(e) {
+                                  if(e && e.overrideMimeType) {
+                                      e.overrideMimeType("application/json;charset=UTF-8");
+                                  }
+                              },
+                              data: {sales_order: $('#sales_order').val(),
+                                    
+                                },success: function(data){
+                                  if(data.sesi == "habis"){
+                                    //alert jika session habis
+                                    alert_modal_warning(data.message);
+                                    window.location.replace('../index');
+                                  }else if(data.status == "failed"){
+                                    //jika details masih kosong
+                                    unblockUI( function() {
+                                      setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                                    });
+                                    $("#tab_1").load(location.href + " #tab_1");
+                                    $("#status_bar").load(location.href + " #status_bar");
+                                    $('#btn-confirm-date').button('reset');
+                                  
+                                  }else{
+                                    unblockUI( function() {
+                                      setTimeout(function() { 
+                                        alert_notify(data.icon,data.message,data.type, function(){
+                                      },1000); 
+                                      });
+                                    });
+                                    $("#confirm").load(location.href + " #confirm");
+                                    $("#status_bar").load(location.href + " #status_bar");
+                                    $("#foot").load(location.href + " #foot");
+                                  }
+                                  $('#btn-confirm-date').button('reset');
 
-      $('#btn-confirm-date').button('loading');
-      please_wait(function(){});
-      $.ajax({
-         type: "POST",
-         dataType: "json",
-         url :'<?php echo base_url('ppic/orderplanning/confirm_date')?>',
-         beforeSend: function(e) {
-            if(e && e.overrideMimeType) {
-                e.overrideMimeType("application/json;charset=UTF-8");
-            }
-         },
-         data: {sales_order: $('#sales_order').val(),
-              
-          },success: function(data){
-            if(data.sesi == "habis"){
-              //alert jika session habis
-              alert_modal_warning(data.message);
-              window.location.replace('../index');
-            }else if(data.status == "failed"){
-              //jika details masih kosong
-              unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-              });
-              $("#tab_1").load(location.href + " #tab_1");
-              $("#status_bar").load(location.href + " #status_bar");
-              $('#btn-confirm-date').button('reset');
-             
-            }else{
-              unblockUI( function() {
-                setTimeout(function() { 
-                  alert_notify(data.icon,data.message,data.type, function(){
-                },1000); 
-                });
-              });
-              $("#confirm").load(location.href + " #confirm");
-              $("#status_bar").load(location.href + " #status_bar");
-              $("#foot").load(location.href + " #foot");
-            }
-            $('#btn-confirm-date').button('reset');
-
-          },error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.responseText);
-            unblockUI( function(){});
-            $('#btn-confirm-date').button('reset');
-          }
-      });
-        window.setTimeout(function() {
-       $(".alert").fadeTo(500, 0).slideUp(500, function(){
-        $(this).remove(); });
-      }, 3000);
+                                },error: function (xhr, ajaxOptions, thrownError) {
+                                  alert(xhr.responseText);
+                                  unblockUI( function(){});
+                                  $('#btn-confirm-date').button('reset');
+                                }
+                            });
+                  }
+	            },
+	            success: {
+	                  label    : "No",
+	                  className: "btn-default  btn-sm",
+	                  callback : function() {
+	                  	$('.bootbox').modal('hide');
+	                  }
+	            }
+	          }
+	      	});
+        
     }else if(status == 'draft'){
       alert_modal_warning('Maaf, Data belum Ready !');
     }else if(status != 'waiting_date'){
       alert_modal_warning('Maaf, Confirm Date sudah Dilakukan !');
+    }
+  });
+
+  //klik button cancel utuk batal confirm date   
+  $(document).on('click','#btn-cancel',function(){
+    var status = $('#status').val();
+    if(status == 'date_assigned' ){
+      bootbox.dialog({
+	          message: "Apakah Anda ingin melakukan Batal Order Planning / Confirm Date ?",
+	          title: "Cancel Confirm Date !",
+	          buttons: {
+	            danger: {
+	                label    : "Yes ",
+	                className: "btn-primary btn-sm",
+	                callback : function() {
+                              $('#btn-cancel').button('loading');
+                              please_wait(function(){});
+                              $.ajax({
+                                type: "POST",
+                                dataType: "json",
+                                url :'<?php echo base_url('ppic/orderplanning/cancel_confirm_date')?>',
+                                beforeSend: function(e) {
+                                    if(e && e.overrideMimeType) {
+                                        e.overrideMimeType("application/json;charset=UTF-8");
+                                    }
+                                },
+                                data: {sales_order: $('#sales_order').val(),
+                                      
+                                  },success: function(data){
+                                    if(data.sesi == "habis"){
+                                      //alert jika session habis
+                                      alert_modal_warning(data.message);
+                                      window.location.replace('../index');
+                                    }else if(data.status == "failed"){
+                                      //jika details masih kosong
+                                      unblockUI( function() {
+                                        setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                                      });
+                                      $("#tab_1").load(location.href + " #tab_1");
+                                      $("#status_bar").load(location.href + " #status_bar");
+                                      $('#btn-cancel').button('reset');
+                                    
+                                    }else{
+                                      unblockUI( function() {
+                                        setTimeout(function() { 
+                                          alert_notify(data.icon,data.message,data.type, function(){
+                                        },1000); 
+                                        });
+                                      });
+                                      $("#confirm").load(location.href + " #confirm");
+                                      $("#status_bar").load(location.href + " #status_bar");
+                                      $("#foot").load(location.href + " #foot");
+                                      $("#tab_1").load(location.href + " #tab_1");
+                                    }
+                                    $('#btn-cancel').button('reset');
+
+                                  },error: function (xhr, ajaxOptions, thrownError) {
+                                    alert(xhr.responseText);
+                                    unblockUI( function(){});              
+                                    $('#btn-cancel').button('reset');
+                                  }
+                              });
+                            }
+	            },
+	            success: {
+	                  label    : "No",
+	                  className: "btn-default  btn-sm",
+	                  callback : function() {
+	                  	$('.bootbox').modal('hide');
+	                  }
+	            }
+	          }
+	      	});
+       
+    }else if(status == 'draft'){
+      alert_modal_warning('Maaf, Data belum Ready !');
+    }else if(status != 'date_assigned'){
+      alert_modal_warning('Maaf, Status Sales Contract Harus Date Assigned ketika akan melakukan Proses batal !');
     }
   });
 

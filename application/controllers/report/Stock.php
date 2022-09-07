@@ -53,15 +53,28 @@ class Stock extends MY_Controller
         
         if(count($arr_order) > 0){
             $order_by =  '';
+            $order_by_in_group = '';
             foreach($arr_order as $val){
                 $column = $this->declaration_name_field($val['column']);
                 $order_by .= $column.' '.$val['sort'].', ';
+                if($val['column'] ==  'qty'){
+                    $order_by_in_group .= ' tot_qty '.$val['sort'].', ';
+                }else if($val['column'] ==  'qty2'){
+                    $order_by_in_group .= ' tot_qty2 '.$val['sort'].', ';
+                }else{
+                    $order_by_in_group .= $column.' '.$val['sort'].', ';
+                }
             }
 
-			$order_by = rtrim($order_by, ', ');
-            $order_by = "ORDER BY ".$order_by;
+			$order_by          = rtrim($order_by, ', ');
+            $order_by          = "ORDER BY ".$order_by;
+            if(!empty($order_by_in_group)){
+                $order_by_in_group = rtrim($order_by_in_group, ', ');
+                $order_by_in_group = "ORDER BY ".$order_by_in_group;
+            }
         }else{
             $order_by = "ORDER BY sq.quant_id desc";
+            $order_by_in_group = "";
         }
 
 	    $dataRecord  = [];
@@ -81,7 +94,7 @@ class Stock extends MY_Controller
         		break;
         	}
 
-        	$list = $this->m_stock->get_list_stock_grouping($where_lokasi, $nama_field, $where_result);
+        	$list = $this->m_stock->get_list_stock_grouping($where_lokasi, $nama_field, $where_result,$order_by_in_group);
             $tot_group = 0;
         	foreach ($list as $gp) {
         		# code...
@@ -176,14 +189,28 @@ class Stock extends MY_Controller
         
         if(count($arr_order) > 0){
             $order_by =  '';
+            $order_by_in_group = '';
             foreach($arr_order as $val){
-                $order_by .= $val['column'].' '.$val['sort'].', ';
+                $column = $this->declaration_name_field($val['column']);
+                $order_by .= $column.' '.$val['sort'].', ';
+                if($val['column'] ==  'qty'){
+                    $order_by_in_group .= ' tot_qty '.$val['sort'].', ';
+                }else if($val['column'] ==  'qty2'){
+                    $order_by_in_group .= ' tot_qty2 '.$val['sort'].', ';
+                }else{
+                    $order_by_in_group .= $column.' '.$val['sort'].', ';
+                }
             }
 
-			$order_by = rtrim($order_by, ', ');
-            $order_by = "ORDER BY ".$order_by;
+			$order_by          = rtrim($order_by, ', ');
+            $order_by          = "ORDER BY ".$order_by;
+            if(!empty($order_by_in_group)){
+                $order_by_in_group = rtrim($order_by_in_group, ', ');
+                $order_by_in_group = "ORDER BY ".$order_by_in_group;
+            }
         }else{
-            $order_by = "ORDER BY quant_id desc";
+            $order_by = "ORDER BY sq.quant_id desc";
+            $order_by_in_group = "";
         }
 
 
@@ -255,7 +282,7 @@ class Stock extends MY_Controller
             $group    = $tbody_id;
             $by2      = $data_group[$group_ke]['nama_field'];
             
-            $list = $this->m_stock->get_list_stock_grouping($where_lokasi,$by2, $where_result);
+            $list = $this->m_stock->get_list_stock_grouping($where_lokasi,$by2, $where_result,$order_by_in_group);
             $group_ke_next = $group_ke + 1;
         
             foreach ($list as $gp2) {

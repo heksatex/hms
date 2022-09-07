@@ -26,12 +26,12 @@ class M_stock extends CI_Model
 	SELECT COUNT(barcode_id) as 'jml', (((datediff(now(), tgl) DIV 30) + 1) * 30) as timegroup FROM stock_kain_finish WHERE kode_lokasi<>'VR.INS' AND kode_lokasi<>'ADJ' GROUP BY timegroup
 	*/
 
-	public function get_list_stock_grouping($where_lokasi,$groupBy,$where)
+	public function get_list_stock_grouping($where_lokasi,$groupBy,$where,$order_by_in_group)
 	{
 		return $this->db->query("SELECT $groupBy as nama_field, concat($groupBy,' (',count(*),')') as grouping, sum(qty) as tot_qty, sum(qty2) as tot_qty2
 								FROM stock_quant as sq 
 								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group 
-								WHERE $where_lokasi $where group by $groupBy ")->result();
+								WHERE $where_lokasi $where group by $groupBy $order_by_in_group ")->result();
 	}
 
 	public function get_record_stock($where_lokasi,$where)
@@ -43,7 +43,7 @@ class M_stock extends CI_Model
 
 	public function get_list_departement_stock()
 	{
-		return $this->db->query("SELECT DISTINCT stock_location  FROM departemen ORDER BY nama ")->result();
+		return $this->db->query("SELECT DISTINCT stock_location  FROM departemen ORDER BY stock_location ")->result();
 	}
 
 	

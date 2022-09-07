@@ -119,6 +119,7 @@ class Billofmaterials extends MY_Controller
     		$nama_produk = addslashes($this->input->post('nama_produk'));
     		$qty         = $this->input->post('qty');
     		$uom         = $this->input->post('uom');
+			$tanggal     = date('Y-m-d H:i:s');
 
     		if(empty($nama_bom)){
                 $callback = array('status' => 'failed', 'field' => 'nama_bom', 'message' => 'Nama BOM Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
@@ -148,7 +149,7 @@ class Billofmaterials extends MY_Controller
 	          			//get last number kode_bom
 	          			$last_bom   = $this->_module->get_kode_bom();
 	          			$kode_bom   = 'BM'.$last_bom;
-	          			$this->m_bom->save_bom($kode_bom,$nama_bom,$kode_produk,$nama_produk,$qty,$uom);
+	          			$this->m_bom->save_bom($kode_bom,$tanggal,$nama_bom,$kode_produk,$nama_produk,$qty,$uom);
 
 	          			//unlock table
     	            	$this->_module->unlock_tabel();

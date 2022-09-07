@@ -101,7 +101,7 @@
           alert_modal_warning(message);
 
         }else{
-          
+          please_wait(function(){});
           $('#btn-tambah').button('loading');
           $.ajax({
               type: "POST",
@@ -123,11 +123,13 @@
                   alert_modal_warning(data.message);
                   window.location.replace('../index');
                   $('#btn-tambah').button('reset');
+                  unblockUI( function(){});
 
                 }else if(data.status == 'failed'){
                   //var pesan = "Lot "+data.lot+ " Sudah diinput !"       
                   alert_modal_warning(data.message);
                   $('#btn-tambah').button('reset');
+                  unblockUI( function(){});
 
                 }else{
                   $("#tab_1").load(location.href + " #tab_1");
@@ -136,7 +138,10 @@
                   $("#foot").load(location.href + " #foot");
                   $('#tambah_data').modal('hide');
                   $('#btn-tambah').button('reset');
-                  alert_notify(data.icon,data.message,data.type,function(){});
+                  unblockUI( function(){
+                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                  });
+                
                 }
 
               },error: function (xhr, ajaxOptions, thrownError) {

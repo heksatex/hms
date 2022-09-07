@@ -545,6 +545,7 @@ class Adjustment extends MY_Controller
         $jml_adj     = 0;
         $loop_adj    = false;
         $qty_stok_adj_manual = false;
+        $qty_data_adj_same   = false;
  
         $item =  $this->m_adjustment->get_adjustment_detail_by_code($kode_adjustment);
         foreach($item as $row){
@@ -722,6 +723,8 @@ class Adjustment extends MY_Controller
                 $sm_row++; //row order stock_move
                 $jml_adj++;
 
+              }else{
+                $qty_data_adj_same = true;
               }
 
           }
@@ -729,7 +732,7 @@ class Adjustment extends MY_Controller
         }// end foreach adjusment details
 
 
-        if($loop_adj == true){
+        if($loop_adj == true AND $qty_data_adj_same == false){
 
   
           // simpan stock move
@@ -835,6 +838,8 @@ class Adjustment extends MY_Controller
 
           if($qty_stok_adj_manual == true){
             $callback = array('status' => 'failed','message' => 'Qty Adjustment tidak Boleh 0 !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if($qty_data_adj_same == true){
+            $callback = array('status' => 'failed','message' => 'Qty Stock dan Qty Adjustment tidak boleh sama, cek kembali Produk yang akan di Adjustment !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
             $callback = array('status' => 'failed','message' => 'Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }

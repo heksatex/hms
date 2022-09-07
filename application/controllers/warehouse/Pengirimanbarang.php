@@ -653,6 +653,8 @@ class Pengirimanbarang extends MY_Controller
           
           $get_jml_qty     = $qty_smi['sum_qty'];
           $qty_quant_lebih = false;
+          $no              = 1;
+          $list_product    = '';
 
           foreach ($check as $data) {
             # code...
@@ -673,24 +675,10 @@ class Pengirimanbarang extends MY_Controller
             $lebar_jadi       = $cek_sq['lebar_jadi'];
             $uom_lebar_jadi   = $cek_sq['uom_lebar_jadi'];
 
-            /*
-              $dt1         =  $row[0];
-              $row2        = explode("|", $dt1);
-              $quantid     = $row2[8];     
-              $kode_produk = $row2[0];
-              $nama_produk = $row2[1];
-              $lot         = $row2[2];
-              $qty         = $row2[3];
-              $uom         = $row2[4];
-              $qty2        = $row2[5];
-              $uom2        = $row2[6];
-              $lokasi      = $row2[7];
-              //$break   = false;
-            */
 
               //cek product di stock quant
               $cq = $this->_module->cek_produk_di_stock_quant($quantid,$location['lokasi_dari'])->row_array();
-              if(!empty($cq['quant_id'])){
+              if(!empty($cq['quant_id']) AND empty($cq['reserve_move'])){
 
                 //untuk mendapatkan origin_prod yang terdapat consume kedepannya atau consume lebih dari 1
                 $loop_sm    = true;
@@ -752,6 +740,8 @@ class Pengirimanbarang extends MY_Controller
                   break;
                 }
 
+                $list_product .= "(".$no.") ".$kode_produk." ".$nama_produk." ".$lot." ".$qty." ".$uom." ".$qty2." ".$uom2." <br>";
+                $no++;
 
               }else{
                 $kosong = true;
@@ -789,8 +779,8 @@ class Pengirimanbarang extends MY_Controller
           
           if($kosong == false AND $qty_quant_lebih == false){            
             $jenis_log   = "edit";
-            $note_log    = "Tambah Data Details";
-            $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
+            $note_log    = "Tambah Data Details -> <br>".$list_product;
+            $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, addslashes($note_log), $username,$deptid);
             $callback    = array('status'=>'success',  'message' => 'Detail Product Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success');            
           }else if($qty_quant_lebih == true AND $deptid == 'GRG'){
             $callback    = array('status'=>'failed',  'message' => 'Maaf, Qty Melebih target !',  'icon' =>'fa fa-check', 'type' => 'danger');  
@@ -992,67 +982,76 @@ class Pengirimanbarang extends MY_Controller
             $nama_produk= addslashes($this->input->post('nama_produk'));
             $origin_prod= addslashes($this->input->post('origin_prod'));
             $status_brg = 'draft';
-            
-            //lock tabel
-            $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, pengiriman_barang_tmp WRITE' );
-            
-            //delete stock move item dan update reserve move jadi kosong
-            $this->_module->delete_details_items($move_id,$quant_id,$row_order);
 
-            // delete pengiriman_barang tmp
-            $this->m_pengirimanBarang->delete_pengiriman_barang_tmp($kode,$move_id,$quant_id);
-
-            // cek apakah terdapat kode_produk yg lebih dari 1
-            $cek_jml_produk_sama = $this->m_pengirimanBarang->cek_jml_produk_sama_pengiriman_barang_by_kode($kode,$kode_produk)->num_rows();
-            if($cek_jml_produk_sama > 0){// where ditambah origin_prod
-              $get_qty = $this->_module->get_qty_stock_move_items_by_kode_origin($move_id,addslashes($kode_produk),$origin_prod)->row_array();
+            // cek item by row
+            $get_smi = $this->_module->get_stock_move_items_by_kode($move_id,$quant_id,$kode_produk,$row_order)->row_array();
+            if(empty($get_smi)){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Product/Lot Tidak ditemukan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else{
-              //get sum qty produk stock move items
-              $get_qty = $this->_module->get_qty_stock_move_items_by_kode($move_id,addslashes($kode_produk))->row_array();
-            }
             
-            //get sum qty produk stock move items
-            //$get_qty  = $this->_module->get_qty_stock_move_items_by_kode($move_id,$kode_produk)->row_array();           
+              //lock tabel
+              $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, pengiriman_barang_tmp WRITE' );
+              
+              //delete stock move item dan update reserve move jadi kosong
+              $this->_module->delete_details_items($move_id,$quant_id,$row_order);
 
-            //update status draft jika qty di stock move items kosong
-            if(empty($get_qty['sum_qty'])){
+              // delete pengiriman_barang tmp
+              $this->m_pengirimanBarang->delete_pengiriman_barang_tmp($kode,$move_id,$quant_id);
 
-              if($cek_jml_produk_sama > 0){
-                $this->m_pengirimanBarang->update_status_pengiriman_barang_items_origin_prod($kode,$kode_produk,$status_brg,$origin_prod);
-                $this->_module->update_status_stock_move_produk_origin_prod($move_id,$kode_produk,$status_brg,$origin_prod);
-
+              // cek apakah terdapat kode_produk yg lebih dari 1
+              $cek_jml_produk_sama = $this->m_pengirimanBarang->cek_jml_produk_sama_pengiriman_barang_by_kode($kode,$kode_produk)->num_rows();
+              if($cek_jml_produk_sama > 0){// where ditambah origin_prod
+                $get_qty = $this->_module->get_qty_stock_move_items_by_kode_origin($move_id,addslashes($kode_produk),$origin_prod)->row_array();
               }else{
-                $this->m_pengirimanBarang->update_status_pengiriman_barang_items($kode,$kode_produk,$status_brg);
-                $this->_module->update_status_stock_move_produk($move_id,$kode_produk,$status_brg);
+                //get sum qty produk stock move items
+                $get_qty = $this->_module->get_qty_stock_move_items_by_kode($move_id,addslashes($kode_produk))->row_array();
               }
               
-            }
+              //get sum qty produk stock move items
+              //$get_qty  = $this->_module->get_qty_stock_move_items_by_kode($move_id,$kode_produk)->row_array();           
 
-            $cek_status = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'draft')->row_array();
-            if(!empty($cek_status['status_barang'])){
-                $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,$status_brg);
-                $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode)->row_array();
-                if($cek_status2['status']=='draft'){
-                    $this->_module->update_status_stock_move($move_id,$status_brg);
-                }
-            }
+              //update status draft jika qty di stock move items kosong
+              if(empty($get_qty['sum_qty'])){
 
-            if(empty($cek_status['status_barang'])){
-                $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,'ready');
-                $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode)->row_array();
-                if($cek_status2['status']=='ready'){
-                    $this->_module->update_status_stock_move($move_id,'ready');
+                if($cek_jml_produk_sama > 0){
+                  $this->m_pengirimanBarang->update_status_pengiriman_barang_items_origin_prod($kode,$kode_produk,$status_brg,$origin_prod);
+                  $this->_module->update_status_stock_move_produk_origin_prod($move_id,$kode_produk,$status_brg,$origin_prod);
+
+                }else{
+                  $this->m_pengirimanBarang->update_status_pengiriman_barang_items($kode,$kode_produk,$status_brg);
+                  $this->_module->update_status_stock_move_produk($move_id,$kode_produk,$status_brg);
                 }
+                
+              }
+
+              $cek_status = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'draft')->row_array();
+              if(!empty($cek_status['status_barang'])){
+                  $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,$status_brg);
+                  $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode)->row_array();
+                  if($cek_status2['status']=='draft'){
+                      $this->_module->update_status_stock_move($move_id,$status_brg);
+                  }
+              }
+
+              if(empty($cek_status['status_barang'])){
+                  $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,'ready');
+                  $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode)->row_array();
+                  if($cek_status2['status']=='ready'){
+                      $this->_module->update_status_stock_move($move_id,'ready');
+                  }
+              }
+              
+              //unlock table
+              $this->_module->unlock_tabel();
+
+              $note_log_produk  =  $get_smi['origin_prod'].' '.$get_smi['nama_produk'].' '.$get_smi['lot'].' '.$get_smi['qty'].' '.$get_smi['uom'].' '.$get_smi['qty2'].' '.$get_smi['uom2'];
+              
+              $jenis_log   = "cancel";
+              $note_log    = "Hapus Data Details - > <br>".$note_log_produk;
+              $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, addslashes($note_log), $username,$deptid);
+              
+              $callback = array('status' => 'success', 'message'=>'Data Berhasil di hapus !', 'icon' => 'fa fa-check', 'type'=>'success');
             }
-            
-            //unlock table
-            $this->_module->unlock_tabel();
-            
-            $jenis_log   = "cancel";
-            $note_log    = "Hapus Data Details";
-            $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);
-            
-            $callback = array('status' => 'success', 'message'=>'Data Berhasil di hapus !', 'icon' => 'fa fa-check', 'type'=>'success');
         }
        echo  json_encode($callback);
 
@@ -1382,27 +1381,35 @@ class Pengirimanbarang extends MY_Controller
                     }
                     
                     //update status stock move items asal
-                     $where = rtrim($where, ',');
-                     $sql_update_stock_move_items  = "UPDATE stock_move_items SET status =(case ".$case." end), tanggal_transaksi = '".$tgl."' WHERE  move_id in (".$where.") ";
-                     $this->_module->update_perbatch($sql_update_stock_move_items);
+                    if(!empty($case) AND !empty($where)){
+                      $where = rtrim($where, ',');
+                      $sql_update_stock_move_items  = "UPDATE stock_move_items SET status =(case ".$case." end), tanggal_transaksi = '".$tgl."' WHERE  move_id in (".$where.") ";
+                      $this->_module->update_perbatch($sql_update_stock_move_items);
+                    }
 
                     //update lokasi tbl stock quant
-                     $where2 = rtrim($where2, ',');
-                     $sql_update_stock_quant  = "UPDATE stock_quant SET lokasi =(case ".$case2." end), move_date = '".$tgl."' WHERE  quant_id in (".$where2.") ";
-                     $this->_module->update_perbatch($sql_update_stock_quant);
+                    if(!empty($case2) AND !empty($where2)){
+                      $where2 = rtrim($where2, ',');
+                      $sql_update_stock_quant  = "UPDATE stock_quant SET lokasi =(case ".$case2." end), move_date = '".$tgl."' WHERE  quant_id in (".$where2.") ";
+                      $this->_module->update_perbatch($sql_update_stock_quant);
+                    }
 
-                     $where6 = rtrim($where2, ',');
-                     $sql_update_stock_quant_move_id  = "UPDATE stock_quant SET reserve_move =(case ".$case6." end) WHERE  quant_id in (".$where6.") ";
-                     $this->_module->update_perbatch($sql_update_stock_quant_move_id);
+                    if(!empty($case6) AND !empty($where6)){
+                      $where6 = rtrim($where6, ',');
+                      $sql_update_stock_quant_move_id  = "UPDATE stock_quant SET reserve_move =(case ".$case6." end) WHERE  quant_id in (".$where6.") ";
+                      $this->_module->update_perbatch($sql_update_stock_quant_move_id);
+                    }
 
-                     $where7 = rtrim($where7, ',');// update reserve origin di hapus
-                     if($method == 'GRG|OUT'){
-                       $reserve_origin = " reserve_origin =(case ".$case7." end), ";
-                     }else{
-                       $reserve_origin = "";
-                     }
-                     $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET $reserve_origin lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
-                     $this->_module->update_perbatch($sql_update_stock_quant_reserve_origin);
+                    if(!empty($where7)){
+                      $where7 = rtrim($where7, ',');// update reserve origin di hapus
+                      if($method == 'GRG|OUT'){
+                        $reserve_origin = " reserve_origin =(case ".$case7." end), ";
+                      }else{
+                        $reserve_origin = "";
+                      }
+                      $sql_update_stock_quant_reserve_origin  = "UPDATE stock_quant SET $reserve_origin lokasi_fisik = ''  WHERE  quant_id in (".$where7.") ";
+                      $this->_module->update_perbatch($sql_update_stock_quant_reserve_origin);
+                    }
 
                     if(!empty($case3) AND !empty($where3)){
                       //update stock move penerimaan barang 
@@ -2307,12 +2314,12 @@ class Pengirimanbarang extends MY_Controller
                     if(!empty($produk_kosong)){
                         $produk_kosong = rtrim($produk_kosong, ', ');
                         $callback = array('status' => 'failed', 'message'=> 
-                            'Maaf, Qty Product "'.  $produk_kosong  .'" Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                            'Maaf, Qty Product "<b>'.  $produk_kosong  .'</b>" Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
 
                     }else if(!empty($produk_kurang)){           
                         $produk_kurang = rtrim($produk_kurang, ', ');
                         $callback = array('status' => 'failed', 'message'=> 
-                            'Maaf, Qty Product "'.  $produk_kurang  .'" tidak mencukupi !', 'icon' => 'fa fa-warning', 'type'=>'danger', 'status_kurang' => 'yes',  'message2'=>'Detail Product Berhasil Ditambahkan !', 'icon2' => 'fa fa-check', 'type2'=>'success');                       
+                            'Maaf, Qty Product "<b>'.  $produk_kurang  .'</b>" tidak mencukupi !', 'icon' => 'fa fa-warning', 'type'=>'danger', 'status_kurang' => 'yes',  'message2'=>'Detail Product Berhasil Ditambahkan !', 'icon2' => 'fa fa-check', 'type2'=>'success');                       
                                             
                     /*            
                     }else if(!empty($produk_terpenuhi)){

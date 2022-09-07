@@ -46,6 +46,10 @@
       resize: vertical;
     }
 
+    .select2-container--focus{
+		    border:  1px solid #66afe9;
+    }
+
    </style>
 </head>
 
@@ -226,6 +230,7 @@
                     <textarea type="text" class="form-control input-sm" name="note_head" id="note_head" ><?php echo $salescontract->note_head?></textarea>
                     <div id="ref_status">
                       <input type="hidden" name="status" id="status" value="<?php echo $salescontract->status?>">
+                      <input type="hidden" name="delivery_date_head" id="delivery_date_head" value="<?php echo $salescontract->delivery_date?>">
                     </div>
                   </div>                                    
                 </div>                                  
@@ -274,11 +279,11 @@
                               <td class="width-80" align="right" data-content="edit" data-id="qty"  data-isi="<?php echo $row->qty;?>"><?php echo number_format($row->qty,2)?></td>
                               <td class="width-100" data-content="edit" data-id="uom"  data-isi="<?php echo $row->uom;?>"><?php echo $row->uom?></td>
                               <!--td class="text-wrap width-120" data-content="edit" data-id="roll" data-isi="<?php echo $row->roll_info;?>"><?php echo $row->roll_info?></td-->
-                              <td class="width-100" align="right" data-content="edit" data-id="price" data-isi="<?php echo ($row->price);?>"><?php echo number_format($row->price,4)?></td>
+                              <td class="width-100" align="right" data-content="edit" data-id="price" data-isi="<?php echo ($row->price);?>"><?php echo number_format($row->price,2)?></td>
                               <td data-content="edit" data-id="taxes" data-isi='<select type="text" class="form-control input-sm tax" name="taxes" id="taxes"><option value="">-Taxes-</option><?php foreach($tax as $val){if($val->id==$row->tax_id){?><option value="<?php echo $val->id; ?>" selected><?php echo $val->nama;?></option><?php }else{?> <option value="<?php echo $val->id; ?>"><?php echo $val->nama;?></option> <?php }}?>'><?php echo $row->tax_nama?>
                                 
                               </td>
-                              <td class="load" align="right"><?php echo number_format(($row->price*$row->qty),4); ?></td>
+                              <td class="load" align="right"><?php echo number_format(($row->price*$row->qty),2); ?></td>
                               <td class="width-100"><?php echo $row->due_date?></td> 
                               <td class="width-120">
                                   <a class="add" title="Simpan" data-toggle="tooltip" row_id='tes'><i class="fa fa-save"></i></a>
@@ -312,14 +317,14 @@
                               <div class="col-xs-4"><label>Untaxed Amount</label></div>
                               <div class="col-xs-1" >: </div>
                               <div class="col-xs-8 col-md-7" align="right">
-                                 <?php echo $salescontract->currency_symbol." ".number_format($salescontract->untaxed_value,4); ?>
+                                 <?php echo $salescontract->currency_symbol." ".number_format($salescontract->untaxed_value,2); ?>
                               </div>                                    
                             </div>
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4"><label>Taxes </label></div>
                                <div class="col-xs-1" >: </div>
                               <div class="col-xs-8 col-md-7" align="right">
-                                <?php echo $salescontract->currency_symbol." ".number_format($salescontract->tax_value,4); ?>
+                                <?php echo $salescontract->currency_symbol." ".number_format($salescontract->tax_value,2); ?>
                               </div>
                             </div>
                           
@@ -327,7 +332,7 @@
                               <div class="col-xs-4"><label>Total </label></div>
                               <div class="col-xs-1" >: </div>
                               <div class="col-xs-8 col-md-7" align="right">
-                                <?php echo $salescontract->currency_symbol ." ".number_format($salescontract->total_value,4); ?>
+                                <?php echo $salescontract->currency_symbol ." ".number_format($salescontract->total_value,2); ?>
                               </div>
                             </div>
                           </div>
@@ -357,6 +362,7 @@
 	                            <th class="style" width="120px">Lebar Jadi</th>
 	                            <th class="style" width="100px">Uom Lbr Jadi</th>
 	                            <th class="style" width="150px">Reff Notes</th>
+	                            <th class="style" width="100px" >Delivery Date</th>
 	                            <th class="style" width="80px" >OW</th>
 	                            <th class="style" >Status</th>
 	                            <th class="style" width="50px"></th>
@@ -389,6 +395,7 @@
                                     <td class="text-wrap" data-content="edit" data-name="Lebar Jadi" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
                                     <td class="text-wrap width-80"  data-content="edit" data-name="Uom Lebar Jadi" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" ><?php echo $row->uom_lebar_jadi?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Reff Note" data-id="reff_notes"  data-isi="<?php echo htmlentities($row->reff_notes);?>"><?php echo $row->reff_notes?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Delivery Date" data-id="delivery_date_items"  data-isi="<?php echo htmlentities($row->delivery_date_items);?>"><?php echo $row->delivery_date_items?></td>
                                     <td ><?php echo $row->ow?></td>
                                     <td style="min-width:80px;" >
                                         <?php if(!empty($row->ow)){ ?>
@@ -636,7 +643,8 @@
   // Append table with add row form on add new button click
   $(document).on("click", ".add-new", function(){
 
-    var status = $("#status").val();
+    var status      = $("#status").val();
+   
 
     if(status == 'draft' || status == 'waiting_date' ){
 
@@ -766,6 +774,8 @@
       var empty2 = false;
       var select = $(this).parents("tr").find('select[type="text"]');
 
+      var this1 = $(this);
+
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
@@ -795,7 +805,7 @@
         var taxes = $(this).parents("tr").find("#taxes").val();
         var row_order = $(this).parents("tr").find("#row_order").val();
         var dat = $(this).parents("tr").find('input[type="text"]').val();
-
+        this1.button('loading');
         $.ajax({
           dataType: "JSON",
           url : '<?php echo site_url('sales/salescontract/simpan_detail') ?>',
@@ -815,11 +825,13 @@
                 //alert jika session habis
                 alert_modal_warning(data.message);
                 window.location.replace('../index');
+                this1.button('reset');
             }else{
                 $("#tab_1").load(location.href + " #tab_1");
                 $("#foot").load(location.href + " #foot");
                 //$("#total").load(location.href + " #total");
                 $(".add-new").show();                   
+                this1.button('reset');
                 alert_notify(data.icon,data.message,data.type,function(){});
                 $("#btn-header").load(location.href + " #btn-header");
                 refresh_tab_and_div();
@@ -827,6 +839,7 @@
           },
           error: function (xhr, ajaxOptions, thrownError){
             alert('Error data');
+            this1.button('reset');
             alert(xhr.responseText);
           }
         });
@@ -994,6 +1007,7 @@
     $(document).on("click", ".delete", function(){ 
 
      var status = $("#status").val();
+     var this1  = $(this);
      if(status == 'draft' || status == 'waiting_date'){
 
       $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -1011,6 +1025,7 @@
               label    : "Yes ",
               className: "btn-primary btn-sm",
               callback : function() {
+                  this1.button('loading');
                   $.ajax({
                       dataType: "JSON",
                       url : '<?php echo site_url('sales/salescontract/hapus_detail') ?>',
@@ -1022,13 +1037,16 @@
                             //alert jika session habis
                             alert_modal_warning(data.message);
                             window.location.replace('../index');
+                            this1.button('reset');  
                         }else if(data.status =='failed'){
                             alert_modal_warning(data.message);
                             $("#btn-header").load(location.href + " #btn-header");
+                            this1.button('reset');  
                             refresh_tab_and_div();
                         }else{
                             refresh_tab_and_div();
                             $("#btn-header").load(location.href + " #btn-header");
+                            this1.button('reset');  
                             $(".add-new").show();                   
                             alert_notify(data.icon,data.message,data.type,function(){});
                          }
@@ -1036,6 +1054,7 @@
                       error: function (xhr, ajaxOptions, thrownError){
                         alert('Error data');
                         alert(xhr.responseText);
+                        this1.button('reset');  
                       }
                     });
               }
@@ -1079,12 +1098,13 @@
     //no SO
     var kode  =  "<?php echo $salescontract->sales_order; ?>";
     var status = $("#status").val();
+    var deliv_head  = $("#delivery_date_head").val();
 
     if(status == 'waiting_color' || status == 'product_generated'){
 
-    $(".add-new-color-lines").hide();
-    var index = $("#color_lines tbody tr:last-child").index();
-    var row   ='<tr class="num">'
+      $(".add-new-color-lines").hide();
+      var index = $("#color_lines tbody tr:last-child").index();
+      var row   ='<tr class="num">'
           + '<td></td>'
           + '<td><select type="text" class="form-control input-sm prod_color width-150" name="Product" id="product"></select></td>'
           + '<td><textarea type="text" class="form-control input-sm description_color set_textarea  width-150" onkeyup="textAreaAdjust(this)"  name="Description" id="description_color"></textarea><input type="hidden" class="form-control input-sm prodhidd_color" name="prodhidd" id="prodhidd_color"></td>'
@@ -1100,6 +1120,7 @@
           + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_jadi" name="Uom Lebar Jadi" id="uom_lebar_jadi"><option value=""></option><?php 
           foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
           + '<td><textarea type="text" class="form-control  input-sm width-100 set_textarea" onkeyup="textAreaAdjust(this)"  name="Reff Notes" id="reff_notes"></textarea></td>'
+          + '<td><input type="text" class="form-control input-sm delivery_date_items width-100 " name="Delivery Date" id="delivery_date_items" value="'+deliv_head+'" ></td>'
           + '<td></td>'
           + '<td><button type="button" class="btn btn-primary btn-xs add-color-lines width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit-color-lines" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal-color-lines width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
           + '</tr>';
@@ -1211,6 +1232,40 @@
           }
         }); 
 
+
+        //select 2 uom lebar jadi
+        $('.uom_lebar_jadi').select2({
+          allowClear: true,
+          placeholder: "",
+          ajax:{
+                dataType: 'JSON',
+                type : "POST",
+                url : "<?php echo base_url();?>sales/salescontract/get_uom_select2",
+                data : function(params){
+
+                  return{
+                    prod:params.term,
+                  };
+                }, 
+                processResults:function(data){
+                  var results = [];
+                  $.each(data, function(index,item){
+                    results.push({
+                        id:item.short,
+                        text:item.short
+                    });
+                  });
+                  return {
+                    results:results
+                  };
+                },
+                error: function (xhr, ajaxOptions, thrownError){
+                //  alert('Error data');
+                //  alert(xhr.responseText);
+                }
+          }
+        });
+
     }else{
       alert_modal_warning('Maaf, Data items tidak bisa Ditambah !');
     }
@@ -1225,6 +1280,8 @@
 
       var empty2 = false;
       var select = $(this).parents("tr").find('select[type="text"]');
+
+      var this1  = $(this);
 
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
@@ -1257,6 +1314,11 @@
           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
           empty2 = true;
         }
+
+        if(!$(this).val() && $(this).attr('name')=='Delivery Date'){
+          alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
+          empty2 = true;
+        }
       });
 
       // validasi untuk inputan textbox
@@ -1284,9 +1346,10 @@
         var lebar_jadi  = $(this).parents("tr").find("#lebar_jadi").val();
         var uom_lebar_jadi  = $(this).parents("tr").find("#uom_lebar_jadi").val();
         var reff_note   = $(this).parents("tr").find("#reff_notes").val();
+        var delivery_date = $(this).parents("tr").find("#delivery_date_items").val();
         var row_order   = $(this).parents("tr").find("#row_order").val();
         //var dat = $(this).parents("tr").find('input[type="text"]').val();
-              
+        this1.button('loading');
         $.ajax({
           dataType: "JSON",
           url : '<?php echo site_url('sales/salescontract/simpan_detail_color_lines') ?>',
@@ -1306,18 +1369,22 @@
                 lebar_jadi  : lebar_jadi,
                 uom_lebar_jadi  : uom_lebar_jadi,
                 reff_note   : reff_note,
+                delivery_date   : delivery_date,
                 row_order   : row_order  },
           success: function(data){
             if(data.sesi=='habis'){
                 //alert jika session habis
                 alert_modal_warning(data.message);
                 window.location.replace('../index');
+                this1.button('reset');
             }else if(data.status == 'failed'){
                 alert_modal_warning(data.message);
+                this1.button('reset');
             }else{
                 $("#tab_2").load(location.href + " #tab_2");
                 $("#foot").load(location.href + " #foot");
                 $(".add-new-color-lines").show();                   
+                this1.button('reset');
                 alert_notify(data.icon,data.message,data.type,function(){});
                 refresh_tab_and_div();
             }
@@ -1327,6 +1394,7 @@
           },
           error: function (xhr, ajaxOptions, thrownError){
             alert('Error data');
+            this1.button('reset');
             alert(xhr.responseText);
             refresh_tab_and_div();
           }
@@ -1350,6 +1418,7 @@
     $(document).on("click", ".delete-color-lines", function(){ 
 
      var status = $("#status").val();
+     var this1  = $(this);
      if(status == 'waiting_color'){
 
       $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -1361,7 +1430,7 @@
 
       var kode  =  "<?php echo $salescontract->sales_order; ?>";
       var row_order = $(this).parents("tr").find("#row_order").val();  
-
+      
         bootbox.dialog({
           message: "Apakah Anda ingin menghapus data ?",
           title: "<i class='glyphicon glyphicon-trash'></i> Delete !",
@@ -1370,6 +1439,7 @@
                 label    : "Yes ",
                 className: "btn-primary btn-sm",
                 callback : function() {
+                    this1.button('loading');
                     $.ajax({
                         dataType: "JSON",
                         url : '<?php echo site_url('sales/salescontract/hapus_detail_color_lines') ?>',
@@ -1381,21 +1451,25 @@
                               //alert jika session habis
                               alert_modal_warning(data.message);
                               window.location.replace('../index');
+                              this1.button('reset');
                           }else if(data.status == 'failed'){
                               $("#tab_2").load(location.href + " #tab_2");
                               $("#foot").load(location.href + " #foot");
                               $(".add-new-color-lines ").show();
                               alert_modal_warning(data.message);
+                              this1.button('reset');
                           }else{
                               $("#tab_2").load(location.href + " #tab_2");
                               $("#foot").load(location.href + " #foot");
                               $(".add-new-color-lines ").show();   
+                              this1.button('reset');
                               alert_notify(data.icon,data.message,data.type,function(){});
                            }
                         },
                         error: function (xhr, ajaxOptions, thrownError){
                           alert('Error data');
                           alert(xhr.responseText);
+                          this1.button('reset');
                         }
                       });
                 }
@@ -1574,7 +1648,7 @@
             $(this).html('<textarea type="text" onkeyup="textAreaAdjust(this)" class="form-control input-sm set_textarea width-150" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
 
           }else{
-            $(this).html('<input type="text"  class="form-control" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'"> ');
+            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'"> ');
           }
 
         });  
@@ -1738,6 +1812,7 @@
                 });
                 $("#foot").load(location.href + " #foot");
                 $("#total").load(location.href + " #total");
+                $("#ref_status").load(location.href + " #ref_status");
 
               }
               $('#btn-simpan').button('reset');

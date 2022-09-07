@@ -464,25 +464,31 @@
                 label    : "Yes ",
                 className: "btn-primary btn-sm",
                 callback : function() {
+                      please_wait(function(){});
                       $.ajax({
                             dataType: "json",
                             type: 'POST',
                             url : "<?php echo site_url('warehouse/penerimaanbarang/hapus_details_items')?>",
                             data : {kode : kode, move_id : move_id, kode_produk : kode_produk, nama_produk : nama_produk, quant_id : quant_id, row_order : row_order, deptid : deptid },
                             error: function (xhr, ajaxOptions, thrownError) { 
-                            alert(xhr.responseText);
+                             alert(xhr.responseText);
+                             unblockUI( function() {})
                             }
                       })
                       .done(function(response){
                         if(response.sesi == 'habis'){
                           alert_modal_warning(response.message);
                           window.location = baseUrl;//replace ke halaman login
+                          unblockUI( function() {})
                         }else if(response.status == 'failed'){
                           alert_modal_warning(response.message);
-                          refresh_div_in();                
+                          refresh_div_in();        
+                          unblockUI( function() {})        
                         }else{
                           refresh_div_in();               
-                          alert_notify(response.icon,response.message,response.type,function(){});
+                          unblockUI( function() {
+                            setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                          }); 
                         }
                       })
                 }

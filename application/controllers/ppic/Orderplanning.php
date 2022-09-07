@@ -122,15 +122,15 @@ class Orderplanning extends MY_Controller
 
     public function confirm_date()
     {
-        $sales_order = $this->input->post('sales_order');
-
-        $sub_menu = $this->uri->segment(2);
-        $username = $this->session->userdata('username'); 
-
         if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
             // session habis
             $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
+
+            $sales_order = $this->input->post('sales_order');
+
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username'); 
             
             ///lock table
             $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE');
@@ -141,16 +141,22 @@ class Orderplanning extends MY_Controller
             $status     = "status IN ('draft')";
             $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
 
-            $status2     = "status NOT IN ('waiting_date')";
+            $status2     = "status IN ('cancel')";
             $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+
+            $status3     = "status NOT IN ('waiting_date')";
+            $cek_status3 = $this->m_sales->cek_status_sales_contract($sales_order,$status3)->row_array();
 
             if($cek_details == 0 ){//jika contract line masih kosong
                 $callback = array('status' => 'failed','message' => 'Contract Line Items Masing Kosong !'.$cek_details, 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else if(!empty($cek_status['sales_order'])){// jika statusnya masih draft
-                $callback = array('status' => 'failed','message' => 'Status Contract Line Masih Draft !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                $callback = array('status' => 'failed','message' => 'Status Sales Contract Masih Draft !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-            }else if(!empty($cek_status2['sales_order'])){
+            }else if(!empty($cek_status2['sales_order'])){// jika statusnya cancel
+                $callback = array('status' => 'failed','message' => 'Status Sales Contract sudah dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else if(!empty($cek_status3['sales_order'])){
                 $callback = array('status' => 'failed','message' => 'Maaf, Confirm Date sudah Dilakukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else{
@@ -174,6 +180,71 @@ class Orderplanning extends MY_Controller
         }
 
         echo json_encode($callback);
+    }
+
+    public function cancel_confirm_date()
+    {
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+            $sales_order = $this->input->post('sales_order');
+    
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username'); 
+                
+            ///lock table
+            $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE');
+
+            //cek_items sales contract
+            $cek_details = $this->m_sales->cek_sales_contract_items_by_kode($sales_order)->num_rows();
+
+            $status     = "status IN ('draft')";
+            $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
+
+            $status2     = "status IN ('cancel')";
+            $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+
+            $status3     = "status NOT IN ('date_assigned')";
+            $cek_status3 = $this->m_sales->cek_status_sales_contract($sales_order,$status3)->row_array();
+
+            if($cek_details == 0 ){//jika contract line masih kosong
+                $callback = array('status' => 'failed','message' => 'Contract Line Items Masing Kosong !'.$cek_details, 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else if(!empty($cek_status['sales_order'])){// jika statusnya masih draft
+                $callback = array('status' => 'failed','message' => 'Status Sales Contract Masih Draft !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else if(!empty($cek_status2['sales_order'])){// jika statusnya cancel
+                $callback = array('status' => 'failed','message' => 'Status Sales Contract sudah dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else if(!empty($cek_status3['sales_order'])){
+                $callback = array('status' => 'failed','message' => 'Maaf, Order Planning / Confirm Date tidak bisa dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else{
+                $cek_details_scl = $this->m_sales->cek_sales_color_line_by_kode($sales_order)->num_rows();
+                if($cek_details_scl>0){
+                    $callback = array('status' => 'failed','message' => 'Maaf,Order Planning / Confirm Date tidak bisa dibatalkan karena  Sales Contract Sudah terisi Color Lines !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                }else{
+
+                    // hapus Due Date
+                    $this->m_orderPlanning->update_due_date_to_empty($sales_order);
+                    
+                    $status = 'waiting_date';
+                    $this->m_sales->update_status_sales_contract($sales_order,$status);
+                    $callback = array('status' => 'success','message' => 'Batal Confirm Date Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+                    $jenis_log   = "edit";
+                    $note_log    = $sales_order.' -> Batal Confirm Date';
+                    $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+                
+                }
+            }
+            //unlock table
+            $this->_module->unlock_tabel();
+        }
+
+        echo json_encode($callback);
+
     }
 
 

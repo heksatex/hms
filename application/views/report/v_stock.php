@@ -293,73 +293,8 @@
                 </div>
               </div>
               <!-- /.Panel Result -->
-
-              <!-- Panel Advance -->
-              <!--div class="col-md-12 col-xs-12 ">
-                <div class="panel panel-default" style="margin-bottom: 0px;">
-                    <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
-                      <div class="panel-body">
-                        <div class="col-12 col-sm-12 col-md-6" >
-
-                          <div class="form-group">
-                            <div class="col-12 col-sm-3 col-md-3">
-                              <span class="fa fa-database"></span> <label>Group By</label>
-                            </div>
-                            <div class="col-12 col-sm-8 col-md-8" id="groupBy">
-                              <li onclick="groupBy('nama_produk','Nama Produk',0)" class="li-adv" data-index="0" >Nama Produk</li>
-                              <li onclick="groupBy('lot','Lot',1)" class="li-adv" data-index="1">Lot</li>
-                              <li onclick="groupBy('lokasi','Lokasi',2)" class="li-adv" data-index="2">Lokasi</li>
-                              <li onclick="groupBy('lokasi_fisik','Lokasi Rak',3)" class="li-adv" data-index="3">Lokasi Rak</li>
-                              <li onclick="groupBy('umur_produk','Umur Produk',4)" class="li-adv" data-index="4">Umur Produk</li>
-                            </div>
-                          </div>
-
-                        </div><!-- /.col-md group caption>
-
-                        <div class="col-12 col-sm-12 col-md-6">
-                          <div class="table-responsive over">
-                            <table id="filterAdvanced" class="table over">
-                              <thead>
-                                <th width="150px">element</th>
-                                <th width="100px">condition</th>
-                                <th width="200px">value</th>
-                                <th width="10px"></th>
-                                <th>delete</th>
-                              </thead>
-                              <tbody>
-                                  <td>
-                                    <select class="form-control input-sm element" name="cmbElement" id="cmbElement" onchange="get_condition(this);">
-                                      <?php 
-                                          foreach($mstFilter as $row) {
-                                              echo "<option value='".$row->kode_element."'>".$row->nama_element."</option>";
-                                           }
-                                      ?>
-                                    </select>
-                                  </td>
-                                  <td></td>
-                                  <td></td>
-                                  <td>or</td>
-                                  <td></td>
-                              </tbody>
-                               <tfoot>
-                                  <tr>
-                                    <td colspan="4">
-                                      <a href="#" onclick="addFilter()"><i class="fa fa-plus"></i> Add filter</a>
-                                    </td>
-                                  </tr>
-                              </tfoot>
-                            </table>
-
-                            <button type="button" id="btn-filter" name="btn-filter" class="btn btn-default btn-sm">Apply</button>
-
-                          </div>
-                        </div><!-- /.col-md-6 tabel filter>
-
-                      </div><!-- /.panel body >
-                    </div><!-- /.advance collapse >
-                </div>
-              <!-- /. Panel Advance -->
-
+          </form>
+             
           <div class="box-body">
             <div class="col-sm-12 table-responsive">
               <div class="table_scroll">
@@ -625,7 +560,7 @@
           }else if(cmbOperator == '>'){
             caption_sparate ='Older Than';
           }
-        }else if(cmbSearch == 'lokasi' || cmbSearch =='lokasi_fisik' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname'){
+        }else if(cmbSearch == 'lokasi' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname'){
           caption_sparate = '=';
           cmbOperator     = '=';
         }else{
@@ -781,7 +716,11 @@
                   }
                     $('#btn-search').button('reset');
 
-                    $('#search').val('');// kosongkan search
+                    if($('#search').is('select')){
+                        $('#search').prop('selectedIndex',0);
+                    }else{
+                        $('#search').val('');// kosongkan search
+                    }
                     $("#example1_processing").css('display','none'); // hidden loading
                     unblockUI( function() {});
                 },error : function(jqXHR, textStatus, errorThrown){
@@ -1227,8 +1166,8 @@
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
                         $row += "<td colspan='4'>"+value.grouping+"</td>";
-                        $row += "<td align='right'>"+value.qty+"</td>";
-                        $row += "<td align='right'>"+value.qty2+"</td>";
+                        $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
+                        $row += "<td align='right' >"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "<td colspan='2' ></td>";
                         $row += "</tr>";

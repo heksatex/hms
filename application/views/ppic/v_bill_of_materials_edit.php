@@ -206,6 +206,19 @@
         $("#foot").load(location.href + " #foot");
     } 
 
+    // untuk focus after select2 close
+    $(document).on('focus', '.select2', function (e) {
+      if (e.originalEvent) {
+          var s2element = $(this).siblings('select');
+          s2element.select2('open');
+
+          // Set focus back to select2 element on closing.
+          s2element.on('select2:closing', function (e) {
+              s2element.select2('focus');
+          });
+      }
+    });
+
     var h_kode_produk   = '<?php echo $head->kode_produk ?>';
     var h_nama_produk   = '<?php echo $head->nama_produk ?>';
 
@@ -479,6 +492,8 @@
         var uom   = $(this).parents("tr").find("#tuom").val();
         var note  = $(this).parents("tr").find("#tnote").val();
         var row_order = $(this).parents("tr").find("#row_order").val();
+        var btn_loading   = $(this);
+        btn_loading.button('loading');
         
         $.ajax({
           dataType: "JSON",
@@ -503,11 +518,13 @@
                 refresh_bom();
                 $(".add-new").show();                   
                 alert_notify(data.icon,data.message,data.type);
-             }
+            }
+            btn_loading.button('loading');
           },
           error: function (xhr, ajaxOptions, thrownError){
             alert('Error data');
             alert(xhr.responseText);
+            btn_loading.button('loading');
           }
         });
         
@@ -541,9 +558,9 @@
             //$('.t_sel2_prod'+row_order).append("<option value ='"+kode_produk+"' selected)[MF118] "+nama_produk+"</option>");
             custom_nama = '['+kode_produk+'] '+nama_produk;
             $newOption = new Option(custom_nama, kode_produk, true, true);
-            $('.t_sel2_prod'+row_order).append($newOption).trigger('change');
+            $('.'+class_sel2_prod).append($newOption).trigger('change');
             //select 2 product
-            $('.t_sel2_prod'+row_order).select2({
+            $('.'+class_sel2_prod).select2({
               allowClear: true,
               placeholder: "",
               ajax:{
@@ -575,19 +592,23 @@
               }
             });
         
-            $('.t_sel2_prod'+row_order).change(function(){
+            $('.'+class_sel2_prod).change(function(){
+                var this1 = $(this);
                 $.ajax({
                       dataType: "JSON",
                       url : '<?php echo site_url('ppic/billofmaterials/get_prod_by_id') ?>',
                       type: "POST",
                       data: {kode_produk: $(this).parents("tr").find("#tproduct").val() },
                       success: function(data){
-                        $('.e_nama_produk'+row_order).val(data.nama_produk);
+                        this1.parents('tr').find("td #tprodhidd").val(data.nama_produk);
+                        this1.parents('tr').find("td #tuom").val(data.uom);
+
+                        //$('.e_nama_produk'+row_order).val(data.nama_produk);
                         //$('.e_').val('1');
                         //$('.uom').val(data.uom);
 
                         var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
-                        $(".e_uom"+row_order).empty().append($newOptionuom).trigger('change');
+                        this1.parents('tr').find('td #tuom').empty().append($newOptionuom).trigger('change');
                       },
                       error: function (xhr, ajaxOptions, thrownError){
                         alert('Error data');
@@ -671,6 +692,7 @@
       });
       var kode  =  "<?php echo $head->kode_bom; ?>";
       var row_order = $(this).parents("tr").find("#row_order").val();  
+      var icon_loading= $(this);
       
       bootbox.dialog({
         message: "Apakah Anda ingin menghapus data ?",
@@ -686,6 +708,9 @@
                       type: "POST",
                       data: {kode : kode, 
                             row_order : row_order  },
+                      beforeSend: function(e) {
+                        icon_loading.button('loading');
+                      },
                       success: function(data){
                         if(data.sesi=='habis'){
                             //alert jika session habis
@@ -698,11 +723,13 @@
                             refresh_bom();
                             $(".add-new").show();                   
                             alert_notify(data.icon,data.message,data.type);
-                         }
+                        }
+                        icon_loading.button('reset');
                       },
                       error: function (xhr, ajaxOptions, thrownError){
                         alert('Error data');
                         alert(xhr.responseText);
+                        icon_loading.button('reset');
                       }
                     });
               }

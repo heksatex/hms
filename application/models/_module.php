@@ -457,7 +457,7 @@ class _module extends CI_Model
 
     public function cek_produk_di_stock_quant($quant_id, $lokasi)
     {
-    	return $this->db->query("SELECT quant_id FROM stock_quant WHERE quant_id = '$quant_id' AND lokasi = '$lokasi' AND reserve_move = ''");
+    	return $this->db->query("SELECT quant_id, reserve_move FROM stock_quant WHERE quant_id = '$quant_id' AND lokasi = '$lokasi' AND reserve_move = ''");
     }
 
     public function get_cek_stok_quant_mo_by_prod($kode_produk,$lokasi_dari,$reserve_origin)
@@ -830,6 +830,13 @@ class _module extends CI_Model
 	public function cek_status_mrp_rm_target_additional_move_id_kosong_by_kode($whereMo)
 	{
 		return $this->db->query("SELECT kode,status FROM mrp_production_rm_target where kode in (".$whereMo.") AND move_id != '' AND additional = 't' AND status IN ('draft','cancel') ");
+	}
+
+	public function get_stock_move_items_by_kode($move_id,$quant_id,$kode_produk,$row_order){
+		return $this->db->query("SELECT quant_id, move_id, kode_produk, nama_produk, lot, qty, uom, qty2, uom2, origin_prod, status
+								FROM stock_move_items 
+								WHERE move_id = '$move_id' AND quant_id = '$quant_id' AND kode_produk = '$kode_produk' AND row_order = '$row_order' ");
+
 	}
 
 }

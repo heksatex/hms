@@ -116,6 +116,7 @@
 								<th class="style no">No.</th>
 							    <th class="style" style="width: 200px;">Product</th>
 								<th class="style" style="width: 180px;">Lot</th>
+								<th class="style" ></th>
 								<th class="style" style="width: 100px;">Qty</th>
 								<th class="style" style="width: 65px;">uom</th>
 								<th class="style" style="width: 100px;">Qty2</th>
@@ -180,11 +181,12 @@
 						<td align="right"><?php echo number_format($row->qty,2)?></td>
 						<td><?php echo $row->uom;?></td>
 						<td>
-							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>">
+							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)">
 							<input type="hidden" name="jml_produk"  id="jml_produk" class="form-control input-sm jml_produk" value="<?php echo $row->jml_produk ?>">
 							<input type="hidden" name="qty_rm"  id="qty_rm" class="form-control input-sm qty_rm" value="<?php echo $row->qty_rm ?>">
 							<input type="hidden" name="quant_id"  id="quant_id" class="form-control input-sm quant_id" value="<?php echo $row->quant_id ?>">
 							<input type="hidden" name="move_id"  id="move_id" class="form-control input-sm move_id" value="<?php echo $row->move_id ?>">
+							<input type="hidden" name="additional"  id="additional" class="form-control input-sm additional" value="<?php echo $row->additional ?>">
 							<input type="hidden" name="origin_prod"  id="origin_prod" class="form-control input-sm origin_prod" value="<?php echo $row->origin_prod ?>">
 							<input type="hidden" name="kode_produk"  id="kode_produk" class="form-control input-sm kode_produk" value="<?php echo $row->kode_produk ?>">
 							<input type="hidden" name="nama_produk"  id="nama_produk" class="form-control input-sm nama_produk" value="<?php echo htmlentities($row->nama_produk) ?>">
@@ -492,6 +494,13 @@
 	}
 
 	//validasi qty
+	function validAngka2(a){
+	    if(!/^[0-9.]+$/.test(a.value)){
+	        a.value = a.value.substring(0,a.value.length-1000);
+	    }
+	}
+
+	//validasi qty
 	function validAngka_waste(a){
 	    if(!/^[0-9.]+$/.test(a.value)){
 	        a.value = a.value.substring(0,a.value.length-1000);
@@ -567,7 +576,8 @@
 		      +'<select type="text" class="form-control input-sm width-200 wproduk" name="wtxtproduct" id="wtxtproduct"></select>'
 		      +'<input type="hidden" name="wtxtnameproduct" id="wtxtnameproduct"  class="form-control input-sm wnameproduct"  readonly="readonly"></td>'
 
-		    + '<td><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-150 wtxtlot" value="'+lot_prefix_next+'" onkeypress="enter_waste(event);"></td>'
+		    + '<td style="min-width:180px !important;"><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-160 wtxtlot" value="'+lot_prefix_next+'" onkeypress="enter_waste(event);"></td>'
+		    + '<td></td>'
 		    + '<td><input type="text" name="wtxtqty"  id="wtxtqty" class="form-control input-sm width-80 wtxtqty" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this)"></td>'
 		    + '<td><input type="text" name="wtxtuom"  id="wtxtuom" class="form-control input-sm width-80 wtxtuom" value="<?php echo $uom_1;?>"  readonly="readonly"></td>'
 		    + '<td><input type="text" name="wtxtqty2" id="wtxtqty2" class="form-control input-sm width-80" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this)"></td>'
@@ -619,9 +629,9 @@
 
 			//select 2 list waste barangjad / bahan baku
 	        $('.wproduk ').select2({
-	          //dropdownParent: $("#tambah_data"),
 	          allowClear: true,
 	          placeholder: "",
+			  //dropdownParent: $('#tambah_data'),
 	          ajax:{
 	                dataType: 'JSON',
 	                type : "POST",
@@ -631,12 +641,15 @@
 	                  return{
 	                    prod:params.term,
 	                    kode: '<?php echo $kode?>',// kode MO
-	                    kode_produk : '<?php echo $kode_produk ?>', // kode_produk jadi
-	                    nama_produk : '<?php echo ($product)?>', //nama Produk jadi
+	                    //kode_produk : '<?php echo $kode_produk ?>', // kode_produk jadi
+	                    //nama_produk : '<?php echo ($product)?>', //nama Produk jadi
  	                  };
 	                }, 
 	                processResults:function(data){
 	                  var results = [];
+					  var kode_produk = '<?php echo $kode_produk ?>';
+					  var nama_produk = '<?php echo $product ?>';
+					  results  = [{id:kode_produk, text:nama_produk}];
 	                  $.each(data, function(index,item){
 	                      results.push({
 	                          id:item.kode_produk,
@@ -661,8 +674,7 @@
 	        	kode_produk_select =  $(this).parents("tr").find("#wtxtproduct").val();
     			var rowIndex = this.parentNode.parentNode.rowIndex;
 	        	var $row     = $(this).parents("tr");
-
-    			//get nama produk waste by kode produk
+		    	//get nama produk waste by kode produk
     			$.ajax({
     				dataType : 'JSON',
     				type     : 'POST',
@@ -674,20 +686,23 @@
     						$row.find('.wtxtuom2').val(data.uom_2);
 
     				},error  :function(xhr, ajaxOptions, thrownError){
-    					alert('error data');
-    					alert(xhr.responseText);
+    					//alert('error data');
+    					//alert(xhr.responseText);
     				}
     			});
 
 	        	if(kode_produk != kode_produk_select){
-	        		var replace = '<select id="wtxtlot" name="wtxtlot" class="form-control input-sm wtxtlot"></select>';
+	        	   var replace = '<select id="wtxtlot" name="wtxtlot" class="form-control input-sm wtxtlot"></select>';
     			   $('#tabel_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3) ').html(replace);
+				   var waste  = '<div style="min-width:70px !important"><div><input type="radio" class="waste" id="waste" name="waste'+rowIndex+'[]" value="D"> <label for="Data"> Data</label></div><div><input type="radio"  class="waste" id="waste"  name="waste'+rowIndex+'[]" value="F" checked="checked"> <label for="fisik"> Fisik</label></div><div>'
+    			   $('#tabel_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(4) ').html(waste);
 
 	        		// untuk select lot bahan baku
 		            $('#tabel_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3) .wtxtlot').select2({
 			          //dropdownParent: $("#tambah_data"),
 			          allowClear: true,
 			          placeholder: "",
+					  //tags: true,
 			          ajax:{
 			                dataType: 'JSON',
 			                type : "POST",
@@ -717,14 +732,13 @@
 			                }
 			          }
 			        });
-
-			        
 			        
 	        	}
 
 	        	if(kode_produk == kode_produk_select || kode_produk_select == null){
 	        	  var replace = '<input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm wtxtlot" value="'+lot_prefix_next+'" onkeypress="enter_waste(event);">';
     			   $('#tabel_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3) ').html(replace);
+    			   $('#tabel_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(4) ').html('<input type="hidden" id="waste" >');
 
 	        	}
 
@@ -993,9 +1007,6 @@
 					    hasil_produksi = true;
 					}
 				}); 
-				//alert(arr.toString().length);
-				//console.log(arr);
-				//alert (JSON.stringify(arr));
 			
 				var arr2 = new Array();
 				$('.qty_konsum').each(function(index,item){
@@ -1005,6 +1016,7 @@
 							qty_konsum  : $(item).parents("tr").find('#qty_konsum').val(),
 							quant_id 	: $(item).parents("tr").find('#quant_id').val(),
 							move_id 	: $(item).parents("tr").find('#move_id').val(),
+							additional 	: $(item).parents("tr").find('#additional').val(),
 							kode_produk : $(item).parents("tr").find('#kode_produk').val(),
 							nama_produk : $(item).parents("tr").find('#nama_produk').val(),
 							qty_smi     : $(item).parents("tr").find('#qty_smi').val(),
@@ -1036,6 +1048,7 @@
 							kode_produk:$(element).parents("tr").find("#wtxtproduct").val(),
 							nama_produk:$(element).val(),
 							lot  :$(element).parents("tr").find("#wtxtlot").val(),
+							waste:$(element).parents("tr").find(".waste:checked").val(),
 							qty  :$(element).parents("tr").find("#wtxtqty").val(),
 							uom  :$(element).parents("tr").find("#wtxtuom").val(),
 							qty2 :$(element).parents("tr").find("#wtxtqty2").val(),
@@ -1056,6 +1069,7 @@
 			if(hasil_produksi==false &&  produk_waste == false){
 				alert('Maaf, Produk Lot / Waste tidak boleh Kosong !');
 			}else{	
+				please_wait(function(){});
 			    $('#btn-tambah').button('loading');
 			    $.ajax({
 			        dataType: "JSON",
@@ -1064,7 +1078,7 @@
 			        data: { deptid 		: deptid, 
 							origin_mo 	: origin_mo,  
 							kode 		: kode,
-							kode_produk:$("#txtkode_produk").val(), 
+							kode_produk :$("#txtkode_produk").val(), 
 							data_fg 	: JSON.stringify(arr), 
 							data_rm 	: JSON.stringify(arr2), 
 							data_waste 	: JSON.stringify(arr5)
@@ -1075,6 +1089,7 @@
 			              //alert jika session habis
 			              alert_modal_warning(data.message);
 			              window.location.replace('../index');
+						  unblockUI( function(){});
 			            }else if(data.status == "failed"){
 			              $("#status_bar").load(location.href + " #status_bar");
 			              $("#tab_1").load(location.href + " #tab_1");
@@ -1082,7 +1097,7 @@
 			              $("#foot").load(location.href + " #foot");
 			              $('#btn-tambah').button('reset');
 			              alert(data.message);
-
+						  unblockUI( function(){});
 			           	}else{
 			              //jika berhasil disimpan
 			              $("#status_bar").load(location.href + " #status_bar");
@@ -1095,7 +1110,9 @@
 			              	alert_modal_warning(data.message2);
 			              }
 			              //console.log(data.sql);
-			              alert_notify(data.icon,data.message,data.type,function(){});
+			              unblockUI( function(){
+							setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+						  });
 						  
 			            }
 						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch'); 
@@ -1103,10 +1120,10 @@
 			        },error: function (jqXHR, textStatus, errorThrown){
 			          alert(jqXHR.responseTex+' error');
 			          $('#btn-tambah').button('reset');
+					  unblockUI( function(){});
 			        }
 			    });
 			}
-		  
 		}// if valid true
 		
 		e.stopImmediatePropagation();

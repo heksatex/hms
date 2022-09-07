@@ -104,6 +104,7 @@
                   <th>Status</th>
                   <th>Marketing</th>
                   <th>Jml Varian</th>
+                  <th>ListOW</th>
                   <th>Notes</th>
                 </tr>
               </thead>
@@ -169,6 +170,20 @@
                   "targets": [ 5 ], 
                   "width" : 70,
               },
+              { 
+                  "targets": [ 6 ], 
+                  "orderable": false, 
+              },
+              {  
+                "targets": [ 6 ], 
+                "data"   : [ 6 ],
+                render: function (data, type, row) {
+                    //return '<input type="button" class="name" id=n-"' + meta.row + '" value="Name"/><input type="button" class="salary" id=s-"' + meta.row + '" value="Salary"/>';
+                    //dataROW = data[6];
+                    return "<a href='#' onclick='history_list_OW("+data+")' data-toggle='tooltip' title='Lihat History OW'><span class='glyphicon  glyphicon-share'></span></a>";
+
+                }
+              }
             ],
  
         });
@@ -181,6 +196,24 @@
         });
  
     });
+
+   
+
+    // cek list ow yang sesuai DTI
+    function history_list_OW(id_warna){
+        $("#view_data").modal({
+            show: true,
+            backdrop: 'static'
+        });
+        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('History DTI List OW ' );
+        $.post('<?php echo site_url()?>lab/dti/view_history_ow',
+            {id_warna : id_warna},
+            function(html){
+              setTimeout(function() {$(".view_body").html(html);  },1000);
+            }   
+        );
+    }
  
 </script>
 

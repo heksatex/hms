@@ -104,9 +104,9 @@ class M_bom extends CI_Model
 								WHERE kode_produk = '$kode_produk' ");
 	}
 
-	public function save_bom($kode_bom,$nama_bom,$kode_produk,$nama_produk,$qty,$uom)
+	public function save_bom($kode_bom,$tanggal,$nama_bom,$kode_produk,$nama_produk,$qty,$uom)
 	{
-		$this->db->query("INSERT INTO bom (kode_bom,nama_bom,kode_produk,nama_produk,qty,uom) VALUES ('$kode_bom','$nama_bom','$kode_produk','$nama_produk','$qty','$uom')");
+		$this->db->query("INSERT INTO bom (kode_bom,tanggal,nama_bom,kode_produk,nama_produk,qty,uom) VALUES ('$kode_bom','$tanggal','$nama_bom','$kode_produk','$nama_produk','$qty','$uom')");
 	}
 
 	public function update_bom($kode_bom,$nama_bom,$kode_produk,$nama_produk,$qty,$uom)
