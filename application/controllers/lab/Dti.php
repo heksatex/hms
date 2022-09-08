@@ -102,10 +102,13 @@ class Dti extends MY_Controller
 			$duplicate  = addslashes($this->input->post('duplicate'));
 
       $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sales_group);
-
-      $status   = $this->m_lab->cek_status_dti_by_id($id);
+          if(!empty($id)){
+            $status_head   = $this->m_lab->cek_status_dti_by_id($id);
+          }else{
+            $status_head   = '';
+          }
             
-            if($status == 'cancel' AND !empty($id)){
+            if($status_head == 'cancel' AND !empty($id)){
               $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Data tidak bisa disimpan, DTI sudah di Batalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );  
             }else if(empty($warna) AND empty($id)){
               $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Warna Harus Diisi !', 'icon' =>'fa fa-warning', 

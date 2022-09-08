@@ -3708,11 +3708,11 @@ class MO extends MY_Controller
                             // update status done/draft
                             if(!empty($where7) AND !empty($case7)){
                                 $where7 = rtrim($where7, ',');
-                                $sql_update_status_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case7." end) WHERE  origin_prod in (".$where7.") AND kode = '".$kode."' AND move_id = '".$move_id."' ";
-                                $this->_module->update_perbatch($sql_update_status_rm_target);
+                                // $sql_update_status_rm_target = "UPDATE mrp_production_rm_target SET status =(case ".$case7." end) WHERE  origin_prod in (".$where7.") AND kode = '".$kode."' AND move_id = '".$move_id."' ";
+                                // $this->_module->update_perbatch($sql_update_status_rm_target);
 
-                                $sql_update_status_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case7." end) WHERE  origin_prod in (".$where7.") AND move_id = '".$move_id."' ";
-                                $this->_module->update_perbatch($sql_update_status_stock_move_produk);
+                                // $sql_update_status_stock_move_produk = "UPDATE stock_move_produk SET status =(case ".$case7." end) WHERE  origin_prod in (".$where7.") AND move_id = '".$move_id."' ";
+                                // $this->_module->update_perbatch($sql_update_status_stock_move_produk);
                                 $case7 = "";
                                 $case7  = "";
                                 $sql_update_status_rm_target         = "";

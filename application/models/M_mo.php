@@ -582,7 +582,7 @@ class M_mo extends CI_Model
 								INNER JOIN mrp_production_rm_target rm ON smi.origin_prod = rm.origin_prod AND rm.move_id = smi.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id 
 								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
-								where rm.kode = '$kode' AND smi.status = '$status' order by smi.nama_produk,smi.lot ")->result();
+								where rm.kode = '$kode' AND smi.status = '$status' AND mp.id_category NOT IN ('11','12') order by smi.nama_produk,smi.lot ")->result();
 	
 	}
 
