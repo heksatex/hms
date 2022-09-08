@@ -512,8 +512,8 @@
         // add tags to result                
         //var span = '<span class="breadcumb "><span class="breadcumb-field">Group By = </span><span class="breadcumb-value"><span class="ul-pl-02">'+caption+'</span><i class="fa fa-times" data-type="group" data-search="'+groupBy+'" id="'+htmlentities_script(id)+'"></i></span></span>';
     
-        $('#result').append(span);
-        $('.breadcumb .breadcumb-value').find('i').addClass("breadcumb-close");
+        //$('#result').append(span);
+        //$('.breadcumb .breadcumb-value').find('i').addClass("breadcumb-close");
     
         //$('#groupBy [data-index="'+dataIndex+'"]').addClass('badge bg-red');//add class badge bg red
     

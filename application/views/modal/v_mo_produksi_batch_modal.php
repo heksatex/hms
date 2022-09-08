@@ -1043,12 +1043,18 @@
 
 				var arr5 = [];
 				$(".wnameproduct").each(function(index, element) {
+					find_waste = $(element).parents("tr").find(".waste:checked").val();
+					if(find_waste == undefined){
+						checked_waste = '';
+					}else{
+						checked_waste = $(element).parents("tr").find(".waste:checked").val();
+					}
 					if ($(element).val()!=="") {
 						arr5.push({
 							kode_produk:$(element).parents("tr").find("#wtxtproduct").val(),
 							nama_produk:$(element).val(),
 							lot  :$(element).parents("tr").find("#wtxtlot").val(),
-							waste:$(element).parents("tr").find(".waste:checked").val(),
+							waste:checked_waste,
 							qty  :$(element).parents("tr").find("#wtxtqty").val(),
 							uom  :$(element).parents("tr").find("#wtxtuom").val(),
 							qty2 :$(element).parents("tr").find("#wtxtqty2").val(),
@@ -1056,7 +1062,6 @@
 							reff_note :$(element).parents("tr").find("#wreff_note").val(),
 							kode 	  :$("#txtkode").val(),
 						});
-						//alert (JSON.stringify(arr5));
 					    produk_waste = true;
 					}
 				});
