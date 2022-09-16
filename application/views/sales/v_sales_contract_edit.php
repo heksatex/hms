@@ -294,7 +294,6 @@
                           <?php 
                             }     
                           ?>
-                       
                             </tr>
                           </tbody>
                           <tfoot>
@@ -371,6 +370,7 @@
 	                        <tbody>
                             <?php 
                                   $no = 1;
+                                  $total_qty = 0;
                                   foreach ($details_color_lines as $row) {
                                     if($row->status == 'f'){
                                       $style = 'style="color:red"';
@@ -434,8 +434,13 @@
                                     </td>
                                   </tr>
                                 <?php 
+                                    $total_qty = $total_qty + $row->qty;
                                   }     
                                 ?>
+                                  <tr>
+                                    <th colspan="7" class="text-right">Total Qty</th>
+                                    <th colspan="3" class="text-right"><?php echo number_format($total_qty,2).' Mtr'; ?></th>
+                                  </tr>
                           </tbody>
                           <tfoot>
                             <tr>

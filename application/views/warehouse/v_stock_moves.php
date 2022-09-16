@@ -1194,6 +1194,7 @@
     var page_next = '';
     var page_prev = '';
     var id_dept   = '<?php  echo $id_dept;?>';
+    var this_icon = '';
 
     // ambil data berdasarkan data-content='edit'
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -1211,6 +1212,7 @@
           tampil = false;
         }
         $(this).find(".glyphicon").toggleClass("glyphicon-plus glyphicon-minus"); // ganti icon + jadi minus
+        this_icon = $(this);
     });
 
 
@@ -1222,6 +1224,9 @@
       $("#example1 tbody[id='"+tbody_id+"'] tr" ).find('td.list_pagination').text('');// remove btn pagination by tbody_id
 
     }else{
+      this_icon.html('<i class="fa fa-spinner fa-spin "></i>');
+      this_icon.css('pointer-events','none');
+     
       $.ajax({
             type : 'POST',
             dataType: 'json',
@@ -1275,10 +1280,16 @@
                   });
                 }
             }
+            // kembalikan icon ke awal
+            this_icon.css('pointer-events','');
+            this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
 
             },error: function (jqXHR, textStatus, errorThrown){
               //alert(jqXHR.responseText);
               alert('Error Load Child Root');
+              // kembalikan icon ke awal
+              this_icon.css('pointer-events','');
+              this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
             }
       });
 
@@ -1305,7 +1316,10 @@
     });
 
     action = 'prev';
-    loadPageChild(kode,group_by,group_ke,tbody_id,page,action,id_dept,root)
+    var this_icon =  $(this);
+    loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,id_dept,root)
+    this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+    this_icon.css('pointer-events','none');
   });
 
 
@@ -1326,12 +1340,15 @@
         page = $(this).attr('info-page-now');
     });
     action = 'next';
-    loadPageChild(kode,group_by,group_ke,tbody_id,page,action,id_dept,root)
+    var this_icon =  $(this);
+    loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,id_dept,root)
+    this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+    this_icon.css('pointer-events','none');
   });
 
   
   // untuk meload child dari next/prev button
-  function loadPageChild(kode,group_by,group_ke,tbody_id,page,action,id_dept,root){
+  function loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,id_dept,root){
 
            $.ajax({
             type : 'POST',
@@ -1402,10 +1419,24 @@
 
                 $("#example1 tbody[id='"+tbody_id+"'] tr ").find("td.list_pagination button[data-pager-action='next'] ").attr('info-page-now',page_next);
                 //alert(action);
+                if(action == 'next'){
+                  icon = '>';
+                }else{
+                  icon = '<';
+                }
+                this_icon.html(icon);
+                this_icon.css('pointer-events','');  
 
             },error: function (jqXHR, textStatus, errorThrown){
               //alert(jqXHR.responseText);
               alert('Error Load Page Child');
+              if(action == 'next'){
+                 icon = '>';
+              }else{
+                 icon = '<';
+              }
+              this_icon.html(icon);
+              this_icon.css('pointer-events','');  
             }
       });
 

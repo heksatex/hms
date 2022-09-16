@@ -600,18 +600,17 @@ class Stockxow extends MY_Controller
         $by2           = '';
         
         // create where
-        $where_result  .= " WHERE pb.dept_id ='GRG' AND pb.status IN ('draft','ready')  ";
-        $where          = $this->create_where2($data_filter);
+        $where_default  = " WHERE pb.dept_id = 'GRG' AND pb.status IN ('draft','ready')  ";
+        $where_filter   = $this->create_where2($data_filter);
         $group_by_dec   = $this->declaration_name_field2($group_by);
-        $where_result  .= $where." AND ".$group_by_dec." = '".$kode."'";
+        $where_result  .= $where_default." ".$where_filter." AND ".$group_by_dec." = '".$kode."'";
 
         if($group_ke > 1){
             // looping post arr_tmp_group
             foreach ($post_tmp_group as $key) {
-                    # code...
                     if($key['tbody_id'] == $root){
                         $key_by        = $this->declaration_name_field2($key['by']);
-                        $where_result .= "AND ".$key_by." = '".$key['value']."' ";
+                        $where_result .= " AND ".$key_by." = '".$key['value']."' ";
                         break;
                     }
             }
@@ -687,6 +686,7 @@ class Stockxow extends MY_Controller
                 $list_group[]  = array( 'group'          => 'Yes',
                                         'nama_field'     => $row->nama_field,
                                         'grouping'       => $row->grouping,
+                                        'origin'         => $row->origin,
                                         'qty_planing'    => 'Qty1 Planning = '.number_format($row->tot_qty_planning,2),
                                         'qty'            => 'Qty1 Terpesan = '.number_format($row->tot_qty,2),
                                         'qty2'           => 'Qty2 = '.number_format($row->tot_qty2,2),
@@ -766,16 +766,16 @@ class Stockxow extends MY_Controller
         $filter_table = FALSE;
 
     	if(!empty($data_filter)){
-
             // filter atas
 	    	foreach ($data_filter as $row) {
                 # code...
-                if($loop > 0){
-                    $where_condition  = ' AND ';
-                }
 	    		if($row['type'] == 'search'){// search biasa
 	    			
                     if($row['nama_field'] == 'kode_produk' or $row['nama_field'] == 'nama_produk'){ 
+
+                        if($loop > 0){
+                            $where_condition  = ' AND ';
+                        }
 
                         if($row['operator'] == 'LIKE'){
                             $isi        = "LIKE '%".addslashes($row['value'])."%' ";
@@ -787,61 +787,19 @@ class Stockxow extends MY_Controller
                             $isi        = "= '".addslashes($row['value'])."' ";
                         }
 
-                        //$isi        = "LIKE '%".addslashes($row['value'])."%' ";
                         $nama_field = $this->declaration_name_field2($row['nama_field']);
                         $loop++;
+                        $where     .= $where_condition.' '.$nama_field.' '.$isi;
                     }else{
                         $nama_field = '';
                         $isi        = '';
                     }
                     
-                    $where     .= $where_condition.' '.$nama_field.' '.$isi;
 	    		}
 	    	}
 
             $where_condition   = '';
             $loop = 1;
-
-            // filter table
-            foreach ($data_filter as $row) {
-                # code...
-                if($row['type'] == 'table'){// search table
-                    $filter_table = TRUE;
-
-                    foreach ($row['data'] as $tbl) {
-                        if($loop_2 > 1){
-                            $where_condition_2 = ' OR ';
-                            $where_condition   = ' AND ';
-                        }
-
-                        # code...
-                        if($tbl['operator'] == 'LIKE'){
-                            $isi = $tbl['operator']." '%".addslashes($tbl['value'])."%' ";
-                        }else{
-                            $isi = $tbl['operator']." '".addslashes($tbl['value'])."' ";
-                        }
-
-                        //$isi        = $tbl['operator']." '%".addslashes($tbl['value'])."%' ";
-                        $nama_field = $this->declaration_name_field2($tbl['nama_field']);
-                        $where_tb   .= $where_condition_2.' '.$nama_field.' '.$isi;
-
-                        $loop_2++;
-                    }
-                    $where_tb = $where_condition.' ( '.$where_tb.' )';
-                    $loop_2 = 0;
-                    if($loop == 2){
-                        //break;
-                    }
-                    $loop++;
-                }
-            }
-
-            if($filter_table == true){
-                $where = $where.' AND '.$where_tb;
-            }else{
-                $where = rtrim($where," AND ");
-                $where = $where.' '.$where_tb;
-            }
 
     	}
 

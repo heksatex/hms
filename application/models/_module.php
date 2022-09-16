@@ -591,14 +591,44 @@ class _module extends CI_Model
 		return $this->db->query("SELECT nama, short FROM uom ORDER BY id ")->result();
 	}
 
-	public function save_user_filter($username,$dept_id,$inisial_class,$nama_filter,$data_filter,$data_grouping,$use_default)
+	public function get_last_user_filter_id()
 	{
-		return $this->db->query("INSERT INTO user_filter (username,dept_id,inisial_class,nama_filter,data_filter,data_grouping,use_default) values ('$username','$dept_id','$inisial_class','$nama_filter','$data_filter','$data_grouping','$use_default')");
+		$last_no =  $this->db->query("SELECT max(id) as nom FROM user_filter");
+
+		$result = $last_no->row();
+		if(empty($result->nom)){
+			$no   = 1;
+		}else{
+     		$no   = (int)$result->nom + 1;
+		}
+		return $no;
 	}
 
-	public function delete_user_filter($username,$id_dept,$inisial_class,$nama_filter)
+	public function save_user_filter($id,$username,$dept_id,$inisial_class,$nama_filter,$use_default)
 	{
-		return $this->db->query("DELETE FROM user_filter WHERE username = '$username' AND dept_id = '$id_dept' AND inisial_class = '$inisial_class' AND nama_filter = '$nama_filter'");
+		$this->db->query("INSERT INTO user_filter (id,username,dept_id,inisial_class,nama_filter,use_default) values ('$id','$username','$dept_id','$inisial_class','$nama_filter','$use_default')");
+	}
+
+	public function save_user_filter_isi($filter_id,$nama_field,$operator,$value,$condition)
+	{
+		$this->db->query("INSERT INTO user_filter_isi (filter_id,name_field,operator,value_filter,condition_filter) values ('$filter_id','$nama_field','$operator','$value','$condition') ");
+	}
+
+	public function save_user_filter_grouping($filter_id,$nama_field,$index)
+	{
+		$this->db->query("INSERT INTO user_filter_grouping (filter_id,name_field,data_index) values ('$filter_id','$nama_field','$index') ");
+	}
+
+	public function save_user_filter_order($filter_id,$nama_field,$index)
+	{
+		$this->db->query("INSERT INTO user_filter_order_by (filter_id,name_field,sort) values ('$filter_id','$nama_field','$index') ");
+	}
+
+	public function delete_user_filter($id)
+	{
+		$this->db->query("DELETE FROM user_filter WHERE id = '$id'");
+		$this->db->query("DELETE FROM user_filter_isi WHERE filter_id = '$id'");
+		$this->db->query("DELETE FROM user_filter_grouping WHERE filter_id = '$id'");
 	}
 
 	public function check_default_user_filter($username,$id_dept,$inisial_class,$use_default)
@@ -615,6 +645,26 @@ class _module extends CI_Model
 	public function get_list_user_filter($id_dept,$username)
 	{
 		return $this->db->query("SELECT * FROM user_filter where dept_id = '$id_dept' AND username = '$username' ")->result_array();
+	}
+
+	public function get_user_filter_default($id_dept,$username)
+	{
+		return $this->db->query("SELECT * FROM user_filter where dept_id = '$id_dept' AND username = '$username' AND use_default = 'true' ")->row_array();
+	}
+
+	public function get_user_filter_isi_by_id($id)
+	{
+		return $this->db->query("SELECT * FROM user_filter_isi WHERE filter_id = '$id'");
+	}
+
+	public function get_user_filter_order_by_id($id)
+	{
+		return $this->db->query("SELECT * FROM user_filter_order_by WHERE filter_id = '$id'");
+	}
+
+	public function get_user_filter_grouping_by_id($id)
+	{
+		return $this->db->query("SELECT * FROM user_filter_grouping WHERE filter_id = '$id'");
 	}
 
 	public function get_list_stock_move_origin($origin)

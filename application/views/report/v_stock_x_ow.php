@@ -233,7 +233,7 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <input type="text" class="form-control input-sm" id="search" name="search" >
+                                <input type="text" class="form-control input-sm" id="search" name="search" onkeydown=" event_input(event)"  >
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -423,7 +423,6 @@
                                       <th  class='style min-width-100'><a class="column_sort2" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
                                       <th  class='style min-width-100'><a class="column_sort2" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
                                       <th  class='style min-width-80' ></th>
-                                      <th  class='style min-width-80' ></th>
                                       </tr>
                                   </thead>
                                   <tbody>
@@ -463,14 +462,20 @@
     });
 
 
-    // disable enter
-    $(window).keydown(function(event){
+    // disable enter checkboxes
+    $("input[type='checkbox']").keydown(function(event){
         if(event.keyCode == 13) {
         event.preventDefault();
         return false;
         }
     });
-    
+
+    function event_input(event){ 
+      if(event.keyCode == 13) {
+          event.preventDefault();
+            btn_search();
+      }
+    }
 
     //show / hide collapse child in tabel
     $(document).on("hide.bs.collapse show.bs.collapse", ".child", function (event) {
@@ -587,7 +592,7 @@
             value += "</select>";
             value += '</div>';
             value += '<div class="col-md-3">';
-            value += '<input type="number" class="form-control input-sm" id="search" name="search" placeholder="Day" onkeypress="return isNumberKey(event)">';
+            value += '<input type="number" class="form-control input-sm" id="search" name="search" placeholder="Day" onkeypress="return isNumberKey(event)" onkeydown=" event_input(event)" >';
             value += '</div>';
             $('#f_search').html(value);
         }else{
@@ -600,16 +605,21 @@
             value += "</select>";
             value += '</div>';
             value += '<div class="col-md-3">';
-            value += '<input type="text" class="form-control input-sm" id="search" name="search" >';
+            value += '<input type="text" class="form-control input-sm" id="search" name="search" onkeydown=" event_input(event)"  >';
             value += '</div>';
             $('#f_search').html(value);
         }
 
     }); 
 
+   
 
     // klik btn search
     $('#btn-search').on('click', function(e){
+      btn_search();
+    });
+
+    function btn_search(){
         //alert('masuk');
         var search      = $('#search').val();
         var cmbSearch   = $('#cmbSearch').val();
@@ -675,7 +685,7 @@
 
       }
             
-    });
+    }
 
 
     // remove tags result
@@ -753,7 +763,7 @@
                     type: "POST",
                     dataType : "JSON",
                     url : '<?=base_url()?>report/stockxow/loadData/'+pageNum,
-                    data: {arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), arr_oder:arr_order, transit:check_transit},
+                    data: {arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), arr_order:arr_order, transit:check_transit},
                     success: function(data){
 
                     $('#pagination').html(data.pagination);
@@ -761,7 +771,6 @@
                     $('#total_lot').html(data.total_lot);
                     $('#total_qty').html(data.total_qty);
                     $('#total_qty2').html(data.total_qty2);
-                    $('#sql').val(data.sql);
 
                     let tbody = $("<tbody />");
                     let no    = 0;
@@ -781,7 +790,7 @@
                             $row += "<td colspan='3'>"+value.grouping+"</td>";
                             $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
                             $row += "<td align='right' colspan='2'>"+value.qty2+"</td>";
-                            $row += "<td colspan='2' class='list_pagination'></td>";
+                            $row += "<td colspan='2' class='list_pagination' style='min-width:100px'></td>";
                             $row += "</tr>";
                             $row += "</tbody>";
                             $ro++;
@@ -916,7 +925,7 @@
       var info_page = '';
       var page_next = '';
       var page_prev = '';
-      //var id_dept   = '<?php  echo $id_dept;?>';
+      var this_icon = '';
 
       // ambil data berdasarkan data-content='edit'
       $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -933,28 +942,28 @@
           }else if($(this).hasClass("collapsed") == false){
             tampil = false;
           }
-
           $(this).find(".glyphicon").toggleClass("glyphicon-plus glyphicon-minus"); // ganti icon + jadi minus
+          this_icon = $(this);
       });
+
       //alert('array loadchild');
 
-
       if(tampil == true){
-        $("#example1 tbody[data-parent='"+tbody_id+"']").remove();// remove child by groupby
-        if(node_root == 'Yes'){
-          $("#example1 tbody[data-root='"+root+"']").remove();// remove child by root
-          if(tmp_arr_group.length > 0){ // berlaku untuk group by 2
-            // hapus tmp_arr_group
-            $.each(tmp_arr_group,  function(index,isi){
-              if(tmp_arr_group[index].tbody_id == tbody_id){
-                tmp_arr_group.splice(index,1); 
-                return false;
-              }
+          $("#example1 tbody[data-parent='"+tbody_id+"']").remove();// remove child by groupby
+          if(node_root == 'Yes'){
+            $("#example1 tbody[data-root='"+root+"']").remove();// remove child by root
+            if(tmp_arr_group.length > 0){ // berlaku untuk group by 2
+              // hapus tmp_arr_group
+              $.each(tmp_arr_group,  function(index,isi){
+                if(tmp_arr_group[index].tbody_id == tbody_id){
+                  tmp_arr_group.splice(index,1); 
+                  return false;
+                }
 
-            });
+              });
+            }
           }
-        }
-        $("#example1 tbody[id='"+tbody_id+"'] tr" ).find('td.list_pagination').text('');// remove btn pagination by tbody_id
+          $("#example1 tbody[id='"+tbody_id+"'] tr" ).find('td.list_pagination').text('');// remove btn pagination by tbody_id
 
       }else{
 
@@ -967,88 +976,97 @@
                     return i.value;
                   }
           }).get();
+          
+          this_icon.html('<i class="fa fa-spinner fa-spin "></i>');
+          this_icon.css('pointer-events','none');
       
-        $.ajax({
-              type      : 'POST',
-              dataType  : 'json',
-              url       : '<?=base_url()?>report/stockxow/loadChild',
-              data      : {kode:kode, group_by:group_by, tbody_id:tbody_id, group_ke:group_ke, record:'0', arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), root:root, tmp_arr_group:JSON.stringify(tmp_arr_group), arr_order:arr_order, transit:check_transit},
-              success:function(data){
+          $.ajax({
+                type      : 'POST',
+                dataType  : 'json',
+                url       : '<?=base_url()?>report/stockxow/loadChild',
+                data      : {kode:kode, group_by:group_by, tbody_id:tbody_id, group_ke:group_ke, record:'0', arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), root:root, tmp_arr_group:JSON.stringify(tmp_arr_group), arr_order:arr_order, transit:check_transit},
+                success:function(data){
 
-                if(data.list_group != ''){
-                    //$('#example1 tbody[id='+data.tbody_id+']').after(data.list_group);
-                    tmp_arr_group.push(data.tmp_arr_group);
+                  if(data.list_group != ''){
+                      //$('#example1 tbody[id='+data.tbody_id+']').after(data.list_group);
+                      tmp_arr_group.push(data.tmp_arr_group);
 
-                    let $ro     = 1;
-                    let $row    = '';
-                    let $group  = data.tbody_id;
-                    let $groupOf= $group;
-                    let $group_ke_next = parseInt(data.group_ke) + 1;
+                      let $ro     = 1;
+                      let $row    = '';
+                      let $group  = data.tbody_id;
+                      let $groupOf= $group;
+                      let $group_ke_next = parseInt(data.group_ke) + 1;
 
-                    $.each(data.list_group, function(key, value){
-                          $id      = $group+'-'+$ro;
-                          if(value.tot_items  > 0){
-                              $icon = "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$groupOf+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
-                          }else{
-                              $icon = "<td class='show collapsed group1' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"' data-root='"+$groupOf+"' node-root='No' group-ke='"+$group_ke_next+"'></td>";
-                          }
+                      $.each(data.list_group, function(key, value){
+                            $id      = $group+'-'+$ro;
+                            if(value.tot_items  > 0){
+                                $icon = "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$groupOf+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
+                            }else{
+                                $icon = "<td class='show collapsed group1' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"' data-root='"+$groupOf+"' node-root='No' group-ke='"+$group_ke_next+"'></td>";
+                            }
 
-                          $row  += "<tbody data-root='"+$groupOf+"' data-parent='"+$groupOf+"' id='"+$id+"'>";
-                          $row  += "<tr  class='oe_group_header'>";
-                          $row  += "<td></td>";
-                          $row  +=  $icon;
-                          $row += "<td colspan='2'>"+value.grouping+"</td>";
-                          $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                          $row += "<td align='right'  colspan='2'>"+value.qty2+"</td>";
-                          $row += "<td colspan='2' class='list_pagination'></td>";
-                          $row += "</tr>";
-                          $row += "</tbody>";
-                          $ro++;
-                    });
-                    $('#example1 tbody[id='+data.tbody_id+']').after($row);
+                            $row  += "<tbody data-root='"+$groupOf+"' data-parent='"+$groupOf+"' id='"+$id+"'>";
+                            $row  += "<tr  class='oe_group_header'>";
+                            $row  += "<td></td>";
+                            $row  +=  $icon;
+                            $row += "<td colspan='2'>"+value.grouping+"</td>";
+                            $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
+                            $row += "<td align='right'  colspan='2'>"+value.qty2+"</td>";
+                            $row += "<td colspan='2' class='list_pagination'></td>";
+                            $row += "</tr>";
+                            $row += "</tbody>";
+                            $ro++;
+                      });
+                      $('#example1 tbody[id='+data.tbody_id+']').after($row);
 
-                }else{
-                    let tbody = $("<tbody data-root='"+data.root+"' data-parent='"+tbody_id+"' />");
-                    let row   = '';
-                    let no    = 1;
+                  }else{
+                      let tbody = $("<tbody data-root='"+data.root+"' data-parent='"+tbody_id+"' />");
+                      let row   = '';
+                      let no    = 1;
 
-                    $.each(data.record, function(key, value) {
+                      $.each(data.record, function(key, value) {
 
-                        var tr = $("<tr style='background-color: #f2f2f2;'>").append(
-                                  $("<td>").text(no),
-                                  $("<td >").text(value.lot),
-                                  $("<td>").text(value.grade),
-                                  $("<td>").text(value.lokasi),
-                                  $("<td>").text(value.kode_produk),
-                                  $("<td>").text(value.nama_produk),
-                                  $("<td align='right'>").text(value.qty),
-                                  $("<td align='right'>").text(value.qty2),
-                        );
-                        tbody.append(tr);
-                        no++;
-                    });
-                
-                  $('#example1 tbody[id='+data.tbody_id+']').after(tbody);
-                }
-                
-                  // buat pagination jika data lebih dari 10
-                  if(data.total_record > data.limit){
-                    info_page = data.page_now+'/'+data.all_page;
-                    page_prev = data.page_now;
-                    page_next = data.page_now+1;
-                    $('#example1 tbody[id='+data.tbody_id+'] tr' ).find("td.list_pagination").each(function(){
-                      html  += '<button type="button" class="btn btn-xs btn-default" data-pager-action="previous" info-page-now='+page_prev+' style="visibility: hidden;"><</button>';
-                      html  += ' <span class="list_page_state"> '+info_page+' </span>';
-                      html  += ' <button type="button" class="btn btn-xs btn-default" data-pager-action="next" info-page-now='+page_next+'>></button>' ;
-                      $(this).html(html);
-                    });
+                          var tr = $("<tr style='background-color: #f2f2f2;'>").append(
+                                    $("<td>").text(no),
+                                    $("<td >").text(value.lot),
+                                    $("<td>").text(value.grade),
+                                    $("<td>").text(value.lokasi),
+                                    $("<td>").text(value.kode_produk),
+                                    $("<td>").text(value.nama_produk),
+                                    $("<td align='right'>").text(value.qty),
+                                    $("<td align='right'>").text(value.qty2),
+                          );
+                          tbody.append(tr);
+                          no++;
+                      });
+                  
+                    $('#example1 tbody[id='+data.tbody_id+']').after(tbody);
                   }
+                  
+                    // buat pagination jika data lebih dari 10
+                    if(data.total_record > data.limit){
+                      info_page = data.page_now+'/'+data.all_page;
+                      page_prev = data.page_now;
+                      page_next = data.page_now+1;
+                      $('#example1 tbody[id='+data.tbody_id+'] tr' ).find("td.list_pagination").each(function(){
+                        html  += '<button type="button" class="btn btn-xs btn-default" data-pager-action="previous" info-page-now='+page_prev+' style="visibility: hidden;"><</button>';
+                        html  += ' <span class="list_page_state"> '+info_page+' </span>';
+                        html  += ' <button type="button" class="btn btn-xs btn-default" data-pager-action="next" info-page-now='+page_next+'>></button>' ;
+                        $(this).html(html);
+                      });
+                    }
 
-              },error: function (jqXHR, textStatus, errorThrown){
-                alert(jqXHR.responseText);
-                alert('Error Load Child Root');
-              }
-        });
+                    // kembalikan icon ke awal
+                    this_icon.css('pointer-events','');
+                    this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+
+                },error: function (jqXHR, textStatus, errorThrown){
+                  alert('Error Load Child Root');
+                  // kembalikan icon ke awal
+                  this_icon.css('pointer-events','');
+                  this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+                }
+          });
 
       }
       
@@ -1063,7 +1081,6 @@
           tbody_id = $(this).attr('data-tbody');
           group_ke = $(this).attr('group-ke');
           root     = $(this).attr('data-root');
-
       });
 
       $(this).each(function(){
@@ -1071,7 +1088,10 @@
       });
 
       action = 'prev';
-      loadPageChild(kode,group_by,group_ke,tbody_id,page,action,root)
+      var this_icon =  $(this);
+      loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
+      this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+      this_icon.css('pointer-events','none');
     });
 
 
@@ -1092,12 +1112,15 @@
           page = $(this).attr('info-page-now');
       });
       action = 'next';
-      loadPageChild(kode,group_by,group_ke,tbody_id,page,action,root)
+      var this_icon =  $(this);
+      loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
+      this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+      this_icon.css('pointer-events','none');
     });
 
 
     // untuk meload child dari next/prev button
-    function loadPageChild(kode,group_by,group_ke,tbody_id,page,action,root){
+    function loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root){
 
               var check_transit  = false;
               var checkboxes_arr =  new Array(); 
@@ -1203,10 +1226,23 @@
 
                   $("#example1 tbody[id='"+tbody_id+"'] tr ").find("td.list_pagination button[data-pager-action='next'] ").attr('info-page-now',page_next);
                   //alert(action);
+                  if(action == 'next'){
+                      icon = '>';
+                    }else{
+                      icon = '<';
+                  }
+                  this_icon.html(icon);
+                  this_icon.css('pointer-events',''); 
 
               },error: function (jqXHR, textStatus, errorThrown){
-                //alert(jqXHR.responseText);
                 alert('Error Load Page Child');
+                if(action == 'next'){
+                  icon = '>';
+                  }else{
+                  icon = '<';
+                }
+                this_icon.html(icon);
+                this_icon.css('pointer-events',''); 
               }
         });
 
@@ -1230,27 +1266,6 @@
         arr_order   = [];
 
         arr_order.push({column:nama_kolom, sort:order });
-
-        //let index = arr_order.indexOf();
-        /*
-        // remove array_filter
-        $.each(arr_order, function(index,isi){
-          //alert('array '+JSON.stringify(arr_filter));
-            if(arr_order[index].column == nama_kolom){
-              same = true;
-              index_ke = index;
-            }
-        });
-        if(index_ke >= 0 && same == true){
-          arr_order.splice(index_ke,1);
-          hapus  = true;
-        }
-
-        if(arr_order.length == 0 || hapus  == true || same == false){
-        }
-        */
-
-        //alert('akhir 2 '+JSON.stringify(arr_order));
 
         if(order == 'desc'){
           //$(this).addClass('fa fa-arrow-down');
@@ -1413,7 +1428,7 @@
                               $row += "<td align='right' colspan='2'>"+value.qty_planing+"</td>";
                               $row  += "<td align='right' colspan='2'>"+value.qty+"</td>";
                               $row  += "<td align='right'  colspan='1'>"+value.qty2+"</td>";
-                              $row  += "<td colspan='2' class='list_pagination'></td>";
+                              $row  += "<td colspan='1' class='list_pagination' style='min-width:100px'></td>";
                               $row  += "</tr>";
                               $row  += "</tbody>";
                               $ro++;
@@ -1458,6 +1473,7 @@
         var info_page = '';
         var page_next = '';
         var page_prev = '';
+        var this_icon = '';
         //var id_dept   = '<?php  echo $id_dept;?>';
 
         // ambil data berdasarkan data-content='edit'
@@ -1477,6 +1493,8 @@
             }
 
             $(this).find(".glyphicon").toggleClass("glyphicon-plus glyphicon-minus"); // ganti icon + jadi minus
+            this_icon = $(this);
+
         });
       
         if(tampil == true){
@@ -1498,6 +1516,8 @@
 
         }else{
 
+          this_icon.html('<i class="fa fa-spinner fa-spin "></i>');
+          this_icon.css('pointer-events','none');
                
           $.ajax({
                 type      : 'POST',
@@ -1510,9 +1530,8 @@
                       //$('#example2 tbody[id='+data.tbody_id+']').after(data.list_group);
                       tmp_arr_group2.push(data.tmp_arr_group2);
 
-                      let $ro    = 1;
-                      let $row   = '';
-                      //let $group_ke_next = 0;
+                      let $ro      = 1;
+                      let $row     = '';                    
                       let $group   = data.tbody_id;
                       let $groupOf = $group;
                       let $group_ke_next = parseInt(data.group_ke) + 1;
@@ -1529,11 +1548,12 @@
                             $row  += "<tr  class='oe_group_header'>";
                             $row  += "<td></td>";
                             $row  +=  $icon;
-                            $row += "<td colspan='2'>"+value.grouping+"</td>";
+                            $row += "<td colspan='1' style='min-width:120px'>"+value.grouping+"</td>";
+                            $row += "<td colspan='2'>"+value.origin+"</td>";
                             $row += "<td align='right' colspan='2'>"+value.qty_planing+"</td>";
                             $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                            $row += "<td align='right'  colspan='1'>"+value.qty2+"</td>";
-                            $row += "<td colspan='2' class='list_pagination'></td>";
+                            $row += "<td align='right' colspan='1' style='min-width:100px'>"+value.qty2+"</td>";
+                            $row += "<td class='list_pagination'style='min-width:100px'></td>";
                             $row += "</tr>";
                             $row += "</tbody>";
                             $ro++;
@@ -1579,9 +1599,15 @@
                       });
                     }
 
+                    // kembalikan icon ke awal
+                    this_icon.css('pointer-events','');
+                    this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+
                 },error: function (jqXHR, textStatus, errorThrown){
-                  alert(jqXHR.responseText);
                   alert('Error Load Child Root');
+                  // kembalikan icon ke awal
+                  this_icon.css('pointer-events','');
+                  this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
                 }
           });
 
@@ -1606,7 +1632,10 @@
         });
 
         action = 'prev';
-        loadPageChild2(kode,group_by,group_ke,tbody_id,page,action,root)
+        var this_icon =  $(this);
+        loadPageChild2(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
+        this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+        this_icon.css('pointer-events','none');
     });
 
     // klik button next
@@ -1625,11 +1654,14 @@
           page = $(this).attr('info-page-now');
       });
       action = 'next';
-      loadPageChild2(kode,group_by,group_ke,tbody_id,page,action,root)
+      var this_icon =  $(this);
+      loadPageChild2(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
+      this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+      this_icon.css('pointer-events','none');
     });
 
     // untuk meload child dari next/prev button
-    function loadPageChild2(kode,group_by,group_ke,tbody_id,page,action,root){
+    function loadPageChild2(this_icon,kode,group_by,group_ke,tbody_id,page,action,root){
 
         var check_transit  = false;
         var checkboxes_arr =  new Array(); 
@@ -1739,10 +1771,23 @@
 
             $("#example2 tbody[id='"+tbody_id+"'] tr ").find("td.list_pagination button[data-page-action2='next'] ").attr('info-page-now',page_next);
             //alert(action);
+            if(action == 'next'){
+              icon = '>';
+            }else{
+              icon = '<';
+            }
+            this_icon.html(icon);
+            this_icon.css('pointer-events','');  
 
         },error: function (jqXHR, textStatus, errorThrown){
-          //alert(jqXHR.responseText);
           alert('Error Load Page Child');
+          if(action == 'next'){
+            icon = '>';
+          }else{
+            icon = '<';
+          }
+          this_icon.html(icon);
+          this_icon.css('pointer-events','');  
         }
         });
 

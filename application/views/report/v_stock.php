@@ -191,8 +191,7 @@
           <h3 class="box-title"><b>Stock</b></h3>
         </div>
         <div class="box-body">
-
-          <form name="input" class="form-horizontal" role="form" id="form_filter"  action="<?=base_url()?>report/stock/export_excel_stock" method="POST">
+            <form name="input" class="form-horizontal" role="form" method="POST">
               <div class="col-md-12">
                 <div class="col-md-8">
                   <div class="col-md-3">
@@ -217,7 +216,7 @@
                       </select>
                     </div>
                     <div class="col-md-3">
-                      <input type="number" class="form-control input-sm" id="search" name="search"placeholder="Day" onkeypress="return isNumberKey(event)" >
+                      <input type="number" class="form-control input-sm" id="search" name="search"placeholder="Day" onkeypress="return isNumberKey(event)" onkeydown=" event_input(event)" >
                     </div>
                   </div>
                   <div class="col-md-3">
@@ -236,8 +235,8 @@
                       </div>
                 </div>
               </div>
-              <br>
-
+           
+            <br>
               <!-- Panel Result -->
               <div class="col-md-12 col-xs-12" style="padding-top: 8px;">
                 <div class="panel panel-default">
@@ -256,10 +255,12 @@
                                   <span class="fa fa-download"></span> <label>Export</label>
                                 </div>
                                 <div class="col-12 col-sm-8 col-md-8">
-                                  <input type="hidden" name="sql" id="sql">
-                                  <button type="submit" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm">
-                                    <i class="fa fa-file-excel-o"></i>  Excel
-                                  </button>
+                                  <form name="input" class="form-horizontal" role="form" id="form_export"  action="<?=base_url()?>report/stock/export_excel_stock" method="POST">
+                                    <input type="hidden" name="sql" id="sql">
+                                    <button type="submit" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm">
+                                      <i class="fa fa-file-excel-o"></i>  Excel
+                                    </button>
+                                  </form>
                                 </div>
                             </div>
                             <div class="form-group" style="margin-bottom: 0px;">
@@ -273,15 +274,57 @@
                                 <li onclick="groupBy('nama_grade','Grade',3)" class="li-adv" data-index="3">Grade</li>
                               </div>
                             </div>
+                            <div class="form-group" style="margin-bottom: 0px;">
+                              <div class="col-12 col-sm-3 col-md-3">
+                                <label><i class="fa fa-star"></i> Favorite </label>
+                              </div>
+                              <div class="col-12 col-sm-8 col-md-8" id="favorites">
+                                <?php 
+                                    foreach ($user_filter as $val) {
+                                      $id_filter = $val['id'];
+                                      $id_span   = "span-".$val['id'];
+                                ?>
+                                      <a onclick='favorite("<?php echo $id_filter;?>")' class="badge" id="<?php echo $id_filter; ?>">
+                                          <?php echo $val['nama_filter'];?>
+                                      </a>
+                                      <span id="<?php echo $id_span;?>" aria-hidden="true" onclick="deleteFavorite('<?php echo $id_filter;?>')">
+                                          <i class="fa fa-remove" style="cursor: pointer;" data-toggle='tooltip' title="delete favorite"></i>
+                                      </span>
+                                <?php
+                                    }
+                                ?>
+                              </div>
+                            </div>
 
                         </div>
                         <!-- /. kiri -->
                         <!-- kanan -->
                         <div class="col-12 col-sm-12 col-md-6">
                             <div class="form-group">
+                              <div class="col-12 col-sm-12 col-md-12">
+                                <div data-toggle="collapse" href="#saveFilter" aria-expanded="false" aria-controls="saveFilter" class="collapsed" style="cursor: pointer;">
+                                <i class="saveFilter glyphicon glyphicon-triangle-bottom"></i><strong>Save Filter </strong>
+                                </div>
+                                <div id="saveFilter" class="collapse">
+                                  <div class="panel-body ">
+                                    <div class="col-md-12">
+                                      <input type="text" name="nama_filter" id="nama_filter" class="form-control input-sm" placeholder="Name Filter">
+                                    </div>
+                                    <div class="col-md-12">
+                                      <input type="checkbox" name="check_default" id="check_default">
+                                      <label>use by default</label>
+                                    </div>
+                                    <div class="col-md-12">
+                                      <button type="button" id="btn-simpan-filter" class="btn btn-default btn-sm">Save</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="form-group">
                                 <div class="col-12 col-sm-12 col-md-12">
                                   <span class="fa fa-filter"></span> 
-                                  <label>Result :</label>
+                                  <label> Result :</label>
                                   <span class="result" id="result">
                                   </span>
                                 </div>
@@ -293,7 +336,7 @@
                 </div>
               </div>
               <!-- /.Panel Result -->
-          </form>
+            </form>
              
           <div class="box-body">
             <div class="col-sm-12 table-responsive">
@@ -305,7 +348,7 @@
                             <tr>
                               <th  class="style no"  >No. </th>
                               <th  class='style' ><a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)">Lot</a></th>
-                              <th  class='style min-width-80' ><a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)">Grade</a></th>
+                              <th  class='style min-width-80' ><a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"> Grade</a></th>
                               <th  class='style min-width-100' ><a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)">Tgl diterima</a></th>
                               <th  class='style' ><a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)">Lokasi</a></th>
                               <th  class='style min-width-120' ><a class="column_sort" id="lokasi_fisik" data-order="desc" href="javascript:void(0)">Lokasi Fisik</a></th>
@@ -356,15 +399,21 @@
     $('#sql').val('');
   });
 
+  function event_input(event)
+  { 
+    if(event.keyCode == 13) {
+        event.preventDefault();
+          btn_search();
+    }
+  }
 
   // disable enter
-  $(window).keydown(function(event){
+  $('input[type="checkbox"]').keydown(function(event){
     if(event.keyCode == 13) {
       event.preventDefault();
       return false;
     }
   });
-  
   /*
    // set date tgldari
   $('#tgldari').datetimepicker({
@@ -422,22 +471,240 @@
 
     $("#cmbSearch").prop('selectedIndex',0);
 
-    var groupBy     = 'lokasi';
-    var id          = 'group-'+groupBy;
-    var caption     = 'Lokasi';
-    var dataIndex   = 1;
+    var filter_id   = '<?php echo $filter_default;?>';
 
-    arr_group.push({type:'group', nama_field:groupBy, id:id,  index_group:dataIndex});
-    
-    // add tags to result                
-    var span = '<span class="breadcumb "><span class="breadcumb-field">Group By = </span><span class="breadcumb-value"><span class="ul-pl-02">'+caption+'</span><i class="fa fa-times" data-type="group" data-search="'+groupBy+'" id="'+htmlentities_script(id)+'"></i></span></span>';
-  
-    $('#result').append(span);
-    $('.breadcumb .breadcumb-value').find('i').addClass("breadcumb-close");
-  
-    $('#groupBy [data-index="'+dataIndex+'"]').addClass('badge bg-red');//add class badge bg red
-  
-    loadSearchData();
+    if(filter_id != ''){
+      // get favorit default
+      $.ajax({
+            type      : 'POST',
+            dataType  : 'json',
+            url       : '<?=base_url()?>report/stock/get_default',
+            data      : {filter_id : filter_id},
+            success:function(data){
+              $.each(data.filter, function(index,value){
+                arr_filter.push({type:'search', nama_field:value.name_field, operator:value.operator, value:value.value_filter, id:'id-'+value.value_filter, fav:'Yes',fav_id:filter_id});
+              });
+              $.each(data.group, function(index,value){
+                id = 'group-'+value.name_field;
+                arr_group.push({type:'group', nama_field:value.name_field, id:id,  index_group:value.data_index, fav:'Yes',fav_id:filter_id}); 
+              });
+
+              $.each(data.sort, function(index,value){
+                arr_order.push({column:value.name_field, sort:value.sort, fav:'Yes',fav_id:filter_id });
+              });
+            },error: function (jqXHR, textStatus, errorThrown){
+              alert('Error Load Default');
+            },complete: function (data) {
+              loadSearchData();
+            }
+      });
+
+      $('#favorites #'+filter_id).addClass('bg-red');// css 
+      
+    }else{
+
+      var groupBy     = 'lokasi';
+      var id          = 'group-'+groupBy;
+      var caption     = 'Lokasi';
+      var dataIndex   = 1;
+
+      arr_group.push({type:'group', nama_field:groupBy, id:id,  index_group:dataIndex, fav:'No'});
+      // add tags to result                
+      var span = '<span class="breadcumb "><span class="breadcumb-field">Group By = </span><span class="breadcumb-value"><span class="ul-pl-02">'+caption+'</span><i class="fa fa-times" data-type="group" data-search="'+groupBy+'" id="'+htmlentities_script(id)+'"></i></span></span>';
+      $('#result').append(span);
+      $('.breadcumb .breadcumb-value').find('i').addClass("breadcumb-close");
+      $('#groupBy [data-index="'+dataIndex+'"]').addClass('badge bg-red');//add class badge bg red
+      loadSearchData();
+    }
+  }
+
+  // onlick Favorite
+  function favorite(id){
+
+    var id_same = false;
+    var remove_arr_group  = [];
+    var remove_arr_filter = [];
+    var remove_arr_order  = [];
+
+    // cek group fav
+    $.each(arr_group,  function(index,isi){
+        if(arr_group[index].fav =='Yes'){
+            remove_arr_group.push(index);
+            if(arr_group[index].fav_id == id){
+              id_same = true;
+            }
+        }
+    });
+    // cek filter fav
+    $.each(arr_filter,  function(index,isi){
+        if(arr_filter[index].fav =='Yes'){
+            remove_arr_filter.push(index);
+            if(arr_filter[index].fav_id == id){
+              id_same = true;
+            }
+        }
+    });
+
+    // cek order fav
+    $.each(arr_order,  function(index,isi){
+        if(arr_order[index].fav =='Yes'){
+            remove_arr_order.push(index);
+            if(arr_order[index].fav_id == id){
+              id_same = true;
+            }
+        }
+    });
+
+    if(id_same == true){
+        remove_arr_group.reverse().forEach(function(index) {
+          arr_group.splice(index, 1);
+          $('#favorites #'+id).removeClass('bg-red');// css 
+        });
+
+        remove_arr_filter.reverse().forEach(function(index) {
+          arr_filter.splice(index, 1);
+          $('#favorites #'+id).removeClass('bg-red');// css 
+        });
+
+        remove_arr_order.reverse().forEach(function(index) {
+          arr_order.splice(index, 1);
+          $('#favorites #'+id).removeClass('bg-red');// css 
+        });
+        loadSearchData();
+    }else{
+        remove_arr_group.reverse().forEach(function(index) {
+          arr_group.splice(index, 1);
+          $('#favorites a').removeClass('bg-red');// css 
+        });
+
+        remove_arr_filter.reverse().forEach(function(index) {
+          arr_filter.splice(index, 1);
+          $('#favorites a').removeClass('bg-red');// css 
+        });
+
+        remove_arr_order.reverse().forEach(function(index) {
+          arr_order.splice(index, 1);
+          $('#favorites #'+id).removeClass('bg-red');// css 
+        });
+        
+        // get favorit default
+        $.ajax({
+              type      : 'POST',
+              dataType  : 'json',
+              url       : '<?=base_url()?>report/stock/get_default',
+              data      : {filter_id : id},
+              success:function(data){
+                jml_group = parseInt(arr_group.length) +  parseInt(data.group.length);
+                if(jml_group > 2 ){
+                  alert_modal_warning('Maaf, Favorite tidak bisa di pilih karena terdapat Group By yang lebih dari 2');
+                }else{
+                  $.each(data.filter, function(index,value){
+                    arr_filter.push({type:'search', nama_field:value.name_field, operator:value.operator, value:value.value_filter, id:'id-'+value.value_filter, fav:'Yes',fav_id:id});
+                  });
+                  $.each(data.group, function(index,value){
+                    id_group = 'group-'+value.name_field;
+                    arr_group.push({type:'group', nama_field:value.name_field, id:id_group,  index_group:value.data_index, fav:'Yes',fav_id:id}); 
+                  });
+                  $.each(data.sort, function(index,value){
+                    arr_order.push({column:value.name_field, sort:value.sort, fav:'Yes',fav_id:id });
+                  });
+                  $('#favorites #'+id).addClass('bg-red');// css 
+                }
+              },error: function (jqXHR, textStatus, errorThrown){
+                alert('Error Load Default');
+              },complete: function (data) {
+                loadSearchData();
+              }
+        });
+
+    }
+  }
+
+  // delete favorite
+  function deleteFavorite(id){
+        
+        // apa badge yg di hapus tu hapus
+        var active     = $("#favorites a[id='"+id+"'] ").hasClass('badge bg-red');
+        var remove_arr_group  = [];
+        var remove_arr_filter = [];
+        var remove_arr_order  = [];
+        var id_same    = false;
+         // cek group fav
+        $.each(arr_group,  function(index,isi){
+            if(arr_group[index].fav =='Yes'){
+              if(arr_group[index].fav_id == id){
+                  remove_arr_group.push(index);
+                  id_same = true;
+                }
+            }
+        });
+        // cek filter fav
+        $.each(arr_filter,  function(index,isi){
+            if(arr_filter[index].fav =='Yes'){
+              if(arr_filter[index].fav_id == id){
+                  remove_arr_filter.push(index);
+                  id_same = true;
+                }
+            }
+        });
+
+        // cek order fav
+        $.each(arr_order,  function(index,isi){
+            if(arr_order[index].fav =='Yes'){
+                remove_arr_order.push(index);
+                if(arr_order[index].fav_id == id){
+                  id_same = true;
+                }
+            }
+        });
+
+        if(id == ''){
+          alert_modal_warning('Favorite Kosong ! ');
+        }else{
+          please_wait(function(){});
+          $.ajax({
+                  type: "POST",
+                  dataType : "JSON",
+                  url : '<?=base_url()?>report/stock/delete_favorite',
+                  data: {filter_id:id,},
+                  success: function(data){
+                    if(data.sesi == 'habis'){
+                      alert_modal_warning(data.message);
+                      var baseUrl = '<?php echo base_url(); ?>';
+                      window.location = baseUrl;//replace ke halaman login  
+                    }else {
+                      unblockUI( function() {
+                        setTimeout(function() { 
+                            alert_notify(data.icon,data.message,data.type,function(){});
+                            if(active == true || id_same == true){
+                                // remove filter
+                                remove_arr_group.reverse().forEach(function(index) {
+                                  arr_group.splice(index, 1);
+                                });
+
+                                remove_arr_filter.reverse().forEach(function(index) {
+                                  arr_filter.splice(index, 1);
+                                });
+
+                                remove_arr_order.reverse().forEach(function(index) {
+                                  arr_order.splice(index, 1);
+                                });
+                                loadSearchData();
+                            }
+                         }, 1000);
+                      });
+                    }
+                   $("#favorites a[id='"+id+"'] ").remove();
+                   $("#favorites span[id='span-"+id+"'] ").remove();
+
+                  
+                   
+                  },error : function(jqXHR, textStatus, errorThrown){
+                    alert('error delete Favorite');
+                    unblockUI( function() {});
+                  }
+          }); 
+        }
   }
 
 
@@ -514,7 +781,7 @@
           value += "</select>";
           value += '</div>';
           value += '<div class="col-md-3">';
-          value += '<input type="number" class="form-control input-sm" id="search" name="search" placeholder="Day" onkeypress="return isNumberKey(event)">';
+          value += '<input type="number" class="form-control input-sm" id="search" name="search" placeholder="Day" onkeypress="return isNumberKey(event)" onkeydown="event_input(event)" >';
           value += '</div>';
           $('#f_search').html(value);
     }else{
@@ -527,16 +794,81 @@
           value += "</select>";
           value += '</div>';
           value += '<div class="col-md-3">';
-          value += '<input type="text" class="form-control input-sm" id="search" name="search" >';
+          value += '<input type="text" class="form-control input-sm" id="search" name="search" onkeydown="event_input(event)" >';
           value += '</div>';
           $('#f_search').html(value);
     }
 
   }); 
 
+  // klik btn search
+  $('#btn-simpan-filter').on('click', function(e){
+        var nama_filter   = $('#nama_filter').val();
+        var check_default  = false;
+        var checkboxes_default =  new Array(); 
+        checkboxes_default = $('input[name="check_default"]').map(function(e, i) {
+                if(this.checked == true){
+                  check_default = true;
+                  return i.value;
+                }
+        }).get();
+
+        var favorite = false;
+         // cek array group dan filter fav=no
+        $.each(arr_group,  function(index,isi){
+            if(arr_group[index].fav =='Yes'){
+              favorite = true;
+            }
+        });
+        // cek filter fav
+        $.each(arr_filter,  function(index,isi){
+            if(arr_filter[index].fav =='Yes'){
+              favorite = true;
+            }
+        });
+
+        if(nama_filter == ''){
+          alert_modal_warning('Nama Flter Harus diisi !');
+        }else if(favorite == true){
+          alert_modal_warning('Filter tidak bisa disimpan, karena terdapat Favorite yang aktif !');
+        }else{
+          please_wait(function(){});
+          $.ajax({
+                  type: "POST",
+                  dataType : "JSON",
+                  url : '<?=base_url()?>report/stock/save_filter',
+                  data: {nama_filter:nama_filter, default:check_default, arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group),arr_order:JSON.stringify(arr_order) },
+                  success: function(data){
+
+                    if(data.sesi == 'habis'){
+                      alert_modal_warning(data.message);
+                      var baseUrl = '<?php echo base_url(); ?>';
+                      window.location = baseUrl;//replace ke halaman login  
+                    }else {
+                      unblockUI( function() {
+                        setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                      });
+                    }
+                
+                    $('#btn-simpan-filter').button('reset');
+                    $("#favorites").load(location.href + " #favorites>*");
+                    $('#nama_filter').val('');
+                  },error : function(jqXHR, textStatus, errorThrown){
+                    alert('error simpan filter');
+                    $('#btn-simpan-filter').button('reset');
+                    unblockUI( function() {});
+                  }
+          });
+        }
+
+  });
 
   // klik btn search
   $('#btn-search').on('click', function(e){
+    btn_search();
+  });
+
+  function btn_search(){
     //alert('masuk');
     var search      = $('#search').val();
     var cmbSearch   = $('#cmbSearch').val();
@@ -568,7 +900,7 @@
         }
 
         // add to array 
-        arr_filter.push({type:'search', nama_field:cmbSearch, operator:cmbOperator,  value:search, id:id});
+        arr_filter.push({type:'search', nama_field:cmbSearch, operator:cmbOperator,  value:search, id:id, fav:'No'});
         
         if(cmbSearch == 'sales_group'){
           $.each(obj_sales, function(index,isi){
@@ -601,7 +933,7 @@
 
     }
          
-  });
+  }
 
 
   // remove tags result
@@ -669,7 +1001,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : '<?=base_url()?>report/stock/loadData/'+pageNum,
-                data: {arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), arr_oder:arr_order, transit:check_transit},
+                data: {arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), arr_order:arr_order, transit:check_transit},
                 success: function(data){
 
                   $('#pagination').html(data.pagination);
@@ -681,7 +1013,6 @@
                   let empty = true;
                   if(data.group == true){
                     empty = false;
-
                     let $ro    = 1;
                     let $row   = '';
 
@@ -703,26 +1034,25 @@
                     $("#example1").append($row);
 
                   }else{
-
-                      //if(data.sql != ''){
-                      // buat list record
                       tbody = loadRecord(data.record);
-                      if(data.record.length == 0){
-                        var tr = $("<tr>").append($("<td colspan='16' align='center'>").text('Tidak ada Data'));
-                        tbody.append(tr);
-                      }
                       $("#example1").append(tbody);
-                      //}
                   }
-                    $('#btn-search').button('reset');
 
-                    if($('#search').is('select')){
-                        $('#search').prop('selectedIndex',0);
-                    }else{
-                        $('#search').val('');// kosongkan search
-                    }
-                    $("#example1_processing").css('display','none'); // hidden loading
-                    unblockUI( function() {});
+                  if(data.record.length == 0){
+                      let tbody = $("<tbody />");
+                      let tr    = $("<tr>").append($("<td colspan='16' align='center'>").text('Tidak ada Data'));
+                      tbody.append(tr)
+                      $('#example1').append(tbody);
+                  }
+
+                  $('#btn-search').button('reset');
+                  if($('#search').is('select')){
+                      $('#search').prop('selectedIndex',0);
+                  }else{
+                      $('#search').val('');// kosongkan search
+                  }
+                  $("#example1_processing").css('display','none'); // hidden loading
+                  unblockUI( function() {});
                 },error : function(jqXHR, textStatus, errorThrown){
                   //alert(jqXHR.responseText);
                   alert('error data '+jqXHR.responseText);
@@ -736,7 +1066,7 @@
     
 
     // cek sql saat klik btn excel
-    $("#form_filter").submit(function(event){
+    $("#form_export").submit(function(event){
 
         var sql = $('#sql').val();
         if(event.keyCode == 13){
@@ -750,7 +1080,7 @@
         }
     });
 
-    // remove aray group
+    // remove array group
     function removeGroup(data_type,nama_field,id){
       
       $.each(arr_group,  function(index,isi){
@@ -778,18 +1108,23 @@
       var indexKe     = '';
       var id          = 'group-'+groupBy;
       var empty       = true;
+      var favorite    = true;
 
       $.each(arr_group,  function(index,isi){
           if(arr_group[index].nama_field == groupBy && arr_group[index].index_group == dataIndex){
             //alert('ada');
             empty = false;
+            if(arr_group[index].fav == 'No'){
+              favorite  = false;
+            }
           }
       });
 
       if(empty == false){
-        removeGroup('group',groupBy,id);
-        $('#'+id+'').parents(".breadcumb").remove();
-
+        if(favorite == false){
+          removeGroup('group',groupBy,id);
+          $('#'+id+'').parents(".breadcumb").remove();
+        }
       }else{
 
         if(arr_group.length == 2){
@@ -797,7 +1132,7 @@
         }else{
 
           // add to array 
-          arr_group.push({type:'group', nama_field:groupBy, id:id,  index_group:dataIndex});
+          arr_group.push({type:'group', nama_field:groupBy, id:id,  index_group:dataIndex, fav:'No'});
 
           // add tags to result                
           var span = '<span class="breadcumb "><span class="breadcumb-field">Group By = </span><span class="breadcumb-value"><span class="ul-pl-02">'+caption+'</span><i class="fa fa-times" data-type="group" data-search="'+groupBy+'" id="'+htmlentities_script(id)+'"></i></span></span>';
@@ -823,7 +1158,7 @@
     var info_page = '';
     var page_next = '';
     var page_prev = '';
-    //var id_dept   = '<?php  echo $id_dept;?>';
+    var this_icon = '';
 
     // ambil data berdasarkan data-content='edit'
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -842,6 +1177,7 @@
         }
 
         $(this).find(".glyphicon").toggleClass("glyphicon-plus glyphicon-minus"); // ganti icon + jadi minus
+        this_icon = $(this);
     });
     //alert('array loadchild');
 
@@ -874,6 +1210,9 @@
                   return i.value;
                 }
         }).get();
+
+       this_icon.html('<i class="fa fa-spinner fa-spin "></i>');
+       this_icon.css('pointer-events','none');
      
        $.ajax({
             type      : 'POST',
@@ -885,6 +1224,31 @@
               if(data.list_group != ''){
                 $('#example1 tbody[id='+data.tbody_id+']').after(data.list_group);
                 tmp_arr_group.push(data.tmp_arr_group);
+
+                empty = false;
+
+                let $ro    = 1;
+                let $row   = '';
+                      //let $group_ke_next = 0;
+                let $group   = data.tbody_id;
+                let $group_ke_next = parseInt(data.group_ke) + 1;
+
+                $.each(data.list_group, function(key, value){
+                      $id      = $group+'-'+$ro;
+                      $row  += "<tbody data-root='"+$group+"' data-parent='"+$group+"' id='"+$id+"'>";
+                      $row  += "<tr  class='oe_group_header'>";
+                      $row  += "<td></td>";
+                      $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$group+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
+                      $row  += "<td colspan='4' style='min-width:120px'>"+value.grouping+"</td>";
+                      $row  += "<td align='right' colspan='2'>"+value.qty+"</td>";
+                      $row  += "<td align='right' colspan='2' style='min-width:100px'>"+value.qty2+"</td>";
+                      $row  += "<td class='list_pagination' colspan='3' style='min-width:80px'></td>";
+                      $row  += "</tr>";
+                      $row  += "</tbody>";
+                      $ro++;
+                });
+                $('#example1 tbody[id='+data.tbody_id+']').after($row);
+
               }else{
                 let tbody = $("<tbody data-root='"+data.root+"' data-parent='"+tbody_id+"' />");
                 let row   = '';
@@ -915,25 +1279,30 @@
                 });
                
                 $('#example1 tbody[id='+data.tbody_id+']').after(tbody);
-
-                  // buat pagination jika data lebih dari 10
-                if(data.total_record > data.limit){
-                  info_page = data.page_now+'/'+data.all_page;
-                  page_prev = data.page_now;
-                  page_next = data.page_now+1;
-                  $('#example1 tbody[id='+data.tbody_id+'] tr' ).find("td.list_pagination").each(function(){
-                    html  += '<button type="button" class="btn btn-xs btn-default" data-pager-action="previous" info-page-now='+page_prev+' style="visibility: hidden;"><</button>';
-                    html  += ' <span class="list_page_state"> '+info_page+' </span>';
-                    html  += ' <button type="button" class="btn btn-xs btn-default" data-pager-action="next" info-page-now='+page_next+'>></button>' ;
-                    $(this).html(html);
-                  });
-                }
-
+              }
+              
+              // buat pagination jika data lebih dari 10
+              if(data.total_record > data.limit){
+                info_page = data.page_now+'/'+data.all_page;
+                page_prev = data.page_now;
+                page_next = data.page_now+1;
+                $('#example1 tbody[id='+data.tbody_id+'] tr' ).find("td.list_pagination").each(function(){
+                  html  += '<button type="button" class="btn btn-xs btn-default" data-pager-action="previous" info-page-now='+page_prev+' style="visibility: hidden;"><</button>';
+                  html  += ' <span class="list_page_state"> '+info_page+' </span>';
+                  html  += ' <button type="button" class="btn btn-xs btn-default" data-pager-action="next" info-page-now='+page_next+'>></button>' ;
+                  $(this).html(html);
+                });
               }
 
+              // kembalikan icon ke awal
+              this_icon.css('pointer-events','');
+              this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+             
             },error: function (jqXHR, textStatus, errorThrown){
-              alert(jqXHR.responseText);
               alert('Error Load Child Root');
+              // kembalikan icon ke awal
+              this_icon.css('pointer-events','');
+              this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
             }
       });
 
@@ -958,7 +1327,10 @@
     });
 
     action = 'prev';
-    loadPageChild(kode,group_by,group_ke,tbody_id,page,action,root)
+    var this_icon =  $(this);
+    loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
+    this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+    this_icon.css('pointer-events','none');
   });
 
 
@@ -979,12 +1351,15 @@
         page = $(this).attr('info-page-now');
     });
     action = 'next';
-    loadPageChild(kode,group_by,group_ke,tbody_id,page,action,root)
+    var this_icon =  $(this);
+    loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
+    this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
+    this_icon.css('pointer-events','none');
   });
 
 
   // untuk meload child dari next/prev button
-  function loadPageChild(kode,group_by,group_ke,tbody_id,page,action,root){
+  function loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root){
 
             var check_transit  = false;
             var checkboxes_arr =  new Array(); 
@@ -1006,34 +1381,62 @@
             
                 $("#example1 tbody[data-parent='"+tbody_id+"']").remove();// remove child by data-parent
 
-                let tbody = $("<tbody data-root='"+data.root+"' data-parent='"+tbody_id+"' />");
-                let no  = 1;
+                if(data.list_group != ''){
+                    empty = false;
 
-                $.each(data.record, function(key, value) {
+                    let $ro    = 1;
+                    let $row   = '';
+                          //let $group_ke_next = 0;
+                    let $group   = data.tbody_id;
+                    let $group_ke_next = parseInt(data.group_ke) + 1;
 
-                      var tr = $("<tr style='background-color: #f2f2f2;'>").append(
-                                  $("<td>").text(no),
-                                  $("<td >").text(value.lot),
-                                  $("<td>").text(value.grade),
-                                  $("<td>").text(value.tgl_diterima),
-                                  $("<td>").text(value.lokasi),
-                                  $("<td>").text(value.lokasi_fisik),
-                                  $("<td>").text(value.kode_produk),
-                                  $("<td>").text(value.nama_produk),
-                                  $("<td align='right'>").text(value.qty),
-                                  $("<td align='right'>").text(value.qty2),
-                                  $("<td align='right'>").text(value.lebar_greige),
-                                  $("<td align='right'>").text(value.lebar_jadi),
-                                  $("<td>").text(value.sales_order),
-                                  $("<td>").text(value.sales_group),
-                                  $("<td>").text(value.qty_opname),
-                                  $("<td>").text(value.umur_produk),
-                       );
-                      tbody.append(tr);
-                      no++;
-                });
-               
-                $('#example1 tbody[id='+data.tbody_id+']').after(tbody);
+                    $.each(data.list_group, function(key, value){
+                          $id      = $group+'-'+$ro;
+                          $row  += "<tbody data-root='"+$group+"' data-parent='"+$group+"' id='"+$id+"'>";
+                          $row  += "<tr  class='oe_group_header'>";
+                          $row  += "<td></td>";
+                          $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$group+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
+                          $row  += "<td colspan='4' style='min-width:120px'>"+value.grouping+"</td>";
+                          $row  += "<td align='right' colspan='2'>"+value.qty+"</td>";
+                          $row  += "<td align='right' colspan='2' style='min-width:100px'>"+value.qty2+"</td>";
+                          $row  += "<td class='list_pagination' colspan='3' style='min-width:80px'></td>";
+                          $row  += "</tr>";
+                          $row  += "</tbody>";
+                          $ro++;
+                    });
+                    $('#example1 tbody[id='+data.tbody_id+']').after($row);
+                }else{
+
+                  let tbody = $("<tbody data-root='"+data.root+"' data-parent='"+tbody_id+"' />");
+                  let no  = 1;
+  
+                  $.each(data.record, function(key, value) {
+  
+                        var tr = $("<tr style='background-color: #f2f2f2;'>").append(
+                                    $("<td>").text(no),
+                                    $("<td >").text(value.lot),
+                                    $("<td>").text(value.grade),
+                                    $("<td>").text(value.tgl_diterima),
+                                    $("<td>").text(value.lokasi),
+                                    $("<td>").text(value.lokasi_fisik),
+                                    $("<td>").text(value.kode_produk),
+                                    $("<td>").text(value.nama_produk),
+                                    $("<td align='right'>").text(value.qty),
+                                    $("<td align='right'>").text(value.qty2),
+                                    $("<td align='right'>").text(value.lebar_greige),
+                                    $("<td align='right'>").text(value.lebar_jadi),
+                                    $("<td>").text(value.sales_order),
+                                    $("<td>").text(value.sales_group),
+                                    $("<td>").text(value.qty_opname),
+                                    $("<td>").text(value.umur_produk),
+                         );
+                        tbody.append(tr);
+                        no++;
+                  });
+                 
+                  $('#example1 tbody[id='+data.tbody_id+']').after(tbody);
+                }
+
 
                 if(action == 'prev' && data.page_now == 2){// jika saat previus dan page ==2 atau maka hidden btn prev
                   page_prev_start = 1;
@@ -1067,10 +1470,25 @@
 
                 $("#example1 tbody[id='"+tbody_id+"'] tr ").find("td.list_pagination button[data-pager-action='next'] ").attr('info-page-now',page_next);
                 //alert(action);
+                if(action == 'next'){
+                  icon = '>';
+                }else{
+                  icon = '<';
+                }
+                this_icon.html(icon);
+                this_icon.css('pointer-events','');   
 
             },error: function (jqXHR, textStatus, errorThrown){
               //alert(jqXHR.responseText);
               alert('Error Load Page Child');
+              //alert(action);
+              if(action == 'next'){
+                  icon = '>';
+                }else{
+                  icon = '<';
+              }
+              this_icon.html(icon);
+              this_icon.css('pointer-events','');   
             }
       });
 
@@ -1093,7 +1511,7 @@
       var hapus       = false;
       arr_order   = [];
 
-      arr_order.push({column:nama_kolom, sort:order });
+      arr_order.push({column:nama_kolom, sort:order, fav:'No' });
 
       //let index = arr_order.indexOf();
       /*
