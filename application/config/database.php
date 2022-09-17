@@ -75,7 +75,7 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => '10.10.0.1',
+	'hostname' => 'localhost',
 	'username' => 'root',
 	'password' => 'toor',
 	'database' => 'hmsdb',
