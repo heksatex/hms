@@ -50,6 +50,26 @@ class M_trackinglot extends CI_Model
                                 WHERE fg.lot = '$lot' ORDER by fg.create_date asc ")->result();
     }
 
+    function get_mrp_cons_by_lot($lot){
+        return $this->db->query("SELECT rm.kode, rm.kode_produk, rm.nama_produk, d.nama as nama_dept, smi.tanggal_transaksi
+                                FROM mrp_production_rm_hasil rm
+                                INNER JOIN mrp_production mrp ON rm.kode = mrp.kode
+                                INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id AND smi.quant_id = rm.quant_id
+                                INNER JOIN departemen d ON mrp.dept_id = d.kode
+                                WHERE rm.lot = '$lot' ORDER by smi.tanggal_transaksi asc ")->result();
+    }
+
+    function get_mrp_cons_target_by_lot($lot){
+        return $this->db->query("SELECT rm.kode, rm.kode_produk, rm.nama_produk, d.nama as nama_dept, smi.tanggal_transaksi, smi.status, ms.nama_status
+                                FROM mrp_production_rm_target rm
+                                INNER JOIN mrp_production mrp ON rm.kode = mrp.kode
+                                INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id
+                                INNER JOIN departemen d ON mrp.dept_id = d.kode
+                                INNER JOIN mst_status ms ON smi.status = ms.kode
+                                WHERE smi.lot = '$lot' AND smi.status NOT IN ('done') ORDER by smi.tanggal_transaksi asc
+                                ")->result();
+    }
+
     function get_transfer_lokasi_by_lot($lot){
         return $this->db->query("SELECT tl.kode_tl, tl.tanggal_transfer, tl.lokasi_tujuan, d.nama as departemen, tl.nama_user, tli.lot, tli.lokasi_asal, ms.nama_status
                                 FROM transfer_lokasi tl

@@ -17,8 +17,16 @@ class Stock extends MY_Controller
 
 	public function index()
     {
-    	$id_dept         = 'RSTOK';
-    	$data['id_dept'] = $id_dept;
+    	$id_dept            = 'RSTOK';
+        $username           = $this->session->userdata('username');
+    	$data['id_dept']    = $id_dept;
+        $data['user_filter']= $this->_module->get_list_user_filter($id_dept,$username);
+        $filter_default     = $this->_module->get_user_filter_default($id_dept,$username);
+        $data['filter_default'] =  $filter_default['id'];
+        //$data['dfi']        = $this->_module->get_user_filter_isi_by_id($filter_default['id'])->row_array();
+        //$data['dfg']        = $this->_module->get_user_filter_isi_by_id($filter_default['id'])->row_array();
+        //$data['filter_group']   = $this->_module->get_user_filter_grouping_by_id('1');
+
     	$type_condition     = $this->_module->get_first_type_conditon($id_dept);
         $data['mstFilter']  = $this->_module->get_list_mst_filter($id_dept);
         $data['list_grade'] = $this->_module->get_list_grade();
@@ -27,6 +35,82 @@ class Stock extends MY_Controller
         $data['list_grade']      = $this->_module->get_list_grade();
 		$data['mst_sales_group'] = $this->_module->get_list_sales_group();
     	$this->load->view('report/v_stock', $data);
+    }
+
+    public function get_default()
+    {   
+        $filter_id = $this->input->post('filter_id');
+        $filter =  $this->_module->get_user_filter_isi_by_id($filter_id)->result_array();
+        $group  =  $this->_module->get_user_filter_grouping_by_id($filter_id)->result_array();
+        $sort   =  $this->_module->get_user_filter_order_by_id($filter_id)->result_array();
+        echo json_encode(array('filter' => $filter, 'group' => $group, 'sort' => $sort));
+    }
+
+    public function save_filter()
+    {
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+            $sub_menu    = $this->uri->segment(2);
+            $id_dept     = 'RSTOK';
+            $username    = addslashes($this->session->userdata('username')); 
+            $nama_filter = $this->input->post('nama_filter');
+            $data_filter = json_decode($this->input->post('arr_filter'),true); // tampung arr filter
+            $data_group  = json_decode($this->input->post('arr_group'),true);
+            $data_order  = json_decode($this->input->post('arr_order'),true);
+            $default     = $this->input->post('default');
+
+            // cek apakah user terdapat save default atau tidak
+            $filter_default  = $this->_module->get_user_filter_default($id_dept,$username);
+            if(!empty($filter_default['id']) AND $default == 'true'){
+                $callback = array('status' => 'failed', 'message'=> 'Maaf, use by default filter sudah ada, silahkan uncheck use default jika ingin menyimpan Filternya !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else{
+                // lock table
+                $this->_module->lock_tabel('user_filter WRITE, user_filter_isi WRITE, user_filter_grouping WRITE, user_filter_order_by WRITE');
+                $filter_id = $this->_module->get_last_user_filter_id();
+                $this->_module->save_user_filter($filter_id,$username,$id_dept,$sub_menu,$nama_filter,$default);
+                foreach($data_filter as $filter){
+                    // insert table filter isi
+                    $nama_field     = $filter['nama_field'];
+                    $operator       = $filter['operator'];
+                    $value          = $filter['value'];
+                    $this->_module->save_user_filter_isi($filter_id,$nama_field,$operator,$value,'');
+                }
+                foreach($data_group as $group){
+                    $index      = $group['index_group'];
+                    $nama_field = $group['nama_field'];
+                    $this->_module->save_user_filter_grouping($filter_id,$nama_field,$index);
+                }
+                foreach($data_order as $order){
+                    $column    = $order['column'];
+                    $sort      = $order['sort'];
+                    $this->_module->save_user_filter_order($filter_id,$column,$sort);
+                }
+                //unlock table
+                $this->_module->unlock_tabel();
+                $callback = array('status' => 'success', 'message'=> 'Data Filter Berhasil Disimpan !', 'icon' => 'fa fa-check', 'type'=>'success');
+            }
+
+        }
+        echo json_encode($callback);
+    }
+
+    public function delete_favorite()
+    {
+
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+            $filter_id = $this->input->post('filter_id');
+            //delete favorite
+            $this->_module->delete_user_filter($filter_id);
+            $callback = array('status' => 'success', 'message'=> 'Favorite Berhasil Dihapus !', 'icon' => 'fa fa-check', 'type'=>'success');
+        }
+
+        echo json_encode($callback);
+
     }
 
     public function loadData($record=0)
@@ -74,7 +158,7 @@ class Stock extends MY_Controller
             }
         }else{
             $order_by = "ORDER BY sq.quant_id desc";
-            $order_by_in_group = "";
+            $order_by_in_group = "ORDER BY sq.quant_id asc";
         }
 
 	    $dataRecord  = [];
@@ -94,25 +178,24 @@ class Stock extends MY_Controller
         		break;
         	}
 
-        	$list = $this->m_stock->get_list_stock_grouping($where_lokasi, $nama_field, $where_result,$order_by_in_group);
-            $tot_group = 0;
+        	$list = $this->m_stock->get_list_stock_grouping($where_lokasi, $nama_field, $where_result,$order_by_in_group,$record,$recordPerPage);
+            //$tot_group = 0;
         	foreach ($list as $gp) {
         		# code...
-        		$dataRecord[]  = array('group' => 'Yes',
+        		$dataRecord[]  = array('group'      => 'Yes',
         							   'nama_field' => $gp->nama_field,
         							   'grouping'   => $gp->grouping,
         							   'qty'        => 'Qty1 = '.number_format($gp->tot_qty,2),
         							   'qty2'       => 'Qty2 = '.number_format($gp->tot_qty2,2),
                                        'by'         => $nama_field
         						);
-                $tot_group++;
-                
-
+                //$tot_group++;
         	}
 
-        	$group = true;
+        	$group      = true;
         	$name_total = "Total Group : ";
-            $allcount   = $tot_group;
+            $allcount   = $this->m_stock->get_record_list_stock_grouping($where_lokasi, $nama_field, $where_result);
+            //$allcount   = $tot_group;
 
         }else{
             $name_total="Total Data : ";
@@ -140,23 +223,23 @@ class Stock extends MY_Controller
     	    							);
     	    	}
 
-
                 $allcount   = $this->m_stock->get_record_stock($where_lokasi,$where_result);
+            }
 
-                $config['base_url']         = base_url().'report/stock/loadData';
-                $config['use_page_numbers'] = TRUE;
-                $config['total_rows']       = $allcount;
-                $config['per_page']         = $recordPerPage;
-                
-                //$config['first_link']     = FALSE;
-                //$config['last_link']      = FALSE;
-                $config['num_links']        = 1;
-                $config['next_link']        = '>';
-                $config['prev_link']        = '<';
-                $this->pagination->initialize($config);
-                $pagination         = $this->pagination->create_links();
-    	}
+            $config['base_url']         = base_url().'report/stock/loadData';
+            $config['use_page_numbers'] = TRUE;
+            $config['total_rows']       = $allcount;
+            $config['per_page']         = $recordPerPage;
+            
+            //$config['first_link']     = FALSE;
+            //$config['last_link']      = FALSE;
+            $config['num_links']        = 1;
+            $config['next_link']        = '>';
+            $config['prev_link']        = '<';
+            $this->pagination->initialize($config);
+            $pagination         = $this->pagination->create_links();
 
+            
         $total_record       = $name_total.' '. number_format($allcount);
 
     	$callback  = array('group' => $group, 'record' => $dataRecord, 'pagination'=>$pagination, 'total_record'=>$total_record, 'sql' => $where_result.' '.$order_by);
@@ -210,7 +293,7 @@ class Stock extends MY_Controller
             }
         }else{
             $order_by = "ORDER BY sq.quant_id desc";
-            $order_by_in_group = "";
+            $order_by_in_group = "ORDER BY sq.quant_id desc";
         }
 
 
@@ -218,8 +301,9 @@ class Stock extends MY_Controller
         $tmp_arr_group = [];
         $all_page    = 0;
         $allcount    = 0;
-        $list_group  = '';
+        $list_group  = [];
         $where_result= '';
+        $by2         = '';
 
 
         // create where
@@ -238,15 +322,15 @@ class Stock extends MY_Controller
         }
 
         // informasi page sekarang
-        $page_now = $record+1;
-        $recordPerPage = 10;
+        $page_now       = $record+1;
+        $recordPerPage  = 10;
 
+        if($record != 0){
+           $record = ($record-1) * $recordPerPage;
+        }
 
         if($group_ke == count($data_group)){// loadchild list
 
-            if($record != 0){
-               $record = ($record-1) * $recordPerPage;
-            }
 
             $list = $this->m_stock->get_list_stock_by($where_lokasi,$where_result,$order_by,$record,$recordPerPage)->result();
             foreach ($list as $row) {
@@ -282,9 +366,10 @@ class Stock extends MY_Controller
             $group    = $tbody_id;
             $by2      = $data_group[$group_ke]['nama_field'];
             
-            $list = $this->m_stock->get_list_stock_grouping($where_lokasi,$by2, $where_result,$order_by_in_group);
+            $list = $this->m_stock->get_list_stock_grouping($where_lokasi,$by2, $where_result,$order_by_in_group,$record,$recordPerPage);
             $group_ke_next = $group_ke + 1;
         
+            /*    
             foreach ($list as $gp2) {
                 # code...
                 $groupOf = $group;
@@ -300,9 +385,21 @@ class Stock extends MY_Controller
                 $row .= "</tr>";
                 $row .="</tbody>";
                 $no++;
+            } */
 
-            }
-            $list_group  = $row;
+            foreach ($list as $gp2) {
+        		$list_group[]  = array('group'      => 'Yes',
+        							   'nama_field' => $gp2->nama_field,
+        							   'grouping'   => $gp2->grouping,
+        							   'qty'        => 'Qty1 = '.number_format($gp2->tot_qty,2),
+        							   'qty2'       => 'Qty2 = '.number_format($gp2->tot_qty2,2),
+                                       'by'         => $tbody_id
+        						);
+        	}
+
+
+            $allcount = $this->m_stock->get_record_list_stock_grouping($where_lokasi, $by2, $where_result);
+            $all_page = ceil($allcount/$recordPerPage);
 
             // create array tmpung group yang terbuka / collapsed
             $tmp_arr_group = array('tbody_id' => $tbody_id, 'by' => $group_by, 'value' => $kode);
@@ -314,6 +411,8 @@ class Stock extends MY_Controller
                           'total_record'    => $allcount,
                           'all_page'        => $all_page,
                           'page_now'        => $page_now,
+                          'group_ke'        => $group_ke,
+                          'group_by'        => $by2,
                           'list_group'      => $list_group,
                           'root'            => $root,
                           'limit'           => $recordPerPage,

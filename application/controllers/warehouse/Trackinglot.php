@@ -27,7 +27,7 @@ class Trackinglot extends MY_Controller
         $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
     }else{
 
-        $txtlot         = $this->input->post('txtlot');
+        $txtlot         = addslashes($this->input->post('txtlot'));
         $result_info    = [];
         $result_record  = [];
         $result_tmp     = [];
@@ -84,6 +84,32 @@ class Trackinglot extends MY_Controller
                                             );
                 }
 
+                // get mrp_production_rm_target status != done
+                $rmt = $this->m_trackingLot->get_mrp_cons_target_by_lot($txtlot);
+                foreach($rmt as $rmts){
+                   $kode_encrypt = encrypt_url($rmts->kode);
+                   $result_record[] = array('tanggal' => $rmts->tanggal_transaksi, 
+                                     'kode'        => $rmts->kode,
+                                     'link'        => 'manufacturing/mO/edit/'.$kode_encrypt,
+                                     'keterangan'  => 'Bahan Baku Produksi yang Terpesan -> '.$rmts->nama_dept,
+                                     'status'      =>  $rmts->nama_status,
+                                     'user'        => '-',
+                                     );
+                }
+
+                // get mrp_production_rm_hasil
+                $rmh = $this->m_trackingLot->get_mrp_cons_by_lot($txtlot);
+                foreach($rmh as $rmhs){
+                   $kode_encrypt = encrypt_url($rmhs->kode);
+                   $result_record[] = array('tanggal' => $rmhs->tanggal_transaksi, 
+                                     'kode'         => $rmhs->kode,
+                                     'link'       => 'manufacturing/mO/edit/'.$kode_encrypt,
+                                     'keterangan'  => 'Bahan Baku Produksi -> '.$rmhs->nama_dept,
+                                     'status'      => '-',
+                                     'user'        => '-',
+                                     );
+                }
+
                 // get mrp_production_fg_hasil
                 $mrp = $this->m_trackingLot->get_mrp_by_lot($txtlot);
                 foreach($mrp as $mrps){
@@ -91,11 +117,12 @@ class Trackinglot extends MY_Controller
                   $result_record[] = array('tanggal' => $mrps->create_date, 
                                     'kode'    => $mrps->kode,
                                     'link'     => 'manufacturing/mO/edit/'.$kode_encrypt,
-                                    'keterangan'  => 'Produksi -> '.$mrps->nama_dept,
+                                    'keterangan'  => 'Hasil Produksi -> '.$mrps->nama_dept,
                                     'status'      => '-',
                                     'user'        => $mrps->nama_user,
                                     );
                 }
+               
 
                 // transfer lokasi
                 $tl = $this->m_trackingLot->get_transfer_lokasi_by_lot($txtlot);

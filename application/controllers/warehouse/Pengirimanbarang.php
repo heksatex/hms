@@ -2373,7 +2373,7 @@ class Pengirimanbarang extends MY_Controller
 
             $deptid      = $this->input->post('deptid');
             $kode        = addslashes($this->input->post('kode'));
-            $txtbarcode  = $this->input->post('txtbarcode');
+            $txtbarcode  = addslashes($this->input->post('txtbarcode'));
             $tgl         = date('Y-m-d H:i:s');
 
             // lock table
