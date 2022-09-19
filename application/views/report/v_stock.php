@@ -191,7 +191,7 @@
           <h3 class="box-title"><b>Stock</b></h3>
         </div>
         <div class="box-body">
-            <form name="input" class="form-horizontal" role="form" method="POST">
+            <form name="input" class="form-horizontal" role="form">
               <div class="col-md-12">
                 <div class="col-md-8">
                   <div class="col-md-3">
@@ -235,108 +235,110 @@
                       </div>
                 </div>
               </div>
-           
+            </form>
             <br>
               <!-- Panel Result -->
               <div class="col-md-12 col-xs-12" style="padding-top: 8px;">
                 <div class="panel panel-default">
                     <div class="panel-collapse collapsed" role="tabpanel" aria-labelledby="result" >
                       <div class="panel-body" style="padding: 5px">
-                        <!-- kiri -->
-                        <div class="col-12 col-sm-12 col-md-6">
-                            <div class="form-group" style="margin-bottom: 0px;">
-                              <div class="col-md-12">
-                               <label><div id='total_record'>Total Data : 0</div></label>
-                               <label class="pull-right text-right"><input type="checkbox" name="transit[]" value="Transit Location"> Transit Location </label>
-                              </div>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 0px;">
-                                <div class="col-sm-3 col-md-3 col-xs-4">
-                                  <span class="fa fa-download"></span> <label>Export</label>
+                        <form name="input" class="form-horizontal" role="form" id="form_export"  action="<?=base_url()?>report/stock/export_excel_stock" method="POST">
+                          <!-- kiri -->
+                          <div class="col-12 col-sm-12 col-md-6">
+                              <div class="form-group" style="margin-bottom: 0px;">
+                                <div class="col-md-12">
+                                <label><div id='total_record'>Total Data : 0</div></label>
+                                <label class="pull-right text-right"><input type="checkbox" name="transit[]" value="Transit Location"> Transit Location </label>
                                 </div>
-                                <div class="col-12 col-sm-8 col-md-8">
-                                  <form name="input" class="form-horizontal" role="form" id="form_export"  action="<?=base_url()?>report/stock/export_excel_stock" method="POST">
-                                    <input type="hidden" name="sql" id="sql">
-                                    <button type="submit" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm">
-                                      <i class="fa fa-file-excel-o"></i>  Excel
-                                    </button>
-                                  </form>
+                              </div>
+                              <div class="form-group" style="margin-bottom: 0px;">
+                                  <div class="col-sm-3 col-md-3 col-xs-4">
+                                    <span class="fa fa-download"></span> <label>Export</label>
+                                  </div>
+                                  <div class="col-12 col-sm-8 col-md-8">
+                                  
+                                      <input type="hidden" name="sql" id="sql">
+                                      <button type="submit" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm">
+                                        <i class="fa fa-file-excel-o"></i>  Excel
+                                      </button>
+                                  
+                                  </div>
+                              </div>
+                              <div class="form-group" style="margin-bottom: 0px;">
+                                <div class="col-12 col-sm-3 col-md-3">
+                                  <span class="fa fa-database"></span> <label>Group By</label>
                                 </div>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 0px;">
-                              <div class="col-12 col-sm-3 col-md-3">
-                                <span class="fa fa-database"></span> <label>Group By</label>
+                                <div class="col-12 col-sm-8 col-md-8" id="groupBy">
+                                  <li onclick="groupBy('nama_produk','Nama Produk',0)" class="li-adv" data-index="0" >Nama Produk</li>
+                                  <li onclick="groupBy('lokasi','Lokasi',1)" class="li-adv" data-index="1">Lokasi</li>
+                                  <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',2)" class="li-adv" data-index="2">Lokasi Fisik</li>
+                                  <li onclick="groupBy('nama_grade','Grade',3)" class="li-adv" data-index="3">Grade</li>
+                                </div>
                               </div>
-                              <div class="col-12 col-sm-8 col-md-8" id="groupBy">
-                                <li onclick="groupBy('nama_produk','Nama Produk',0)" class="li-adv" data-index="0" >Nama Produk</li>
-                                <li onclick="groupBy('lokasi','Lokasi',1)" class="li-adv" data-index="1">Lokasi</li>
-                                <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',2)" class="li-adv" data-index="2">Lokasi Fisik</li>
-                                <li onclick="groupBy('nama_grade','Grade',3)" class="li-adv" data-index="3">Grade</li>
+                              <div class="form-group" style="margin-bottom: 0px;">
+                                <div class="col-12 col-sm-3 col-md-3">
+                                  <label><i class="fa fa-star"></i> Favorite </label>
+                                </div>
+                                <div class="col-12 col-sm-8 col-md-8" id="favorites">
+                                  <?php 
+                                      foreach ($user_filter as $val) {
+                                        $id_filter = $val['id'];
+                                        $id_span   = "span-".$val['id'];
+                                  ?>
+                                        <a onclick='favorite("<?php echo $id_filter;?>")' class="badge" id="<?php echo $id_filter; ?>">
+                                            <?php echo $val['nama_filter'];?>
+                                        </a>
+                                        <span id="<?php echo $id_span;?>" aria-hidden="true" onclick="deleteFavorite('<?php echo $id_filter;?>')">
+                                            <i class="fa fa-remove" style="cursor: pointer;" data-toggle='tooltip' title="delete favorite"></i>
+                                        </span>
+                                  <?php
+                                      }
+                                  ?>
+                                </div>
                               </div>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 0px;">
-                              <div class="col-12 col-sm-3 col-md-3">
-                                <label><i class="fa fa-star"></i> Favorite </label>
-                              </div>
-                              <div class="col-12 col-sm-8 col-md-8" id="favorites">
-                                <?php 
-                                    foreach ($user_filter as $val) {
-                                      $id_filter = $val['id'];
-                                      $id_span   = "span-".$val['id'];
-                                ?>
-                                      <a onclick='favorite("<?php echo $id_filter;?>")' class="badge" id="<?php echo $id_filter; ?>">
-                                          <?php echo $val['nama_filter'];?>
-                                      </a>
-                                      <span id="<?php echo $id_span;?>" aria-hidden="true" onclick="deleteFavorite('<?php echo $id_filter;?>')">
-                                          <i class="fa fa-remove" style="cursor: pointer;" data-toggle='tooltip' title="delete favorite"></i>
-                                      </span>
-                                <?php
-                                    }
-                                ?>
-                              </div>
-                            </div>
 
-                        </div>
-                        <!-- /. kiri -->
-                        <!-- kanan -->
-                        <div class="col-12 col-sm-12 col-md-6">
-                            <div class="form-group">
-                              <div class="col-12 col-sm-12 col-md-12">
-                                <div data-toggle="collapse" href="#saveFilter" aria-expanded="false" aria-controls="saveFilter" class="collapsed" style="cursor: pointer;">
-                                <i class="saveFilter glyphicon glyphicon-triangle-bottom"></i><strong>Save Filter </strong>
-                                </div>
-                                <div id="saveFilter" class="collapse">
-                                  <div class="panel-body ">
-                                    <div class="col-md-12">
-                                      <input type="text" name="nama_filter" id="nama_filter" class="form-control input-sm" placeholder="Name Filter">
-                                    </div>
-                                    <div class="col-md-12">
-                                      <input type="checkbox" name="check_default" id="check_default">
-                                      <label>use by default</label>
-                                    </div>
-                                    <div class="col-md-12">
-                                      <button type="button" id="btn-simpan-filter" class="btn btn-default btn-sm">Save</button>
+                          </div>
+                          <!-- /. kiri -->
+                          <!-- kanan -->
+                          <div class="col-12 col-sm-12 col-md-6">
+                              <div class="form-group">
+                                <div class="col-12 col-sm-12 col-md-12">
+                                  <div data-toggle="collapse" href="#saveFilter" aria-expanded="false" aria-controls="saveFilter" class="collapsed" style="cursor: pointer;">
+                                  <i class="saveFilter glyphicon glyphicon-triangle-bottom"></i><strong>Save Filter </strong>
+                                  </div>
+                                  <div id="saveFilter" class="collapse">
+                                    <div class="panel-body ">
+                                      <div class="col-md-12">
+                                        <input type="text" name="nama_filter" id="nama_filter" class="form-control input-sm" placeholder="Name Filter">
+                                      </div>
+                                      <div class="col-md-12">
+                                        <input type="checkbox" name="check_default" id="check_default">
+                                        <label>use by default</label>
+                                      </div>
+                                      <div class="col-md-12">
+                                        <button type="button" id="btn-simpan-filter" class="btn btn-default btn-sm">Save</button>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-12 col-sm-12 col-md-12">
-                                  <span class="fa fa-filter"></span> 
-                                  <label> Result :</label>
-                                  <span class="result" id="result">
-                                  </span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /. kanan -->
+                              <div class="form-group">
+                                  <div class="col-12 col-sm-12 col-md-12">
+                                    <span class="fa fa-filter"></span> 
+                                    <label> Result :</label>
+                                    <span class="result" id="result">
+                                    </span>
+                                  </div>
+                              </div>
+                          </div>
+                          <!-- /. kanan -->
+                        </form>
                       </div>
                   </div>
                 </div>
               </div>
               <!-- /.Panel Result -->
-            </form>
+            
              
           <div class="box-body">
             <div class="col-sm-12 table-responsive">
