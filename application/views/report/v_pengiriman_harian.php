@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -85,25 +84,20 @@
                       <select type="text" class="form-control input-sm" name="departemen" id="departemen" required="">
                       </select>
                     </div>
-                    <div class="col-md-1">
-                        <label>Tujuan</label>
-                    </div>
-                    <div class="col-md-4">
-                      <select type="text" class="form-control input-sm" name="tujuan" id="tujuan" >
-                      </select>
-                    </div>
                   </div>
                 </div>
                 <div class="form-group">
                   <div class="col-md-12"> 
-                    <div class="col-md-2 col-sm-2">
-                      <label>Status </label>
+                    <div class="col-md-2">
+                        <label>View </label>
                     </div>
-                    <div class="col-xs-4 col-sm-3 col-md-2">
-                        <label><input type="checkbox" name="status[]" value="ready" checked> Ready </label>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Detail">
+                      <label for="detail">Detail</label>
                     </div>
-                    <div class="col-xs-4 col-sm-3 col-md-2">
-                        <label><input type="checkbox" name="status[]"  value="done" checked> Done </label>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Global" checked="checked">
+                      <label for="global">Global</label>
                     </div>
                   </div>
                 </div>
@@ -111,8 +105,16 @@
                   <div class="col-md-12">
                     <div class="col-md-4">
                       <label>
-                          <div id='total_record'>Total Lot : 0</div>
+                          <div id='total_record'>Total Data : 0</div>
                       </label>
+                    </div>
+                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                          <label style="cursor:pointer;">
+                            <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                             Advanced 
+                          </label>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -122,6 +124,57 @@
                 <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
               </div>
               <br>
+              <div class="col-md-12">
+                  <div class="panel panel-default" style="margin-bottom: 0px;">
+                    <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                      <div class="panel-body" style="padding: 5px">
+                        <div class="form-group col-md-12" style="margin-bottom:0px">
+                          <div class="col-md-5" >
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Dept tujuan </label>
+                              </div>
+                              <div class="col-md-7">
+                                <select type="text" class="form-control input-sm" name="tujuan" id="tujuan" style="width:100% !important"></select>
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Status </label>
+                              </div>
+                              <div class="col-xs-4 col-sm-3 col-md-3">
+                                  <label><input type="checkbox" name="status[]" value="ready" checked> Ready </label>
+                              </div>
+                              <div class="col-xs-4 col-sm-3 col-md-3">
+                                  <label><input type="checkbox" name="status[]"  value="done" checked> Done </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-5">
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Kode </label>
+                              </div>
+                              <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="kode" id="kode" >
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Corak </label>
+                              </div>
+                              <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="corak" id="corak" placeholder="Corak / Nama Produk">
+                              </div>
+                            </div>
+                          </div>
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+
             </form>
 
             <!-- table -->
@@ -141,6 +194,7 @@
                               <th  class='style'>Kode Produk</th>
                               <th  class='style' style="min-width: 150px">Nama Produk</th>
                               <th  class='style' style="min-width: 150px">Lot</th>
+                              <th  class='style' id="head_lot">Lot</th>
                               <th  class='style'>Qty1</th>
                               <th  class='style'>Qty2</th>
                               <th  class='style'>Status</th>
@@ -318,6 +372,8 @@
       tglsampai     = $('#tglsampai').val();
       departemen    = $('#departemen').val();
       dept_tujuan   = $('#tujuan').val();
+      kode          = $('#kode').val();
+      corak         = $('#corak').val();
       tgldari_2     = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2   = $('#tglsampai').data("DateTimePicker").date();
 
@@ -325,6 +381,17 @@
       var checkboxes_arr = new Array(); 
 
       var checkboxes_arr = $('input[name="status[]"]').map(function(e, i) {
+            if(this.checked == true){
+                check_status = true;
+              return i.value;
+            }
+
+      }).get();
+
+      var radio_view= false;
+      var radio_arr = new Array(); 
+
+      var radio_arr = $('input[name="view[]"]').map(function(e, i) {
             if(this.checked == true){
                 check_status = true;
               return i.value;
@@ -363,15 +430,22 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/pengirimanharian/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_tujuan:dept_tujuan, status_arr:checkboxes_arr},
+                data: {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_tujuan:dept_tujuan, status_arr:checkboxes_arr, kode:kode, corak:corak, view_arr:radio_arr},
                 success: function(data){
 
                   if(data.status == 'failed'){
-                    $('#total_record').html('Total Lot : 0');
+                    $('#total_record').html('Total Data : 0');
                     alert_modal_warning(data.message);
                   }else{
 
                     $('#total_record').html(data.total_record);
+                    if(data.view == 'Global'){
+                      $('#head_lot').html('Total Lot');
+                      width_lot = "style='min-width: 50px !important'; text-align:right";
+                    }else{
+                      $('#head_lot').html('Lot');;
+                      width_lot = "style='min-width: 150px !important'";
+                    }
 
                     let tbody = $("<tbody />");
                     let no    = 1;

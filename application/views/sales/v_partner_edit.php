@@ -235,9 +235,13 @@
 
   <footer class="main-footer">
    <?php $this->load->view("admin/_partials/modal.php") ?>
-   <div id="foot">
-     <?php $this->load->view("admin/_partials/footer.php") ?>
-   </div>
+    <div id="foot">
+     <?php 
+        $data['kode'] =  $partner->id;
+        $data['mms']  =  $mms->kode;
+        $this->load->view("admin/_partials/footer.php",$data) 
+     ?>
+    </div>
   </footer>
 
 </div>
