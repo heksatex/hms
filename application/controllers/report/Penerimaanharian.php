@@ -32,62 +32,115 @@ class Penerimaanharian extends MY_Controller
 	{
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
-		$departemen  = $this->input->post('departemen');
-		$dept_dari   = $this->input->post('dept_dari');
+		$departemen  = addslashes($this->input->post('departemen'));
+		$dept_dari   = addslashes($this->input->post('dept_dari'));
+		$kode        = addslashes($this->input->post('kode'));
+		$corak  	 = addslashes($this->input->post('corak'));
 		$status_arr  = $this->input->post('status_arr');
+		$view_arr  	 = $this->input->post('view_arr');
 		$dataRecord = [];
 
 		$status      = '';
 		foreach($status_arr as $val){
-				$status .= "'".$val."',";
+				$status .= "'".$val."', ";
 		}
 		$status = rtrim($status, ', ');// pb.status in ('done','ready')
 
-		$list  = $this->m_inout->get_list_penerimaan_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_dari,$status);
-		$total = 0;
-		foreach($list as $row){
-			$nama_status = $this->_module->get_mst_status_by_kode($row->status);
-        	$kode_encrypt = encrypt_url($row->kode);
-			$dataRecord[] = array('kode' 		=> $row->kode,
-								'kode_enc'      => $kode_encrypt,
-								'tgl_kirim' 	=> $row->tanggal_transaksi,
-								'origin'		=> $row->origin,
-								'reff_picking' 	=> $row->reff_picking,
-								'kode_produk'	=> $row->kode_produk,
-								'nama_produk'	=> $row->nama_produk,
-								'lot'			=> $row->lot,
-								'qty1'			=> number_format($row->qty,2).' '.$row->uom,
-								'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
-								'status'		=> $nama_status,
-								'reff_note'		=> $row->reff_note,
-								'in'           => 'Yes'
-
-			);
-			$total++;
+		$view ='Global';
+		foreach($view_arr as $val2){
+			$view = $val2;
+			break;
 		}
 
-		$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_get_in($tgldari,$tglsampai,$departemen,$dept_dari,$status);
-		foreach($list as $row){
-			$nama_status = $this->_module->get_mst_status_by_kode($row->status);
-        	$kode_encrypt = encrypt_url($row->kode);
-			$dataRecord[] = array('kode' 		=> $row->kode,
-								'kode_enc'      => $kode_encrypt,
-								'tgl_kirim' 	=> $row->tanggal_transaksi,
-								'origin'		=> $row->origin,
-								'reff_picking' 	=> $row->reff_picking,
-								'kode_produk'	=> $row->kode_produk,
-								'nama_produk'	=> $row->nama_produk,
-								'lot'			=> $row->lot,
-								'qty1'			=> number_format($row->qty,2).' '.$row->uom,
-								'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
-								'status'		=> $nama_status,
-								'reff_note'		=> $row->reff_note,
-								'in'           => 'No'
-			);
-			$total++;
+		if($view == "Detail"){
+
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			$total = 0;
+			foreach($list as $row){
+				$kode_encrypt = encrypt_url($row->kode);
+				$dataRecord[] = array('kode' 		=> $row->kode,
+									'kode_enc'      => $kode_encrypt,
+									'tgl_kirim' 	=> $row->tanggal_transaksi,
+									'origin'		=> $row->origin,
+									'reff_picking' 	=> $row->reff_picking,
+									'kode_produk'	=> $row->kode_produk,
+									'nama_produk'	=> $row->nama_produk,
+									'lot'			=> $row->lot,
+									'qty1'			=> number_format($row->qty,2).' '.$row->uom,
+									'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
+									'status'		=> $row->nama_status,
+									'reff_note'		=> $row->reff_note,
+									'in'           => 'Yes'
+
+				);
+				$total++;
+			}
+
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_get_in($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			foreach($list as $row){
+				$kode_encrypt = encrypt_url($row->kode);
+				$dataRecord[] = array('kode' 		=> $row->kode,
+									'kode_enc'      => $kode_encrypt,
+									'tgl_kirim' 	=> $row->tanggal_transaksi,
+									'origin'		=> $row->origin,
+									'reff_picking' 	=> $row->reff_picking,
+									'kode_produk'	=> $row->kode_produk,
+									'nama_produk'	=> $row->nama_produk,
+									'lot'			=> $row->lot,
+									'qty1'			=> number_format($row->qty,2).' '.$row->uom,
+									'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
+									'status'		=> $row->nama_status,
+									'reff_note'		=> $row->reff_note,
+									'in'           => 'No'
+				);
+				$total++;
+			}
+		}else{
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_group($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			$total = 0;
+			foreach($list as $row){
+				$kode_encrypt = encrypt_url($row->kode);
+				$dataRecord[] = array('kode' 		=> $row->kode,
+									'kode_enc'      => $kode_encrypt,
+									'tgl_kirim' 	=> $row->tanggal_transaksi,
+									'origin'		=> $row->origin,
+									'reff_picking' 	=> $row->reff_picking,
+									'kode_produk'	=> $row->kode_produk,
+									'nama_produk'	=> $row->nama_produk,
+									'lot'			=> $row->tot_lot,
+									'qty1'			=> number_format($row->tot_qty,2).' '.$row->uom,
+									'qty2'			=> number_format($row->tot_qty2,2).' '.$row->uom2,
+									'status'		=> $row->nama_status,
+									'reff_note'		=> $row->reff_note,
+									'in'           => 'Yes'
+
+				);
+				$total++;
+			}
+
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_get_in_group($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			foreach($list as $row){
+				$kode_encrypt = encrypt_url($row->kode);
+				$dataRecord[] = array('kode' 		=> $row->kode,
+									'kode_enc'      => $kode_encrypt,
+									'tgl_kirim' 	=> $row->tanggal_transaksi,
+									'origin'		=> $row->origin,
+									'reff_picking' 	=> $row->reff_picking,
+									'kode_produk'	=> $row->kode_produk,
+									'nama_produk'	=> $row->nama_produk,
+									'lot'			=> $row->tot_lot,
+									'qty1'			=> number_format($row->tot_qty,2).' '.$row->uom,
+									'qty2'			=> number_format($row->tot_qty2,2).' '.$row->uom2,
+									'status'		=> $row->nama_status,
+									'reff_note'		=> $row->reff_note,
+									'in'           => 'No'
+				);
+				$total++;
+			}
+
 		}
 	
-		$callback = array('record' => $dataRecord, 'total_record' => 'Total Lot : '.$total);
+		$callback = array('record' => $dataRecord, 'total_record' => 'Total Data : '.$total, 'view' => $view);
 
 		echo json_encode($callback);
 
@@ -100,9 +153,12 @@ class Penerimaanharian extends MY_Controller
 
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
-		$departemen  = $this->input->post('departemen');
-		$dept_dari   = $this->input->post('dari');
+		$departemen  = addslashes($this->input->post('departemen'));
+		$dept_dari   = addslashes($this->input->post('dari'));
+		$kode 		 = addslashes($this->input->post('kode'));
+		$corak       = addslashes($this->input->post('corak'));
 		$status_arr  = $this->input->post('status[]');
+		$view_arr  	 = $this->input->post('view[]');
 		$dataRecord  = [];
 
 		$dept    = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
@@ -117,6 +173,12 @@ class Penerimaanharian extends MY_Controller
 		}
 		$status      = rtrim($status, ', ');// pb.status in ('done','ready')
 		$status_capt = rtrim($status_capt, ', ');// Done,Ready;
+
+		$view ='Global';
+		foreach($view_arr as $val2){
+			$view = $val2;
+			break;
+		}
 
 		$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
@@ -138,20 +200,26 @@ class Penerimaanharian extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('C3', ': '.$dept['nama']);
 		$object->getActiveSheet()->mergeCells('C3:D3');
 
-		// set Departemen tujuan
-		$object->getActiveSheet()->SetCellValue('A4', 'Tujuan');
+		// set Departemen dari
+		$object->getActiveSheet()->SetCellValue('A4', 'Dari');
 		$object->getActiveSheet()->mergeCells('A4:B4');
 		$object->getActiveSheet()->SetCellValue('C4', ': '.$dept_dr['nama']);
 		$object->getActiveSheet()->mergeCells('C4:D4');
 
-		// Status
-		$object->getActiveSheet()->SetCellValue('A5', 'Status');
+		// view
+		$object->getActiveSheet()->SetCellValue('A5', 'View');
 		$object->getActiveSheet()->mergeCells('A5:B5');
-		$object->getActiveSheet()->SetCellValue('C5', ': '.$status_capt);
+		$object->getActiveSheet()->SetCellValue('C5', ': '.$view);
 		$object->getActiveSheet()->mergeCells('C5:D5');
 
+		// Status
+		$object->getActiveSheet()->SetCellValue('A6', 'Status');
+		$object->getActiveSheet()->mergeCells('A6:B6');
+		$object->getActiveSheet()->SetCellValue('C6', ': '.$status_capt);
+		$object->getActiveSheet()->mergeCells('C6:D6');
+
 		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:N7")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:N8")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -163,125 +231,237 @@ class Penerimaanharian extends MY_Controller
 		);	
 
 		// header table
-    	$table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Lot','Qty1','Uom1','Qty2','Uom2','Status','Reff Note');
-    	$column = 0;
-    	foreach ($table_head_columns as $field) {
-	    	$object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $field);  
-    		$column++;
-    	}
+		if($view == 'Detail'){
+			$table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Lot','Qty1','Uom1','Qty2','Uom2','Status','Reff Note');
+			$column = 0;
+			foreach ($table_head_columns as $field) {
+				$object->getActiveSheet()->setCellValueByColumnAndRow($column, 8, $field);  
+				$column++;
+			}
+	
+			// set width and border
+			$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
+			$loop = 0;
+			foreach ($index_header as $val) {
+				$object->getActiveSheet()->getStyle($val.'8')->applyFromArray($styleArray);
+				if($loop == 0  OR $loop >=12){
+					$object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A,M,N
+				}else if($loop == 5 ){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(15); // index F
+				}else if( ($loop >= 8 AND $loop <=11 )){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(14); // index I,J,K,L
+				}else if( $loop == 6 OR $loop ==4 ){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(25); // index G,E
+				}else if($loop == 1 or  $loop == 2 OR $loop == 7 or $loop ==3){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index B,C,D,H
+				}
+	
+				$loop++;
+			}
+		}else{
+			$table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Total Lot',' Total Qty1', 'Total Qty2','Status','Reff Note');
+			$column = 0;
+			foreach ($table_head_columns as $field) {
+				$object->getActiveSheet()->setCellValueByColumnAndRow($column, 8, $field);  
+				$column++;
+			}
+	
+			// set width and border
+			$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L');
+			$loop = 0;
+			foreach ($index_header as $val) {
+				$object->getActiveSheet()->getStyle($val.'8')->applyFromArray($styleArray);
+				if($loop == 0  OR $loop >=10){
+					$object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A,K,L
+				}else if($loop == 5 ){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(15); // index F
+				}else if( ($loop == 8 AND $loop <=9 )){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(14); // index I,J
+				}else if( $loop == 6 OR $loop ==4 ){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(25); // index G,E
+				}else if(($loop >= 1 AND  $loop <= 3) OR $loop == 7 ){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index B,C,D,H
+				}
+	
+				$loop++;
+			}
+		}
 
-    	// set width and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
-		$loop = 0;
-    	foreach ($index_header as $val) {
-			$object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
-			if($loop == 0  AND $loop >=12){
-				$object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A,M,N
-			}else if(($loop == 3 OR $loop ==4) OR $loop == 7){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(19); // index D,E,H
-			}else if( $loop == 2 OR $loop == 5 AND ($loop >= 8 AND $loop <=11 )){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(14); // index C,F,I,J,K,L
-			}else if($loop == 6){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(25); // index G
-			}else if($loop == 1){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(10); // index B
+
+		if($view == "Detail"){
+
+			// tbody 1
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			$num   = 1;
+			$rowCount = 9;
+			foreach($list as $row){
+
+				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
+				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
+				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->lot);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->qty);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->qty2);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
+				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->nama_status);
+				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->reff_note);
+
+				// set wrapText
+				$object->getActiveSheet()->getStyle('B'.$rowCount.':B'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				// $object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('N'.$rowCount.':N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+
+				//set border true
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+
+				$rowCount++;
 			}
 
-			$loop++;
-		}
+			// tbody 2
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_get_in($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			foreach($list as $row){
 
-		// tbody
-		$list  = $this->m_inout->get_list_penerimaan_harian_by_kode($tgldari,$tglsampai,$departemen,$dept_dari,$status);
-		$num   = 1;
-        $rowCount = 8;
-		foreach($list as $row){
-			$nama_status = $this->_module->get_mst_status_by_kode($row->status);
+				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
+				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
+				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->lot);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->qty);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->qty2);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
+				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->nama_status);
+				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->reff_note);
 
-			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
-			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
-			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
-			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
-			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
-			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
-			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
-			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->lot);
-			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->qty);
-			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom);
-			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->qty2);
-			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
-			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $nama_status);
-			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->reff_note);
+				// set wrapText
+				$object->getActiveSheet()->getStyle('B'.$rowCount.':B'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				// $object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('N'.$rowCount.':N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 
-			// set wrapText
-			$object->getActiveSheet()->getStyle('B'.$rowCount.':B'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('N'.$rowCount.':N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				//set border true
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 
-			//set border true
-			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+				$rowCount++;
+			}
+		}else{
+			// tbody 1
+			$list  = $this->m_inout->get_list_penerimaan_harian_by_kode_group($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			$num   = 1;
+			$rowCount = 9;
+			foreach($list as $row){
 
-			$rowCount++;
-		}
+				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
+				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
+				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->tot_lot);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->tot_qty);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->tot_qty2);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->nama_status);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->reff_note);
 
-		// tbody
-		$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_get_in($tgldari,$tglsampai,$departemen,$dept_dari,$status);
-		foreach($list as $row){
-			$nama_status = $this->_module->get_mst_status_by_kode($row->status);
+				// set wrapText
+				$object->getActiveSheet()->getStyle('B'.$rowCount.':B'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				// $object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 
-			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
-			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
-			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
-			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
-			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
-			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
-			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
-			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->lot);
-			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->qty);
-			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom);
-			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->qty2);
-			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
-			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $nama_status);
-			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->reff_note);
+				//set border true
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+				$rowCount++;
+			}
 
-			// set wrapText
-			$object->getActiveSheet()->getStyle('B'.$rowCount.':B'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-			$object->getActiveSheet()->getStyle('N'.$rowCount.':N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+			// tbody 2
+			$list  = $this->m_inout->get_list_pengiriman_harian_by_kode_get_in_group($tgldari,$tglsampai,$departemen,$dept_dari,$status,$kode,$corak);
+			foreach($list as $row){
 
-			//set border true
-			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
+				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
+				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->tot_lot);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->tot_qty);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->tot_qty2);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->nama_status);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->reff_note);
 
-			$rowCount++;
+				// set wrapText
+				$object->getActiveSheet()->getStyle('B'.$rowCount.':B'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				// $object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+				$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+
+				//set border true
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+
+				$rowCount++;
+			}
 		}
 
 		$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  

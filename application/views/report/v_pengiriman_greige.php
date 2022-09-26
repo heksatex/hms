@@ -111,7 +111,7 @@
               </div>
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
               </div>
               <br>
 

@@ -68,6 +68,7 @@ class Partner extends MY_Controller
         $kode_decrypt      = decrypt_url($id);
         $data['id_dept']   = 'PRT';
         $partner           = $this->m_partner->get_partner_by_kode($kode_decrypt);
+        $data['mms']      = $this->_module->get_data_mms_for_log_history('PRT');// get mms by dept untuk menu yg beda-beda
         $data['partner']   = $partner;
 
         // >> invoice
