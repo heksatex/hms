@@ -284,12 +284,14 @@
                     let tbody = $("<tbody />");
                     let no    = 1;
                     let empty = true;
+                    let link  = '';
 
                     $.each(data.record, function(key, value){
                         empty = false;
+                        link = '<a href="<?=base_url()?>warehouse/penerimaanbarang/edit/'+value.kode_enc+'" data-toggle="tooltip" title="Lihat Penerimaan Barang" target="_blank">'+value.kode+'</a>'
                         var tr = $("<tr>").append(
                                  $("<td>").text(no++),
-                                 $("<td>").text(value.kode),
+                                 $("<td>").html(link),
                                  $("<td>").text(value.tgl_kirim),
                                  $("<td>").text(value.origin),
                                  $("<td>").text(value.reff_picking),
