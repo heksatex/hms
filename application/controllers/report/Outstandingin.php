@@ -42,8 +42,9 @@ class Outstandingin extends MY_Controller
 			$list  = $this->m_outstandingIn->get_list_outstanding_in_by_kode($departemen,$dept_dari,$kode,$corak);
 			$total = 0;
 			foreach($list as $row){
-
+				$kode_encrypt = encrypt_url($row->kode);
 				$dataRecord[] = array('kode' 		=> $row->kode,
+									'kode_enc'      => $kode_encrypt,
 									'tgl_kirim' 	=> $row->tanggal_transaksi,
 									'origin'		=> $row->origin,
 									'reff_picking' 	=> $row->reff_picking,
@@ -66,6 +67,7 @@ class Outstandingin extends MY_Controller
 
 				$kode_encrypt = encrypt_url($row->kode);
 				$dataRecord[] = array('kode' 		=> $row->kode,
+									'kode_enc'      => $kode_encrypt,
 									'tgl_kirim' 	=> $row->tanggal_transaksi,
 									'origin'		=> $row->origin,
 									'reff_picking' 	=> $row->reff_picking,
