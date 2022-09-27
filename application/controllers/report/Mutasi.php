@@ -49,7 +49,8 @@ class Mutasi extends MY_Controller
             $acc_mutasi_rm  = $this->get_acc_mutasi_by_kode($table,$tahun,$bulan,$rm_field);
 
             $table_mutasi[] = array('table_1'       => 'Yes',
-                                    'record'        =>$acc_mutasi_rm, 
+                                    'record'        =>$acc_mutasi_rm[0], 
+                                    'count_record'  =>$acc_mutasi_rm[1],
                                     'head_table1'   =>$rm_head_table1, 
                                     'head_table2'   => $rm_head_table2, 
                                     'count_in'      => $rm_jml_in, 
@@ -67,7 +68,8 @@ class Mutasi extends MY_Controller
             $acc_mutasi_fg  = $this->get_acc_mutasi_by_kode($table2,$tahun,$bulan,$fg_field);
 
             $table_mutasi[]    = array('table_2'       => 'Yes',
-                                        'record'        =>$acc_mutasi_fg,
+                                        'record'        =>$acc_mutasi_fg[0],
+                                        'count_record'  =>$acc_mutasi_fg[1],
                                         'head_table1'   =>$fg_head_table1, 
                                         'head_table2'   => $fg_head_table2, 
                                         'count_in'      => $fg_jml_in, 
@@ -87,13 +89,15 @@ class Mutasi extends MY_Controller
             // $acc_mutasi  = $this->m_mutasi->acc_mutasi_by_kode($table,$tahun,$bulan,$field)->result();
             $acc_mutasi  = $this->get_acc_mutasi_by_kode($table,$tahun,$bulan,$field);
             $table_mutasi[]    = array('table_1'       => 'Yes',
-                                        'record'        =>$acc_mutasi, 
+                                        'record'        =>$acc_mutasi[0], 
+                                        'count_record'  =>$acc_mutasi[1],
                                         'head_table1'   =>$head_table1, 
                                         'head_table2'   => $head_table2, 
                                         'count_in'      => $jml_in, 
                                         'count_out'     => $jml_out);
             $table_mutasi[]    = array('table_2'       => 'No',
                                         'record'        => '', 
+                                        'count_record'  => '',
                                         'head_table1'   => '', 
                                         'head_table2'   => '', 
                                         'count_in'      => '', 
@@ -106,7 +110,10 @@ class Mutasi extends MY_Controller
 
     function get_acc_mutasi_by_kode($table,$tahun,$bulan,$field)
     {
-        return  $this->m_mutasi->acc_mutasi_by_kode($table,$tahun,$bulan,$field)->result();
+        $query      = $this->m_mutasi->acc_mutasi_by_kode($table,$tahun,$bulan,$field);
+        $result     = $query->result();
+        $result2    = $query->num_rows();
+        return array($result,$result2);
     }
 
     function create_header($mutasi_dept)

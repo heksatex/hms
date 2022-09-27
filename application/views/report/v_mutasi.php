@@ -82,16 +82,21 @@
 
             <!-- table -->
             <div class="box-body">
-              <div class="form-group">
-                  <div class="col-md-12">
-                    <div class="col-md-4">
-                      <label>
-                          <div id='total_record'>Total Data : 0</div>
-                      </label>
-                    </div>
-                  </div>
-              </div>
               <div class="col-sm-12 table-responsive">
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <label>
+                            <div id='info_table1'></div>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <label>
+                            <div id='total_record'>Total Data : 0</div>
+                        </label>
+                    </div>
+                </div>
                 <div class="table_scroll">
                   <div class="table_scroll_head">
                     <div class="divListviewHead">
@@ -120,11 +125,25 @@
                 </div>
               </div>
 
-              <div class="col-sm-12 table-responsive">
+              <div class="col-sm-12 table-responsive" style="display: none;" id="table_2">
+                <div class="form-group">
+                      <div class="col-md-12">
+                          <label>
+                              <div id='info_table2'></div>
+                          </label>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <div class="col-md-12">
+                          <label>
+                              <div id='total_record2'>Total Data : 0</div>
+                          </label>
+                      </div>
+                </div>
                 <div class="table_scroll">
                   <div class="table_scroll_head">
                     <div class="divListviewHead">
-                        <table id="example2" class="table" border="0" style="display: none;">
+                        <table id="example2" class="table" border="0" >
                             <thead>
                               <tr>
                                 <th  class="style no" >No. </th>
@@ -290,215 +309,24 @@
                     $.each(data, function(key, value){ 
                       if(value.table_1 == "Yes"){
                         create_table('example1', value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                        $('#info_table1').html('');
+                        $('#total_record').html('Total Data : '+value.count_record);
                       }
 
                       if(value.table_2 == "Yes"){
                         create_table('example2',value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
-                        $('#example2').css('display','');
+                        $('#table_2').css('display','');
+                        $('#info_table1').html('Mutasi Bahan Baku');
+                        $('#info_table2').html('Mutasi Barang Jadi');
+                        $('#total_record2').html('Total Data : '+value.count_record);
                       }else{
-                        $('#example2').css('display','none');
+                        $('#info_table1').html('');
+                        $('#info_table2').html('');
+                        $('#table_2').css('display','none');
+                        $('#total_record2').html('Total Data : '+value.count_record);
                       }
                     });
                     
-                    // let thead = $("<thead />");
-                    // let row   = '';
-                    // let row2  = '';
-                    // $.each(data.head_table1, function(key, value){ // loop
-                    //     $.each(value, function(a, b){
-                    //         if(a == 'info'){
-                    //             for ( var i = 0, l = b.length; i < l; i++ ) {
-                    //                 $.each(b[i], function(c, d){
-                    //                     row += "<th class='style no'  rowspan='2'>";
-                    //                     row += d;
-                    //                     row += "</th>";
-                    //                 });
-                    //             }
-                    //         }else if(a == 'awal' || a == 'akhir' || a == 'in' || a== 'out' || a == 'adj_in' || a == 'adj_out' || a == 'count_in' || a == 'count_out'){
-                              
-                    //           for ( var i = 0, l = b.length; i < l; i++ ) {
-                    //                 $.each(b[i], function(c, d){
-                    //                     row += "<th class='style no text-center'  colspan='4' >";
-                    //                     row += d;
-                    //                     row += "</th>";
-                    //                 });
-                    //                 /*
-                    //                 if(a == 'in'  ){
-                    //                     var x = data.count_in;
-                    //                 }else if( a == 'out'){
-                    //                     var x = data.count_out;
-                    //                 }else{
-                    //                     var x = 1;
-                    //                 }
-                    //                 for ( var z = 0; z < x; z++) {
-                    //                     $.each(b[i], function(c, d){
-                    //                         row += "<th class='style no text-center'  colspan='4' >";
-                    //                         row += d;
-                    //                         row += "</th>";
-                    //                     });
-                    //                 } 
-                    //                 */
-                    //             }
-                    //         }
-
-                    //     });
-                    // });
-                    // tr = $("<tr>").append(row);
-                    // thead.append(tr)
-                    // $.each(data.head_table2, function(key, value){ //loop head table
-                    //     $.each(value, function(a, b){ // loop jenis awal, in, out, adj, akhir
-                    //             for ( var i = 0, l = b.length; i < l; i++ ) {
-                    //                 $.each(b[i], function(c, d){
-                    //                     row2 += "<th>";
-                    //                     row2 += d;
-                    //                     row2 += "</th>";
-                    //                 });
-                    //             }
-
-                    //     });
-                    // });
-                    // tr2  = $("<tr>").append(row2);
-                    // thead.append(tr2)
-                    // $('#example1').append(thead);
-
-                    // body
-                    // let tbody = $("<tbody />");
-                    // let row3  = '';
-                    // let no    = 1;
-                  
-                    // $.each(data.record, function(key, value){ // loop body
-
-                    //       // in 
-                    //       let d = 0;
-                    //       let no_in = 1;
-                    //       let in_total_lot         = 0
-                    //       let in_total_qty1        = 0;
-                    //       let in_total_qty2        = 0;
-                    //       let in_total_qty_opname  = 0;
-                    //       let qty1_uom             = '';
-                    //       let qty2_uom             = '';
-                    //       let qty_opname_uom       = '';
-                    //       let in_empty             = true;
-
-                    //       let x = 0;
-                    //       let no_out= 1;
-                    //       let out_empty    = true;
-                    //       let out_total_lot   = 0
-                    //       let out_total_qty1        = 0;
-                    //       let out_total_qty2        = 0;
-                    //       let out_total_qty_opname  = 0;
-
-                    //       row3 += "<tr>";
-                    //       row3 += "<td>"+ (no++) +"</td>";
-                    //       row3 += "<td>"+value.kode_produk+"</td>";
-                    //       row3 += "<td>"+value.nama_produk+"</td>";
-                    //       // saldo awal
-                    //       row3 += "<td align='right'>"+value.s_awal_lot+"</td>";
-                    //       row3 += "<td align='right'>"+value.s_awal_qty1+" "+value.s_awal_qty1_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.s_awal_qty2+" "+value.s_awal_qty2_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.s_awal_qty_opname+" "+value.s_awal_qty_opname_uom+"</td>";
-
-                    //       // info uom in 1
-                    //       qty1_uom        = value.s_awal_qty1_uom;
-                    //       qty2_uom        = value.s_awal_qty2_uom;
-                    //       qty_opname_uom  = value.s_awal_qty_opname_uom;
-
-                    //       for (  n = data.count_in; d < n; d++ ) {
-                    //         in_lot         = 'in'+no_in+'_lot';
-                    //         in_qty1        = 'in'+no_in+'_qty1';
-                    //         in_qty1_uom    = 'in'+no_in+'_qty1_uom';
-                    //         in_qty2        = 'in'+no_in+'_qty2';
-                    //         in_qty2_uom    = 'in'+no_in+'_qty2_uom';
-                    //         in_opname      = 'in'+no_in+'_qty_opname';
-                    //         in_opname_uom  = 'in'+no_in+'_qty_opname_uom';
-                    //         row3 += "<td align='right'>"+value[in_lot]+"</td>";
-                    //         row3 += "<td align='right'>"+value[in_qty1]+" "+value[in_qty1_uom]+"</td>";
-                    //         row3 += "<td align='right'>"+value[in_qty2]+" "+value[in_qty2_uom]+"</td>";
-                    //         row3 += "<td align='right'>"+value[in_opname]+" "+value[in_opname_uom]+"</td>";
-                    //         no_in++;
-                    //         // info total++ in
-                    //         in_total_lot         = in_total_lot+parseInt(value[in_lot]);
-                    //         in_total_qty1        = in_total_qty1+parseFloat(value[in_qty1]);
-                    //         in_total_qty2        = in_total_qty2+parseFloat(value[in_qty2]);
-                    //         in_total_qty_opname  = in_total_qty_opname+parseFloat(value[in_opname]);
-                           
-                    //         in_empty        = true;
-                    //       }
-
-                    //       // adj in
-                    //       row3 += "<td align='right'>"+value.adj_in_lot+"</td>";
-                    //       row3 += "<td align='right'>"+value.adj_in_qty1+" "+value.adj_in_qty1_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.adj_in_qty2+" "+value.adj_in_qty2_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.adj_in_qty_opname+" "+value.adj_in_qty_opname_uom+"</td>";
-
-                    //       in_total_lot         = in_total_lot+parseInt(value.adj_in_lot);
-                    //       in_total_qty1        = in_total_qty1+parseFloat(value.adj_in_qty1);
-                    //       in_total_qty2        = in_total_qty2+parseFloat(value.adj_in_qty2);
-                    //       in_total_qty_opname  = in_total_qty_opname+parseFloat(value.adj_in_qty_opname);
-
-                    //       // total in 
-                    //       if(in_empty == true){
-                    //         row3 += "<td align='right'>"+in_total_lot+"</td>";
-                    //         row3 += "<td align='right'>"+in_total_qty1.toFixed(2)+" "+qty1_uom+"</td>";
-                    //         row3 += "<td align='right'>"+in_total_qty2.toFixed(2)+" "+qty2_uom+"</td>";
-                    //         row3 += "<td align='right'>"+in_total_qty_opname+" "+qty_opname_uom+"</td>";
-                    //       }
-
-                    //       for (  s = data.count_out; x < s; x++ ) {
-                    //         out_lot         = 'out'+no_out+'_lot';
-                    //         out_qty1        = 'out'+no_out+'_qty1';
-                    //         out_qty1_uom    = 'out'+no_out+'_qty1_uom';
-                    //         out_qty2        = 'out'+no_out+'_qty2';
-                    //         out_qty2_uom    = 'out'+no_out+'_qty2_uom';
-                    //         out_opname      = 'out'+no_out+'_qty_opname';
-                    //         out_opname_uom  = 'out'+no_out+'_qty_opname_uom';
-                    //         row3 += "<td align='right'>"+value[out_lot]+"</td>";
-                    //         row3 += "<td align='right'>"+value[out_qty1]+" "+value[out_qty1_uom]+"</td>";
-                    //         row3 += "<td align='right'>"+value[out_qty2]+" "+value[out_qty2_uom]+"</td>";
-                    //         row3 += "<td align='right'>"+value[out_opname]+" "+value[out_opname_uom]+"</td>";
-                    //         no_out++;
-
-                    //         // info total++ out
-                    //         out_total_lot       = out_total_lot+parseInt(value[out_lot]);
-                    //         out_total_qty1      = out_total_qty1+parseFloat(value[out_qty1]);
-                    //         out_total_qty1      = out_total_qty1+parseFloat(value[out_qty2]);
-                    //         out_total_qty_opname = out_total_qty_opname+parseFloat(value[out_opname]);
-                           
-                    //         out_empty        = true;
-                    //       }
-
-                    //       // adj out
-                    //       row3 += "<td align='right'>"+value.adj_out_lot+"</td>";
-                    //       row3 += "<td align='right'>"+value.adj_out_qty1+" "+value.adj_out_qty1_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.adj_out_qty2+" "+value.adj_out_qty2_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.adj_out_qty_opname+" "+value.adj_out_qty_opname_uom+"</td>";
-
-                    //       out_total_lot         = out_total_lot+parseInt(value.adj_out_lot);
-                    //       out_total_qty1        = out_total_qty1+parseFloat(value.adj_out_qty1);
-                    //       out_total_qty2        = out_total_qty2+parseFloat(value.adj_out_qty2);
-                    //       out_total_qty_opname  = out_total_qty_opname+parseFloat(value.adj_out_qty_opname);
-
-                    //       // total out
-                    //       if(out_empty == true){
-                    //         row3 += "<td align='right'>"+out_total_lot+"</td>";
-                    //         row3 += "<td align='right'>"+out_total_qty1.toFixed(2)+" "+qty1_uom+"</td>";
-                    //         row3 += "<td align='right'>"+out_total_qty2.toFixed(2)+" "+qty2_uom+"</td>";
-                    //         row3 += "<td align='right'>"+out_total_qty_opname+" "+qty_opname_uom+"</td>";
-                    //       }
-
-                    //       // saldo Akhir
-                    //       row3 += "<td align='right'>"+value.s_akhir_lot+"</td>";
-                    //       row3 += "<td align='right'>"+value.s_akhir_qty1+" "+value.s_akhir_qty1_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.s_akhir_qty2+" "+value.s_akhir_qty2_uom+"</td>";
-                    //       row3 += "<td align='right'>"+value.s_akhir_qty_opname+" "+value.s_akhir_qty_opname_uom+"</td>";
-
-
-                    //       row3 += "</tr>";
-                            
-                    // }); 
-
-                    // tbody.append(row3);
-                    // $('#example1').append(tbody);
-
                 $('#btn-generate').button('reset');
                 $("#example1_processing").css('display','none'); // hidden loading
 
