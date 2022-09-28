@@ -581,6 +581,7 @@
   //klik button simpan
     $('#btn-simpan').click(function(){
       $('#btn-simpan').button('loading');
+      var id            = '<?php echo $produk->id; ?>';
       
       var dapatdijual   = $('#dapatdijual').is(":checked");
       if (dapatdijual == true) {
@@ -606,7 +607,8 @@
                 e.overrideMimeType("application/json;charset=UTF-8");
             }
          },
-         data: {kodeproduk      : $('#kodeproduk').val(),
+         data: {id              : id,
+                kodeproduk      : $('#kodeproduk').val(),
                 namaproduk      : $('#namaproduk').val(),
                 dapatdijual     : dapatdijual_value,
                 dapatdibeli     : dapatdibeli_value,

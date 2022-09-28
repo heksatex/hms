@@ -20,7 +20,33 @@ class M_produk extends CI_Model
 
 	private function _get_datatables_query()
 	{
-		$this->db->select("p.kode_produk,p.nama_produk,p.create_date,p.uom,p.uom_2,c.nama_category,p.route_produksi,p.type, nama_status");
+
+		if($this->input->post('kode_produk'))
+        {
+    		$this->db->like('p.kode_produk',$this->input->post('kode_produk'));
+        }
+		if($this->input->post('nama_produk'))
+        {
+    		$this->db->like('p.nama_produk',$this->input->post('nama_produk'));
+        }
+		if($this->input->post('kategori'))
+        {
+    		$this->db->where('p.id_category',$this->input->post('kategori'));
+        }
+		if($this->input->post('route'))
+        {
+    		$this->db->where('p.route_produksi',$this->input->post('route'));
+        }
+		if($this->input->post('type'))
+        {
+    		$this->db->where('p.type',$this->input->post('type'));
+        }
+		if($this->input->post('status'))
+        {
+    		$this->db->where('p.status_produk',$this->input->post('status'));
+        }
+
+		$this->db->select("p.id, p.kode_produk,p.nama_produk,p.create_date,p.uom,p.uom_2,c.nama_category,p.route_produksi,p.type, nama_status");
 		$this->db->from("mst_produk p");		
 		$this->db->JOIN("mst_category c","p.id_category=c.id","LEFT");
 		$this->db->JOIN("mst_status s","p.status_produk=s.kode","LEFT");
@@ -84,6 +110,19 @@ class M_produk extends CI_Model
 		return $this->db->count_all_results();
 	}
 
+	public function get_last_id_mst_produk()
+	{
+		$last_no =  $this->db->query("SELECT max(id) as nom FROM mst_produk");
+
+		$result = $last_no->row();
+		if(empty($result->nom)){
+			$no   = 1;
+		}else{
+     		$no   = (int)$result->nom + 1;
+		}
+		return $no;
+	}
+
 	public function get_list_coa($coa)
 	{
 		return $this->db->query("SELECT kode_coa, CONCAT(kode_coa,' | ',nama) as nama_coa
@@ -92,9 +131,9 @@ class M_produk extends CI_Model
 								ORDER BY kode_coa LIMIT 10")->result_array();
 	}
 
-	public function get_produk_by_kode($kodeproduk)
+	public function get_produk_by_kode($id)
 	{
-		return $this->db->query("SELECT * FROM mst_produk where kode_produk = '$kodeproduk' ")->row();
+		return $this->db->query("SELECT * FROM mst_produk where id = '$id' ")->row();
 	}
 
 	public function get_list_uom()
@@ -122,9 +161,9 @@ class M_produk extends CI_Model
 		return $this->db->query("SELECT kode_produk,nama_produk FROM mst_produk where kode_produk = '$kodeproduk'");
 	}
 
-	public function update_produk($kode_produk,$nama_produk,$uom,$uom_2,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk)
+	public function update_produk($id,$nama_produk,$uom,$uom_2,$route_produksi,$type,$dapat_dibeli,$dapat_dijual,$id_category,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk)
 	{
-		return $this->db->query("UPDATE mst_produk set nama_produk = '$nama_produk', uom = '$uom',uom_2 = '$uom_2', route_produksi = '$route_produksi', type = '$type', dapat_dibeli = '$dapat_dibeli', dapat_dijual = '$dapat_dijual', id_category = '$id_category', note = '$note', bom = '$bom', lebar_greige = '$lebargreige', uom_lebar_greige = '$uom_lebargreige' ,lebar_jadi = '$lebarjadi', uom_lebar_jadi = '$uom_lebarjadi', status_produk = '$statusproduk'  WHERE kode_produk = '$kode_produk' ");
+		return $this->db->query("UPDATE mst_produk set nama_produk = '$nama_produk', uom = '$uom',uom_2 = '$uom_2', route_produksi = '$route_produksi', type = '$type', dapat_dibeli = '$dapat_dibeli', dapat_dijual = '$dapat_dijual', id_category = '$id_category', note = '$note', bom = '$bom', lebar_greige = '$lebargreige', uom_lebar_greige = '$uom_lebargreige' ,lebar_jadi = '$lebarjadi', uom_lebar_jadi = '$uom_lebarjadi', status_produk = '$statusproduk'  WHERE id = '$id' ");
 	}
 
 	public function get_nama_category_by_id($id)

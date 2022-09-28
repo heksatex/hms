@@ -16,6 +16,8 @@ class Produk extends MY_Controller
   public function index()
   {
     $data['id_dept']='MPROD';
+    $data['category'] = $this->m_produk->get_list_category();
+    $data['route']    = $this->m_produk->get_list_route();
     $this->load->view('warehouse/v_produk', $data);
   }
 
@@ -27,7 +29,7 @@ class Produk extends MY_Controller
       $data = array();
       $no = $_POST['start'];
       foreach ($list as $field) {
-          $kode_encrypt = encrypt_url($field->kode_produk);
+          $kode_encrypt = encrypt_url($field->id);
           $no++;
           $row = array();
           $row[] = $no;
@@ -57,7 +59,7 @@ class Produk extends MY_Controller
   public function add()
   { 
     $data['id_dept']  ='MPROD';
-    $data['uom'] = $this->_module->get_list_uom();
+    $data['uom']      = $this->_module->get_list_uom();
     $data['category'] = $this->m_produk->get_list_category();
     $data['route']    = $this->m_produk->get_list_route();        
     return $this->load->view('warehouse/v_produk_add', $data);
@@ -85,6 +87,7 @@ class Produk extends MY_Controller
         $kodeproduk = 'MF'.$kodeproduk;
       }
       
+      $id             = $this->input->post('id');//id produk auto increment
       $namaproduk     = addslashes($this->input->post('namaproduk'));
       $uomproduk      = addslashes($this->input->post('uomproduk'));
       $uomproduk2     = addslashes($this->input->post('uomproduk2'));
@@ -155,8 +158,7 @@ class Produk extends MY_Controller
             $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Nama Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );   
         }else if(!empty($cek['kode_produk'])){
           //update/edit produk
-          $this->m_produk->update_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk);
-          $kodeproduk_encr = encrypt_url($kodeproduk);
+          $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk);
          
           $jenis_log   = "edit";
           $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." |".$status_aktif;
@@ -164,8 +166,10 @@ class Produk extends MY_Controller
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
         }else{
           //insert/add produk
+          $id_new = $this->m_produk->get_last_id_mst_produk();
+
           $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk);
-          $kodeproduk_encr = encrypt_url($kodeproduk);
+          $kodeproduk_encr = encrypt_url($id_new);
 
           $jenis_log   = "create";
           $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$status_aktif;
@@ -194,16 +198,18 @@ class Produk extends MY_Controller
         $kode_decrypt     = decrypt_url($id);
         $data['id_dept']  ='MPROD';
         $data['mms']      = $this->_module->get_data_mms_for_log_history('MPROD');// get mms by dept untuk log history
-        $data['produk']   = $this->m_produk->get_produk_by_kode($kode_decrypt);
+        $produk           = $this->m_produk->get_produk_by_kode($kode_decrypt);//id auto increment
+        $data['produk']   = $produk;
+        
         $data['uom']      = $this->m_produk->get_list_uom();
         $data['category'] = $this->m_produk->get_list_category();
         $data['route']    = $this->m_produk->get_list_route();
 
         //get data untuk glyphicon
-        $data['onhand']   = $this->m_produk->get_qty_onhand($kode_decrypt);
-        $data['moves']    = $this->m_produk->get_jml_moves($kode_decrypt);
-        $data['bom']      = $this->m_produk->get_jml_bom($kode_decrypt);
-        $data['mo']       = $this->m_produk->get_jml_mo($kode_decrypt);
+        $data['onhand']   = $this->m_produk->get_qty_onhand($produk->kode_produk);
+        $data['moves']    = $this->m_produk->get_jml_moves($produk->kode_produk);
+        $data['bom']      = $this->m_produk->get_jml_bom($produk->kode_produk);
+        $data['mo']       = $this->m_produk->get_jml_mo($produk->kode_produk);
 
         //$data['dyest']    = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'DYE');
         //$data['aux']      = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'AUX');
