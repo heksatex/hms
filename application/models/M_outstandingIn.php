@@ -10,7 +10,7 @@ class M_outstandingIn extends CI_Model
     {
         $reff_picking = '';
         if(!empty($dept_dari)){
-            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',1) LIKE '%$dept_dari%' ";
+            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',1) LIKE '%".$dept_dari."%' ";
         }
         $kode_in = '';
         if(!empty($kode)){
@@ -38,7 +38,7 @@ class M_outstandingIn extends CI_Model
     {
         $reff_picking = '';
         if(!empty($dept_dari)){
-            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',1) LIKE '%$dept_dari%' ";
+            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',1) LIKE '%".$dept_dari."%' ";
         }
         $kode_in = '';
         if(!empty($kode)){

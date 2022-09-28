@@ -110,7 +110,7 @@ class Outstandingin extends MY_Controller
 		}
 
 		$dept      = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
-		$dept_dari = $this->_module->get_nama_dept_by_kode($dept_dari)->row_array();
+		$dept_dr = $this->_module->get_nama_dept_by_kode($dept_dari)->row_array();
 		
 		$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
@@ -127,9 +127,9 @@ class Outstandingin extends MY_Controller
 		$object->getActiveSheet()->mergeCells('C2:H2');
 
 		// set Departemen dari
- 		$object->getActiveSheet()->SetCellValue('A3', 'Dept Dari');
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Departemen Dari');
 		$object->getActiveSheet()->mergeCells('A3:B3');
- 		$object->getActiveSheet()->SetCellValue('C3', ': '.$dept_dari['nama']);
+ 		$object->getActiveSheet()->SetCellValue('C3', ': '.$dept_dr['nama']);
 		$object->getActiveSheet()->mergeCells('C3:D3');
 
 		// set View
