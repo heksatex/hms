@@ -82,6 +82,7 @@
 
             <!-- table -->
             <div class="box-body">
+              
               <div class="col-sm-12 table-responsive">
                 <div class="form-group">
                     <div class="col-md-12">
@@ -431,7 +432,7 @@
                           row3 += "<tr>";
                           row3 += "<td>"+ (no++) +"</td>";
                           row3 += "<td>"+value.kode_produk+"</td>";
-                          row3 += "<td>"+value.nama_produk+"</td>";
+                          row3 += "<td style='width:100% !important;'>"+value.nama_produk+"</td>";
                           // saldo awal
                           row3 += "<td align='right'>"+value.s_awal_lot+"</td>";
                           row3 += "<td align='right'>"+value.s_awal_qty1+" "+value.s_awal_qty1_uom+"</td>";

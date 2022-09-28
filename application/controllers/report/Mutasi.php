@@ -158,7 +158,7 @@ class Mutasi extends MY_Controller
 
                     $field .=  $int_lot.', '.$in_qty1.', '.$in_qty1_uom.', '.$in_qty2.', '.$in_qty2_uom.', '.$in_opname.', '.$in_opname_uom.', ';
                     $no_in++;
-                    $head_table2_in[] = array('Lot'.$no_in,'Qty1','Qty2', 'Qty Opname');
+                    $head_table2_in[] = array('Lot','Qty1','Qty2', 'Qty Opname');
                     $jml_in++;
                     if($mts->type == 'prod'){
                         $judul_column_group_in = 'Hasil Produksi '.$mts->dept_id_dari.'';
