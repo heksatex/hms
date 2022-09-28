@@ -1702,11 +1702,12 @@
                       $row  += "<tr  class='oe_group_header'>";
                       $row  += "<td></td>";
                       $row  +=  $icon;
-                      $row += "<td colspan='2'>"+value.grouping+"</td>";
+                      $row += "<td colspan='1'  style='min-width:120px'>"+value.grouping+"</td>";
+                      $row += "<td colspan='2'>"+value.origin+"</td>";
                       $row += "<td align='right' colspan='2'>"+value.qty_planing+"</td>";
                       $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                      $row += "<td align='right'  colspan='1'>"+value.qty2+"</td>";
-                      $row += "<td colspan='2' class='list_pagination'></td>";
+                      $row += "<td align='right'  colspan='1' style='min-width:100px'>"+value.qty2+"</td>";
+                      $row += "<td colspan='2' class='list_pagination' style='min-width:100px'></td>";
                       $row += "</tr>";
                       $row += "</tbody>";
                       $ro++;
