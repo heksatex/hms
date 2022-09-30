@@ -342,7 +342,7 @@
                                 }
                             }else if(a == 'awal' || a == 'akhir' || a == 'in' || a== 'out' || a == 'adj_in' || a == 'adj_out' || a == 'count_in' || a == 'count_out'){
                               
-                              for ( var i = 0, l = b.length; i < l; i++ ) {
+                                for ( var i = 0, l = b.length; i < l; i++ ) {
                                     $.each(b[i], function(c, d){
                                         row += "<th class='style no text-center'  colspan='4' >";
                                         row += d;

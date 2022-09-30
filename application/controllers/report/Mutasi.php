@@ -226,6 +226,19 @@ class Mutasi extends MY_Controller
 
     }
 
+    function cek_column_excel($index)
+    {
+        $max    = 200; 
+        $result = 'A';
+        for ($l = 'A', $i = 1; $i < $max; $l++, $i++) {
+            if($i == $index){
+                $result = $l;
+                break;
+            }
+        }
+        return $result;
+    }
+
 
     function export_excel_mutasi()
     {
@@ -333,22 +346,41 @@ class Mutasi extends MY_Controller
         // header table
         // var_dump($head_table1);
     	// $table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Lot','Qty1','Uom1','Qty2','Uom2','Status','Reff Note');
-    	$column = 0;
+    	$column   = 0;
+    	$column_e = 1;
+        $row      = 7;
     	foreach ($head_table1 as $field) {
-            foreach($field as $field2){
-                //$object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $field2[0]); 
-                $column++;
-                if($field2[0] == 'info'){
-                    var_dump($field2[0]) ;
-                    for (  $i = 0, $l = count($field2); $i < $l; $i++ ) {
-                        foreach($field[$i] as $d){
+            foreach($field as $field2 => $field22){
+                //var_dump($field);
+                if($field2 == 'info'){
+                    for (  $i = 0, $l = count($field22); $i < $l; $i++ ) {
+                        foreach($field22[$i] as $field3 => $field33){
+                            $object->getActiveSheet()->setCellValueByColumnAndRow($column, $row, $field33); 
+                            $column++;
+                            $column_e++;;
                         }
                     }
+                }else if($field2 == 'awal' || $field2 == 'akhir' || $field2 == 'in' || $field2 == 'out' || $field2 == 'adj_in' || $field2 == 'adj_out' || $field2 == 'count_in' || $field2 == 'count_out'  ){
 
+                    for ( $i = 0, $l = count($field22); $i < $l; $i++ ) {
+                        foreach($field22[$i] as $field3 => $field33){
+                            
+                            $object->getActiveSheet()->setCellValueByColumnAndRow($column, $row, $field33); 
+                            $column_excel_start  = $this->cek_column_excel($column_e);
+                            $column_excel_finish = $this->cek_column_excel($column_e);
+                            $object->getActiveSheet()->mergeCells($column_excel_start.'7:'.$column_excel_finish.'7');
+                            // $object->getActiveSheet()->mergeCells($column_excel_start.'7:'.$column_excel_finish.'7');
+                            
+                            $column = $column + 4;
+                        }
+                    }
+                    
                 }
                
             }
     	}
+
+        // $object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $field2[0]); 
 
 
       	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
