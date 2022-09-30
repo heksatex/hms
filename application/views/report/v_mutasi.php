@@ -16,6 +16,10 @@
       overflow-x: auto;
     }
 
+    .white-space-nowrap {
+      white-space: nowrap !important;
+    }
+
   </style>
 </head>
 
@@ -48,12 +52,12 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_mutasi" action="">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_mutasi" action="<?=base_url()?>report/mutasi/export_excel_mutasi">
               <div class="col-md-8">
                 <div class="form-group">
                     <div class="col-md-12"> 
                         <div class="col-md-2">
-                            <label>Tanggal </label>
+                            <label>Periode </label>
                         </div>
                         <div class="col-md-4">
                             <div class='input-group'>
@@ -79,6 +83,7 @@
               </div>
               <br>
             </form>
+
 
             <!-- table -->
             <div class="box-body">
@@ -244,40 +249,19 @@
 
 
 
- /*  // cek selisih saatu submit excel
-  $('#frm_periode').submit(function(){
+  // cek selisih saatu submit excel
+  $('#frm_mutasi').submit(function(){
 
-    tgldari   = $('#tgldari').data("DateTimePicker").date();
-    tglsampai = $('#tglsampai').data("DateTimePicker").date();
-    var check_status   = false;
-    var checkboxes_arr = new Array(); 
-
-    var checkboxes_arr = $('input[name="status[]"]').map(function(e, i) {
-            if(this.checked == true){
-                check_status = true;
-              return i.value;
-            }
-
-    }).get();
-
-    var timeDiff = 0;
-    if (tglsampai) {
-        timeDiff = (tglsampai - tgldari) / 1000; // 000 mengubah hasil milisecond ke bentuk second
-    }
-    selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
-
-    if(tglsampai < tgldari){ // cek validasi tgl sampai kurang dari tgl Dari
-      alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+    tanggal    = $('#tanggal').val();
+    if(tanggal == ''){ 
+      alert_modal_warning('Periode Tanggal Harus diisi!');
       return false;
-    }else if (checkboxes_arr.length == 0) {
-      alert_modal_warning('Status Harus Dipilih Salah satu !');
-      return false;
-    }else if( selisih > 30 ){
-      alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 30 hari !')
+    }else if (departemen == null) {
+      alert_modal_warning('Departemen Harus diisi !');
       return false;
     }
 
-  }); */
+  });
 
   // btn generate
   $("#btn-generate").on('click', function(){
@@ -391,7 +375,7 @@
                         $.each(value, function(a, b){ // loop jenis awal, in, out, adj, akhir
                                 for ( var i = 0, l = b.length; i < l; i++ ) {
                                     $.each(b[i], function(c, d){
-                                        row2 += "<th>";
+                                        row2 += "<th class='style'>";
                                         row2 += d;
                                         row2 += "</th>";
                                     });
@@ -431,13 +415,13 @@
 
                           row3 += "<tr>";
                           row3 += "<td>"+ (no++) +"</td>";
-                          row3 += "<td>"+value.kode_produk+"</td>";
-                          row3 += "<td style='width:100% !important;'>"+value.nama_produk+"</td>";
+                          row3 += "<td class='white-space-nowrap'>"+value.kode_produk+"</td>";
+                          row3 += "<td class='white-space-nowrap'>"+value.nama_produk+"</td>";
                           // saldo awal
-                          row3 += "<td align='right'>"+value.s_awal_lot+"</td>";
-                          row3 += "<td align='right'>"+value.s_awal_qty1+" "+value.s_awal_qty1_uom+"</td>";
-                          row3 += "<td align='right'>"+value.s_awal_qty2+" "+value.s_awal_qty2_uom+"</td>";
-                          row3 += "<td align='right'>"+value.s_awal_qty_opname+" "+value.s_awal_qty_opname_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_awal_lot+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_awal_qty1+" "+value.s_awal_qty1_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_awal_qty2+" "+value.s_awal_qty2_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_awal_qty_opname+" "+value.s_awal_qty_opname_uom+"</td>";
 
                           // info uom in 1
                           qty1_uom        = value.s_awal_qty1_uom;
@@ -452,10 +436,10 @@
                             in_qty2_uom    = 'in'+no_in+'_qty2_uom';
                             in_opname      = 'in'+no_in+'_qty_opname';
                             in_opname_uom  = 'in'+no_in+'_qty_opname_uom';
-                            row3 += "<td align='right'>"+value[in_lot]+"</td>";
-                            row3 += "<td align='right'>"+value[in_qty1]+" "+value[in_qty1_uom]+"</td>";
-                            row3 += "<td align='right'>"+value[in_qty2]+" "+value[in_qty2_uom]+"</td>";
-                            row3 += "<td align='right'>"+value[in_opname]+" "+value[in_opname_uom]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[in_lot]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[in_qty1]+" "+value[in_qty1_uom]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[in_qty2]+" "+value[in_qty2_uom]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[in_opname]+" "+value[in_opname_uom]+"</td>";
                             no_in++;
                             // info total++ in
                             in_total_lot         = in_total_lot+parseInt(value[in_lot]);
@@ -467,10 +451,10 @@
                           }
 
                           // adj in
-                          row3 += "<td align='right'>"+value.adj_in_lot+"</td>";
-                          row3 += "<td align='right'>"+value.adj_in_qty1+" "+value.adj_in_qty1_uom+"</td>";
-                          row3 += "<td align='right'>"+value.adj_in_qty2+" "+value.adj_in_qty2_uom+"</td>";
-                          row3 += "<td align='right'>"+value.adj_in_qty_opname+" "+value.adj_in_qty_opname_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_in_lot+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_in_qty1+" "+value.adj_in_qty1_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_in_qty2+" "+value.adj_in_qty2_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_in_qty_opname+" "+value.adj_in_qty_opname_uom+"</td>";
 
                           in_total_lot         = in_total_lot+parseInt(value.adj_in_lot);
                           in_total_qty1        = in_total_qty1+parseFloat(value.adj_in_qty1);
@@ -479,10 +463,10 @@
 
                           // total in 
                           if(in_empty == true){
-                            row3 += "<td align='right'>"+in_total_lot+"</td>";
-                            row3 += "<td align='right'>"+in_total_qty1.toFixed(2)+" "+qty1_uom+"</td>";
-                            row3 += "<td align='right'>"+in_total_qty2.toFixed(2)+" "+qty2_uom+"</td>";
-                            row3 += "<td align='right'>"+in_total_qty_opname+" "+qty_opname_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+in_total_lot+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+in_total_qty1.toFixed(2)+" "+qty1_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+in_total_qty2.toFixed(2)+" "+qty2_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+in_total_qty_opname+" "+qty_opname_uom+"</td>";
                           }
 
                           for (  s = count_out; x < s; x++ ) {
@@ -493,10 +477,10 @@
                             out_qty2_uom    = 'out'+no_out+'_qty2_uom';
                             out_opname      = 'out'+no_out+'_qty_opname';
                             out_opname_uom  = 'out'+no_out+'_qty_opname_uom';
-                            row3 += "<td align='right'>"+value[out_lot]+"</td>";
-                            row3 += "<td align='right'>"+value[out_qty1]+" "+value[out_qty1_uom]+"</td>";
-                            row3 += "<td align='right'>"+value[out_qty2]+" "+value[out_qty2_uom]+"</td>";
-                            row3 += "<td align='right'>"+value[out_opname]+" "+value[out_opname_uom]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[out_lot]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[out_qty1]+" "+value[out_qty1_uom]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[out_qty2]+" "+value[out_qty2_uom]+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+value[out_opname]+" "+value[out_opname_uom]+"</td>";
                             no_out++;
 
                             // info total++ out
@@ -509,10 +493,10 @@
                           }
 
                           // adj out
-                          row3 += "<td align='right'>"+value.adj_out_lot+"</td>";
-                          row3 += "<td align='right'>"+value.adj_out_qty1+" "+value.adj_out_qty1_uom+"</td>";
-                          row3 += "<td align='right'>"+value.adj_out_qty2+" "+value.adj_out_qty2_uom+"</td>";
-                          row3 += "<td align='right'>"+value.adj_out_qty_opname+" "+value.adj_out_qty_opname_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_out_lot+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_out_qty1+" "+value.adj_out_qty1_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_out_qty2+" "+value.adj_out_qty2_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.adj_out_qty_opname+" "+value.adj_out_qty_opname_uom+"</td>";
 
                           out_total_lot         = out_total_lot+parseInt(value.adj_out_lot);
                           out_total_qty1        = out_total_qty1+parseFloat(value.adj_out_qty1);
@@ -521,17 +505,17 @@
 
                           // total out
                           if(out_empty == true){
-                            row3 += "<td align='right'>"+out_total_lot+"</td>";
-                            row3 += "<td align='right'>"+out_total_qty1.toFixed(2)+" "+qty1_uom+"</td>";
-                            row3 += "<td align='right'>"+out_total_qty2.toFixed(2)+" "+qty2_uom+"</td>";
-                            row3 += "<td align='right'>"+out_total_qty_opname+" "+qty_opname_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+out_total_lot+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+out_total_qty1.toFixed(2)+" "+qty1_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+out_total_qty2.toFixed(2)+" "+qty2_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap'  align='right'>"+out_total_qty_opname+" "+qty_opname_uom+"</td>";
                           }
 
                           // saldo Akhir
-                          row3 += "<td align='right'>"+value.s_akhir_lot+"</td>";
-                          row3 += "<td align='right'>"+value.s_akhir_qty1+" "+value.s_akhir_qty1_uom+"</td>";
-                          row3 += "<td align='right'>"+value.s_akhir_qty2+" "+value.s_akhir_qty2_uom+"</td>";
-                          row3 += "<td align='right'>"+value.s_akhir_qty_opname+" "+value.s_akhir_qty_opname_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_akhir_lot+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_akhir_qty1+" "+value.s_akhir_qty1_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_akhir_qty2+" "+value.s_akhir_qty2_uom+"</td>";
+                          row3 += "<td class='white-space-nowrap' align='right'>"+value.s_akhir_qty_opname+" "+value.s_akhir_qty_opname_uom+"</td>";
 
 
                           row3 += "</tr>";

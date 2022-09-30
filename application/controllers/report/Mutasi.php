@@ -25,7 +25,7 @@ class Mutasi extends MY_Controller
     {
 
         $tanggal    = $this->input->post('tanggal');
-        $departemen = $this->input->post('departemen');
+        $departemen = addslashes($this->input->post('departemen'));
 
         $tahun      = date('Y', strtotime($tanggal)); // example 2022
         $bulan      = date('n', strtotime($tanggal)); // example 8
@@ -129,13 +129,13 @@ class Mutasi extends MY_Controller
         $head_table2_out    = [];
         $head_table2_awal   = [];
         $head_table2_akhir  = [];
-            // field saldo awal
+        // field saldo awal
         $field   .= 'kode_produk, nama_produk, s_awal_lot, s_awal_qty1, s_awal_qty1_uom, s_awal_qty2,  s_awal_qty2_uom, s_awal_qty_opname, s_awal_qty_opname_uom, '; 
-            // field saldo akhir
+        // field saldo akhir
         $field   .= 's_akhir_lot, s_akhir_qty1, s_akhir_qty1_uom, s_akhir_qty2, s_akhir_qty2_uom, s_akhir_qty_opname, s_akhir_qty_opname_uom, ';
-            // field adj in 
+        // field adj in 
         $field  .= 'adj_in_lot, adj_in_qty1, adj_in_qty1_uom, adj_in_qty2, adj_in_qty2_uom, adj_in_qty_opname, adj_in_qty_opname_uom, ';
-            // field adj in 
+        // field adj in 
         $field  .= 'adj_out_lot, adj_out_qty1, adj_out_qty1_uom, adj_out_qty2, adj_out_qty2_uom, adj_out_qty_opname, adj_out_qty_opname_uom, ';
         // $head_table2_awal[]  = array('S Awal Lot','S Awal Qty1','S Awal Qty2','S Awal Qty Opname');
         $head_table2_awal[]  = array('Lot','Qty1','Qty2','Qty Opname');
@@ -223,6 +223,142 @@ class Mutasi extends MY_Controller
                                 'akhir'   => $head_table2_awal);
       
        return array($field,$head_table1,$head_table2,$jml_in,$jml_out);
+
+    }
+
+
+    function export_excel_mutasi()
+    {
+
+        $this->load->library('excel');
+        
+        $tanggal    = $this->input->post('tanggal');
+        $departemen = addslashes($this->input->post('departemen'));
+
+        $tahun      = date('Y', strtotime($tanggal)); // example 2022
+        $bulan      = date('n', strtotime($tanggal)); // example 8
+
+        $dept    = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
+
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Laporan Mutasi');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:N1');
+
+		// set Departemen
+ 		$object->getActiveSheet()->SetCellValue('A2', 'Departemen');
+		$object->getActiveSheet()->mergeCells('A2:B2');
+ 		$object->getActiveSheet()->SetCellValue('C2', ': '.$dept['nama']);
+		$object->getActiveSheet()->mergeCells('C2:D2');
+
+
+		// set periode
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Periode');
+		$object->getActiveSheet()->mergeCells('A3:B3');
+ 		$object->getActiveSheet()->SetCellValue('C3', ': '.tgl_indo(date('d-m-Y H:i:s',strtotime('2022-08-29'))) );
+ 		// $object->getActiveSheet()->SetCellValue('C3', ': '.tgl_indo(date('m Y',strtotime($tanggal))) );
+		$object->getActiveSheet()->mergeCells('C3:F3');
+
+         // cek tipe departemen
+        $get_dept  = $this->_module->get_nama_dept_by_kode($departemen);
+        $type_dept = $get_dept->row_array();
+        if($type_dept['type_dept'] == 'manufaktur'){
+            // rm
+            $mutasi_dept_rm = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'rm')->result();
+            $table          = 'acc_mutasi_'.strtolower($departemen).'_rm';
+            $result         = $this->create_header($mutasi_dept_rm);
+
+            $rm_field          = $result[0];
+            $rm_head_table1    = $result[1];
+            $rm_head_table2    = $result[2];
+            $rm_jml_in         = $result[3];
+            $rm_jml_out        = $result[4];
+            $acc_mutasi_rm  = $this->get_acc_mutasi_by_kode($table,$tahun,$bulan,$rm_field);
+
+            $table_mutasi[] = array('table_1'       => 'Yes',
+                                    'record'        =>$acc_mutasi_rm[0], 
+                                    'count_record'  =>$acc_mutasi_rm[1],
+                                    'head_table1'   =>$rm_head_table1, 
+                                    'head_table2'   => $rm_head_table2, 
+                                    'count_in'      => $rm_jml_in, 
+                                    'count_out'     => $rm_jml_out);
+
+            // fg
+            $mutasi_dept_fg = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'fg')->result();
+            $table2         = 'acc_mutasi_'.strtolower($departemen).'_fg';
+            $result2        = $this->create_header($mutasi_dept_fg);
+            $fg_field          = $result2[0];
+            $fg_head_table1    = $result2[1];
+            $fg_head_table2    = $result2[2];
+            $fg_jml_in         = $result2[3];
+            $fg_jml_out        = $result2[4];
+            $acc_mutasi_fg  = $this->get_acc_mutasi_by_kode($table2,$tahun,$bulan,$fg_field);
+
+            $table_mutasi[]    = array('table_2'       => 'Yes',
+                                        'record'        =>$acc_mutasi_fg[0],
+                                        'count_record'  =>$acc_mutasi_fg[1],
+                                        'head_table1'   =>$fg_head_table1, 
+                                        'head_table2'   => $fg_head_table2, 
+                                        'count_in'      => $fg_jml_in, 
+                                        'count_out'     => $fg_jml_out);
+
+        }else{
+
+            $mutasi_dept = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'')->result();
+            $table       = 'acc_mutasi_'.strtolower($departemen);
+            $result      = $this->create_header($mutasi_dept);
+
+            $field       = $result[0];
+            $head_table1 = $result[1];
+            $head_table2 = $result[2];
+            $jml_in      = $result[3];
+            $jml_out     = $result[4];
+
+            // $acc_mutasi  = $this->m_mutasi->acc_mutasi_by_kode($table,$tahun,$bulan,$field)->result();
+            $acc_mutasi  = $this->get_acc_mutasi_by_kode($table,$tahun,$bulan,$field);
+            $table_mutasi[]    = array('table_1'       => 'Yes',
+                                        'record'        =>$acc_mutasi[0], 
+                                        'count_record'  =>$acc_mutasi[1],
+                                        'head_table1'   =>$head_table1, 
+                                        'head_table2'   => $head_table2, 
+                                        'count_in'      => $jml_in, 
+                                        'count_out'     => $jml_out);
+        }
+
+
+        // header table
+        // var_dump($head_table1);
+    	// $table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Lot','Qty1','Uom1','Qty2','Uom2','Status','Reff Note');
+    	$column = 0;
+    	foreach ($head_table1 as $field) {
+            foreach($field as $field2){
+                //$object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $field2[0]); 
+                $column++;
+                if($field2[0] == 'info'){
+                    var_dump($field2[0]) ;
+                    for (  $i = 0, $l = count($field2); $i < $l; $i++ ) {
+                        foreach($field[$i] as $d){
+                        }
+                    }
+
+                }
+               
+            }
+    	}
+
+
+      	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+
+		$name_file ='Penerimaan Harian '.$dept['nama'].'.xls';
+
+        header('Content-Type: application/vnd.ms-excel'); //mime type
+        header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
+        header('Cache-Control: max-age=0'); //no cache
+        $object->save('php://output');
 
     }
 }
