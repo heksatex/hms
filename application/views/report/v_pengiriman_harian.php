@@ -15,6 +15,10 @@
       overflow-x: auto;
     }
 
+    .nowrap{
+      white-space: nowrap;
+    }
+
   </style>
 </head>
 
@@ -191,10 +195,9 @@
                               <th  class='style' style="min-width: 80px">Tgl Kirim</th>
                               <th  class='style'>Origin</th>
                               <th  class='style' style="min-width: 150px">Reff Picking</th>
-                              <th  class='style'>Kode Produk</th>
+                              <th  class='style nowrap' >Kode Produk</th>
                               <th  class='style' style="min-width: 150px">Nama Produk</th>
-                              <th  class='style' style="min-width: 150px">Lot</th>
-                              <th  class='style' id="head_lot">Lot</th>
+                              <th  class='style nowrap' id="head_lot">Lot</th>
                               <th  class='style'>Qty1</th>
                               <th  class='style'>Qty2</th>
                               <th  class='style'>Status</th>
@@ -441,10 +444,10 @@
                     $('#total_record').html(data.total_record);
                     if(data.view == 'Global'){
                       $('#head_lot').html('Total Lot');
-                      width_lot = "style='min-width: 50px !important'; text-align:right";
+                      width_lot = "style='min-width: 50px !important; text-align:right;' ";
                     }else{
                       $('#head_lot').html('Lot');;
-                      width_lot = "style='min-width: 150px !important'";
+                      width_lot = "style='min-width: 150px !important';";
                     }
 
                     let tbody = $("<tbody />");
@@ -467,7 +470,7 @@
                                  $("<td>").text(value.reff_picking),
                                  $("<td>").text(value.kode_produk),
                                  $("<td>").text(value.nama_produk),
-                                 $("<td>").text(value.lot),
+                                 $("<td class='nowrap' "+width_lot+">").text(value.lot),
                                  $("<td align='right'>").text(value.qty1),
                                  $("<td align='right'>").text(value.qty2),
                                  $("<td>").text(value.status),
