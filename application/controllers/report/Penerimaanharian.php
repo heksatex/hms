@@ -108,8 +108,8 @@ class Penerimaanharian extends MY_Controller
 									'kode_produk'	=> $row->kode_produk,
 									'nama_produk'	=> $row->nama_produk,
 									'lot'			=> $row->tot_lot,
-									'qty1'			=> number_format($row->tot_qty,2).' '.$row->uom,
-									'qty2'			=> number_format($row->tot_qty2,2).' '.$row->uom2,
+									'qty1'			=> number_format($row->tot_qty,2).' ',
+									'qty2'			=> number_format($row->tot_qty2,2).' ',
 									'status'		=> $row->nama_status,
 									'reff_note'		=> $row->reff_note,
 									'in'           => 'Yes'
@@ -129,8 +129,8 @@ class Penerimaanharian extends MY_Controller
 									'kode_produk'	=> $row->kode_produk,
 									'nama_produk'	=> $row->nama_produk,
 									'lot'			=> $row->tot_lot,
-									'qty1'			=> number_format($row->tot_qty,2).' '.$row->uom,
-									'qty2'			=> number_format($row->tot_qty2,2).' '.$row->uom2,
+									'qty1'			=> number_format($row->tot_qty,2).' ',
+									'qty2'			=> number_format($row->tot_qty2,2).' ',
 									'status'		=> $row->nama_status,
 									'reff_note'		=> $row->reff_note,
 									'in'           => 'No'
@@ -140,7 +140,7 @@ class Penerimaanharian extends MY_Controller
 
 		}
 	
-		$callback = array('record' => $dataRecord, 'total_record' => 'Total Data : '.$total, 'view' => $view);
+		$callback = array('record' => $dataRecord, 'total_record' => 'Total Data : '.number_format($total), 'view' => $view);
 
 		echo json_encode($callback);
 

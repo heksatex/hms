@@ -142,7 +142,7 @@ class Pengirimanharian extends MY_Controller
 
 		}
 	
-		$callback = array('record' => $dataRecord, 'total_record' => 'Total Data : '.$total, 'view' => $view);
+		$callback = array('record' => $dataRecord, 'total_record' => 'Total Data : '.number_format($total), 'view' => $view);
 
 		echo json_encode($callback);
 
