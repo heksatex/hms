@@ -521,7 +521,9 @@ class Dti extends MY_Controller
 
   public function view_history_dti()
   {
-      $data['id_warna']  = $this->input->post('id_warna');
+      $id_warna          = $this->input->post('id_warna');
+      $data['id_warna']  = $id_warna;
+      $data['head']      = $this->m_lab->get_data_color_by_code($id_warna);
       return $this->load->view('modal/v_history_dti',$data);
   }
 
@@ -697,10 +699,10 @@ class Dti extends MY_Controller
       $row_order          = $this->input->post('row_order');
 
       $data['id_warna']   = $id_warna;
-      $data['nama_warna'] = $this->input->post('warna');
+      $data['nama_warna'] = addslashes($this->input->post('warna'));
       $data['ro']         = $row_order;
       $data['kode_produk']= $kode_produk; 
-      $data['nama_produk']= $nama_produk; 
+      $data['nama_produk']= addslashes($nama_produk); 
       $data['uom']        = $this->_module->get_list_uom();
 
       $data['get']= $this->m_lab->get_warna_items_by_id($id_warna,$kode_produk,$row_order)->row_array();

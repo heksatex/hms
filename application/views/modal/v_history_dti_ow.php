@@ -23,7 +23,7 @@
 
 <script type="text/javascript">
     
-     var nama_warna = '<?php echo $head->nama_warna; ?>';
+    var nama_warna = "<?php echo $head->nama_warna; ?>";
 
     $('.modal-title').text('History DTI List OW ('+nama_warna+')' );
 

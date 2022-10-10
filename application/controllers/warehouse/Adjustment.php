@@ -253,6 +253,8 @@ class Adjustment extends MY_Controller
         $row_order  = $this->_module->get_row_order_adjustment_items_by_kode($kode_adjustment);
         $item_add   = false;
         $lot_sama   = '';
+        $list_product = '';
+        $no         = 1;
 
         foreach($arr_data as $row){
 
@@ -260,6 +262,7 @@ class Adjustment extends MY_Controller
           $row_data = $this->m_adjustment->get_stock_quant_by_quant_id($row)->row_array();
 
           $kode_produk = $row_data['kode_produk'];
+          $nama_produk = $row_data['nama_produk'];
           $lot         = $row_data['lot'];
           $qty         = $row_data['qty'];
           $uom         = $row_data['uom'];
@@ -278,7 +281,9 @@ class Adjustment extends MY_Controller
             $item_add = true;
             //insert ke adjustment_items
             $sql_adjustment_items_batch .= "('".$kode_adjustment."', '".$quant_id."', '".addslashes($kode_produk)."','".addslashes($lot)."', '".addslashes($uom)."','".$qty."','".$qty."', '".addslashes($uom2)."','".$qty2."','".$qty2."', '".$mo['kode']."', '".$row_order."'), ";
-            
+
+            $list_product .= "(".$no.") ".$kode_produk." ".$nama_produk." ".$lot." ".$qty." ".$uom." ".$qty2." ".$uom2." <br>";
+            $no++;
             $row_order++;            
           }else{
             $lot_sama .= $lot.', ';
@@ -303,7 +308,7 @@ class Adjustment extends MY_Controller
             $callback = array('status'=>'success',  'message' => 'Adjustment Detail Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success'); 
           }
             $jenis_log   = "edit";
-            $note_log    = "Tambah Data Details ".$kode_adjustment;
+            $note_log    = "Tambah Data Details ".$kode_adjustment." <br> ".$list_product;
             $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
             
         }else if($item_add == false){
@@ -383,7 +388,7 @@ class Adjustment extends MY_Controller
          }else{
               $this->m_adjustment->update_adjustment_items($kode_adjustment,$row,$qty_adjustment,$qty_adjustment2);
               // produk before
-              $note_      = $get['kode_produk'].' '.$get['nama_produk'].' '.$get['lot'].' '.$get['qty_adjustment'].' -> '.$get['kode_produk'].' |'.$get['nama_produk']." ".$lot."  ".$qty_adjustment;
+              $note_      = $get['kode_produk'].' '.$get['nama_produk'].' '.$get['lot'].' | '.$get['qty_adjustment'].' '.$get['uom'].' | '.$get['qty_adjustment2'].' '.$get['uom2'].' -> '.$get['kode_produk'].' |'.$get['nama_produk']." ".$lot." | ".$qty_adjustment." ".$get['uom']." | ".$qty_adjustment2." ".$get['uom2'];
               $note_log   = "Edit data Details | ".$kode_adjustment." Baris Ke ".$row." <br> ".$note_;
          }
 
@@ -391,7 +396,7 @@ class Adjustment extends MY_Controller
           $this->_module->unlock_tabel();
 
           $jenis_log   = "edit";
-          $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
+          $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, addslashes($note_log), $username);
           $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 
         }else{//simpan data baru
@@ -405,7 +410,7 @@ class Adjustment extends MY_Controller
 
           $jenis_log   = "edit";
           $note_log    = "Tambah data Details | ".$kode_adjustment." | ".$produk." | ".$lot." | ".$qty_data." | ".$qty_adjustment;
-          $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
+          $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, addslashes($note_log), $username);
           $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
         }
 
@@ -462,9 +467,9 @@ class Adjustment extends MY_Controller
         $this->_module->unlock_tabel();
         
         $callback = array('status' => 'success','message' => 'Data Berhasil Dihapus !', 'icon' =>'fa fa-check', 'type' => 'success');
-        $jenis_log   = "delete";        
-        $note_log    = "Hapus data Details Baris Ke ".$row." | ".$kode_adjustment." | ".$get['kode_produk']." | ".$get['nama_produk']." | ".$get['lot']." | ".$get['qty_data']." ".$get['uom']." ".$get['qty_adjustment']." | ".$get['qty_data2']." ".$get['uom2']." ".$get['qty_adjustment2'];
-        $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
+        $jenis_log   = "cancel";        
+        $note_log    = "Hapus data Details Baris Ke ".$row." <br> ".$kode_adjustment." | ".$get['kode_produk']." | ".$get['nama_produk']." | ".$get['lot']." | ".$get['qty_data']." ".$get['uom']." ".$get['qty_adjustment']." | ".$get['qty_data2']." ".$get['uom2']." ".$get['qty_adjustment2'];
+        $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, addslashes($note_log), $username);
       }
 
       echo json_encode($callback);

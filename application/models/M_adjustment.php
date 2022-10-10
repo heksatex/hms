@@ -119,7 +119,7 @@ class M_adjustment extends CI_Model
 		$this->_get_datatables2_query();		
 		$this->db->where('lokasi', $kode_lokasi);
 		//$this->db->where('reserve_move','');
-		$this->db->where_not_in('qty','0');
+		// $this->db->where_not_in('qty','0');
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
@@ -130,7 +130,7 @@ class M_adjustment extends CI_Model
 	{
 		//$this->db->where('reserve_move','');
 		$this->db->where('lokasi', $kode_lokasi);
-		$this->db->where_not_in('qty','0');
+		// $this->db->where_not_in('qty','0');
 		$this->_get_datatables2_query();
 		$query = $this->db->get();
 		return $query->num_rows();
@@ -140,7 +140,7 @@ class M_adjustment extends CI_Model
 	{
 		//$this->db->where('reserve_move','');
 		$this->db->where('lokasi', $kode_lokasi);
-		$this->db->where_not_in('qty','0');
+		// $this->db->where_not_in('qty','0');
 		$this->db->from($this->table2);
 		return $this->db->count_all_results();
 	}

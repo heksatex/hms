@@ -169,7 +169,7 @@
                             <th class="style">Qty Adjustment 2</th>
                             <th class="style">Move ID</th>
                             <th class="style">Qty Move</th>
-                            <th class="style"></th>                            
+                            <th class="style" style="min-width:50px;"></th>                            
                           </tr>
                         </thead>
                         <tbody>
@@ -203,7 +203,7 @@
                               <td class="width-200" align="center">
                                 <?php if($adjustment->status == 'draft'){?>
                                 <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" ><i class="fa fa-save"></i></a>               
-                                <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107; margin-right: 24px;"><i class="fa fa-edit"></i></a>
+                                <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107; margin-right: 20px;"><i class="fa fa-edit"></i></a>
                                 <a href="javascript:void(0)" class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red"></i></a>
                                 <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;"><i class="fa fa-close"></i></a>
                                 <?php }?>
@@ -764,7 +764,7 @@
           }
           }); 
 
-        }else if($(this).attr('data-id')=='qtyadjustment2'&& quant == 'FALSE' ){
+        }else if($(this).attr('data-id')=='qtyadjustment2' ){
           $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)" > ');        
         }
       });  

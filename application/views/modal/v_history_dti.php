@@ -22,6 +22,11 @@
 </form>
 
 <script type="text/javascript">
+
+    var nama_warna = "<?php echo $head->nama_warna; ?>";
+
+    $('.modal-title').text('History DTI List MG ('+nama_warna+')' );
+
     var table;
     $(document).ready(function() {
         //datatables
