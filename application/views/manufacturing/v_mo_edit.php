@@ -917,8 +917,13 @@
                           <tbody>
                             <?php
                               foreach ($hasil_fg as $row) {
+                                if($row->lot_adj != ''){
+                                  $color = "style='color:red';";
+                                }else{
+                                  $color = "";
+                                }
                             ?>
-                              <tr class="num">
+                              <tr class="num" <?php echo $color ?>>
                                 <td></td>
                                 <td ><?php echo $row->nama_produk?></td>
                                 <td><?php echo $row->lot?></td>
@@ -949,6 +954,7 @@
                             ?>
                           </tbody>
                         </table>
+                        <small><b>*Jika terdapat baris yang berwarna <font color="red">MERAH</font> maka Product/Lot tersebut telah di proses ADJUSTMENT !!</b></small>
                       </div>
                        <!-- /.Tabel Kanan -->
                       </div>

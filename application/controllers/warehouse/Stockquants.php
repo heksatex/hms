@@ -60,11 +60,17 @@ class Stockquants extends MY_Controller
             $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
             $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
             $uom_lebar_jadi     = addslashes($this->input->post('uom_lebar_jadi'));
+            $lokasi     = addslashes($this->input->post('lokasi'));
 
-            $this->m_stockQuants->update_stockquants($quant_id,$qty2,$uom2,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
+            // get data stock_quant by quant_id sebelumnya
+            $sq   = $this->m_stockQuants->get_stock_quant_by_kode($quant_id);
+
+            $note_before = $sq->quant_id.' '.$sq->kode_produk.' '.$sq->nama_produk.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty.' '.$sq->uom.' '.$sq->qty2.' '.$sq->uom2.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
+
+            $this->m_stockQuants->update_stockquants($quant_id,$uom2,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
 
             $jenis_log   = "edit";        
-            $note_log    = $quant_id.' | '.$nama_produk.' | '.$lot.' | '.$nama_grade.' | '.$qty2.' | '.$uom2.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$reff_note;
+            $note_log    = $note_before.' <b> -> </b>'. $quant_id.' '.$nama_produk.'  '.$lot.'  '.$nama_grade.' '.$qty2.' '.$uom2.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
             $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
 
             $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');

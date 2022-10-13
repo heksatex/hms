@@ -30,6 +30,10 @@
       min-width: 100px;
     }
 
+    .error{
+      border:  1px solid red !important;
+    }  
+
     /*
     @media screen and (max-width: 767px) {
       .over {
@@ -169,6 +173,7 @@
                             <th class="style">Qty Adjustment 2</th>
                             <th class="style">Move ID</th>
                             <th class="style">Qty Move</th>
+                            <th class="style">Qty Move 2</th>
                             <th class="style" style="min-width:50px;"></th>                            
                           </tr>
                         </thead>
@@ -185,27 +190,28 @@
 
                               <td class="text-wrap width-300" data-content="edit" data-name="Lot" data-id="lot" data-isi="<?php echo htmlentities($row->lot) ?>" ><?php echo $row->lot?></a></td>
 
-                              <td class="text-wrap width-100" data-content="edit" data-name="Uom" data-id="uom" data-isi="<?php echo $row->uom ?>" ><?php echo $row->uom?></a></td>
+                              <td class="text-wrap width-100 text-right" data-content="edit" data-name="Uom" data-id="uom" data-isi="<?php echo $row->uom ?>" ><?php echo $row->uom?></a></td>
 
-                              <td class="text-wrap width-200" ><?php echo $row->qty_data?></a></td>
+                              <td class="text-wrap width-200 text-right" ><?php echo $row->qty_data?></a></td>
 
-                              <td class="text-wrap width-200" data-content="edit" data-name="Qty Adjustment" data-id="qtyadjustment" data-isi="<?php echo $row->qty_adjustment ?>" ><?php echo $row->qty_adjustment?></a></td>
+                              <td class="text-wrap width-200 text-right" data-content="edit" data-name="Qty Adjustment" data-id="qtyadjustment" data-isi="<?php echo $row->qty_adjustment ?>" ><?php echo $row->qty_adjustment?></a></td>
 
-                              <td class="text-wrap width-100" data-content="edit" data-name="Uom2" data-id="uom2" data-isi="<?php echo $row->uom2 ?>" ><?php echo $row->uom2?></a></td>
+                              <td class="text-wrap width-100 text-right" data-content="edit" data-name="Uom2" data-id="uom2" data-isi="<?php echo $row->uom2 ?>" ><?php echo $row->uom2?></a></td>
 
-                              <td class="text-wrap width-200" ><?php echo $row->qty_data2?></a></td>
+                              <td class="text-wrap width-200 text-right" ><?php echo $row->qty_data2?></a></td>
 
-                              <td class="text-wrap width-200" data-content="edit" data-name="Qty Adjustment2"  data-id="qtyadjustment2" data-isi="<?php echo $row->qty_adjustment2 ?>" ><?php echo $row->qty_adjustment2?></a></td>
+                              <td class="text-wrap width-200 text-right" data-content="edit" data-name="Qty Adjustment2"  data-id="qtyadjustment2" data-isi="<?php echo $row->qty_adjustment2 ?>" ><?php echo $row->qty_adjustment2?></a></td>
 
                               <td class="text-wrap width-200" ><?php echo $row->move_id?></a></td>
-                              <td class="text-wrap width-200" ><?php echo $row->qty_move?></a></td>
+                              <td class="text-wrap width-200 text-right" ><?php echo number_format($row->qty_move,2)?></a></td>
+                              <td class="text-wrap width-200 text-right" ><?php echo number_format($row->qty2_move,2)?></a></td>
                               
                               <td class="width-200" align="center">
                                 <?php if($adjustment->status == 'draft'){?>
                                 <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" ><i class="fa fa-save"></i></a>               
-                                <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107; margin-right: 20px;"><i class="fa fa-edit"></i></a>
+                                <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107; margin-right: 15px;"><i class="fa fa-edit"></i></a>
                                 <a href="javascript:void(0)" class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red"></i></a>
-                                <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;"><i class="fa fa-close"></i></a>
+                                <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 15px;"><i class="fa fa-close"></i></a>
                                 <?php }?>
                               </td>
 
@@ -294,12 +300,13 @@
           + '<td></td>'
           + '<td style="min-width:170px;"><select type="text" class="form-control input-sm prod" name="Product" id="product"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'          
           + '<td style="min-width:100px;"><input type="text" class="form-control input-sm lot" name="Lot" id="lot"></td>'
-          + '<td class="width-150"><input type="text" class="form-control input-sm uom" name="Uom" id="uom" readonly></td>'          
+          + '<td class="width-200"><input type="text" class="form-control input-sm uom" name="Uom" id="uom" readonly></td>'          
           + '<td></td>'          
           + '<td class="width-200"><input type="text" class="form-control input-sm qtyadjustment" name="Qty Adjustment" id="qtyadjustment"  onkeyup="validAngka(this)" ></td>'
           + '<td style="min-width:80px;"><select type="text" class="form-control input-sm uom2" name="Uom2" id="uom2"></select></select></td>'          
           + '<td class="width-200"></td>'          
           + '<td class="width-200"><input type="text" class="form-control input-sm qtyadjustment2" name="Qty Adjustment2" id="qtyadjustment2"  onkeyup="validAngka(this)" ></td>'
+          + '<td></td>'
           + '<td></td>'
           + '<td></td>'
           + '<td align="center"><button type="button" class="btn btn-primary btn-xs add width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
@@ -452,27 +459,25 @@
     var empty2 = false;
     var select = $(this).parents("tr").find('select[type="text"]');
 
-
     //validasi tidak boleh kosong select2
     select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
-          alert_notify('fa fa-warning',' Nama Produk Harus Diisi !','danger');
+          alert_notify('fa fa-warning',' Product Harus Diisi !','danger',function(){});
           empty2 = true;
+          $(this).parents('td').find('span span.selection span.select2-selection').addClass('error');
+        }else{
+          $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error');
         }
-
-        if(!$(this).val() && $(this).attr('name')=='Uom' ){
-          alert_notify('fa fa-warning',' Uom  Harus Diisi !','danger');
-          empty2 = true;
-        }
-        
     });
-
 
     // validasi untuk inputan textbox
     input.each(function(){
-      if(!$(this).val()){
+      if(!$(this).val() && $(this).attr('id')!='qtyadjustment2' ){
         alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
         empty = true;
+        $(this).addClass('error'); 
+      }else{
+        $(this).removeClass('error'); 
       }
     });
     
@@ -723,7 +728,7 @@
           }); 
 
         }else if($(this).attr('data-id')=='qtyadjustment'){
-          $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+          $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)"> ');
         }else if($(this).attr('data-id')=='uom2' && quant == 'FALSE'){
           class_uom = 'e_uom2'+row_order;
 
@@ -765,7 +770,7 @@
           }); 
 
         }else if($(this).attr('data-id')=='qtyadjustment2' ){
-          $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)" > ');        
+          $(this).html('<input type="text"  class="form-control input-sm" value="'+ ($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)" > ');        
         }
       });  
       $(this).parents("tr").find(".add, .edit").toggle();
