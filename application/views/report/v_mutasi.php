@@ -203,7 +203,7 @@
     defaultDate : new Date(year, month),
     format : 'MMMM YYYY',
     ignoreReadonly: true,
-    maxDate: new Date(year, month),
+    //maxDate: new Date(year, month),
   });
 
   // disable enter
