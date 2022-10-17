@@ -671,14 +671,14 @@ class Adjustment extends MY_Controller
                   }else if($qty_data2 < $qty_adjustment2){
                     $qty2_adj  = $qty_adjustment2 - $qty_data2;
                   }else{ // qty2 sama
-                    $qty2_adj  = $qty_adjustment2;
+                    $qty2_adj  = $qty_data2 - $qty_adjustment2;
                   }
                   
                   if($qty_adjustment != 0){
-                    // insert stock quant dengan id baru 
-                    $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
+                      // insert stock quant dengan id baru 
+                      $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
 
-                    $quant_id_new = true; // untuk stock_move_items
+                      $quant_id_new = true; // untuk stock_move_items
                    
                   }
 
@@ -695,8 +695,15 @@ class Adjustment extends MY_Controller
 
                   // update lokasi jadi adj berdasarkan quant_id lama
                   if($qty_adjustment == 0){
-                     $case5 .= " when quant_id = '".$row->quant_id."' then '".$lokasi_tujuan."'";
-                     $where5.= "'".$row->quant_id."',";
+
+                      if($qty_adjustment2 == 0 ){
+                        $case5 .= " when quant_id = '".$row->quant_id."' then '".$lokasi_tujuan."'";
+                        $where5.= "'".$row->quant_id."',";
+                      }else{
+                        // insert stock quant dengan id baru 
+                        $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
+                        $quant_id_new = true; // untuk stock_move_items
+                      }
                   }
 
                 }
@@ -715,7 +722,7 @@ class Adjustment extends MY_Controller
                   }else if($qty_data2 < $qty_adjustment2){
                     $qty2_adj  = $qty_adjustment2 - $qty_data2;
                   }else{ // qty2 sama
-                    $qty2_adj  = $qty_adjustment2;
+                    $qty2_adj  = $qty_data2 - $qty_adjustment2;
                   }
 
                   // insert stock quant dengan id baru 
@@ -755,7 +762,7 @@ class Adjustment extends MY_Controller
 
                   }
 
-                  if($qty_adjustment2 != 0){
+                  if($qty_adjustment2 != 0 or $qty_adjustment2 == 0){
                     // insert stock quant dengan id baru 
                     $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
 
