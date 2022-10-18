@@ -700,6 +700,13 @@ class Adjustment extends MY_Controller
                         $case5 .= " when quant_id = '".$row->quant_id."' then '".$lokasi_tujuan."'";
                         $where5.= "'".$row->quant_id."',";
                       }else{
+                        // update qty baru stock_quant berdasarkan qty_adjustment items dengan quant_id sebelumnya
+                        $case4 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment."'";
+                        $where4.= "'".$row->quant_id."',";
+
+                         // update qty2 baru stock_quant berdasarkan qty_adjustmen2 items dengan quant_id sebelumnya
+                        $case8 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment2."'";
+
                         // insert stock quant dengan id baru 
                         $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
                         $quant_id_new = true; // untuk stock_move_items
@@ -745,12 +752,14 @@ class Adjustment extends MY_Controller
                     $lokasi_dari   = $kode_lokasi;
                     $lokasi_tujuan = $la['adjustment_location'];
 
-                    // update qty baru stock_quant berdasarkan qty_adjustment items dengan quant_id sebelumnya
-                    $case4 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment."'";
-                    $where4.= "'".$row->quant_id."',";
- 
-                    // update qty2 baru stock_quant berdasarkan qty_adjustmen2 items dengan quant_id sebelumnya
-                    $case8 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment2."'";
+                    if($qty_adj != 0 AND $qty2_adj != 0){
+                      // update qty baru stock_quant berdasarkan qty_adjustment items dengan quant_id sebelumnya
+                      $case4 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment."'";
+                      $where4.= "'".$row->quant_id."',";
+                      
+                      // update qty2 baru stock_quant berdasarkan qty_adjustmen2 items dengan quant_id sebelumnya
+                      $case8 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment2."'";
+                    }
 
                   }else if($qty_data2 < $qty_adjustment2){
                     $qty2_adj  = $qty_adjustment2 - $qty_data2;
@@ -763,10 +772,25 @@ class Adjustment extends MY_Controller
                   }
 
                   if($qty_adjustment2 != 0 or $qty_adjustment2 == 0){
-                    // insert stock quant dengan id baru 
-                    $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
+                    if($qty_adjustment == 0 AND $qty_adjustment2 == 0){ // update lokasi
 
-                    $quant_id_new = true; // untuk stock_move_items
+                      $case5 .= " when quant_id = '".$row->quant_id."' then '".$lokasi_tujuan."'";
+                      $where5.= "'".$row->quant_id."',";
+
+                    }else{
+
+                      // update qty baru stock_quant berdasarkan qty_adjustment items dengan quant_id sebelumnya
+                      $case4 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment."'";
+                      $where4.= "'".$row->quant_id."',";
+
+                      // update qty2 baru stock_quant berdasarkan qty_adjustmen2 items dengan quant_id sebelumnya
+                      $case8 .= " when quant_id = '".$row->quant_id."' then '".$qty_adjustment2."'";
+
+                      // insert stock quant dengan id baru 
+                      $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".addslashes($row->lot)."','".$nama_grade."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$lokasi_tujuan."','".$reff_note."','','".$reserve_origin."','".$tanggal."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."','".addslashes($row->sales_order)."','".addslashes($row->sales_group)."'), ";
+                      
+                      $quant_id_new = true; // untuk stock_move_items
+                    }
                   }
 
                 }
