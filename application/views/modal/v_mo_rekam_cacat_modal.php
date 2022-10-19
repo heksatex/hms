@@ -11,7 +11,7 @@
     border:  1px solid red;
   } 
 
-  table.table td .cancel {
+  table.table td .cancel_cacat {
         display: none;
         color : red;
         min-width:  24px;
@@ -34,23 +34,28 @@
     </thead>
     <tbody>
       <?php 
+      $item_empty= TRUE;
       foreach ($rekam_cacat as $row) {
+        $item_empty = FALSE;
       ?>
       <tr class="num">
         <td></td>
-        <td  data-content="edit" data-id="point_cacat" data-isi="<?php echo $row->point_cacat;?>" ><?php echo $row->point_cacat;?></td>
+        <td data-content="edit" data-id="point_cacat" data-isi="<?php echo $row->point_cacat;?>" ><?php echo $row->point_cacat;?></td>
         <td data-content="edit" data-id="cacat" data-isi="<?php echo $row->kode_nama;?>" data-cacat="<?php foreach($list_cacat as $val){ if($val['kode_cacat'] == $row->kode_cacat){ echo '<option value='.$val['kode_cacat'].' selected>'.$val['kode_nama'].'</option>';} else {echo '<option value='.$val['kode_cacat'].'>'.$val['kode_nama'].'</option>';}} ?>" ><?php echo $row->kode_nama;?></td>
         <td>
-            <?php if($status_mo != 'done'){//jika status mo tidak sama dengan done maka tampilkan 
+            <?php if($status_mo == 'done' || $status_mo == 'ready'){//jika status mo tidak sama dengan done maka tampilkan 
             ?>
-            <a class="edit" href="javascript:void(0)" title="Edit" data-toggle="tooltip" style="color: #FFC107;   margin-right: 24px;"><i class="fa fa-edit"></i></a>
-            <a class="delete"  href="javascript:void(0)" title="Hapus" data-toggle="tooltip"><i class="fa fa-trash" style="color: red"></i></a>
-            <a class="cancel" href="javascript:void(0)" title="Cancel" data-toggle="tooltip"><i class="fa fa-close"></i></a>
+            <a class="edit_cacat" href="javascript:void(0)" title="Edit" data-toggle="tooltip" style="color: #FFC107;   margin-right: 24px;"><i class="fa fa-edit"></i></a>
+            <a class="delete_cacat"  onclick="delete_rekam_cacat('<?php echo $row->row_order;?>')" href="javascript:void(0)" title="Hapus" data-toggle="tooltip"><i class="fa fa-trash" style="color: red"></i></a>
+            <a class="cancel_cacat" href="javascript:void(0)" title="Cancel" data-toggle="tooltip"><i class="fa fa-close"></i></a>
           <?php }?>
         </td>
         <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>"></td>
       </tr>
       <?php 
+      }
+      if($item_empty == TRUE){
+        echo '<tr><td colspan=4" align="center">Tidak ada Data</tr>';
       }
       ?>
     </tbody>      
@@ -67,6 +72,9 @@
       </tr>
     </tfoot>          
   </table>
+  <div class="example1_processing_cacat table_processing" style="display: none">
+    Processing...
+	</div>
 </form>
 
 <script type="text/javascript">
@@ -78,7 +86,7 @@
     }
 
     // Edit row on edit button click
-    $(document).on("click", ".edit", function(){  
+    $(document).on('click', '.edit_cacat', function(){
         $(this).parents("tr").find("td[data-content='edit']").each(function(){
           $('.cacat').select2({});
 
@@ -92,8 +100,10 @@
       
         });  
 
-        $(this).parents("tr").find(".edit").toggle();
-        $(this).parents("tr").find(".cancel, .delete").toggle();      
+        $(this).parents("tr").find(".edit_cacat").hide();
+        $(this).parents("tr").find(".delete_cacat").hide();
+        $(this).parents("tr").find(".cancel_cacat").show();
+        // $(this).parent("tr").find(".delete_cacat").toggle();      
     });
 
     //update data rekam cacat
@@ -106,31 +116,26 @@
     });
 
     //btn batal edit
-    $(".delete").off("click").on("click",function(e) {
+    $(document).on('click', '.cancel_cacat', function(){
       $(this).parents("tr").find("td[data-content='edit']").each(function(){
           if($(this).attr('data-id')!="row_order"){
            $(this).html($(this).attr('data-isi'));
           }
       });
-      $(this).parents("tr").find(".edit").toggle();
-      $(this).parents("tr").find(".delete, .cancel").toggle();
+      $(this).parents("tr").find(".edit_cacat").show();
+      $(this).parents("tr").find(".cancel_cacat").hide();
+      $(this).parents("tr").find(".delete_cacat").show();
 
     });
 
     //btn delete cacat
-    $(document).on("click", ".delete", function(){
+    function delete_rekam_cacat(row){
 
-        $(this).parents("tr").find("td[data-content='edit']").each(function(){
-          if($(this).attr('data-id')=="row_order"){
-            $(this).html('<input type="hidden" class="form-control" value="' + ($(this).attr('data-isi')) + '" id="'+ $(this).attr('data-id') +'"> ');         
-          }
-        });
-
-      var row_order = $(this).parents("tr").find("#row_order").val(); 
-      var kode   = '<?php echo $kode; ?>';
-      var lot    = '<?php echo $lot; ?>';
-      var quant_id  = $("#quant_id").val();
-      var deptid    = $("#deptid").val();
+        var row_order = row; 
+        var kode      = '<?php echo $kode; ?>';
+        var lot       = '<?php echo $lot; ?>';
+        var quant_id  = $("#quant_id").val();
+        var deptid    = $("#deptid").val();
       
         bootbox.dialog({
         message: "Apakah Anda ingin menghapus data ?",
@@ -140,7 +145,7 @@
               label    : "Yes ",
               className: "btn-primary btn-sm",
               callback : function() {
-               
+                  please_wait(function(){});
                   $.ajax({
                       dataType: "JSON",
                       url : '<?php echo site_url('manufacturing/mO/delete_rekam_cacat_lot_modal') ?>',
@@ -151,16 +156,23 @@
                             //alert jika session habis
                             alert_modal_warning(data.message);
                             window.location.replace('../index');
+                        }else if(data.status == "failed"){
+                            alert_modal_warning(data.message);
+                            unblockUI( function(){});
                         }else{
-                            $("#tab_1").load(location.href + " #tab_1");
-                            $("#foot").load(location.href + " #foot");
-                            $("#status_bar").load(location.href + " #status_bar");
-                            $('#tambah_data').modal('hide');
-                            alert_notify(data.icon,data.message,data.type);
+                            // $("#tab_1").load(location.href + " #tab_1");
+                            // $("#foot").load(location.href + " #foot");
+                            // $("#status_bar").load(location.href + " #status_bar");
+                            // $('#tambah_data').modal('hide');
+                            unblockUI( function(){
+                              setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                            });
+                            reloadBodyRekamCacat();
                          }
                       },
                       error: function (xhr, ajaxOptions, thrownError){
                         alert(xhr.responseText);
+                        unblockUI( function(){});
                       }
                     });
               }
@@ -175,7 +187,76 @@
         }
         });
      
-    });
+    }
+
+    function reloadBodyRekamCacat(){
+
+      var kode      = "<?php echo $kode; ?>";
+      var lot       = "<?php echo $lot; ?>";
+      var quant_id  = "<?php echo $quant_id; ?>";
+     
+      $.ajax({
+        type	: "POST",
+        dataType: "json",
+        url 	:'<?php echo base_url('manufacturing/mO/get_body_rekam_cacat')?>',
+              beforeSend: function(e) {
+                if(e && e.overrideMimeType) {
+                  e.overrideMimeType("application/json;charset=UTF-8");
+                }
+                $("#tabel_cacat tbody").remove();
+                $(".example1_processing_cacat").css('display','block');
+              },
+        data: {kode:kode, lot:lot, quant_id:quant_id},
+        success: function(data){
+          if(data.sesi == "habis"){
+            //alert jika session habis
+            alert_modal_warning(data.message);
+            window.location = baseUrl;//replace ke halaman login
+				  }else{
+            $(".example1_processing_cacat").css('display','none');
+            var no    = 1;
+            var empty = true;
+            var tbody = $("<tbody />");
+            var tr    = '';
+            var btn  = '';
+
+            $.each(data.items, function(key, value) {
+
+                if(status_mo == 'draft' || status_mo == 'ready'){
+                  btn   = '<a class="edit_cacat" href="javascript:void(0)" title="Edit" data-toggle="tooltip" style="color: #FFC107;   margin-right: 24px;"><i class="fa fa-edit"></i></a><a class="delete_cacat"  onclick="delete_rekam_cacat('+value.row_order+')" href="javascript:void(0)" title="Hapus" data-toggle="tooltip"><i class="fa fa-trash" style="color: red"></i></a><a class="cancel_cacat" href="javascript:void(0)" title="Cancel" data-toggle="tooltip"><i class="fa fa-close"></i></a>';
+                }else{
+                  btn = '';
+                }
+
+                empty = false;
+                tr    = '<tr>'
+                      + '<td>'+no+'</td>'
+                      + '<td data-content="edit" data-id="point_cacat" data-isi="'+value.point_cacat+'" >'+value.point_cacat+'</td>'
+                      + '<td data-content="edit" data-id="cacat" data-isi="'+value.kode_nama+'" >'+value.kode_nama+'</td>'
+                      + '<td>'+btn+'</td>'
+                      + '<td data-content="edit" data-id="row_order" data-isi="'+value.row_order+'"></td>'
+                      + '</tr>';
+                no++;
+                tbody.append(tr);
+            });
+              
+            if(empty == true){
+					    var tr = $("<tr>").append($("<td colspan='4' align='center'>").text('Tidak ada Data'));
+              tbody.append(tr);
+					  }
+
+            $("#tabel_cacat").append(tbody);
+
+          }
+
+        },error: function (xhr, ajaxOptions, thrownError) { 
+          alert(xhr.responseText);
+          alert('error Reload');
+					$(".example1_processing_cacat").css('display','none');
+        }
+      });
+
+    }
 
     //fungsi panggil tambah_cacat() ketika enter di qty
     function enter(e){
@@ -220,7 +301,7 @@
                + '<td ></td>'
                +  '<td><input type="text" name="point_cacat" id="point_cacat" class="form-control input-sm point_cacat" autocomplete="off" onkeypress="enter(event);"/></td>'
                +  '<td><select type="text" class="form-control input-sm cacat" name="cacat" id="cacat" style="width:100%;"><?php foreach($list_cacat as $row){ echo '<option value='.$row['kode_cacat'].'>'.$row['kode_nama'].'</option>';}?></select></td>'
-               +  '<td><a class="hapus_baris"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red" data-toggle="tooltip" title="Hapus"></i> </a</td>'
+               +  '<td><a class="hapus_baris"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red" data-toggle="tooltip" title="Hapus"></i> </a></td>'
                + '<td></td>'
                +  '</tr>'
           $('#tabel_cacat tbody').append(row);       
@@ -284,6 +365,8 @@
           if(list_cacat == false){
               alert_modal_warning('Maaf, Rekam Cacat Masih Kosong !');
           }else{
+            please_wait(function(){});
+            $('#btn-tambah').button('loading');
             $.ajax({
                 dataType: "JSON",
                 url : '<?php echo site_url('manufacturing/mO/save_rekam_cacat_lot_modal') ?>',
@@ -291,10 +374,14 @@
                 data: {rekam_cacat : arr4, kode : kode, deptid : $('#deptid').val(), lot : lot, quant_id  :$("#quant_id").val(),},
                 success: function(data){
 
-                  if(data.sesi == "habis"){
+                    if(data.sesi == "habis"){
                       //alert jika session habis
                       alert_modal_warning(data.message);
                       window.location.replace('../index');
+                    }else if(data.status == 'failed'){
+                      alert_modal_warning(data.message);
+                      $('#btn-tambah').button('reset');
+                      unblockUI( function(){});
                     }else{
                       //jika berhasil disimpan
                       var rekam_cacat = '';
@@ -309,13 +396,15 @@
                       $('#tambah_data').modal('hide');
                       $('#btn-tambah').button('reset');                   
                       //window.location.replace(data.kode);
-                      alert_notify(data.icon,data.message,data.type);
-
+                      unblockUI( function(){
+                        setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                      });
                     }
                     
                 },error: function (jqXHR, textStatus, errorThrown){
                   alert(jqXHR.responseText);
                   $('#btn-tambah').button('reset');
+  								unblockUI( function(){});
                 }
             });
           }

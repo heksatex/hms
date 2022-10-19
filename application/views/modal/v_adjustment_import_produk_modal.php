@@ -132,7 +132,7 @@
                 if(data.msg2 == 'Yes'){
                   alert_modal_warning(data.message2);
                 }
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
               }
 
             },error: function (xhr, ajaxOptions, thrownError) {

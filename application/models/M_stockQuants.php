@@ -132,13 +132,13 @@ class M_stockQuants extends CI_Model
 	}
 
 	
-	public function update_stockquants($quant_id,$qty2,$uom2,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi)
+	public function update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi)
 	{
-		$this->db->query("UPDATE stock_quant SET qty2 = '$qty2', uom2 = '$uom2', nama_grade = '$nama_grade', reff_note = '$reff_note', lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi' WHERE quant_id = '$quant_id' ");
+		$this->db->query("UPDATE stock_quant SET  nama_grade = '$nama_grade', reff_note = '$reff_note', lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi' WHERE quant_id = '$quant_id' ");
 
-		$this->db->query("UPDATE mrp_production_fg_hasil SET qty2 = '$qty2', uom2 = '$uom2', nama_grade = '$nama_grade',lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'  WHERE quant_id = '$quant_id' ");
+		$this->db->query("UPDATE mrp_production_fg_hasil SET  nama_grade = '$nama_grade',lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'  WHERE quant_id = '$quant_id' ");
 
-		$this->db->query("UPDATE stock_move_items SET qty2 = '$qty2', uom2 = '$uom2',lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'  WHERE quant_id = '$quant_id' ");
+		$this->db->query("UPDATE stock_move_items SET lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'  WHERE quant_id = '$quant_id' ");
 	}
 
 

@@ -119,9 +119,11 @@
                               <th  class='style' >Qty Stock</th>
                               <th  class='style' >Qty Adj</th>
                               <th  class='style' >UoM</th>
-                              <th  class='style' >Qty2</th>
+                              <th  class='style' >Qty2 Stock</th>
+                              <th  class='style' >Qty2 Adj</th>
                               <th  class='style' >UoM2</th>
                               <th  class='style' >Qty Move</th>
+                              <th  class='style' >Qty Move2</th>
                               <th  class='style' style="min-width: 80px">User</th>
                               <th  class='style' style="min-width: 100px">Notes</th>
                             </tr>
@@ -252,9 +254,11 @@
                                $("<td align='right'>").text(value.qty_stock),
                                $("<td align='right'>").text(value.qty),
                                $("<td>").text(value.uom),
+                               $("<td align='right'>").text(value.qty2_stock),
                                $("<td align='right'>").text(value.qty2),
                                $("<td>").text(value.uom2),
                                $("<td align='right'>").text(value.qty_move),
+                               $("<td align='right'>").text(value.qty_move2),
                     );
                     no++;
                     tbody = $("<tbody id='"+group+"'>").append(tr);
@@ -319,6 +323,11 @@
           $("#example1 tbody[data-parent='"+tbody_id+"']").remove();// remove child by groupby
 
         }else{
+
+          this_icon = $(this);
+          this_icon.html('<i class="fa fa-spinner fa-spin "></i>');
+          this_icon.css('pointer-events','none');
+
           $.ajax({
             type : 'POST',
             dataType: 'json',
@@ -339,9 +348,11 @@
                           row += "<td align='right' >"+value.qty_stock+"</td>";
                           row += "<td align='right' >"+value.qty+"</td>";
                           row += "<td>"+value.uom+"</td>";
+                          row += "<td align='right'>"+value.qty2_stock+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
                           row += "<td align='right'>"+value.qty_move+"</td>";
+                          row += "<td align='right'>"+value.qty_move2+"</td>";
                           row += "<td>"+value.user+"</td>";
                           row += "<td>"+value.note+"</td>";
                           row += "</tr>";
@@ -349,9 +360,17 @@
                 tbody.append(row);
                 $('#example1 tbody[id='+tbody_id+']').after(tbody);
 
+                // kembalikan icon ke awal
+                this_icon.css('pointer-events','');
+                this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+
             },error : function(jqXHR, textStatus, errorThrown){
-              alert(jqXHR.responseText);
-              //alert('error data');
+              //alert(jqXHR.responseText);
+              alert('error load child');
+              // kembalikan icon ke awal
+              this_icon.css('pointer-events','');
+              this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+              
             }
 
           });

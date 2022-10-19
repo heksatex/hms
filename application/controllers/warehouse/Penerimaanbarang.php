@@ -208,14 +208,27 @@ class Penerimaanbarang extends MY_Controller
             $data['mo']    = '';
         }
 
-        // cek type mo
-        $data['type_mo'] = $this->_module->cek_type_mo_by_dept($list->dept_id);
-
         // cek priv akses menu
         $sub_menu           = $this->uri->segment(2);
         $username           = $this->session->userdata('username'); 
         $kode               = $this->_module->get_kode_sub_menu_deptid($sub_menu,$list->dept_id)->row_array();
         $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
+
+        // cek level akses by user
+        $level_akses = $this->_module->get_level_akses_by_user($username)->row_array();
+        // cek departemen by user
+        $cek_dept = $this->_module->cek_departemen_by_user($username)->row_array();
+ 
+        if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
+          $data['show_delete']   = true;
+        }else if($cek_dept['dept'] == 'PPIC'){
+          $data['show_delete']  = true;
+        }else{
+          $data['show_delete'] = false;
+        }
+
+        // cek type mo
+        $data['type_mo'] = $this->_module->cek_type_mo_by_dept($list->dept_id);
 
         if(empty($data["list"])){
             show_404();
@@ -1214,6 +1227,23 @@ class Penerimaanbarang extends MY_Controller
 
         $cek_kirim  = $this->m_penerimaanBarang->cek_status_barang($kode)->row_array();
 
+        $kode_menu  = $this->_module->get_kode_sub_menu_deptid($sub_menu,$deptid)->row_array();
+        $akses_menu = $this->_module->cek_priv_menu_by_user($username,$kode_menu['kode'])->num_rows();
+
+        // cek level akses by user
+        $level_akses = $this->_module->get_level_akses_by_user($username)->row_array();
+        // cek departemen by user
+        $cek_dept = $this->_module->cek_departemen_by_user($username)->row_array();
+      
+        if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
+          $delete_items   = true;
+        }else if($cek_dept['dept'] == 'QC' OR $cek_dept['dept'] == 'PPIC'){
+          $delete_items  = true;
+        }else{
+          $delete_items = false;
+        }
+
+
         if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
             // session habis
             $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
@@ -1221,6 +1251,8 @@ class Penerimaanbarang extends MY_Controller
             $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dihapus, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type'=>'danger');
         }else if($cek_kirim['status'] == 'cancel'){//cek jika status penerimaan batal
             $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dihapus, Data Penerimaan Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+        }else if($delete_items == false or $akses_menu == 0){
+            $callback = array('status' => 'failed', 'message'=>'Maaf, Anda tidak punya akses untuk menghapus data !', 'icon' => 'fa fa-warning', 'type'=>'danger');
         }else{
 
             $quant_id   = $this->input->post('quant_id');

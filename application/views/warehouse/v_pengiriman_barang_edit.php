@@ -1026,6 +1026,7 @@
       var kode  =  "<?php echo $list->kode; ?>";
       var deptid  = "<?php echo $list->dept_id; ?>";
       var row_order = $(this).parents("tr").find("#row_order").val();  
+      var this1  = $(this);
       bootbox.dialog({
         message: "Apakah Anda ingin menghapus data ?",
         title: "<i class='glyphicon glyphicon-trash'></i> Delete !",
@@ -1035,6 +1036,7 @@
               className: "btn-primary btn-sm",
               callback : function() {
                   please_wait(function(){});
+                  this1.button('loading');
                   $.ajax({
                       dataType: "JSON",
                       url : '<?php echo site_url('warehouse/pengirimanbarang/hapus_products_pengiriman_barang') ?>',
@@ -1045,12 +1047,15 @@
                             //alert jika session habis
                             alert_modal_warning(data.message);
                             window.location.replace('../index');
+                            this1.button('reset');
                             unblockUI( function(){});
                         }else if(data.status == 'failed'){
+                            this1.button('reset');
                             alert_modal_warning(data.message);
                             refresh_div_out();
                             unblockUI( function(){});
                         }else{
+                            this1.button('reset');
                             refresh_div_out();
                             $(".add-new").show();                   
                             unblockUI( function() {
@@ -1062,6 +1067,7 @@
                       error: function (xhr, ajaxOptions, thrownError){
                         //alert('Error Hapus Produk');
                         alert(xhr.responseText);
+                        this1.button('reset');
                         unblockUI( function(){});
                       }
                     });

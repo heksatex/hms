@@ -48,7 +48,7 @@ class M_joblistgobout extends CI_Model
 	
 		foreach ($this->column_search as $item) // loop column 
 		{
-			if($_POST['search']['value']) // if datatable send POST for search
+			if(isset($_POST['search']['value'])) // if datatable send POST for search
 			{
 				
 				if($i===0) // first loop
@@ -83,6 +83,7 @@ class M_joblistgobout extends CI_Model
 		$this->_get_datatables_query();
 		$this->db->where('dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
+		$this->db->where_in('pb.status',array('ready','draft'));
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
@@ -93,6 +94,7 @@ class M_joblistgobout extends CI_Model
 	{
 		$this->db->where('dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
+		$this->db->where_in('pb.status',array('ready','draft'));
 		$this->_get_datatables_query();
 		$query = $this->db->get();
 		return $query->num_rows();
@@ -105,6 +107,7 @@ class M_joblistgobout extends CI_Model
 		$this->db->from("pengiriman_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
+		$this->db->where_in('pb.status',array('ready','draft'));
 		$this->db->where('dept_id',$id_dept);
 		return $this->db->count_all_results();
 	}

@@ -122,24 +122,13 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Qty2 </label></div>
                   <div id="ta" class="col-xs-8">
-                    <input type='text' class="form-control input-sm" name="qty2" id="qty2"  value="<?php echo $list->qty2; ?>"  />
+                    <input type='text' class="form-control input-sm" name="qty2" id="qty2"  value="<?php echo $list->qty2; ?>" readonly="readonly"  />
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Uom2 </label></div>
                   <div class="col-xs-8">
-                    <select class="form-control input-sm " id="uom2" name="uom2">
-                        <option value=""></option>
-                        <?php 
-                          foreach ($list_uom as $row) {
-                            if($list->uom2 == $row->short){
-                              echo "<option selected>".$row->short."</option>";
-                            }else{
-                              echo "<option >".$row->short."</option>";
-                            }
-                          }
-                        ?>
-                    </select>
+                    <input type='text' class="form-control input-sm" name="uom2" id="uom2"  value="<?php echo $list->uom2; ?>"  readonly="readonly"/>
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -292,6 +281,7 @@
                 uom_lebar_greige :$('#uom_lebar_greige').val(),
                 lebar_jadi       :$('#lebar_jadi').val(),
                 uom_lebar_jadi   :$('#uom_lebar_jadi').val(),
+                lokasi   :$('#lokasi').val(),
 
           },success: function(data){
             if(data.sesi == "habis"){

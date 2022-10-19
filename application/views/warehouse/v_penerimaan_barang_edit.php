@@ -226,7 +226,7 @@
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                 <td><?php echo $row->quant_id?></td>
                                 <td class="no" align="center" >
-                                  <?php if($akses_menu > 0){?>
+                                  <?php if($akses_menu > 0 AND $show_delete == true){?>
                                     <a onclick="hapus('<?php  echo $list->kode ?>','<?php  echo $list->move_id ?>','<?php  echo $row->kode_produk ?>','<?php  echo htmlentities($row->nama_produk) ?>', '<?php  echo $row->quant_id ?>', '<?php  echo $row->row_order ?>', '<?php  echo $row->status ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
                                     </a>
                                   <?php }?>

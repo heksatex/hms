@@ -248,7 +248,6 @@
                               <div class="form-group" style="margin-bottom: 0px;">
                                 <div class="col-md-12">
                                 <label><div id='total_record'>Total Data : 0</div></label>
-                                <label class="pull-right text-right"><input type="checkbox" name="transit[]" value="Transit Location"> Transit Location </label>
                                 </div>
                               </div>
                               <div class="form-group" style="margin-bottom: 0px;">
@@ -744,8 +743,8 @@
     if(value == 'lokasi'){
       var value = '<div class="col-md-6"> ';
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
-          value += "<option value='kosong'>-- Pilih Lokasi Stock --</option>";
-          value += "<?php foreach($warehouse as $row){ echo "<option>".$row->stock_location."</option>";} ?>";
+          value += "<option value='kosong'>-- Pilih Lokasi  --</option>";
+          value += "<?php foreach($warehouse as $row){ echo "<option>".$row['lokasi']."</option>";} ?>";
           value += "</select>";
           value += '</div>';
           
@@ -986,15 +985,15 @@
         pageNum = 0;
      }
 
-    var check_transit  = false;
-    var checkboxes_arr =  new Array(); 
+    // var check_transit  = false;
+    // var checkboxes_arr =  new Array(); 
 
-    var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
-            if(this.checked == true){
-              check_transit = true;
-              return i.value;
-            }
-    }).get();
+    // var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
+    //         if(this.checked == true){
+    //           check_transit = true;
+    //           return i.value;
+    //         }
+    // }).get();
 
      $("#example1 tbody").remove();
      please_wait(function(){});
@@ -1003,7 +1002,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : '<?=base_url()?>report/stock/loadData/'+pageNum,
-                data: {arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), arr_order:arr_order, transit:check_transit},
+                data: {arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), arr_order:arr_order},
                 success: function(data){
 
                   $('#pagination').html(data.pagination);
@@ -1203,15 +1202,15 @@
 
     }else{
 
-        var check_transit  = false;
-        var checkboxes_arr =  new Array(); 
+        // var check_transit  = false;
+        // var checkboxes_arr =  new Array(); 
 
-        var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
-                if(this.checked == true){
-                  check_transit = true;
-                  return i.value;
-                }
-        }).get();
+        // var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
+        //         if(this.checked == true){
+        //           check_transit = true;
+        //           return i.value;
+        //         }
+        // }).get();
 
        this_icon.html('<i class="fa fa-spinner fa-spin "></i>');
        this_icon.css('pointer-events','none');
@@ -1220,7 +1219,7 @@
             type      : 'POST',
             dataType  : 'json',
             url       : '<?=base_url()?>report/stock/loadChild',
-            data      : {kode:kode, group_by:group_by, tbody_id:tbody_id, group_ke:group_ke, record:'0', arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), root:root, tmp_arr_group:JSON.stringify(tmp_arr_group), arr_order:arr_order, transit:check_transit},
+            data      : {kode:kode, group_by:group_by, tbody_id:tbody_id, group_ke:group_ke, record:'0', arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), root:root, tmp_arr_group:JSON.stringify(tmp_arr_group), arr_order:arr_order},
             success:function(data){
 
               if(data.list_group != ''){
@@ -1363,22 +1362,22 @@
   // untuk meload child dari next/prev button
   function loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root){
 
-            var check_transit  = false;
-            var checkboxes_arr =  new Array(); 
+            // var check_transit  = false;
+            // var checkboxes_arr =  new Array(); 
 
-            var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
-                    if(this.checked == true){
-                      check_transit = true;
-                      return i.value;
-                    }
+            // var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
+            //         if(this.checked == true){
+            //           check_transit = true;
+            //           return i.value;
+            //         }
 
-            }).get();
+            // }).get();
 
            $.ajax({
             type : 'POST',
             dataType: 'json',
             url  : '<?=base_url()?>report/stock/loadChild',
-            data : {  kode:kode,  record:page, arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), group_by:group_by, tbody_id:tbody_id, group_ke:group_ke, root:root, tmp_arr_group:JSON.stringify(tmp_arr_group), arr_order:arr_order, transit:check_transit},
+            data : {  kode:kode,  record:page, arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), group_by:group_by, tbody_id:tbody_id, group_ke:group_ke, root:root, tmp_arr_group:JSON.stringify(tmp_arr_group), arr_order:arr_order},
             success:function(data){
             
                 $("#example1 tbody[data-parent='"+tbody_id+"']").remove();// remove child by data-parent
@@ -1546,20 +1545,20 @@
         arrow = ' <span class="fa fa-sort-amount-asc"></span>';
       }
 
-      var check_transit  = false;
-      var checkboxes_arr =  new Array(); 
-      var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
-                if(this.checked == true){
-                  check_transit = true;
-                  return i.value;
-                }
-      }).get();
+      // var check_transit  = false;
+      // var checkboxes_arr =  new Array(); 
+      // var checkboxes_arr = $('input[name="transit[]"]').map(function(e, i) {
+      //           if(this.checked == true){
+      //             check_transit = true;
+      //             return i.value;
+      //           }
+      // }).get();
       
       $.ajax({
           type : 'POST',
           dataType: 'json',
           url : '<?=base_url()?>report/stock/loadData/0',
-          data:{arr_order:arr_order, arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group), transit:check_transit},
+          data:{arr_order:arr_order, arr_filter:JSON.stringify(arr_filter), arr_group:JSON.stringify(arr_group)},
           beforeSend: function() {
             if(order == 'desc'){
               $('#'+nama_kolom+'').attr('data-order','asc');

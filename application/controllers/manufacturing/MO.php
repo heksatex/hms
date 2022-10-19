@@ -2770,6 +2770,17 @@ class MO extends MY_Controller
 
         return $this->load->view('modal/v_mo_rekam_cacat_modal', $data); 
     }
+    
+    public function get_body_rekam_cacat()
+    {
+        $lot     = $this->input->post('lot');
+        $quant_id= $this->input->post('quant_id');
+        $kode    = $this->input->post('kode');
+        $dataRecord= $this->m_mo->get_list_rekam_cacat($kode,addslashes($lot),$quant_id);
+        $callback = array('status' => 'success', 'message'=>'Data Berhasil di hapus !', 'icon' => 'fa fa-check', 'type'=>'success', 'items'=>$dataRecord );
+        echo json_encode($callback);
+
+    }
 
     public function save_rekam_cacat_lot_modal()
     {
@@ -4866,7 +4877,6 @@ class MO extends MY_Controller
             $pdf->setXY(32,30);
             $pdf->Multicell(42,5,$nh_mc."".$reff_note,0,'L'); // Departemen Tujuan - MC - Reff note Lot
 
-
             $pdf->setXY(3,39);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
@@ -4875,10 +4885,10 @@ class MO extends MY_Controller
             $pdf->Multicell(77,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
 
             $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
-            
+            $tgl_now = (date('Y/m/d H:i:s'));
             $pdf->SetFont('Arial','B',8,'C'); // set font
             $pdf->setXY(0,54);
-            $pdf->Multicell(80,5,$barcode.' - Barcode Warping Panjang',0,'C');// barcode
+            $pdf->Multicell(80,5,$barcode.' - Barcode WRP - '.$tgl_now,0,'C');// barcode
        
             $loop++;
         }

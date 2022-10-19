@@ -78,6 +78,8 @@
                     }else{
                         $last_done = '( MG '.$dept['nama'].' )';
                     }
+                }else{
+                    $last_done = '';
                 }
 
                 $href     = 'collapse'.$cod->row_order;

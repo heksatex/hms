@@ -1853,7 +1853,7 @@ class Pengirimanbarang extends MY_Controller
                               $num++;
                         }
               
-                        $sql_insert_tbl_prints  = "INSERT INTO greige_out_prints (no_greige_out,tgl_buat,tgl_kirim,route,mkt,origin,color_name,barcode_id,corak,lbr_jadi,lbr_grg,panjang,sat_pjg,berat,sat_brt,grade,reff_note,row_order,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20) values ('".$arr['no_greige_out']."','".$arr['tgl_buat']."','".$arr['tgl_kirim']."','".$arr['route']."','".$arr['mkt']."','".$arr['origin']."','".$arr['color_name']."','".$arr['barcode_id']."','".$arr['corak']."','".$arr['lbr_jadi']."','".$arr['lbr_grg']."','".$arr['panjang']."','".$arr['sat_pjg']."','".$arr['berat']."','".$arr['sat_brt']."','".$arr['grade']."','".$arr['reff_note']."','".$arr['row_order']."','".$f1."','".$f2."','".$f3."','".$f4."','".$f5."','".$f6."','".$f7."','".$f8."','".$f9."','".$f10."','".$f11."','".$f12."','".$f13."','".$f14."','".$f15."','".$f16."','".$f17."','".$f18."','".$f19."','".$f20."') ";
+                        $sql_insert_tbl_prints  = "INSERT INTO greige_out_prints (no_greige_out,tgl_buat,tgl_kirim,route,mkt,origin,color_name,barcode_id,corak,lbr_jadi,lbr_grg,panjang,sat_pjg,berat,sat_brt,grade,reff_note,row_order,f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14,f15,f16,f17,f18,f19,f20) values ('".$arr['no_greige_out']."','".$arr['tgl_buat']."','".$arr['tgl_kirim']."','".$arr['route']."','".$arr['mkt']."','".$arr['origin']."','".addslashes($arr['color_name'])."','".$arr['barcode_id']."','".addslashes($arr['corak'])."','".$arr['lbr_jadi']."','".$arr['lbr_grg']."','".$arr['panjang']."','".$arr['sat_pjg']."','".$arr['berat']."','".$arr['sat_brt']."','".$arr['grade']."','".addslashes($arr['reff_note'])."','".$arr['row_order']."','".$f1."','".$f2."','".$f3."','".$f4."','".$f5."','".$f6."','".$f7."','".$f8."','".$f9."','".$f10."','".$f11."','".$f12."','".$f13."','".$f14."','".$f15."','".$f16."','".$f17."','".$f18."','".$f19."','".$f20."') ";
                         $this->_module->update_perbatch($sql_insert_tbl_prints); 
               
                       }
@@ -2439,6 +2439,22 @@ class Pengirimanbarang extends MY_Controller
         $qc_ke      = addslashes($this->input->post('qc_ke'));// ex qc_1, qc_2 harus sama dengan table
         $value      = $this->input->post('value');
 
+        // cek akses QC
+        $kode_menu          = $this->_module->get_kode_sub_menu_deptid($sub_menu,$deptid)->row_array();
+        $akses_menu         = $this->_module->cek_priv_menu_by_user($username,$kode_menu['kode'])->num_rows();
+
+        // cek level akses by user
+        $level_akses = $this->_module->get_level_akses_by_user($username)->row_array();
+        // cek departemen by user
+        $cek_dept = $this->_module->cek_departemen_by_user($username)->row_array();
+     
+        if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
+          $check_qc   = true;
+        }else if($cek_dept['dept'] == 'QC' OR $cek_dept['dept'] == 'PPIC'){
+          $check_qc  = true;
+        }else{
+          $check_qc = false;
+        }
  
         //cek status terkirim ?
         $cek_kirim  = $this->m_pengirimanBarang->cek_status_barang($kode)->row_array();
@@ -2448,6 +2464,8 @@ class Pengirimanbarang extends MY_Controller
              $callback = array('status' => 'failed','alert'=>'modal', 'message'=>'Maaf, QC tidak bisa dilakukan, Data Pengiriman Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
         }else if($cek_kirim['status'] == 'draft'){
             $callback = array('status' => 'failed', 'alert'=>'notify', 'message'=>'Maaf, QC tidak bisa dilakukan, status data pengiriman masih draft !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+        }else if( $check_qc == false or $akses_menu == 0){
+          $callback = array('status' => 'failed', 'alert'=>'notify', 'message'=>'Maaf, anda tidak ada akses untuk melakukan QC !', 'icon' => 'fa fa-warning', 'type'=>'danger');
 
         }else{
 

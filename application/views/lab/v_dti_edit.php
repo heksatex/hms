@@ -222,7 +222,7 @@
                   <div class="col-xs-4"><label></label></div>
                   <div class="col-xs-8 col-md-8">
                     <ul class="bs-glyphicons">
-                      <li class="pointer" onclick="cek_history_dti('<?php echo $color->id ?>', '<?php echo $color->nama_warna?>')" data-toggle="tooltip" title="Lihat History MG">
+                      <li class="pointer" onclick="cek_history_dti('<?php echo $color->id ?>')" data-toggle="tooltip" title="Lihat History MG">
                         <span class="glyphicon glyphicon-cog"></span>            
                         <span class="glyphicon-class">History DTI List MG</span>
                       </li>                     
@@ -768,8 +768,8 @@
   // edit dyeing stuff / aux
   function edit(caption, row_order, kode_produk, nama_produk)
   {
-      var id_warna = '<?php echo $color->id?>';
-      var warna    = '<?php echo $color->nama_warna?>';
+      var id_warna = "<?php echo $color->id?>";
+      var warna    = "<?php echo htmlspecialchars($color->nama_warna)?>";
       $("#edit_data").modal({
           show: true,
           backdrop: 'static'
@@ -790,13 +790,13 @@
   }
 
   // cek hisotry DTI
-  function cek_history_dti(id_warna, nama_warna){
+  function cek_history_dti(id_warna){
       $("#view_data").modal({
           show: true,
           backdrop: 'static'
       })
       $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $('.modal-title').text('History DTI List MG ( '+nama_warna+')' );
+      $('.modal-title').text('History DTI List MG ' );
       $.post('<?php echo site_url()?>lab/dti/view_history_dti',
           {id_warna : id_warna},
           function(html){
@@ -806,7 +806,7 @@
   }
 
   // cek list ow yang sesuai DTI
-  function history_list_OW(id_warna, nama_warna){
+  function history_list_OW(id_warna){
         $("#view_data").modal({
             show: true,
             backdrop: 'static'

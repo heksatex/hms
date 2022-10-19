@@ -350,7 +350,7 @@ class Colororder extends MY_Controller
 
 
                         if ($method_action == 'PROD'){
-                          $cek_prod2 = $this->m_colorOrder->cek_nama_product($product_fullname)->row_array();
+                          $cek_prod2 = $this->m_colorOrder->cek_nama_product(addslashes($product_fullname))->row_array();
 
                           if(empty($cek_prod2['nama_produk'])){ // jika nama produk blm ada di master produk
 
@@ -367,7 +367,7 @@ class Colororder extends MY_Controller
                             
                             $last_number = $last_number + 1;
                             $kode_prod    = "MF".$last_number;
-                            $sql_insert_batch .= "('".$kode_prod."','".$product_fullname."','".$tgl."', '".$lebar_jadi."','".$uom_lebar_jadi."','".$kategori_produk."','".$bom_true_false."','".$type_produk."','".$uom."','".$uom_2."','".$status_produk."'), ";
+                            $sql_insert_batch .= "('".$kode_prod."','".addslashes($product_fullname)."','".$tgl."', '".$lebar_jadi."','".$uom_lebar_jadi."','".$kategori_produk."','".$bom_true_false."','".$type_produk."','".$uom."','".$uom_2."','".$status_produk."'), ";
 
                           }else{
                             $kode_prod = $cek_prod2['kode_produk'];
