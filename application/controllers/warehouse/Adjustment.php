@@ -554,6 +554,7 @@ class Adjustment extends MY_Controller
         $loop_adj    = false;
         $qty_stok_adj_manual = false;
         $qty_data_adj_same   = false;
+        $qty_adj_null        = false;
  
         $item =  $this->m_adjustment->get_adjustment_detail_by_code($kode_adjustment);
         foreach($item as $row){
@@ -647,17 +648,18 @@ class Adjustment extends MY_Controller
                 $where3.= "'".$row->row_order."',";
 
               }
+
               // << QTY 2
 
 
               //jika qty_data != qty_adjustment
-              if($qty_data != $qty_adjustment or $qty_data2 != $qty_adjustment2){
-                $loop_adj = true;
-
-                $quant_id_new = false;
-
+              if($qty_adjustment == 0 AND $qty_adjustment2 == 0){
+                
                 // jika qty_data > qty_adjustment
-                if($qty_data > $qty_adjustment){
+                //if($qty_data > $qty_adjustment){
+                  $loop_adj = true;
+  
+                  $quant_id_new = false;
 
                   $lokasi_dari   = $kode_lokasi;
                   $lokasi_tujuan = $la['adjustment_location'];
@@ -713,9 +715,42 @@ class Adjustment extends MY_Controller
                       }
                   }
 
-                }
+                  // update qty_move adjustment_items
+                  $qty_move = $qty_adjustment - $qty_data;
+                  $case7 .= " when row_order = '".$row->row_order."' then '".$qty_move."'";
+                  $qty2_move = $qty_adjustment2 - $qty_data2;
+                  $case9 .= " when row_order = '".$row->row_order."' then '".$qty2_move."'";
+                  $where7.= "'".$row->row_order."',";
 
-                // jika qty_data < qty_adjustment
+                  //update move_id ajdustment_items
+                  $case .= " when row_order = '".$row->row_order."' then '".$move_id."'";
+                  $where.= "'".$row->row_order."',";
+
+                  // simpan stock_move
+                  $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','".$sm_row."',''), ";
+
+                  if($quant_id_new == true) {// cek apa quant_id di SMI pakai quant_id baru atau lama
+                    $quant_id = $quant_id_new = $start;
+                  }else{
+                    $quant_id =  $row->quant_id;
+                  }
+
+                  // simpan stock_move_items
+                  $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($row->lokasi_fisik)."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+
+                  // simpan stock_move_produk
+                  $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_adj."','".$row->uom."','".$status_done."','1',''), ";
+
+                  $start++;
+                  $move_id++;
+                  $sm_row++; //row order stock_move
+                  $jml_adj++;
+
+                // }else{
+                //   $qty_data_adj_same = true;
+                // }
+
+                /* // jika qty_data < qty_adjustment
                 if($qty_data < $qty_adjustment ){
                   $lokasi_dari   = $la['adjustment_location'];
                   $lokasi_tujuan = $kode_lokasi;
@@ -737,9 +772,9 @@ class Adjustment extends MY_Controller
 
                   $quant_id_new = true; // untuk stock_move_items
 
-                }
+                } */
 
-                //jika qty_data == qty_adjustment
+                /* //jika qty_data == qty_adjustment
                 if($qty_data == $qty_adjustment){
                   $lokasi_dari   = $la['adjustment_location'];
                   $lokasi_tujuan = $kode_lokasi;
@@ -794,38 +829,14 @@ class Adjustment extends MY_Controller
                   }
 
                 }
-                
-                // update qty_move adjustment_items
-                $qty_move = $qty_adjustment - $qty_data;
-                $case7 .= " when row_order = '".$row->row_order."' then '".$qty_move."'";
-                $qty2_move = $qty_adjustment2 - $qty_data2;
-                $case9 .= " when row_order = '".$row->row_order."' then '".$qty2_move."'";
-                $where7.= "'".$row->row_order."',";
+                 */
 
-                //update move_id ajdustment_items
-                $case .= " when row_order = '".$row->row_order."' then '".$move_id."'";
-                $where.= "'".$row->row_order."',";
-
-                // simpan stock_move
-                $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','".$sm_row."',''), ";
-
-                if($quant_id_new == true) {// cek apa quant_id di SMI pakai quant_id baru atau lama
-                   $quant_id = $quant_id_new = $start;
+              }else if($qty_data != $qty_adjustment or $qty_data2 != $qty_adjustment2){ // 
+                if($qty_data == $qty_adjustment  or  $qty_data2 == $qty_adjustment2 ){
+                  $qty_data_adj_same = true;
                 }else{
-                   $quant_id =  $row->quant_id;
+                  $qty_adj_null = true;
                 }
-
-                // simpan stock_move_items
-                $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($row->lokasi_fisik)."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
-
-                // simpan stock_move_produk
-                $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_adj."','".$row->uom."','".$status_done."','1',''), ";
-
-                $start++;
-                $move_id++;
-                $sm_row++; //row order stock_move
-                $jml_adj++;
-
               }else{
                 $qty_data_adj_same = true;
               }
@@ -835,7 +846,7 @@ class Adjustment extends MY_Controller
         }// end foreach adjusment details
 
 
-        if($loop_adj == true AND $qty_data_adj_same == false){
+        if($loop_adj == true AND $qty_data_adj_same == false AND $qty_adj_null == false){
 
   
           // simpan stock move
@@ -943,6 +954,8 @@ class Adjustment extends MY_Controller
             $callback = array('status' => 'failed','message' => 'Qty Adjustment tidak Boleh 0 !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if($qty_data_adj_same == true){
             $callback = array('status' => 'failed','message' => 'Qty Stock dan Qty Adjustment tidak boleh sama, cek kembali Produk yang akan di Adjustment !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if($qty_adj_null == true){
+            $callback = array('status' => 'failed','message' => 'Proses Adjustment tidak boleh  <b>  dikurang atau ditambah</b>, hanya boleh <b> mengadakan atau menghilangkan </b>  !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
             $callback = array('status' => 'failed','message' => 'Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }

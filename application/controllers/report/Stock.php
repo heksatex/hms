@@ -30,7 +30,21 @@ class Stock extends MY_Controller
     	$type_condition     = $this->_module->get_first_type_conditon($id_dept);
         $data['mstFilter']  = $this->_module->get_list_mst_filter($id_dept);
         $data['list_grade'] = $this->_module->get_list_grade();
-        $data['warehouse']  = $this->m_stock->get_list_departement_stock();
+
+        $stock_location    = $this->m_stock->get_list_departement_stock();
+        $output_location   = $this->m_stock->get_list_departemen_outputlocation();
+
+        $location          = [];
+        foreach($stock_location as $stock){
+            $location[]    = array('lokasi'=>$stock->stock_location);
+        }
+        foreach($output_location as $output){
+            $location[]   = array('lokasi' => $output->output_location);
+        }
+
+        $data['warehouse'] = $location;
+        
+
         $data['type_condition']  = $type_condition;
         $data['list_grade']      = $this->_module->get_list_grade();
 		$data['mst_sales_group'] = $this->_module->get_list_sales_group();
@@ -125,13 +139,13 @@ class Stock extends MY_Controller
     	$cmbSearch   = $this->input->post('cmbSearch');
     	$data_filter = json_decode($this->input->post('arr_filter'),true); // tampung arr filter
     	$data_group  = json_decode($this->input->post('arr_group'),true);
-    	$transit_location = $this->input->post('transit');
+    	// $transit_location = $this->input->post('transit');
 
-        if($transit_location == 'true'){
-            $where_lokasi = " (sq.lokasi LIKE '%Stock%' OR sq.lokasi  LIKE '%Transit Location%') ";
-        }else{
-            $where_lokasi = " sq.lokasi LIKE '%Stock%'  ";
-        }
+        $where_lokasi = " (sq.lokasi LIKE '%Stock%' OR sq.lokasi  LIKE '%Transit Location%') ";
+        // if($transit_location == 'true'){
+        // }else{
+        //     $where_lokasi = " sq.lokasi LIKE '%Stock%'  ";
+        // }
 
     	$arr_order     = $this->input->post('arr_order'); 
         
@@ -259,14 +273,13 @@ class Stock extends MY_Controller
         $tbody_id    = $this->input->post('tbody_id');
         $root        = $this->input->post('root');
         $post_tmp_group  = json_decode($this->input->post('tmp_arr_group'),true);
+        // $transit_location = $this->input->post('transit');
+        $where_lokasi = " (sq.lokasi LIKE '%Stock%' OR sq.lokasi  LIKE '%Transit Location%') ";
 
-        $transit_location = $this->input->post('transit');
-
-        if($transit_location == 'true'){
-            $where_lokasi = " (sq.lokasi LIKE '%Stock%' OR sq.lokasi  LIKE '%Transit Location%') ";
-        }else{
-            $where_lokasi = " sq.lokasi LIKE '%Stock%'  ";
-        }
+        // if($transit_location == 'true'){
+        // }else{
+        //     $where_lokasi = " sq.lokasi LIKE '%Stock%'  ";
+        // }
 
         $arr_order     = $this->input->post('arr_order'); 
         
@@ -559,14 +572,14 @@ class Stock extends MY_Controller
 
         $where_result= $this->input->post('sql');
         //$order_by = "ORDER BY quant_id desc";
+        $where_lokasi = " (lokasi LIKE '%Stock%' OR lokasi  LIKE '%Transit Location%') ";
 
-        $transit_location = $this->input->post('transit[]');
+        // $transit_location = $this->input->post('transit[]');
 
-        if(count($transit_location) > 0){
-            $where_lokasi = " (lokasi LIKE '%Stock%' OR lokasi  LIKE '%Transit Location%') ";
-        }else{
-            $where_lokasi = " lokasi LIKE '%Stock%'  ";
-        }
+        // if(count($transit_location) > 0){
+        // }else{
+        //     $where_lokasi = " lokasi LIKE '%Stock%'  ";
+        // }
 
     	$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);

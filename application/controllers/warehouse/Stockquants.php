@@ -67,7 +67,7 @@ class Stockquants extends MY_Controller
 
             $note_before = $sq->quant_id.' '.$sq->kode_produk.' '.$sq->nama_produk.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty.' '.$sq->uom.' '.$sq->qty2.' '.$sq->uom2.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
 
-            $this->m_stockQuants->update_stockquants($quant_id,$uom2,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
+            $this->m_stockQuants->update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
 
             $jenis_log   = "edit";        
             $note_log    = $note_before.' <b> -> </b>'. $quant_id.' '.$nama_produk.'  '.$lot.'  '.$nama_grade.' '.$qty2.' '.$uom2.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;

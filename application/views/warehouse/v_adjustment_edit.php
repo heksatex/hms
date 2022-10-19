@@ -482,6 +482,8 @@
     });
     
     if(!empty){
+      var this1  = $(this);
+      this1.button('loading');
       var kode_adjustment   = "<?php echo $adjustment->kode_adjustment ?>";
       var kode_produk       = $(this).parents("tr").find("#product").val();
       var nama_produk       = $(this).parents("tr").find("#prodhidd").val();
@@ -516,10 +518,13 @@
               //alert jika session habis
               alert_modal_warning(data.message);
               window.location.replace('../index');
+              this1.button('reset');
           }else if(data.status == 'failed'){
               alert_modal_warning(data.message);
+              this1.button('reset');
               refresh_adjustment();
           }else{
+              this1.button('reset');
               refresh_adjustment();
               $(".add-new").show();                   
               alert_notify(data.icon,data.message,data.type,function(){});
@@ -528,6 +533,7 @@
         error: function (xhr, ajaxOptions, thrownError){
           alert('Error data');
           alert(xhr.responseText);
+          this1.button('reset');
         }
       }); 
     }
@@ -789,6 +795,7 @@
 
     var kode_adjustment   =  "<?php echo $adjustment->kode_adjustment; ?>";
     var row_order         = $(this).parents("tr").find("#row_order").val();  
+    var this1  = $(this);
 
     bootbox.dialog({
       message: "Apakah Anda ingin menghapus data ?",
@@ -798,6 +805,7 @@
             label    : "Yes ",
             className: "btn-primary btn-sm",
             callback : function() {
+                this1.button('loading');
                 $.ajax({
                     dataType: "JSON",
                     url : '<?php echo site_url('warehouse/adjustment/hapus_adjustment_items') ?>',
@@ -809,10 +817,13 @@
                           //alert jika session habis
                           alert_modal_warning(data.message);
                           window.location.replace('../index');
+                          this1.button('reset');
                       }else if(data.status == 'failed'){
                           alert_modal_warning(data.message);
+                          this1.button('reset');
                           refresh_adjustment();
                       }else{
+                          this1.button('reset');
                           refresh_adjustment();
                           $(".add-new").show();                   
                           alert_notify(data.icon,data.message,data.type,function(){});
@@ -821,6 +832,7 @@
                     error: function (xhr, ajaxOptions, thrownError){
                       alert('Error data');
                       alert(xhr.responseText);
+                      this1.button('reset');
                     }
                   });
             }
