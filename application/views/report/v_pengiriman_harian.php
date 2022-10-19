@@ -143,7 +143,7 @@
                                 <label>Status </label>
                               </div>
                               <div class="col-xs-4 col-sm-3 col-md-3">
-                                  <label><input type="checkbox" name="status[]" value="ready" checked> Ready </label>
+                                  <label><input type="checkbox" name="status[]" value="ready"> Ready </label>
                               </div>
                               <div class="col-xs-4 col-sm-3 col-md-3">
                                   <label><input type="checkbox" name="status[]"  value="done" checked> Done </label>
