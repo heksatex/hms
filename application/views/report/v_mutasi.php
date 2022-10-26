@@ -20,6 +20,46 @@
       white-space: nowrap !important;
     }
 
+    #pagination {
+        display: inline-block;
+        padding-left: 0;
+        border-radius: 4px;
+        /*padding-top: 5px;*/
+
+    } 
+
+    #pagination>a, #pagination>strong {
+        position: relative;
+        float: left;
+        padding: 4px 8px;
+        margin-left: -1px;
+        line-height: 1.42857143;
+        color: #337ab7;
+        text-decoration: none;
+        background-color: #fff;
+        border: 1px solid #ddd;
+    }
+
+    #pagination2 {
+        display: inline-block;
+        padding-left: 0;
+        border-radius: 4px;
+        /*padding-top: 5px;*/
+
+    } 
+
+    #pagination2>a, #pagination2>strong {
+        position: relative;
+        float: left;
+        padding: 4px 8px;
+        margin-left: -1px;
+        line-height: 1.42857143;
+        color: #337ab7;
+        text-decoration: none;
+        background-color: #fff;
+        border: 1px solid #ddd;
+    }
+
   </style>
 </head>
 
@@ -54,7 +94,7 @@
            
             <form name="input" class="form-horizontal" role="form" method="POST" id="frm_mutasi" action="<?=base_url()?>report/mutasi/export_excel_mutasi">
               <div class="col-md-8">
-                <div class="form-group">
+                <div class="form-group" >
                     <div class="col-md-12"> 
                         <div class="col-md-2">
                             <label>Periode </label>
@@ -76,14 +116,90 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-group" >
+                  <div class="col-md-12"> 
+                    <div class="col-md-2">
+                        <label>View </label>
+                    </div>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Detail">
+                      <label for="detail">Detail</label>
+                    </div>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Global" checked="checked">
+                      <label for="global">Global</label>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
                 <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
               </div>
-              <br>
+              <div class="col-md-12">
+                <div class="form-group" style="margin-bottom: 0px;">
+                  <div class="col-md-12">
+                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                          <label style="cursor:pointer;">
+                            <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                             Advanced 
+                          </label>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12">
+                   <div class="panel panel-default" style="margin-bottom: 0px;">
+                    <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                      <div class="panel-body" style="padding: 5px">
+                        <div class="form-group col-md-12" style="margin-bottom:0px">
+                          <div class="col-md-4" >
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Kode Produk </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="kode_produk" id="kode_produk" >
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Nama Produk </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" >
+                              </div>
+                            </div> 
+                           
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Kode Transaksi </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="kode_transaksi" id="kode_transaksi" placeholder="">
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Lot </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="lot" id="lot" >
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              </div>
             </form>
-
 
             <!-- table -->
             <div class="box-body">
@@ -97,16 +213,21 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <label>
                             <div id='total_record'>Total Data : 0</div>
                         </label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pull-right text-right">
+                          <div id='pagination'></div>
+                        </div>
                     </div>
                 </div>
                 <div class="table_scroll">
                   <div class="table_scroll_head">
                     <div class="divListviewHead">
-                        <table id="example1" class="table" border="0">
+                        <table id="example1" class="table table-condesed table-hover" border="0">
                             <thead>
                               <tr>
                                 <th  class="style no" >No. </th>
@@ -140,16 +261,21 @@
                       </div>
                   </div>
                   <div class="form-group">
-                      <div class="col-md-12">
+                      <div class="col-md-6">
                           <label>
                               <div id='total_record2'>Total Data : 0</div>
                           </label>
                       </div>
+                      <div class="col-md-6">
+                          <div class="pull-right text-right">
+                            <div id='pagination2'></div>
+                          </div>
+                    </div>
                 </div>
                 <div class="table_scroll">
                   <div class="table_scroll_head">
                     <div class="divListviewHead">
-                        <table id="example2" class="table" border="0" >
+                        <table id="example2" class="table table-condesed table-hover" border="0" >
                             <thead>
                               <tr>
                                 <th  class="style no" >No. </th>
@@ -189,6 +315,16 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
+
+  //* Show collapse advanced search
+  $('#advancedSearch').on('shown.bs.collapse', function () {
+      $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+  });
+
+  //* Hide collapse advanced search
+  $('#advancedSearch').on('hidden.bs.collapse', function () {
+    $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+  });
 
   var d     = new Date();
   var month = d.getMonth()-1;
@@ -265,11 +401,79 @@
 
   });
 
-  // btn generate
-  $("#btn-generate").on('click', function(){
+  // next pagination
+  $('#pagination').on('click','a',function(e){
+      
+      e.preventDefault(); 
+      var pageNum = $(this).attr('data-ci-pagination-page');
+      //alert(pageNum);
+      $("#example1 tbody").remove();
+      loadSearchData(pageNum,'rm')
 
-      tanggal    = $('#tanggal').val();
-      departemen = $('#departemen').val();
+  });
+
+   // next pagination 2
+   $('#pagination2').on('click','a',function(e){
+      
+      e.preventDefault(); 
+      var pageNum = $(this).attr('data-ci-pagination-page');
+      //alert(pageNum);
+      $("#example2 tbody").remove();
+      loadSearchData(pageNum,'fg')
+
+  });
+
+  $("#btn-generate").on('click', function(){
+    loadSearchData();
+    $("#example1 tbody").remove();
+    $("#example2 tbody").remove();
+        // $.ajax({
+        //         type: "POST",
+        //         dataType : "JSON",
+        //         url : 'http://10.10.0.13:8000/send-group-message',
+        //         data: {id:'EgFjt81Mw34Briw6hQZ3EI', name:'IT WDT', message:'Test ngirim PESAN POSTMAN !!!' },
+        //         success: function(data){
+        //           $('#btn-generate').button('reset');
+        //         },error : function(jqXHR, textStatus, errorThrown){
+        //           alert(jqXHR.responseText);
+        //           //alert('error data');
+        //           $('#btn-generate').button('reset');
+        //         }
+        // });
+  });
+
+
+  var arr_filter = [];
+
+  // load Data
+  function loadSearchData(pageNum=null,table=null){
+
+      if(pageNum == null){
+          pageNum = 0;
+      }
+      if(table == null){
+        table  = "all";
+      }
+
+      arr_filter = [];
+
+      tanggal         = $('#tanggal').val();
+      departemen      = $('#departemen').val();
+      kode_produk     = $('#kode_produk').val();
+      nama_produk     = $('#nama_produk').val();
+      kode_transaksi  = $('#kode_transaksi').val();
+      lot             = $('#lot').val();
+
+      var radio_view= false;
+      var radio_arr = new Array(); 
+
+      var radio_arr = $('input[name="view[]"]').map(function(e, i) {
+            if(this.checked == true){
+                check_status = true;
+              return i.value;
+            }
+
+      }).get();
 
       if(tanggal == '' ){
         alert_modal_warning('Periode Tanggal Harus diisi !');
@@ -277,60 +481,151 @@
       }else if (departemen == null) {
         alert_modal_warning('Departemen Harus diisi !');
 
-      }else{  
+      }else{
           $("#example1_processing").css('display',''); // show loading
+          if(table == 'all' || table =='fg'){
+            $("#example2_processing").css('display',''); // show loading
+          }
 
           $('#btn-generate').button('loading');
-          $("#example1 tbody").remove();
+          //$("#example1 tbody").remove();
+          //$("#example2 tbody").remove();
+       
+          // push array
+          arr_filter.push({tanggal:tanggal, departemen:departemen, kode_produk:kode_produk, nama_produk:nama_produk, kode_transaksi:kode_transaksi, lot:lot, view_arr:radio_arr});
           $.ajax({
                 type: "POST",
                 dataType : "JSON",
-                url : "<?php echo site_url('report/mutasi/loadData')?>",
-                data: {tanggal:tanggal,departemen:departemen},
+                url : '<?=base_url()?>report/mutasi/loadData/'+pageNum,
+                data: {arr_filter:arr_filter, table:table },
                 success: function(data){
+
+                  if(data.view == 'Global'){
+                    $('#pagination').html('');
+                    $('#pagination2').html('');
+                  }
+
                   if(data.status == 'failed'){
                     alert_modal_warning(data.message);
+                    let tbody = $("<tbody />");
+                    $('#info_table1').html('');
+                    $('#info_table2').html('');
+                    $('#total_record').html('Total Data : 0');
+                    $('#total_record2').html('Total Data : 0');
+                    row = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
+                    tbody.append(row);
+                    $('#example1').append(tbody);
+                    $('#example2').append(tbody);
                   }else{
-
-                    $("#example1 thead").remove();
-                    $("#example1 tbody").remove();
-                    $("#example2 thead").remove();
-                    $("#example2 tbody").remove();
-
+                    if(table == 'all' || table == 'rm'){
+                      $("#example1 thead").remove();
+                    }
+                    if(table == 'all' || table == 'fg'){
+                      $("#example2 thead").remove();
+                    }
                     $.each(data.result, function(key, value){ 
                       if(value.table_1 == "Yes"){
-                        create_table('example1', value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                        if(data.view == "Global"){
+                          create_table('example1', value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                        }else{
+                          create_table_detail('example1', value.head_table,value.record);
+                        }
                         $('#info_table1').html('');
                         $('#total_record').html('Total Data : '+value.count_record);
+                        $('#pagination').html(value.pagination);
                       }
 
                       if(value.table_2 == "Yes"){
-                        create_table('example2',value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                        if(data.view == "Global"){
+                          create_table('example2',value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                        }else{
+                          create_table_detail('example2', value.head_table,value.record);
+                        }
+
                         $('#table_2').css('display','');
                         $('#info_table1').html('Mutasi Bahan Baku');
                         $('#info_table2').html('Mutasi Barang Jadi');
                         $('#total_record2').html('Total Data : '+value.count_record);
-                      }else{
+                        $('#pagination2').html(value.pagination);
+                      }else if(value.table_2 == "No"){
                         $('#info_table1').html('');
                         $('#info_table2').html('');
                         $('#table_2').css('display','none');
                         $('#total_record2').html('Total Data : '+value.count_record);
+                        $('#pagination2').html(value.pagination);
                       }
                     });
                   }
                     
                 $('#btn-generate').button('reset');
                 $("#example1_processing").css('display','none'); // hidden loading
+                $("#example2_processing").css('display','none'); // show loading
 
                 },error : function(jqXHR, textStatus, errorThrown){
                   alert(jqXHR.responseText);
                   //alert('error data');
                   $("#example1_processing").css('display','none'); // hidden loading
+                  $("#example2_processing").css('display','none'); // show loading
                   $('#btn-generate').button('reset');
                 }
           });
       }
-  });
+  }
+
+  function create_table_detail(tableId,head_table,body){
+                    let thead = $("<thead />");
+                    let row   = '';
+
+                    for ( var i = 0, l = head_table.length; i < l; i++ ) {
+                        row += "<th class='style white-space-nowrap' >";
+                        row += head_table[i];
+                        row += "</th>";
+                    }
+                    tr = $("<tr>").append(row);
+                    thead.append(tr)
+                    $('#'+tableId).append(thead);
+
+                    let no    = 1;
+                    let row2  = '';
+                    let tbody = $("<tbody />");
+                    $.each(body, function(key, value){ 
+
+                        if(value.type == 'in'){
+                          dept  = value.dept_id_dari;
+                        }else{ 
+                          dept  = value.dept_id_tujuan;
+                        }
+
+                        row2 += "<tr>";
+                        row2 += "<td>"+ (no++) +"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.posisi_mutasi+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+dept+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.type+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.kode_transaksi+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.tanggal_transaksi+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.kode_produk+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.nama_produk+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.nama_category+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.lot+"</td>";
+                        row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty)+" "+value.uom+"</td>";
+                        row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty2)+" "+value.uom2+"</td>";
+                        row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty_opname)+" "+value.uom_opname+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.origin+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.method+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.sc+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.nama_sales_group+"</td>";
+
+                        row2 += "</tr>";
+                    });
+                    if(body.length == 0){
+                      row2 = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
+                    }
+
+                    tbody.append(row2);
+                    $('#'+tableId).append(tbody);
+          return
+
+  }
 
   function create_table(tableId,head_table1,head_table2,body,count_in,count_out){
                     let thead = $("<thead />");
@@ -342,7 +637,7 @@
                             if(a == 'info'){
                                 for ( var i = 0, l = b.length; i < l; i++ ) {
                                     $.each(b[i], function(c, d){
-                                        row += "<th class='style no'  rowspan='2'>";
+                                        row += "<th class='style no white-space-nowrap'  rowspan='2'>";
                                         row += d;
                                         row += "</th>";
                                     });
@@ -382,7 +677,7 @@
                         $.each(value, function(a, b){ // loop jenis awal, in, out, adj, akhir
                                 for ( var i = 0, l = b.length; i < l; i++ ) {
                                     $.each(b[i], function(c, d){
-                                        row2 += "<th class='style'>";
+                                        row2 += "<th class='style white-space-nowrap'>";
                                         row2 += d;
                                         row2 += "</th>";
                                     });
@@ -584,7 +879,11 @@
 
                           row3 += "</tr>";
                             
-                    }); 
+                    });
+
+                    if(body.length == 0){
+                      row3 = $("<tr>").append($("<td colspan='20' align='center'>").text('Tidak ada Data'));
+                    }
 
                     tbody.append(row3);
                     $('#'+tableId).append(tbody);
