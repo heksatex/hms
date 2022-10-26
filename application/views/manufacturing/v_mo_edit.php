@@ -942,7 +942,7 @@
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                 </td>
                                 <td>
-                                  <input type="checkbox" class='checkPrint' value="<?php echo $row->lot.'^^'.$row->nama_grade.'|^'?>">
+                                  <input type="checkbox" class='checkPrint' value="<?php echo $row->quant_id; ?>">
 
                                   <!--a href="javascript:void(0)" onclick="print_lot('<?php echo $row->lot ?>','<?php echo $row->nama_grade ?>')" data-toggle="tooltip" title="Print">
                                      <span class="fa  fa-print"></span>
@@ -1330,12 +1330,13 @@
         checkboxBarcode.push($(this).val());
     });
     countchek = checkboxBarcode.length;
+    var arrStr = encodeURIComponent(JSON.stringify(checkboxBarcode));
 
     if(countchek == 0){
       alert_modal_warning('Silahkan Pilih Product yang akan di Print !');
     }else{
       var url = '<?php echo base_url() ?>manufacturing/mO/print_barcode';
-      window.open(url+'?kode='+ kode+'&&dept_id='+ dept_id+'&&countchek='+ countchek+'&&checkboxBarcode='+ checkboxBarcode,'_blank');
+      window.open(url+'?kode='+ kode+'&&dept_id='+ dept_id+'&&checkboxBarcode='+ arrStr,'_blank');
     }
 
   });

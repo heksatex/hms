@@ -171,6 +171,7 @@ class Procurementpurchase extends MY_Controller
         $data["procurementpurchase"] = $this->m_procurementPurchase->get_data_by_code($kode_decrypt);
         $data['details']    = $this->m_procurementPurchase->get_data_detail_by_code($kode_decrypt);
         $data['warehouse']  = $this->_module->get_list_departement();
+        $data['uom']        = $this->_module->get_list_uom();
         $where_status       = "AND status IN ('generated','cancel')";
         $data['cek_status'] = $this->m_procurementPurchase->cek_status_procurement_purchase_items($kode_decrypt,$where_status)->num_rows();
 
@@ -236,9 +237,9 @@ class Procurementpurchase extends MY_Controller
             $qty         = $this->input->post('qty'); 
             $uom         = addslashes($this->input->post('uom')); 
             $reff        = addslashes($this->input->post('reff')); 
-            $row1        = ($this->input->post('row_order')); 
-            $data        = explode("^|",$row1);
-            $row         = $data[0];
+            $row        = ($this->input->post('row_order')); 
+            // $data        = explode("^|",$row1);
+            // $row         = $data[0];
 
             //cek apa ada produk yang sudah diinput ?
             $cek_prod = $this->m_procurementPurchase->cek_produk_by_kode($kode,$kode_produk)->row_array();
@@ -248,7 +249,10 @@ class Procurementpurchase extends MY_Controller
 
                 if(!empty($row)){//update details
 
-                    $kode_produk_ex_row = addslashes($data[1]);
+                    $get  = $this->m_procurementPurchase->get_data_procurement_purchase_item_by_row($kode,$row)->row_array();
+                    $kode_produk_ex_row =  $get['kode_produk'];
+                    $nama_produk        =  $get['nama_produk'];
+                    $uom                =  $get['uom'];
 
                     //cek status produk, dan cek apa produk masih ada ?
                     $cek_status = $this->m_procurementPurchase->cek_status_procurement_purchase_items_by_row($kode,$kode_produk_ex_row,$row)->row_array(); 
@@ -264,7 +268,7 @@ class Procurementpurchase extends MY_Controller
                         $this->m_procurementPurchase->update_procurement_purchase_items($kode,$tgl,$qty,$reff,$row);
                         
                         $jenis_log   = "edit";
-                        $note_log    = "Edit data Details | ".$kode." | ".$tgl." | ".$qty." | ".$reff." | ".$row;
+                        $note_log    = "Edit data Details | ".$kode." | ".$kode_produk_ex_row."  ".$nama_produk." | ".$tgl." | ".$qty." ".$uom." | ".$reff." | ".$row;
                         $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
                         $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                     }
@@ -301,7 +305,7 @@ class Procurementpurchase extends MY_Controller
                         }
 
                         $jenis_log   = "edit";
-                        $note_log    = "Tambah data Details | ".$kode." | ".$produk." | ".$tgl." | ".$qty." | ".$uom." | ".$reff." | ".$row_order;
+                        $note_log    = "Tambah data Details | ".$kode." | ".$kode_produk." ".$produk." | ".$tgl." | ".$qty."  ".$uom." | ".$reff." | ".$row_order;
                         $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
                         
                         $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
@@ -330,17 +334,16 @@ class Procurementpurchase extends MY_Controller
             $kode = addslashes($this->input->post('kode'));
             $row  = $this->input->post('row_order');
 
-            $data = explode("^|",$row);
-            $row_order   = $data[0];
-            $kode_produk = addslashes($data[1]);
-            $nama_produk = addslashes($data[2]);
-            $qty = $data[3];
-            $uom = addslashes($data[4]);
-            $reff_notes    = addslashes($data[5]);
-            $schedule_date = $data[6];
-            $sales_order   = addslashes($data[7]);
+            $get  = $this->m_procurementPurchase->get_data_procurement_purchase_item_by_row($kode,$row)->row_array();
+            $kode_produk_ex_row =  $get['kode_produk'];
+            $nama_produk        =  $get['nama_produk'];
+            $qty                =  $get['qty'];
+            $uom                =  $get['uom'];
+            $schedule_date      =  $get['schedule_date'];
+            $row_order          =  $row;
 
-            $cek_status = $this->m_procurementPurchase->cek_status_procurement_purchase_items_by_row($kode,$kode_produk,$row)->row_array(); 
+
+            $cek_status = $this->m_procurementPurchase->cek_status_procurement_purchase_items_by_row($kode,$kode_produk_ex_row,$row)->row_array(); 
             if(empty($kode) && empty($row) ){
                 $callback = array('status' => 'success','message' => 'Data Gagal Dihapus !', 'icon' =>'fa fa-warning', 'type' => 'danger');
            
@@ -369,7 +372,7 @@ class Procurementpurchase extends MY_Controller
                 }
                 
                 $jenis_log   = "cancel";
-                $note_log    = "Hapus data Details | ".$kode." | ".$schedule_date." | ".$kode_produk." | ".$nama_produk." | ".$qty." | ".$uom." | ".$row_order;
+                $note_log    = "Hapus data Details | ".$kode." | ".$kode_produk_ex_row." ".$nama_produk." | ".$schedule_date." | ".$qty."  ".$uom." | ".$row_order;
                 $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
                 
             }

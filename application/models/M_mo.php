@@ -795,13 +795,13 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT origin_prod FROM mrp_production_rm_target WHERE kode = '$kode' AND kode_produk = '$kode_produk' ORDER BY row_order ");
 	}
 
-	public function get_data_fg_hasil_by_kode($kode,$lot)
+	public function get_data_fg_hasil_by_kode($kode,$quant_id)
 	{
-		return $this->db->query("SELECT mp.create_date,mp.kode_produk, mp.nama_produk, mp.lot, mp.qty, mp.uom, mp.qty2, mp.uom2, sq.reff_note, mph.reff_note as note_head
+		return $this->db->query("SELECT mp.create_date,mp.kode_produk, mp.nama_produk, mp.lot, mp.qty, mp.uom, mp.qty2, mp.uom2, sq.reff_note, mph.reff_note as note_head, sq.nama_grade
 								FROM mrp_production_fg_hasil mp
 								LEFT JOIN stock_quant sq ON mp.quant_id = sq.quant_id
 								LEFT Join mrp_production mph ON mp.kode = mph.kode
-								where mp.kode = '$kode' AND mp.lot = '$lot' ");
+								where mp.kode = '$kode' AND mp.quant_id = '$quant_id' ");
 	}
 
 	public function get_mesin_by_mo($kode)
