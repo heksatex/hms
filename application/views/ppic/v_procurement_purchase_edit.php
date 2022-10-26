@@ -210,7 +210,7 @@
                               foreach ($details as $row) {
                             ?>
                               <tr class="">
-                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order."^|".$row->kode_produk."^|".htmlentities($row->nama_produk)."^|".$row->qty."^|".$row->uom."^|".htmlentities($row->reff_notes)."^|".$row->schedule_date."^|".$procurementpurchase->sales_order."^|".$procurementpurchase->kode_prod."^|".$procurementpurchase->warehouse;?>"><?php echo $no++.".";?></td>
+                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"><?php echo $no++.".";?></td>
                                 <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
                                 <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date;?>"><?php echo $row->schedule_date?></td>
                                 <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
@@ -315,7 +315,7 @@
           + '<td><select type="text" class="form-control input-sm width-150 prod" name="Product" id="product"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
           + '<td><div class="input-group width-150 date" id="sch_date" ><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
           + '<td><input type="text" class="form-control input-sm width-100 qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>'
-          + '<td><input type="text" class="form-control input-sm width-50 uom" name="Uom" id="uom"></td>'
+          + '<td><select type="text" class="form-control input-sm width-80 uom" name="Uom" id="uom"><option value=""></option><?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
           + '<td><textarea type="text" class="form-control input-sm width-150" name="reff" id="reff"></textarea></td>'
           + '<td></td>'
           + '<td align="center"><button type="button" class="btn btn-primary btn-xs add width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'        
@@ -425,7 +425,11 @@
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
+          empty2 = true;
+        }
+        if(!$(this).val() && $(this).attr('name')=='Uom' ){
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
       });
@@ -434,7 +438,7 @@
       // validasi untuk inputan textbox
       input.each(function(){
         if(!$(this).val() && $(this).attr('name')!='reff'){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
         }
       });
@@ -449,6 +453,9 @@
         var uom   = $(this).parents("tr").find("#uom").val();
         var reff  = $(this).parents("tr").find("#reff").val();
         var row_order = $(this).parents("tr").find("#row_order").val();
+
+        var btn_load = $(this);
+        btn_load.button('loading');
 
         $.ajax({
           dataType: "JSON",
@@ -467,15 +474,18 @@
                 //alert jika session habis
                 alert_modal_warning(data.message);
                 window.location.replace('../index');
+                btn_load.button('reset');
             }else{
                 refresh_procurement();
                 $(".add-new").show();                   
-                alert_notify(data.icon,data.message,data.type);
+                alert_notify(data.icon,data.message,data.type,function(){});
+                btn_load.button('reset');
              }
           },
           error: function (xhr, ajaxOptions, thrownError){
             alert('Error data');
             alert(xhr.responseText);
+            btn_load.button('reset');
           }
         });
         
@@ -536,6 +546,7 @@
       });
       var kode  =  "<?php echo $procurementpurchase->kode_pp; ?>";
       var row_order = $(this).parents("tr").find("#row_order").val();  
+      var btn_load = $(this);
       bootbox.dialog({
         message: "Apakah Anda ingin menghapus data ?",
         title: "<i class='glyphicon glyphicon-trash'></i> Delete !",
@@ -550,6 +561,9 @@
                       type: "POST",
                       data: {kode : kode, 
                             row_order : row_order  },
+                      beforeSend : function(){
+                          btn_load.button('loading');
+                      },
                       success: function(data){
                         if(data.sesi=='habis'){
                             //alert jika session habis
@@ -561,12 +575,14 @@
                         }else{
                             refresh_procurement();
                             $(".add-new").show();                   
-                            alert_notify(data.icon,data.message,data.type);
+                            alert_notify(data.icon,data.message,data.type,function(){});
                          }
+                         btn_load.button('reset');
                       },
                       error: function (xhr, ajaxOptions, thrownError){
                         alert('Error data');
                         alert(xhr.responseText);
+                        btn_load.button('reset');
                       }
                     });
               }
@@ -622,7 +638,7 @@
                     }else{
                         refresh_procurement();
                         unblockUI( function() {
-                          setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                          setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                         });
                         $('#btn-generate').button('reset');
                         
@@ -694,7 +710,7 @@
                     }else{
                         refresh_procurement();
                         unblockUI( function() {
-                          setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                          setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                         });
                      }
                   },
@@ -754,14 +770,14 @@
               refresh_procurement();
               $('#btn-simpan').button('reset');
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               document.getElementById(data.field).focus();
             }else{
               //jika berhasil disimpan/diubah
               refresh_procurement();
               unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $('#btn-simpan').button('reset');
             }

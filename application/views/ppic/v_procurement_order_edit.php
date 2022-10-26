@@ -361,7 +361,7 @@
   function validAngka(a){
     if(!/^[0-9.]+$/.test(a.value)){
       a.value = a.value.substring(0,a.value.length-1000);
-      alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger');
+      alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger',function(){});
     }
   }
 
@@ -510,7 +510,11 @@
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         if(!$(this).val() && $(this).attr('name')=='Product' ){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
+          empty2 = true;
+        }
+        if(!$(this).val() && $(this).attr('name')=='Uom' ){
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
       });
@@ -519,7 +523,7 @@
       // validasi untuk inputan textbox
       input.each(function(){
         if(!$(this).val() && $(this).attr('name')!='reff'){
-          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger');
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
         }
       });

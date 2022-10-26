@@ -341,12 +341,12 @@ class Procurementorder extends MY_Controller
                 
                 // get data items by row 
                 $d_items = $this->m_procurementOrder->get_data_items_by_row($kode,$row)->row_array();
-                $row_order   = $d_items['row_order'];
                 $kode_produk_ex_row = addslashes($d_items['kode_produk']);
+                $row_order   = $d_items['row_order'];
                 $nama_produk = addslashes($d_items['nama_produk']); 
-                $qty         = $d_items['qty'];
+                // $qty         = $d_items['qty'];
                 $uom         = $d_items['uom'];
-                $reff        = $d_items['reff_notes'];
+                // $reff        = $d_items['reff_notes'];
 
                 $cek_status = $this->m_procurementOrder->cek_status_procurement_order_items_by_row($kode,$kode_produk_ex_row,$row)->row_array(); 
 
@@ -367,7 +367,7 @@ class Procurementorder extends MY_Controller
                     $this->_module->unlock_tabel();
     				
                     $jenis_log   = "edit";
-                    $note_log    = "Edit data Details | ".$kode." | ".$tgl." | ".$kode_produk_ex_row." ".$nama_produk." | ".$qty." | ".$reff." | ".$row;
+                    $note_log    = "Edit data Details | ".$kode." | ".$tgl." | ".$kode_produk_ex_row." ".$nama_produk." | ".$qty." ".$uom." | ".$reff." | ".$row;
                     $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
                     $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                 }
@@ -401,7 +401,7 @@ class Procurementorder extends MY_Controller
                 $this->_module->unlock_tabel();
 				
 	            $jenis_log   = "edit";
-                $note_log    = "Tambah data Details | ".$kode." | ".$kode_produk." ".$produk." | ".$tgl." | ".$qty." | ".$uom." | ".$reff." | ".$row_order;
+                $note_log    = "Tambah data Details | ".$kode." | ".$kode_produk." ".$produk." | ".$tgl." | ".$qty." ".$uom." | ".$reff." | ".$row_order;
                 $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
                 $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 			}

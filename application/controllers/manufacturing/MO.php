@@ -4608,8 +4608,7 @@ class MO extends MY_Controller
   
     public function print_barcode()
     {
-        $data_arr  = $this->input->get('checkboxBarcode');  
-        $count     = $this->input->get('countchek'); 
+        $data_arr  = json_decode($this->input->get('checkboxBarcode'),true);  
         $kode      = $this->input->get('kode');
         $dept_id   = $this->input->get('dept_id');
 
@@ -4623,10 +4622,10 @@ class MO extends MY_Controller
             $this->barcode_wrp($kode,$data_arr,$dept_id);
         
         }else if($dept_id == 'TRI'){
-            $this->barcode_tri($data_arr,$count);
+            $this->barcode_tri($kode,$data_arr);
 
         }else if($dept_id == 'INS1'){
-            $this->barcode_ins1($data_arr);
+            $this->barcode_ins1($kode,$data_arr);
 
         }else{// belum ada barcode
             $this->barcode_empty();
@@ -4649,8 +4648,6 @@ class MO extends MY_Controller
         $pdf->AddPage();
         $pdf->SetFont('Arial','B',15,'C');
 
-        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
-        $row         = explode("|^,", $data_arr2);
         $loop          = 1;
 
         // get mesin by kode
@@ -4661,28 +4658,36 @@ class MO extends MY_Controller
         $origin_mo  = $this->m_mo->get_origin_mo_by_kode($kode);
         $method= $dept_id.'|OUT';
         
-        foreach ($row as $val ) {
+        foreach ($data_arr as $val ) {
       
             if($loop == 2){
                 $pdf->AddPage();
                 $loop = 1;
             }
-
-            $items    = explode("^^",$val);
-            $barcode  = $items[0];
+            
+            //get produk,qty by kode etc
+            $get         = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
+            if(isset($get)){
+                $nama_produk = $get['nama_produk'];
+                $barcode     = $get['lot'];
+                $qty         = $get['qty'];
+                $uom         = $get['uom'];
+                $tgl         = $get['create_date'];
+                $reff_note   = $get['reff_note'];
+                $note_head   = $get['note_head'];
+            }else{
+                $nama_produk = "Not Found";
+                $barcode     = "Not Found";
+                $qty         = "";
+                $uom         = "";
+                $tgl         = "";
+                $reff_note   = "";
+                $note_head   = "";
+            }
+           
 
             // get reff picking by kode
             $reff_picking  = $this->m_mo->get_reff_picking_pengiriman_by_kode($barcode, $method, $origin_mo);
-
-            //get produk,qty by kode
-            $get = $this->m_mo->get_data_fg_hasil_by_kode($kode,$barcode)->row_array();
-
-            $nama_produk = $get['nama_produk'];
-            $qty         = $get['qty'];
-            $uom         = $get['uom'];
-            $tgl         = $get['create_date'];
-            $reff_note   = $get['reff_note'];
-            $note_head   = $get['note_head'];
 
             $nh = explode('|', $note_head);
             $loop1 = 0;
@@ -4765,8 +4770,6 @@ class MO extends MY_Controller
         $pdf->AddPage();
         $pdf->SetFont('Arial','B',15,'C');
 
-        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
-        $row         = explode("|^,", $data_arr2);
         $loop        = 1;
 
         //get origin_mo
@@ -4777,29 +4780,40 @@ class MO extends MY_Controller
         //$get_mc = $this->m_mo->get_mesin_by_mo($kode)->row_array();
         //$mesin  = $get_mc['nama_mesin'];
 
-        foreach ($row as $val ) {
+        foreach ($data_arr as $val ) {
 
             if($loop == 2){
                 $pdf->AddPage();
                 $loop = 1;
             }
 
-            $items    = explode("^^",$val);
-            $barcode  = $items[0];
+            //get produk,qty by kode etc
+            $get         = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
+            if(isset($get)){
+                $nama_produk = $get['nama_produk'];
+                $barcode     = $get['lot'];
+                $qty         = $get['qty'];
+                $uom         = $get['uom'];
+                $qty2        = $get['qty2'];
+                $uom2        = $get['uom2'];
+                $tgl         = $get['create_date'];
+                $reff_note   = $get['reff_note'];
+                $note_head   = $get['note_head'];
+            }else{
+                $nama_produk = "Not Found";
+                $barcode     = "Not Found";
+                $qty         = "";
+                $uom         = "";
+                $qty2        = "";
+                $uom2        = "";
+                $tgl         = "";
+                $reff_note   = "";
+                $note_head   = "";
+                
+            }
 
             // get reff picking by kode
             $reff_picking  = $this->m_mo->get_reff_picking_pengiriman_by_kode($barcode, $method, $origin_mo);
-
-            //get produk,qty by kode
-            $get = $this->m_mo->get_data_fg_hasil_by_kode($kode,$barcode)->row_array();
-
-            $nama_produk = $get['nama_produk'];
-            $qty         = $get['qty'];
-            $uom         = $get['uom'];
-            $qty2        = $get['qty2'];
-            $uom2        = $get['uom2'];
-            $tgl         = $get['create_date'];
-            $reff_note   = $get['reff_note'];
             /*
                 Format reff note dari PPIC
                 1. SC
@@ -4810,7 +4824,6 @@ class MO extends MY_Controller
                 Contoh Penulisan Reff NOte 
                 SC1896 | MO211000406 | MC222 | 7P1514 | NYLON 70/6 TEXT
             */
-            $note_head   = $get['note_head']; 
 
             $nh = explode('|', $note_head);
             $loop1 = 0;
@@ -4909,13 +4922,6 @@ class MO extends MY_Controller
         $pdf->AddPage();
         $pdf->SetFont('Arial','B',15,'C');
 
-
-        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
-        $row   = explode("|^,", $data_arr2);
-        // $pdf->setXY(1,2);
-        //$cellWidth     = 60;
-        //$offset_length = FALSE;
-
         //get origin_mo
         $origin_mo  = $this->m_mo->get_origin_mo_by_kode($kode);
         $method= $dept_id.'|OUT';
@@ -4924,12 +4930,8 @@ class MO extends MY_Controller
         $heightNama = 0; 
         $enter         = 1;
         $enter_barcode = 13;
-        //$pdf->setXY(1,2);
-        //$cellWidth     = 60;
 
-        foreach ($row as $val ) {
-            //$pdf->Cell($width,$height,$val,0,0,'R');
-            //$pdf->Cell($width,$height,'tes',0,0,'R');
+        foreach ($data_arr as $val ) {
 
             if($loop == 3){
                 $pdf->AddPage();
@@ -4939,9 +4941,13 @@ class MO extends MY_Controller
                 $enter_barcode = 13;
 
             }
-
-            $items    = explode("^^",$val);
-            $barcode  = $items[0];
+            
+            $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
+            if(isset($get)){
+                $barcode     = $get['lot'];
+            }else{
+                $barcode     = "Not Found";
+            }
 
             // get reff picking by kode
             $reff_picking  = $this->m_mo->get_reff_picking_pengiriman_by_kode($barcode, $method, $origin_mo);
@@ -4970,40 +4976,29 @@ class MO extends MY_Controller
     }
 
 
-    function barcode_tri($data_arr,$count)
+    function barcode_tri($kode,$data_arr)
     {
        
         $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
 
         $pdf->AddPage();
-
-        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
-        $row   = explode("|^,", $data_arr2);
         $loop  = 1;
-
-
-        foreach ($row as $val) {
+        foreach ($data_arr as $val) {
 
             if($loop == 2){
                 $pdf->AddPage();
                 $loop = 1;
             }
-            
-            $items    = explode("^^",$val);
-            $no_itm   = 0;
-            $barcode  = '';
-            $nama_grade = '';
-            foreach($items as $itm){
-                if($no_itm == 0 ){
-                    $barcode  = $itm;
-                }
-                if($no_itm == 1){
-                    $nama_grade = $itm;
-                }
-                $no_itm++;
+
+            $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
+            if(isset($get)){
+                $barcode     = $get['lot'];
+                $nama_grade  = $get['nama_grade'];
+            }else{
+                $barcode     = "Not Found";
+                $nama_grade  = "";
             }
-
-
+            
             $pdf->SetFont('Arial','B',25,'C');
             $pdf->setXY(10,8);
             $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 1
@@ -5042,39 +5037,29 @@ class MO extends MY_Controller
     }
 
 
-    function barcode_ins1($data_arr)
+    function barcode_ins1($kode,$data_arr)
     {
        
         $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
 
         $pdf->AddPage();
-
-        $data_arr2   = rtrim($data_arr,'|^,');//empty |^
-        $row   = explode("|^,", $data_arr2);
+      
         $loop  = 1;
-
-
-        foreach ($row as $val) {
+        foreach ($data_arr as $val) {
 
             if($loop == 2){
                 $pdf->AddPage();
                 $loop = 1;
             }
             
-            $items    = explode("^^",$val);
-            $no_itm   = 0;
-            $barcode  = '';
-            $nama_grade = '';
-            foreach($items as $itm){
-                if($no_itm == 0 ){
-                    $barcode  = $itm;
-                }
-                if($no_itm == 1){
-                    $nama_grade = $itm;
-                }
-                $no_itm++;
+            $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
+            if(isset($get)){
+                $barcode     = $get['lot'];
+                $nama_grade  = $get['nama_grade'];
+            }else{
+                $barcode     = "Not Found";
+                $nama_grade  = "";
             }
-
 
             $pdf->SetFont('Arial','B',25,'C');
             $pdf->setXY(10,8);

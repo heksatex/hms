@@ -308,4 +308,11 @@ class M_procurementPurchase extends CI_Model
 		   						WHERE a.sales_order = '$sales_order' AND a.kode_prod = '$kode_prod' AND a.kode_pp ='$kode_pp'")->result();
 	}
 
+	public function  get_data_procurement_purchase_item_by_row($kode,$row)
+	{
+		return $this->db->query("SELECT kode_produk,nama_produk,schedule_date,qty,uom,reff_notes,status,row_order 
+								FROM procurement_purchase_items 
+								where kode_pp = '$kode' AND row_order = '$row'");
+	}
+
 }

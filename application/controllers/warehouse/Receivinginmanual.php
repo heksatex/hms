@@ -139,6 +139,8 @@ class Receivinginmanual extends MY_Controller
     		$kode_empty   = TRUE;
     		$row_order    = 1;
     		$not_done     = FALSE;
+			$produk_empty = FALSE;
+			$produk_empty_name = "";
 
     		//get list product by kode
     		$items    = $this->m_receivinginmanual->get_list_receiving_by_kode($kode)->result_array();
@@ -177,45 +179,47 @@ class Receivinginmanual extends MY_Controller
 
 	    			if(empty($get['nama_produk'])){//jika nama produk tidak ada
 
-	    				
-	    				//get uom translate
-	    				$uom_odoo = addslashes($row['uom']);
-		    			$get_uom = $this->m_receivinginmanual->get_uom_by_uom_odoo($uom_odoo)->row_array();
-		    			if(!empty($get_uom['uom'])){
-		    				$uom  = ($get_uom['uom']);
-		    			}else{
-		    				$uom  = '';
-		    			}
+						$produk_empty = TRUE;
+						$produk_empty_name = $ads_prod;
+						break;
+	    				// //get uom translate
+	    				// $uom_odoo = addslashes($row['uom']);
+		    			// $get_uom = $this->m_receivinginmanual->get_uom_by_uom_odoo($uom_odoo)->row_array();
+		    			// if(!empty($get_uom['uom'])){
+		    			// 	$uom  = ($get_uom['uom']);
+		    			// }else{
+		    			// 	$uom  = '';
+		    			// }
 
-		    			//get route/category odoo translate
-		    			$route_odoo = addslashes($row['route']);
-		    			$get_route  = $this->m_receivinginmanual->get_route_by_category_odoo($route_odoo)->row_array();
-		    			if(!empty($get_route['route_produksi'])){
-		    				$route = ($get_route['route_produksi']);
-		    			}else{
-		    				$route = '';
-		    			}
+		    			// //get route/category odoo translate
+		    			// $route_odoo = addslashes($row['route']);
+		    			// $get_route  = $this->m_receivinginmanual->get_route_by_category_odoo($route_odoo)->row_array();
+		    			// if(!empty($get_route['route_produksi'])){
+		    			// 	$route = ($get_route['route_produksi']);
+		    			// }else{
+		    			// 	$route = '';
+		    			// }
 
-		    			if($row['type'] == 'product'){
-		    				$type = 'stockable';
-		    			}else if($row['type'] == 'consu'){
-		    				$type = 'consumable';
-		    			}else{
-		    				$type = 'service';
-		    			}
+		    			// if($row['type'] == 'product'){
+		    			// 	$type = 'stockable';
+		    			// }else if($row['type'] == 'consu'){
+		    			// 	$type = 'consumable';
+		    			// }else{
+		    			// 	$type = 'service';
+		    			// }
 
-		    			if(empty($row['default_code'])){
-		    				$kode_produk  = 'MF'.$last_number;
-		    				//lat number + 1 kode_produk ex MF..
-		    				$last_number++;
-		    			}else{
-		    				$kode_produk = ($row['default_code']);
-		    			}
+		    			// if(empty($row['default_code'])){
+		    			// 	$kode_produk  = 'MF'.$last_number;
+		    			// 	//lat number + 1 kode_produk ex MF..
+		    			// 	$last_number++;
+		    			// }else{
+		    			// 	$kode_produk = ($row['default_code']);
+		    			// }
 
-		    			$nama_produk  = ($row['name_template']);
+		    			// $nama_produk  = ($row['name_template']);
 		    			
-	    				//insert ke mst_produk
-	    				$sql_simpan_mst_produk .= "('".addslashes($kode_produk)."','".addslashes($nama_produk)."','".addslashes($uom)."','".$create_date."','".addslashes($route)."','".addslashes($type)."'), ";
+	    				// //insert ke mst_produk
+	    				// $sql_simpan_mst_produk .= "('".addslashes($kode_produk)."','".addslashes($nama_produk)."','".addslashes($uom)."','".$create_date."','".addslashes($route)."','".addslashes($type)."'), ";
 
 	    				
 	    			}else{
@@ -224,16 +228,16 @@ class Receivinginmanual extends MY_Controller
 	    				$nama_produk  = ($get['nama_produk']);
 	    				$uom          = ($get['uom']);
 
+						$qty          = $row['qty'];
+						$status       = ($row['state']);
+						//insert ke penerimaan barang m items
+						$sql_simpan_penerimaan_barang_items .= "('".$kode."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".$lot."','".$qty."','".addslashes($uom)."','".$status."','".$row_order."'), ";
+						$row_order++;
+	
+						//insert ke stock quant
+						$sql_simpan_stock_quant .= "('".$start."','".$tanggal."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".$lot."','','".$qty."','".addslashes($uom)."','','','RCV/Stock','".addslashes($note)."','','','".$tanggal."','','','','','',''), ";
+						$start++;
 	    			}
-	    			$qty          = $row['qty'];
-	    			$status       = ($row['state']);
-	    			//insert ke penerimaan barang m items
-	    			$sql_simpan_penerimaan_barang_items .= "('".$kode."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".$lot."','".$qty."','".addslashes($uom)."','".$status."','".$row_order."'), ";
-	    			$row_order++;
-
-	    			//insert ke stock quant
-	    			$sql_simpan_stock_quant .= "('".$start."','".$tanggal."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".$lot."','','".$qty."','".addslashes($uom)."','','','RCV/Stock','".addslashes($note)."','','','".$tanggal."','','','','','',''), ";
-	    			$start++;
 
 
 	    		}//end foreach items
@@ -246,6 +250,8 @@ class Receivinginmanual extends MY_Controller
     			}else if($not_done == TRUE ){
     				//$callback = array();
     				$callback = array('status' => 'failed', 'field' => 'rcv_in', 'message' => 'No Receiving IN Belum ditransfer !', 'icon' =>'fa fa-warning', 'type' => 'danger' );
+				}else if($produk_empty == TRUE){
+					$callback = array('status' => 'failed', 'field' => 'rcv_in', 'message' => 'Produk <b>'.$produk_empty_name.'</b> belum terdapat di HMS, Silahkan tambahkan terlebih dahulu Master Produk tersebut !!', 'icon' =>'fa fa-warning', 'type' => 'danger' );
     			}else{
 
 					if(!empty($sql_simpan_penerimaan_barang_items)){
