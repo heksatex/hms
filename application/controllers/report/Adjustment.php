@@ -243,12 +243,12 @@ class Adjustment extends MY_Controller
 				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_adjustment);
 				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->uom);
 				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty_data2);
-				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty_adjustment2);
-				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom2);
-				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty_move);
-				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->qty2_move);
-				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_user);
-				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->note);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->qty_adjustment2);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->uom2);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->qty_move);
+				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->qty2_move);
+				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->nama_user);
+				$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->note);
 
 				// set align
 		        $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -273,9 +273,9 @@ class Adjustment extends MY_Controller
 			$rowCount2++;
 		}
 
-    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
         header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename=Laporan Adjustment '.$dept['nama'].' .xls '); //tell browser what's the file name
+        header('Content-Disposition: attachment;filename=Laporan Adjustment '.$dept['nama'].' .xlsx '); //tell browser what's the file name
         header('Cache-Control: max-age=0'); //no cache
         $object->save('php://output');	
     

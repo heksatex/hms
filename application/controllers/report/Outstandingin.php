@@ -152,9 +152,9 @@ class Outstandingin extends MY_Controller
 
 		// header table
 		if($view == 'Global'){
-			$table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Total Lot',' Total Qty1','Total Qty2','Status','Reff Note');
+			$table_head_columns  = array('No', 'kode','Origin','Reff Picking','Kode Produk','Nama Produk','Total Lot',' Total Qty1','Total Qty2','Status','Reff Note');
 
-			$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L');
+			$index_header = array('A','B','C','D','E','F','G','H','I','J','K');
 			$loop = 0;
 			foreach ($index_header as $val) {
 				$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
@@ -163,10 +163,10 @@ class Outstandingin extends MY_Controller
 
 				}else if(($loop >= 1 AND $loop <= 3)){
 					$object->getSheet(0)->getColumnDimension($val)->setWidth(19); // index B,C,D
-				}else if($loop >= 7 AND $loop <=10 ){
-					$object->getSheet(0)->getColumnDimension($val)->setWidth(14); // index I,J,K
-				}else if($loop == 6 or $loop == 12 or $loop == 11){
-					$object->getSheet(0)->getColumnDimension($val)->setWidth(25); // index G,H,M,L
+				}else if($loop >= 6 AND $loop <=9 ){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(14); // index I,J,G
+				}else if( $loop == 11 or $loop == 10){
+					$object->getSheet(0)->getColumnDimension($val)->setWidth(25); // index H,K
 				}else if($loop == 4 ){
 					$object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index E
 				}
@@ -175,9 +175,9 @@ class Outstandingin extends MY_Controller
 			}
 
 		}else{
-			$table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Lot','Qty1','Uom1','Qty2','Uom2','Status','Reff Note');
+			$table_head_columns  = array('No', 'kode','Origin','Reff Picking','Kode Produk','Nama Produk','Lot','Qty1','Uom1','Qty2','Uom2','Status','Reff Note');
 
-			$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
+			$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
 			$loop = 0;
 			foreach ($index_header as $val) {
 				$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
@@ -217,14 +217,51 @@ class Outstandingin extends MY_Controller
 
 				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
 				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
-				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
-				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
-				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
-				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
-				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
-				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->tot_lot);
-				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->tot_qty);
-				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->tot_qty2);
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->origin);
+				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->reff_picking);
+				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->kode_produk);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->nama_produk);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->tot_lot);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->tot_qty);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->tot_qty2);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->nama_status);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->reff_note);
+
+				//set border true
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+
+				$rowCount++;
+			}
+
+		}else{
+
+			// tbody
+			$list  = $this->m_outstandingIn->get_list_outstanding_in_by_kode($departemen,$dept_dari,$kode,$corak);
+			$num   = 1;
+			$rowCount = 7;
+			foreach($list as $row){
+
+				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
+				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->origin);
+				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->reff_picking);
+				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->kode_produk);
+				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->nama_produk);
+				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->lot);
+				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->qty);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->uom);
+				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->qty2);
+				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->uom2);
 				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->nama_status);
 				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->reff_note);
 
@@ -241,57 +278,16 @@ class Outstandingin extends MY_Controller
 				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
 				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
 				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
-
-				$rowCount++;
-			}
-
-		}else{
-
-			// tbody
-			$list  = $this->m_outstandingIn->get_list_outstanding_in_by_kode($departemen,$dept_dari,$kode,$corak);
-			$num   = 1;
-			$rowCount = 7;
-			foreach($list as $row){
-
-				$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
-				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);
-				$object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal_transaksi);
-				$object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->origin);
-				$object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->reff_picking);
-				$object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->kode_produk);
-				$object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->nama_produk);
-				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->lot);
-				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->qty);
-				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom);
-				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->qty2);
-				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->uom2);
-				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->nama_status);
-				$object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->reff_note);
-
-				//set border true
-				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
 				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 
 				$rowCount++;
 			}
 		}
 
 		
-		$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 
-		$name_file ='Outstading IN '.$dept['nama'].'.xls';
+		$name_file ='Outstading IN '.$dept['nama'].'.xlsx';
 
         header('Content-Type: application/vnd.ms-excel'); //mime type
         header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
