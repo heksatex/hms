@@ -261,9 +261,9 @@ class Outstandingin extends MY_Controller
 				$object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->qty);
 				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->uom);
 				$object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->qty2);
-				$object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->uom2);
-				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->nama_status);
-				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->reff_note);
+				$object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->uom2);
+				$object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->nama_status);
+				$object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->reff_note);
 
 				//set border true
 				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
