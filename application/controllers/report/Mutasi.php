@@ -661,9 +661,9 @@ class Mutasi extends MY_Controller
                 $rowCount++;
             }
         
-            $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+            $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 
-            $name_file ='Mutasi Detail '.$dept['nama'].'.xls';
+            $name_file ='Mutasi Detail '.$dept['nama'].'.xlsx';
 
             header('Content-Type: application/vnd.ms-excel'); //mime type
             header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
@@ -1134,9 +1134,9 @@ class Mutasi extends MY_Controller
             }
 
 
-            $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+            $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 
-            $name_file ='Mutasi Global'.$dept['nama'].'.xls';
+            $name_file ='Mutasi Global'.$dept['nama'].'.xlsx';
 
             header('Content-Type: application/vnd.ms-excel'); //mime type
             header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
