@@ -165,7 +165,6 @@
                             <tr>
                               <th  class="style no" >No. </th>
                               <th  class='style' style="min-width: 80px">Kode</th>
-                              <th  class='style' style="min-width: 80px">Tgl Kirim</th>
                               <th  class='style'>Origin</th>
                               <th  class='style'>Reff Picking</th>
                               <th  class='style'>Kode Produk</th>
@@ -292,7 +291,6 @@
                         var tr = $("<tr>").append(
                                  $("<td>").text(no++),
                                  $("<td>").html(link),
-                                 $("<td>").text(value.tgl_kirim),
                                  $("<td>").text(value.origin),
                                  $("<td>").text(value.reff_picking),
                                  $("<td>").text(value.kode_produk),
