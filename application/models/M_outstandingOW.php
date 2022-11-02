@@ -44,7 +44,6 @@ class M_outstandingOW extends CI_Model
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");
         $this->db->join("warna w", "scl.id_warna = w.id", "inner");
-        $this->db->join("( SELECT kode, status, origin FROM pengiriman_barang where dept_id= 'GRG' and status IN ('ready','draft') )  pb ", "scl.ow = SUBSTRING_INDEX( pb.origin,'|',-1) ", "inner");
 
 		$i = 0;
 	
@@ -85,8 +84,11 @@ class M_outstandingOW extends CI_Model
 		$this->_get_datatables_query();      
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
+        $list_ow    =  $this->get_list_ow_done_cancel();
+        $this->db->where_not_in("scl.ow",$list_ow);
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
+        $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
 		$query = $this->db->get();
 		return $query->result();
@@ -95,8 +97,11 @@ class M_outstandingOW extends CI_Model
 	function count_filtered()
 	{
 		$this->_get_datatables_query();
+        $list_ow    =  $this->get_list_ow_done_cancel();
+        $this->db->where_not_in("scl.ow",$list_ow);
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
+        $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
 		$query = $this->db->get();
 		return $query->num_rows();
@@ -109,7 +114,6 @@ class M_outstandingOW extends CI_Model
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");
         $this->db->join("warna w", "scl.id_warna = w.id", "inner");
-        $this->db->join("( SELECT kode, status, origin FROM pengiriman_barang where dept_id= 'GRG' and status IN ('ready','draft') )  pb ", "scl.ow = SUBSTRING_INDEX( pb.origin,'|',-1) ", "inner");
 
 
         if($this->input->post('sc'))
@@ -138,6 +142,9 @@ class M_outstandingOW extends CI_Model
         }
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
+        $list_ow    =  $this->get_list_ow_done_cancel();
+        $this->db->where_not_in("scl.ow",$list_ow);
+        $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
        
 		return $this->db->count_all_results();
@@ -177,13 +184,26 @@ class M_outstandingOW extends CI_Model
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");
         $this->db->join("warna w", "scl.id_warna = w.id", "inner");
-        $this->db->join("( SELECT kode, status, origin FROM pengiriman_barang where dept_id= 'GRG' and status IN ('ready','draft') )  pb ", "scl.ow = SUBSTRING_INDEX( pb.origin,'|',-1) ", "inner");
 
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
+        $list_ow    =  $this->get_list_ow_done_cancel();
+        $this->db->where_not_in("scl.ow",$list_ow);
+        $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
         $this->db->order_by("scl.tanggal_ow"," ASC");
 		$query = $this->db->get();
 		return $query->result();
+    }
+
+    function get_list_ow_done_cancel()
+    {
+        $query =  $this->db->query("SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel')")->result();
+        $where = [];
+        foreach($query as $rs){
+            $where[] = $rs->ow;
+        }
+
+        return $where;
     }
 }
