@@ -84,7 +84,7 @@ class M_outstandingOW extends CI_Model
 		$this->_get_datatables_query();      
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
-        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $this->db->where("scl.ow <> ''");
@@ -96,7 +96,7 @@ class M_outstandingOW extends CI_Model
 	function count_filtered()
 	{
 		$this->_get_datatables_query();
-        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $this->db->where("scl.ow <> ''");
@@ -140,7 +140,7 @@ class M_outstandingOW extends CI_Model
         }
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
-        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done') )");
         $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
        
@@ -184,7 +184,7 @@ class M_outstandingOW extends CI_Model
 
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
-        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done') )");
         $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
         $this->db->order_by("scl.tanggal_ow"," ASC");
