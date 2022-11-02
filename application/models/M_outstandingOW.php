@@ -85,7 +85,7 @@ class M_outstandingOW extends CI_Model
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
         $list_ow    =  $this->get_list_ow_done_cancel();
-        $this->db->where_not_in("scl.ow",$list_ow);
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $this->db->where("scl.ow <> ''");
@@ -98,7 +98,7 @@ class M_outstandingOW extends CI_Model
 	{
 		$this->_get_datatables_query();
         $list_ow    =  $this->get_list_ow_done_cancel();
-        $this->db->where_not_in("scl.ow",$list_ow);
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $this->db->where("scl.ow <> ''");
@@ -143,7 +143,7 @@ class M_outstandingOW extends CI_Model
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $list_ow    =  $this->get_list_ow_done_cancel();
-        $this->db->where_not_in("scl.ow",$list_ow);
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
        
@@ -188,7 +188,7 @@ class M_outstandingOW extends CI_Model
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $list_ow    =  $this->get_list_ow_done_cancel();
-        $this->db->where_not_in("scl.ow",$list_ow);
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
         $this->db->order_by("scl.tanggal_ow"," ASC");
@@ -200,8 +200,13 @@ class M_outstandingOW extends CI_Model
     {
         $query =  $this->db->query("SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel')")->result();
         $where = [];
+        $loop  = 0;
         foreach($query as $rs){
             $where[] = $rs->ow;
+            $loop++;
+            if($loop == 1){
+                break;
+            }
         }
 
         return $where;
