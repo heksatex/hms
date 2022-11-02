@@ -84,7 +84,6 @@ class M_outstandingOW extends CI_Model
 		$this->_get_datatables_query();      
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
-        $list_ow    =  $this->get_list_ow_done_cancel();
         $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
@@ -97,7 +96,6 @@ class M_outstandingOW extends CI_Model
 	function count_filtered()
 	{
 		$this->_get_datatables_query();
-        $list_ow    =  $this->get_list_ow_done_cancel();
         $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
@@ -142,7 +140,6 @@ class M_outstandingOW extends CI_Model
         }
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
-        $list_ow    =  $this->get_list_ow_done_cancel();
         $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
@@ -187,7 +184,6 @@ class M_outstandingOW extends CI_Model
 
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
-        $list_ow    =  $this->get_list_ow_done_cancel();
         $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel') )");
         $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
@@ -196,19 +192,4 @@ class M_outstandingOW extends CI_Model
 		return $query->result();
     }
 
-    function get_list_ow_done_cancel()
-    {
-        $query =  $this->db->query("SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done','cancel')")->result();
-        $where = [];
-        $loop  = 0;
-        foreach($query as $rs){
-            $where[] = $rs->ow;
-            $loop++;
-            if($loop == 1){
-                break;
-            }
-        }
-
-        return $where;
-    }
 }
