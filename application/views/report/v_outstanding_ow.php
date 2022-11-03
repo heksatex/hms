@@ -125,6 +125,7 @@
                       <th>Product</th>
                       <th>Warna</th>
                       <th>Qty</th>
+                      <th>Reff Note</th>
                     </tr>
                   </thead>
                 </table>
@@ -246,6 +247,10 @@
                   "targets": [ 8 ], 
                   "className": 'text-right', 
                   "width" : 80,
+                },
+                { 
+                  "targets": [ 9 ], 
+                  "width" : 120,
                 },
             ],
            
