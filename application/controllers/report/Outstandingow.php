@@ -49,6 +49,7 @@ class Outstandingow extends MY_Controller
             $row[] = $field->nama_produk;
             $row[] = $field->nama_warna;
             $row[] = number_format($field->qty,2).' '.$field->uom;
+            $row[] = $field->reff_notes;
          
             $data[] = $row;
             
@@ -86,7 +87,7 @@ class Outstandingow extends MY_Controller
 		$object->getActiveSheet()->getStyle("A1:T3")->getFont()->setBold(true);
 
         // header table
-    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom');
+    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Reff Note');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $field);  
@@ -116,6 +117,7 @@ class Outstandingow extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->nama_warna);
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
 			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->reff_notes);
 	        $rowCount++;
         }
 

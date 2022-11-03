@@ -5,8 +5,8 @@
 class M_outstandingOW extends CI_Model
 {
 
-    var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty');
-	var $column_search= array('scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty');
+    var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'scl.reff_notes');
+	var $column_search= array('scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'scl.reff_notes');
 	var $order  	  = array('scl.tanggal_ow' => 'asc');
 
     
