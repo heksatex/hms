@@ -1104,7 +1104,7 @@ class Mutasi extends MY_Controller
                     $column_excel_tot_out  = $this->cek_column_excel($column+4);
                     $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty2_uom);
                     $column_excel_tot_out  = $this->cek_column_excel($column+5);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $in_total_qty_opname);
+                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty_opname);
                     $column_excel_tot_out  = $this->cek_column_excel($column+6);
                     $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty_opname_uom);
 
@@ -1136,7 +1136,7 @@ class Mutasi extends MY_Controller
 
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 
-            $name_file ='Mutasi Global'.$dept['nama'].'.xlsx';
+            $name_file ='Mutasi Global '.$dept['nama'].'.xlsx';
 
             header('Content-Type: application/vnd.ms-excel'); //mime type
             header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
@@ -1148,6 +1148,117 @@ class Mutasi extends MY_Controller
             echo "<script>alert('Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi');location.replace(history.back())</script>";
             
         }
+
+    }
+
+    function print_bap_mutasi()
+    {
+  		$this->load->library('Pdf');//load library pdf
+        $pdf = new FPDF('p','mm','A4');
+        // membuat halaman baru
+        $pdf->AddPage();
+        $pdf->SetMargins(10,10,5);
+        //$pdf->Cell(10,65,'',0,1);//Buat Jarak ke bawah
+         
+        $tanggal    = $this->input->get('tanggal');
+        $departemen = $this->input->get('departemen');
+
+        $tahun      = date('Y', strtotime($tanggal)); // example 2022
+        $bulan      = date('n', strtotime($tanggal)); // example 8
+        $dept       = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
+        
+        $pdf->SetFont('Arial','',8,'C');
+        $pdf->setXY(145, 5);
+        $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+        $pdf->Multicell(60,4, 'Tgl.Cetak : '.$tgl_now, 0,'R');
+
+        $pdf->setTitle('BAP Mutasi '.$dept['nama']);
+
+        // setting jenis font yang akan digunakan
+    	$pdf->SetFont('Arial','B',10);
+  		$pdf->Cell(190,5,'BERITA ACARA PEMERIKSAAN ADJUSTMENT',0,1,'C');
+    	
+
+        $pdf->SetFont('Arial','B',9,'C');
+        // Caption kiri
+        $pdf->setXY(10,22);
+        $pdf->Multicell(25, 4, 'Periode ', 0, 'L');
+        $pdf->setXY(10,26);
+        $pdf->Multicell(25, 4, 'Departemen ', 0, 'L');
+
+        $pdf->setXY(29, 22);
+        $pdf->Multicell(25, 4, ':', 0, 'L');
+        $pdf->setXY(29, 26);
+        $pdf->Multicell(25, 4, ':', 0, 'L');
+      
+        // isi kiri
+        $pdf->SetFont('Arial','',9,'C');
+        $pdf->setXY(31,22);
+        $pdf->Multicell(50, 4,bln_indo(date('d-m-Y',strtotime($tanggal))), 0, 'L');
+        $pdf->setXY(31,26);
+        $pdf->Multicell(63, 4, $dept['nama'], 0, 'L');
+        
+        $pdf->SetFont('Arial','B',9,'C');
+
+        // table bahan baku
+        $pdf->setXY(10,40);
+        $pdf->Multicell(25, 5, 'Bahan Baku ', 0, 'L');
+        // head
+        $pdf->setXY(10,45);
+        $pdf->Cell(20, 5, 'Jml Lot', 1, 0, 'C');
+        $pdf->Cell(30, 5, 'Jml Qty 1 ', 1, 0, 'C');
+        $pdf->Cell(20, 5, 'Jml Qty 2', 1, 0, 'C');
+        //body
+        $pdf->setXY(10,50);
+        $pdf->Cell(20, 5, 'Jml Lot', 1, 0, 'C');
+        $pdf->Cell(30, 5, 'Jml Qty 1 ', 1, 0, 'C');
+        $pdf->Cell(20, 5, 'Jml Qty 2', 1, 0, 'C');
+
+        // table barang jadi
+        $pdf->setXY(100,40);
+        $pdf->Multicell(25, 5, 'Barang Jadi ', 0, 'L');
+        // head
+        $pdf->setXY(100,45);
+        $pdf->Cell(20, 5, 'Jml Lot', 1, 0, 'C');
+        $pdf->Cell(30, 5, 'Jml Qty 1 ', 1, 0, 'C');
+        $pdf->Cell(20, 5, 'Jml Qty 2', 1, 0, 'C');
+        //body
+        $pdf->setXY(100,50);
+        $pdf->Cell(20, 5, 'Jml Lot', 1, 0, 'C');
+        $pdf->Cell(30, 5, 'Jml Qty 1 ', 1, 0, 'C');
+        $pdf->Cell(20, 5, 'Jml Qty 2', 1, 0, 'C');
+
+        //catatan
+        $pdf->setXY(10,70);
+        $pdf->Multicell(25, 5, 'Catatan ', 0, 'L');
+
+        $pdf->setXY(10,75);
+        $pdf->Multicell(160, 30, ' ', 1, 'L');
+
+        // ttd
+        $pdf->setXY(20, 120);
+    	$pdf->Multicell(23, 4, 'PPIC', 0, 'C');
+    	$pdf->setXY(20, 135);
+    	$pdf->Multicell(23, 4, '( ', 0, 'L');
+    	$pdf->setXY(20, 135);
+    	$pdf->Multicell(23, 4, ' )', 0, 'R');
+
+        $pdf->setXY(60, 120);
+    	$pdf->Multicell(23, 4, $dept['nama'], 0, 'C');
+    	$pdf->setXY(60, 135);
+    	$pdf->Multicell(23, 4, '( ', 0, 'L');
+    	$pdf->setXY(60, 135);
+    	$pdf->Multicell(23, 4, ' )', 0, 'R');
+
+   		// $pdf->setXY(240, 120);
+   		// $pdf->Multicell(23, 4, 'Kepala Shift C', 0, 'C');
+   		// $pdf->setXY(240, 135);
+   		// $pdf->Multicell(23, 4, '( ', 0, 'L');
+   		// $pdf->setXY(240, 135);
+   		// $pdf->Multicell(23, 4, ' )', 0, 'R');
+        
+
+  		$pdf->Output();
 
     }
 }
