@@ -141,6 +141,8 @@ class Receivinginmanual extends MY_Controller
     		$not_done     = FALSE;
 			$produk_empty = FALSE;
 			$produk_empty_name = "";
+			$produk_nonaktif = FALSE;
+			$produk_nonaktif_name = "";
 
     		//get list product by kode
     		$items    = $this->m_receivinginmanual->get_list_receiving_by_kode($kode)->result_array();
@@ -180,7 +182,7 @@ class Receivinginmanual extends MY_Controller
 	    			if(empty($get['nama_produk'])){//jika nama produk tidak ada
 
 						$produk_empty = TRUE;
-						$produk_empty_name = $ads_prod;
+						$produk_empty_name .= $ads_prod.', ';
 						break;
 	    				// //get uom translate
 	    				// $uom_odoo = addslashes($row['uom']);
@@ -224,19 +226,28 @@ class Receivinginmanual extends MY_Controller
 	    				
 	    			}else{
 
-	    				$kode_produk  = ($get['kode_produk']);
-	    				$nama_produk  = ($get['nama_produk']);
-	    				$uom          = ($get['uom']);
+						$cek_aktif = $this->_module->get_status_aktif_by_produk($get['kode_produk'])->row_array();
 
-						$qty          = $row['qty'];
-						$status       = ($row['state']);
-						//insert ke penerimaan barang m items
-						$sql_simpan_penerimaan_barang_items .= "('".$kode."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".$lot."','".$qty."','".addslashes($uom)."','".$status."','".$row_order."'), ";
-						$row_order++;
+						if($cek_aktif['status_produk'] == 'f'){
+							$produk_nonaktif 	= TRUE;
+							$produk_nonaktif_name .= $get['nama_produk'].', ';
+							break;
+						}else{
+							$kode_produk  = ($get['kode_produk']);
+							$nama_produk  = ($get['nama_produk']);
+							$uom          = ($get['uom']);
 	
-						//insert ke stock quant
-						$sql_simpan_stock_quant .= "('".$start."','".$tanggal."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".$lot."','','".$qty."','".addslashes($uom)."','','','RCV/Stock','".addslashes($note)."','','','".$tanggal."','','','','','',''), ";
-						$start++;
+							$qty          = $row['qty'];
+							$status       = ($row['state']);
+							//insert ke penerimaan barang m items
+							$sql_simpan_penerimaan_barang_items .= "('".$kode."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".$lot."','".$qty."','".addslashes($uom)."','".$status."','".$row_order."'), ";
+							$row_order++;
+		
+							//insert ke stock quant
+							$sql_simpan_stock_quant .= "('".$start."','".$tanggal."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".$lot."','','".$qty."','".addslashes($uom)."','','','RCV/Stock','".addslashes($note)."','','','".$tanggal."','','','','','',''), ";
+							$start++;
+						}
+
 	    			}
 
 
@@ -251,8 +262,12 @@ class Receivinginmanual extends MY_Controller
     				//$callback = array();
     				$callback = array('status' => 'failed', 'field' => 'rcv_in', 'message' => 'No Receiving IN Belum ditransfer !', 'icon' =>'fa fa-warning', 'type' => 'danger' );
 				}else if($produk_empty == TRUE){
+					$produk_empty_name = rtrim($produk_empty_name, ', ');
 					$callback = array('status' => 'failed', 'field' => 'rcv_in', 'message' => 'Produk <b>'.$produk_empty_name.'</b> belum terdapat di HMS, Silahkan tambahkan terlebih dahulu Master Produk tersebut !!', 'icon' =>'fa fa-warning', 'type' => 'danger' );
-    			}else{
+    			}else if($produk_nonaktif == TRUE){
+					$produk_nonaktif_name = rtrim($produk_nonaktif_name, ', ');
+					$callback = array('status' => 'failed', 'field' => 'rcv_in', 'message' => 'Status Produk <b>'.$produk_nonaktif_name.'</b> di HMS tidak Aktif !!', 'icon' =>'fa fa-warning', 'type' => 'danger' );
+				}else{
 
 					if(!empty($sql_simpan_penerimaan_barang_items)){
     					//insert ke penerimaan barang m
