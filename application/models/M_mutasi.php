@@ -47,4 +47,14 @@ class M_mutasi extends CI_Model
                                 ");
     }
 
+    public function get_total_adjustment($table,$tahun,$bulan)
+    {
+        return $this->db->query("SELECT cat.nama_category, sum(mut.adj_in_lot) as total_lot_in, sum(mut.adj_in_qty1) as total_qty1_in, adj_in_qty1_uom, sum(mut.adj_in_qty2) as total_qty2_in, adj_in_qty2_uom, sum(mut.adj_out_lot) as total_lot_out, sum(mut.adj_out_qty1) as total_qty1_out, adj_out_qty1_uom, sum(mut.adj_out_qty2) as total_qty2_out, adj_out_qty2_uom
+                            FROM $table as mut
+                            INNER JOIN mst_category as cat ON cat.id = mut.id_category
+                            WHERE periode_th = '$tahun'  AND periode_bln = '$bulan'  AND (mut.adj_in_qty1 <> 0 or mut.adj_in_qty2 <> 0 or mut.adj_out_qty1 <> 0 or  mut.adj_out_qty2 < 0 )
+                            GROUP BY id_category
+                                ");
+    }
+
 }
