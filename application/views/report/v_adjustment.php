@@ -85,14 +85,7 @@
                       </div>                                    
                   </div>
                 </div>
-                <div class="form-group">
-                  <div class="col-md-12">
-                    <div class="col-md-2"><label>Total Lot</label></div>
-                    <div class="col-md-4" id="total_lot">
-                        <label>: 0</label>
-                    </div>                                    
-                  </div>
-                </div>
+               
                
               </div>
               <div class="col-md-4">
@@ -102,46 +95,100 @@
 
             </form>
 
-            <!-- table -->
+            <!-- table ADJ IN  -->
             <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
-                  <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
-                          <thead>
-                            <tr>
-                              <th  class="style no"  >No. </th>
-                              <th  class='style' style="min-width: 80px">Kode Adjustment</th>
-                              <th  class='style' style="min-width: 80px">Tanggal</th>
-                              <th  class='style' style="min-width: 150px">Nama Produk</th>
-                              <th  class='style' style="min-width: 80px">Lot</th>
-                              <th  class='style' >Qty Stock</th>
-                              <th  class='style' >Qty Adj</th>
-                              <th  class='style' >UoM</th>
-                              <th  class='style' >Qty2 Stock</th>
-                              <th  class='style' >Qty2 Adj</th>
-                              <th  class='style' >UoM2</th>
-                              <th  class='style' >Qty Move</th>
-                              <th  class='style' >Qty Move2</th>
-                              <th  class='style' style="min-width: 80px">User</th>
-                              <th  class='style' style="min-width: 100px">Notes</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td colspan="11" align="center">Tidak ada Data</td>
-                            </tr>
-                          </tbody>
-                      </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
-                        Processing...
-                      </div>
-                  </div>
+              <div class="col-sm-12 table-responsive">
+                <div class="form-group">
+                    <div class="col-md-2">
+                          <label>Adjustment IN</label>
+                    </div>
+                    <div class="col-xs-5 col-md-10" id="total_lot"><label>Total Lot : 0</label></div>
                 </div>
+                <div class="table_scroll">
+                  <div class="table_scroll_head">
+                    <div class="divListviewHead">
+                        <table id="example1" class="table" border="0">
+                            <thead>
+                              <tr>
+                                <th  class="style no"  >No. </th>
+                                <th  class='style' style="min-width: 80px">Kode Adjustment</th>
+                                <th  class='style' style="min-width: 80px">Tanggal</th>
+                                <th  class='style' style="min-width: 150px">Nama Produk</th>
+                                <th  class='style' style="min-width: 80px">Lot</th>
+                                <th  class='style' >Qty Stock</th>
+                                <th  class='style' >Qty Adj</th>
+                                <th  class='style' >UoM</th>
+                                <th  class='style' >Qty2 Stock</th>
+                                <th  class='style' >Qty2 Adj</th>
+                                <th  class='style' >UoM2</th>
+                                <th  class='style' >Qty Move</th>
+                                <th  class='style' >Qty Move2</th>
+                                <th  class='style' style="min-width: 80px">User</th>
+                                <th  class='style' style="min-width: 100px">Notes</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td colspan="15" align="center">Tidak ada Data</td>
+                              </tr>
+                            </tbody>
+                        </table>
+                        <div id="example1_processing" class="table_processing" style="display: none">
+                          Processing...
+                        </div>
+                    </div>
+                  </div>
 
+                </div>
               </div>
             </div>
+
+             <!-- table ADJ OUT  -->
+             <div class="box-body">
+              <div class="col-sm-12 table-responsive">
+                <div class="form-group">
+                    <div class="col-md-2">
+                          <label>Adjustment OUT</label>
+                    </div>
+                    <div class="col-xs-5 col-md-10" id="total_lot2"><label>Total Lot : 0</label></div>
+                </div>
+                <div class="table_scroll">
+                  <div class="table_scroll_head">
+                    <div class="divListviewHead">
+                        <table id="example2" class="table" border="0">
+                            <thead>
+                              <tr>
+                                <th  class="style no"  >No. </th>
+                                <th  class='style' style="min-width: 80px">Kode Adjustment</th>
+                                <th  class='style' style="min-width: 80px">Tanggal</th>
+                                <th  class='style' style="min-width: 150px">Nama Produk</th>
+                                <th  class='style' style="min-width: 80px">Lot</th>
+                                <th  class='style' >Qty Stock</th>
+                                <th  class='style' >Qty Adj</th>
+                                <th  class='style' >UoM</th>
+                                <th  class='style' >Qty2 Stock</th>
+                                <th  class='style' >Qty2 Adj</th>
+                                <th  class='style' >UoM2</th>
+                                <th  class='style' >Qty Move</th>
+                                <th  class='style' >Qty Move2</th>
+                                <th  class='style' style="min-width: 80px">User</th>
+                                <th  class='style' style="min-width: 100px">Notes</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td colspan="15" align="center">Tidak ada Data</td>
+                              </tr>
+                            </tbody>
+                        </table>
+                        <div id="example2_processing" class="table_processing" style="display: none">
+                          Processing...
+                        </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
             </div>
 
 
@@ -225,60 +272,30 @@
 
       }else{  
           $("#example1_processing").css('display',''); // show loading
+          $("#example2_processing").css('display',''); // show loading
 
           $('#btn-generate').button('loading');
           $("#example1 tbody").remove();
+          $("#example2 tbody").remove();
           $.ajax({
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/adjustment/loadData')?>",
                 data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, load:'header'},
                 success: function(data){
-                  $("#total_lot").html(data.total_lot);;
-                  let no    = 1;
-                  let empty = true;
-                  let icon  = '';
-                  let style = '';
-                  var group = 'group-of-rows-';
-              
-                  $.each(data.record, function(key, value){
-                    empty = false;
-                    group = 'group-of-rows-'+no;
-
-                    var tr = $("<tr >").append(
-                              $("<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.kode_produk+"' data-tbody='"+group+"'>").html("<i class='glyphicon glyphicon-plus' ></i>"),
-                               $("<td>").text(''),
-                               $("<td>").text(''),
-                               $("<td>").text(value.nama_produk),
-                               $("<td>").text(value.tot_lot),
-                               $("<td align='right'>").text(value.qty_stock),
-                               $("<td align='right'>").text(value.qty),
-                               $("<td>").text(value.uom),
-                               $("<td align='right'>").text(value.qty2_stock),
-                               $("<td align='right'>").text(value.qty2),
-                               $("<td>").text(value.uom2),
-                               $("<td align='right'>").text(value.qty_move),
-                               $("<td align='right'>").text(value.qty_move2),
-                    );
-                    no++;
-                    tbody = $("<tbody id='"+group+"'>").append(tr);
-                    $("#example1").append(tbody); // append parents
-
-                  });
+                  $("#total_lot").html(data.total_lot_adj_in);;
+                  $("#total_lot2").html(data.total_lot_adj_out);;
+                  
                   // push data filter ke array tmp_filter
                   tmp_filter.push({'id_dept' : id_dept, 'tgldari' : tgldari, 'tglsampai' : tglsampai});
                   //alert('check arr '+JSON.stringify(tmp_filter));
 
-                  if(empty == true){
-                    var tr = $("<tr>").append($("<td colspan='11' align='center'>").text('Tidak ada Data'));
-                    tbody = $("<tbody id='"+group+"'>").append(tr);
-                    $("#example1").append(tbody); // append parents
-
-                  }
-              
+                  body_grouping("example1",data.record)// ADJ IN
+                  body_grouping("example2",data.record2)// ADJ OUT
 
                 $('#btn-generate').button('reset');
                 $("#example1_processing").css('display','none'); // hidden loading
+                $("#example2_processing").css('display','none'); // hidden loading
 
                 },error : function(jqXHR, textStatus, errorThrown){
                   alert(jqXHR.responseText);
@@ -304,7 +321,6 @@
       tglsampai = tmp_filter[i].tglsampai;
             
     }
-
 
     // ambil data berdasarkan data-content='edit'
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -332,33 +348,10 @@
             type : 'POST',
             dataType: 'json',
             url : "<?php echo site_url('report/adjustment/loadData')?>",
-            data : {id_dept:id_dept, tgldari:tgldari, tglsampai:tglsampai, data_isi:data_isi, load:'item'},
+            data : {id_dept:id_dept, tgldari:tgldari, tglsampai:tglsampai, data_isi:data_isi, load:'item', view:'in'},
             success:function(data){
-
-                let tbody = $("<tbody data-parent='"+tbody_id+"' />");
-                let row = '';
-                let no  = 1;
-                $.each(data.item, function(key, value) {
-                          row +=  "<tr  style='background-color: #f2f2f2;' >";
-                          row += "<td>"+no++ +"</td>";
-                          row += "<td>"+value.kode_adjustment+"</td>";
-                          row += "<td>"+value.tanggal+"</td>";
-                          row += "<td></td>";
-                          row += "<td>"+value.lot+"</td>";
-                          row += "<td align='right' >"+value.qty_stock+"</td>";
-                          row += "<td align='right' >"+value.qty+"</td>";
-                          row += "<td>"+value.uom+"</td>";
-                          row += "<td align='right'>"+value.qty2_stock+"</td>";
-                          row += "<td align='right'>"+value.qty2+"</td>";
-                          row += "<td>"+value.uom2+"</td>";
-                          row += "<td align='right'>"+value.qty_move+"</td>";
-                          row += "<td align='right'>"+value.qty_move2+"</td>";
-                          row += "<td>"+value.user+"</td>";
-                          row += "<td>"+value.note+"</td>";
-                          row += "</tr>";
-                });
-                tbody.append(row);
-                $('#example1 tbody[id='+tbody_id+']').after(tbody);
+                
+                body_items('example1',data.item,tbody_id);
 
                 // kembalikan icon ke awal
                 this_icon.css('pointer-events','');
@@ -381,6 +374,149 @@
     });
 
   });
+
+  $(document).on("click", ".group2", function(e){
+
+    var kode      = '';
+    var tbody_id  = '';
+    var tampil    = false;
+    var id_dept = '';
+    var tgldari = '';
+    var tglsampai = '';
+    for(i = 0; i < tmp_filter.length; i++){
+      id_dept   = tmp_filter[i].id_dept;
+      tgldari   = tmp_filter[i].tgldari;
+      tglsampai = tmp_filter[i].tglsampai;
+            
+    }
+
+    // ambil data berdasarkan data-content='edit'
+    $(this).parents("tr").find("td[data-content='edit']").each(function(){
+        data_isi = $(this).attr('data-isi');
+        tbody_id = $(this).attr('data-tbody');
+
+        $(this).toggleClass("collapsed collapse"); // ganti collapsed, collapse
+        if($(this).hasClass("collapsed") == true){
+          tampil = true;
+        }else if($(this).hasClass("collapsed") == false){
+          tampil = false;
+        }
+        $(this).find(".glyphicon").toggleClass("glyphicon-plus glyphicon-minus"); // ganti icon + jadi minus
+
+        if(tampil == true){
+          $("#example2 tbody[data-parent='"+tbody_id+"']").remove();// remove child by groupby
+
+        }else{
+
+          this_icon = $(this);
+          this_icon.html('<i class="fa fa-spinner fa-spin "></i>');
+          this_icon.css('pointer-events','none');
+
+          $.ajax({
+            type : 'POST',
+            dataType: 'json',
+            url : "<?php echo site_url('report/adjustment/loadData')?>",
+            data : {id_dept:id_dept, tgldari:tgldari, tglsampai:tglsampai, data_isi:data_isi, load:'item', view:'out'},
+            success:function(data){
+                
+                body_items('example2',data.item,tbody_id);
+
+                // kembalikan icon ke awal
+                this_icon.css('pointer-events','');
+                this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+
+            },error : function(jqXHR, textStatus, errorThrown){
+              //alert(jqXHR.responseText);
+              alert('error load child');
+              // kembalikan icon ke awal
+              this_icon.css('pointer-events','');
+              this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
+              
+            }
+
+          });
+
+
+        }
+
+    });
+
+  });
+
+  function body_grouping(id_table,record){
+
+                  let no    = 1;  
+                  let empty = true;
+                  let icon  = '';
+                  let style = '';
+                  var group = 'group-of-rows-';
+
+                  if(id_table == 'example1'){
+                    $group_num = 'group1';
+                  }else{
+                    $group_num = 'group2';
+                  }
+              
+                  $.each(record, function(key, value){
+                    empty = false;
+                    group = 'group-of-rows-'+no;
+
+                    var tr = $("<tr >").append(
+                              $("<td class='show collapsed "+$group_num+"' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.kode_produk+"' data-tbody='"+group+"'>").html("<i class='glyphicon glyphicon-plus' ></i>"),
+                               $("<td>").text(''),
+                               $("<td>").text(''),
+                               $("<td>").text(value.nama_produk),
+                               $("<td>").text(value.tot_lot),
+                               $("<td align='right'>").text(value.qty_stock),
+                               $("<td align='right'>").text(value.qty),
+                               $("<td>").text(value.uom),
+                               $("<td align='right'>").text(value.qty2_stock),
+                               $("<td align='right'>").text(value.qty2),
+                               $("<td>").text(value.uom2),
+                               $("<td align='right'>").text(value.qty_move),
+                               $("<td align='right'>").text(value.qty_move2),
+                    );
+                    no++;
+                    tbody = $("<tbody id='"+group+"'>").append(tr);
+                    $("#"+id_table).append(tbody); // append parents
+
+                  });
+
+                  if(empty == true){
+                    var tr = $("<tr>").append($("<td colspan='15' align='center'>").text('Tidak ada Data'));
+                    tbody = $("<tbody id='"+group+"'>").append(tr);
+                    $("#"+id_table).append(tbody); // append parents
+                  }
+
+  }
+
+  function body_items(id_table,record,tbody_id){
+                let tbody = $("<tbody data-parent='"+tbody_id+"' />");
+                let row = '';
+                let no  = 1;
+                $.each(record, function(key, value) {
+                          row +=  "<tr  style='background-color: #f2f2f2;' >";
+                          row += "<td>"+no++ +"</td>";
+                          row += "<td>"+value.kode_adjustment+"</td>";
+                          row += "<td>"+value.tanggal+"</td>";
+                          row += "<td></td>";
+                          row += "<td>"+value.lot+"</td>";
+                          row += "<td align='right' >"+value.qty_stock+"</td>";
+                          row += "<td align='right' >"+value.qty+"</td>";
+                          row += "<td>"+value.uom+"</td>";
+                          row += "<td align='right'>"+value.qty2_stock+"</td>";
+                          row += "<td align='right'>"+value.qty2+"</td>";
+                          row += "<td>"+value.uom2+"</td>";
+                          row += "<td align='right'>"+value.qty_move+"</td>";
+                          row += "<td align='right'>"+value.qty_move2+"</td>";
+                          row += "<td>"+value.user+"</td>";
+                          row += "<td>"+value.note+"</td>";
+                          row += "</tr>";
+                });
+                tbody.append(row);
+                $('#'+id_table+' tbody[id='+tbody_id+']').after(tbody);
+                
+  }
 
 </script>
 
