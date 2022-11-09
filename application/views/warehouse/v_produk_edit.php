@@ -342,6 +342,12 @@
                                 </div>
                               </div>                                    
                             </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4">Product Parent</div>
+                                <div class="col-xs-8 col-md-8">
+                                  <select type="text" class="form-control input-sm" name="product_parent" id="product_parent" > </select>
+                                </div>                                    
+                            </div>
                           </div>
                         </div>
                         
@@ -578,6 +584,46 @@
       ignoreReadonly: true,
   });
 
+  var id_parent      = "<?php echo $produk->id_parent ?>";
+  var nama_parent    = "<?php echo $produk->nama_parent ?>";
+    
+  //untuk event selected select2 uom
+  var $newOptionuom = $("<option></option>").val(id_parent).text(nama_parent);
+  $("#product_parent").empty().append($newOptionuom).trigger('change'); 
+
+  //select 2 produk parent
+  $('#product_parent').select2({
+      allowClear: true,
+      placeholder: "",
+      ajax:{
+            dataType: 'JSON',
+            type : "POST",
+            url : "<?php echo base_url();?>warehouse/produk/get_product_parent_select2",
+            //delay : 250,
+            data : function(params){
+              return{
+                nama:params.term,
+              };
+            }, 
+            processResults:function(data){
+              var results = [];
+              $.each(data, function(index,item){
+                results.push({
+                    id:item.id,
+                    text:item.nama
+                });
+              });
+              return {
+                results:results
+              };
+            },
+            error: function (xhr, ajaxOptions, thrownError){
+              //alert('Error data');
+              //alert(xhr.responseText);
+            }
+      }
+  });
+
   //klik button simpan
     $('#btn-simpan').click(function(){
       $('#btn-simpan').button('loading');
@@ -624,6 +670,7 @@
                 bom             : $('#bom').val(),
                 tanggaldibuat   : $('#tanggaldibuat').val(),
                 note            : $('#note').val(),
+                product_parent  : $('#product_parent').val(),
                 statusproduk   : $('#status').val(),// aktif/tidak aktif
                 status          : 'edit',
 

@@ -229,6 +229,12 @@
                                 </div>
                               </div>                                    
                             </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4">Product Parent</div>
+                                <div class="col-xs-8 col-md-8">
+                                  <select type="text" class="form-control input-sm" name="product_parent" id="product_parent" > </select>
+                                </div>
+                            </div>
                           </div>
                         </div>
                         
@@ -448,6 +454,40 @@
       format : 'YYYY-MM-DD HH:mm:ss',
       ignoreReadonly: true,
   });
+
+  //select 2 produk parent
+  $('#product_parent').select2({
+      allowClear: true,
+      placeholder: "",
+      ajax:{
+            dataType: 'JSON',
+            type : "POST",
+            url : "<?php echo base_url();?>warehouse/produk/get_product_parent_select2",
+            //delay : 250,
+            data : function(params){
+              return{
+                nama:params.term,
+              };
+            }, 
+            processResults:function(data){
+              var results = [];
+              $.each(data, function(index,item){
+                results.push({
+                    id:item.id,
+                    text:item.nama
+                });
+              });
+              return {
+                results:results
+              };
+            },
+            error: function (xhr, ajaxOptions, thrownError){
+              //alert('Error data');
+              //alert(xhr.responseText);
+            }
+      }
+  });
+
   
   autogenerate_value = 0;
 
@@ -545,6 +585,7 @@
                 note            : $('#note').val(),
                 status          : 'tambah',
                 statusproduk    : $('#status').val(),
+                product_parent  : $('#product_parent').val(),
                 autogenerate    : autogenerate_value,
 
           },success: function(data){
