@@ -45,8 +45,16 @@ class M_produk extends CI_Model
         {
     		$this->db->where('p.status_produk',$this->input->post('status'));
         }
+		if($this->input->post('parent'))
+        {
+			if($this->input->post('parent') == "t"){
+				$this->db->where('p.id_parent <> 0');
+			}else{
+				$this->db->where('p.id_parent = 0');
+			}
+        }
 
-		$this->db->select("p.id, p.kode_produk,p.nama_produk,p.create_date,p.uom,p.uom_2,c.nama_category,p.route_produksi,p.type, nama_status");
+		$this->db->select("p.id, p.kode_produk,p.nama_produk,p.create_date,p.uom,p.uom_2,c.nama_category,p.route_produksi,p.type, nama_status, p.id_parent");
 		$this->db->from("mst_produk p");		
 		$this->db->JOIN("mst_category c","p.id_category=c.id","LEFT");
 		$this->db->JOIN("mst_status s","p.status_produk=s.kode","LEFT");

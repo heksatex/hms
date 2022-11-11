@@ -30,6 +30,11 @@ class Produk extends MY_Controller
       $no = $_POST['start'];
       foreach ($list as $field) {
           $kode_encrypt = encrypt_url($field->id);
+          if($field->id_parent == 0){
+            $parent = 'Tidak Ada';
+          }else{
+            $parent = 'Ada';
+          }
           $no++;
           $row = array();
           $row[] = $no;
@@ -42,7 +47,7 @@ class Produk extends MY_Controller
           $row[] = $field->route_produksi;
           $row[] = $field->type;
           $row[] = $field->nama_status;
-
+          $row[] = $parent;
           $data[] = $row;
       }
       
