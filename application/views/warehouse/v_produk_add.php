@@ -67,14 +67,14 @@
                     </div>                                    
                   </div>
                   <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-8">                      
+                    <!-- <div class="col-xs-8">                      
                       <input type="checkbox" name="dapat_dijual" id="dapatdijual" value="true">
                       <label>Dapat Dijual</label>
                     </div>
                     <div class="col-xs-8">                      
                       <input type="checkbox" name="dapat_dibeli" id="dapatdibeli" value="true">
                       <label>Dapat Dibeli</label>
-                    </div>
+                    </div> -->
                       <!--
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input" id="dapatdijual" checked value="vdapatdijual"> Dapat Dijual
@@ -96,8 +96,8 @@
               <div class="">
                 <ul class="nav nav-tabs">
                   <li class="active"><a href="#tab_1" data-toggle="tab">Konfigurasi Umum</a></li>
-                  <li><a href="#tab_2" data-toggle="tab">Persediaan</a></li>
-                  <li><a href="#tab_3" data-toggle="tab">Pembelian</a></li>                  
+                  <!-- <li><a href="#tab_2" data-toggle="tab">Persediaan</a></li> -->
+                  <!-- <li><a href="#tab_3" data-toggle="tab">Pembelian</a></li> -->
                 </ul>             
                 <div class="tab-content"><br>
 
@@ -239,11 +239,11 @@
                         </div>
                         
                         <!-- gl accounts -->
-                        <div class="col-md-12">
+                        <!-- <div class="col-md-12">
                           <p class="text-light-blue"><strong>GL Accounts</strong></p>
-                        </div>
+                        </div> -->
                         <!-- kiri -->
-                        <div class="col-md-6">
+                        <!-- <div class="col-md-6">
                           <div class="form-group">
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Sales Account</div>
@@ -274,7 +274,8 @@
                               </div>               
                             </div>
                           </div>
-                        </div>
+                        </div> -->
+                        
                         <!-- kanan -->
                         <div class="col-md-6">
                         </div>

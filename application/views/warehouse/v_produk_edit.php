@@ -112,7 +112,7 @@
                       <input type="text" class="form-control input-sm" name="namaproduk" id="namaproduk" title="<?php echo htmlentities($produk->nama_produk)?>" data-toggle="tooltip" value="<?php echo htmlentities($produk->nama_produk)?>"/>
                     </div>                                    
                   </div>
-                  <div class="col-md-12 col-xs-12">
+                 <!--  <div class="col-md-12 col-xs-12">
                     <div class="col-xs-8">
                       <?php if($produk->dapat_dijual == 0){?>
                         <input type="checkbox" name="dapatdijual" id="dapatdijual" value="true">
@@ -129,7 +129,7 @@
                       <?php } ?>                           
                       <label>Dapat Dibeli</label>
                     </div>
-                  </div>
+                  </div> -->
                 </div>
 
                 <div class="col-md-4 col-xs-12">
@@ -174,8 +174,8 @@
               <div class="">
                 <ul class="nav nav-tabs">
                   <li class="active"><a href="#tab_1" data-toggle="tab">Konfigurasi Umum</a></li>
-                  <li><a href="#tab_2" data-toggle="tab">Persediaan</a></li>
-                  <li><a href="#tab_3" data-toggle="tab">Pembelian</a></li>                  
+                  <!-- <li><a href="#tab_2" data-toggle="tab">Persediaan</a></li> -->
+                  <!-- <li><a href="#tab_3" data-toggle="tab">Pembelian</a></li> -->
                 </ul>             
                 <div class="tab-content"><br>
 
@@ -352,11 +352,11 @@
                         </div>
                         
                         <!-- gl accounts -->
-                        <div class="col-md-12">
+                        <!-- <div class="col-md-12">
                           <p class="text-light-blue"><strong>GL Accounts</strong></p>
-                        </div>
+                        </div> -->
                         <!-- kiri -->
-                        <div class="col-md-6">
+                        <!-- <div class="col-md-6">
                           <div class="form-group">
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Sales Account</div>
@@ -387,7 +387,7 @@
                               </div>               
                             </div>
                           </div>
-                        </div>
+                        </div> -->
                         <!-- kanan -->
                         <div class="col-md-6">
                         </div>
