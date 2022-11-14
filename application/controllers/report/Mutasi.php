@@ -508,7 +508,6 @@ class Mutasi extends MY_Controller
             $this->export_excel_mutasi_detail($tanggal,$departemen,$kode_produk,$nama_produk,$kode_transaksi,$lot);
         }
         
-
     }
 
 
@@ -1104,7 +1103,7 @@ class Mutasi extends MY_Controller
                     $column_excel_tot_out  = $this->cek_column_excel($column+4);
                     $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty2_uom);
                     $column_excel_tot_out  = $this->cek_column_excel($column+5);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $in_total_qty_opname);
+                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty_opname);
                     $column_excel_tot_out  = $this->cek_column_excel($column+6);
                     $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty_opname_uom);
 
@@ -1136,7 +1135,7 @@ class Mutasi extends MY_Controller
 
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 
-            $name_file ='Mutasi Global'.$dept['nama'].'.xlsx';
+            $name_file ='Mutasi Global '.$dept['nama'].'.xlsx';
 
             header('Content-Type: application/vnd.ms-excel'); //mime type
             header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
@@ -1148,6 +1147,284 @@ class Mutasi extends MY_Controller
             echo "<script>alert('Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi');location.replace(history.back())</script>";
             
         }
+
+    }
+
+    function print_bap_mutasi()
+    {
+  		$this->load->library('Pdf');//load library pdf
+        $pdf = new FPDF('p','mm','A4');
+        // membuat halaman baru
+        $pdf->AddPage();
+        $pdf->SetMargins(7,7,5);
+         
+        $tanggal    = $this->input->get('tanggal');
+        $departemen = $this->input->get('departemen');
+
+        $tahun      = date('Y', strtotime($tanggal)); // example 2022
+        $bulan      = date('n', strtotime($tanggal)); // example 8
+        $dept       = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
+
+        //cek departemen yg ada mutasi
+        $result = $this->cek_dept_mutasi($departemen);
+        if($result == true){
+
+            if($dept['type_dept'] == 'manufaktur'){
+
+                $table     = 'acc_mutasi_'.strtolower($departemen).'_rm';
+                $table2    = 'acc_mutasi_'.strtolower($departemen).'_fg';
+                
+            }else{// gudang
+                $table     = 'acc_mutasi_'.strtolower($departemen);
+            }
+            
+            $pdf->SetFont('Arial','',8,'C');
+            $pdf->setXY(143, 5);
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(60,4, 'Tgl.Cetak : '.$tgl_now, 0,'R');
+
+            $pdf->setTitle('BAP Mutasi '.$dept['nama']);
+
+            // setting jenis font yang akan digunakan
+            $pdf->SetFont('Arial','B',10);
+            $pdf->Cell(195,5,'BERITA ACARA PEMERIKSAAN',0,1,'C');
+            $pdf->Cell(195,5,'MUTASI ADJUSTMENT',0,1,'C');
+            
+
+            $pdf->SetFont('Arial','B',9,'C');
+            // Caption kiri
+            $pdf->setXY(7,22);
+            $pdf->Multicell(25, 4, 'Periode ', 0, 'L');
+            $pdf->setXY(7,26);
+            $pdf->Multicell(25, 4, 'Departemen ', 0, 'L');
+
+            $pdf->setXY(29, 22);
+            $pdf->Multicell(25, 4, ':', 0, 'L');
+            $pdf->setXY(29, 26);
+            $pdf->Multicell(25, 4, ':', 0, 'L');
+        
+            // isi kiri
+            $pdf->SetFont('Arial','',9,'C');
+            $pdf->setXY(31,22);
+            $pdf->Multicell(50, 4,bln_indo(date('d-m-Y',strtotime($tanggal))), 0, 'L');
+            $pdf->setXY(31,26);
+            $pdf->Multicell(63, 4, $dept['nama'], 0, 'L');
+            
+            $pdf->SetFont('Arial','B',9,'C');
+
+            if($dept['type_dept'] == 'manufaktur'){
+                $ket_rm  = "Total Adjustment Bahan Baku" ;
+                $set     = 2;
+            }else{
+                $ket_rm  = "Total Adjustment" ;
+                $set     = 1;
+            }
+
+            $y         = 35;
+            $cellWidth = 0;
+            
+            $yPos_out  = $pdf->GetY()+5;       
+            $yPos      = $pdf->GetY()+5;       
+            $xPos      = $pdf->GetX();
+            $line      = 0;
+            $cellHeight= 0;
+            $yPos_no_data = 0;
+            
+            for($a=0; $a<$set; $a++){
+
+                $pdf->SetFont('Arial','B',9,'C');
+                if($a == 1){
+                    // table
+                    $ket_rm  = "Total Adjustment Barang Jadi" ;
+                    $table   = $table2;                    
+                }
+                
+                $pdf->setXY(7,$yPos);
+                $pdf->Multicell(50, 5, $ket_rm, 0, 'L');
+
+                $pdf->setXY(7,$yPos+5);         
+                $pdf->Multicell(30, 5, 'Adjustment IN', 0, 'L');
+                
+                // head
+                $pdf->setXY(7,$yPos+10);
+                $pdf->Cell(35, 5, 'Kategori ', 1, 0, 'C');
+                $pdf->Cell(15, 5, 'Total Lot', 1, 0, 'C');
+                $pdf->Cell(25, 5, 'Total Qty 1 ', 1, 0, 'C');
+                $pdf->Cell(20, 5, 'Total Qty 2', 1, 0, 'C');
+
+                //body
+                $pdf->SetFont('Arial','',9,'C');
+                $result1 = $this->m_mutasi->get_total_adjustment($table,$tahun,$bulan)->result();
+                $restul1_empty = true;
+                $pdf->setXY(7,$yPos+15);
+                $line_tmp  = 1;
+                foreach($result1 as $row ){
+                    $restul1_empty = false;
+
+                    $cellWidth =35; //lebar sel
+                    $cellHeight=5; //tinggi sel satu baris normal
+                    $kategori = $row->nama_category;
+
+                    if($pdf->GetStringWidth($kategori) < $cellWidth){
+                        // jika tidak
+                        $line =1;
+                    }else{
+
+                        $textLength =strlen($kategori);	//total panjang teks
+                        $errMargin  =5;		//margin kesalahan lebar sel, untuk jaga-jaga
+                        $startChar  =0;		//posisi awal karakter untuk setiap baris
+                        $maxChar    =0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+                        $textArray  =array();	//untuk menampung data untuk setiap baris
+                        $tmpString  ="";		//untuk menampung teks untuk setiap baris (sementara)
+                        
+                        while($startChar < $textLength){ //perulangan sampai akhir teks
+                            //perulangan sampai karakter maksimum tercapai
+                            while( 
+                            $pdf->GetStringWidth( $tmpString ) < ($cellWidth-$errMargin) &&
+                            ($startChar+$maxChar) < $textLength ) {
+                            $maxChar++;
+                            $tmpString=substr($kategori,$startChar,$maxChar);
+                            }
+                            //pindahkan ke baris berikutnya
+                            $startChar=$startChar+$maxChar;
+                            //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                            array_push($textArray,$tmpString);
+                            //reset variabel penampung
+                            $maxChar  =0;
+                            $tmpString='';
+                            
+                        }
+                        //dapatkan jumlah baris
+                        $line=count($textArray);                    
+                    }
+                    
+                    $yPos=$pdf->GetY();
+                    $xPos=$pdf->GetX();
+                    $pdf->Multicell($cellWidth,$cellHeight,$kategori,1,1);
+
+                    $pdf->SetXY($xPos + $cellWidth , $yPos);
+                    $pdf->Multicell(15,($line * $cellHeight),$row->total_lot_in,1,'C');
+                    $pdf->SetXY($xPos + 15 +  $cellWidth , $yPos);
+                    $pdf->Multicell(25,($line * $cellHeight),number_format($row->total_qty1_in,2).' '.$row->adj_in_qty1_uom,1,'R');
+                    $pdf->SetXY($xPos + 40 +$cellWidth , $yPos);
+                    $pdf->Multicell(20,($line * $cellHeight),number_format($row->total_qty2_in,2).' '.$row->adj_in_qty2_uom,1,'R');
+                    $line_tmp = $line_tmp + $line;
+                }
+
+                if($restul1_empty == true){
+                    $pdf->Cell(95, 5, 'Tidak Ada Data', 1, 0, 'C');
+                    $yPos_no_data = 5;
+                }
+
+                $pdf->SetFont('Arial','B',9,'C');
+                $pdf->setXY(108,$yPos_out+5);
+                $pdf->Multicell(30, 5, 'Adjustment OUT ', 0, 'L');
+
+                // head
+                $pdf->setXY(108,$yPos_out+10);
+                $pdf->Cell(35, 5, 'Kategori ', 1, 0, 'C');
+                $pdf->Cell(15, 5, 'Total Lot', 1, 0, 'C');
+                $pdf->Cell(25, 5, 'Total Qty 1 ', 1, 0, 'C');
+                $pdf->Cell(20, 5, 'Total Qty 2', 1, 0, 'C');
+                //body
+                $pdf->SetFont('Arial','',9,'C');
+                $result2 = $this->m_mutasi->get_total_adjustment($table,$tahun,$bulan)->result();
+                $yPos_out = $yPos_out + 15;
+                $restul2_empty = true;
+                $x_out    = 108;
+                foreach($result2 as $row ){
+                    $restul2_empty = false;
+
+                    $cellWidth =35; //lebar sel
+                    $cellHeight=5; //tinggi sel satu baris normal
+                    $kategori = $row->nama_category;
+
+                    if($pdf->GetStringWidth($kategori) < $cellWidth){
+                        // jika tidak
+                        $line =1;
+                    }else{
+
+                        $textLength =strlen($kategori);	//total panjang teks
+                        $errMargin  =5;		//margin kesalahan lebar sel, untuk jaga-jaga
+                        $startChar  =0;		//posisi awal karakter untuk setiap baris
+                        $maxChar    =0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+                        $textArray  =array();	//untuk menampung data untuk setiap baris
+                        $tmpString  ="";		//untuk menampung teks untuk setiap baris (sementara)
+                        
+                        while($startChar < $textLength){ //perulangan sampai akhir teks
+                            //perulangan sampai karakter maksimum tercapai
+                            while( 
+                            $pdf->GetStringWidth( $tmpString ) < ($cellWidth-$errMargin) &&
+                            ($startChar+$maxChar) < $textLength ) {
+                            $maxChar++;
+                            $tmpString=substr($kategori,$startChar,$maxChar);
+                            }
+                            //pindahkan ke baris berikutnya
+                            $startChar=$startChar+$maxChar;
+                            //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                            array_push($textArray,$tmpString);
+                            //reset variabel penampung
+                            $maxChar  =0;
+                            $tmpString='';
+                            
+                        }
+                        //dapatkan jumlah baris
+                        $line=count($textArray);                    
+                    }
+                    $pdf->setXY($x_out,$yPos_out);
+                    $pdf->Multicell($cellWidth,$cellHeight,$kategori,1,1);
+                    $pdf->SetXY($x_out + $cellWidth , $yPos_out);
+                    $pdf->Multicell(15,($line * $cellHeight),$row->total_lot_out,1,'C');
+                    $pdf->SetXY($x_out + 15 +  $cellWidth , $yPos_out);
+                    $pdf->Multicell(25,($line * $cellHeight),number_format($row->total_qty1_out,2).' '.$row->adj_out_qty1_uom,1,'R');
+                    $pdf->SetXY($x_out + 40 +  $cellWidth , $yPos_out);
+                    $pdf->Multicell(20,($line * $cellHeight),number_format($row->total_qty2_out,2).' '.$row->adj_out_qty2_uom,1,'R');
+                    
+                    $yPos_out = $yPos_out + 5;
+
+                }
+
+                if($restul2_empty == true){
+                    $pdf->setXY(108,$yPos_out);
+                    $pdf->Cell(95, 5, 'Tidak Ada Data', 1, 0, 'C');
+                }
+
+                $yPos       = $pdf->GetY()+5+$yPos_no_data;
+                $yPos_out   = $pdf->GetY()+5+$yPos_no_data;
+                $xPos       = $pdf->GetX();
+            }
+
+            $pdf->SetFont('Arial','B',9,'C');
+
+            //alasan
+            $pdf->setXY(7,$yPos);
+            $pdf->Multicell(25, 5, 'Alasan ', 0, 'L');
+
+            $pdf->setXY(7,$yPos+5);
+            $pdf->Multicell(195, 30, ' ', 1, 'L');
+
+            $username  = addslashes($this->session->userdata('username')); 
+            $nu        = $this->_module->get_nama_user($username)->row_array();
+            $nama_user = $nu['nama'];
+
+            // ttd
+            $pdf->setXY(20, $yPos+40);
+            $pdf->Multicell(23, 4, 'PPIC', 0, 'C');
+            $pdf->setXY(20, $yPos+65);
+            $pdf->Multicell(23, 4, '( '.$nama_user.' )', 0, 'C');
+
+            $pdf->setXY(80,  $yPos+40);
+            $pdf->Multicell(23, 4, $dept['nama'], 0, 'C');
+            $pdf->setXY(80, $yPos+65);
+            $pdf->Multicell(23, 4, '( ', 0, 'L');
+            $pdf->setXY(80, $yPos+65);
+            $pdf->Multicell(23, 4, ' )', 0, 'R');
+        }else{
+            $pdf->SetFont('Arial','B',10);
+  		    $pdf->Cell(195,5,"  Departemen ".$dept['nama']." belum terdapat Laporan Mutasi",0,1,'L');
+        }
+
+  		$pdf->Output();
 
     }
 }

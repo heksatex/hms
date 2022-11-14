@@ -134,7 +134,8 @@
               </div>
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="print-bap" > <i class="fa fa-file-pdf-o" style="color:red"></i> BAP Mutasi</button>
               </div>
               <div class="col-md-12">
                 <div class="form-group" style="margin-bottom: 0px;">
@@ -427,19 +428,7 @@
     loadSearchData();
     $("#example1 tbody").remove();
     $("#example2 tbody").remove();
-        // $.ajax({
-        //         type: "POST",
-        //         dataType : "JSON",
-        //         url : 'http://10.10.0.13:8000/send-group-message',
-        //         data: {id:'EgFjt81Mw34Briw6hQZ3EI', name:'IT WDT', message:'Test ngirim PESAN POSTMAN !!!' },
-        //         success: function(data){
-        //           $('#btn-generate').button('reset');
-        //         },error : function(jqXHR, textStatus, errorThrown){
-        //           alert(jqXHR.responseText);
-        //           //alert('error data');
-        //           $('#btn-generate').button('reset');
-        //         }
-        // });
+       
   });
 
 
@@ -892,10 +881,26 @@
             return;
   }
 
+  $('#print-bap').click(function(e){
+
+    e.preventDefault();
+    tanggal    = encodeURIComponent($('#tanggal').val());
+    departemen = $('#departemen').val();
+
+    if(tanggal == ''){ 
+      alert_modal_warning('Periode Tanggal Harus diisi!');
+    }else if (departemen == null) {
+      alert_modal_warning('Departemen Harus diisi !');
+    }else{
+
+      var url = '<?php echo base_url() ?>report/mutasi/print_bap_mutasi';
+      window.open(url+'?tanggal='+tanggal+'&&departemen='+departemen,'_blank');
+    }
+  });  
   
-function formatNumber(n) {
-	return new Intl.NumberFormat('en-US').format(n);
-}
+  function formatNumber(n) {
+    return new Intl.NumberFormat('en-US').format(n);
+  }
 
 </script>
 
