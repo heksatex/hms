@@ -30,6 +30,11 @@ class Produk extends MY_Controller
       $no = $_POST['start'];
       foreach ($list as $field) {
           $kode_encrypt = encrypt_url($field->id);
+          if($field->id_parent == 0){
+            $parent = 'Tidak Ada';
+          }else{
+            $parent = 'Ada';
+          }
           $no++;
           $row = array();
           $row[] = $no;
@@ -42,7 +47,7 @@ class Produk extends MY_Controller
           $row[] = $field->route_produksi;
           $row[] = $field->type;
           $row[] = $field->nama_status;
-
+          $row[] = $parent;
           $data[] = $row;
       }
       
@@ -65,6 +70,13 @@ class Produk extends MY_Controller
     return $this->load->view('warehouse/v_produk_add', $data);
   }
 
+  function get_product_parent_select2()
+	{
+		  $nama     = addslashes($this->input->post('nama'));
+   		$callback = $this->m_produk->get_list_product_parent($nama);
+      echo json_encode($callback);
+	}
+
   public function simpan()
   {
     $sub_menu  = $this->uri->segment(2);
@@ -76,7 +88,7 @@ class Produk extends MY_Controller
     }else{
       
       //lock table
-      $this->_module->lock_tabel('mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, mst_status WRITE');
+      $this->_module->lock_tabel('mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, mst_status WRITE, mst_produk_parent WRITE');
 
       //cek auto generate kode produk atau input sendiri
       $autogenerate = $this->input->post('autogenerate');
@@ -102,6 +114,7 @@ class Produk extends MY_Controller
       $uom_lebargreige= addslashes($this->input->post('uom_lebargreige'));
       $lebarjadi      = addslashes($this->input->post('lebarjadi'));
       $uom_lebarjadi  = addslashes($this->input->post('uom_lebarjadi'));
+      $product_parent = addslashes($this->input->post('product_parent'));
       $statusproduk   = $this->input->post('statusproduk');
 
       
@@ -148,6 +161,9 @@ class Produk extends MY_Controller
         }else{
           $log_bom =  'False';
         }
+        
+        // cek mst parent by id
+        $parent = $this->m_produk->get_mst_parent_produk_by_id($product_parent)->row_array();
 
         //get status aktif by kode f/t
         $status_aktif = $this->_module->get_mst_status_by_kode($statusproduk);
@@ -158,21 +174,21 @@ class Produk extends MY_Controller
             $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Nama Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );   
         }else if(!empty($cek['kode_produk'])){
           //update/edit produk
-          $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk);
+          $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent);
          
           $jenis_log   = "edit";
-          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." |".$status_aktif;
+          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." |".$status_aktif;
           $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
         }else{
           //insert/add produk
           $id_new = $this->m_produk->get_last_id_mst_produk();
 
-          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk);
+          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent);
           $kodeproduk_encr = encrypt_url($id_new);
 
           $jenis_log   = "create";
-          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$status_aktif;
+          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." |".$status_aktif;
           $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kodeproduk_encr, 'icon' =>'fa fa-check', 'type' => 'success');
         }

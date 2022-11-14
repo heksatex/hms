@@ -1060,7 +1060,6 @@ class Salescontract extends MY_Controller
   		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
       }
 
-
   		$pdf->SetFont('Arial','B',10);
   		$pdf->Cell(38,0.5,'Bank :',0,0, 'L');
   		$pdf->Cell(10,5,'',0,1);
@@ -1091,17 +1090,22 @@ class Salescontract extends MY_Controller
   		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
        
   		$pdf->SetFont('Arial','B',10);  
-  		$pdf->Cell(15,0,'');
+  		$pdf->Cell(10,0,'');
   		$pdf->Cell(60,0.5,'Menyatakan Setuju, ',0,0, 'c');
-  		$pdf->Cell(50,0,'');
+  		$pdf->Cell(15,0,'');
+  		$pdf->Cell(55,0.5,'Direksi',0,0, 'c');
   		$pdf->Cell(60,0.5,' PT.Heksatex Indah,  ',0,0, 'c');
   		$pdf->Cell(10,17,'',0,1);//Buat Jarak ke bawah
 
-  		$pdf->Cell(10,4,'',0,1);
-  		$pdf->Cell(6,0,'');
+  		$pdf->Cell(15,4,'',0,1);
+  		$pdf->Cell(5,0,'');
   		$pdf->Cell(3,0.5,'(',0,0, 'L');
-  		$pdf->Cell(50,1,'','B',0,'L');
-  		$pdf->Cell(28,0.5,')',0,0, 'L');
+  		$pdf->Cell(40,1,'','B',0,'L');
+  		$pdf->Cell(25,0.5,')',0,0, 'L');
+
+  		$pdf->Cell(3,0.5,'(',0,0, 'L');
+  		$pdf->Cell(40,1,'','B',0,'L');
+  		$pdf->Cell(13,0.5,')',0,0, 'L');
 
 	    if(empty($sc->sales_group)){
   			$pdf->Cell(25,0,'');
@@ -1112,8 +1116,6 @@ class Salescontract extends MY_Controller
 
 	   	if(!empty($sc->sales_group)){
 
-		    $pdf->Cell(5,0,'',0,0);
-		    $pdf->Cell(20,0,'',0,0);
 		  	$pdf->SetFont('Arial','B',10);
 		    $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
   			$pdf->SetFont('Arial','',10);
@@ -1123,228 +1125,235 @@ class Salescontract extends MY_Controller
   		$pdf->Output();
       }
 
-  public function print_view_eng()
-  {
+    public function print_view_eng()
+    {
 
-    	$kode = $this->input->get('so');
-      $so   = decrypt_url($kode);
-      $sc   = $this->m_sales->get_data_by_kode($so);
-      $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
-      $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
-      $state   = $this->m_sales->get_partner_states_by_kode($cust->invoice_city)->row_array();// id_state
-      $country = $this->m_sales->get_partner_country_by_kode($cust->invoice_city)->row_array();// id_country
-      $inisial_sales_group = $this->_module->get_inisial_sales_Group_by_kode($sc->sales_group);
-
-
-    	$pdf = new FPDF('p','mm','legal');
-  		// membuat halaman baru
-  		$pdf->AddPage();
-  		$pdf->SetMargins(13,20,10);
-  		$pdf->Cell(10,65,'',0,1);//Buat Jarak ke bawah
+        $kode = $this->input->get('so');
+        $so   = decrypt_url($kode);
+        $sc   = $this->m_sales->get_data_by_kode($so);
+        $pay  = $this->m_sales->get_data_paymentterm_by_kode($sc->paymentterm_id);
+        $cust = $this->m_sales->get_data_customer_by_kode($sc->customer_id);
+        $state   = $this->m_sales->get_partner_states_by_kode($cust->invoice_city)->row_array();// id_state
+        $country = $this->m_sales->get_partner_country_by_kode($cust->invoice_city)->row_array();// id_country
+        $inisial_sales_group = $this->_module->get_inisial_sales_Group_by_kode($sc->sales_group);
 
 
-  		// setting jenis font yang akan digunakan
-  		$pdf->SetFont('Arial','B',10);
-  		// mencetak string
-  		$pdf->Cell(185,7,'Invoice',0,1,'L');
-  		$pdf->SetFont('Arial','',10);
-  		$pdf->Cell(100,5,$sc->customer_name,0,1,'L');
-  		$pdf->Multicell(100,4,$cust->invoice_street,0, 'L');
-  		$pdf->Cell(190,5,$country['name']." ".$cust->invoice_zip,0,1,'L');
-    	$pdf->Cell(190,5,$state['name'],0,1,'L');
+        $pdf = new FPDF('p','mm','legal');
+        // membuat halaman baru
+        $pdf->AddPage();
+        $pdf->SetMargins(13,20,10);
+        $pdf->Cell(10,65,'',0,1);//Buat Jarak ke bawah
 
-  		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
 
-  		$pdf->SetFont('Arial','b',20);
-  		$pdf->Cell(190,7,'Order '.$sc->sales_order,0,1,'L');
+        // setting jenis font yang akan digunakan
+        $pdf->SetFont('Arial','B',10);
+        // mencetak string
+        $pdf->Cell(185,7,'Invoice',0,1,'L');
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(100,5,$sc->customer_name,0,1,'L');
+        $pdf->Multicell(100,4,$cust->invoice_street,0, 'L');
+        $pdf->Cell(190,5,$country['name']." ".$cust->invoice_zip,0,1,'L');
+        $pdf->Cell(190,5,$state['name'],0,1,'L');
 
-  		$pdf->SetFont('Arial','B',10);
-  		$pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
-  		if(!empty($sc->reference)){
-  			$pdf->Cell(47,0.5,'Reference :',0,0, 'L');
-  		}
-  		$pdf->Cell(49,0.5,'Date Ordered :',0,0, 'L');
-  		$pdf->Cell(15,0.5,' Salesperson :',0,0, 'L');
-  		$pdf->Cell(10,4,'',0,1);//Buat Jarak ke bawah
+        $pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
 
-  		$pdf->SetFont('Arial','',10);
-  		$tgl_trans  =  date('d-m-Y ', strtotime($sc->create_date)); 
-  		if(!empty($sc->reference)){
-  			$pdf->Cell(47,0.5,$sc->reference,0,0, 'L');
-  		}
-      $tgl_eng = tgl_eng($tgl_trans);
-  		$pdf->Cell(50,0.5,$tgl_eng,0,0, 'L');
-  		$pdf->Cell(15,0.5,$inisial_sales_group,0,0, 'L');
-  		$pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
+        $pdf->SetFont('Arial','b',20);
+        $pdf->Cell(190,7,'Order '.$sc->sales_order,0,1,'L');
 
-  		// Memberikan space kebawah agar tidak terlalu rapat
-  		$pdf->Cell(10,4,'',0,1);
-  		$pdf->Cell(177,1,'','B',0,'C');//garis atas header
-  		$pdf->Cell(10,1,'',0,1);
-
-  		$pdf->SetFont('Arial','B',9,0,1);
-  		$pdf->Cell(7,6,'No',0,0);
-  		$pdf->Cell(65,6,'Poduct Name',0,0);
-  		$pdf->Cell(20,6,'Quantiy',0,0,'R');
-  		$pdf->Cell(20,6,'UoM',0,0);
-  		$pdf->Cell(30,6,'Unit Price',0,0,'R');
-  		$pdf->Cell(35,6,'Amount',0,1,'R');
-
-  		$pdf->Cell(177,1,'','B',0,'C');//garis bawah header
-  		$pdf->Cell(10,1,'',0,1);
-
-	   	$pdf->SetFont('Arial','',9);
-		
-        $list   = $this->m_sales->get_data_detail_by_kode($so);
-        $no     = 1;
-        foreach ($list as $row) {
-        	$pdf->Cell(7,6,$no++,0,0,'LR');
-        	$pdf->Cell(65,6,$row->description,0,0,'LR');
-		    $pdf->Cell(20,6,number_format($row->qty,2),0,0,'R');
-		    $pdf->Cell(20,6,$row->uom,0,0);
-		    $pdf->Cell(30,6,number_format($row->price,2),0,0,'R');
-		    $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),2),0,1,'R'); 
+        $pdf->SetFont('Arial','B',10);
+        $pdf->Cell(10,7,'',0,1);//Buat Jarak ke bawah
+        if(!empty($sc->reference)){
+          $pdf->Cell(47,0.5,'Reference :',0,0, 'L');
         }
-				
-	  		$pdf->Cell(10,2,'',0,1);
-		  	$pdf->Cell(60,0,'',0,0);
-		    $pdf->Cell(37,0,'',0,0);
-		    $pdf->Cell(20,0,'',0,0);
-		    $pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(60,1,'','B',0,'C');//garis atas sub total
-			
-	   		$pdf->Cell(10,4,'',0,1);
+        $pdf->Cell(49,0.5,'Date Ordered :',0,0, 'L');
+        $pdf->Cell(15,0.5,' Salesperson :',0,0, 'L');
+        $pdf->Cell(10,4,'',0,1);//Buat Jarak ke bawah
 
-		    $pdf->Cell(60,0,'',0,0);
-		    $pdf->Cell(37,0,'',0,0);
-		    $pdf->Cell(20,0,'',0,0);
-		    $pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(25,0,'Sub Total',0,'L');
-	   		$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->untaxed_value,2),0,0,'R'); 
-
-		  	$pdf->Cell(10,2,'',0,1);
-		    $pdf->Cell(60,0,'',0,0);
-		    $pdf->Cell(37,0,'',0,0);
-		    $pdf->Cell(20,0,'',0,0);
-		    $pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(60,1,'','B',0,'C');//garis atas pajak
-			
-	   		$pdf->Cell(10,4,'',0,1);
-
-         // get PPN by code
-        $ppn = $this->m_sales->get_ppn_by_sc($so)->row_array();
-        if(!empty($ppn['tax_id'])){
-          $info_ppn= 'Taxes ('.$ppn['ket'].')';
-        }else{
-          $info_ppn= 'Taxes ';
+        $pdf->SetFont('Arial','',10);
+        $tgl_trans  =  date('d-m-Y ', strtotime($sc->create_date)); 
+        if(!empty($sc->reference)){
+          $pdf->Cell(47,0.5,$sc->reference,0,0, 'L');
         }
-			
-		  	$pdf->Cell(60,0,'',0,0);
-		    $pdf->Cell(37,0,'',0,0);
-		    $pdf->Cell(20,0,'',0,0);
-	   		$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(25,0,$info_ppn,0,0);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,2),0,0,'R'); 
+        $tgl_eng = tgl_eng($tgl_trans);
+        $pdf->Cell(50,0.5,$tgl_eng,0,0, 'L');
+        $pdf->Cell(15,0.5,$inisial_sales_group,0,0, 'L');
+        $pdf->Cell(10,6,'',0,1);//Buat Jarak ke bawah
 
-		  	$pdf->Cell(10,2,'',0,1);
-	   		$pdf->Cell(60,0,'',0,0);
-		    $pdf->Cell(37,0,'',0,0);
-		    $pdf->Cell(20,0,'',0,0);
-		    $pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(60,1,'','B',0,'C');//garis atas  total
-			
-	   		$pdf->Cell(10,4,'',0,1);
-		    $pdf->Cell(60,0,'',0,0);
-		    $pdf->Cell(37,0,'',0,0);
-		    $pdf->Cell(20,0,'',0,0);
-		  	$pdf->SetFont('Arial','B',9);
-		    $pdf->Cell(25,0,'Total',0,0);
-		  	$pdf->SetFont('Arial','',9);
-		    $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->total_value,2),0,0,'R'); 
+        // Memberikan space kebawah agar tidak terlalu rapat
+        $pdf->Cell(10,4,'',0,1);
+        $pdf->Cell(177,1,'','B',0,'C');//garis atas header
+        $pdf->Cell(10,1,'',0,1);
+
+        $pdf->SetFont('Arial','B',9,0,1);
+        $pdf->Cell(7,6,'No',0,0);
+        $pdf->Cell(65,6,'Poduct Name',0,0);
+        $pdf->Cell(20,6,'Quantiy',0,0,'R');
+        $pdf->Cell(20,6,'UoM',0,0);
+        $pdf->Cell(30,6,'Unit Price',0,0,'R');
+        $pdf->Cell(35,6,'Amount',0,1,'R');
+
+        $pdf->Cell(177,1,'','B',0,'C');//garis bawah header
+        $pdf->Cell(10,1,'',0,1);
+
+        $pdf->SetFont('Arial','',9);
+      
+          $list   = $this->m_sales->get_data_detail_by_kode($so);
+          $no     = 1;
+          foreach ($list as $row) {
+            $pdf->Cell(7,6,$no++,0,0,'LR');
+            $pdf->Cell(65,6,$row->description,0,0,'LR');
+          $pdf->Cell(20,6,number_format($row->qty,2),0,0,'R');
+          $pdf->Cell(20,6,$row->uom,0,0);
+          $pdf->Cell(30,6,number_format($row->price,2),0,0,'R');
+          $pdf->Cell(35,6,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format(($row->qty*$row->price),2),0,1,'R'); 
+          }
+          
+          $pdf->Cell(10,2,'',0,1);
+          $pdf->Cell(60,0,'',0,0);
+          $pdf->Cell(37,0,'',0,0);
+          $pdf->Cell(20,0,'',0,0);
+          $pdf->SetFont('Arial','B',9);
+          $pdf->Cell(60,1,'','B',0,'C');//garis atas sub total
+        
+          $pdf->Cell(10,4,'',0,1);
+
+          $pdf->Cell(60,0,'',0,0);
+          $pdf->Cell(37,0,'',0,0);
+          $pdf->Cell(20,0,'',0,0);
+          $pdf->SetFont('Arial','B',9);
+          $pdf->Cell(25,0,'Sub Total',0,'L');
+          $pdf->SetFont('Arial','',9);
+          $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->untaxed_value,2),0,0,'R'); 
+
+          $pdf->Cell(10,2,'',0,1);
+          $pdf->Cell(60,0,'',0,0);
+          $pdf->Cell(37,0,'',0,0);
+          $pdf->Cell(20,0,'',0,0);
+          $pdf->SetFont('Arial','B',9);
+          $pdf->Cell(60,1,'','B',0,'C');//garis atas pajak
+        
+          $pdf->Cell(10,4,'',0,1);
+
+          // get PPN by code
+          $ppn = $this->m_sales->get_ppn_by_sc($so)->row_array();
+          if(!empty($ppn['tax_id'])){
+            $info_ppn= 'Taxes ('.$ppn['ket'].')';
+          }else{
+            $info_ppn= 'Taxes ';
+          }
+        
+          $pdf->Cell(60,0,'',0,0);
+          $pdf->Cell(37,0,'',0,0);
+          $pdf->Cell(20,0,'',0,0);
+          $pdf->SetFont('Arial','',9);
+          $pdf->Cell(25,0,$info_ppn,0,0);
+          $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->tax_value,2),0,0,'R'); 
+
+          $pdf->Cell(10,2,'',0,1);
+          $pdf->Cell(60,0,'',0,0);
+          $pdf->Cell(37,0,'',0,0);
+          $pdf->Cell(20,0,'',0,0);
+          $pdf->SetFont('Arial','B',9);
+          $pdf->Cell(60,1,'','B',0,'C');//garis atas  total
+        
+          $pdf->Cell(10,4,'',0,1);
+          $pdf->Cell(60,0,'',0,0);
+          $pdf->Cell(37,0,'',0,0);
+          $pdf->Cell(20,0,'',0,0);
+          $pdf->SetFont('Arial','B',9);
+          $pdf->Cell(25,0,'Total',0,0);
+          $pdf->SetFont('Arial','',9);
+          $pdf->Cell(35,0,iconv('utf-8', 'cp1252', $sc->currency_symbol)." ".number_format($sc->total_value,2),0,0,'R'); 
 
 
-    		// Memberikan space kebawah agar tidak terlalu rapat
-    		$pdf->Cell(10,10,'',0,1);
-    		//FOOTER
-    		$pdf->SetFont('Arial','B',10);
-    		$pdf->Cell(25,0.5,'Delivery Date :',0,0, 'L');
-    		$pdf->SetFont('Arial','',10);
-    		$pdf->Cell(15,0.5,$sc->delivery_date,0,0, 'L');
-    		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
+          // Memberikan space kebawah agar tidak terlalu rapat
+          $pdf->Cell(10,10,'',0,1);
+          //FOOTER
+          $pdf->SetFont('Arial','B',10);
+          $pdf->Cell(25,0.5,'Delivery Date :',0,0, 'L');
+          $pdf->SetFont('Arial','',10);
+          $pdf->Cell(15,0.5,$sc->delivery_date,0,0, 'L');
+          $pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
 
-        if(!empty($pay->nama)){          
-    		$pdf->SetFont('Arial','B',10);
-    		$pdf->Cell(28,0.5,'Payment Term :',0,0, 'L');
-    		$pdf->SetFont('Arial','',10);
-    		$pdf->Cell(15,0.5,$pay->nama,0,0, 'L');
-    		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
-        }
+          if(!empty($pay->nama)){          
+          $pdf->SetFont('Arial','B',10);
+          $pdf->Cell(28,0.5,'Payment Term :',0,0, 'L');
+          $pdf->SetFont('Arial','',10);
+          $pdf->Cell(15,0.5,$pay->nama,0,0, 'L');
+          $pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
+          }
 
 
-    		$pdf->SetFont('Arial','B',10);
-    		$pdf->Cell(38,0.5,'Bank :',0,0, 'L');
-    		$pdf->Cell(10,5,'',0,1);
-    		$pdf->SetFont('Arial','',10);
-    		
-    		$breaks = array("<br />","<br>","<br/>"); 
-        $bank  = str_ireplace($breaks, "\n", nl2br(htmlspecialchars($sc->bank)));
-    		$pdf->Multicell(0,2,$bank,0, 'L');
-    		$pdf->Cell(10,5,'',0,1);//ENTER ke bawah
-    	  	
-    	  if(!empty($sc->clause)){
-    			$pdf->SetFont('Arial','B',10);  
-    			$pdf->Cell(13,0.5,'Clause :',0,0, 'L');
-    			$pdf->SetFont('Arial','',10);
-    			$pdf->Cell(15,0.5,$sc->clause,0,0, 'L');
-    			$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
-    	  	}
+          $pdf->SetFont('Arial','B',10);
+          $pdf->Cell(38,0.5,'Bank :',0,0, 'L');
+          $pdf->Cell(10,5,'',0,1);
+          $pdf->SetFont('Arial','',10);
+          
+          $breaks = array("<br />","<br>","<br/>"); 
+          $bank  = str_ireplace($breaks, "\n", nl2br(htmlspecialchars($sc->bank)));
+          $pdf->Multicell(0,2,$bank,0, 'L');
+          $pdf->Cell(10,5,'',0,1);//ENTER ke bawah
+            
+          if(!empty($sc->clause)){
+            $pdf->SetFont('Arial','B',10);  
+            $pdf->Cell(13,0.5,'Clause :',0,0, 'L');
+            $pdf->SetFont('Arial','',10);
+            $pdf->Cell(15,0.5,$sc->clause,0,0, 'L');
+            $pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
+            }
 
-    	  if(!empty($sc->note)){
-    			$pdf->SetFont('Arial','B',10);  
-    			$pdf->Cell(10,4,'Note :',0,0, 'L');
-    			$pdf->SetFont('Arial','',10);
-    			//$pdf->cell(15,0.5,$sc->note,0,0, 'L');
-          $pdf->Multicell(0,4,$sc->note,0, 'L');
-    			$pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
-    		}
+          if(!empty($sc->note)){
+            $pdf->SetFont('Arial','B',10);  
+            $pdf->Cell(10,4,'Note :',0,0, 'L');
+            $pdf->SetFont('Arial','',10);
+            //$pdf->cell(15,0.5,$sc->note,0,0, 'L');
+            $pdf->Multicell(0,4,$sc->note,0, 'L');
+            $pdf->Cell(10,15,'',0,1);//Buat Jarak ke bawah
+          }
 
-        $pdf->Cell(10,5,'',0,1);//ENTER ke bawah
+          $pdf->Cell(10,5,'',0,1);//ENTER ke bawah
 
-    		$pdf->SetFont('Arial','B',10);  
-    		$pdf->Cell(60,0.5,'We hereby confirm and accept this contract of sales, ',0,0, 'c');
-    		$pdf->Cell(65,0,'');
-    		$pdf->Cell(60,0.5,' PT.Heksatex Indah,  ',0,0, 'c');
-    		$pdf->Cell(10,17,'',0,1);//Buat Jarak ke bawah
+          $pdf->SetFont('Arial','B',10);  
+          $pdf->Cell(5,0,'');
+          $pdf->Cell(50,0.5,'We hereby confirm and accept ',0,1, 'C');
+          $pdf->Cell(5,0,'');
+          $pdf->Cell(50,5,'this contract of sales, ',0,0, 'C');
+          $pdf->Cell(10,0,'');
+          $pdf->Cell(60,0.5,'Directors,  ',0,0, 'C');
+          $pdf->Cell(3,0,'');
+          $pdf->Cell(60,0.5,' PT.Heksatex Indah,  ',0,0, 'C');
+          $pdf->Cell(10,17,'',0,1);//Buat Jarak ke bawah
 
-    		$pdf->Cell(10,4,'',0,1);
-    		$pdf->Cell(7,0,'');
-    		$pdf->Cell(3,0.5,'(',0,0, 'L');
-    		$pdf->Cell(50,1,'','B',0,'L');
-    		$pdf->Cell(28,0.5,')',0,0, 'L');
+          $pdf->Cell(10,4,'',0,1);
+          $pdf->Cell(1,0,'');
+          $pdf->Cell(3,0.5,'(',0,0, 'L');
+          $pdf->Cell(50,1,'','B',0,'L');
+          $pdf->Cell(15,0.5,')',0,0, 'L');
 
-    		if(empty($sc->sales_group)){
-    			$pdf->Cell(25,0,'');
-    			$pdf->Cell(3,0.5,'(',0,0, 'L');
-    			$pdf->Cell(50,1,'','B',0,'L');
-    			$pdf->Cell(28,0.5,')',0,1, 'L');
-    		}
+          $pdf->Cell(3,0.5,'(',0,0, 'L');
+          $pdf->Cell(50,1,'','B',0,'L');
+          $pdf->Cell(15,0.5,')',0,0, 'L');
 
-    		if(!empty($sc->sales_group)){
+          if(empty($sc->sales_group)){
+            $pdf->Cell(3,0.5,'(',0,0, 'L');
+            $pdf->Cell(40,1,'','B',0,'L');
+            $pdf->Cell(28,0.5,')',0,1, 'L');
+          }
 
-    		  $pdf->Cell(5,0,'',0,0);
-    		  $pdf->Cell(20,0,'',0,0);
-    			$pdf->SetFont('Arial','B',10);
-    		  $pdf->Cell(60,0,'('.$inisial_sales_group.")",0,0,'C'); 
-    			$pdf->SetFont('Arial','',10);
-    		}
+          if(!empty($sc->sales_group)){
+            $pdf->SetFont('Arial','B',10);
+            $pdf->Cell(40,0,'('.$inisial_sales_group.")",0,0,'C'); 
+            $pdf->SetFont('Arial','',10);
+          }
 
-    		$pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
-    		$pdf->Cell(1,0,'');
-    		$pdf->Cell(28,0.5,'Please return one copy with your due signature',0,1, 'L');
+          $pdf->Cell(10,5,'',0,1);//Buat Jarak ke bawah
+          $pdf->Cell(10,0,'');
+          $pdf->Cell(28,0.5,'Please return one copy ',0,1, 'L');
+          $pdf->Cell(10,0,'');
+          $pdf->Cell(28,7,'with your due signature',0,1, 'L');
 
-    		// Geser Ke Kanan 35mm
-    		$pdf->Output();
-        }
+          // Geser Ke Kanan 35mm
+          $pdf->Output();
+    }
 
 }

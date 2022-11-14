@@ -31,7 +31,10 @@ class _module extends CI_Model
 
 	public function get_prod($id)
 	{
-		return $this->db->query("SELECT * FROM mst_produk WHERE nama_produk LIKE '%".$id."%'");
+		return $this->db->query("SELECT mp.kode_produk, mp.nama_produk, mp.uom, mp.uom_2, cat.nama_category, mp.create_date
+								FROM mst_produk mp
+								LEFT JOIN mst_category cat ON mp.id_category = cat.id 
+								WHERE mp.kode_produk = '".$id."'");
 	}
 
 	public function sub_menu_default($kode_sub,$username)

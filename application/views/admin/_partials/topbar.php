@@ -69,8 +69,15 @@
         }else
         {
           $row      = $this->m_button->view_button($username, $this->uri->segment(2),$deptid);
-          foreach ($row as $val) {?>
-            <a href ="<?php echo base_url($val->link_button); ?>">
+          foreach ($row as $val) {
+              if(empty($val->link_button)){
+                  $link = "javascript:void(0);";
+              }else{
+                  $link = base_url($val->link_button);
+              }
+            ?>
+
+            <a href ="<?php echo $link; ?>">
               <button type="button" id="<?php echo $val->id_button; ?>" class="<?php echo $val->class_button; ?>"  ><i class="<?php echo $val->ikon; ?>"></i> <?php echo $val->caption; ?></button>
             </a>
           <?php

@@ -100,6 +100,14 @@
                                           <option value="t">Aktif</option>
                                            <option value="f">Tidak Aktif</option>
                                     </select>
+                                </div>  
+                                <div class="col-xs-5"><label>Product Parent</label></div>
+                                <div class="col-xs-7">
+                                    <select class="form-control input-sm" name="parent" id="parent" >
+                                          <option value="">All</option>
+                                          <option value="t">Ada</option>
+                                           <option value="f">Tidak Ada</option>
+                                    </select>
                                 </div>                                    
                               </div>
                             </div>
@@ -131,6 +139,7 @@
                   <th>Route</th>
                   <th>Type</th>
                   <th>Status</th>
+                  <th>Parent</th>
                 </tr>
               </thead>
             </table>
@@ -183,6 +192,7 @@
                     data.route       = $('#route').val();
                     data.type        = $('#type').val();
                     data.status      = $('#status').val();
+                    data.parent      = $('#parent').val();
                 },error: function() {
                     // Message also does not show here
                   alert("error Load");
@@ -193,6 +203,10 @@
             "columnDefs": [
               { 
                   "targets": [ 0 ], 
+                  "orderable": false, 
+              },
+              { 
+                  "targets": [ 10 ], 
                   "orderable": false, 
               },
               {

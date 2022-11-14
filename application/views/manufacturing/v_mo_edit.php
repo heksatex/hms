@@ -1310,7 +1310,7 @@
       $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       $('.modal-title').text('View Data Product');
         $.post('<?php echo site_url()?>manufacturing/mO/get_product',
-          {txtProduct      : $('#product').val() },
+          {txtProduct      : $('#kode_produk').val() },
           function(html){
             setTimeout(function() {$(".view_body").html(html);  },1000);
           }   

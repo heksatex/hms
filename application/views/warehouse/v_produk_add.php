@@ -67,14 +67,14 @@
                     </div>                                    
                   </div>
                   <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-8">                      
+                    <!-- <div class="col-xs-8">                      
                       <input type="checkbox" name="dapat_dijual" id="dapatdijual" value="true">
                       <label>Dapat Dijual</label>
                     </div>
                     <div class="col-xs-8">                      
                       <input type="checkbox" name="dapat_dibeli" id="dapatdibeli" value="true">
                       <label>Dapat Dibeli</label>
-                    </div>
+                    </div> -->
                       <!--
                       <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input" id="dapatdijual" checked value="vdapatdijual"> Dapat Dijual
@@ -96,8 +96,8 @@
               <div class="">
                 <ul class="nav nav-tabs">
                   <li class="active"><a href="#tab_1" data-toggle="tab">Konfigurasi Umum</a></li>
-                  <li><a href="#tab_2" data-toggle="tab">Persediaan</a></li>
-                  <li><a href="#tab_3" data-toggle="tab">Pembelian</a></li>                  
+                  <!-- <li><a href="#tab_2" data-toggle="tab">Persediaan</a></li> -->
+                  <!-- <li><a href="#tab_3" data-toggle="tab">Pembelian</a></li> -->
                 </ul>             
                 <div class="tab-content"><br>
 
@@ -229,15 +229,21 @@
                                 </div>
                               </div>                                    
                             </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4">Product Parent</div>
+                                <div class="col-xs-8 col-md-8">
+                                  <select type="text" class="form-control input-sm" name="product_parent" id="product_parent" > </select>
+                                </div>
+                            </div>
                           </div>
                         </div>
                         
                         <!-- gl accounts -->
-                        <div class="col-md-12">
+                        <!-- <div class="col-md-12">
                           <p class="text-light-blue"><strong>GL Accounts</strong></p>
-                        </div>
+                        </div> -->
                         <!-- kiri -->
-                        <div class="col-md-6">
+                        <!-- <div class="col-md-6">
                           <div class="form-group">
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Sales Account</div>
@@ -268,7 +274,8 @@
                               </div>               
                             </div>
                           </div>
-                        </div>
+                        </div> -->
+                        
                         <!-- kanan -->
                         <div class="col-md-6">
                         </div>
@@ -448,6 +455,40 @@
       format : 'YYYY-MM-DD HH:mm:ss',
       ignoreReadonly: true,
   });
+
+  //select 2 produk parent
+  $('#product_parent').select2({
+      allowClear: true,
+      placeholder: "",
+      ajax:{
+            dataType: 'JSON',
+            type : "POST",
+            url : "<?php echo base_url();?>warehouse/produk/get_product_parent_select2",
+            //delay : 250,
+            data : function(params){
+              return{
+                nama:params.term,
+              };
+            }, 
+            processResults:function(data){
+              var results = [];
+              $.each(data, function(index,item){
+                results.push({
+                    id:item.id,
+                    text:item.nama
+                });
+              });
+              return {
+                results:results
+              };
+            },
+            error: function (xhr, ajaxOptions, thrownError){
+              //alert('Error data');
+              //alert(xhr.responseText);
+            }
+      }
+  });
+
   
   autogenerate_value = 0;
 
@@ -545,6 +586,7 @@
                 note            : $('#note').val(),
                 status          : 'tambah',
                 statusproduk    : $('#status').val(),
+                product_parent  : $('#product_parent').val(),
                 autogenerate    : autogenerate_value,
 
           },success: function(data){
