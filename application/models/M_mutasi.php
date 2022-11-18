@@ -17,6 +17,15 @@ class M_mutasi extends CI_Model
                                 ORDER BY step, seq");
     }
 
+    public function acc_mutasi_by_kode2($table,$tahun, $bulan, $field,$where)
+    {
+        return $this->db->query("SELECT $field
+                                FROM $table mut
+                                INNER JOIN mst_category cat ON mut.id_category = cat.id
+                                WHERE mut.periode_th = '$tahun'  AND mut.periode_bln = '$bulan' $where
+                                ORDER BY mut.id_category, mut.nama_produk");
+    }
+
     public function acc_mutasi_by_kode($table,$tahun, $bulan, $field,$where)
     {
         return $this->db->query("SELECT $field
@@ -47,12 +56,22 @@ class M_mutasi extends CI_Model
                                 ");
     }
 
-    public function get_total_adjustment($table,$tahun,$bulan)
+    public function get_total_adjustment_in($table,$tahun,$bulan)
     {
-        return $this->db->query("SELECT cat.nama_category, sum(mut.adj_in_lot) as total_lot_in, sum(mut.adj_in_qty1) as total_qty1_in, adj_in_qty1_uom, sum(mut.adj_in_qty2) as total_qty2_in, adj_in_qty2_uom, sum(mut.adj_out_lot) as total_lot_out, sum(mut.adj_out_qty1) as total_qty1_out, adj_out_qty1_uom, sum(mut.adj_out_qty2) as total_qty2_out, adj_out_qty2_uom
+        return $this->db->query("SELECT cat.nama_category, sum(mut.adj_in_lot) as total_lot_in, sum(mut.adj_in_qty1) as total_qty1_in, adj_in_qty1_uom, sum(mut.adj_in_qty2) as total_qty2_in, adj_in_qty2_uom
                             FROM $table as mut
                             INNER JOIN mst_category as cat ON cat.id = mut.id_category
-                            WHERE periode_th = '$tahun'  AND periode_bln = '$bulan'  AND (mut.adj_in_qty1 <> 0 or mut.adj_in_qty2 <> 0 or mut.adj_out_qty1 <> 0 or  mut.adj_out_qty2 < 0 )
+                            WHERE periode_th = '$tahun'  AND periode_bln = '$bulan'  AND (mut.adj_in_qty1 <> 0 or mut.adj_in_qty2 <> 0  )
+                            GROUP BY id_category
+                                ");
+    }
+
+    public function get_total_adjustment_out($table,$tahun,$bulan)
+    {
+        return $this->db->query("SELECT cat.nama_category, sum(mut.adj_out_lot) as total_lot_out, sum(mut.adj_out_qty1) as total_qty1_out, adj_out_qty1_uom, sum(mut.adj_out_qty2) as total_qty2_out, adj_out_qty2_uom
+                            FROM $table as mut
+                            INNER JOIN mst_category as cat ON cat.id = mut.id_category
+                            WHERE periode_th = '$tahun'  AND periode_bln = '$bulan'  AND (mut.adj_out_qty1 <> 0 or  mut.adj_out_qty2 <> 0 )
                             GROUP BY id_category
                                 ");
     }
