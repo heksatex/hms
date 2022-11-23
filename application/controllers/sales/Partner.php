@@ -193,7 +193,7 @@ class Partner extends MY_Controller
 					$nama_double = TRUE;
 				}
 
-				if($status_simpan == 'edit' AND ($cek['id'] != $id)){
+				if($status_simpan == 'edit' AND ($cek['id'] != $id) AND $cek['id'] != ''){
 
 					$callback = array('status' => 'failed', 'field' => 'name', 'message' => 'Name Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
 
