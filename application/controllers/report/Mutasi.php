@@ -204,7 +204,7 @@ class Mutasi extends MY_Controller
                     $table          = 'acc_mutasi_'.strtolower($departemen).'_rm_detail';
                     $result         = $this->create_header_detail(false);
                     $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
-                    $acc_mutasi_rm  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage);
+                    $acc_mutasi_rm  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage,false);
                     $pagination_rm  = $this->get_pagination($acc_mutasi_rm[1],$recordPerPage);
                     $table_mutasi[] =  array('table_1'          => 'Yes',
                                             'head_table'        => $result,
@@ -218,7 +218,7 @@ class Mutasi extends MY_Controller
                     $table          = 'acc_mutasi_'.strtolower($departemen).'_fg_detail';
                     $result         = $this->create_header_detail(false);
                     $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
-                    $acc_mutasi_fg  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage);
+                    $acc_mutasi_fg  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage,false);
                     $pagination_fg  = $this->get_pagination($acc_mutasi_fg[1],$recordPerPage);
 
                     $table_mutasi[] =  array('table_2'          => 'Yes',
@@ -235,7 +235,7 @@ class Mutasi extends MY_Controller
                     $table       = 'acc_mutasi_'.strtolower($departemen).'_detail';
                     $result      = $this->create_header_detail(false);
                     $result_where= $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
-                    $acc_mutasi  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage);
+                    $acc_mutasi  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage,false);
                     $pagination = $this->get_pagination($acc_mutasi[1],$recordPerPage);
                     
                     $table_mutasi[] =  array('table_1'          => 'Yes',
@@ -310,13 +310,12 @@ class Mutasi extends MY_Controller
         return array($result,$result2);
     }
 
-    function get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$where,$record,$recordPerPage)
+    function get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$where,$record,$recordPerPage,$excel)
     {
-        if($record >= 0 AND $recordPerPage >= 0){
+        $result  = '';
+        if($excel == false){
             $query  = $this->m_mutasi->acc_mutasi_detail_by_kode($table,$tahun,$bulan,$where,$record,$recordPerPage);
             $result = $query->result();
-        }else{
-            $result  = '';
         }
         $query2  = $this->m_mutasi->acc_mutasi_detail_by_kode_no_limit($table,$tahun,$bulan,$where);
         $result2 = $query2->num_rows();
@@ -549,7 +548,7 @@ class Mutasi extends MY_Controller
                 $table          = 'acc_mutasi_'.strtolower($departemen).'_rm_detail';
                 $result         = $this->create_header_detail(true);
                 $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
-                $acc_mutasi_rm  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','');
+                $acc_mutasi_rm  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','',true);
                 $table_mutasi[] =  array('judul'            => "Laporan Mutasi Bahan Baku",
                                         'table_1'           => 'Yes',
                                         'head_table'        => $result,
@@ -559,7 +558,7 @@ class Mutasi extends MY_Controller
                 $table          = 'acc_mutasi_'.strtolower($departemen).'_fg_detail';
                 $result         = $this->create_header_detail(true);
                 $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
-                $acc_mutasi_fg  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','');
+                $acc_mutasi_fg  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','',true);
 
                 $table_mutasi[] =  array('judul'            => "Laporan Mutasi Barang Jadi",
                                         'table_2'           => 'Yes',
@@ -572,7 +571,7 @@ class Mutasi extends MY_Controller
                 $table       = 'acc_mutasi_'.strtolower($departemen).'_detail';
                 $result      = $this->create_header_detail(true);
                 $result_where= $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
-                $acc_mutasi  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','');
+                $acc_mutasi  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','',true);
                 
                 $table_mutasi[] =  array('judul'            => "Laporan Mutasi",
                                         'table_1'           => 'Yes',
