@@ -4227,7 +4227,7 @@ class MO extends MY_Controller
                         $where3_move_id  .= "'".$move_id_smi."',";
 
 
-                        $sql_mrp_production_rm_hasil .= "('".$kode."','".$move_id_smi."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".addslashes($lot_remark)."','".$qty."','".addslashes($uom)."','".addslashes($origin_prod_smi)."','".$row_order_rm."','".$quant_id."','".$additional."'), ";
+                        $sql_mrp_production_rm_hasil .= "('".$kode."','".$move_id_smi."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".addslashes($lot)."','".$qty."','".addslashes($uom)."','".addslashes($origin_prod_smi)."','".$row_order_rm."','".$quant_id."','".$additional."'), ";
                         $row_order_rm++;
                         
                         $jml_lot++;
