@@ -10,19 +10,19 @@
 			<div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Nama Produk</label></div>
                 <div class="col-xs-8">
-                  	<input type="text" name="product" id="product"class="form-control input-sm"  value="<?php echo htmlentities($prod['nama_produk'])?>" readonly="readonly"/>
+                  	<input type="text" name="product" id="product" class="form-control input-sm"  value="<?php echo htmlentities($prod['nama_produk'])?>" readonly="readonly"/>
                 </div>  
             </div>
 			<div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Uom</label></div>
                 <div class="col-xs-8">
-                  	<input type="text" name="uom1" id="uom1"class="form-control input-sm"  value="<?php echo htmlentities($prod['uom'])?>" readonly="readonly"/>
+                  	<input type="text" name="uom1" id="uom1" class="form-control input-sm"  value="<?php echo htmlentities($prod['uom'])?>" readonly="readonly"/>
                 </div>  
             </div>
 			<div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Uom2</label></div>
                 <div class="col-xs-8">
-                  	<input type="text" name="uom2" id="uom2"class="form-control input-sm"  value="<?php echo htmlentities($prod['uom_2'])?>" readonly="readonly"/>
+                  	<input type="text" name="uom2" id="uom2" class="form-control input-sm"  value="<?php echo htmlentities($prod['uom_2'])?>" readonly="readonly"/>
                 </div>  
             </div>
 			<div class="col-md-12 col-xs-12">
@@ -39,6 +39,12 @@
 	            <div class="col-xs-4"><label>Tanggal dibuat</label></div>
 	            <div class="col-xs-8">
 	                <input type="text" name="create" id="create" class="form-control input-sm"  value="<?php echo htmlentities($prod['create_date'])?>" readonly="readonly"/>
+	            </div>  
+	        </div>
+			<div class="col-md-12 col-xs-12">
+	            <div class="col-xs-4"><label>Status Produk</label></div>
+	            <div class="col-xs-8">
+	                <input type="text" name="status_produk" id="status_produk" class="form-control input-sm"  value="<?php echo htmlentities($prod['nama_status'])?>" readonly="readonly"/>
 	            </div>  
 	        </div>
 		</div>

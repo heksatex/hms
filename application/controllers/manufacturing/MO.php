@@ -301,6 +301,13 @@ class MO extends MY_Controller
         $data['prod'] = $this->_module->get_prod($id)->row_array();
     	return $this->load->view('modal/v_mo_product_modal', $data);
     }
+
+    public function get_bom()
+    {
+        $kode_bom     = addslashes($this->input->post('kode'));
+        $data['bom'] = $this->m_mo->get_data_bom($kode_bom)->row_array();
+    	return $this->load->view('modal/v_mo_bom_modal', $data);
+    }
  
     public function simpan_rm_additional()
     {
