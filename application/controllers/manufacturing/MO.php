@@ -301,6 +301,13 @@ class MO extends MY_Controller
         $data['prod'] = $this->_module->get_prod($id)->row_array();
     	return $this->load->view('modal/v_mo_product_modal', $data);
     }
+
+    public function get_bom()
+    {
+        $kode_bom     = addslashes($this->input->post('kode'));
+        $data['bom'] = $this->m_mo->get_data_bom($kode_bom)->row_array();
+    	return $this->load->view('modal/v_mo_bom_modal', $data);
+    }
  
     public function simpan_rm_additional()
     {
@@ -4227,7 +4234,7 @@ class MO extends MY_Controller
                         $where3_move_id  .= "'".$move_id_smi."',";
 
 
-                        $sql_mrp_production_rm_hasil .= "('".$kode."','".$move_id_smi."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".addslashes($lot_remark)."','".$qty."','".addslashes($uom)."','".addslashes($origin_prod_smi)."','".$row_order_rm."','".$quant_id."','".$additional."'), ";
+                        $sql_mrp_production_rm_hasil .= "('".$kode."','".$move_id_smi."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".addslashes($lot)."','".$qty."','".addslashes($uom)."','".addslashes($origin_prod_smi)."','".$row_order_rm."','".$quant_id."','".$additional."'), ";
                         $row_order_rm++;
                         
                         $jml_lot++;

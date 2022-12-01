@@ -1007,5 +1007,13 @@ class M_mo extends CI_Model
 		return $result['qty'];
 	}
 
+	public function get_data_bom($kode_bom)
+	{
+		return $this->db->query("SELECT b.kode_bom, b.tanggal, b.nama_bom, b.kode_produk, b.nama_produk, b.qty, b.uom, b.status_bom, sat.nama_status
+								FROM bom b
+								LEFT JOIN mst_status sat ON b.status_bom = sat.kode 
+								WHERE b.kode_bom = '".$kode_bom."'");
+	}
+
 
 }

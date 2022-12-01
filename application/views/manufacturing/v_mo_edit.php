@@ -134,7 +134,7 @@
                   <div class='input-group'>
                     <input type="text" class="form-control input-sm" name="product" id="product" value="<?php echo htmlentities($list->nama_produk);?>" readonly="readonly" data-toggle="tooltip" title="<?php echo htmlentities($list->nama_produk); ?>">
                     <span class="input-group-addon">
-                        <a href="#" class="view"><span class="glyphicon  glyphicon-share"></span></a>
+                        <a href="#" class="view" title="Lihat detail Produk"><span class="glyphicon  glyphicon-share"></span></a>
                     </span>
                     <input type="hidden" class="form-control input-sm" name="kode_produk" id="kode_produk"  value="<?php echo $list->kode_produk;?>"  readonly="readonly"   />
                   </div>
@@ -149,7 +149,12 @@
               <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>BOM </label></div>
                 <div class="col-xs-8">
-                  <input type="text" class="form-control input-sm" name="bom" id="bom"  value="<?php echo htmlentities($bom['nama_bom']);?>"  readonly="readonly"   />
+                  <div class='input-group'>
+                    <input type="text" class="form-control input-sm" name="bom" id="bom"  value="<?php echo htmlentities($bom['nama_bom']);?>"  readonly="readonly"   />
+                    <span class="input-group-addon">
+                        <a href="#" class="view-bom"  title="Lihat detail BOM"><span class="glyphicon  glyphicon-share"></span></a>
+                    </span>
+                  </div>                                    
                 </div>                                    
               </div>
 
@@ -1316,6 +1321,26 @@
           }   
        );
   });
+
+  // modal view detail product
+  $(".view-bom").unbind( "click" );
+  $(document).on('click','.view-bom',function(e){
+      kode_bom  = "<?php echo $list->kode_bom;?>";
+      e.preventDefault();
+      $("#view_data").modal({
+          show: true,
+          backdrop: 'static'
+      });
+      $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $('.modal-title').text('View Data BOM');
+        $.post('<?php echo site_url()?>manufacturing/mO/get_bom',
+          {kode : kode_bom },
+          function(html){
+            setTimeout(function() {$(".view_body").html(html);  },1000);
+          }   
+       );
+  });
+
 
 
   // klik btn print 
