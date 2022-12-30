@@ -839,6 +839,11 @@ class _module extends CI_Model
 		return $this->db->query("SELECT id,nama_handling FROM mst_handling ORDER BY id ")->result();
 	}
 
+	public function get_list_category()
+	{
+		return $this->db->query("SELECT id, nama_category FROM mst_category ORDER BY nama_category")->result();
+	}
+
 	public function get_handling_by_id($id)
 	{
 		return $this->db->query("SELECT * FROM mst_handling WHERE id = '$id' ");
