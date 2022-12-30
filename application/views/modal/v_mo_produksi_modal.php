@@ -326,7 +326,7 @@
 
 
 	//simpan data 
-	//$("#btn-tambah").unbind( "click" );
+	$("#btn-tambah").unbind( "click" );
 	//$("#btn-tambah").off("click").on("click",function(e) {
 	$("#btn-tambah").one("click",function(e) {
 		e.preventDefault();

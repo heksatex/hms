@@ -142,7 +142,7 @@ class M_mo extends CI_Model
 		$this->db->where('kode_produk',$kode_produk );
 		$this->db->where('lokasi', $lokasi);
 		$this->db->where('reserve_move','');
-		$this->db->where_not_in('qty','0');
+		$this->db->where('(qty != 0 or qty2 != 0)');
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
@@ -154,7 +154,8 @@ class M_mo extends CI_Model
 		$this->db->where('kode_produk',$kode_produk );
 		$this->db->where('reserve_move','');
 		$this->db->where('lokasi', $lokasi);
-		$this->db->where_not_in('qty','0');
+		// $this->db->where_not_in('qty','0');
+		$this->db->where('(qty != 0 or qty2 != 0)');
 		$this->_get_datatables2_query();
 		$query = $this->db->get();
 		return $query->num_rows();
@@ -165,7 +166,8 @@ class M_mo extends CI_Model
 		$this->db->where('kode_produk',$kode_produk );
 		$this->db->where('reserve_move','');
 		$this->db->where('lokasi', $lokasi);
-		$this->db->where_not_in('qty','0');
+		// $this->db->where_not_in('qty','0');		
+		$this->db->where('(qty != 0 or qty2 != 0)');
 		$this->db->from($this->table2);
 		return $this->db->count_all_results();
 	}
@@ -254,7 +256,7 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT fg.kode, fg.move_id, fg.quant_id, fg.kode_produk, fg.kode_produk, fg.nama_produk, 
 										fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.row_order, sq.reff_note, fg.qty2, fg.uom2, fg.lebar_greige, fg.uom_lebar_greige, fg.lebar_jadi, fg.uom_lebar_jadi,(SELECT lot FROM adjustment_items adji 
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
-									where adj.status = 'done' AND adji.quant_id = fg.quant_id ) as lot_adj
+									where adj.status = 'done' AND adji.quant_id = fg.quant_id limit 1 ) as lot_adj
 								FROM mrp_production_fg_hasil fg 
 								INNER JOIN stock_quant sq ON fg.quant_id =  sq.quant_id
 								WHERE fg.kode = '".$kode."' AND fg.lokasi NOT IN ('".$lokasi_waste."') ORDER BY fg.row_order")->result();
@@ -670,7 +672,12 @@ class M_mo extends CI_Model
 
 	public function cek_qty_stock_move_items_by_produk($move_id,$origin_prod,$status)
 	{
-		return $this->db->query("SELECT sum(qty) as jml_qty FROM stock_move_items WHERE move_id = '$move_id' AND origin_prod = '$origin_prod' AND status = '$status' ");
+		return $this->db->query("SELECT sum(qty) as jml_qty, sum(qty2) as jml_qty2 FROM stock_move_items WHERE move_id = '$move_id' AND origin_prod = '$origin_prod' AND status = '$status' ");
+	}
+
+	public function cek_qty_waste_by_produk($kode,$kode_produk)
+	{
+		return $this->db->query("SELECT sum(qty) as jml_qty, sum(qty2) as jml_qty2 FROM mrp_production_fg_hasil WHERE kode = '$kode' AND kode_produk = '$kode_produk' ");
 	}
 
 	public function get_list_cacat($deptid)
@@ -752,10 +759,17 @@ class M_mo extends CI_Model
 								FROM stock_move_items smi
 								INNER JOIN mrp_production_rm_target rm ON smi.origin_prod = rm.origin_prod AND rm.move_id = smi.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id 
-								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
-								where rm.kode = '$kode' AND mp.type = 'stockable' AND smi.nama_produk LIKE '%$params%'
+								where rm.kode = '$kode' AND smi.nama_produk LIKE '%$params%'
 								GROUP BY smi.kode_produk
 								order by smi.nama_produk,smi.lot");
+	}
+
+	public function get_list_waste_barang_jadi($kode,$params)
+	{
+		return $this->db->query("SELECT kode_produk, nama_produk
+								FROM mrp_production_fg_target
+								where kode = '$kode' AND nama_produk LIKE '%$params%'
+								order by nama_produk");
 	}
 
 	public function get_list_lot_waste_by_kode($kode,$kode_produk,$params)
@@ -764,15 +778,14 @@ class M_mo extends CI_Model
 								FROM stock_move_items smi
 								INNER JOIN mrp_production_rm_target rm ON smi.origin_prod = rm.origin_prod AND rm.move_id = smi.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id 
-								INNER JOIN mst_produk mp ON rm.kode_produk = mp.kode_produk
-								where rm.kode = '$kode' AND mp.type = 'stockable'  AND smi.kode_produk = '$kode_produk' AND smi.lot LIKE '%$params%'
+								where rm.kode = '$kode'  AND smi.kode_produk = '$kode_produk' AND smi.lot LIKE '%$params%'
 								GROUP BY lot
 								order by smi.nama_produk,smi.lot");
 	}
 
 	public function get_nama_produk_waste_by_kode($kode_produk)
 	{
-		return $this->db->query("SELECT nama_produk,uom,uom_2 FROM mst_produk where kode_produk = '$kode_produk'");
+		return $this->db->query("SELECT nama_produk,uom,uom_2 FROM mst_produk where kode_produk = '$kode_produk' AND kode_produk != ''");
 	}
 
 	public function get_smi_produk_by_kode($move_id,$origin_prod,$status)
@@ -1013,6 +1026,16 @@ class M_mo extends CI_Model
 								FROM bom b
 								LEFT JOIN mst_status sat ON b.status_bom = sat.kode 
 								WHERE b.kode_bom = '".$kode_bom."'");
+	}
+
+	public function get_bom_by_kode_produk($kode_produk)
+	{
+		return $this->db->query("SELECT b.kode_bom, b.kode_produk, b.qty, bi.qty as qty_item
+								FROM bom b
+								INNER JOIN bom_items bi ON b.kode_bom = bi.kode_bom
+								where b.kode_produk = '$kode_produk' AND b.status_bom = 't' 
+								ORDER BY b.tanggal desc
+								LIMIT 1 ");
 	}
 
 

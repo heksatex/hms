@@ -85,7 +85,7 @@
   */
 
   //simpan details ketika button simpan di klik
-  //$("#btn-tambah").unbind( "click" );
+  $("#btn-tambah").unbind( "click" );
   $("#btn-tambah").off("click").on("click",function(e) {
       var myCheckboxes = table.column(6).checkboxes.selected();
       var myCheckboxes_arr = new Array();
@@ -132,6 +132,7 @@
                   unblockUI( function(){});
 
                 }else{
+
                   $("#tab_1").load(location.href + " #tab_1");
                   $("#tab_2").load(location.href + " #tab_2");
                   $("#status_bar").load(location.href + " #status_bar");
@@ -153,4 +154,14 @@
         } 
       return false;
   });
+
+ /*  function removeEvent(el, type,clickHandler) {
+    if (el.detachEvent) {
+      el.detachEvent('on' + type, clickHandler);
+    } else {
+      el.removeEventListener(type, 'click', function(){
+        alert('tess');
+      });
+    }
+  } */
 </script>
