@@ -3222,6 +3222,28 @@ class Pengirimanbarang extends MY_Controller
           }
 
       }
+      $x = $x;
+      $x = $x+110;
+
+      $y = $y+10;
+
+      $pdf->SetFont('Arial','B',8,'C');
+
+      $pdf->setXY($x, $y+15);
+			$pdf->Multicell(23, 4, '( ', 0, 'L');
+			$pdf->setXY($x, $y+15);
+			$pdf->Multicell(23, 4, ' )', 0, 'R');
+			$pdf->setXY($x, $y);
+			$pdf->Multicell(23, 4, 'Penerima', 0, 'C');
+
+
+			$pdf->setXY($x+40,  $y+15);;
+			$pdf->Multicell(23, 4, '( ', 0, 'L');
+			$pdf->setXY($x+40,  $y+15);
+			$pdf->Multicell(23, 4, ' )', 0, 'R');
+			$pdf->setXY($x+40, $y);
+			$pdf->Multicell(23, 4, 'Pengirim', 0, 'C');
+
 
       $pdf->Output();
     }
