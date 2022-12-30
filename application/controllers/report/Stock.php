@@ -30,6 +30,7 @@ class Stock extends MY_Controller
     	$type_condition     = $this->_module->get_first_type_conditon($id_dept);
         $data['mstFilter']  = $this->_module->get_list_mst_filter($id_dept);
         $data['list_grade'] = $this->_module->get_list_grade();
+        $data['category']   = $this->_module->get_list_category();
 
         $stock_location    = $this->m_stock->get_list_departement_stock();
         $output_location   = $this->m_stock->get_list_departemen_outputlocation();
@@ -188,7 +189,8 @@ class Stock extends MY_Controller
 
         	foreach ($data_group as $gp) {
         		# code..
-        		$nama_field = $gp['nama_field'];
+        		$nama_field     = $this->declaration_name_field_group($gp['nama_field']);
+        		$nama_field_real = $gp['nama_field'];
         		break;
         	}
 
@@ -201,7 +203,7 @@ class Stock extends MY_Controller
         							   'grouping'   => $gp->grouping,
         							   'qty'        => 'Qty1 = '.number_format($gp->tot_qty,2),
         							   'qty2'       => 'Qty2 = '.number_format($gp->tot_qty2,2),
-                                       'by'         => $nama_field
+                                       'by'         => $nama_field_real
         						);
                 //$tot_group++;
         	}
@@ -226,6 +228,7 @@ class Stock extends MY_Controller
     	    							  'lokasi_fisik'  => $row->lokasi_fisik,
     	    							  'kode_produk' => $row->kode_produk,
     	    							  'nama_produk' => $row->nama_produk,
+    	    							  'kategori'    => $row->nama_category,
     	    							  'qty' 		=> $row->qty.' '.$row->uom,
     	    							  'qty2'        => $row->qty2.' '.$row->uom2,
     	    							  'lebar_greige'=> $row->lebar_greige.' '.$row->uom_lebar_greige,
@@ -265,7 +268,7 @@ class Stock extends MY_Controller
     public function loadChild()
     {
         $kode        = $this->input->post('kode');
-        $group_by    = $this->declaration_name_field($this->input->post('group_by'));
+        $group_by    = $this->input->post('group_by');
         $group_ke    = $this->input->post('group_ke');
         $data_filter = json_decode($this->input->post('arr_filter'),true); // tampung arr filter
         $data_group  = json_decode($this->input->post('arr_group'),true);
@@ -317,11 +320,18 @@ class Stock extends MY_Controller
         $list_group  = [];
         $where_result= '';
         $by2         = '';
+        $by2_real    = '';
 
 
         // create where
         $where         = $this->create_where($data_filter);
-        $where_result  .= $where ." AND ".$group_by." = '".$kode."'";
+        if($kode == 'null' && $group_by == 'category'){
+            $where_result  .= $where ." AND ".$this->declaration_name_field($group_by)." = '".$kode."'";
+            $group_by       = $this->declaration_name_field($group_by);
+        }else{
+            $where_result  .= $where ." AND ".$this->declaration_name_field_group($group_by)." = '".$kode."'";
+            $group_by       = $this->declaration_name_field_group($group_by);
+        }
 
         if($group_ke > 1){
             // looping post arr_tmp_group
@@ -357,6 +367,7 @@ class Stock extends MY_Controller
                                       'lokasi_fisik'  => $row->lokasi_fisik,
                                       'kode_produk' => $row->kode_produk,
                                       'nama_produk' => $row->nama_produk,
+   	    							  'kategori'    => $row->nama_category,
                                       'qty' 		=> $row->qty.' '.$row->uom,
     	    						  'qty2'        => $row->qty2.' '.$row->uom2,
                                       'lebar_greige'=> $row->lebar_greige.' '.$row->uom_lebar_greige,
@@ -377,7 +388,8 @@ class Stock extends MY_Controller
             $no    = 1;
             $group_ke_next = 0;
             $group    = $tbody_id;
-            $by2      = $data_group[$group_ke]['nama_field'];
+            $by2      = $this->declaration_name_field_group($data_group[$group_ke]['nama_field']);
+            $by2_real = ($data_group[$group_ke]['nama_field']);
             
             $list = $this->m_stock->get_list_stock_grouping($where_lokasi,$by2, $where_result,$order_by_in_group,$record,$recordPerPage);
             $group_ke_next = $group_ke + 1;
@@ -425,7 +437,7 @@ class Stock extends MY_Controller
                           'all_page'        => $all_page,
                           'page_now'        => $page_now,
                           'group_ke'        => $group_ke,
-                          'group_by'        => $by2,
+                          'group_by'        => $by2_real,
                           'list_group'      => $list_group,
                           'root'            => $root,
                           'limit'           => $recordPerPage,
@@ -491,7 +503,12 @@ class Stock extends MY_Controller
                         }
 
                         //$isi        = "LIKE '%".addslashes($row['value'])."%' ";
-                        $nama_field = $this->declaration_name_field($row['nama_field']);
+                        if($row['nama_field'] == 'category'){
+                            $nama_field = $this->declaration_name_field_group($row['nama_field']);
+                        }else{
+                            $nama_field = $this->declaration_name_field($row['nama_field']);
+                        }
+
                     }
                     
                     $where     .= $where_condition.' '.$nama_field.' '.$isi;
@@ -558,10 +575,22 @@ class Stock extends MY_Controller
 
     function declaration_name_field($nama_field)
     {
-        
-        $where = 'sq.'.$nama_field;
+        if($nama_field == 'category'){
+            $where = 'mp.id_category';
+        }else{
+            $where = 'sq.'.$nama_field;
+        }
         return $where;
+    }
 
+    function declaration_name_field_group($nama_field)
+    {
+        if($nama_field == 'category'){
+            $where = 'cat.nama_category';
+        }else{
+            $where = 'sq.'.$nama_field;
+        }
+        return $where;
     }
 
 
@@ -589,7 +618,7 @@ class Stock extends MY_Controller
 		$object->getActiveSheet()->mergeCells('A1:L1');
 
         //bold huruf
-        $object->getActiveSheet()->getStyle("A1:V4")->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle("A1:W4")->getFont()->setBold(true);
 
         // Border 
 		$styleArray = array(
@@ -602,7 +631,7 @@ class Stock extends MY_Controller
 
 
         // header table
-        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk','Kategori' ,'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -612,7 +641,7 @@ class Stock extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -636,19 +665,20 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->lokasi_fisik);
             $object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->kode_produk);
             $object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->nama_produk);
-            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->qty);
-            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->uom);
-            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->qty2);
-            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->uom2);
-            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->lebar_greige);
-            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->uom_lebar_greige);
-            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->uom_lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->sales_order);
-            $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->nama_sales_group);
-            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->qty_opname);
-            $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->uom_opname);
-            $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->umur);
+            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->nama_category);
+            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty);
+            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->uom);
+            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->qty2);
+            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->uom2);
+            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_greige);
+            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->uom_lebar_greige);
+            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->uom_lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->sales_order);
+            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->nama_sales_group);
+            $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->qty_opname);
+            $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->uom_opname);
+            $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->umur);
 
              //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -674,6 +704,7 @@ class Stock extends MY_Controller
 			$object->getActiveSheet()->getStyle('T'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('V'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('W'.$rowCount)->applyFromArray($styleArray);
 
             $rowCount++;
 

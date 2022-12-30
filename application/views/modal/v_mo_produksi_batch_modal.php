@@ -54,7 +54,7 @@
             <!-- Custom Tabs -->           
             <ul class="nav nav-tabs">
                 <li class="active"><a href="#tab_1_modal" data-toggle="tab">Product Lot Details</a></li>
-                <li><a href="#tab_2_modal" data-toggle="tab">Waste Details</a></li>
+                <!-- <li><a href="#tab_2_modal" data-toggle="tab">Waste Details</a></li> -->
             </ul>
             <div class="tab-content"><br>
                 <div class="tab-pane active" id="tab_1_modal">
@@ -844,9 +844,9 @@
 
 
 	//simpan data 
-	//$("#btn-tambah").unbind( "click" );
-	//$("#btn-tambah").off("click").on("click",function(e) {
-	$("#btn-tambah").one("click",function(e) {
+	$("#btn-tambah").unbind( "click" );
+	$("#btn-tambah").off("click").on("click",function(e) {
+	//$("#btn-tambah").one("click",function(e) {
 
 		e.preventDefault();
 		var deptid = '<?php echo $deptid?>';//dept id untuk log history

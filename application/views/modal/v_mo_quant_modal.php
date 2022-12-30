@@ -56,12 +56,16 @@
 							<td><?php echo $row->uom2?></td>
 							<td><?php echo $row->reff_note?></td>
 							<td style="min-width:50px">
-								<input type="checkbox" class="checkItem" value="<?php echo $row->quant_id?>" data-valuetwo="<?php echo $row->row_order?>" data-valuetree="<?php echo $row->lot?>" data-toggle="tooltip" title="Pilih Waste Data">
+								<?php 	
+								if( $akses_menu > 0){
+								?>
+									<input type="checkbox" class="checkItem" value="<?php echo $row->quant_id?>" data-valuetwo="<?php echo $row->row_order?>" data-valuetree="<?php echo $row->lot?>" data-toggle="tooltip" title="Pilih Waste Data">
+									<?php if((($row->status == 'ready' AND $type_mo['type_mo']!='colouring' ) OR $level == 'Super Administrator') ){?>
+										<a onclick="hapus_quant_mo('<?php  echo $row->move_id ?>', '<?php  echo ($row->quant_id) ?>', '<?php  echo ($row->origin_prod) ?>', '<?php  echo ($row->row_order) ?>',  '<?php  echo ($row->status) ?>')"  href="javascript:void(0)" data-toggle="tooltip" title="Hapus Data" style="padding-left:5px;"><i class="fa fa-trash" style="color: red"></i> </a>
 
-								<?php if(($row->status == 'ready' AND $type_mo['type_mo']!='colouring' AND $akses_menu > 0) OR $level == 'Super Administrator'){?>
-								<a onclick="hapus_quant_mo('<?php  echo $row->move_id ?>', '<?php  echo ($row->quant_id) ?>', '<?php  echo ($row->origin_prod) ?>', '<?php  echo ($row->row_order) ?>',  '<?php  echo ($row->status) ?>')"  href="javascript:void(0)" data-toggle="tooltip" title="Hapus Data" style="padding-left:5px;"><i class="fa fa-trash" style="color: red"></i> </a>
-
-								<?php }?>
+								<?php }
+								} 
+								?>
 							</td>
 						</tr>
 						<?php 
@@ -91,7 +95,13 @@
 
 <script type="text/javascript">
 
-	$("#btn-waste").off("click").on("click",function(e) {
+	akses_menu = "<?php echo $akses_menu; ?>";
+
+	if(akses_menu > 0){
+		$("#view_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-waste-data" class="btn btn-primary btn-sm"> Habis Diproduksi</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+	}
+
+	$("#btn-waste-data").off("click").on("click",function(e) {
 		//$("#btn-waste").unbind("click");
 		e.preventDefault();
 		var message      = 'Silahkan pilih Product/Lot terlebih dahulu !';
@@ -116,16 +126,22 @@
 		if(countchek == 0){
 			alert_modal_warning(message);
 		}else{
-			bootbox.dialog({
-			message: "Apakah Anda yakin ingin melakukan Waste Data ?",
-			title: "<i class='glyphicon glyphicon-trash'></i> Waste Data !",
+			bootbox.confirm({
+			message: "Apakah Anda yakin bahan baku ini Habis diproduksi ?",
+			title: "<i class='glyphicon glyphicon-trash'></i> Habis Diproduksi !",
 			buttons: {
-				danger: {
-				label    : "Yes ",
-				className: "btn-primary btn-sm",
-					callback : function() {
+					confirm: {
+						label: 'Yes',
+						className: 'btn-primary btn-sm'
+					},
+					cancel: {
+						label: 'No',
+						className: 'btn-default btn-sm'
+					},
+			},callback: function (result) {
+					if(result == true){
 						please_wait(function(){});
-						$('#btn-waste').button('loading');
+						$('#btn-waste-data').button('loading');
 						$.ajax({
 							type: "POST",
 							url :'<?php echo base_url('manufacturing/mO/waste_details_items')?>',
@@ -142,12 +158,12 @@
 									//alert jika session habis
 									alert_modal_warning(data.message);
 									window.location.replace('../index');
-									$('#btn-waste').button('reset');
+									$('#btn-waste-data').button('reset');
 									unblockUI( function(){});
 								}else if(data.status == 'failed'){
 									//var pesan = "Lot "+data.lot+ " Sudah diinput !"       
 									alert_modal_warning(data.message);
-									$('#btn-waste').button('reset');
+									$('#btn-waste-data').button('reset');
 									unblockUI( function(){});
 								}else{
 									$("#tab_1").load(location.href + " #tab_1");
@@ -163,19 +179,12 @@
 								}
 							},error: function (xhr, ajaxOptions, thrownError) {
 								alert(xhr.responseText);
-								$('#btn-waste').button('reset');
+								$('#btn-waste-data').button('reset');
 								unblockUI( function(){});
 							}
 						});
+					}else{
 					}
-				},
-				success: {
-						label    : "No",
-						className: "btn-default  btn-sm",
-						callback : function() {
-						$('.bootbox').modal('hide');
-						}
-				}
 			}
 		});
 		

@@ -199,6 +199,7 @@
                       <option value="umur">Umur</option>
                       <option value="kode_produk">Kode Produk</option>
                       <option value="nama_produk">Nama Produk</option>
+                      <option value="category">Kategori</option>
                       <option value="lot">Lot</option>
                       <option value="nama_grade">Grade</option>
                       <option value="lokasi">Lokasi</option>
@@ -268,10 +269,11 @@
                                   <span class="fa fa-database"></span> <label>Group By</label>
                                 </div>
                                 <div class="col-12 col-sm-8 col-md-8" id="groupBy">
-                                  <li onclick="groupBy('nama_produk','Nama Produk',0)" class="li-adv" data-index="0" >Nama Produk</li>
-                                  <li onclick="groupBy('lokasi','Lokasi',1)" class="li-adv" data-index="1">Lokasi</li>
-                                  <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',2)" class="li-adv" data-index="2">Lokasi Fisik</li>
-                                  <li onclick="groupBy('nama_grade','Grade',3)" class="li-adv" data-index="3">Grade</li>
+                                  <li onclick="groupBy('category','Kategori',0)" class="li-adv" data-index="0">Kategori</li>
+                                  <li onclick="groupBy('nama_produk','Nama Produk',1)" class="li-adv" data-index="1" >Nama Produk</li>
+                                  <li onclick="groupBy('lokasi','Lokasi',2)" class="li-adv" data-index="2">Lokasi</li>
+                                  <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',3)" class="li-adv" data-index="3">Lokasi Fisik</li>
+                                  <li onclick="groupBy('nama_grade','Grade',4)" class="li-adv" data-index="4">Grade</li>
                                 </div>
                               </div>
                               <div class="form-group" style="margin-bottom: 0px;">
@@ -355,6 +357,7 @@
                               <th  class='style min-width-120' ><a class="column_sort" id="lokasi_fisik" data-order="desc" href="javascript:void(0)">Lokasi Fisik</a></th>
                               <th  class='style min-width-80'  ><a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
                               <th  class='style min-width-140' ><a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
+                              <th  class='style min-width-140' ><a class="column_sort" id="category" data-order="desc" href="javascript:void(0)">Kategori</a></th>
                               <th  class='style min-width-100' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
                               <th  class='style min-width-100' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
                               <th  class='style min-width-100' ><a class="column_sort" id="lebar_greige" data-order="desc" href="javascript:void(0)">Lbr Greige</a></th>
@@ -442,6 +445,15 @@
       }
     ?>
 
+  var obj_category = new Array();
+    <?php 
+      foreach($category as $key ){
+    ?>
+          obj_category.push({kode:"<?php echo $key->id?>", name:"<?php echo $key->nama_category;?>"});
+    <?php 
+      }
+    ?>
+
   //show / hide collapse child in tabel
    $(document).on("hide.bs.collapse show.bs.collapse", ".child", function (event) {
       //alert('tes');
@@ -507,7 +519,7 @@
       var groupBy     = 'lokasi';
       var id          = 'group-'+groupBy;
       var caption     = 'Lokasi';
-      var dataIndex   = 1;
+      var dataIndex   = 2;
 
       arr_group.push({type:'group', nama_field:groupBy, id:id,  index_group:dataIndex, fav:'No'});
       // add tags to result                
@@ -732,7 +744,9 @@
     }else if(field == 'sales_group'){
       field = 'Marketing';
     }else if(field == 'opname'){
-      field  = 'Status Opname'
+      field  = 'Status Opname';
+    }else if(field == 'category'){
+      field  = 'Kategori';
     }
     return field;
   }
@@ -754,6 +768,14 @@
           value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
           value += "<option value='kosong'>Pilih Grade</option>";
           value += "<?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";} ?>";
+          value += "</select>";
+          value += '</div>';
+          $('#f_search').html(value);
+    }else if(value == 'category'){
+      var value = '<div class="col-md-6"> ';
+          value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
+          value += "<option value='kosong'>Pilih Kategori</option>";
+          value += "<?php foreach($category as $row){ echo "<option >".$row->nama_category."</option>";} ?>";
           value += "</select>";
           value += '</div>';
           $('#f_search').html(value);
@@ -893,7 +915,7 @@
           }else if(cmbOperator == '>'){
             caption_sparate ='Older Than';
           }
-        }else if(cmbSearch == 'lokasi' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname'){
+        }else if(cmbSearch == 'lokasi' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname' || cmbSearch == 'category'){
           caption_sparate = '=';
           cmbOperator     = '=';
         }else{
@@ -910,6 +932,7 @@
             }
           });
           caption_value = name_sales_group;
+      
         }else if(cmbSearch == 'opname'){
           if(search == 'done'){
             caption_value = 'Sudah Opname';
@@ -1266,6 +1289,7 @@
                                 $("<td>").text(value.lokasi_fisik),
                                 $("<td>").text(value.kode_produk),
                                 $("<td>").text(value.nama_produk),
+                                $("<td>").text(value.kategori),
                                 $("<td align='right'>").text(value.qty),
                                 $("<td align='right'>").text(value.qty2),
                                 $("<td align='right'>").text(value.lebar_greige),
@@ -1422,6 +1446,7 @@
                                     $("<td>").text(value.lokasi_fisik),
                                     $("<td>").text(value.kode_produk),
                                     $("<td>").text(value.nama_produk),
+                                    $("<td>").text(value.kategori),
                                     $("<td align='right'>").text(value.qty),
                                     $("<td align='right'>").text(value.qty2),
                                     $("<td align='right'>").text(value.lebar_greige),
@@ -1634,6 +1659,7 @@
                       $("<td>").text(value.lokasi_fisik),
                       $("<td>").text(value.kode_produk),
                       $("<td>").text(value.nama_produk),
+                      $("<td>").text(value.kategori),
                       $("<td align='right'>").text(value.qty),
                       $("<td align='right'>").text(value.qty2),
                       $("<td align='right'>").text(value.lebar_greige),

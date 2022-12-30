@@ -57,7 +57,7 @@ class M_trackinglot extends CI_Model
                                 INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id AND smi.quant_id = rm.quant_id
                                 INNER JOIN departemen d ON mrp.dept_id = d.kode
                                 WHERE rm.lot = '$lot' 
-                                GROUP BY rm.lot
+                                GROUP BY rm.kode, rm.lot
                                 ORDER by smi.tanggal_transaksi desc ")->result();
     }
 
@@ -69,7 +69,7 @@ class M_trackinglot extends CI_Model
                                 INNER JOIN departemen d ON mrp.dept_id = d.kode
                                 INNER JOIN mst_status ms ON smi.status = ms.kode
                                 WHERE smi.lot = '$lot' AND smi.status NOT IN ('done') 
-                                GROUP BY smi.lot
+                                GROUP BY rm.kode, smi.lot
                                 ORDER by smi.tanggal_transaksi asc
                                 ")->result();
     }

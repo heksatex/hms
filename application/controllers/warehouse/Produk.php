@@ -143,6 +143,9 @@ class Produk extends MY_Controller
       }else if(!empty($lebarjadi) AND empty($uom_lebarjadi)){
         $callback = array('status' => 'failed', 'field' => 'uom_lebarjadi', 'message' => 'Uom Lebar Jadi Harus Diisi !', 'icon' =>'fa fa-warning', 
               'type' => 'danger'  );
+      }else if(empty($product_parent)){
+        $callback = array('status' => 'failed', 'field' => 'product_parent', 'message' => 'Product Parent Harus Diisi !', 'icon' =>'fa fa-warning', 
+              'type' => 'danger'  );
       }else{
         //cek kode produk apa sudah ada apa belum
         $cek = $this->m_produk->cek_produk_by_kode($kodeproduk)->row_array();

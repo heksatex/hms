@@ -1143,6 +1143,7 @@
     $("#btn-done").show();
     $("#btn-print").show();
     $("#btn-produksi-batch").show();
+    $("#btn-waste").show();
     $('#mc').attr('disabled', true);
     $("#btn-cancel-edit").attr('id','btn-cancel');
     $("#lebar_jadi_mo").attr("readonly", true);
@@ -1168,8 +1169,17 @@
     $("#tambah_data .modal-dialog .modal-content .modal-footer #btn_request").attr('id',"btn-tambah");
     $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").text("Simpan");
 
+    $("#tambah_data .modal-dialog .modal-content .modal-body").empty();
+    // $("#tambah_data .modal-dialog .modal-content .modal-footer button[id='btn-tambah']).remove();
+
     readonly_textfield();
     refresh_mo();
+  });
+
+  $(document).on('hidden.bs.modal', '.bootbox.modal', function (e) {    
+        if($(".modal").hasClass('in')) {
+            $('body').addClass('modal-open');
+        }
   });
 
   // ketika modal view data close maka button nya ubah btn tutup saja
@@ -1208,7 +1218,7 @@
       })
       var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
       $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $("#view_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-waste" class="btn btn-primary btn-sm"> Waste Data</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+      // $("#view_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-waste-data" class="btn btn-primary btn-sm"> Habis Diproduksi</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
 
       $('.modal-title').text('View Quant');
         $.post('<?php echo site_url()?>manufacturing/mO/view_mo_quant_modal',
@@ -1288,6 +1298,7 @@
     $("#btn-edit").hide();//sembuyikan btn-edit
     $("#btn-produksi").hide();//sembuyikan btn-produksi
     $("#btn-produksi-batch").hide();//sembuyikan btn-produksi-batch
+    $("#btn-waste").hide();//sembuyikan btn-waste
     $("#btn-stok").hide();//sembuyikan btn-produksi
     $("#btn-done").hide();//sembuyikan btn-done
     $("#btn-print").hide();//sembuyikan btn-print
@@ -1517,6 +1528,62 @@
         $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
 
       });;
+    }
+  });
+
+  $("#btn-waste").unbind( "click" );
+  $(document).on('click','#btn-waste',function(e){
+
+    var status = $('#status').val();
+    if(status == 'done'){
+      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+    }else if(status == 'cancel'){
+      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+    }else if(status == 'draft'){
+      alert_modal_warning('Maaf, Product belum ready !');
+    }else{
+      e.preventDefault();
+      $('.modal-title').text('Waste');
+
+      $('#btn-tambah').button('reset');
+     
+      var kode       = $("#kode").val();
+      var deptid     = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
+      var move_id_fg = '<?php echo $move_id_fg['move_id'];?>';
+      var qty        = '<?php echo $list->qty?>';
+      $("#tambah_data").modal({
+          show: true,
+          backdrop: 'static'
+      });
+      $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('waste_produksi');
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+
+      $("#btn-produksi").prop('disabled',true);
+
+      $(".waste_produksi").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $.post('<?php echo site_url()?>manufacturing/mO/produksi_waste',
+        { kode        : $('#kode').val(),
+          kode_produk : $('#kode_produk').val(), 
+          nama_produk : $('#product').val(),
+          sisa_qty    : $('#total_sisa').val(), 
+          uom_qty_sisa    : $('#uom_qty_sisa').val(), 
+          deptid      : deptid, 
+          kode        : kode,
+          //move_id     : move_id, 
+          move_id_fg  : move_id_fg, 
+          qty         : $('#qty_prod').val(),  
+          origin      : $('#origin').val(),
+          // qty1_std    : $('#qty1_std').val(),
+          // qty2_std    : $('#qty2_std').val(),
+          // lot_prefix  : $('#lot_prefix').val(),
+          lot_prefix_waste  : $('#lot_prefix_waste').val(),       
+        } 
+      ).done(function(html){
+        setTimeout(function() {
+          $(".waste_produksi").html(html)  
+        },1000);
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+      });
     }
   });
 
@@ -2387,11 +2454,6 @@
     });  
 
   //## << Finish Additional 
- 
-
-
-
-
 </script>
 
 
