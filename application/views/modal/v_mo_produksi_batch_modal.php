@@ -387,7 +387,7 @@
 		    //+ '<td></td>'
 		    + '<td class="width-200"><input add="manual" type="hidden" name="txtkode_produk" id="txtkode_produk"  class="form-control input-sm"  readonly="readonly" value="<?php echo ($kode_produk) ?>"><input type="hidden" name="txtproduct[]" id="txtproduct"  class="form-control input-sm produk"  readonly="readonly" data-toggle="tooltip" title="<?php echo htmlentities($product) ?>" value="<?php echo htmlentities($product) ?>">'
 		 
-		    +  '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot width-150" value="'+lot_prefix_next+'" onkeypress="enter(event);"></td>'
+		    +  '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot width-200" value="'+lot_prefix_next+'" onkeypress="enter(event);"></td>'
 		    + '<td class="width-120"><select class="form-control input-sm grade width-100" name="grade" id="grade"><option value=""> Pilih Grade </option><?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";}?></select></td>'
 		    + '<td class="width-100"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm width-80 txtqty" value="<?php echo $qty1_std;?>"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
 		    + '<td ><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm width-50" value="<?php echo $uom_1;?>"  readonly="readonly"></td>'

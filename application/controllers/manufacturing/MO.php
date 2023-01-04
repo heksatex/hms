@@ -254,14 +254,19 @@ class MO extends MY_Controller
             if($list->dept_id == 'TRI' OR $list->dept_id == 'JAC'){
                 if($list->type_production =='Proofing'){
                     $lot_prefix   = 'PF/[MY]/[MC]/[DEPT]/COUNTER';
+                    $lot_prefix_waste   = 'PF/[MY]/[MC]/[DEPT]/COUNTER';
                 }else{
                     $lot_prefix   = 'KP/[MY]/[MC]/[DEPT]/COUNTER';
+                    $lot_prefix_waste   = 'KP/[MY]/[MC]/[DEPT]/COUNTER';
                 }
             }else{
                 $lot_prefix   = $list->lot_prefix;
+                $lot_prefix_waste   = $list->lot_prefix_waste;
             }
+            
 
-            $data['lot_prefix'] = $lot_prefix;
+            $data['lot_prefix']       = $lot_prefix;
+            $data['lot_prefix_waste'] = $lot_prefix_waste;
 
             if(!empty($cek_request['origin'])){
                 $data['dystuff']   = $this->m_mo->get_dyeing_stuff($kode_decrypt);
@@ -1331,7 +1336,7 @@ class MO extends MY_Controller
 
         $kode             = $this->input->post('kode');
         $deptid           = $this->input->post('deptid');
-        $lot_prefix_waste = $this->input->post('lot_prefix_waste');
+        // $lot_prefix_waste = $this->input->post('lot_prefix_waste');
         $kode_produk      = $this->input->post('kode_produk');
 
         $get_uom          = $this->_module->get_uom_by_kode_produk($kode_produk)->row_array();//get uom 1 dan uom 2 by kode_produk
@@ -1356,14 +1361,32 @@ class MO extends MY_Controller
         $data['uom']        = $this->_module->get_list_uom();
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
 
-        $data['lot_prefix_waste'] = $lot_prefix_waste;
-        if(!empty($lot_prefix_waste)){
-            $lw                   = $this->m_mo->get_location_waste_by_deptid($deptid)->row_array();
-            $count_waste          = $this->m_mo->get_counter_by_lot_prefix_waste(addslashes($lot_prefix_waste),$lw['waste_location'])->row_array();
-            $data['row_lot_waste']= $count_waste['jml_lot'] + 1;
+        if($deptid == 'TRI' OR $deptid == 'JAC'){
+            //cek MC by dept_id
+            $list   = $this->m_mo->get_data_by_code($kode);
+            if(empty($list->mc_id)){
+                $lot_prefix_waste = '';
+            }else{// setting lot prefix by defualt KP/my/MC/DEPT/
+                // get no mesin by mc_id 
+                $no_mesin = $this->m_mo->no_mesin_by_mc_id($list->mc_id);
+                $tgl_bln   = date('m').''.date('y');// ex 0122
+                if($deptid == 'TRI'){
+                    $dept_prefix = 'TR';
+                }else{
+                    $dept_prefix = $deptid;
+                }
+                if($list->type_production == 'Proofing'){
+                    $awal = 'PF';
+                }else{
+                    $awal = 'KP';
+                }
+                $lot_prefix_waste  = $awal.'/'.$tgl_bln.'/'.$no_mesin.'/'.$dept_prefix.'/';// lot prefix by default system
+            }
         }else{
-            $data['row_lot_waste']    = "";
-        }
+            $lot_prefix_waste  = $this->input->post('lot_prefix_waste');       
+        };
+
+        $data['lot_prefix_waste'] = $lot_prefix_waste;
 
         return $this->load->view('modal/v_mo_produksi_waste_modal',$data);
 
@@ -4078,7 +4101,8 @@ class MO extends MY_Controller
                 }else{
 
                     if($deptid == 'TRI' OR $deptid == 'JAC'){
-                        $lot_prefix = '';
+                        $lot_prefix      = '';
+                        $lot_prefix_waste = '';
                     }
 
                     $this->m_mo->update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program);
@@ -4091,6 +4115,7 @@ class MO extends MY_Controller
 
                     if($deptid == 'TRI' OR $deptid == 'JAC'){
                         $lot_prefix = 'Format Lot Prefix Default System';
+                        $lot_prefix_waste = 'Format Lot Prefix Waste Default System';
                     }
                     
                     $mc = $this->m_mo->get_nama_mesin_by_kode($mesin)->row_array();
@@ -5637,7 +5662,7 @@ class MO extends MY_Controller
         $loop = 1;
         $heightNama = 0; 
         $enter         = 1;
-        $enter_barcode = 13;
+        $enter_barcode = 18;
 
         foreach ($data_arr as $val ) {
 
@@ -5646,7 +5671,7 @@ class MO extends MY_Controller
                 $loop = 1;
                 $heightNama = 0; 
                 $enter         = 1;
-                $enter_barcode = 13;
+                $enter_barcode = 18;
 
             }
             
@@ -5664,10 +5689,10 @@ class MO extends MY_Controller
             $pdf->Multicell(60,5,$barcode,0,'C');
             
             $pdf->SetFont('Arial','B',8,'C');
-            $pdf->setXY(0,5+$heightNama+3);
+            $pdf->setXY(0,5+$heightNama+8);
             $pdf->Multicell(60,3,'Reff Picking : '.$reff_picking,0,'C');
 
-            $pdf->Code128(5,$enter+$enter_barcode,$barcode,50,10,'C',0,1);//barcode
+            $pdf->Code128(5,$enter+$enter_barcode,$barcode,50,6,'C',0,1);//barcode
 
             $pdf->SetFont('Arial','B',15,'C');
 

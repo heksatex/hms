@@ -1,9 +1,4 @@
 <?php 
-	if(!empty($row_lot_waste)){//jika lot prefix waste nya tidak kosong maka dikasih counter
-		$counter_waste =$row_lot_waste;
-	}else{
-		$counter_waste =0;
-	}
 
 	if(empty($konsumsi)){
 		$item_rm = false;
@@ -962,7 +957,7 @@
 	}
 
 
-	var last_counter_waste = parseInt("<?php echo $counter_waste;?>");
+	var tmp_last_counter   = [];
 
 	function add_new_row_waste(){
 
@@ -1037,13 +1032,6 @@
 			}
 		});	
 
-		//cek apa baris di tabel waste kosong ?
-		var lenRow = $('#tbl_produksi_waste tbody tr ').length;
-	    if (lenRow < 1) {
-	       //set counter product waste
-	        last_counter_waste =  parseInt("<?php echo $counter_waste;?>");	     
-	    }
-
 		//cek untuk lot double
 		var sama = false;
 		var arr3 = [];
@@ -1081,26 +1069,26 @@
 				
 		if(tambah){
 				
-			last_counter_waste1 = (("00" + last_counter_waste).slice(-3));
-			var lot_prefix   	= '<?php echo $lot_prefix_waste;?>';
-			var lot_prefix_next = '';
-			if(lot_prefix && radio_waste == 'fg'){
-				lot_prefix_next =lot_prefix+''+last_counter_waste1;
-			}else{
-				lot_prefix_next ='';
-			}
+			// last_counter_waste1 = (("00" + last_counter_waste).slice(-3));
+			// var lot_prefix   	= '<?php echo $lot_prefix_waste;?>';
+			// var lot_prefix_next = '';
+			// if(lot_prefix && radio_waste == 'fg'){
+			// 	lot_prefix_next =lot_prefix+''+last_counter_waste1;
+			// }else{
+			// 	lot_prefix_next ='';
+			// }
 			
-			last_counter_waste +=1;
+			// last_counter_waste +=1;
 			wtxtqty = "'wtxtqty'";
 			wtxtqty2 = "'wtxtqty2'";
 
 		    html='<tr class="num">'
 		    + '<td></td>'
 		    + '<td width="150px">'
-		      +'<select type="text" class="form-control input-sm width-200 wproduk" name="wtxtproduct" id="wtxtproduct"></select>'
-		      +'<input type="hidden" name="wtxtnameproduct" id="wtxtnameproduct"  class="form-control input-sm wnameproduct"  readonly="readonly"></td>'
+		    +'<select type="text" class="form-control input-sm width-200 wproduk" name="wtxtproduct" id="wtxtproduct"></select>'
+		    +'<input type="hidden" name="wtxtnameproduct" id="wtxtnameproduct"  class="form-control input-sm wnameproduct"  readonly="readonly"></td>'
 
-		    + '<td style="min-width:180px !important;"><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-160 wtxtlot"  onkeypress="enter_waste(event);" value="'+lot_prefix_next+'"></td>'
+		    + '<td style="min-width:180px !important;"><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-160 wtxtlot"  onkeypress="enter_waste(event);" ></td>'
 		    + '<td></td>'
 		    + '<td><input type="text" name="wtxtqty"  id="wtxtqty" class="form-control input-sm width-80 wtxtqty" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this,'+wtxtqty+')"></td>'
 		    + '<td><input type="text" name="wtxtuom"  id="wtxtuom" class="form-control input-sm width-80 wtxtuom"   readonly="readonly"></td>'
@@ -1114,6 +1102,7 @@
 	        lot[inx_lot+1].focus();
 			// total_waste(inx_lot+1);
 
+			
 			if(radio_waste == 'rm'){
 				$link_wproduk = 'manufacturing/mO/get_list_produk_waste'; // rm
 			}else{
@@ -1325,8 +1314,67 @@
 					});
 
 				}else{
-					var replace = '<input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm wtxtlot" value="'+lot_prefix_next+'" onkeypress="enter_waste(event);">';
-					$('#tabel_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3) ').html(replace);
+					// var replace = '<input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm wtxtlot" value="'+lot_prefix_next+'" onkeypress="enter_waste(event);">';
+					// $('#tabel_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3) ').html(replace);
+
+					if(radio_waste == 'fg'){
+						var deptid 				= "<?php echo $deptid?>";
+						var lot_prefix_waste   	= "<?php echo $lot_prefix_waste;?>";
+						if(radio_jenis == 'f'){
+							lot_prefix_post  = 'F|'+lot_prefix_waste;
+						}else{
+							lot_prefix_post  = 'D|'+lot_prefix_waste;
+						}
+
+						if(lot_prefix_waste != ''){
+							// var lot_prefix_post   	= '<?php echo $lot_prefix_waste;?>';
+							var lenRow = $('#tbl_produksi_waste tbody tr ').length;
+							if(lenRow <= 1){
+								tmp_last_counter    = [];
+								$.ajax({
+										dataType : 'JSON',
+										type     : 'POST',
+										url      : '<?php echo base_url();?>manufacturing/mO/get_last_lot_prefix_waste_by_lot',
+										data     : {deptid:deptid, lot_prefix:lot_prefix_post},
+										success  :function(data){
+											lot_counter_waste    = data.counter;
+											tmp_last_counter.push(data.counter);
+											last_counter_waste1  = (("00" + data.counter).slice(-3));
+											lot_prefix_next 	 = lot_prefix_post+''+last_counter_waste1;
+											$('#tbl_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3)').find('.wtxtlot').val(lot_prefix_next);
+					
+										},error  :function(xhr, ajaxOptions, thrownError){
+											alert('error data');
+											//alert(xhr.responseText);
+										}
+								});
+								// last_counter_waste = lot_counter_waste
+							}else{
+								if(tmp_last_counter.length>0){
+									last_counter  		= parseInt(tmp_last_counter[0]) + 1;
+									last_counter_waste1 = (("00" + last_counter).slice(-3));
+								}else{
+									last_counter  		= 1;
+									last_counter_waste1 = "001";
+								}
+								tmp_last_counter    = [];
+								lot_prefix_next 	= lot_prefix_post+''+last_counter_waste1;
+								$('#tbl_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3)').find('.wtxtlot').val(lot_prefix_next);
+								tmp_last_counter.push(last_counter)
+
+							}
+						}else{
+							if(radio_jenis == 'f'){
+								lot_prefix_next  = 'F|';
+							}else{
+								lot_prefix_next  = 'D|';
+							}
+							$('#tbl_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3)').find('.wtxtlot').val(lot_prefix_next);
+
+						}
+
+					}
+
 				}
 
 			});
