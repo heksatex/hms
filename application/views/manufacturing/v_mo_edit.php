@@ -370,7 +370,7 @@
                <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Lot Prefix Waste</label></div>
                 <div class="col-xs-8">
-                  <input type='text' class="form-control input-sm" name="lot_prefix_waste" id="lot_prefix_waste"  readonly="readonly"   value="<?php echo $list->lot_prefix_waste;?>" />
+                  <input type='text' class="form-control input-sm" name="lot_prefix_waste" id="lot_prefix_waste"  readonly="readonly"   value="<?php echo $lot_prefix_waste;?>" />
                 </div>                                    
               </div>
 
@@ -1196,10 +1196,13 @@
       var type = $('#type_production').val();
       if(type == 'Production'){
         $('#lot_prefix').val('KP/[MY]/[MC]/DEPT/COUNTER');
+        $('#lot_prefix_waste').val('KP/[MY]/[MC]/DEPT/COUNTER');
       }else if(type == 'Proofing'){
         $('#lot_prefix').val('PF/[MY]/[MC]/DEPT/COUNTER');
+        $('#lot_prefix_waste').val('PF/[MY]/[MC]/DEPT/COUNTER');
       }else{
         $('#lot_prefix').val('');
+        $('#lot_prefix_waste').val('');
       }
 
     });
@@ -1285,13 +1288,14 @@
     $("#target_efisiensi").attr("readonly", false);
     $("#qty1_std").attr("readonly", false);
     $("#qty2_std").attr("readonly", false);
-    $("#lot_prefix_waste").attr("readonly", false);
+    // $("#lot_prefix_waste").attr("readonly", false);
 
     $('#type_production').attr('disabled', false).attr('id','type_production');
 
     var dept_id = "<?php echo $list->dept_id; ?>";
     if(dept_id != 'TRI' && dept_id != 'JAC'){
       $("#lot_prefix").attr("readonly", false);
+      $("#lot_prefix_waste").attr("readonly", false);
     }
 
     $("#btn-simpan").show();//tampilkan btn-simpan

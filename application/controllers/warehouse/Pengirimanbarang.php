@@ -2536,8 +2536,6 @@ class Pengirimanbarang extends MY_Controller
       $kode_co             = '';
       $row_co              = '';
 
-    
-      
      
       $dept    = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
       $head    = $this->m_pengirimanBarang->get_data_by_code_print($kode,$dept_id);
@@ -3121,7 +3119,7 @@ class Pengirimanbarang extends MY_Controller
       $pdf->Cell(70, 5, 'Nama Produk', 1, 0, 'C');
       $pdf->Cell(25, 5, 'Qty', 1, 0, 'R');
       $pdf->Cell(10, 5, 'Uom', 1, 0, 'C');
-      $pdf->Cell(18, 5, 'Tersedia', 1, 0, 'C');
+      $pdf->Cell(18, 5, 'Tersedia', 1, 1, 'C');
 
       
       // products
@@ -3131,21 +3129,68 @@ class Pengirimanbarang extends MY_Controller
       $no   = 1;
       foreach($items as $row){
         
-        // set font tbody =
-        $pdf->SetFont('Arial','',8,'C');
+          // set font tbody =
+          $pdf->SetFont('Arial','',8,'C');
+
+          $cellWidth   = 70; //lebar sel
+          $nama_produk = $row->nama_produk;
+
+          if(($pdf->GetStringWidth($nama_produk)+3) < $cellWidth){
+            // jika tidak
+            $line   = 1;
+            $cellHeight   = 5; //tinggi sel satu baris normal
+            $x            = 5;
+          
+          }else{
+              $cellHeight   = 4; //tinggi sel satu baris normal
+              $x            = 4;
+
+              $textLength = strlen($nama_produk);	//total panjang teks
+              $errMargin  = 3;		//margin kesalahan lebar sel, untuk jaga-jaga
+              $startChar  = 0;		//posisi awal karakter untuk setiap baris
+              $maxChar    = 0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+              $textArray  = array();	//untuk menampung data untuk setiap baris
+              $tmpString  = '';		//untuk menampung teks untuk setiap baris (sementara)
+              
+              while($startChar < $textLength){ //perulangan sampai akhir teks
+                //perulangan sampai karakter maksimum tercapai
+                while( 
+                $pdf->GetStringWidth( $tmpString ) < ($cellWidth-$errMargin) &&
+                ($startChar+$maxChar) < $textLength ) {
+                  $maxChar++;
+                  $tmpString=substr($nama_produk,$startChar,$maxChar);
+                }
+                //pindahkan ke baris berikutnya
+                $startChar=$startChar+$maxChar;
+                //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                array_push($textArray,$tmpString);
+                //reset variabel penampung
+                $maxChar  =0;
+                $tmpString='';
+                
+              }
+              //dapatkan jumlah baris
+              $line=count($textArray);
+          }
+
+
+          $pdf->SetFillColor(255,255,255);
+          $pdf->Cell(5,($line * $cellHeight),'',0,0,'',true); //sesuaikan ketinggian dengan jumlah garis
+          $pdf->Cell(7,($line * $cellHeight),$no,'L,B',0,'L'); 
+
+          $x=$pdf->GetX();
+          $y=$pdf->GetY();
 
           $pdf->setXY($x, $y);
-          $pdf->Multicell(7, 5, $no, 1,'L');
-          $pdf->setXY($x+7, $y);
-          $pdf->Multicell(20, 5, $this->custom_char_out($row->kode_produk,8), 1,'L');
-          $pdf->setXY($x+27, $y);
-          $pdf->Multicell(70, 5, $this->custom_char_out($row->nama_produk,45), 1,'L');
-          $pdf->setXY($x+97, $y);
-          $pdf->Multicell(25, 5, number_format($row->qty,2), 1,'R');
-          $pdf->setXY($x+122, $y);
-          $pdf->Multicell(10, 5, $this->custom_char_out($row->uom,3), 1,'L');
-          $pdf->setXY($x+132, $y);
-          $pdf->Multicell(18, 5, number_format($row->sum_qty,2), 1,'R');
+          $pdf->Multicell(20, ($line * $cellHeight), $this->custom_char_out($row->kode_produk,8), 1,'L');
+          $pdf->setXY($x+20, $y);
+          $pdf->Multicell($cellWidth,$cellHeight,  $nama_produk, 1,'L');
+          $pdf->setXY($x+90, $y);
+          $pdf->Multicell(25, ($line * $cellHeight), number_format($row->qty,2), 1,'R');
+          $pdf->setXY($x+115, $y);
+          $pdf->Multicell(10, ($line * $cellHeight), $this->custom_char_out($row->uom,3), 1,'L');
+          $pdf->setXY($x+125, $y);
+          $pdf->Multicell(18, ($line * $cellHeight), number_format($row->sum_qty,2), 1,'R');
           
           $no++;
           $y = $y + 5;
@@ -3157,7 +3202,6 @@ class Pengirimanbarang extends MY_Controller
             $pdf->setXY(160,3);
             $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
             $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
-            
           }
       }
 
@@ -3177,39 +3221,142 @@ class Pengirimanbarang extends MY_Controller
       $pdf->Cell(10, 5, 'Uom', 1, 0, 'L');
       $pdf->Cell(10, 5, 'Qty2', 1, 0, 'R');
       $pdf->Cell(10, 5, 'Uom2', 1, 0, 'L');
-      $pdf->Cell(28, 5, 'Reff Note', 1, 0, 'C');
+      $pdf->Cell(28, 5, 'Reff Note', 1, 1, 'C');
 
       // details
       $smi  = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode,$dept_id);
       $x    = 5;
       $y    = $y+10;
+      $y2   = $y+10;
       $no   = 1;
       foreach($smi as $row){
 
           // set font tbody 
           $pdf->SetFont('Arial','',8,'C');
+        
+          $cellWidth   = 70; //lebar sel
+          $nama_produk = $row->nama_produk;
+          $lot         = $row->lot;
+          
+          if(($pdf->GetStringWidth($nama_produk)+3)  < $cellWidth){
+              // jika tidak
+              $lineProduk   = 1;
+            
+          }else{
+
+              $textLength = strlen($nama_produk);	//total panjang teks
+              $errMargin  = 3;		//margin kesalahan lebar sel, untuk jaga-jaga
+              $startChar  = 0;		//posisi awal karakter untuk setiap baris
+              $maxChar    = 0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+              $textArray  = array();	//untuk menampung data untuk setiap baris
+              $tmpString  = '';		//untuk menampung teks untuk setiap baris (sementara)
+              
+              while($startChar < $textLength){ //perulangan sampai akhir teks
+                //perulangan sampai karakter maksimum tercapai
+                while( 
+                $pdf->GetStringWidth( $tmpString ) < ($cellWidth-$errMargin) &&
+                ($startChar+$maxChar) < $textLength ) {
+                  $maxChar++;
+                  $tmpString=substr($nama_produk,$startChar,$maxChar);
+                }
+                //pindahkan ke baris berikutnya
+                $startChar=$startChar+$maxChar;
+                //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                array_push($textArray,$tmpString);
+                //reset variabel penampung
+                $maxChar  =0;
+                $tmpString='';
+                
+              }
+              //dapatkan jumlah baris
+              $lineProduk=count($textArray);
+          }
+
+          $cellWidthLot   = 29; //lebar sel
+          if($pdf->GetStringWidth($lot) < $cellWidthLot){
+              $lineLot      = 1;
+              // $cellHeight   = 4; //tinggi sel satu baris normal
+              // $x            = 4;
+          }else{
+
+              // $cellHeight  = 4; //tinggi sel satu baris normal
+              // $x           = 4;
+
+              $textLength = strlen($lot);	//total panjang teks
+              $errMargin  = 5;		//margin kesalahan lebar sel, untuk jaga-jaga
+              $startChar  = 0;		//posisi awal karakter untuk setiap baris
+              $maxChar    = 0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+              $textArray  = array();	//untuk menampung data untuk setiap baris
+              $tmpString  = '';		//untuk menampung teks untuk setiap baris (sementara)
+              
+              while($startChar < $textLength){ //perulangan sampai akhir teks
+                //perulangan sampai karakter maksimum tercapai
+                while( 
+                $pdf->GetStringWidth( $tmpString ) < ($cellWidthLot-$errMargin) &&
+                ($startChar+$maxChar) < $textLength ) {
+                  $maxChar++;
+                  $tmpString=substr($lot,$startChar,$maxChar);
+                }
+                //pindahkan ke baris berikutnya
+                $startChar=$startChar+$maxChar;
+                //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                array_push($textArray,$tmpString);
+                //reset variabel penampung
+                $maxChar  =0;
+                $tmpString='';
+                
+              }
+              //dapatkan jumlah baris
+              $lineLot=count($textArray);
+          }
+
+          if($lineProduk > $lineLot){
+            $line = $lineProduk;
+            $cellHeight   = 4; //tinggi sel satu baris normal
+            $x            = 4;
+            $cellHeightLot       = ($line * $cellHeight);
+            $cellHeightProduk    =  $cellHeight;
+          }else if ($lineProduk < $lineLot){
+            $line = $lineLot;
+            $cellHeight   = 4; //tinggi sel satu baris normal
+            $x            = 4;
+            $cellHeightProduk = ($line * $cellHeight);
+            $cellHeightLot   =  $cellHeight;
+          }else{
+            $line         = 1;
+            $cellHeight   = 5; //tinggi sel satu baris normal
+            $x            = 5;
+            $cellHeightProduk = ($line * $cellHeight);
+            $cellHeightLot    = ($line * $cellHeight);
+          }
+
+          $pdf->SetFillColor(255,255,255);
+          $pdf->Cell(5,($line * $cellHeight),'',0,0,'',true); //sesuaikan ketinggian dengan jumlah garis
+          $pdf->Cell(7,($line * $cellHeight),$no,'L,B',0,'L'); 
+
+          $x=$pdf->GetX();
+          $y=$pdf->GetY();
           
           $pdf->setXY($x, $y);
-          $pdf->Multicell(7, 5, $no, 1,'L');
-          $pdf->setXY($x+7, $y);
-          $pdf->Multicell(20, 5, $this->custom_char_out($row->kode_produk,8), 1,'L');
-          $pdf->setXY($x+27, $y);
-          $pdf->Multicell(70, 5,  $this->custom_char_out($row->nama_produk,45), 1,'L');
-          $pdf->setXY($x+97, $y);
-          $pdf->Multicell(30, 5, $row->lot, 1,'L');
-          $pdf->setXY($x+127, $y);
-          $pdf->Multicell(15, 5, number_format($row->qty,2), 1,'R');
-          $pdf->setXY($x+142, $y);
-          $pdf->Multicell(10, 5, $row->uom, 1,'L');
-          $pdf->setXY($x+152, $y);
-          $pdf->Multicell(10, 5, round($row->qty2,2), 1,'R');
-          $pdf->setXY($x+162, $y);
-          $pdf->Multicell(10, 5, $row->uom2, 1,'L');
-          $pdf->setXY($x+172, $y);
-          $pdf->Multicell(28, 5, $this->custom_char_out($row->reff_note,10), 1,'L');
+          $pdf->Multicell(20, ($line * $cellHeight), $this->custom_char_out($row->kode_produk,8), 1,'L');
+          $pdf->setXY($x+20, $y);
+          $pdf->Multicell($cellWidth,$cellHeightProduk,  $nama_produk, 1,'L');
+          $pdf->setXY($x+90, $y);
+          $pdf->Multicell(30, $cellHeightLot, $row->lot, 1,'L');
+          $pdf->setXY($x+120, $y);
+          $pdf->Multicell(15, ($line * $cellHeight), number_format($row->qty,2), 1,'R');
+          $pdf->setXY($x+135, $y);
+          $pdf->Multicell(10, ($line * $cellHeight), $row->uom, 1,'L');
+          $pdf->setXY($x+145, $y);
+          $pdf->Multicell(10, ($line * $cellHeight), round($row->qty2,2), 1,'R');
+          $pdf->setXY($x+155, $y);
+          $pdf->Multicell(10, ($line * $cellHeight), $row->uom2, 1,'L');
+          $pdf->setXY($x+165, $y);
+          $pdf->Multicell(28, ($line * $cellHeight), $this->custom_char_out($row->reff_note,9), 1,'L');
           
           $no++;
-          $y=$y+5;
+          $x = $x+5;
+          //$y=$y+5;
 
           if($y>290 ){
             $pdf->AddPage();
@@ -3230,17 +3377,17 @@ class Pengirimanbarang extends MY_Controller
       $pdf->SetFont('Arial','B',8,'C');
 
       $pdf->setXY($x, $y+15);
-			$pdf->Multicell(23, 4, '( ', 0, 'L');
+			$pdf->Multicell(23, 4, '(____________ ', 0, 'L');
 			$pdf->setXY($x, $y+15);
-			$pdf->Multicell(23, 4, ' )', 0, 'R');
+			$pdf->Multicell(23, 4, ' _)', 0, 'R');
 			$pdf->setXY($x, $y);
-			$pdf->Multicell(23, 4, 'Penerima', 0, 'C');
+			$pdf->Multicell(22, 4, 'Penerima', 0, 'C');
 
 
 			$pdf->setXY($x+40,  $y+15);;
-			$pdf->Multicell(23, 4, '( ', 0, 'L');
+			$pdf->Multicell(23, 4, '(____________', 0, 'L');
 			$pdf->setXY($x+40,  $y+15);
-			$pdf->Multicell(23, 4, ' )', 0, 'R');
+			$pdf->Multicell(23, 4, ' __)', 0, 'R');
 			$pdf->setXY($x+40, $y);
 			$pdf->Multicell(23, 4, 'Pengirim', 0, 'C');
 
