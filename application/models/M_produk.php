@@ -343,7 +343,7 @@ class M_produk extends CI_Model
 
 	public function get_list_product_parent($nama)
 	{
-		return $this->db->query("SELECT id,nama FROM mst_produk_parent  WHERE nama LIKE '%$nama%' ORDER BY nama LIMIT 200")->result();
+		return $this->db->query("SELECT id,nama FROM mst_produk_parent  WHERE status_parent = 't' AND nama LIKE '%$nama%' ORDER BY nama LIMIT 200")->result();
 	}
 
 	public function get_mst_parent_produk_by_id($id)

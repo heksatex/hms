@@ -8,6 +8,26 @@
                 </div>  
             </div>
         </div>
+        <div class="form-group">
+            <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Status</label></div>
+                <div class="col-xs-8">
+                    <select class="form-control input-sm" name="status" id="status">
+                    <?php 
+                        $arr_status = array(array('value' => 't', 'text' => 'Aktif'), array( 'value'=> 'f', 'text' => 'Tidak Aktif'));
+                        foreach ($arr_status as $val) {
+                            if($val['value'] == $data['status_parent']){?>
+                                <option value="<?php echo $val['value']; ?>" selected><?php echo $val['text'];?></option>
+                            <?php
+                            }else{?>
+                                <option value="<?php echo $val['value']; ?>" ><?php echo $val['text'];?></option>
+                            <?php  
+                            }
+                    }?>
+                    </select>  
+                </div>  
+            </div>
+        </div>
     </div>
     
     <div class="row">
@@ -87,6 +107,7 @@
         $('#btn-ubah2').button('loading');
         
         var nama   = $('#nama').val();
+        var status = $('#status').val();
         var id     = "<?php echo $data['id']?>";
 
         please_wait(function(){});
@@ -99,7 +120,7 @@
                     e.overrideMimeType("application/json;charset=UTF-8");
                 }
             },
-            data: { id:id, nama:nama},
+            data: { id:id, nama:nama, status:status},
             success: function(data){
                 if(data.sesi == "habis"){
                     //alert jika session habis
