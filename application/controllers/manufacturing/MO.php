@@ -4732,7 +4732,7 @@ class MO extends MY_Controller
             $status_brg = 'draft';
             
             //lock tabel
-            $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, mrp_production WRITE, stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE' );
+            $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, mrp_production WRITE, stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE, mrp_production_fg_hasil WRITE' );
             
             //cek status mrp_production = done
             $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
@@ -4778,7 +4778,11 @@ class MO extends MY_Controller
 
                     //cek apa ada ada produk yang statusnya ready atau done?
                     $cek_status = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready', 'done')->row_array();
-                    if(empty($cek_status['status'])){//jika kosong maka update status mrp_production jadi draft
+
+                    //cek fg hasil
+                    $cek_fg_hasil = $this->m_mo->cek_mrp_production_fg_hasil($kode)->num_rows();
+
+                    if(empty($cek_status['status']) AND $cek_fg_hasil == 0){
                         $this->m_mo->update_status_mrp_production($kode,$status_brg);
                         $cek_status2 = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
                         if($cek_status2['status']=='draft'){
@@ -4802,10 +4806,106 @@ class MO extends MY_Controller
         echo  json_encode($callback);
     }
 
-    public function waste_details_items()
-    {
+    // fitur habis diproduksi di tutup
+    // public function waste_details_items()
+    // {
 
-        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+        //cehckbox view
+        /* <input type="checkbox" class="checkItem" value="<?php echo $row->quant_id?>" data-valuetwo="<?php echo $row->row_order?>" data-valuetree="<?php echo $row->lot?>" data-toggle="tooltip" title="Pilih Waste Data"> */
+
+
+        /* // fungsi  ajax simpan 
+        $("#btn-waste-data").off("click").on("click",function(e) {
+            //$("#btn-waste").unbind("click");
+            e.preventDefault();
+            var message      = 'Silahkan pilih Product/Lot terlebih dahulu !';
+            var myCheckboxes = new Array();
+            var deptid 		 = "<?php echo $deptid; ?>";//parsing data id dept untuk log history
+            var kode   		 = "<?php echo $kode; ?>";//kode MO untuk log history
+            var move_id   	 = "<?php echo $move_id; ?>";
+            var origin_prod  = "<?php echo $origin_prod; ?>";
+            var kode_produk  = "<?php echo $kode_produk; ?>";
+
+            $(".checkItem:checked").each(function() {
+                value2  = $(this).attr('data-valuetwo');
+                value3  = $(this).attr('data-valuetree');
+                myCheckboxes.push({
+                                "quant_id" : $(this).val(),
+                                "row_order": value2,
+                                "lot"      : value3
+                            });
+            });
+            
+            countchek = myCheckboxes.length;
+            if(countchek == 0){
+                alert_modal_warning(message);
+            }else{
+                bootbox.confirm({
+                message: "Apakah Anda yakin bahan baku ini Habis diproduksi ?",
+                title: "<i class='glyphicon glyphicon-trash'></i> Habis Diproduksi !",
+                buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-primary btn-sm'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-default btn-sm'
+                        },
+                },callback: function (result) {
+                        if(result == true){
+                            please_wait(function(){});
+                            $('#btn-waste-data').button('loading');
+                            $.ajax({
+                                type: "POST",
+                                url :'<?php echo base_url('manufacturing/mO/waste_details_items')?>',
+                                dataType: 'JSON',
+                                data    : { kode 		: kode, 
+                                            deptid      : deptid,
+                                            checkbox    : JSON.stringify(myCheckboxes),
+                                            origin_prod : origin_prod,
+                                            move_id 	: move_id,
+                                            kode_produk : kode_produk,
+                                        },
+                                success: function(data){
+                                    if(data.sesi=='habis'){
+                                        //alert jika session habis
+                                        alert_modal_warning(data.message);
+                                        window.location.replace('../index');
+                                        $('#btn-waste-data').button('reset');
+                                        unblockUI( function(){});
+                                    }else if(data.status == 'failed'){
+                                        //var pesan = "Lot "+data.lot+ " Sudah diinput !"       
+                                        alert_modal_warning(data.message);
+                                        $('#btn-waste-data').button('reset');
+                                        unblockUI( function(){});
+                                    }else{
+                                        $("#tab_1").load(location.href + " #tab_1");
+                                        $("#tab_2").load(location.href + " #tab_2");
+                                        $("#tab_2").load(location.href + " #tab_2");
+                                        $("#status_bar").load(location.href + " #status_bar");
+                                        $("#foot").load(location.href + " #foot");
+                                        $('#view_data').modal('hide');
+                                        $('#btn-tambah').button('reset');
+                                        unblockUI( function(){
+                                            setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                                        });
+                                    }
+                                },error: function (xhr, ajaxOptions, thrownError) {
+                                    alert(xhr.responseText);
+                                    $('#btn-waste-data').button('reset');
+                                    unblockUI( function(){});
+                                }
+                            });
+                        }else{
+                        }
+                }
+            });
+            
+            }
+        }); */
+
+       /*  if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
             // session habis
             $callback = array('status' => 'failed','message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
@@ -5093,10 +5193,10 @@ class MO extends MY_Controller
             }
 
 
-        }
+        } */
 
-        echo json_encode($callback);
-    }
+    //     echo json_encode($callback);
+    // }
 
     public function tambah_data_details_quant_mo()
     {

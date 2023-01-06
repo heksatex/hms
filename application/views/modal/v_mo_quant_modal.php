@@ -59,7 +59,7 @@
 								<?php 	
 								if( $akses_menu > 0){
 								?>
-									<input type="checkbox" class="checkItem" value="<?php echo $row->quant_id?>" data-valuetwo="<?php echo $row->row_order?>" data-valuetree="<?php echo $row->lot?>" data-toggle="tooltip" title="Pilih Waste Data">
+									
 									<?php if((($row->status == 'ready' AND $type_mo['type_mo']!='colouring' ) OR $level == 'Super Administrator') ){?>
 										<a onclick="hapus_quant_mo('<?php  echo $row->move_id ?>', '<?php  echo ($row->quant_id) ?>', '<?php  echo ($row->origin_prod) ?>', '<?php  echo ($row->row_order) ?>',  '<?php  echo ($row->status) ?>')"  href="javascript:void(0)" data-toggle="tooltip" title="Hapus Data" style="padding-left:5px;"><i class="fa fa-trash" style="color: red"></i> </a>
 
@@ -94,102 +94,6 @@
 </form>
 
 <script type="text/javascript">
-
-	akses_menu = "<?php echo $akses_menu; ?>";
-
-	if(akses_menu > 0){
-		$("#view_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-waste-data" class="btn btn-primary btn-sm"> Habis Diproduksi</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
-	}
-
-	$("#btn-waste-data").off("click").on("click",function(e) {
-		//$("#btn-waste").unbind("click");
-		e.preventDefault();
-		var message      = 'Silahkan pilih Product/Lot terlebih dahulu !';
-     	var myCheckboxes = new Array();
-		var deptid 		 = "<?php echo $deptid; ?>";//parsing data id dept untuk log history
-	    var kode   		 = "<?php echo $kode; ?>";//kode MO untuk log history
-	    var move_id   	 = "<?php echo $move_id; ?>";
-	    var origin_prod  = "<?php echo $origin_prod; ?>";
-	    var kode_produk  = "<?php echo $kode_produk; ?>";
-
-        $(".checkItem:checked").each(function() {
-			value2  = $(this).attr('data-valuetwo');
-			value3  = $(this).attr('data-valuetree');
-            myCheckboxes.push({
-							"quant_id" : $(this).val(),
-							"row_order": value2,
-							"lot"      : value3
-						});
-        });
-		
-        countchek = myCheckboxes.length;
-		if(countchek == 0){
-			alert_modal_warning(message);
-		}else{
-			bootbox.confirm({
-			message: "Apakah Anda yakin bahan baku ini Habis diproduksi ?",
-			title: "<i class='glyphicon glyphicon-trash'></i> Habis Diproduksi !",
-			buttons: {
-					confirm: {
-						label: 'Yes',
-						className: 'btn-primary btn-sm'
-					},
-					cancel: {
-						label: 'No',
-						className: 'btn-default btn-sm'
-					},
-			},callback: function (result) {
-					if(result == true){
-						please_wait(function(){});
-						$('#btn-waste-data').button('loading');
-						$.ajax({
-							type: "POST",
-							url :'<?php echo base_url('manufacturing/mO/waste_details_items')?>',
-							dataType: 'JSON',
-							data    : { kode 		: kode, 
-										deptid      : deptid,
-										checkbox    : JSON.stringify(myCheckboxes),
-										origin_prod : origin_prod,
-										move_id 	: move_id,
-										kode_produk : kode_produk,
-									},
-							success: function(data){
-								if(data.sesi=='habis'){
-									//alert jika session habis
-									alert_modal_warning(data.message);
-									window.location.replace('../index');
-									$('#btn-waste-data').button('reset');
-									unblockUI( function(){});
-								}else if(data.status == 'failed'){
-									//var pesan = "Lot "+data.lot+ " Sudah diinput !"       
-									alert_modal_warning(data.message);
-									$('#btn-waste-data').button('reset');
-									unblockUI( function(){});
-								}else{
-									$("#tab_1").load(location.href + " #tab_1");
-									$("#tab_2").load(location.href + " #tab_2");
-									$("#tab_2").load(location.href + " #tab_2");
-									$("#status_bar").load(location.href + " #status_bar");
-									$("#foot").load(location.href + " #foot");
-									$('#view_data').modal('hide');
-									$('#btn-tambah').button('reset');
-									unblockUI( function(){
-										setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
-									});
-								}
-							},error: function (xhr, ajaxOptions, thrownError) {
-								alert(xhr.responseText);
-								$('#btn-waste-data').button('reset');
-								unblockUI( function(){});
-							}
-						});
-					}else{
-					}
-			}
-		});
-		
-		}
-	});
 
 	//hapus quant mo
 	function hapus_quant_mo(move_id,quant_id,origin_prod,row_order,status) {

@@ -5,14 +5,25 @@
  */
 class M_produkParent extends CI_Model
 {
-	var $column_order = array(null, 'nama', 'tanggal', 'child');
-	var $column_search= array('tanggal','nama');
+	var $column_order = array(null, 'nama', 'tanggal', 'child', 'nama_status');
+	var $column_search= array('tanggal','nama', 'nama_status');
 	var $order  	  = array('tanggal' => 'desc');
 
 	private function _get_datatables_query()
 	{
-		$this->db->select("p.id,p.nama, p.tanggal, count(id_parent) as child");
+
+		if($this->input->post('nama_parent'))
+        {
+    		$this->db->like('p.nama',$this->input->post('nama_parent'));
+        }
+		if($this->input->post('status'))
+        {
+    		$this->db->where('p.status_parent',$this->input->post('status'));
+        }
+
+		$this->db->select("p.id,p.nama, p.tanggal, count(id_parent) as child, ms.nama_status, p.status_parent ");
 		$this->db->from("mst_produk_parent p");		
+		$this->db->JOIN("mst_status ms","ms.kode = p.status_parent","LEFT");
 		$this->db->JOIN("mst_produk mp","p.id = mp.id_parent","LEFT");
 		$i = 0;
 	
@@ -68,8 +79,9 @@ class M_produkParent extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select("p.nama, count(id_parent) as child");
+		$this->db->select("p.id,p.nama, p.tanggal, count(id_parent) as child, ms.nama_status, p.status_parent ");
 		$this->db->from("mst_produk_parent p");		
+		$this->db->JOIN("mst_status ms","ms.kode = p.status_parent","LEFT");
 		$this->db->JOIN("mst_produk mp","p.id = mp.id_parent","LEFT");
         $this->db->group_by("p.id");
 		return $this->db->count_all_results();
@@ -93,20 +105,28 @@ class M_produkParent extends CI_Model
         return $this->db->query("SELECT id, nama FROM mst_produk_parent WHERE nama = '$nama'");
     }
 
+	public function cek_nama_parent_by_nama_id($nama,$id)
+    {
+        return $this->db->query("SELECT id, nama FROM mst_produk_parent WHERE nama = '$nama' and id != '$id'");
+    }
+
     public function save_product_parent($nama)
     {
         $tanggal     = date("Y-m-d H:i:s");
         $this->db->query("INSERT INTO mst_produk_parent (tanggal,nama) values ('".$tanggal."','".$nama."')");
     }
 
-    public function update_product_parent_by_id($id_parent,$nama)
+    public function update_product_parent_by_id($id_parent,$nama,$status)
     {
-        $this->db->query("UPDATE mst_produk_parent SET nama = '$nama' WHERE id = '$id_parent' ");
+        $this->db->query("UPDATE mst_produk_parent SET nama = '$nama', status_parent = '$status' WHERE id = '$id_parent' ");
     }
 
     public function get_data_parent_by_id($id_parent)
     {
-        return $this->db->query("SELECT id,tanggal, nama FROM mst_produk_parent WHERE id = '$id_parent'");
+        return $this->db->query("SELECT mpp.id, mpp.tanggal, mpp.nama, mpp.status_parent, ms.nama_status 
+								FROM mst_produk_parent  mpp
+								LEFT JOIN mst_status ms ON mpp.status_parent = ms.kode
+								WHERE mpp.id = '$id_parent'");
     }
 
     public function get_list_child_by_parent($id_parent)
@@ -117,4 +137,39 @@ class M_produkParent extends CI_Model
                         INNER JOIN mst_status sat ON sat.kode = mp.status_produk
                         WHERE mp.id_parent = '$id_parent' ");
     }
+
+	public function get_jml_child_by_id_parent($id)
+	{
+		return $this->db->query("SELECT count(id_parent) as jml FROM mst_produk WHERE id_parent = '$id' group by id_parent")->num_rows();
+	}
+
+	public function get_list_product_parent_by_kode($post_nama_parent,$post_status,$post_filterAll)
+	{
+
+		if($post_nama_parent){
+			$this->db->where("p.nama",$post_nama_parent);
+        }
+
+		if($post_status){
+			$this->db->where("p.status_parent",$post_status);
+        }
+
+		if($post_filterAll){
+			$this->db->group_start(); 
+			$this->db->or_like("p.nama", $post_filterAll);
+			$this->db->or_like("ms.nama_status", $post_filterAll);
+			$this->db->group_end(); 
+		}
+
+
+		$this->db->select("p.id,p.nama, p.tanggal, count(id_parent) as child, ms.nama_status, p.status_parent ");
+		$this->db->from("mst_produk_parent p");		
+		$this->db->JOIN("mst_status ms","ms.kode = p.status_parent","LEFT");
+		$this->db->JOIN("mst_produk mp","p.id = mp.id_parent","LEFT");
+		$this->db->order_by("p.tanggal","desc");
+		$this->db->group_by("p.id");
+		$query = $this->db->get();
+		return $query->result();
+
+	}
 }
