@@ -679,7 +679,7 @@ class Mutasi extends MY_Controller
         
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 
-            $name_file ='Mutasi Detail Lot '.$dept['nama'].'.xlsx';
+            $name_file ='Mutasi Detail Lot '.$dept['nama'].' '.bln_indo(date('d-m-Y',strtotime($tanggal))).'.xlsx';
 
             header('Content-Type: application/vnd.ms-excel'); //mime type
             header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
@@ -1397,9 +1397,9 @@ class Mutasi extends MY_Controller
             $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 
             if($view == "Global"){
-                $name_file ='Mutasi Global '.$dept['nama'].'.xlsx';
+                $name_file ='Mutasi Global '.$dept['nama'].' '.bln_indo(date('d-m-Y',strtotime($tanggal))).'.xlsx';
             }else{ // detail lot
-                $name_file ='Mutasi Detail Produk '.$dept['nama'].'.xlsx';
+                $name_file ='Mutasi Detail Produk '.$dept['nama'].' '.bln_indo(date('d-m-Y',strtotime($tanggal))).'.xlsx';
             }
 
             header('Content-Type: application/vnd.ms-excel'); //mime type
