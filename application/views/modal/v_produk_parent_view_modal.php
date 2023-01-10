@@ -12,7 +12,7 @@
             <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Status</label></div>
                 <div class="col-xs-8">
-                    <select class="form-control input-sm" name="status" id="status">
+                    <select class="form-control input-sm" name="status_parent" id="status_parent">
                     <?php 
                         $arr_status = array(array('value' => 't', 'text' => 'Aktif'), array( 'value'=> 'f', 'text' => 'Tidak Aktif'));
                         foreach ($arr_status as $val) {
@@ -107,7 +107,7 @@
         $('#btn-ubah2').button('loading');
         
         var nama   = $('#nama').val();
-        var status = $('#status').val();
+        var status = $('#status_parent').val();
         var id     = "<?php echo $data['id']?>";
 
         please_wait(function(){});
