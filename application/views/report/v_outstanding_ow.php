@@ -105,7 +105,7 @@
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-sm btn-default" name="btn-filter" id="btn-filter" >Proses</button>
-                    <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                    <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                 </div>
             </form>
             <br>
