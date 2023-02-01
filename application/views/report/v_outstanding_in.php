@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -53,7 +54,7 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/outstandingin/export_excel">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" >
               <div class="col-md-6">
                 <div class="form-group">
                     <div class="col-md-12"> 
@@ -78,12 +79,12 @@
                         <label>View </label>
                     </div>
                     <div class="col-xs-4 col-sm-3 col-md-3">
-                      <input type="radio" id="view" name="view[]" value="Detail">
-                      <label for="detail">Detail</label>
-                    </div>
-                    <div class="col-xs-4 col-sm-3 col-md-3">
                       <input type="radio" id="view" name="view[]" value="Global" checked="checked">
                       <label for="global">Global</label>
+                    </div>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Detail">
+                      <label for="detail">Detail</label>
                     </div>
                   </div>
                 </div>
@@ -107,7 +108,7 @@
               </div>
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
               <br>
 
@@ -161,24 +162,23 @@
 
             <!-- table -->
             <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
+              <div class="col-sm-12 table-responsive">
                   <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
+                      <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                        <table id="example1" class="table table-condesed table-hover" border="0">
                           <thead>
                             <tr>
-                              <th  class="style no" >No. </th>
-                              <th  class='style' style="min-width: 80px">Kode</th>
-                              <th  class='style'>Origin</th>
-                              <th  class='style'>Reff Picking</th>
-                              <th  class='style nowrap'>Kode Produk</th>
-                              <th  class='style' style="min-width: 150px">Nama Produk</th>
-                              <th  class='style nowrap' id="head_lot">Lot</th>
-                              <th  class='style' style="min-width: 80px">Qty1</th>
-                              <th  class='style' style="min-width: 80px">Qty2</th>
-                              <th  class='style'>Status</th>
-                              <th  class='style' style="min-width: 80px">Reff Note</th>
+                              <th  class="style bb no" >No. </th>
+                              <th  class='style bb' style="min-width: 80px">Kode</th>
+                              <th  class='style bb'>Origin</th>
+                              <th  class='style bb'>Reff Picking</th>
+                              <th  class='style bb nowrap'>Kode Produk</th>
+                              <th  class='style bb' style="min-width: 150px">Nama Produk</th>
+                              <th  class='style bb nowrap' id="head_lot">Lot</th>
+                              <th  class='style bb' style="min-width: 80px">Qty1</th>
+                              <th  class='style bb' style="min-width: 80px">Qty2</th>
+                              <th  class='style bb'>Status</th>
+                              <th  class='style bb' style="min-width: 80px">Reff Note</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -186,15 +186,14 @@
                               <td colspan="10" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
-                      </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
-                        Processing...
+                        </table>
+                        <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
+                          Processing...
+                        </div>
                       </div>
-                  </div>
-                </div>
 
+                  </div>
               </div>
-            </div>
             </div>
 
         </div>
@@ -249,16 +248,16 @@
 
       var radio_arr = $('input[name="view[]"]').map(function(e, i) {
             if(this.checked == true){
-                check_status = true;
+              radio_view = true;
               return i.value;
             }
 
       }).get();
 
-
       if(departemen == '') {
         alert_modal_warning('Departemen Harus Dipilih !');
-
+      }else if(radio_view == '') {
+        alert_modal_warning('View Harus Dipilih !');
       }else{  
           $("#example1_processing").css('display',''); // show loading
 
@@ -326,6 +325,58 @@
                 }
           });
       }
+  });
+
+  $('#btn-excel').click(function(){
+
+    var departemen = $('#departemen').val();
+    var dept_dari  = $('#dept_dari').val();
+    var kode       = $('#kode').val();
+    var corak      = $('#corak').val();
+
+    var radio_view= false;
+    var radio_arr = new Array(); 
+
+    var radio_arr = $('input[name="view[]"]').map(function(e, i) {
+          if(this.checked == true){
+              radio_view = true;
+              return i.value;
+          }
+
+    }).get();
+
+    if(departemen == '') {
+      alert_modal_warning('Departemen Harus Dipilih !');
+    }else if(radio_view == '') {
+      alert_modal_warning('View Harus Dipilih !');
+    }else{
+
+      $.ajax({
+          "type":'POST',
+          "url": "<?php echo site_url('report/outstandingin/export_excel')?>",
+          "data": {departemen:departemen, kode:kode, corak:corak, dept_dari:dept_dari, view_arr:radio_arr},
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert("Export Excel error");
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status == "failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
+    }
+
   });
 
 </script>
