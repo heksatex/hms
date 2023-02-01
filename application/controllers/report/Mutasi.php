@@ -357,49 +357,73 @@ class Mutasi extends MY_Controller
         $head_table2_akhir  = [];
         // field saldo awal
         if($view == "Global"){
-            $field   .= 'nama_produk, s_awal_lot, s_awal_qty1, s_awal_qty1_uom, s_awal_qty2,  s_awal_qty2_uom, s_awal_qty_opname, s_awal_qty_opname_uom, '; 
+            // $field   .= 'nama_produk, s_awal_lot, s_awal_qty1, s_awal_qty1_uom, s_awal_qty2,  s_awal_qty2_uom, s_awal_qty_opname, s_awal_qty_opname_uom, '; 
+            $field   .= 'nama_produk, s_awal_lot, s_awal_mtr, s_awal_kg, '; 
+            $field   .= 's_akhir_lot, s_akhir_mtr, s_akhir_kg, '; 
+            $field   .= 'adj_in_lot, adj_in_mtr, adj_in_kg, '; 
+            $field   .= 'adj_out_lot, adj_out_mtr, adj_out_kg, '; 
+
+            $head_table2_awal[]  = array('Lot','Mtr','Kg');
+            $head_table2_adj[]   = array('Lot','Mtr','Kg');
+
         }else{
             $field   .= 'nama_category, id_category, kode_produk, nama_produk, s_awal_lot, s_awal_qty1, s_awal_qty1_uom, s_awal_qty2,  s_awal_qty2_uom, s_awal_qty_opname, s_awal_qty_opname_uom, '; 
+            // field saldo akhir
+            $field   .= 's_akhir_lot, s_akhir_qty1, s_akhir_qty1_uom, s_akhir_qty2, s_akhir_qty2_uom, s_akhir_qty_opname, s_akhir_qty_opname_uom, ';
+            // field adj in 
+            $field  .= 'adj_in_lot, adj_in_qty1, adj_in_qty1_uom, adj_in_qty2, adj_in_qty2_uom, adj_in_qty_opname, adj_in_qty_opname_uom, ';
+            // field adj out
+            $field  .= 'adj_out_lot, adj_out_qty1, adj_out_qty1_uom, adj_out_qty2, adj_out_qty2_uom, adj_out_qty_opname, adj_out_qty_opname_uom, ';
+
+            // $head_table2_awal[]  = array('S Awal Lot','S Awal Qty1','S Awal Qty2','S Awal Qty Opname');
+            if($excel == true){
+                $head_table2_awal[]  = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
+            }else{
+                $head_table2_awal[]  = array('Lot','Qty1','Qty2','Qty Opname');
+            }
+            // $head_table2_akhir[] = array('S Akhir Lot','S Akhir Qty1','S Akhir Qty2','S Akhir Qty Opname');
+            if($excel == true){
+                $head_table2_adj[]   = array(' Adj Lot',' Adj Qty1','Uom1',' Adj Qty2', 'Uom2',' Adj Qty Opname','Uom Opname');
+            }else{
+                $head_table2_adj[]   = array(' Adj Lot',' Adj Qty1',' Adj Qty2',' Adj Qty Opname');
+            }
+            // $head_table2_adj[]   = array('S Adj Lot','S Adj Qty1','S Adj Qty2','S Adj Qty Opname');
         }
-        // field saldo akhir
-        $field   .= 's_akhir_lot, s_akhir_qty1, s_akhir_qty1_uom, s_akhir_qty2, s_akhir_qty2_uom, s_akhir_qty_opname, s_akhir_qty_opname_uom, ';
-        // field adj in 
-        $field  .= 'adj_in_lot, adj_in_qty1, adj_in_qty1_uom, adj_in_qty2, adj_in_qty2_uom, adj_in_qty_opname, adj_in_qty_opname_uom, ';
-        // field adj in 
-        $field  .= 'adj_out_lot, adj_out_qty1, adj_out_qty1_uom, adj_out_qty2, adj_out_qty2_uom, adj_out_qty_opname, adj_out_qty_opname_uom, ';
-        // $head_table2_awal[]  = array('S Awal Lot','S Awal Qty1','S Awal Qty2','S Awal Qty Opname');
-        if($excel == true){
-            $head_table2_awal[]  = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
-        }else{
-            $head_table2_awal[]  = array('Lot','Qty1','Qty2','Qty Opname');
-        }
-        // $head_table2_akhir[] = array('S Akhir Lot','S Akhir Qty1','S Akhir Qty2','S Akhir Qty Opname');
-        if($excel == true){
-            $head_table2_adj[]   = array(' Adj Lot',' Adj Qty1','Uom1',' Adj Qty2', 'Uom2',' Adj Qty Opname','Uom Opname');
-        }else{
-            $head_table2_adj[]   = array(' Adj Lot',' Adj Qty1',' Adj Qty2',' Adj Qty Opname');
-        }
-        // $head_table2_adj[]   = array('S Adj Lot','S Adj Qty1','S Adj Qty2','S Adj Qty Opname');
+
 
         $jml_in   = 0;
         $jml_out  = 0;
 
         foreach($mutasi_dept as $mts){
                 if (strpos($mts->seq, 'in') !== FALSE) {
-                    $int_lot        = 'in'.$no_in.'_lot';
-                    $in_qty1        = 'in'.$no_in.'_qty1';
-                    $in_qty1_uom    = 'in'.$no_in.'_qty1_uom';
-                    $in_qty2        = 'in'.$no_in.'_qty2';
-                    $in_qty2_uom    = 'in'.$no_in.'_qty2_uom';
-                    $in_opname      = 'in'.$no_in.'_qty_opname';
-                    $in_opname_uom  = 'in'.$no_in.'_qty_opname_uom';
+                    if($view == "Global"){
+                        $in_lot         = 'in'.$no_in.'_lot';
+                        $in_mtr         = 'in'.$no_in.'_mtr';
+                        $in_kg          = 'in'.$no_in.'_kg';
+    
+                        $field .=  $in_lot.', '.$in_mtr.', '.$in_kg.', ';
 
-                    $field .=  $int_lot.', '.$in_qty1.', '.$in_qty1_uom.', '.$in_qty2.', '.$in_qty2_uom.', '.$in_opname.', '.$in_opname_uom.', ';
-                    $no_in++;
-                    if($excel == true){
-                        $head_table2_in[]  = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
                     }else{
-                        $head_table2_in[] = array('Lot','Qty1','Qty2', 'Qty Opname');
+                        $in_lot         = 'in'.$no_in.'_lot';
+                        $in_qty1        = 'in'.$no_in.'_qty1';
+                        $in_qty1_uom    = 'in'.$no_in.'_qty1_uom';
+                        $in_qty2        = 'in'.$no_in.'_qty2';
+                        $in_qty2_uom    = 'in'.$no_in.'_qty2_uom';
+                        $in_opname      = 'in'.$no_in.'_qty_opname';
+                        $in_opname_uom  = 'in'.$no_in.'_qty_opname_uom';
+    
+                        $field .=  $in_lot.', '.$in_qty1.', '.$in_qty1_uom.', '.$in_qty2.', '.$in_qty2_uom.', '.$in_opname.', '.$in_opname_uom.', ';
+                    }
+                    $no_in++;
+                    if($view == "Global"){
+                        $head_table2_in[]  = array('Lot','Mtr','Kg');
+                    }else{
+
+                        if($excel == true){
+                            $head_table2_in[]  = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
+                        }else{
+                            $head_table2_in[] = array('Lot','Qty1','Qty2', 'Qty Opname');
+                        }
                     }
                     $jml_in++;
                     if($mts->type == 'prod'){
@@ -412,20 +436,35 @@ class Mutasi extends MY_Controller
                 }
 
                 if (strpos($mts->seq, 'out') !== FALSE) {
-                    $out_lot         = 'out'.$no_out.'_lot';
-                    $out_qty1        = 'out'.$no_out.'_qty1';
-                    $out_qty1_uom    = 'out'.$no_out.'_qty1_uom';
-                    $out_qty2        = 'out'.$no_out.'_qty2';
-                    $out_qty2_uom    = 'out'.$no_out.'_qty2_uom';
-                    $out_opname      = 'out'.$no_out.'_qty_opname';
-                    $out_opname_uom  = 'out'.$no_out.'_qty_opname_uom';
 
-                    $field .=  $out_lot.', '.$out_qty1.', '.$out_qty1_uom.', '.$out_qty2.', '.$out_qty2_uom.', '.$out_opname.', '.$out_opname_uom.', ';
-                    $no_out++;
-                    if($excel == true){
-                        $head_table2_out[]  = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
+                    if($view == "Global"){
+                        $out_lot         = 'out'.$no_out.'_lot';
+                        $out_mtr         = 'out'.$no_out.'_mtr';
+                        $out_kg          = 'out'.$no_out.'_kg';
+    
+                        $field .=  $out_lot.', '.$out_mtr.', '.$out_kg.', ';
                     }else{
-                        $head_table2_out[] = array('Lot','Qty1','Qty2', 'Qty Opname');
+                        $out_lot         = 'out'.$no_out.'_lot';
+                        $out_qty1        = 'out'.$no_out.'_qty1';
+                        $out_qty1_uom    = 'out'.$no_out.'_qty1_uom';
+                        $out_qty2        = 'out'.$no_out.'_qty2';
+                        $out_qty2_uom    = 'out'.$no_out.'_qty2_uom';
+                        $out_opname      = 'out'.$no_out.'_qty_opname';
+                        $out_opname_uom  = 'out'.$no_out.'_qty_opname_uom';
+                        
+                        $field .=  $out_lot.', '.$out_qty1.', '.$out_qty1_uom.', '.$out_qty2.', '.$out_qty2_uom.', '.$out_opname.', '.$out_opname_uom.', ';
+                    }
+
+                    $no_out++;
+
+                    if($view == "Global"){
+                        $head_table2_out[]  = array('Lot','Mtr','Kg');
+                    }else{
+                        if($excel == true){
+                            $head_table2_out[]  = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
+                        }else{
+                            $head_table2_out[] = array('Lot','Qty1','Qty2', 'Qty Opname');
+                        }
                     }
 
                     $jml_out++;
@@ -864,8 +903,13 @@ class Mutasi extends MY_Controller
                                     
                                     $sheet->setCellValueByColumnAndRow($column, $rowCount, $field33); 
                                     // $sheet->mergeCells($column_excel_start.'7:'.$column_excel_finish.'7');
-                                    $column = $column + 7;
-                                    $column_e = $column_e + 7;
+                                    if($view == "Global"){
+                                        $column_e = $column_e + 3;
+                                        $column = $column + 3;
+                                    }else{
+                                        $column_e = $column_e + 7;
+                                        $column = $column + 7;
+                                    }
                                 }
                                 $column_excel_finish = $this->cek_column_excel($column_e-1);
                                 $sheet->mergeCells($column_excel_start.''.$rowCount.':'.$column_excel_finish.''.$rowCount);
@@ -964,6 +1008,12 @@ class Mutasi extends MY_Controller
                     $out_total_qty2        = 0;
                     $out_total_qty_opname  = 0;
 
+                    $in_total_mtr         = 0;
+                    $in_total_kg          = 0;
+
+                    $out_total_mtr         = 0;
+                    $out_total_kg          = 0;
+
                     if($view == "DetailProduk"){
                         if($row['id_category'] != $id_category AND $id_category != '' AND $view == "DetailProduk"){
                             $no = 1;
@@ -1032,39 +1082,38 @@ class Mutasi extends MY_Controller
                     if($view == "DetailProduk"){
                         $id_category   = $row['id_category'];
                         $nama_category = $row['nama_category'];
+                        //total saldo awal
+                        $cat_total_lot_s_awal = $cat_total_lot_s_awal + $row['s_awal_lot'];
+                        $cat_total_qty_s_awal = $cat_total_qty_s_awal + $row['s_awal_qty1'];
+                        $cat_total_qty2_s_awal = $cat_total_qty2_s_awal + $row['s_awal_qty2'];
+                        $cat_total_qty_opname_s_awal = $cat_total_qty_opname_s_awal + $row['s_awal_qty_opname'];
+    
+                        //total saldo akhir
+                        $cat_total_lot_s_akhir = $cat_total_lot_s_akhir + $row['s_akhir_lot'];
+                        $cat_total_qty_s_akhir = $cat_total_qty_s_akhir + $row['s_akhir_qty1'];
+                        $cat_total_qty2_s_akhir = $cat_total_qty2_s_akhir + $row['s_akhir_qty2'];
+                        $cat_total_qty_opname_s_akhir = $cat_total_qty_opname_s_akhir + $row['s_akhir_qty_opname'];
+     
+                        //total adj in
+                        $cat_total_lot_adj_in     = $cat_total_lot_adj_in + $row['adj_in_lot'];
+                        $cat_total_qty_adj_in     = $cat_total_qty_adj_in + $row['adj_in_qty1'];
+                        $cat_total_qty2_adj_in    = $cat_total_qty2_adj_in + $row['adj_in_qty2'];
+                        $cat_total_qty_opname_adj_in = $cat_total_qty_opname_adj_in + $row['adj_in_qty_opname'];
+    
+                        //total adj out
+                        $cat_total_lot_adj_out     = $cat_total_lot_adj_out + $row['adj_out_lot'];
+                        $cat_total_qty_adj_out     = $cat_total_qty_adj_out + $row['adj_out_qty1'];
+                        $cat_total_qty2_adj_out    = $cat_total_qty2_adj_out + $row['adj_out_qty2'];
+                        $cat_total_qty_opname_adj_out = $cat_total_qty_opname_adj_out + $row['adj_out_qty_opname'];
                     }else{
                         $id_category   = "";
                         $nama_category = "";
                     }
                     
-
-                    //total saldo awal
-                    $cat_total_lot_s_awal = $cat_total_lot_s_awal + $row['s_awal_lot'];
-                    $cat_total_qty_s_awal = $cat_total_qty_s_awal + $row['s_awal_qty1'];
-                    $cat_total_qty2_s_awal = $cat_total_qty2_s_awal + $row['s_awal_qty2'];
-                    $cat_total_qty_opname_s_awal = $cat_total_qty_opname_s_awal + $row['s_awal_qty_opname'];
-
-                    //total saldo akhir
-                    $cat_total_lot_s_akhir = $cat_total_lot_s_akhir + $row['s_akhir_lot'];
-                    $cat_total_qty_s_akhir = $cat_total_qty_s_akhir + $row['s_akhir_qty1'];
-                    $cat_total_qty2_s_akhir = $cat_total_qty2_s_akhir + $row['s_akhir_qty2'];
-                    $cat_total_qty_opname_s_akhir = $cat_total_qty_opname_s_akhir + $row['s_akhir_qty_opname'];
- 
-                    //total adj in
-                    $cat_total_lot_adj_in     = $cat_total_lot_adj_in + $row['adj_in_lot'];
-                    $cat_total_qty_adj_in     = $cat_total_qty_adj_in + $row['adj_in_qty1'];
-                    $cat_total_qty2_adj_in    = $cat_total_qty2_adj_in + $row['adj_in_qty2'];
-                    $cat_total_qty_opname_adj_in = $cat_total_qty_opname_adj_in + $row['adj_in_qty_opname'];
-
-                    //total adj out
-                    $cat_total_lot_adj_out     = $cat_total_lot_adj_out + $row['adj_out_lot'];
-                    $cat_total_qty_adj_out     = $cat_total_qty_adj_out + $row['adj_out_qty1'];
-                    $cat_total_qty2_adj_out    = $cat_total_qty2_adj_out + $row['adj_out_qty2'];
-                    $cat_total_qty_opname_adj_out = $cat_total_qty_opname_adj_out + $row['adj_out_qty_opname'];
                     
                     $sheet->SetCellValue('A'.$rowCount, ($no++));
                     $column_awal = 2;
-                    $column = 10;
+                    $column = 6;
                     if($view == "DetailProduk"){
                         $column_excel  = $this->cek_column_excel($column_awal);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_category']);
@@ -1072,314 +1121,448 @@ class Mutasi extends MY_Controller
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['kode_produk']);
                         $column = 12;
                         $column_awal = 4;
-                    }
 
-                    $column_excel  = $this->cek_column_excel($column_awal);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_produk']);
-                    $column_excel  = $this->cek_column_excel($column_awal+1);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
-                    $column_excel  = $this->cek_column_excel($column_awal+2);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1']);
-                    $column_excel  = $this->cek_column_excel($column_awal+3);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1_uom']);
-                    $column_excel  = $this->cek_column_excel($column_awal+4);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2']);
-                    $column_excel  = $this->cek_column_excel($column_awal+5);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2_uom']);
-                    $column_excel  = $this->cek_column_excel($column_awal+6);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty_opname']);
-                    $column_excel  = $this->cek_column_excel($column_awal+7);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty_opname_uom']);
+                        $column_excel  = $this->cek_column_excel($column_awal);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_produk']);
+                        $column_excel  = $this->cek_column_excel($column_awal+1);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
+                        $column_excel  = $this->cek_column_excel($column_awal+2);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1']);
+                        $column_excel  = $this->cek_column_excel($column_awal+3);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1_uom']);
+                        $column_excel  = $this->cek_column_excel($column_awal+4);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2']);
+                        $column_excel  = $this->cek_column_excel($column_awal+5);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2_uom']);
+                        $column_excel  = $this->cek_column_excel($column_awal+6);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty_opname']);
+                        $column_excel  = $this->cek_column_excel($column_awal+7);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty_opname_uom']);
 
-                    // info uom
-                    if($row['s_awal_qty1_uom'] != ''){// jik ada
-                        $qty1_uom        = $row['s_awal_qty1_uom'];
-                        $cat_qty1_uom_s_awal   = $row['s_awal_qty1_uom'];
-                    }else{
-                        $qty1_uom        = '';
+                         // info uom
+                        if($row['s_awal_qty1_uom'] != ''){// jik ada
+                            $qty1_uom        = $row['s_awal_qty1_uom'];
+                            $cat_qty1_uom_s_awal   = $row['s_awal_qty1_uom'];
+                        }else{
+                            $qty1_uom        = '';
+                        }
+                        if($row['s_awal_qty2_uom'] != ''){
+                            $qty2_uom        = $row['s_awal_qty2_uom'];
+                            $cat_qty2_uom_s_awal   = $row['s_awal_qty2_uom'];
+                        }else{
+                            $qty2_uom        = '';
+                        }
+                        if($row['s_awal_qty_opname_uom'] != ''){
+                            $qty_opname_uom  = $row['s_awal_qty_opname_uom'];
+                            $cat_opname_uom_s_awal   = $row['s_awal_qty_opname_uom'];
+                        }else{
+                            $qty_opname_uom  = '';
+                        }
+
+                    }else{// global
+
+                        $column_excel  = $this->cek_column_excel($column_awal);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_produk']);
+                        $column_excel  = $this->cek_column_excel($column_awal+1);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
+                        $column_excel  = $this->cek_column_excel($column_awal+2);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_mtr']);
+                        $column_excel  = $this->cek_column_excel($column_awal+3);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_kg']);
                     }
-                    if($row['s_awal_qty2_uom'] != ''){
-                        $qty2_uom        = $row['s_awal_qty2_uom'];
-                        $cat_qty2_uom_s_awal   = $row['s_awal_qty2_uom'];
-                    }else{
-                        $qty2_uom        = '';
-                    }
-                    if($row['s_awal_qty_opname_uom'] != ''){
-                        $qty_opname_uom  = $row['s_awal_qty_opname_uom'];
-                        $cat_opname_uom_s_awal   = $row['s_awal_qty_opname_uom'];
-                    }else{
-                        $qty_opname_uom  = '';
-                    }
+                   
+                   
                     
                     // IN
                     $no_in  = 1;
                     $n      = $tm['count_in'];
                     for ( $d = 0; $d < $n; $d++) {
-                        $in_lot         = $row['in'.$no_in.'_lot'];
-                        $in_qty1        = $row['in'.$no_in.'_qty1'];
-                        $in_qty1_uom    = $row['in'.$no_in.'_qty1_uom'];
-                        $in_qty2        = $row['in'.$no_in.'_qty2'];
-                        $in_qty2_uom    = $row['in'.$no_in.'_qty2_uom'];
-                        $in_opname      = $row['in'.$no_in.'_qty_opname'];
-                        $in_opname_uom  = $row['in'.$no_in.'_qty_opname_uom'];
-                        $column_excel  = $this->cek_column_excel($column);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $in_lot);
-                        $column_excel1  = $this->cek_column_excel($column+1);
-                        $sheet->SetCellValue($column_excel1.''.$rowCount, $in_qty1);
-                        $column_excel2  = $this->cek_column_excel($column+2);
-                        $sheet->SetCellValue($column_excel2.''.$rowCount, $in_qty1_uom);
-                        $column_excel3  = $this->cek_column_excel($column+3);
-                        $sheet->SetCellValue($column_excel3.''.$rowCount, $in_qty2);
-                        $column_excel4  = $this->cek_column_excel($column+4);
-                        $sheet->SetCellValue($column_excel4.''.$rowCount, $in_qty2_uom);
-                        $column_excel5  = $this->cek_column_excel($column+5);
-                        $sheet->SetCellValue($column_excel5.''.$rowCount, $in_opname);
-                        $column_excel6  = $this->cek_column_excel($column+6);
-                        $sheet->SetCellValue($column_excel6.''.$rowCount, $in_opname_uom);
 
-                        $in_total_lot         = $in_total_lot+($in_lot);
-                        $in_total_qty1        = $in_total_qty1+($in_qty1);
-                        $in_total_qty2        = $in_total_qty2+($in_qty2);
-                        $in_total_qty_opname  = $in_total_qty_opname+($in_opname);
+                        if($view =="DetailProduk"){
 
-                        $arr_in[] = array( 'in_lot'     => $in_lot, 
-                                           'in_qty1'    => $in_qty1,
-                                           'in_qty1_uom'=> $in_qty1_uom,
-                                           'in_qty2'    => $in_qty2,
-                                           'in_qty2_uom'=> $in_qty2_uom,
-                                           'in_opname'  => $in_opname,
-                                           'in_opname_uom'=> $in_opname_uom
-                        );
+                            $in_lot         = $row['in'.$no_in.'_lot'];
+                            $in_qty1        = $row['in'.$no_in.'_qty1'];
+                            $in_qty1_uom    = $row['in'.$no_in.'_qty1_uom'];
+                            $in_qty2        = $row['in'.$no_in.'_qty2'];
+                            $in_qty2_uom    = $row['in'.$no_in.'_qty2_uom'];
+                            $in_opname      = $row['in'.$no_in.'_qty_opname'];
+                            $in_opname_uom  = $row['in'.$no_in.'_qty_opname_uom'];
+                            $column_excel  = $this->cek_column_excel($column);
+                            $sheet->SetCellValue($column_excel.''.$rowCount, $in_lot);
+                            $column_excel1  = $this->cek_column_excel($column+1);
+                            $sheet->SetCellValue($column_excel1.''.$rowCount, $in_qty1);
+                            $column_excel2  = $this->cek_column_excel($column+2);
+                            $sheet->SetCellValue($column_excel2.''.$rowCount, $in_qty1_uom);
+                            $column_excel3  = $this->cek_column_excel($column+3);
+                            $sheet->SetCellValue($column_excel3.''.$rowCount, $in_qty2);
+                            $column_excel4  = $this->cek_column_excel($column+4);
+                            $sheet->SetCellValue($column_excel4.''.$rowCount, $in_qty2_uom);
+                            $column_excel5  = $this->cek_column_excel($column+5);
+                            $sheet->SetCellValue($column_excel5.''.$rowCount, $in_opname);
+                            $column_excel6  = $this->cek_column_excel($column+6);
+                            $sheet->SetCellValue($column_excel6.''.$rowCount, $in_opname_uom);
 
-                        // info uom
-                        if($in_qty1_uom != ''){
-                            $qty1_uom        = $in_qty1_uom;
+                            $in_total_lot         = $in_total_lot+($in_lot);
+                            $in_total_qty1        = $in_total_qty1+($in_qty1);
+                            $in_total_qty2        = $in_total_qty2+($in_qty2);
+                            $in_total_qty_opname  = $in_total_qty_opname+($in_opname);
+
+                            $arr_in[] = array( 'in_lot'     => $in_lot, 
+                                            'in_qty1'    => $in_qty1,
+                                            'in_qty1_uom'=> $in_qty1_uom,
+                                            'in_qty2'    => $in_qty2,
+                                            'in_qty2_uom'=> $in_qty2_uom,
+                                            'in_opname'  => $in_opname,
+                                            'in_opname_uom'=> $in_opname_uom
+                            );
+
+                            // info uom
+                            if($in_qty1_uom != ''){
+                                $qty1_uom        = $in_qty1_uom;
+                            }
+                            if($in_qty2_uom != ''){
+                                $qty2_uom        = $in_qty2_uom;
+                            }
+                            if($in_opname_uom != ''){
+                                $qty_opname_uom  = $in_opname_uom;
+                            }
+                            $column = $column + 7;
+
+                        }else{
+
+                            $in_lot         = $row['in'.$no_in.'_lot'];
+                            $in_mtr         = $row['in'.$no_in.'_mtr'];
+                            $in_kg          = $row['in'.$no_in.'_kg'];
+                            $column_excel  = $this->cek_column_excel($column);
+                            $sheet->SetCellValue($column_excel.''.$rowCount, $in_lot);
+                            $column_excel1  = $this->cek_column_excel($column+1);
+                            $sheet->SetCellValue($column_excel1.''.$rowCount, $in_mtr);
+                            $column_excel2  = $this->cek_column_excel($column+2);
+                            $sheet->SetCellValue($column_excel2.''.$rowCount, $in_kg);
+
+                            $in_total_lot       = $in_total_lot+($in_lot);
+                            $in_total_mtr       = $in_total_mtr+($in_mtr);
+                            $in_total_kg        = $in_total_kg+($in_kg);
+
+                            $column = $column + 3;
+
                         }
-                        if($in_qty2_uom != ''){
-                            $qty2_uom        = $in_qty2_uom;
-                        }
-                        if($in_opname_uom != ''){
-                            $qty_opname_uom  = $in_opname_uom;
-                        }
-                        $column = $column + 7;
+
                         $no_in++;
                     }
                     
                     $arr_in2[] = $arr_in;
                     $arr_in    = [];
-                    
-                    // ADJ IN
-                    $column_excel_adj  = $this->cek_column_excel($column);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_lot']);
-                    $column_excel_adj  = $this->cek_column_excel($column+1);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty1']);
-                    $column_excel_adj  = $this->cek_column_excel($column+2);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty1_uom']);
-                    $column_excel_adj  = $this->cek_column_excel($column+3);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty2']);
-                    $column_excel_adj  = $this->cek_column_excel($column+4);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty2_uom']);
-                    $column_excel_adj  = $this->cek_column_excel($column+5);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty_opname']);
-                    $column_excel_adj  = $this->cek_column_excel($column+6);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty_opname_uom']);
 
-                    $in_total_lot         = $in_total_lot+($row['adj_in_lot']);
-                    $in_total_qty1        = $in_total_qty1+($row['adj_in_qty1']);
-                    $in_total_qty2        = $in_total_qty2+($row['adj_in_qty2']);
-                    $in_total_qty_opname  = $in_total_qty_opname+($row['adj_in_qty_opname']);
+                    if($view == "DetailProduk"){
 
-                    // info uom
-                    if($row['adj_in_qty1_uom'] != ''){
-                        $qty1_uom        = $row['adj_in_qty1_uom'];
-                        $cat_qty1_uom_adj_in   =  $row['adj_in_qty1_uom'];
+                        // ADJ IN
+                        $column_excel_adj  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_lot']);
+                        $column_excel_adj  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty1']);
+                        $column_excel_adj  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty1_uom']);
+                        $column_excel_adj  = $this->cek_column_excel($column+3);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty2']);
+                        $column_excel_adj  = $this->cek_column_excel($column+4);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty2_uom']);
+                        $column_excel_adj  = $this->cek_column_excel($column+5);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty_opname']);
+                        $column_excel_adj  = $this->cek_column_excel($column+6);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_qty_opname_uom']);
+
+                        $in_total_lot         = $in_total_lot+($row['adj_in_lot']);
+                        $in_total_qty1        = $in_total_qty1+($row['adj_in_qty1']);
+                        $in_total_qty2        = $in_total_qty2+($row['adj_in_qty2']);
+                        $in_total_qty_opname  = $in_total_qty_opname+($row['adj_in_qty_opname']);
+
+                        // info uom
+                        if($row['adj_in_qty1_uom'] != ''){
+                            $qty1_uom        = $row['adj_in_qty1_uom'];
+                            $cat_qty1_uom_adj_in   =  $row['adj_in_qty1_uom'];
+                        }
+                        if($row['adj_in_qty2_uom'] != ''){
+                            $qty2_uom        = $row['adj_in_qty2_uom'];
+                            $cat_qty2_uom_adj_in   =  $row['adj_in_qty2_uom'];
+                        }
+                        if($row['adj_in_qty_opname_uom'] != ''){
+                            $qty_opname_uom  = $row['adj_in_qty_opname_uom'];
+                            $cat_opname_uom_adj_in   = $row['adj_in_qty_opname_uom'];
+                        }
+
+                        $column = $column + 7;
+
+                    }else{// global
+                        $column_excel_adj  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_lot']);
+                        $column_excel_adj  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_mtr']);
+                        $column_excel_adj  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_kg']);
+
+                        $in_total_lot       = $in_total_lot+($row['adj_in_lot']);
+                        $in_total_mtr       = $in_total_mtr+($row['adj_in_mtr']);
+                        $in_total_kg        = $in_total_kg+($row['adj_in_kg']);
+
+                        $column = $column + 3;
+
                     }
-                    if($row['adj_in_qty2_uom'] != ''){
-                        $qty2_uom        = $row['adj_in_qty2_uom'];
-                        $cat_qty2_uom_adj_in   =  $row['adj_in_qty2_uom'];
+
+                    if($view =="DetailProduk"){
+
+                        // Total IN
+                        $column_excel_tot_in  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_lot);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_qty1);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $qty1_uom);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+3);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_qty2);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+4);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $qty2_uom);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+5);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_qty_opname);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+6);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $qty_opname_uom);
+
+                        $column = $column + 7;
+
+                        $arr_tot_in[] = array("tot_lot"     => $in_total_lot,
+                                            "tot_qty1"    => $in_total_qty1,
+                                            "qty1_uom"    => $qty1_uom,
+                                            "tot_qty2"    => $in_total_qty2,
+                                            "qty2_uom"    => $qty2_uom,
+                                            "tot_qty_opname"    => $in_total_qty_opname,
+                                            "qty_opname_uom"    => $qty_opname_uom,
+                        );
+                    }else{
+                        // Total IN
+                        $column_excel_tot_in  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_lot);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_mtr);
+                        $column_excel_tot_in  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_kg);
+
+                        $column = $column + 3;
+
                     }
-                    if($row['adj_in_qty_opname_uom'] != ''){
-                        $qty_opname_uom  = $row['adj_in_qty_opname_uom'];
-                        $cat_opname_uom_adj_in   = $row['adj_in_qty_opname_uom'];
-                    }
-
-                    $column = $column + 7;
-
-                    // Total IN
-                    $column_excel_tot_in  = $this->cek_column_excel($column);
-                    $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_lot);
-                    $column_excel_tot_in  = $this->cek_column_excel($column+1);
-                    $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_qty1);
-                    $column_excel_tot_in  = $this->cek_column_excel($column+2);
-                    $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $qty1_uom);
-                    $column_excel_tot_in  = $this->cek_column_excel($column+3);
-                    $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_qty2);
-                    $column_excel_tot_in  = $this->cek_column_excel($column+4);
-                    $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $qty2_uom);
-                    $column_excel_tot_in  = $this->cek_column_excel($column+5);
-                    $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $in_total_qty_opname);
-                    $column_excel_tot_in  = $this->cek_column_excel($column+6);
-                    $sheet->SetCellValue($column_excel_tot_in.''.$rowCount, $qty_opname_uom);
-
-                    $column = $column + 7;
-
-                    $arr_tot_in[] = array("tot_lot"     => $in_total_lot,
-                                          "tot_qty1"    => $in_total_qty1,
-                                          "qty1_uom"    => $qty1_uom,
-                                          "tot_qty2"    => $in_total_qty2,
-                                          "qty2_uom"    => $qty2_uom,
-                                          "tot_qty_opname"    => $in_total_qty_opname,
-                                          "qty_opname_uom"    => $qty_opname_uom,
-                    );
 
 
                     // OUT
                     $no_out = 1;
                     $n      = $tm['count_out'];
                     for ( $d = 0; $d < $n; $d++) {
-                    
-                        $out_lot         = $row['out'.$no_out.'_lot'];
-                        $out_qty1        = $row['out'.$no_out.'_qty1'];
-                        $out_qty1_uom    = $row['out'.$no_out.'_qty1_uom'];
-                        $out_qty2        = $row['out'.$no_out.'_qty2'];
-                        $out_qty2_uom    = $row['out'.$no_out.'_qty2_uom'];
-                        $out_opname      = $row['out'.$no_out.'_qty_opname'];
-                        $out_opname_uom  = $row['out'.$no_out.'_qty_opname_uom'];
-                        $column_excel  = $this->cek_column_excel($column);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $out_lot);
-                        $column_excel1  = $this->cek_column_excel($column+1);
-                        $sheet->SetCellValue($column_excel1.''.$rowCount, $out_qty1);
-                        $column_excel2  = $this->cek_column_excel($column+2);
-                        $sheet->SetCellValue($column_excel2.''.$rowCount, $out_qty1_uom);
-                        $column_excel3  = $this->cek_column_excel($column+3);
-                        $sheet->SetCellValue($column_excel3.''.$rowCount, $out_qty2);
-                        $column_excel4  = $this->cek_column_excel($column+4);
-                        $sheet->SetCellValue($column_excel4.''.$rowCount, $out_qty2_uom);
-                        $column_excel5  = $this->cek_column_excel($column+5);
-                        $sheet->SetCellValue($column_excel5.''.$rowCount, $out_opname);
-                        $column_excel6  = $this->cek_column_excel($column+6);
-                        $sheet->SetCellValue($column_excel6.''.$rowCount, $out_opname_uom);
-        
-                        $out_total_lot         = $out_total_lot+($out_lot);
-                        $out_total_qty1        = $out_total_qty1+($out_qty1);
-                        $out_total_qty2        = $out_total_qty2+($out_qty2);
-                        $out_total_qty_opname  = $out_total_qty_opname+($out_opname);
 
-                        $arr_out[] = array( 'out_lot'     => $out_lot, 
-                                            'out_qty1'    => $out_qty1,
-                                            'out_qty1_uom'=> $out_qty1_uom,
-                                            'out_qty2'    => $out_qty2,
-                                            'out_qty2_uom'=> $out_qty2_uom,
-                                            'out_opname'  => $out_opname,
-                                            'out_opname_uom'=> $in_opname_uom
-                        );
-        
-                        // info uom
-                        if($out_qty1_uom != ''){
-                            $qty1_uom        = $out_qty1_uom;
+                        if($view == "DetailProduk"){
+
+                            $out_lot         = $row['out'.$no_out.'_lot'];
+                            $out_qty1        = $row['out'.$no_out.'_qty1'];
+                            $out_qty1_uom    = $row['out'.$no_out.'_qty1_uom'];
+                            $out_qty2        = $row['out'.$no_out.'_qty2'];
+                            $out_qty2_uom    = $row['out'.$no_out.'_qty2_uom'];
+                            $out_opname      = $row['out'.$no_out.'_qty_opname'];
+                            $out_opname_uom  = $row['out'.$no_out.'_qty_opname_uom'];
+                            $column_excel  = $this->cek_column_excel($column);
+                            $sheet->SetCellValue($column_excel.''.$rowCount, $out_lot);
+                            $column_excel1  = $this->cek_column_excel($column+1);
+                            $sheet->SetCellValue($column_excel1.''.$rowCount, $out_qty1);
+                            $column_excel2  = $this->cek_column_excel($column+2);
+                            $sheet->SetCellValue($column_excel2.''.$rowCount, $out_qty1_uom);
+                            $column_excel3  = $this->cek_column_excel($column+3);
+                            $sheet->SetCellValue($column_excel3.''.$rowCount, $out_qty2);
+                            $column_excel4  = $this->cek_column_excel($column+4);
+                            $sheet->SetCellValue($column_excel4.''.$rowCount, $out_qty2_uom);
+                            $column_excel5  = $this->cek_column_excel($column+5);
+                            $sheet->SetCellValue($column_excel5.''.$rowCount, $out_opname);
+                            $column_excel6  = $this->cek_column_excel($column+6);
+                            $sheet->SetCellValue($column_excel6.''.$rowCount, $out_opname_uom);
+            
+                            $out_total_lot         = $out_total_lot+($out_lot);
+                            $out_total_qty1        = $out_total_qty1+($out_qty1);
+                            $out_total_qty2        = $out_total_qty2+($out_qty2);
+                            $out_total_qty_opname  = $out_total_qty_opname+($out_opname);
+
+                            $arr_out[] = array( 'out_lot'     => $out_lot, 
+                                                'out_qty1'    => $out_qty1,
+                                                'out_qty1_uom'=> $out_qty1_uom,
+                                                'out_qty2'    => $out_qty2,
+                                                'out_qty2_uom'=> $out_qty2_uom,
+                                                'out_opname'  => $out_opname,
+                                                'out_opname_uom'=> $in_opname_uom
+                            );
+            
+                            // info uom
+                            if($out_qty1_uom != ''){
+                                $qty1_uom        = $out_qty1_uom;
+                            }
+                            if($out_qty2_uom != ''){
+                                $qty2_uom        = $out_qty2_uom;
+                            }
+                            if($out_opname_uom != ''){
+                                $qty_opname_uom  = $out_opname_uom;
+                            }
+            
+                            $column = $column + 7;
+
+                        }else{
+                            $out_lot         = $row['out'.$no_out.'_lot'];
+                            $out_mtr         = $row['out'.$no_out.'_mtr'];
+                            $out_kg          = $row['out'.$no_out.'_kg'];
+                            $column_excel  = $this->cek_column_excel($column);
+                            $sheet->SetCellValue($column_excel.''.$rowCount, $out_lot);
+                            $column_excel1  = $this->cek_column_excel($column+1);
+                            $sheet->SetCellValue($column_excel1.''.$rowCount, $out_mtr);
+                            $column_excel2  = $this->cek_column_excel($column+2);
+                            $sheet->SetCellValue($column_excel2.''.$rowCount, $out_kg);
+
+                            $out_total_lot       = $out_total_lot+($out_lot);
+                            $out_total_mtr       = $out_total_mtr+($out_mtr);
+                            $out_total_kg        = $out_total_kg+($out_kg);
+
+                            $column = $column + 3;
+
                         }
-                        if($out_qty2_uom != ''){
-                            $qty2_uom        = $out_qty2_uom;
-                        }
-                        if($out_opname_uom != ''){
-                            $qty_opname_uom  = $out_opname_uom;
-                        }
-        
-                        $column = $column + 7;
+
                         $no_out++;
                     }
 
                     $arr_out2[] = $arr_out;
                     $arr_out    = [];
 
-                    // ADJ OUT
-                    $column_excel_adj  = $this->cek_column_excel($column);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_lot']);
-                    $column_excel_adj  = $this->cek_column_excel($column+1);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty1']);
-                    $column_excel_adj  = $this->cek_column_excel($column+2);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty1_uom']);
-                    $column_excel_adj  = $this->cek_column_excel($column+3);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty2']);
-                    $column_excel_adj  = $this->cek_column_excel($column+4);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty2_uom']);
-                    $column_excel_adj  = $this->cek_column_excel($column+5);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty_opname']);
-                    $column_excel_adj  = $this->cek_column_excel($column+6);
-                    $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty_opname_uom']);
+                    if($view == "DetailProduk"){
+                        // ADJ OUT
+                        $column_excel_adj  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_lot']);
+                        $column_excel_adj  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty1']);
+                        $column_excel_adj  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty1_uom']);
+                        $column_excel_adj  = $this->cek_column_excel($column+3);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty2']);
+                        $column_excel_adj  = $this->cek_column_excel($column+4);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty2_uom']);
+                        $column_excel_adj  = $this->cek_column_excel($column+5);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty_opname']);
+                        $column_excel_adj  = $this->cek_column_excel($column+6);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_qty_opname_uom']);
 
-                    $out_total_lot         = $out_total_lot+($row['adj_out_lot']);
-                    $out_total_qty1        = $out_total_qty1+($row['adj_out_qty1']);
-                    $out_total_qty2        = $out_total_qty2+($row['adj_out_qty2']);
-                    $out_total_qty_opname  = $out_total_qty_opname+($row['adj_out_qty_opname']);
+                        $out_total_lot         = $out_total_lot+($row['adj_out_lot']);
+                        $out_total_qty1        = $out_total_qty1+($row['adj_out_qty1']);
+                        $out_total_qty2        = $out_total_qty2+($row['adj_out_qty2']);
+                        $out_total_qty_opname  = $out_total_qty_opname+($row['adj_out_qty_opname']);
 
-                    // info uom
-                    if($row['adj_out_qty1_uom'] != ''){
-                        $qty1_uom        = $row['adj_out_qty1_uom'];
-                        $cat_qty1_uom_adj_out   =  $row['adj_out_qty1_uom'];
+                        // info uom
+                        if($row['adj_out_qty1_uom'] != ''){
+                            $qty1_uom        = $row['adj_out_qty1_uom'];
+                            $cat_qty1_uom_adj_out   =  $row['adj_out_qty1_uom'];
+                        }
+                        if($row['adj_out_qty2_uom'] != ''){
+                            $qty2_uom        = $row['adj_out_qty2_uom'];
+                            $cat_qty2_uom_adj_out   =  $row['adj_out_qty2_uom'];
+                        }
+                        if($row['adj_out_qty_opname_uom'] != ''){
+                            $qty_opname_uom  = $row['adj_out_qty_opname_uom'];
+                            $cat_opname_uom_adj_out   =  $row['adj_out_qty_opname_uom'];
+                        }
+
+                        $column = $column + 7;
+
+                    }else{
+
+                        // ADJ OUT
+                        $column_excel_adj  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_lot']);
+                        $column_excel_adj  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_mtr']);
+                        $column_excel_adj  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_kg']);
+
+                        $out_total_lot       = $out_total_lot+($row['adj_out_lot']);
+                        $out_total_mtr       = $out_total_mtr+($row['adj_out_mtr']);
+                        $out_total_kg        = $out_total_kg+($row['adj_out_kg']);
+
+                        $column = $column + 3;
                     }
-                    if($row['adj_out_qty2_uom'] != ''){
-                        $qty2_uom        = $row['adj_out_qty2_uom'];
-                        $cat_qty2_uom_adj_out   =  $row['adj_out_qty2_uom'];
+
+                    if($view == "DetailProduk"){
+                        // Total OUT
+                        $column_excel_tot_out  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_lot);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty1);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty1_uom);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+3);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty2);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+4);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty2_uom);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+5);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty_opname);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+6);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty_opname_uom);
+
+                        $arr_tot_out[] = array("tot_lot"        => $out_total_lot,
+                                            "tot_qty1"          => $out_total_qty1,
+                                            "qty1_uom"          => $qty1_uom,
+                                            "tot_qty2"          => $out_total_qty2,
+                                            "qty2_uom"          => $qty2_uom,
+                                            "tot_qty_opname"    => $out_total_qty_opname,
+                                            "qty_opname_uom"    => $qty_opname_uom,
+                        );
+
+                        $column = $column + 7;
+                    }else{
+
+                        // Total OUT
+                        $column_excel_tot_out  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_lot);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_mtr);
+                        $column_excel_tot_out  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_kg);
+
+                        $column = $column + 3;
                     }
-                    if($row['adj_out_qty_opname_uom'] != ''){
-                        $qty_opname_uom  = $row['adj_out_qty_opname_uom'];
-                        $cat_opname_uom_adj_out   =  $row['adj_out_qty_opname_uom'];
-                    }
 
-                    $column = $column + 7;
+                    if($view == "DetailProduks"){
+                        // Saldo Akhir
+                        $column_excel_akhir  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_lot']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty1']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty1_uom']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+3);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty2']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+4);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty2_uom']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+5);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty_opname']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+6);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty_opname_uom']);
 
-                    // Total OUT
-                    $column_excel_tot_out  = $this->cek_column_excel($column);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_lot);
-                    $column_excel_tot_out  = $this->cek_column_excel($column+1);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty1);
-                    $column_excel_tot_out  = $this->cek_column_excel($column+2);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty1_uom);
-                    $column_excel_tot_out  = $this->cek_column_excel($column+3);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty2);
-                    $column_excel_tot_out  = $this->cek_column_excel($column+4);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty2_uom);
-                    $column_excel_tot_out  = $this->cek_column_excel($column+5);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $out_total_qty_opname);
-                    $column_excel_tot_out  = $this->cek_column_excel($column+6);
-                    $sheet->SetCellValue($column_excel_tot_out.''.$rowCount, $qty_opname_uom);
+                        if($row['s_akhir_qty1_uom'] != ''){
+                            $cat_qty1_uom_s_akhir   = $row['s_akhir_qty1_uom'];
+                        }
+                        if($row['s_akhir_qty2_uom'] != ''){
+                            $cat_qty2_uom_s_akhir   = $row['s_akhir_qty2_uom'];
+                        }
+                        if($row['s_akhir_qty_opname_uom'] != ''){
+                            $cat_opname_uom_s_akhir   = $row['s_akhir_qty_opname_uom'];
+                        }
 
-                    $arr_tot_out[] = array("tot_lot"        => $out_total_lot,
-                                        "tot_qty1"          => $out_total_qty1,
-                                        "qty1_uom"          => $qty1_uom,
-                                        "tot_qty2"          => $out_total_qty2,
-                                        "qty2_uom"          => $qty2_uom,
-                                        "tot_qty_opname"    => $out_total_qty_opname,
-                                        "qty_opname_uom"    => $qty_opname_uom,
-                    );
+                    }else{
 
-                    $column = $column + 7;
-
-                    // Saldo Akhir
-                    $column_excel_akhir  = $this->cek_column_excel($column);
-                    $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_lot']);
-                    $column_excel_akhir  = $this->cek_column_excel($column+1);
-                    $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty1']);
-                    $column_excel_akhir  = $this->cek_column_excel($column+2);
-                    $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty1_uom']);
-                    $column_excel_akhir  = $this->cek_column_excel($column+3);
-                    $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty2']);
-                    $column_excel_akhir  = $this->cek_column_excel($column+4);
-                    $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty2_uom']);
-                    $column_excel_akhir  = $this->cek_column_excel($column+5);
-                    $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty_opname']);
-                    $column_excel_akhir  = $this->cek_column_excel($column+6);
-                    $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_qty_opname_uom']);
-
-                    if($row['s_akhir_qty1_uom'] != ''){
-                        $cat_qty1_uom_s_akhir   = $row['s_akhir_qty1_uom'];
-                    }
-                    if($row['s_akhir_qty2_uom'] != ''){
-                        $cat_qty2_uom_s_akhir   = $row['s_akhir_qty2_uom'];
-                    }
-                    if($row['s_akhir_qty_opname_uom'] != ''){
-                        $cat_opname_uom_s_akhir   = $row['s_akhir_qty_opname_uom'];
+                        $column_excel_akhir  = $this->cek_column_excel($column);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_lot']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+1);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_mtr']);
+                        $column_excel_akhir  = $this->cek_column_excel($column+2);
+                        $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_kg']);
+                            
                     }
 
                     $rowCount++;
