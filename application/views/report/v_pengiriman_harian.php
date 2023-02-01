@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -96,12 +97,12 @@
                         <label>View </label>
                     </div>
                     <div class="col-xs-4 col-sm-3 col-md-3">
-                      <input type="radio" id="view" name="view[]" value="Detail">
-                      <label for="detail">Detail</label>
-                    </div>
-                    <div class="col-xs-4 col-sm-3 col-md-3">
                       <input type="radio" id="view" name="view[]" value="Global" checked="checked">
                       <label for="global">Global</label>
+                    </div>
+                    <div class="col-xs-4 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="Detail">
+                      <label for="detail">Detail</label>
                     </div>
                   </div>
                 </div>
@@ -125,7 +126,7 @@
               </div>
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
               <br>
               <div class="col-md-12">
@@ -183,25 +184,24 @@
 
             <!-- table -->
             <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
+                <div class="col-sm-12 table-responsive">
                   <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
+                    <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                        <table id="example1" class="table table-condesed table-hover" border="0">
                           <thead>
                             <tr>
-                              <th  class="style no" >No. </th>
-                              <th  class='style'>Kode</th>
-                              <th  class='style' style="min-width: 80px">Tgl Kirim</th>
-                              <th  class='style'>Origin</th>
-                              <th  class='style' style="min-width: 150px">Reff Picking</th>
-                              <th  class='style nowrap' >Kode Produk</th>
-                              <th  class='style' style="min-width: 150px">Nama Produk</th>
-                              <th  class='style nowrap' id="head_lot">Lot</th>
-                              <th  class='style'>Qty1</th>
-                              <th  class='style'>Qty2</th>
-                              <th  class='style'>Status</th>
-                              <th  class='style'>Reff Note</th>
+                              <th  class="style bb no" >No. </th>
+                              <th  class='style bb'>Kode</th>
+                              <th  class='style bb' style="min-width: 80px">Tgl Kirim</th>
+                              <th  class='style bb'>Origin</th>
+                              <th  class='style bb' style="min-width: 150px">Reff Picking</th>
+                              <th  class='style bb nowrap' >Kode Produk</th>
+                              <th  class='style bb' style="min-width: 150px">Nama Produk</th>
+                              <th  class='style bb nowrap' id="head_lot">Lot</th>
+                              <th  class='style bb'>Qty1</th>
+                              <th  class='style bb'>Qty2</th>
+                              <th  class='style bb'>Status</th>
+                              <th  class='style bb'>Reff Note</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -213,11 +213,10 @@
                       <div id="example1_processing" class="table_processing" style="display: none">
                         Processing...
                       </div>
+                    </div>
                   </div>
                 </div>
 
-              </div>
-            </div>
             </div>
 
         </div>
