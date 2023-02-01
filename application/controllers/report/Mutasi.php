@@ -1527,7 +1527,7 @@ class Mutasi extends MY_Controller
                         $column = $column + 3;
                     }
 
-                    if($view == "DetailProduks"){
+                    if($view == "DetailProduk"){
                         // Saldo Akhir
                         $column_excel_akhir  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel_akhir.''.$rowCount, $row['s_akhir_lot']);
