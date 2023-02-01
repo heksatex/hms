@@ -32,7 +32,11 @@
 
     .error{
       border:  1px solid red !important;
-    }  
+    }
+
+    .reserve_move{
+      color:red;
+    }
 
     /*
     @media screen and (max-width: 767px) {
@@ -956,6 +960,7 @@
                       unblockUI( function(){});
                       alert_modal_warning(data.message);
                       refresh_adjustment();
+                      
                   }else{
                       refresh_adjustment();
                       unblockUI( function() {
