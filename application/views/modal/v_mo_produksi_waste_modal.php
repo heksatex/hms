@@ -255,6 +255,10 @@
 </style>
 
 <script>
+
+	$("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-produksi-waste" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+
+
 	$("input[name='waste?[]']").unbind();
 	$("input[name='waste?[]']").off("change").on("change", function(){
 		// alert(this.value);
@@ -416,7 +420,6 @@
 			});
 			document.getElementById('total_qty2_konsum').value = formatNumber(total_qty2_konsum.toFixed(2));
 		}
-		
 	});
 
 	function get_qty_by_bom(position,kode_produk,qty2){
@@ -1387,7 +1390,7 @@
 	}
 
 
-	$("#btn-tambah").off("click").on("click",function(e) {
+	$("#btn-produksi-waste").off("click").on("click",function(e) {
 		
 			e.preventDefault();
 			
@@ -1558,7 +1561,7 @@
 						qty2_row.removeClass('error');
 					}
 
-					if ($(item).val()!=="") {
+					if ((qty_konsum != "" || qty2_konsum != "") && ( qty_konsum != 0 || qty2_konsum ) && (qty_konsum != 0.00  || qty2_konsum != 0.00)) {
 						arr2.push({
 							kode 		: $("#txtkode").val(),
 							qty_konsum  : $(item).parents("tr").find('#qty_konsum').val(),
@@ -1596,7 +1599,7 @@
 					alert('Maaf, Inputan Konsumsi Bahan baku tidak Valid !');
 				}else{
 					please_wait(function(){});
-				    $('#btn-tambah').button('loading');
+				    $('#btn-produksi-waste').button('loading');
 				    $.ajax({
 				        dataType: "JSON",
 				        url : '<?php echo site_url('manufacturing/mO/save_produksi_waste_modal') ?>',
@@ -1622,7 +1625,7 @@
 				              $("#tab_1").load(location.href + " #tab_1");
 				              $("#tab_2").load(location.href + " #tab_2");             
 				              $("#foot").load(location.href + " #foot");
-				              $('#btn-tambah').button('reset');
+				              $('#btn-produksi-waste').button('reset');
 				              alert(data.message);
 							  unblockUI( function(){});
 				           	}else{
@@ -1632,7 +1635,7 @@
 				              $("#tab_2").load(location.href + " #tab_2");             
 				              $("#foot").load(location.href + " #foot");
 		                 	  $('#tambah_data').modal('hide');
-				              $('#btn-tambah').button('reset');
+				              $('#btn-produksi-waste').button('reset');
 				              if(data.double == 'yes'){
 				              	alert_modal_warning(data.message2);
 				              }
@@ -1645,7 +1648,7 @@
 							
 				        },error: function (jqXHR, textStatus, errorThrown){
 				          alert(jqXHR.responseTex+' error');
-				          $('#btn-tambah').button('reset');
+				          $('#btn-produksi-waste').button('reset');
 						  unblockUI( function(){});
 				        }
 				    });

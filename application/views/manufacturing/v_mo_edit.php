@@ -1049,6 +1049,8 @@
 </div>
 <!--/. Site wrapper -->
 <?php $this->load->view("admin/_partials/js.php") ?>
+<!-- add js -->
+<script src="<?php echo base_url('dist/js/myscript.js') ?>"></script>
 
 <script type="text/javascript">
 
@@ -1144,6 +1146,7 @@
     $("#btn-print").show();
     $("#btn-produksi-batch").show();
     $("#btn-waste").show();
+    $("#btn-consume").show();
     $('#mc').attr('disabled', true);
     $("#btn-cancel-edit").attr('id','btn-cancel');
     $("#lebar_jadi_mo").attr("readonly", true);
@@ -1165,6 +1168,7 @@
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('tambah_quant');
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('request_resep');
     $("#tambah_data .modal-dialog ").removeClass('lebar2');
+    $("#view_data .modal-dialog ").removeClass('lebar2');
     //replace id btn_request
     $("#tambah_data .modal-dialog .modal-content .modal-footer #btn_request").attr('id',"btn-tambah");
     $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").text("Simpan");
@@ -1303,6 +1307,7 @@
     $("#btn-produksi").hide();//sembuyikan btn-produksi
     $("#btn-produksi-batch").hide();//sembuyikan btn-produksi-batch
     $("#btn-waste").hide();//sembuyikan btn-waste
+    $("#btn-consume").hide();// sembuyikan btn-consume
     $("#btn-stok").hide();//sembuyikan btn-produksi
     $("#btn-done").hide();//sembuyikan btn-done
     $("#btn-print").hide();//sembuyikan btn-print
@@ -1592,6 +1597,61 @@
   });
 
 
+  $("#btn-consume").unbind( "click" );
+  $(document).on('click','#btn-consume',function(e){
+
+    var status = $('#status').val();
+    if(status == 'done'){
+      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+    }else if(status == 'cancel'){
+      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+    }else if(status == 'draft'){
+      alert_modal_warning('Maaf, Product belum ready !');
+    }else{
+      e.preventDefault();
+      $('.modal-title').text('Consume');
+
+      $('#btn-tambah').button('reset');
+     
+      var kode       = $("#kode").val();
+      var deptid     = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
+      var move_id_fg = "<?php echo $move_id_fg['move_id'];?>";
+      var qty        = "<?php echo $list->qty?>";
+      $("#tambah_data").modal({
+          show: true,
+          backdrop: 'static'
+      });
+      $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('consume');
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+
+      $("#btn-produksi").prop('disabled',true);
+      $("#btn-produksi-batch").prop('disabled',true);
+
+      $(".consume").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $.post('<?php echo site_url()?>manufacturing/mO/consume_mo',
+        { kode        : $('#kode').val(),
+          kode_produk : $('#kode_produk').val(), 
+          nama_produk : $('#product').val(),
+          sisa_qty    : $('#total_sisa').val(), 
+          uom_qty_sisa    : $('#uom_qty_sisa').val(), 
+          deptid      : deptid, 
+          kode        : kode,
+          move_id_fg  : move_id_fg, 
+          qty         : $('#qty_prod').val(),  
+          origin      : $('#origin').val(),
+          lot_prefix_waste  : $('#lot_prefix_waste').val(),       
+        } 
+      ).done(function(html){
+        setTimeout(function() {
+          $(".consume").html(html)  
+        },1000);
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+      });
+    }
+  });
+
+
+
   //hapus data bahan baku
   function hapus(kode, row_order){
       bootbox.dialog({
@@ -1813,66 +1873,41 @@
     });
 
 
-  //klik button done
-  $("#btn-done").unbind( "click" );
-  $('#btn-done').click(function(){
-    var status = $('#status').val();
-    //var move_id = '<?php echo $move_id_rm['move_id'];?>';
-    if(status == 'done'){
-      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
-    }else if(status == 'cancel'){
-      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
-    /*
-    }else if(status == 'draft'){
-      alert_modal_warning('Maaf, Product belum ready !');
-    */
-    }else{
+   //modal request resep
+   $('#btn-done').click(function(){
 
-    $('#btn-done').button('loading');
-    var deptid  = "<?php echo $list->dept_id; ?>";//parsing data id dept untuk log history    
-    var qty_target  = "<?php echo $list->qty; ?>";
-    please_wait(function(){});
+      var status = $('#status').val();
+      // if(status == 'done'){
+      //   alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+      // }else if(status == 'cancel'){
+      //   alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+      
+      // }else if(status == 'draft'){
+      //   alert_modal_warning('Maaf, Product belum ready !');
+     
+      // }else{
 
-        $.ajax({
-           type: "POST",
-           dataType: "json",
-           url :'<?php echo base_url('manufacturing/mO/mo_done')?>',
-           beforeSend: function(e) {
-              if(e && e.overrideMimeType) {
-                  e.overrideMimeType("application/json;charset=UTF-8");
-              }
-           },
-            data: {kode   : $('#kode').val(),              
-                   deptid : deptid,   
-                   qty_target : qty_target,             
-            },success: function(data){
-              if(data.sesi == "habis"){
-                //alert jika session habis
-                alert_modal_warning(data.message);
-                window.location.replace('../index');
-              }else if(data.status == "failed"){
-                unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                });
-                refresh_mo(); 
-                $('#btn-done').button('reset')         
-              }else{
-                unblockUI( function() {
-                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                });
-                refresh_mo();
-                $('#btn-done').button('reset');           
-              }
+        $("#view_data").modal({
+            show: true,
+            backdrop: 'static'
+        })
+        var deptid = "<?php echo $list->dept_id; ?>"
 
-            },error: function (xhr, ajaxOptions, thrownError) { 
-              alert(xhr.responseText);
-              setTimeout($.unblockUI, 1000); 
-              unblockUI( function(){});
-              $('#btn-done').button('reset');
-            }
-        });
-    }
-  });
+        // $("#view_data .modal-dialog ").addClass('lebar2');
+
+        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Warning !!');
+        $.post('<?php echo site_url()?>manufacturing/mO/mo_done_modal',
+              {kode:$('#kode').val(), deptid:deptid},
+        ).done(function(html){
+            setTimeout(function() {
+                $(".view_body").html(html);  
+              },1000);
+         });
+
+      // }
+
+    });
 
 
 

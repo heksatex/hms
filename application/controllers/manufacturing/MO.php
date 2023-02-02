@@ -1331,6 +1331,32 @@ class MO extends MY_Controller
         return $this->load->view('modal/v_mo_produksi_batch_modal',$data);
     }
 
+    public function consume_mo()
+    {
+
+        $kode             = $this->input->post('kode');
+        $deptid           = $this->input->post('deptid');
+        $kode_produk      = $this->input->post('kode_produk');
+
+        $data['deptid']      = $deptid;
+        $data['kode']        = $kode;
+        $data['sisa_qty']    = $this->input->post('sisa_qty');
+        $data['uom_qty_sisa']= $this->input->post('uom_qty_sisa');
+        $data['qty_prod']    = $this->input->post('qty');
+        $data['kode_produk'] = $kode_produk;
+        $data['origin_mo']   = $this->input->post('origin');
+        
+        $data['konsumsi']   = $this->m_mo->get_konsumsi_bahan($kode,'ready');
+        $data['list_fg']    = $this->m_mo->get_list_mrp_production_fg_hasil_cons_no_by_kode($kode);
+
+        $data['rm_done']    = $this->m_mo->get_sum_qty_rm_done($kode,'done')->row();
+        $data['rm_ready']   = $this->m_mo->get_sum_qty_rm_ready($kode,'ready')->row();
+        $data['fg_no']      = $this->m_mo->get_sum_qty_fg($kode,'no')->row();
+        $data['fg_yes']     = $this->m_mo->get_sum_qty_fg($kode,'yes')->row();
+
+        return $this->load->view('modal/v_mo_consume_modal',$data);
+    }
+
     public function produksi_waste()
     {
 
@@ -1389,7 +1415,6 @@ class MO extends MY_Controller
         $data['lot_prefix_waste'] = $lot_prefix_waste;
 
         return $this->load->view('modal/v_mo_produksi_waste_modal',$data);
-
     }
 
     public function get_list_produk_waste()
@@ -1603,9 +1628,12 @@ class MO extends MY_Controller
             $qty2_new = "";
             $jml_lot_fg    = 0;
             $jml_lot_waste = 0;
+            $case11     = "";
+            $where11    = "";
+            $consume    = "yes";
 
             //lock table
-            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE');
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
 
             //get last quant id
             $start = $this->_module->get_last_quant_id();
@@ -1714,6 +1742,9 @@ class MO extends MY_Controller
                    
                     //simpan stock quant dengan quant_id baru              
                     $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty']."','".addslashes($row['uom'])."','".$row['qty2']."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$sm_tj['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
+                    
+                    $case11   .= "when quant_id = '".$start."' then '".$consume."'";
+                    $where11  .= "'".$start."',";
 
                     if($sm_tj['move_id'] != ''){ // jika stock_move tujuan nya tidak kosong maka insert ke smi
 
@@ -2097,6 +2128,15 @@ class MO extends MY_Controller
 
             }
 
+            $sl   = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get ,copy_bahanbaku true/false
+
+            //update consume == yes
+            if(!empty($where11) AND !empty($case11) AND $sl['copy_bahan_baku']=='true' ){
+                $where11 = rtrim($where11, ',');
+                $sql_update_status_consume ="UPDATE mrp_production_fg_hasil SET consume =(case ".$case11." end) WHERE  quant_id in (".$where11.") AND kode = '".$kode."' AND move_id  ='".$move_id_fg."'  ";
+                $this->_module->update_perbatch($sql_update_status_consume);
+            }
+
             ///cek qty sudah produksi sudah memenuhi atau belum ?
             $qty_target = $this->m_mo->get_qty_mrp_production_fg_target($kode)->row_array();
 
@@ -2287,9 +2327,12 @@ class MO extends MY_Controller
             $where5_move_id  = "";
             $qty2_new = "";
             $hasil_produksi = FALSE;
+            $case11     = "";
+            $where11    = "";
+            $consume    = "yes";
 
             //lock table
-            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE');
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
 
 
             //get last quant id
@@ -2390,6 +2433,9 @@ class MO extends MY_Controller
             
                 //simpan stock move items  produksi
                 $sql_stock_move_items_batch .= "('".$move_id_fg."', '".$start."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes(trim($lot))."','".$qty."','".addslashes($uom)."','".$qty2."','".addslashes($uom2)."','".$status_done."','".$row_order_smi."','', '".$tgl."','','".addslashes($lebar_greige)."','".addslashes($uom_lebar_greige)."','".addslashes($lebar_jadi)."','".addslashes($uom_lebar_jadi)."'), ";
+
+                $case11   .= "when quant_id = '".$start."' then '".$consume."'";
+                $where11  .= "'".$start."',";
 
                 if($sm_tj['move_id'] != ''){ // jika stock_move tujuan nya tidak kosong maka insert ke smi
 
@@ -2707,6 +2753,16 @@ class MO extends MY_Controller
 
             }
 
+            $sl   = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get ,copy_bahanbaku true/false
+
+
+            //update consume == yes
+            if(!empty($where11) AND !empty($case11) AND $sl['copy_bahan_baku']=='true' ){
+                $where11 = rtrim($where11, ',');
+                $sql_update_status_consume ="UPDATE mrp_production_fg_hasil SET consume =(case ".$case11." end) WHERE  quant_id in (".$where11.") AND kode = '".$kode."' AND move_id  ='".$move_id_fg."'  ";
+                $this->_module->update_perbatch($sql_update_status_consume);
+            }
+
             ///cek qty sudah produksi sudah memenuhi atau belum ?
             $qty_target = $this->m_mo->get_qty_mrp_production_fg_target($kode)->row_array();
 
@@ -2816,6 +2872,9 @@ class MO extends MY_Controller
             $qty2_update = "";
             $where_move_items= "";
             $where5_move_id  = "";
+            $where7 = "";
+            $case7  = "";
+            $consume = "yes";
 
             //lock table
             $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE');
@@ -2909,6 +2968,9 @@ class MO extends MY_Controller
                              $lot_double_Waste .= $lot_remark.',';
                          }
                     }
+
+                    $case7   .= "when quant_id = '".$start."' then '".$consume."'";
+                    $where7  .= "'".$start."',";
 
                     /*
                     //cek lot apa pernah diinput ?
@@ -3046,8 +3108,7 @@ class MO extends MY_Controller
                                         $where5_move_id  .= "'".$row['move_id']."',";
 
                                         if($r_waste_apa == 'fg'){
-                                            $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$row['quant_id']."','".$row['additional']."'), 
-                                            ";
+                                            $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$row['quant_id']."','".$row['additional']."'), ";
                                         }
                                     }
 
@@ -3310,6 +3371,13 @@ class MO extends MY_Controller
     
                 }
 
+                //update consume == yes
+                if(!empty($where7) AND !empty($case7)){
+                    $where7 = rtrim($where7, ',');
+                    $sql_update_status_consume ="UPDATE mrp_production_fg_hasil SET consume =(case ".$case7." end) WHERE  quant_id in (".$where7.") AND kode = '".$kode."' AND move_id  ='".$move_id_fg."'  ";
+                    $this->_module->update_perbatch($sql_update_status_consume);
+                }
+
 
                 ///cek qty sudah produksi sudah memenuhi atau belum ?
                 $qty_target = $this->m_mo->get_qty_mrp_production_fg_target($kode)->row_array();
@@ -3378,6 +3446,429 @@ class MO extends MY_Controller
     }
 
 
+    public function save_consume_modal()
+    {
+
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username')); 
+            $nama_user = $this->_module->get_nama_user($username)->row_array();
+
+            $deptid        = $this->input->post('deptid');
+            $kode          = $this->input->post('kode');
+            $origin_mo     = $this->input->post('origin_mo');
+            $kode_produk   = $this->input->post('kode_produk');
+            $array_rm      = json_decode($this->input->post('data_rm'),true);     
+            $array_fg      = json_decode($this->input->post('data_fg'),true);    
+
+            $tgl         = date('Y-m-d H:i:s');
+            $sql_mrp_production_fg_hasil = "";
+            $sql_mrp_production_rm_hasil = "";
+            $sql_stock_quant_batch       = "";
+            $sql_stock_move_items_batch  = "";
+            $konsumsi_bahan  = TRUE;
+            $status_brg  = 'done';
+            $case_fg   = "";
+            $where_fg  = "";
+            $case  = "";
+            $where = "";
+            $case2 = "";
+            $where2= "";
+            $case3 = "";
+            $where3= "";
+            $case4 = "";
+            $where4= "";
+            $case5 = "";
+            $where5= "";
+            $case6 = "";
+            $where6 = "";
+            $case_qty2= "";
+            $qty2_update = "";
+            $where_move_items= "";
+            $where5_move_id  = "";
+
+            //lock table
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE');
+
+
+            //get last quant id
+            $start          = $this->_module->get_last_quant_id();
+            $status_ready   = 'ready';
+            $status_done    = 'done';
+            $move_fg        = $this->m_mo->get_move_id_fg_target_by_kode($kode)->row_array();
+            $move_id_fg     = $move_fg['move_id'];
+            $status_consume = "yes";
+            $list_kp_consume = '';
+
+            if(!empty($array_fg)){
+                // looping array fg
+                foreach($array_fg as $row){
+                    $case_fg  .= "when quant_id = '".$row['quant_id']."' then '".$status_consume."'";
+                    $where_fg .= "'".$row['quant_id']."',"; 
+                    $list_kp_consume .= $row['lot'].", ";
+                }
+            }
+
+            $list_sm_rm = $this->m_mo->get_move_id_rm_target_by_kode($kode)->result();
+
+            if(!empty($array_rm)){
+
+                $konsumsi_bahan = TRUE;
+
+                //simpan rm hasil
+                $move_arr     = [];
+                $move_id_rm   = '';
+                // get list row order by move_id;
+                foreach($list_sm_rm as $listsm){
+                    $move_id_rm  = $listsm->move_id; // get salah satu move_id
+                    $row_order   = $this->_module->get_row_order_stock_move_items_by_kode($listsm->move_id); // row yang sudah + 1
+                    $move_arr[]  = array('move_id' => $listsm->move_id, 'row_order' => $row_order);
+                }
+
+                //lokasi tujuan rm
+                $lokasi_rm = $this->_module->get_location_by_move_id($move_id_rm)->row_array();
+                
+                $get_ro      = $this->m_mo->get_row_order_rm_hasil($kode)->row_array();
+                $row_order_rm= $get_ro['row']+1;
+                foreach ($array_rm as $row) {
+                    if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){
+
+                        if($row['qty_konsum'] < $row['qty_smi']){//jika qty_konsum kurang dari qty stock_move_items
+
+                            $loop  = 0;
+                            $row_order_push = 0 ;
+                            foreach($move_arr as $mv_row){
+                                if(isset($mv_row['move_id']) == $row['move_id']){
+                                  $row_order      = $mv_row['row_order'];
+                                  $row_order_push = $mv_row['row_order'] + 1; // row order + 1 untuk di masukan ke array lagi
+                                  array_splice($move_arr,$loop,1);
+                                  array_push($move_arr,array('move_id'=>$row['move_id'],'row_order'=>$row_order_push));
+                                  break;
+                                }
+                              $loop++;
+                            }
+
+                            //update qty stock_quant dan stock move items by quant_id
+                            $qty_new = $row['qty_smi'] - $row['qty_konsum'];
+                            $case   .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";
+                            $where  .= "'".$row['quant_id']."',";
+
+                            $qty2_new       = $row['qty2'] - $row['qty2_konsum'];
+                            $case_qty2     .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'";
+                            $where_move_items .= "'".$row['move_id']."',";
+
+                            //simpan qty_konsum di stock_quant dan stock_move_items dengan quant_id baru
+                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".addslashes($origin_mo)."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($row['sales_order'])."','".addslashes($row['sales_group'])."'), ";
+                                                        
+                            $sql_stock_move_items_batch .= "('".$row['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$status_brg."','".$row_order."','".addslashes($row['origin_prod'])."','".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+
+                            $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$start."','".$row['additional']."'), ";
+                            //$row_order++;
+                            $start++;
+
+                        }elseif($row['qty_konsum'] == $row['qty_smi']){//jika qty_konsum sama dengan qty stock_move_items
+
+                            if($row['qty2_konsum']<$row['qty2']){
+                                $qty_new     = $row['qty_smi'] - $row['qty_konsum'];
+                                $case       .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";// update qty1 smi sbelumnya
+                                        
+                                $qty2_new    = $row['qty2'] - $row['qty2_konsum'];
+                                $case_qty2  .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'"; // update qty2 smi sblumnya
+                                        
+                                $where              .= "'".$row['quant_id']."',";
+                                $where_move_items   .= "'".$row['move_id']."',";
+
+                                //simpan qty_konsum di stock_quant dan stock_move_items dengan quant_id baru
+                                $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".addslashes($origin_mo)."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($row['sales_order'])."','".addslashes($row['sales_group'])."'), ";
+                                                            
+                                $sql_stock_move_items_batch .= "('".$row['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$status_brg."','".$row_order."','".addslashes($row['origin_prod'])."','".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+      
+                                $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$start."','".$row['additional']."'), ";
+                                  $start++;
+
+                            }else if($row['qty2_konsum'] == $row['qty2']){
+
+                                $case3   .= "when quant_id = '".$row['quant_id']."' then '".$lokasi_rm['lokasi_tujuan']."'"; //update lokasi
+                                $where3  .= "'".$row['quant_id']."',";
+    
+                                $case4   .= "when quant_id = '".$row['quant_id']."' then '".addslashes($origin_mo)."'"; //update reserve_origin
+                                $where4  .= "'".$row['quant_id']."',";
+    
+                                $case5   .= "when quant_id = '".$row['quant_id']."' then '".$status_brg."'"; //update status done move items
+                                $where5  .= "'".$row['quant_id']."',";
+                                $where5_move_id  .= "'".$row['move_id']."',";
+
+                                $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$row['quant_id']."','".$row['additional']."'), ";
+
+
+                            }
+
+                        }
+                        $row_order_rm++;
+
+                    }// if qty konsum > 0
+
+                    if($row['qty_konsum'] == 0 OR $row['qty_konsum'] == '' OR $row['qty_konsum'] == 0.00){  
+                        
+                        if($row['qty2_konsum']<$row['qty2']){ //jika qty2_konsum kurang dari qty2 stock_move_items
+
+                            $loop  = 0;
+                            $row_order_push = 0 ;
+                            foreach($move_arr as $mv_row){
+                                if(isset($mv_row['move_id']) == $row['move_id']){
+                                    $row_order      = $mv_row['row_order'];
+                                    $row_order_push = $mv_row['row_order'] + 1; // row order + 1 untuk di masukan ke array lagi
+                                    array_splice($move_arr,$loop,1);
+                                    array_push($move_arr,array('move_id'=>$row['move_id'],'row_order'=>$row_order_push));
+                                    break;
+                                }
+                                $loop++;
+                            }
+
+                            $qty_new     = $row['qty_smi'] - $row['qty_konsum'];
+                            $case       .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";// update qty1 smi sbelumnya
+                            
+                            $qty2_new    = $row['qty2'] - $row['qty2_konsum'];
+                            $case_qty2  .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'"; // update qty2 smi sblumnya
+                            
+                            $where              .= "'".$row['quant_id']."',";
+                            $where_move_items   .= "'".$row['move_id']."',";
+
+                            //simpan qty_konsum di stock_quant dan stock_move_items dengan quant_id baru
+                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".addslashes($origin_mo)."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($row['sales_order'])."','".addslashes($row['sales_group'])."'), ";
+                                                        
+                            $sql_stock_move_items_batch .= "('".$row['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$status_brg."','".$row_order."','".addslashes($row['origin_prod'])."','".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+ 
+                            $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$start."','".$row['additional']."'), ";
+                            $start++;
+
+                        }elseif($row['qty2_konsum'] == $row['qty2']){
+
+                            if($row['qty_konsum']<$row['qty_smi']){
+
+                                $qty_new     = $row['qty_smi'] - $row['qty_konsum'];
+                                $case       .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";// update qty1 smi sbelumnya
+                                
+                                $qty2_new    = $row['qty2'] - $row['qty2_konsum'];
+                                $case_qty2  .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'"; // update qty2 smi sblumnya
+                                
+                                $where              .= "'".$row['quant_id']."',";
+                                $where_move_items   .= "'".$row['move_id']."',";
+
+                                //simpan qty_konsum di stock_quant dan stock_move_items dengan quant_id baru
+                                $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$lokasi_rm['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$row['move_id']."','".addslashes($origin_mo)."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($row['sales_order'])."','".addslashes($row['sales_group'])."'), ";
+                                                            
+                                $sql_stock_move_items_batch .= "('".$row['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".$row['qty2_konsum']."','".addslashes($row['uom2'])."','".$status_brg."','".$row_order."','".addslashes($row['origin_prod'])."','".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+     
+                                $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$start."','".$row['additional']."'), ";
+                                $start++;
+
+                            }else if($row['qty_konsum'] == $row['qty_smi']){
+                                      
+                                $case3   .= "when quant_id = '".$row['quant_id']."' then '".$lokasi_rm['lokasi_tujuan']."'"; //update lokasi
+                                $where3  .= "'".$row['quant_id']."',";
+    
+                                $case4   .= "when quant_id = '".$row['quant_id']."' then '".addslashes($origin_mo)."'"; //update reserve_origin
+                                $where4  .= "'".$row['quant_id']."',";
+    
+                                $case5   .= "when quant_id = '".$row['quant_id']."' then '".$status_brg."'"; //update status done move items
+                                $where5  .= "'".$row['quant_id']."',";
+                                $where5_move_id  .= "'".$row['move_id']."',";
+
+                                $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".$row['qty_konsum']."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$row['quant_id']."','".$row['additional']."'), ";
+                            }
+
+                        }
+
+                        $row_order_rm++;
+                        
+                    }
+
+                }// end foreach array rm
+
+            }// !empty array_rm
+
+            if($konsumsi_bahan == TRUE){
+                
+                //update consume = yes
+                if(!empty($where_fg) AND !empty($case_fg)){
+                    $where_fg = rtrim($where_fg, ',');
+                    $sql_update_consume_fg_hasil  = "UPDATE mrp_production_fg_hasil SET consume =(case ".$case_fg." end) WHERE  quant_id in (".$where_fg.") AND kode in ('".$kode."') ";
+                    $this->_module->update_perbatch($sql_update_consume_fg_hasil);
+                }
+
+                if(!empty($sql_mrp_production_rm_hasil)){
+                    $sql_mrp_production_rm_hasil = rtrim($sql_mrp_production_rm_hasil, ', ');
+                    $this->m_mo->simpan_mrp_production_rm_hasil_batch($sql_mrp_production_rm_hasil);
+                }
+
+                if(!empty($sql_stock_quant_batch) ){
+                    $sql_stock_quant_batch = rtrim($sql_stock_quant_batch, ', ');
+                    $this->_module->simpan_stock_quant_batch($sql_stock_quant_batch);
+                }
+
+                if(!empty($sql_stock_move_items_batch)){
+                    $sql_stock_move_items_batch = rtrim($sql_stock_move_items_batch, ', ');
+                    $this->_module->simpan_stock_move_items_batch($sql_stock_move_items_batch);
+                }
+
+                //update qty di stock_quant dan stock move items
+                if(!empty($where) AND !empty($case)){
+                    $where = rtrim($where, ',');
+                    $where_move_items = rtrim($where_move_items, ',');
+                    $sql_update_qty_stock_quant  = "UPDATE stock_quant SET qty =(case ".$case." end), qty2=( case ".$case_qty2
+                    ." end) WHERE  quant_id in (".$where.") ";
+                    $this->_module->update_perbatch($sql_update_qty_stock_quant);
+
+                    $sql_update_qty_stock_move_items = "UPDATE stock_move_items SET qty =(case ".$case." end), qty2=( case ".$case_qty2
+                    ." end) WHERE  quant_id in (".$where.") AND move_id in (".$where_move_items.") ";
+                    $this->_module->update_perbatch($sql_update_qty_stock_move_items);
+
+                }
+
+                 //update lokasi di stock_quant
+                 if(!empty($where3) AND !empty($case3)){
+                    $where3 = rtrim($where3, ',');
+                    $sql_update_lokasi  = "UPDATE stock_quant SET lokasi =(case ".$case3." end), move_date = '".$tgl."' WHERE  quant_id in (".$where3.") ";
+                    $this->_module->update_perbatch($sql_update_lokasi);
+                }
+
+                //update reserve_origin di stock_quant
+                if(!empty($where4) AND !empty($case4)){
+                    $where4 = rtrim($where4, ',');
+                    $sql_update_reserve_move  = "UPDATE stock_quant SET reserve_origin =(case ".$case4." end) WHERE  quant_id in (".$where4.") ";
+                    $this->_module->update_perbatch($sql_update_reserve_move);
+                }
+
+                //update status done di stock_move_items
+                if(!empty($where5) AND !empty($case5)){
+                    $where5 = rtrim($where5, ',');
+                    $where5_move_id = rtrim($where5_move_id, ',');
+                    $sql_update_status_stock_move_items  = "UPDATE stock_move_items SET status =(case ".$case5." end),tanggal_transaksi ='".$tgl."' WHERE  quant_id in (".$where5.") AND move_id in (".$where5_move_id.") ";
+                    $this->_module->update_perbatch($sql_update_status_stock_move_items);
+                }
+
+                if(!empty($array_rm)){
+                    $where6_move_id = '';
+                    foreach ($array_rm as $row) {
+    
+                        if(($row['qty_konsum'] > 0 AND $row['qty_konsum'] != '') OR ($row['qty2_konsum'] > 0 AND $row['qty2_konsum'] != '')){                       
+                            //untuk update status
+                            //cek jml_qty di stock_move_items yg status nya ready
+                            $cek_smi=$this->m_mo->cek_qty_stock_move_items_by_produk($row['move_id'],addslashes($row['origin_prod']),'ready')->row_array();
+                            if(empty($cek_smi['jml_qty']) or $cek_smi['jml_qty'] == '0'){
+                                //cek yg status nya done
+                                $cek_smi2=$this->m_mo->cek_qty_stock_move_items_by_produk($row['move_id'],addslashes($row['origin_prod']),'done')->row_array();
+                                if($cek_smi2['jml_qty'] < $row['qty_rm']){
+                                    //update status barang jadi draft
+                                    $case6   .= "when origin_prod = '".addslashes($row['origin_prod'])."' then 'draft' ";
+                                    $where6  .= "'".addslashes($row['origin_prod'])."',";
+                                    $where6_move_id .= "'".addslashes($row['move_id'])."',";
+                                }else if($cek_smi2['jml_qty'] >= $row['qty_rm']){
+                                    //update status barang jadi done
+                                    $case6   .= "when origin_prod = '".addslashes($row['origin_prod'])."' then 'done' "; 
+                                    $where6  .= "'".addslashes($row['origin_prod'])."',";
+                                    $where6_move_id .= "'".addslashes($row['move_id'])."',";
+                                }
+                            }  
+                        }
+
+                    }
+                }   
+
+                //update status barang di rm target dan stock_move_produk
+                if(!empty($where6) AND !empty($case6)){
+                    $where6 = rtrim($where6, ',');
+                    $where6_move_id = rtrim($where6_move_id, ',');
+                    $sql_update_status_rm_target ="UPDATE mrp_production_rm_target SET status =(case ".$case6." end) WHERE  origin_prod in (".$where6.") AND kode = '".$kode."' AND move_id in (".$where6_move_id.")  ";
+                    $this->_module->update_perbatch($sql_update_status_rm_target);
+    
+                    $sql_update_status_stock_move_produk ="UPDATE stock_move_produk SET status =(case ".$case6." end) WHERE  origin_prod in (".$where6.") AND move_id in (".$where6_move_id.") ";
+                    $this->_module->update_perbatch($sql_update_status_stock_move_produk);
+    
+                }
+
+                ///cek qty sudah produksi sudah memenuhi atau belum ?
+                $qty_target = $this->m_mo->get_qty_mrp_production_fg_target($kode)->row_array();
+
+                $qty_hasil  = $this->m_mo->get_qty_mrp_production_fg_hasil($kode)->row_array();
+ 
+                if($qty_hasil['sum_qty'] >= $qty_target['qty']){
+                    $this->m_mo->update_status_mrp_production_fg_target($kode,'done');
+                    $this->_module->update_status_stock_move($qty_target['move_id'],'done');
+                    //update stock_move_produk fg_target
+                    $sql_update_status_stock_move_produk_fg_target = "UPDATE stock_move_produk SET status = 'done' Where move_id = '".$qty_target['move_id']."'";
+                    $this->_module->update_perbatch($sql_update_status_stock_move_produk_fg_target); 
+                }
+
+                //unlock table
+                $this->_module->unlock_tabel();   
+                
+                if($list_kp_consume == ''){
+                    $note_log    = "Konsumsi Bahan tanpa KP/Lot ";
+                }else{
+                    $list_kp_consume = rtrim($list_kp_consume, ', ');
+                    $note_log    = "Konsumsi Bahan untuk menghasilkan KP/Lot : ".$list_kp_consume;
+                }
+                
+
+                $jenis_log   = "edit";
+                $note_log    = $note_log;
+                $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);   
+
+                $callback = array('status' => 'success', 'message'=>'Data Berhasil Disimpan !', 'icon' => 'fa fa-check', 'type'=>'success');
+
+            }else{
+                $callback = array('status' => 'failed', 'message'=>'Data Gagal Disimpan !', 'icon' => 'fa fa-check', 'type'=>'danger');
+            }
+                      
+        }
+
+        echo json_encode($callback);
+
+    }
+
+    public function mo_done_modal()
+    {
+
+        $deptid             = $this->input->post('deptid');
+        $kode               = $this->input->post('kode');
+        $data['kode_mo']    = $kode;
+        $data['deptid']     = $deptid;
+
+        $cek_status         = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
+        $data['status']     = $cek_status['status'];
+        
+        $rm_done            = $this->m_mo->get_sum_qty_rm_done($kode,'done')->row();
+        $rm_waste           = $this->m_mo->get_sum_qty_rm_waste($kode,'done')->row();
+        $data['rm_done']    = $rm_done;
+        $data['rm_waste']   = $rm_waste;
+        
+        $fg_prod            = $this->m_mo->get_sum_qty_fg_produce($kode)->row();
+        $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($kode)->row();
+        $data['fg_prod']    = $fg_prod;
+        $data['fg_waste']   = $fg_waste;
+
+        $total_kg_rm        = floatval($rm_done->kg);
+        $total_kg_fg        = floatval($fg_prod->kg) + floatval($fg_waste->kg);
+
+        if($total_kg_rm == $total_kg_fg){
+            $data['show_btn'] = true;
+        }else{
+            $data['show_btn'] = false;
+        }
+
+        $data['total_kg_rm'] = $total_kg_rm;
+        $data['total_kg_fg'] = $total_kg_fg;
+
+        return $this->load->view('modal/v_mo_done_modal', $data); 
+
+    }
+
     public function mo_done()
     {
 
@@ -3389,9 +3880,14 @@ class MO extends MY_Controller
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username')); 
             $deptid   = $this->input->post('deptid');
+            $kode     = $this->input->post('kode');
+            // $qty_target = $this->input->post('qty_target');
 
-            $kode       = $this->input->post('kode');
-            $qty_target = $this->input->post('qty_target');
+            // get qty target mrp_production
+            $mrp_qty    = $this->m_mo->get_qty_target_mrp($kode)->row_array();
+            $qty_target =  $mrp_qty['qty'];
+
+
             //$move_id    = $this->input->post('move_id');
             //$done       = true;
             $status     = 'done';
@@ -3414,7 +3910,8 @@ class MO extends MY_Controller
 
             // cek rm target additional yg move id nya kosong / blm request
             $cek5 = $this->m_mo->get_data_rm_target_additional_by_kode_all($kode,'');
-
+            
+          
             if(!empty($cek3['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if(!empty($cek4['status'])){
@@ -3434,18 +3931,31 @@ class MO extends MY_Controller
             }else if(!empty($cek5)){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Hapus terlebih dahulu data Additional yg belum di Request!', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else{
-                
-                $this->m_mo->update_status_mrp_production($kode,$status);
-                // get list move id rm
-                $list_sm_rm = $this->m_mo->get_move_id_rm_target_by_kode($kode)->result();
-                foreach($list_sm_rm as $sm){
-                    $this->_module->update_status_stock_move($sm->move_id,$status);
+
+                // cek kg 
+                $rm_done            = $this->m_mo->get_sum_qty_rm_done($kode,'done')->row();
+                $rm_waste           = $this->m_mo->get_sum_qty_rm_waste($kode,'done')->row();
+                $fg_prod            = $this->m_mo->get_sum_qty_fg_produce($kode)->row();
+                $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($kode)->row();
+        
+                $total_kg_rm        = $rm_done->kg;
+                $total_kg_fg        = $fg_prod->kg + $fg_waste->kg;
+
+                if($total_kg_rm != $total_kg_fg){
+                    $callback = array('status' => 'failed', 'message'=>'<b>KG</b> Bahan Baku dan <b>KG</b> Barang jadi Harus Sama  !!', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else{
+
+                    $this->m_mo->update_status_mrp_production($kode,$status);
+                    // get list move id rm
+                    $list_sm_rm = $this->m_mo->get_move_id_rm_target_by_kode($kode)->result();
+                    foreach($list_sm_rm as $sm){
+                        $this->_module->update_status_stock_move($sm->move_id,$status);
+                    }
+                    $jenis_log   = "edit";
+                    $note_log    = "Done ". $kode;
+                    $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username, $deptid);   
+                    $callback = array('status' => 'success', 'message'=>'Status Berhasil di Ubah !', 'icon' => 'fa fa-check', 'type'=>'success');
                 }
-                $jenis_log   = "edit";
-                $note_log    = "Done ". $kode;
-                $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username, $deptid);   
-                $callback = array('status' => 'success', 'message'=>'Status Berhasil di Ubah !', 'icon' => 'fa fa-check', 'type'=>'success');
-                
             }
 
         }

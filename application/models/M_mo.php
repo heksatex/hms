@@ -1038,5 +1038,117 @@ class M_mo extends CI_Model
 								LIMIT 1 ");
 	}
 
+	public function get_list_mrp_production_fg_hasil_cons_no_by_kode($kode)
+	{
+		return $this->db->query("SELECT fg.kode, fg.move_id, fg.quant_id, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, 
+								fg.consume, fg.row_order
+								from mrp_production_fg_hasil fg
+								where fg.kode = '$kode'
+								and fg.lokasi like '%stock%' and fg.consume = 'no'
+								order by fg.row_order asc")->result();
+	}
+
+	public function get_sum_qty_rm_done($kode, $status)
+	{
+		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
+							from (
+							SELECT smi.kode_produk, smi.nama_produk, 
+										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
+										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
+							from mrp_production_rm_hasil rm
+							INNER JOIN stock_move_items smi ON rm.quant_id = smi.quant_id AND rm.move_id = smi.move_id
+							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
+							WHERE rm.kode ='$kode' AND smi.status = '$status'
+							GROUP BY smi.kode_produk
+							) as gp");
+	}
+
+
+	public function get_sum_qty_rm_ready($kode, $status)
+	{
+		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
+							from (
+								SELECT smi.kode_produk, smi.nama_produk, 
+										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
+										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
+							from mrp_production_rm_target rm
+							INNER JOIN stock_move_items smi ON rm.kode_produk = smi.kode_produk AND rm.move_id = smi.move_id
+							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
+							WHERE rm.kode ='$kode' AND smi.status = '$status'
+							GROUP BY smi.kode_produk
+							) as gp");
+	}
+
+	public function get_sum_qty_rm_waste($kode,$status)
+	{
+		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
+							from (
+							SELECT fg.kode, smi.kode_produk, smi.nama_produk, 
+										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
+										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
+							from mrp_production_fg_target  fgt
+							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk != fgt.kode_produk
+							INNER JOIN stock_move_items smi ON fg.quant_id = smi.quant_id AND fg.move_id = smi.move_id
+							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
+							WHERE fg.kode ='$kode' AND smi.status = '$status'   AND lokasi LIKE '%waste%' AND fg.lot LIKE 'F|%'
+							GROUP BY smi.kode_produk
+							) as gp");
+	}
+
+
+	public function get_sum_qty_fg($kode, $consume)
+	{
+		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
+							from (
+							SELECT smi.kode_produk, smi.nama_produk, 
+										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
+										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
+							from mrp_production_fg_target  fgt
+							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk = fgt.kode_produk
+							INNER JOIN stock_move_items smi ON fg.quant_id = smi.quant_id AND fg.move_id = smi.move_id
+							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
+							WHERE fg.kode ='$kode' AND smi.status = 'done' and fg.consume = '$consume'  AND lokasi LIKE '%stock%'
+							GROUP BY smi.kode_produk
+							) as gp");
+	}
+
+	public function get_sum_qty_fg_produce($kode)
+	{
+		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
+							from (
+							SELECT smi.kode_produk, smi.nama_produk, 
+										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
+										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
+							from mrp_production_fg_target  fgt
+							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk = fgt.kode_produk
+							INNER JOIN stock_move_items smi ON fg.quant_id = smi.quant_id AND fg.move_id = smi.move_id
+							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
+							WHERE fg.kode ='$kode' AND smi.status = 'done'  AND lokasi LIKE '%stock%'
+							GROUP BY smi.kode_produk
+							) as gp");
+	}
+
+
+	public function get_sum_qty_fg_waste($kode)
+	{
+		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
+							from (
+							SELECT smi.kode_produk, smi.nama_produk, 
+										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
+										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
+							from mrp_production_fg_target  fgt
+							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk = fgt.kode_produk
+							INNER JOIN stock_move_items smi ON fg.quant_id = smi.quant_id AND fg.move_id = smi.move_id
+							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
+							WHERE fg.kode ='$kode' AND smi.status = 'done' AND lokasi LIKE '%waste%' AND fg.lot LIKE 'F|%'
+							GROUP BY smi.kode_produk
+							) as gp");
+	}
+
+	public  function get_qty_target_mrp($kode)
+	{
+		return $this->db->query("SELECT qty FROM mrp_production WHERE kode = '$kode'");
+	}
+
 
 }
