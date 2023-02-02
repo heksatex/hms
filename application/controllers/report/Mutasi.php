@@ -1166,7 +1166,15 @@ class Mutasi extends MY_Controller
                         $column_excel  = $this->cek_column_excel($column_awal+1);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
                         $column_excel  = $this->cek_column_excel($column_awal+2);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_mtr']);
+
+                        if($row['s_awal_mtr'] == null){
+                            $sAwalMtr = 0;
+                        }else{
+                            $sAwalMtr = $row['s_awal_mtr'];
+                        }
+
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $sAwalMtr);
+
                         $column_excel  = $this->cek_column_excel($column_awal+3);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_kg']);
                     }
@@ -1236,12 +1244,17 @@ class Mutasi extends MY_Controller
                             $column_excel  = $this->cek_column_excel($column);
                             $sheet->SetCellValue($column_excel.''.$rowCount, $in_lot);
                             $column_excel1  = $this->cek_column_excel($column+1);
-                            $sheet->SetCellValue($column_excel1.''.$rowCount, $in_mtr);
+                            if($in_mtr == null){
+                                $INMtr = 0;
+                            }else{
+                                $INMtr = $in_mtr;
+                            }
+                            $sheet->SetCellValue($column_excel1.''.$rowCount, $INMtr);
                             $column_excel2  = $this->cek_column_excel($column+2);
                             $sheet->SetCellValue($column_excel2.''.$rowCount, $in_kg);
 
                             $in_total_lot       = $in_total_lot+($in_lot);
-                            $in_total_mtr       = $in_total_mtr+($in_mtr);
+                            $in_total_mtr       = $in_total_mtr+($INMtr);
                             $in_total_kg        = $in_total_kg+($in_kg);
 
                             $column = $column + 3;
@@ -1297,12 +1310,17 @@ class Mutasi extends MY_Controller
                         $column_excel_adj  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_lot']);
                         $column_excel_adj  = $this->cek_column_excel($column+1);
-                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_mtr']);
+                        if($row['adj_in_mtr'] == null){
+                            $adjINMtr = 0;
+                        }else{
+                            $adjINMtr = $row['adj_in_mtr'];
+                        }
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $adjINMtr);
                         $column_excel_adj  = $this->cek_column_excel($column+2);
                         $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_in_kg']);
 
                         $in_total_lot       = $in_total_lot+($row['adj_in_lot']);
-                        $in_total_mtr       = $in_total_mtr+($row['adj_in_mtr']);
+                        $in_total_mtr       = $in_total_mtr+($adjINMtr);
                         $in_total_kg        = $in_total_kg+($row['adj_in_kg']);
 
                         $column = $column + 3;
@@ -1414,12 +1432,17 @@ class Mutasi extends MY_Controller
                             $column_excel  = $this->cek_column_excel($column);
                             $sheet->SetCellValue($column_excel.''.$rowCount, $out_lot);
                             $column_excel1  = $this->cek_column_excel($column+1);
-                            $sheet->SetCellValue($column_excel1.''.$rowCount, $out_mtr);
+                            if($out_mtr == null){
+                                $OUTmtr = 0;
+                            }else{
+                                $OUTmtr = $out_mtr;
+                            }
+                            $sheet->SetCellValue($column_excel1.''.$rowCount, $OUTmtr);
                             $column_excel2  = $this->cek_column_excel($column+2);
                             $sheet->SetCellValue($column_excel2.''.$rowCount, $out_kg);
 
                             $out_total_lot       = $out_total_lot+($out_lot);
-                            $out_total_mtr       = $out_total_mtr+($out_mtr);
+                            $out_total_mtr       = $out_total_mtr+($OUTmtr);
                             $out_total_kg        = $out_total_kg+($out_kg);
 
                             $column = $column + 3;
@@ -1476,12 +1499,17 @@ class Mutasi extends MY_Controller
                         $column_excel_adj  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_lot']);
                         $column_excel_adj  = $this->cek_column_excel($column+1);
-                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_mtr']);
+                        if($row['adj_out_mtr'] == null){
+                            $adjOUTmtr = 0;
+                        }else{
+                            $adjOUTmtr = $row['adj_out_mtr'];
+                        }
+                        $sheet->SetCellValue($column_excel_adj.''.$rowCount, $adjOUTmtr);
                         $column_excel_adj  = $this->cek_column_excel($column+2);
                         $sheet->SetCellValue($column_excel_adj.''.$rowCount, $row['adj_out_kg']);
 
                         $out_total_lot       = $out_total_lot+($row['adj_out_lot']);
-                        $out_total_mtr       = $out_total_mtr+($row['adj_out_mtr']);
+                        $out_total_mtr       = $out_total_mtr+($adjOUTmtr);
                         $out_total_kg        = $out_total_kg+($row['adj_out_kg']);
 
                         $column = $column + 3;

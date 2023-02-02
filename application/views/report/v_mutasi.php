@@ -953,9 +953,14 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_mtr])+" </td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_kg])+" </td>";
                               no_in++;
+                              if(value[in_mtr] == null){
+                                inMtr = 0;
+                              }else{
+                                inMtr = value[in_mtr];
+                              }
                               // info total++ in
                               in_total_lot       = in_total_lot+parseInt(value[in_lot]);
-                              in_total_mtr       = in_total_mtr+parseFloat(value[in_mtr]);
+                              in_total_mtr       = in_total_mtr+parseFloat(inMtr);
                               in_total_kg        = in_total_kg+parseFloat(value[in_kg]);
 
                               // arr_in.push({in_lot:value[in_lot], in_mtr:value[in_mtr],  in_kg:value[in_kg]});
@@ -1011,8 +1016,14 @@
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_mtr)+" </td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_kg)+" </td>";
 
+                            if(value.adj_in_mtr == null){
+                                adjINMtr = 0;
+                            }else{
+                                adjINMtr = value.adj_in_mtr;
+                            }
+
                             in_total_lot       = in_total_lot+parseInt(value.adj_in_lot);
-                            in_total_mtr       = in_total_mtr+parseFloat(value.adj_in_mtr);
+                            in_total_mtr       = in_total_mtr+parseFloat(adjINMtr);
                             in_total_kg        = in_total_kg+parseFloat(value.adj_in_kg);
 
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_lot)+"</td>";
@@ -1069,9 +1080,15 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_kg])+" </td>";
                               no_out++;
 
+                              if(value[in_mtr] == null){
+                                outMtr = 0;
+                              }else{
+                                outMtr = value[out_mtr];
+                              }
+
                               // info total++ out
                               out_total_lot      = out_total_lot+parseInt(value[out_lot]);
-                              out_total_mtr      = out_total_mtr+parseFloat(value[out_mtr]);
+                              out_total_mtr      = out_total_mtr+parseFloat(outMtr);
                               out_total_kg       = out_total_kg+parseFloat(value[out_kg]);
 
                               // arr_out.push({out_lot:value[out_lot], out_mtr:value[out_mtr], out_kg:value[out_kg]});
@@ -1091,7 +1108,7 @@
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty1)+" "+value.adj_out_qty1_uom+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty2)+" "+value.adj_out_qty2_uom+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+"</td>";
-
+                      
                             out_total_lot         = out_total_lot+parseInt(value.adj_out_lot);
                             out_total_qty1        = out_total_qty1+parseFloat(value.adj_out_qty1);
                             out_total_qty2        = out_total_qty2+parseFloat(value.adj_out_qty2);
@@ -1145,8 +1162,14 @@
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_mtr)+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_kg)+" </td>";
 
+                            if(value.adj_out_mtr == null){
+                                adjOUTMtr = 0;
+                            }else{
+                              adjOUTMtr = value.adj_in_mtr;
+                            }
+
                             out_total_lot         = out_total_lot+parseInt(value.adj_out_lot);
-                            out_total_mtr         = out_total_mtr+parseFloat(value.adj_out_mtr);
+                            out_total_mtr         = out_total_mtr+parseFloat(adjOUTMtr);
                             out_total_kg          = out_total_kg+parseFloat(value.adj_out_kg);
 
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_lot)+"</td>";
