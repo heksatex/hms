@@ -209,7 +209,7 @@
                           $("<td style='text-align: right;'>").text(value.qty2),
                           $("<td>").text(value.uom2),
                           $("<td>").text(value.reff_note),
-                          $("<td style='min-width:50px'>").html('<input type="checkbox" class="checkItem" value="'+value.quant_id+'" data-valuetwo="'+value.row_order+'" data-valuetree="'+value.lot+'" data-toggle="tooltip" title="Pilih Waste Data"> '+checkbox	),
+                          $("<td style='min-width:50px'>").html(checkbox	),
                         );
                        	tbody.append(tr);
                     });
