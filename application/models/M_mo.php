@@ -1041,7 +1041,9 @@ class M_mo extends CI_Model
 	public function get_list_mrp_production_fg_hasil_cons_no_by_kode($kode)
 	{
 		return $this->db->query("SELECT fg.kode, fg.move_id, fg.quant_id, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, 
-								fg.consume, fg.row_order
+								fg.consume, fg.row_order,(SELECT lot FROM adjustment_items adji 
+									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
+									where adj.status = 'done' AND adji.quant_id = fg.quant_id limit 1 ) as lot_adj
 								from mrp_production_fg_hasil fg
 								where fg.kode = '$kode'
 								and fg.lokasi like '%stock%' and fg.consume = 'no'
@@ -1107,7 +1109,7 @@ class M_mo extends CI_Model
 							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk = fgt.kode_produk
 							INNER JOIN stock_move_items smi ON fg.quant_id = smi.quant_id AND fg.move_id = smi.move_id
 							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
-							WHERE fg.kode ='$kode' AND smi.status = 'done' and fg.consume = '$consume'  AND lokasi LIKE '%stock%'
+							WHERE fg.kode ='$kode' AND smi.status = 'done' and fg.consume = '$consume'  AND fg.lokasi LIKE '%stock%'
 							GROUP BY smi.kode_produk
 							) as gp");
 	}
@@ -1123,7 +1125,7 @@ class M_mo extends CI_Model
 							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk = fgt.kode_produk
 							INNER JOIN stock_move_items smi ON fg.quant_id = smi.quant_id AND fg.move_id = smi.move_id
 							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
-							WHERE fg.kode ='$kode' AND smi.status = 'done'  AND lokasi LIKE '%stock%'
+							WHERE fg.kode ='$kode' AND smi.status = 'done'  AND fg.lokasi LIKE '%stock%'
 							GROUP BY smi.kode_produk
 							) as gp");
 	}
@@ -1140,7 +1142,25 @@ class M_mo extends CI_Model
 							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk = fgt.kode_produk
 							INNER JOIN stock_move_items smi ON fg.quant_id = smi.quant_id AND fg.move_id = smi.move_id
 							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
-							WHERE fg.kode ='$kode' AND smi.status = 'done' AND lokasi LIKE '%waste%' AND fg.lot LIKE 'F|%'
+							WHERE fg.kode ='$kode' AND smi.status = 'done' AND fg.lokasi LIKE '%waste%' AND fg.lot LIKE 'F|%'
+							GROUP BY smi.kode_produk
+							) as gp");
+	}
+
+	public function get_sum_qty_fg_adj($kode)
+	{
+		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
+							from (
+							SELECT smi.kode_produk, smi.nama_produk, 
+										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
+										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
+							from mrp_production_fg_target  fgt
+							INNER JOIN mrp_production_fg_hasil fg ON fg.kode = fgt.kode AND fg.kode_produk = fgt.kode_produk
+							INNER JOIN adjustment_items adji ON fg.quant_id = adji.quant_id
+							INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
+							INNER JOIN stock_move_items smi ON adji.quant_id = smi.quant_id AND adji.move_id = smi.move_id
+							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
+							WHERE fg.kode ='$kode' AND smi.status = 'done'  AND fg.lokasi LIKE '%stock%' AND adj.status = 'done'
 							GROUP BY smi.kode_produk
 							) as gp");
 	}
@@ -1149,6 +1169,80 @@ class M_mo extends CI_Model
 	{
 		return $this->db->query("SELECT qty FROM mrp_production WHERE kode = '$kode'");
 	}
+
+	public function get_data_mrp_fg_hasil_by_quant($kode,$quant_id)
+	{
+		$this->db->select("kode, create_date, kode_produk, nama_produk, lot, nama_grade, qty, uom, qty2, uom2, lokasi, consume ");
+		$this->db->from("mrp_production_fg_hasil");
+		$this->db->where('kode',$kode);
+		$this->db->where('quant_id',$quant_id);
+		$query = $this->db->get();
+		return $query->row();
+	}
+
+	public function cek_lokasi_by_quant($quant_id)
+	{
+		$this->db->select('lokasi');
+		$this->db->from('stock_quant');
+		$this->db->where('quant_id',$quant_id);
+		$query = $this->db->get();
+		return $query->row();
+	}
+
+	public function cek_quant_acc_stock_move_items_by_kode($thn,$bln,$deptid,$type,$kode,$quant_id)
+	{	
+		$where = array('periode_th'=>$thn, 'periode_bln'=>$bln, 'dept_id_mutasi'=>$deptid, 'type'=>$type, 'kode_transaksi' => $kode, 'quant_id' => $quant_id);
+		$this->db->select('kode_transaksi, kode_produk, nama_produk');
+		$this->db->from('acc_stock_move_items');
+		$this->db->where($where);
+		$query  = $this->db->get();
+		return $query;
+	}
+
+	public function cek_route_after_produce_by_origin($origin,$move_id)
+	{
+		$this->db->select('move_id, method');
+		$this->db->from('stock_move');
+		$this->db->where('origin', $origin);
+		$this->db->where('source_move',$move_id);
+		$this->db->where('status', 'ready');
+		$this->db->order_by('cast(mid(move_id,3,(length(move_id))-2) as unsigned) asc' );
+		$query = $this->db->get();
+		return $query;
+	}
+
+	public function get_kode_pengiriman_barang_by_move_id($move_id)
+	{
+		$this->db->select('kode');
+		$this->db->from('pengiriman_barang');
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get();
+		$result = $query->row();
+		return $result->kode;
+	}
+
+
+	public function get_kode_penerimaan_barang_by_move_id($move_id)
+	{
+		$this->db->select('kode');
+		$this->db->from('penerimaan_barang');
+		$this->db->where('move_id', $move_id);
+		$query = $this->db->get();
+		$result = $query->row();
+		return $result->kode;
+	}
+
+	public function cek_lot_adj_by_quant($quant_id)
+	{
+		$this->db->select("adji.quant_id");
+		$this->db->from('adjustment_items adji');
+		$this->db->join("adjustment adj", "adj.kode_adjustment = adji.kode_adjustment", "inner");
+		$this->db->where("adj.status","done");
+		$this->db->where("adji.quant_id",$quant_id);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
 
 
 }

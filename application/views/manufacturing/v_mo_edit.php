@@ -918,6 +918,7 @@
                             <th class="style">Reff Note</th>
                             <th class="style">Cacat</th>
                             <th class="style">Print</th>
+                            <th class="style"></th>
                          </tr>
                           <tbody>
                             <?php
@@ -944,14 +945,17 @@
                                 <td class="text-wrap width-200"><?php echo $row->reff_note?></td>
                                 <td>
                                    <a href="javascript:void(0)" onclick="rekam_cacat('<?php echo $list->dept_id ?>', '<?php echo $row->quant_id ?>','<?php echo $row->lot ?>')" data-toggle="tooltip" title="Rekam Cacat Lot">
-                                     <span class="glyphicon  glyphicon-share"></span></a>
+                                   <span class="glyphicon  glyphicon-share"></span></a>
                                 </td>
                                 <td>
                                   <input type="checkbox" class='checkPrint' value="<?php echo $row->quant_id; ?>">
-
-                                  <!--a href="javascript:void(0)" onclick="print_lot('<?php echo $row->lot ?>','<?php echo $row->nama_grade ?>')" data-toggle="tooltip" title="Print">
-                                     <span class="fa  fa-print"></span>
-                                   </a-->
+                                </td>
+                                <td>
+                                  <?php if($akses_menu >0){?>
+                                    <a href="javascript:void(0)" onclick="batal_hph(this,'<?php echo $row->quant_id ?>','<?php echo $row->lot ?>')"  title="Hapus Lot/KP" >
+                                     <i class=" fa fa-trash" style="color: red"></i>
+                                    </a>
+                                  <?php } ?>
                                 </td>
                               </tr>
                             <?php 
@@ -1424,6 +1428,78 @@
             setTimeout(function() { $(".tambah_data").html(html); },1000);
           }   
     );
+  }
+
+  function batal_hph(btn,quant_id,lot){ 
+
+      var kode   = $("#kode").val();
+      var dept_id = "<?php echo $list->dept_id;?>";
+      var status = $('#status').val();
+      
+      if(status == 'done'){
+        alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+      }else if(status == 'cancel'){
+        alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+      }else{
+
+        bootbox.confirm({
+          message: "Apa anda yakin ingin menghapus KP/Lot <b>"+lot+" </b> ini ?",
+          title: "<i class='glyphicon glyphicon-trash' style='color: red'></i> Delete !",
+          buttons: {
+            confirm: {
+              label: 'Yes',
+              className: 'btn-primary btn-sm'
+            },
+            cancel: {
+              label: 'No',
+              className: 'btn-default btn-sm'
+            },
+          },
+          callback: function (result) {
+            if(result == true){
+              var btn_load = $(btn);
+              btn_load.button('loading');
+              please_wait(function(){});
+              $.ajax({
+                  type: "POST",
+                  url :'<?php echo base_url('manufacturing/mO/batal_hph')?>',
+                  dataType: 'JSON',
+                  data    : {kode:kode, quant_id:quant_id, deptid:dept_id, lot:lot},
+                  success: function(data){
+                    if(data.sesi=='habis'){
+                      //alert jika session habis
+                      alert_modal_warning(data.message);
+                      window.location.replace('../index');
+                      unblockUI( function(){});
+                      btn_load.button('reset');
+
+                    }else if(data.status == 'failed'){
+                      alert_modal_warning(data.message);
+                      unblockUI( function(){});
+                      btn_load.button('reset');
+                    }else{
+                      $("#tab_2").load(location.href + " #tab_2");
+                      $("#status_bar").load(location.href + " #status_bar");
+                      $("#foot").load(location.href + " #foot");
+                      btn_load.button('reset');
+                      unblockUI( function(){
+                        setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                      });
+                    
+                    }
+
+                  },error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.responseText);
+                    unblockUI( function(){});
+                    btn_load.button('reset');
+                  }
+              });
+
+            }
+          }
+        });
+        
+      }
   }
 
   // modal produksi batch

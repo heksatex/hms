@@ -120,8 +120,13 @@
                                 $empty = true;
                                 foreach ($list_fg as $row) {
                                     $empty = false;
+                                    if($row->lot_adj != ''){
+                                        $color = "style='color:red';";
+                                    }else{
+                                        $color = "";
+                                    }
                                 ?>
-                                <tr class="num">
+                                <tr class="num" <?php echo $color ?>>
                                     <td></td>
                                     <td><?php echo $row->nama_produk?></td>
                                     <td><?php echo $row->lot?></td>
@@ -129,7 +134,9 @@
                                     <td align="right"><?php echo number_format($row->qty2,2)." ".$row->uom2?></td>
                                     <td><?php echo $row->nama_grade?></td>
                                     <td>
-                                    <input type="checkbox" class='checkFG' value="<?php echo $row->quant_id; ?>" value2="<?php echo $row->qty;?>" value3="<?php echo $row->lot;?>">
+                                    <?php if($row->lot_adj == ''){ ?>
+                                        <input type="checkbox" class='checkFG' value="<?php echo $row->quant_id; ?>" value2="<?php echo $row->qty;?>" value3="<?php echo $row->lot;?>">
+                                    <?php } ?>
                                     </td>
                                 </tr>
                                 <?php 
@@ -144,6 +151,7 @@
                             </tbody>							
                                                 
                         </table>
+                        <small><b>*Jika terdapat baris yang berwarna <font color="red">MERAH</font> maka Product/Lot tersebut telah di proses ADJUSTMENT !!</b></small>
 				    </div>
                     <div class="col-md-12">	
                 		<div class="form-group">

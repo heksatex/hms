@@ -3847,14 +3847,18 @@ class MO extends MY_Controller
         $rm_waste           = $this->m_mo->get_sum_qty_rm_waste($kode,'done')->row();
         $data['rm_done']    = $rm_done;
         $data['rm_waste']   = $rm_waste;
+
+        $fg_adj             = $this->m_mo->get_sum_qty_fg_adj($kode)->row();
+        $data['fg_adj']     = $fg_adj;
         
         $fg_prod            = $this->m_mo->get_sum_qty_fg_produce($kode)->row();
         $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($kode)->row();
         $data['fg_prod']    = $fg_prod;
         $data['fg_waste']   = $fg_waste;
 
+
         $total_kg_rm        = floatval($rm_done->kg);
-        $total_kg_fg        = floatval($fg_prod->kg) + floatval($fg_waste->kg);
+        $total_kg_fg        = (floatval($fg_prod->kg) + floatval($fg_waste->kg)) - floatval($fg_adj->kg) ;
 
         if($total_kg_rm == $total_kg_fg){
             $data['show_btn'] = true;
@@ -3937,9 +3941,9 @@ class MO extends MY_Controller
                 $rm_waste           = $this->m_mo->get_sum_qty_rm_waste($kode,'done')->row();
                 $fg_prod            = $this->m_mo->get_sum_qty_fg_produce($kode)->row();
                 $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($kode)->row();
-        
+
                 $total_kg_rm        = $rm_done->kg;
-                $total_kg_fg        = $fg_prod->kg + $fg_waste->kg;
+                $total_kg_fg        = ($fg_prod->kg + $fg_waste->kg ) - $fg_adj->kg;
 
                 if($total_kg_rm != $total_kg_fg){
                     $callback = array('status' => 'failed', 'message'=>'<b>KG</b> Bahan Baku dan <b>KG</b> Barang jadi Harus Sama  !!', 'icon' => 'fa fa-warning', 'type'=>'danger');
@@ -5946,6 +5950,204 @@ class MO extends MY_Controller
         $result      = $this->m_mo->get_produk_additonal_by_id($kode_produk)->row_array();
         $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'],);
         echo json_encode($callback);
+    }
+
+    public function batal_hph()
+    {
+       
+
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('status' => 'failed','message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+            $this->load->model("m_pengirimanBarang");
+            $this->load->model("m_penerimaanBarang");
+
+            $sub_menu  = $this->uri->segment(2);
+            $username  = $this->session->userdata('username'); 
+
+            $kode      = addslashes($this->input->post('kode'));
+            $quant_id  = addslashes($this->input->post('quant_id'));
+            $deptid    = addslashes($this->input->post('deptid'));
+            $lot_post  = addslashes($this->input->post('lot'));
+            $tanggal   = date("Y-m-d H:i:s");
+
+
+            // lock table
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_fg_hasil WRITE, stock_quant WRITE, acc_stock_move_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production_fg_target WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, adjustment as adj WRITE, adjustment_items as adji WRITE');
+
+
+            //cek status mrp_production = done
+            $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
+            //cek status mrp_production = cancel
+            $cek2  = $this->m_mo->cek_status_mrp_production($kode,'cancel')->row_array();
+
+            if(!empty($cek1['status'])){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dihapus, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if(!empty($cek2['status'])){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dihapus, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else{
+
+                // get data by quant_id
+                $data       = $this->m_mo->get_data_mrp_fg_hasil_by_quant($kode,$quant_id);
+                $consume    = $data->consume;
+                $lokasi_hph = $data->lokasi;
+                $kode_produk= $data->kode_produk;
+                $nama_produk= $data->nama_produk;
+                $lot        = $data->lot;
+                $qty        = $data->qty." ".$data->uom;
+                $qty2       = $data->qty2." ".$data->uom2;
+                $nama_grade = $data->nama_grade;
+
+                $tgl_hph = date("Y-m", strtotime($data->create_date));
+                $tgl_now = date("Y-m", strtotime($tanggal));
+
+                $tgl_hph2 = date("Y-m-d", strtotime($data->create_date));
+                $tgl_now2 = date("Y-m-d", strtotime($tanggal));
+
+                // cek lokasi 
+                $cek_lokasi = $this->m_mo->cek_lokasi_by_quant($quant_id);
+
+                // cek lot apa di adj atau tidak 
+                $cek_adj_lot = $this->m_mo->cek_lot_adj_by_quant($quant_id);
+
+                if($cek_adj_lot > 0 ){
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot <b>'.$lot.'</b> ini Tidak Bisa Dihapus, karena sudah di Adjustment !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else if($lokasi_hph != $cek_lokasi->lokasi){
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot <b>'.$lot.'</b> ini Tidak Bisa Dihapus, karena lokasinya sudah tidak di  <b>'.$lokasi_hph.' </b> !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else if($consume == "yes"){
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot  <b>'.$lot.'</b> ini Tidak Bisa Dihapus, karena sudah terdapat Konsumsi Bahan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else  if($tgl_hph != $tgl_now){// cek apa tgl hph == tgl batal
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot <b>'.$lot.'</b> ini  Tidak Bisa Dihapus, karena sudah Berbeda Bulan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else{
+
+                    $thn = date("Y", strtotime($tanggal));
+                    $bln = date("n", strtotime($tanggal));
+                    $type= "prod";
+                    $where_del1   ="";
+                    $status_brg_draft = "draft";
+                    
+                    // cek quant id di acc stock move items
+                    if($tgl_hph2 != $tgl_now2){
+                        $cek = $this->m_mo->cek_quant_acc_stock_move_items_by_kode($thn,$bln,$deptid,$type,$kode,$quant_id)->num_rows();
+                    }else{
+                        $cek = 1;
+                    }
+                    
+                    if($cek == 0 ){
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot  <b>'.$lot.'</b> ini Tidak Bisa Dihapus !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    }else{
+
+                        $origin_mo  = $this->m_mo->get_origin_mo_by_kode($kode);
+                        $move_fg    = $this->m_mo->get_move_id_fg_target_by_kode($kode)->row_array();
+                        
+                        // cek route after produce
+                        $cek_route = $this->m_mo->cek_route_after_produce_by_origin($origin_mo,$move_fg['move_id']);;
+
+                        if($cek_route->num_rows() > 0 ){// cek move id kedepannya yg status nya ready (OUT/IN)
+                            $result = $cek_route->row_array();
+
+                            $mthd          = explode("|",$result['method']);
+                            $method_dept   = trim($mthd[0]);
+                            $method_action = trim($mthd[1]);
+                            $move_id       =  $result['move_id'];
+
+                            if($method_action == "OUT"){
+
+                                // hapus smi out
+                                $sql_delete_smi = "DELETE FROM stock_move_items WHERE move_id IN ('".$move_id."') AND quant_id IN ('".$quant_id."') ";
+                                $this->_module->update_perbatch($sql_delete_smi);
+
+                                // cek qty stock move item out 
+                                $get_qty = $this->_module->get_qty_stock_move_items_by_kode($move_id,addslashes($kode_produk))->row_array();
+
+                                $kode_out = $this->m_mo->get_kode_pengiriman_barang_by_move_id($move_id);
+
+                                if(!empty($kode_out)){
+                                    if(empty($get_qty['sum_qty'])){// update status barang jadi draft
+                                        $this->m_pengirimanBarang->update_status_pengiriman_barang_items($kode_out,addslashes($kode_produk),$status_brg_draft);
+                                        $this->_module->update_status_stock_move_produk($move_id,addslashes($kode_produk),$status_brg_draft);
+                                    }
+
+                                    $cek_status = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode_out,'draft')->row_array();
+                                    if(!empty($cek_status['status_barang'])){
+                                        $this->m_pengirimanBarang->update_status_pengiriman_barang($kode_out,$status_brg_draft);
+                                        $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode_out)->row_array();
+                                        if($cek_status2['status']=='draft'){
+                                            $this->_module->update_status_stock_move($move_id,$status_brg_draft);
+                                        }
+                                    }
+                                }
+
+                            }else if($method_action == "IN"){
+
+                                // hapus smi out
+                                $sql_delete_smi = "DELETE FROM stock_move_items WHERE move_id IN ('".$move_id."') AND quant_id IN ('".$quant_id."') ";
+                                $this->_module->update_perbatch($sql_delete_smi);
+
+                                // cek qty stock move item out 
+                                $get_qty = $this->_module->get_qty_stock_move_items_by_kode($move_id,addslashes($kode_produk))->row_array();
+
+                                $kode_in = $this->m_mo->get_kode_penerimaan_barang_by_move_id($move_id);
+
+                                if(!empty($kode_in)){
+
+                                    if(empty($get_qty['sum_qty'])){
+                                        $this->m_penerimaanBarang->update_status_penerimaan_barang_items($kode_in,addslashes($kode_produk),$status_brg_draft);
+                                        $this->_module->update_status_stock_move_produk($move_id,addslashes($kode_produk),$status_brg_draft);
+                                    }
+                    
+                                    $cek_status = $this->m_penerimaanBarang->cek_status_barang_penerimaan_barang_items($kode_in,'ready')->row_array();
+                                    if(empty($cek_status['status_barang'])){
+                                        $this->m_penerimaanBarang->update_status_penerimaan_barang($kode_in,$status_brg_draft);
+                                        $cek_status2 = $this->m_penerimaanBarang->cek_status_penerimaan_barang($kode_in)->row_array();
+                                        if($cek_status2['status']=='draft'){
+                                            $this->_module->update_status_stock_move($move_id,$status_brg_draft);
+                                        }
+                                    }
+                                }
+                            }
+                        }   
+
+                        // hapus lot di mrp_fg_hasil
+                        $sql_delete_fg_hasil = "DELETE FROM mrp_production_fg_hasil WHERE kode IN ('".$kode."') AND quant_id IN ('".$quant_id."') ";
+                        $this->_module->update_perbatch($sql_delete_fg_hasil);
+
+                        // hapus lot di smi by move fg hasil
+                        $sql_delete_smi = "DELETE FROM stock_move_items WHERE move_id IN ('".$move_fg['move_id']."') AND quant_id IN ('".$quant_id."') ";
+                        $this->_module->update_perbatch($sql_delete_smi);
+
+                        // hapus stock quant
+                        $sql_delete_stock = "DELETE FROM stock_quant WHERE quant_id IN ('".$quant_id."') ";
+                        $this->_module->update_perbatch($sql_delete_stock);
+
+                        // hapus acc smi
+                        $sql_delete_acc_smi = "DELETE FROM acc_stock_move_items WHERE periode_th = '".$thn."' AND periode_bln = '".$bln."' AND dept_id_mutasi = '".$deptid."' AND kode_transaksi = '".$kode."' AND quant_id = '".$quant_id."' ";
+                        $this->_module->update_perbatch($sql_delete_acc_smi);
+
+
+                        $jenis_log   = "cancel";
+                        $note_log    = " Hapus KP/Lot -> ".$quant_id." ".$kode_produk." ".$nama_produk." ".$lot." ".$qty."  ".$qty2." ".$nama_grade;
+                        $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
+                        
+                        $callback    = array('status'=>'success',  'message' => 'KP/Lot <b>'.$lot.'</b> Berhasil Dihapus !',  'icon' =>'fa fa-check', 'type' => 'success'); 
+
+                    }
+
+                    
+                }
+
+
+            }
+
+            //unlock table
+            $this->_module->unlock_tabel();  
+
+        }
+        
+        echo json_encode($callback);
+
     }
 
   

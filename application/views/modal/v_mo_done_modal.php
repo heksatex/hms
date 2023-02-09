@@ -85,6 +85,14 @@
                           <span class="info-box-number"><?php echo number_format($fg_waste->kg,2);?>  <small>Kg</small></span>
                       </div>
                   </div>
+                  <div class="info-box2">
+                      <span class="info-box-icon bg-red"><i class="fa fa-cube"></i></span>
+                      <div class="info-box-content">
+                          <span class="info-box-text">Adjustment</span>
+                          <span class="info-box-number"><?php echo number_format($fg_adj->mtr,2);?>  <small>Mtr</small></span>
+                          <span class="info-box-number"><?php echo number_format($fg_adj->kg,2);?>  <small>Kg</small></span>
+                      </div>
+                  </div>
               </div>
             </div>
           </div>
