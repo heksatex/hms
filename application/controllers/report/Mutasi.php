@@ -427,7 +427,11 @@ class Mutasi extends MY_Controller
                     }
                     $jml_in++;
                     if($mts->type == 'prod'){
-                        $judul_column_group_in = 'Hasil Produksi '.$mts->dept_id_dari.'';
+                        if(strpos($mts->dept_id_tujuan, 'Waste') !== FALSE){
+                            $judul_column_group_in = 'Penerimaan dari '.$mts->dept_id_tujuan;
+                        }else{
+                            $judul_column_group_in = 'Hasil Produksi '.$mts->dept_id_dari.'';   
+                        }
                     }else{
                         $judul_column_group_in = 'Penerimaan dari '.$mts->dept_id_dari;
                     }
