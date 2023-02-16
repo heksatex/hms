@@ -143,6 +143,7 @@
     </div>   
 </form>
 
+<?php if($copy_bahan_baku == 'true'){ // btn-copy untuk copy_bahan_baku = true;?> 		
 <hr style="border: 1px solid ">
 <form class="form-horizontal" id="konsumsi_bahan" name="form_konsumsi">
 	<div class="form-group">
@@ -218,6 +219,7 @@
 		</div>		
 	</div>
 </form>
+<?php } ?>
 <style type="text/css">
 	.error{
 		border:  1px solid red;
@@ -842,11 +844,12 @@
 		
 	}
 
+	$("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-tambah-produksi-batch" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
 
 	//simpan data 
-	$("#btn-tambah").unbind( "click" );
-	$("#btn-tambah").off("click").on("click",function(e) {
-	//$("#btn-tambah").one("click",function(e) {
+	$("#btn-tambah-produksi-batch").unbind( "click" );
+	$("#btn-tambah-produksi-batch").off("click").on("click",function(e) {
+	//$("#btn-tambah-produksi-batch").one("click",function(e) {
 
 		e.preventDefault();
 		var deptid = '<?php echo $deptid?>';//dept id untuk log history
@@ -1075,7 +1078,7 @@
 				alert('Maaf, Produk Lot / Waste tidak boleh Kosong !');
 			}else{	
 				please_wait(function(){});
-			    $('#btn-tambah').button('loading');
+			    $('#btn-tambah-produksi-batch').button('loading');
 			    $.ajax({
 			        dataType: "JSON",
 			        url : '<?php echo site_url('manufacturing/mO/save_produksi_batch_modal') ?>',
@@ -1100,7 +1103,7 @@
 			              $("#tab_1").load(location.href + " #tab_1");
 			              $("#tab_2").load(location.href + " #tab_2");             
 			              $("#foot").load(location.href + " #foot");
-			              $('#btn-tambah').button('reset');
+			              $('#btn-tambah-produksi-batch').button('reset');
 			              alert(data.message);
 						  unblockUI( function(){});
 			           	}else{
@@ -1110,7 +1113,7 @@
 			              $("#tab_2").load(location.href + " #tab_2");             
 			              $("#foot").load(location.href + " #foot");
 	                 	  $('#tambah_data').modal('hide');
-			              $('#btn-tambah').button('reset');
+			              $('#btn-tambah-produksi-batch').button('reset');
 			              if(data.double == 'yes'){
 			              	alert_modal_warning(data.message2);
 			              }
@@ -1124,7 +1127,7 @@
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
 			          alert(jqXHR.responseTex+' error');
-			          $('#btn-tambah').button('reset');
+			          $('#btn-tambah-produksi-batch').button('reset');
 					  unblockUI( function(){});
 			        }
 			    });

@@ -115,7 +115,7 @@ class Produkparent extends MY_Controller
                     }
 
                     if($child){
-                        $callback = array('status' => 'failed', 'field' => 'nama','message' => 'Status Parent tidak bisa dirubah ke Status Tidak Aktif, karena masih terdapat Childs !','icon' =>'fa fa-check', 'type' => 'success');
+                        $callback = array('status' => 'failed', 'field' => 'nama','message' => 'Status Parent tidak bisa dirubah ke Status Tidak Aktif, karena masih terdapat Childs !','icon' =>'fa fa-warning', 'type' => 'warning');
                     }else{
                         // get nama parent sebelum edit 
                         $before       = $this->m_produkParent->get_data_parent_by_id($id_parent)->row_array();
