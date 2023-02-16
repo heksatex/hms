@@ -3941,6 +3941,7 @@ class MO extends MY_Controller
                 $rm_waste           = $this->m_mo->get_sum_qty_rm_waste($kode,'done')->row();
                 $fg_prod            = $this->m_mo->get_sum_qty_fg_produce($kode)->row();
                 $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($kode)->row();
+                $fg_adj             = $this->m_mo->get_sum_qty_fg_adj($kode)->row();
 
                 $total_kg_rm        = $rm_done->kg;
                 $total_kg_fg        = ($fg_prod->kg + $fg_waste->kg ) - $fg_adj->kg;
@@ -6501,10 +6502,10 @@ class MO extends MY_Controller
             $pdf->Multicell(60,5,$barcode,0,'C');
             
             $pdf->SetFont('Arial','B',8,'C');
-            $pdf->setXY(0,5+$heightNama+8);
+            $pdf->setXY(0,5+$heightNama+13);
             $pdf->Multicell(60,3,'Reff Picking : '.$reff_picking,0,'C');
 
-            $pdf->Code128(5,$enter+$enter_barcode,$barcode,50,6,'C',0,1);//barcode
+            // $pdf->Code128(5,$enter+$enter_barcode,$barcode,50,6,'C',0,1);//barcode
 
             $pdf->SetFont('Arial','B',15,'C');
 
