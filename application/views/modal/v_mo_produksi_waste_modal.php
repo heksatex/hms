@@ -255,6 +255,10 @@
 </style>
 
 <script>
+
+	$("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-produksi-waste" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+
+
 	$("input[name='waste?[]']").unbind();
 	$("input[name='waste?[]']").off("change").on("change", function(){
 		// alert(this.value);
@@ -362,7 +366,7 @@
 
 			if(parseFloat(qty_konsum) > qty_smi){
 				qty_konsum_ = qty_smi;
-				alert("Qty Dikonsumsi tidak boleh lebih dari Qty");
+				alert_bootbox("Qty Dikonsumsi tidak boleh lebih dari Qty");
 				$(this).val(0);
 			}else{
 				qty_konsum_ = qty_konsum;
@@ -401,7 +405,7 @@
 			var qty2_konsum 	= $(this).val();
 			var total_qty2_konsum = 0;
 			if(parseFloat(qty2_konsum) > qty2){
-				alert("Qty Dikonsumsi tidak boleh lebih dari Qty");
+				alert_bootbox("Qty Dikonsumsi tidak boleh lebih dari Qty");
 				$(this).val(0);
 			}
 
@@ -416,7 +420,6 @@
 			});
 			document.getElementById('total_qty2_konsum').value = formatNumber(total_qty2_konsum.toFixed(2));
 		}
-		
 	});
 
 	function get_qty_by_bom(position,kode_produk,qty2){
@@ -974,9 +977,9 @@
 		}).get();
 
 		if(radio_waste == ""){
-			alert('Isi terlebih dahulu Mau Waste Apa ? Bahan Baku atau Barang Jadi ');
+			alert_bootbox('Isi terlebih dahulu Mau Waste Apa ? Bahan Baku atau Barang Jadi ');
 		}else if(radio_jenis == ""){
-			alert('Isi terlebih dahulu Jenis Waste Apa ? Data atau Fisik ');
+			alert_bootbox('Isi terlebih dahulu Jenis Waste Apa ? Data atau Fisik ');
 		}else{
 
 		var lot = document.getElementsByName('wtxtlot');
@@ -987,7 +990,7 @@
 		$('.wproduk').each(function (index,value) {
 			if($(value).val()==null){
 				$($(value).data('select2').$container).addClass('error');
-				alert('Product Waste tidak boleh Kosong !');
+				alert_bootbox('Product Waste tidak boleh Kosong !');
 				tambah = false;
 			}else{
 				$($(value).data('select2').$container).removeClass('error');
@@ -1000,7 +1003,7 @@
 			if($(value).data('select2')){
 				if($(value).val()==null){
 					$($(value).data('select2').$container).addClass('error');
-					alert('Lot Waste tidak boleh kosong !');
+					alert_bootbox('Lot Waste tidak boleh kosong !');
 					tambah = false;
 				}else{
 					$($(value).data('select2').$container).removeClass('error');
@@ -1009,7 +1012,7 @@
 				if($(value).val()==''){
 			   	  	$(value).addClass('error'); 
 			   	  	tambah = false;
-			   	  	alert('Lot Waste tidak boleh kosong !');
+			   	  	alert_bootbox('Lot Waste tidak boleh kosong !');
 				}else{
 				  	$(value).removeClass('error'); 
 				}
@@ -1022,7 +1025,7 @@
 			wtxtqty  = $(this).val();
 			wtxtqty2 = $(this).parents("tr").eq(0).find(".wtxtqty2").val();
 			if((wtxtqty == '' || wtxtqty == 0) && ( wtxtqty2 == '' || wtxtqty2 == 0)) {
-				alert('Qty atau Qty2 tidak boleh kosong !');
+				alert_bootbox('Qty atau Qty2 tidak boleh kosong !');
 				$(value).addClass('error'); 
 				$(this).parents("tr").eq(0).find(".wtxtqty2").addClass('error'); 
 				tambah = false;
@@ -1063,7 +1066,7 @@
 		});	
 
 		if(sama==true){
-			alert('Lot Waste ada yang sama !');
+			alert_bootbox('Lot Waste ada yang sama !');
 			tambah  = false;
 		}
 				
@@ -1274,7 +1277,7 @@
 							});	
 
 							if(sama==true){
-								alert('Lot Sudah pernah dipilih !');
+								alert_bootbox('Lot Sudah pernah dipilih !');
 							}
 							total_input_waste();
 							total_rm_waste();
@@ -1344,7 +1347,7 @@
 											$('#tbl_produksi_waste tbody tr:nth-child('+rowIndex+') td:nth-child(3)').find('.wtxtlot').val(lot_prefix_next);
 					
 										},error  :function(xhr, ajaxOptions, thrownError){
-											alert('error data');
+											alert_bootbox('error data');
 											//alert(xhr.responseText);
 										}
 								});
@@ -1387,7 +1390,7 @@
 	}
 
 
-	$("#btn-tambah").off("click").on("click",function(e) {
+	$("#btn-produksi-waste").off("click").on("click",function(e) {
 		
 			e.preventDefault();
 			
@@ -1406,12 +1409,12 @@
 			var radio_jenis= get_radio_jenis();
 	
 			if(radio_waste == ''){
-				alert('Isi terlebih dahulu Mau Waste Apa ? Bahan Baku atau Barang Jadi ');
+				alert_bootbox('Isi terlebih dahulu Mau Waste Apa ? Bahan Baku atau Barang Jadi ');
 				valid = false;
 			}
 	
 			if(radio_jenis == ''){
-				alert('Isi terlebih dahulu Jenis Waste Apa ? Data atau Fisik ');
+				alert_bootbox('Isi terlebih dahulu Jenis Waste Apa ? Data atau Fisik ');
 				valid = false;
 			}
 	
@@ -1428,7 +1431,7 @@
 			});
 	
 			if(wproduk_empty == true ){
-				alert('Tambahkan terlebih dahulu Product yang akan di Waste !  ');
+				alert_bootbox('Tambahkan terlebih dahulu Product yang akan di Waste !  ');
 				valid = false;
 			}
 	
@@ -1460,11 +1463,11 @@
 			});
 	
 		 	if(wproduk){
-				alert('Product Waste tidak boleh Kosong !');
+				alert_bootbox('Product Waste tidak boleh Kosong !');
 		 	}
 	
 		 	if(wtxtlot){
-		 		alert('Lot Waste tidak boleh kosong !');
+		 		alert_bootbox('Lot Waste tidak boleh kosong !');
 		 	}
 	
 			//cek qty apa ada yg kosong
@@ -1483,7 +1486,7 @@
 	
 			
 			if(qty_waste_empty == true){
-				alert('Qty atau Qty2 tidak boleh kosong !');
+				alert_bootbox('Qty atau Qty2 tidak boleh kosong !');
 			}
 	
 			// < WASTE DETAILS
@@ -1505,7 +1508,145 @@
 			});
 	
 			if(cek_qty){//jiika qty_dikonsumsi melebihi qty 
-				alert("Qty dikonsumsi tidak boleh Melebihi Qty !");	
+				alert_bootbox("Qty dikonsumsi tidak boleh Melebihi Qty !");	
+			}
+			
+			if(radio_waste == 'rm'){
+
+				if(radio_jenis == 'f'){
+					var qty_waste = true;
+					var waste_rm_valid = true;
+					var waste_rm_lot_valid = true;
+					var lot_same = true;
+					var same     = false;
+					var add_error = false;
+					$(".wnameproduct").each(function(index, element) {
+						if ($(element).val()!=="") {
+							kode_produk  = $(element).parents("tr").find("#wtxtproduct").val(),
+							lot  = $(element).parents("tr").find("#wtxtlot").val();							
+							qty	 = $(element).parents("tr").find("#wtxtqty").val();
+							qty2 = $(element).parents("tr").find("#wtxtqty2").val();
+
+							qty_konsum  = '';
+							qty2_konsum = '';
+							rm_rows  	= false;
+							same        = false;
+							arr_tmp_lot = [];
+
+							$('.qty_konsum').each(function(index,item){
+								rm_rows 		= true;
+								kode_produk_rm 	= $(item).parents("tr").find('#kode_produk').val();
+								lot_rm  		= $(item).parents("tr").find('#lot').val();
+								qty_rm  		= $(item).parents("tr").find('#qty_smi');
+								qty_rm_val 		= qty_rm.val();
+								qty2_rm 		= $(item).parents("tr").find('#qty2');
+								qty2_rm_val 	= qty2_rm.val();
+								qty_konsum 		= $(item).parents("tr").find('#qty_konsum');
+								qty2_konsum 	= $(item).parents("tr").find('#qty2_konsum');
+
+								if(kode_produk == kode_produk_rm && lot == lot_rm ){
+									// alert (JSON.stringify(arr_tmp_lot));
+									qty_  = qty ;
+									qty2_ = qty2 ;
+									$.each(arr_tmp_lot, function(index,isi){
+										if(arr_tmp_lot[index].kode_produk == kode_produk_rm && arr_tmp_lot[index].lot == lot_rm){
+											qty_  = (arr_tmp_lot[index].qty1);
+											qty2_ =  (arr_tmp_lot[index].qty2);
+
+											if(parseFloat(qty_) > parseFloat(qty_rm_val) || parseFloat(qty2_) > parseFloat(qty2_rm_val) ){
+												qty_waste  = false;
+												// alert("masuk llg")
+											}else{
+												qty_waste  = true;
+											}
+										}
+									});
+									// alert("qty +"+qty_);
+									if(parseFloat(qty_) > parseFloat(qty_rm_val) || parseFloat(qty2_) > parseFloat(qty2_rm_val) ){
+										qty_waste  = false;
+										if(parseFloat(qty_) > parseFloat(qty_rm_val)  ){
+											qty1_sisa  = parseFloat(qty_) - parseFloat(qty_rm_val);
+										}else{
+											qty1_sisa  = 0;
+										}
+										if(parseFloat(qty2_) > parseFloat(qty2_rm_val)  ){
+											qty2_sisa  = parseFloat(qty2_) - parseFloat(qty2_rm_val);
+										}else{
+											qty2_sisa  = 0;
+										}
+										arr_tmp_lot.push({kode_produk:kode_produk, lot:lot, qty1:qty1_sisa.toFixed(2), qty2:qty2_sisa.toFixed(2)});
+									}
+
+									same = true;
+								}else{
+									lot_same = false;
+								}
+
+							});
+
+							if(rm_rows == true){
+								if(qty_waste == false){
+									$(element).parents("tr").find("#wtxtqty").addClass('error');
+									$(element).parents("tr").find("#wtxtqty2").addClass('error');
+									
+									add_error = true;
+									valid = false;
+									waste_rm_valid = false;
+									qty_waste = true;
+								}else{
+									qty_waste = true;
+									add_error = false;
+									$(element).parents("tr").find("#wtxtqty").removeClass('error');
+									$(element).parents("tr").find("#wtxtqty2").removeClass('error');
+
+								}
+								
+								// alert(lot_same+" "+same);
+								if(add_error == false){
+									if(lot_same == false && same == false){
+										$(element).parents("tr").find("#wtxtqty").addClass('error');
+										$(element).parents("tr").find("#wtxtqty2").addClass('error');
+										valid = false;
+										waste_rm_lot_valid = false;
+										lot_same = true;
+										alert("masuk ff")
+									}else{
+										lot_same  = true;
+										$(element).parents("tr").find("#wtxtqty").removeClass('error');
+										$(element).parents("tr").find("#wtxtqty2").removeClass('error');
+									}
+								}
+							}else{
+								waste_rm_lot_valid = false;
+							}
+
+						}
+					});
+
+					if(waste_rm_valid == false){
+						alert_bootbox("Qty Waste Bahan Baku Fisik tidak boleh lebih dari Qty yg dikonsumsi ! ")
+					}
+
+					if(waste_rm_lot_valid == false){
+						alert_bootbox("Produk atau Lot  Konsumsi Bahan Baku tidak ada  ! ")
+					}
+				}
+
+			}
+
+			if(wproduk_empty == false ){
+				if(radio_waste == 'fg'){
+					if(radio_jenis == 'f'){
+						var rm = false;
+						$('.qty_konsum').each(function(index,item){
+							rm = true;
+						});
+						
+						if(rm == false){// jika rm tidak ada
+							alert_bootbox("Waste Barang Jadi Fisik harus terdapat Konsumsi Bahan Baku  !!");	
+						}
+					}
+				}
 			}
 	
 		    if(valid){
@@ -1558,7 +1699,7 @@
 						qty2_row.removeClass('error');
 					}
 
-					if ($(item).val()!=="") {
+					if ((qty_konsum != "" || qty2_konsum != "") && ( qty_konsum != 0 || qty2_konsum ) && (qty_konsum != 0.00  || qty2_konsum != 0.00)) {
 						arr2.push({
 							kode 		: $("#txtkode").val(),
 							qty_konsum  : $(item).parents("tr").find('#qty_konsum').val(),
@@ -1591,12 +1732,12 @@
 				});		
 			
 				if(produk_waste == false){
-					alert('Maaf, Produk yang akan di Waste masih Kosong !');
+					alert_bootbox('Maaf, Produk yang akan di Waste masih Kosong !');
 				}else if(input_rm == true){	
-					alert('Maaf, Inputan Konsumsi Bahan baku tidak Valid !');
+					alert_bootbox('Maaf, Inputan Konsumsi Bahan baku tidak Valid !');
 				}else{
 					please_wait(function(){});
-				    $('#btn-tambah').button('loading');
+				    $('#btn-produksi-waste').button('loading');
 				    $.ajax({
 				        dataType: "JSON",
 				        url : '<?php echo site_url('manufacturing/mO/save_produksi_waste_modal') ?>',
@@ -1622,8 +1763,8 @@
 				              $("#tab_1").load(location.href + " #tab_1");
 				              $("#tab_2").load(location.href + " #tab_2");             
 				              $("#foot").load(location.href + " #foot");
-				              $('#btn-tambah').button('reset');
-				              alert(data.message);
+				              $('#btn-produksi-waste').button('reset');
+				              alert_bootbox(data.message);
 							  unblockUI( function(){});
 				           	}else{
 				              //jika berhasil disimpan
@@ -1632,7 +1773,7 @@
 				              $("#tab_2").load(location.href + " #tab_2");             
 				              $("#foot").load(location.href + " #foot");
 		                 	  $('#tambah_data').modal('hide');
-				              $('#btn-tambah').button('reset');
+				              $('#btn-produksi-waste').button('reset');
 				              if(data.double == 'yes'){
 				              	alert_modal_warning(data.message2);
 				              }
@@ -1644,8 +1785,8 @@
 							$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('waste_produksi'); 
 							
 				        },error: function (jqXHR, textStatus, errorThrown){
-				          alert(jqXHR.responseTex+' error');
-				          $('#btn-tambah').button('reset');
+						  alert_bootbox('error Simpan Waste');
+				          $('#btn-produksi-waste').button('reset');
 						  unblockUI( function(){});
 				        }
 				    });

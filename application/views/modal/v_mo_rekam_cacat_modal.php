@@ -318,7 +318,9 @@
       $(this).closest('tr').remove();
     });
 
-    $("#btn-tambah").off("click").on("click",function(e) {
+    $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-tambah-cacat" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+
+    $("#btn-tambah-cacat").off("click").on("click",function(e) {
         e.preventDefault();
 
         var kode   = '<?php echo $kode; ?>';
@@ -366,7 +368,7 @@
               alert_modal_warning('Maaf, Rekam Cacat Masih Kosong !');
           }else{
             please_wait(function(){});
-            $('#btn-tambah').button('loading');
+            $('#btn-tambah-cacat').button('loading');
             $.ajax({
                 dataType: "JSON",
                 url : '<?php echo site_url('manufacturing/mO/save_rekam_cacat_lot_modal') ?>',
@@ -380,7 +382,7 @@
                       window.location.replace('../index');
                     }else if(data.status == 'failed'){
                       alert_modal_warning(data.message);
-                      $('#btn-tambah').button('reset');
+                      $('#btn-tambah-cacat').button('reset');
                       unblockUI( function(){});
                     }else{
                       //jika berhasil disimpan
@@ -394,7 +396,7 @@
                       $("#tab_2").load(location.href + " #tab_2");             
                       $("#foot").load(location.href + " #foot");
                       $('#tambah_data').modal('hide');
-                      $('#btn-tambah').button('reset');                   
+                      $('#btn-tambah-cacat').button('reset');                   
                       //window.location.replace(data.kode);
                       unblockUI( function(){
                         setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
@@ -403,7 +405,7 @@
                     
                 },error: function (jqXHR, textStatus, errorThrown){
                   alert(jqXHR.responseText);
-                  $('#btn-tambah').button('reset');
+                  $('#btn-tambah-cacat').button('reset');
   								unblockUI( function(){});
                 }
             });

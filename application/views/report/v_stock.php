@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -159,6 +160,9 @@
       min-width: 150px;
     }
 
+    .nowrap{
+      white-space: nowrap;
+    }
 
   </style>
 </head>
@@ -259,7 +263,7 @@
                                   
                                       <input type="hidden" name="sql" id="sql">
                                       <button type="submit" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm">
-                                        <i class="fa fa-file-excel-o"></i>  Excel
+                                        <i class="fa fa-file-excel-o" style="color:green"></i>  Excel
                                       </button>
                                   
                                   </div>
@@ -341,31 +345,30 @@
               <!-- /.Panel Result -->
             
              
-          <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
+            <div class="box-body">
+              <div class="col-sm-12 table-responsive">
                   <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
+                      <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                        <table id="example1" class="table table-condesed table-hover" border="0">
                           <thead>
                             <tr>
-                              <th  class="style no"  >No. </th>
-                              <th  class='style' ><a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)">Lot</a></th>
-                              <th  class='style min-width-80' ><a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"> Grade</a></th>
-                              <th  class='style min-width-100' ><a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)">Tgl diterima</a></th>
-                              <th  class='style' ><a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)">Lokasi</a></th>
-                              <th  class='style min-width-120' ><a class="column_sort" id="lokasi_fisik" data-order="desc" href="javascript:void(0)">Lokasi Fisik</a></th>
-                              <th  class='style min-width-80'  ><a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
-                              <th  class='style min-width-140' ><a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
-                              <th  class='style min-width-140' ><a class="column_sort" id="category" data-order="desc" href="javascript:void(0)">Kategori</a></th>
-                              <th  class='style min-width-100' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
-                              <th  class='style min-width-100' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
-                              <th  class='style min-width-100' ><a class="column_sort" id="lebar_greige" data-order="desc" href="javascript:void(0)">Lbr Greige</a></th>
-                              <th  class='style min-width-100' ><a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)">Lbr Jadi</th>
-                              <th  class='style min-width-80' ><a class="column_sort" id="sales_order" data-order="desc" href="javascript:void(0)">SC</th>
-                              <th  class='style min-width-100' ><a class="column_sort" id="sales_group" data-order="desc" href="javascript:void(0)">Marketing</th>
-                              <th  class='style min-width-100' ><a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)">Qty Opname</th>
-                              <th  class='style' >Umur (Hari)</th>
+                              <th  class="style bb no"  >No. </th>
+                              <th  class='style bb nowrap' ><a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)">Lot</a></th>
+                              <th  class='style bb min-width-80 nowrap' ><a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"> Grade</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)">Tgl diterima</a></th>
+                              <th  class='style bb nowrap' ><a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)">Lokasi</a></th>
+                              <th  class='style bb min-width-120 nowrap' ><a class="column_sort" id="lokasi_fisik" data-order="desc" href="javascript:void(0)">Lokasi Fisik</a></th>
+                              <th  class='style bb min-width-80 nowrap'  ><a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
+                              <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
+                              <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="category" data-order="desc" href="javascript:void(0)">Kategori</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="lebar_greige" data-order="desc" href="javascript:void(0)">Lbr Greige</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)">Lbr Jadi</th>
+                              <th  class='style bb min-width-80 nowrap' ><a class="column_sort" id="sales_order" data-order="desc" href="javascript:void(0)">SC</th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="sales_group" data-order="desc" href="javascript:void(0)">Marketing</th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)">Qty Opname</th>
+                              <th  class='style bb' >Umur (Hari)</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -373,16 +376,14 @@
                               <td colspan="18" align="center">Tidak ada Data</td>
                             </tr>
                           </tbody>
-                      </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
-                        Processing...
+                        </table>
+                        <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
+                          Processing...
+                        </div>
                       </div>
                   </div>
-                </div>
-
               </div>
             </div>
-          </div>
           <!-- /.box-body -->
         </div>
         <!-- /.box-body -->

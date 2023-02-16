@@ -84,9 +84,11 @@
   });
   */
 
+  $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-tambah-quant" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+
   //simpan details ketika button simpan di klik
-  $("#btn-tambah").unbind( "click" );
-  $("#btn-tambah").off("click").on("click",function(e) {
+  $("#btn-tambah-quant").unbind( "click" );
+  $("#btn-tambah-quant").off("click").on("click",function(e) {
       var myCheckboxes = table.column(6).checkboxes.selected();
       var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
@@ -102,7 +104,7 @@
 
         }else{
           please_wait(function(){});
-          $('#btn-tambah').button('loading');
+          $('#btn-tambah-quant').button('loading');
           $.ajax({
               type: "POST",
               url :'<?php echo base_url('manufacturing/mO/save_details_quant_mo_modal')?>',
@@ -122,13 +124,13 @@
                   //alert jika session habis
                   alert_modal_warning(data.message);
                   window.location.replace('../index');
-                  $('#btn-tambah').button('reset');
+                  $('#btn-tambah-quant').button('reset');
                   unblockUI( function(){});
 
                 }else if(data.status == 'failed'){
                   //var pesan = "Lot "+data.lot+ " Sudah diinput !"       
                   alert_modal_warning(data.message);
-                  $('#btn-tambah').button('reset');
+                  $('#btn-tambah-quant').button('reset');
                   unblockUI( function(){});
 
                 }else{
@@ -138,7 +140,7 @@
                   $("#status_bar").load(location.href + " #status_bar");
                   $("#foot").load(location.href + " #foot");
                   $('#tambah_data').modal('hide');
-                  $('#btn-tambah').button('reset');
+                  $('#btn-tambah-quant').button('reset');
                   unblockUI( function(){
                     setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
                   });
@@ -147,7 +149,7 @@
 
               },error: function (xhr, ajaxOptions, thrownError) {
               alert(xhr.responseText);
-             $('#btn-tambah').button('reset');
+             $('#btn-tambah-quant').button('reset');
             }
           });
           

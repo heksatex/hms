@@ -918,6 +918,7 @@
                             <th class="style">Reff Note</th>
                             <th class="style">Cacat</th>
                             <th class="style">Print</th>
+                            <th class="style"></th>
                          </tr>
                           <tbody>
                             <?php
@@ -944,14 +945,17 @@
                                 <td class="text-wrap width-200"><?php echo $row->reff_note?></td>
                                 <td>
                                    <a href="javascript:void(0)" onclick="rekam_cacat('<?php echo $list->dept_id ?>', '<?php echo $row->quant_id ?>','<?php echo $row->lot ?>')" data-toggle="tooltip" title="Rekam Cacat Lot">
-                                     <span class="glyphicon  glyphicon-share"></span></a>
+                                   <span class="glyphicon  glyphicon-share"></span></a>
                                 </td>
                                 <td>
                                   <input type="checkbox" class='checkPrint' value="<?php echo $row->quant_id; ?>">
-
-                                  <!--a href="javascript:void(0)" onclick="print_lot('<?php echo $row->lot ?>','<?php echo $row->nama_grade ?>')" data-toggle="tooltip" title="Print">
-                                     <span class="fa  fa-print"></span>
-                                   </a-->
+                                </td>
+                                <td>
+                                  <?php if($akses_menu >0){?>
+                                    <a href="javascript:void(0)" onclick="batal_hph(this,'<?php echo $row->quant_id ?>','<?php echo $row->lot ?>')"  title="Hapus Lot/KP" >
+                                     <i class=" fa fa-trash" style="color: red"></i>
+                                    </a>
+                                  <?php } ?>
                                 </td>
                               </tr>
                             <?php 
@@ -1049,6 +1053,8 @@
 </div>
 <!--/. Site wrapper -->
 <?php $this->load->view("admin/_partials/js.php") ?>
+<!-- add js -->
+<script src="<?php echo base_url('dist/js/myscript.js') ?>"></script>
 
 <script type="text/javascript">
 
@@ -1144,6 +1150,7 @@
     $("#btn-print").show();
     $("#btn-produksi-batch").show();
     $("#btn-waste").show();
+    $("#btn-consume").show();
     $('#mc').attr('disabled', true);
     $("#btn-cancel-edit").attr('id','btn-cancel');
     $("#lebar_jadi_mo").attr("readonly", true);
@@ -1165,6 +1172,7 @@
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('tambah_quant');
     $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('request_resep');
     $("#tambah_data .modal-dialog ").removeClass('lebar2');
+    $("#view_data .modal-dialog ").removeClass('lebar2');
     //replace id btn_request
     $("#tambah_data .modal-dialog .modal-content .modal-footer #btn_request").attr('id',"btn-tambah");
     $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").text("Simpan");
@@ -1303,6 +1311,7 @@
     $("#btn-produksi").hide();//sembuyikan btn-produksi
     $("#btn-produksi-batch").hide();//sembuyikan btn-produksi-batch
     $("#btn-waste").hide();//sembuyikan btn-waste
+    $("#btn-consume").hide();// sembuyikan btn-consume
     $("#btn-stok").hide();//sembuyikan btn-produksi
     $("#btn-done").hide();//sembuyikan btn-done
     $("#btn-print").hide();//sembuyikan btn-print
@@ -1419,6 +1428,78 @@
             setTimeout(function() { $(".tambah_data").html(html); },1000);
           }   
     );
+  }
+
+  function batal_hph(btn,quant_id,lot){ 
+
+      var kode   = $("#kode").val();
+      var dept_id = "<?php echo $list->dept_id;?>";
+      var status = $('#status').val();
+      
+      if(status == 'done'){
+        alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+      }else if(status == 'cancel'){
+        alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+      }else{
+
+        bootbox.confirm({
+          message: "Apa anda yakin ingin menghapus KP/Lot <b>"+lot+" </b> ini ?",
+          title: "<i class='glyphicon glyphicon-trash' style='color: red'></i> Delete !",
+          buttons: {
+            confirm: {
+              label: 'Yes',
+              className: 'btn-primary btn-sm'
+            },
+            cancel: {
+              label: 'No',
+              className: 'btn-default btn-sm'
+            },
+          },
+          callback: function (result) {
+            if(result == true){
+              var btn_load = $(btn);
+              btn_load.button('loading');
+              please_wait(function(){});
+              $.ajax({
+                  type: "POST",
+                  url :'<?php echo base_url('manufacturing/mO/batal_hph')?>',
+                  dataType: 'JSON',
+                  data    : {kode:kode, quant_id:quant_id, deptid:dept_id, lot:lot},
+                  success: function(data){
+                    if(data.sesi=='habis'){
+                      //alert jika session habis
+                      alert_modal_warning(data.message);
+                      window.location.replace('../index');
+                      unblockUI( function(){});
+                      btn_load.button('reset');
+
+                    }else if(data.status == 'failed'){
+                      alert_modal_warning(data.message);
+                      unblockUI( function(){});
+                      btn_load.button('reset');
+                    }else{
+                      $("#tab_2").load(location.href + " #tab_2");
+                      $("#status_bar").load(location.href + " #status_bar");
+                      $("#foot").load(location.href + " #foot");
+                      btn_load.button('reset');
+                      unblockUI( function(){
+                        setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                      });
+                    
+                    }
+
+                  },error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.responseText);
+                    unblockUI( function(){});
+                    btn_load.button('reset');
+                  }
+              });
+
+            }
+          }
+        });
+        
+      }
   }
 
   // modal produksi batch
@@ -1590,6 +1671,61 @@
       });
     }
   });
+
+
+  $("#btn-consume").unbind( "click" );
+  $(document).on('click','#btn-consume',function(e){
+
+    var status = $('#status').val();
+    if(status == 'done'){
+      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+    }else if(status == 'cancel'){
+      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+    }else if(status == 'draft'){
+      alert_modal_warning('Maaf, Product belum ready !');
+    }else{
+      e.preventDefault();
+      $('.modal-title').text('Consume');
+
+      $('#btn-tambah').button('reset');
+     
+      var kode       = $("#kode").val();
+      var deptid     = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
+      var move_id_fg = "<?php echo $move_id_fg['move_id'];?>";
+      var qty        = "<?php echo $list->qty?>";
+      $("#tambah_data").modal({
+          show: true,
+          backdrop: 'static'
+      });
+      $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('consume');
+      $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+
+      $("#btn-produksi").prop('disabled',true);
+      $("#btn-produksi-batch").prop('disabled',true);
+
+      $(".consume").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $.post('<?php echo site_url()?>manufacturing/mO/consume_mo',
+        { kode        : $('#kode').val(),
+          kode_produk : $('#kode_produk').val(), 
+          nama_produk : $('#product').val(),
+          sisa_qty    : $('#total_sisa').val(), 
+          uom_qty_sisa    : $('#uom_qty_sisa').val(), 
+          deptid      : deptid, 
+          kode        : kode,
+          move_id_fg  : move_id_fg, 
+          qty         : $('#qty_prod').val(),  
+          origin      : $('#origin').val(),
+          lot_prefix_waste  : $('#lot_prefix_waste').val(),       
+        } 
+      ).done(function(html){
+        setTimeout(function() {
+          $(".consume").html(html)  
+        },1000);
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+      });
+    }
+  });
+
 
 
   //hapus data bahan baku
@@ -1813,66 +1949,41 @@
     });
 
 
-  //klik button done
-  $("#btn-done").unbind( "click" );
-  $('#btn-done').click(function(){
-    var status = $('#status').val();
-    //var move_id = '<?php echo $move_id_rm['move_id'];?>';
-    if(status == 'done'){
-      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
-    }else if(status == 'cancel'){
-      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
-    /*
-    }else if(status == 'draft'){
-      alert_modal_warning('Maaf, Product belum ready !');
-    */
-    }else{
+   //modal request resep
+   $('#btn-done').click(function(){
 
-    $('#btn-done').button('loading');
-    var deptid  = "<?php echo $list->dept_id; ?>";//parsing data id dept untuk log history    
-    var qty_target  = "<?php echo $list->qty; ?>";
-    please_wait(function(){});
+      var status = $('#status').val();
+      // if(status == 'done'){
+      //   alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+      // }else if(status == 'cancel'){
+      //   alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+      
+      // }else if(status == 'draft'){
+      //   alert_modal_warning('Maaf, Product belum ready !');
+     
+      // }else{
 
-        $.ajax({
-           type: "POST",
-           dataType: "json",
-           url :'<?php echo base_url('manufacturing/mO/mo_done')?>',
-           beforeSend: function(e) {
-              if(e && e.overrideMimeType) {
-                  e.overrideMimeType("application/json;charset=UTF-8");
-              }
-           },
-            data: {kode   : $('#kode').val(),              
-                   deptid : deptid,   
-                   qty_target : qty_target,             
-            },success: function(data){
-              if(data.sesi == "habis"){
-                //alert jika session habis
-                alert_modal_warning(data.message);
-                window.location.replace('../index');
-              }else if(data.status == "failed"){
-                unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                });
-                refresh_mo(); 
-                $('#btn-done').button('reset')         
-              }else{
-                unblockUI( function() {
-                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                });
-                refresh_mo();
-                $('#btn-done').button('reset');           
-              }
+        $("#view_data").modal({
+            show: true,
+            backdrop: 'static'
+        })
+        var deptid = "<?php echo $list->dept_id; ?>"
 
-            },error: function (xhr, ajaxOptions, thrownError) { 
-              alert(xhr.responseText);
-              setTimeout($.unblockUI, 1000); 
-              unblockUI( function(){});
-              $('#btn-done').button('reset');
-            }
-        });
-    }
-  });
+        // $("#view_data .modal-dialog ").addClass('lebar2');
+
+        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Warning !!');
+        $.post('<?php echo site_url()?>manufacturing/mO/mo_done_modal',
+              {kode:$('#kode').val(), deptid:deptid},
+        ).done(function(html){
+            setTimeout(function() {
+                $(".view_body").html(html);  
+              },1000);
+         });
+
+      // }
+
+    });
 
 
 

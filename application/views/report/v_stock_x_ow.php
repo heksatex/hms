@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -179,6 +180,10 @@
       min-width: 150px;
     }
 
+    .nowrap{
+      white-space: nowrap;
+    }
+
 
   </style>
 </head>
@@ -336,28 +341,29 @@
                     </div>
                   </div>
                   <div class="col-sm-12 table-responsive" style="padding:0px">
-                    <div>
+                    <div style="padding-bottom:10px;">
                       <label><div id='total_record'>Total Data: 0</div></label>
                       <div class="pull-right text-right">
                           <div id='pagination'></div>
                       </div>
                     </div>
-                      <div class="table_scroll">
+                    <div class="table_scroll">
                           <div class="table_scroll_head">
-                          <div class="divListviewHead">
-                              <table id="example1" class="table" border="0">
+                            <div class="divListviewHead">
+                              <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                                <table id="example1" class="table table-condesed table-hover" border="0">
                                   <thead>
                                       <tr>
-                                      <th  class="style no"  >No. </th>
-                                      <th  class='style' ><a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)">Lot</a></th>
-                                      <th  class='style min-width-80' ><a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)">Grade</a></th>
-                                      <th  class='style' ><a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)">Lokasi</a></th>
-                                      <th  class='style min-width-100'  ><a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
-                                      <th  class='style min-width-140' ><a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
-                                      <th  class='style min-width-100' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
-                                      <th  class='style min-width-100' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
-                                      <th  class='style min-width-80' ></th>
-                                      <th  class='style min-width-80' ></th>
+                                      <th  class="style bb no"  >No. </th>
+                                      <th  class='style bb nowrap' ><a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)">Lot</a></th>
+                                      <th  class='style bb min-width-80 nowrap' ><a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)">Grade</a></th>
+                                      <th  class='style bb nowrap' ><a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)">Lokasi</a></th>
+                                      <th  class='style bb min-width-100 nowrap'  ><a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
+                                      <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
+                                      <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
+                                      <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
+                                      <th  class='style bb min-width-80 nowrap' ></th>
+                                      <th  class='style bb min-width-80 nowrap' ></th>
                                       </tr>
                                   </thead>
                                   <tbody>
@@ -365,13 +371,14 @@
                                       <td colspan="8" align="center">Tidak ada Data</td>
                                       </tr>
                                   </tbody>
-                              </table>
-                              <div id="example1_processing" class="example1_processing table_processing" style="display: none">
+                                </table>
+                                <div id="example1_processing" class="example1_processing table_processing" style="display: none; z-index:5;">
                                   Processing...
+                                </div>
                               </div>
+                            </div>
                           </div>
-                          </div>
-                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -400,29 +407,30 @@
                   </div>
 
                   <div class="col-sm-12 table-responsive" style="padding:0px">
-                      <div>
+                      <div style="padding-bottom:10px;">
                         <label><div id='total_record2'>Total Data : 0</div></label>
-                        <div class="pull-right text-right">
+                        <div class="pull-right text-right" >
                             <div id='pagination2'></div>
                         </div>
                       </div>
                       <div class="table_scroll">
-                          <div class="table_scroll_head">
+                        <div class="table_scroll_head">
                           <div class="divListviewHead">
-                              <table id="example2" class="table" border="0">
+                            <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                                <table id="example2" class="table table-condesed table-hover" border="0">
                                   <thead>
                                       <tr>
-                                      <th  class="style no"  >No. </th>
-                                      <th  class='style min-width-80' ><a class="column_sort2" id="kode" data-order="desc" href="javascript:void(0)">Kode</a></th>
-                                      <th  class='style min-width-80' >Origin</th>
-                                      <th  class='style min-width-100'><a class="column_sort2" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
-                                      <th  class='style min-width-140'><a class="column_sort2" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
-                                      <th  class='style min-width-80' >Lot</th>
-                                      <th  class='style min-width-80' >Grade</th>
-                                      <th  class='style min-width-100'><a class="column_sort2" id="qty_plan" data-order="desc" href="javascript:void(0)">Qty1 Plan</a></th>
-                                      <th  class='style min-width-100'><a class="column_sort2" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
-                                      <th  class='style min-width-100'><a class="column_sort2" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
-                                      <th  class='style min-width-80' ></th>
+                                      <th  class="style bb no"  >No. </th>
+                                      <th  class='style bb min-width-80 nowrap' ><a class="column_sort2" id="kode" data-order="desc" href="javascript:void(0)">Kode</a></th>
+                                      <th  class='style bb min-width-80 nowrap' >Origin</th>
+                                      <th  class='style bb min-width-100 nowrap'><a class="column_sort2" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
+                                      <th  class='style bb min-width-140 nowrap'><a class="column_sort2" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
+                                      <th  class='style bb min-width-80 nowrap' >Lot</th>
+                                      <th  class='style bb min-width-80 nowrap' >Grade</th>
+                                      <th  class='style bb min-width-100 nowrap'><a class="column_sort2" id="qty_plan" data-order="desc" href="javascript:void(0)">Qty1 Plan</a></th>
+                                      <th  class='style bb min-width-100 nowrap'><a class="column_sort2" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
+                                      <th  class='style bb min-width-100 nowrap'><a class="column_sort2" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
+                                      <th  class='style  min-width-80 nowrap' ></th>
                                       </tr>
                                   </thead>
                                   <tbody>
@@ -430,12 +438,13 @@
                                       <td colspan="8" align="center">Tidak ada Data</td>
                                       </tr>
                                   </tbody>
-                              </table>
-                              <div id="example2_processing" class="table_processing example2_processing" style="display: none">
+                                </table>
+                                <div id="example2_processing" class="table_processing example2_processing" style="display: none">
                                   Processing...
-                              </div>
+                                </div>
+                            </div>
                           </div>
-                          </div>
+                        </div>
                       </div>
                   </div>
                 </div>
