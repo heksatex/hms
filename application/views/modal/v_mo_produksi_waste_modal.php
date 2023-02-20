@@ -256,6 +256,8 @@
 
 <script>
 
+
+
 	$("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-produksi-waste" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
 
 
@@ -1545,7 +1547,6 @@
 								qty2_konsum 	= $(item).parents("tr").find('#qty2_konsum');
 
 								if(kode_produk == kode_produk_rm && lot == lot_rm ){
-									// alert (JSON.stringify(arr_tmp_lot));
 									qty_  = qty ;
 									qty2_ = qty2 ;
 									$.each(arr_tmp_lot, function(index,isi){
@@ -1555,13 +1556,11 @@
 
 											if(parseFloat(qty_) > parseFloat(qty_rm_val) || parseFloat(qty2_) > parseFloat(qty2_rm_val) ){
 												qty_waste  = false;
-												// alert("masuk llg")
 											}else{
 												qty_waste  = true;
 											}
 										}
 									});
-									// alert("qty +"+qty_);
 									if(parseFloat(qty_) > parseFloat(qty_rm_val) || parseFloat(qty2_) > parseFloat(qty2_rm_val) ){
 										qty_waste  = false;
 										if(parseFloat(qty_) > parseFloat(qty_rm_val)  ){
@@ -1601,7 +1600,6 @@
 
 								}
 								
-								// alert(lot_same+" "+same);
 								if(add_error == false){
 									if(lot_same == false && same == false){
 										$(element).parents("tr").find("#wtxtqty").addClass('error');
@@ -1609,7 +1607,6 @@
 										valid = false;
 										waste_rm_lot_valid = false;
 										lot_same = true;
-										alert("masuk ff")
 									}else{
 										lot_same  = true;
 										$(element).parents("tr").find("#wtxtqty").removeClass('error');
@@ -1637,20 +1634,34 @@
 			if(wproduk_empty == false ){
 				if(radio_waste == 'fg'){
 					if(radio_jenis == 'f'){
-						var rm = false;
-						$('.qty_konsum').each(function(index,item){
-							rm = true;
+						// list waste fg
+						var cek_rm = false;
+						$(".wnameproduct").each(function(index, element) {
+							if ($(element).val()!=="") {
+								qty1 = $(element).parents("tr").find("#wtxtqty").val();
+								if(qty1 !== "" && qty1 != 0 && qty1 != 0.00 ) {
+									cek_rm = true;
+								}
+							}
 						});
-						
-						if(rm == false){// jika rm tidak ada
-							alert_bootbox("Waste Barang Jadi Fisik harus terdapat Konsumsi Bahan Baku  !!");	
+
+						if(cek_rm == true){
+							var rm = false;
+							$('.qty_konsum').each(function(index,item){
+								rm = true;
+							});
+							if(rm == false){// jika rm tidak ada
+								valid = false;
+								alert_bootbox("Waste Barang Jadi Fisik harus terdapat Konsumsi Bahan Baku  !!");	
+							}
 						}
+						
 					}
 				}
 			}
 	
 		    if(valid){
-		    	// var qty_sisa = $('#qty_sisa').val();
+		    
 				var i = 0;
 				var konsumsi_bahan = false;
 				var produk_waste   = false;
