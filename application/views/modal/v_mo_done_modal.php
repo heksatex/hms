@@ -47,15 +47,14 @@
                 <span class="info-box-icon "><i class="fa fa-cubes"></i></span>
               </div> -->
               <?php 
-              echo $total_kg_rm." ".$total_kg_fg;
-              if($show_btn == 'true' AND ($status == 'ready')){?>
+              if($show_btn == true AND ($status == 'ready')){?>
                       <h2><center><b>KG</b> Bahan Baku dan <br><b>KG</b> Barang Jadi <br><b><font color="green">SAMA</font></b> !!!</center></h2>
                       <button type="button" class="btn btn-success btn-sm btn-block" id="btn-done-mo" name="btn-done-mo">DONE !!</button>
-              <?php }else if($show_btn == 'true' AND ($status == 'done' or $status == 'cancel')){?>
+              <?php }else if($show_btn == true AND ($status == 'done' or $status == 'cancel')){?>
                       <h2><center><b>KG</b> Bahan Baku dan <br><b>KG</b> Barang Jadi <b><br> <font color="green">SAMA</font></b> !!!</center></h2>
-              <?php }else if($show_btn == 'false' AND ($status == 'done' or $status == 'cancel')){?>
+              <?php }else if($show_btn == false AND ($status == 'done' or $status == 'cancel')){?>
                       <h2><center><b>KG</b> Bahan Baku dan <br><b>KG</b> Barang Jadi <br><b><font color="red">TIDAK SAMA</font></b> !!!</center></h2>
-              <?php }else if($show_btn == 'false' ){?>
+              <?php }else if($show_btn == false ){?>
                       <h2><center><b>KG</b> Bahan Baku dan <br><b>KG</b> Barang Jadi <br><b><font color="red">TIDAK SAMA</font></b>!!!</center></h2>
               <?php } 
               ?>
