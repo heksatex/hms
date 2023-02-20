@@ -3858,12 +3858,12 @@ class MO extends MY_Controller
 
 
         $total_kg_rm        = number_format($rm_done->kg,2);
-        $total_kg_fg        = number_format($fg_prod->kg + $fg_waste->kg,2) - number_format($fg_adj->kg,2) ;
+        $total_kg_fg        = number_format(($fg_prod->kg + $fg_waste->kg) - $fg_adj->kg,2);
        
         if($total_kg_fg == $total_kg_rm){
-            $data['show_btn'] = 'true';
+            $data['show_btn'] = true;
         }else{
-            $data['show_btn'] = 'false';
+            $data['show_btn'] = false;
         }
 
         $data['total_kg_rm'] = $total_kg_rm;
@@ -3943,8 +3943,8 @@ class MO extends MY_Controller
                 $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($kode)->row();
                 $fg_adj             = $this->m_mo->get_sum_qty_fg_adj($kode)->row();
 
-                $total_kg_rm        = $rm_done->kg;
-                $total_kg_fg        = ($fg_prod->kg + $fg_waste->kg ) - $fg_adj->kg;
+                $total_kg_rm        = number_format($rm_done->kg,2);
+                $total_kg_fg        = number_format(($fg_prod->kg + $fg_waste->kg) - $fg_adj->kg,2);
 
                 if($total_kg_rm != $total_kg_fg){
                     $callback = array('status' => 'failed', 'message'=>'<b>KG</b> Bahan Baku dan <b>KG</b> Barang jadi Harus Sama  !!', 'icon' => 'fa fa-warning', 'type'=>'danger');
