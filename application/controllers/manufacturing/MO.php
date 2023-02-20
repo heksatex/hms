@@ -3857,13 +3857,13 @@ class MO extends MY_Controller
         $data['fg_waste']   = $fg_waste;
 
 
-        $total_kg_rm        = floatval($rm_done->kg);
-        $total_kg_fg        = (floatval($fg_prod->kg) + floatval($fg_waste->kg)) - floatval($fg_adj->kg) ;
-
-        if($total_kg_rm == $total_kg_fg){
-            $data['show_btn'] = true;
+        $total_kg_rm        = number_format($rm_done->kg,2);
+        $total_kg_fg        = number_format($fg_prod->kg + $fg_waste->kg,2) - number_format($fg_adj->kg,2) ;
+       
+        if($total_kg_fg == $total_kg_rm){
+            $data['show_btn'] = 'true';
         }else{
-            $data['show_btn'] = false;
+            $data['show_btn'] = 'false';
         }
 
         $data['total_kg_rm'] = $total_kg_rm;
