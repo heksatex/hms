@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
 
     #pagination {
@@ -119,7 +120,7 @@
                     </label>
                   </div>
                   <div class="col-md-8">
-                    <input type="text" class="bootstrap-tagsinput" id="tags" data-role="tags-input"  />
+                    <input type="text" class="bootstrap-tagsinput" id="tags" data-role="tags-input"   placeholder="Search Product"/>
                   </div>
                 </div>   
 
@@ -183,6 +184,16 @@
                           <?php
                             }//end if empty user_filter
                           ?>
+                          <div class="form-group" style="margin-bottom: 0px;">
+                            <div class="col-sm-3 col-md-3 col-xs-4">
+                                <span class="fa fa-download"></span> <label>Export</label>
+                            </div>
+                            <div class="col-12 col-sm-8 col-md-8">
+                              <button type="button" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm">
+                                        <i class="fa fa-file-excel-o" style="color:green"></i>  Excel
+                              </button>
+                            </div>
+                          </div>
                           <div class="form-group">
                             <div class="col-12 col-sm-3 col-md-3">
                               <span class="fa fa-database"></span> <label>Group By</label>
@@ -220,11 +231,11 @@
                           <div class="table-responsive over" id="tableFilter">
                             <table id="filterAdvanced" class="table over">
                               <thead>
-                                <th width="150px">element</th>
-                                <th width="100px">condition</th>
-                                <th width="200px">value</th>
-                                <th width="10px"></th>
-                                <th>delete</th>
+                                <th class="bb" width="150px">element</th>
+                                <th class="bb" width="100px">condition</th>
+                                <th class="bb" width="200px">value</th>
+                                <th class="bb" width="10px"></th>
+                                <th class="bb">delete</th>
                               </thead>
                               <tbody>
                                   <td>
@@ -262,25 +273,26 @@
 
           <!-- table -->
           <div class="col-xs-12 table-responsive example1 divListview">
-            <table id="example1" class="table">
+            <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+              <table id="example1" class="table table-condesed table-hover" border="0">
                 <thead>
                   <tr>
-                    <th class='style no'>No. </th>
-                    <th class='style'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tgl Stock Move</a></th>
-                    <th class='style'><!--a class="column_sort" id="move_id" data-order="desc" href="javascript:void(0)"-->Stock Move</a></th>
-                    <th class='style'><!--a class="column_sort" id="origin" data-order="desc" href="javascript:void(0)"-->Origin</a></th>
-                    <th class='style'><!--a class="column_sort" id="lokasi_dari" data-order="desc" href="javascript:void(0)"-->Lokasi dari</a></th>
-                    <th class='style'><!--a class="column_sort" id="lokasi_tujuan" data-order="desc" href="javascript:void(0)"-->Lokasi Tujuan</a></th>
-                    <th class='style'><!--a class="column_sort" id="picking" data-order="desc" href="javascript:void(0)"-->Picking</a></th>
-                    <th class='style'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tgl Transaksi</a></th>
-                    <th class='style'><!--a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)"-->Kode Produk</a></th>
-                    <th class='style'><!--a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)"-->Nama Produk</a></th>
-                    <th class='style'><!--a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)"-->Lot</a></th>
-                    <th class='style'><!--a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)"-->Qty</a></th>
-                    <th class='style'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
-                    <th class='style'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
-                    <th class='style'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
-                    <th class='style'><!--a class="column_sort" id="status" data-order="desc" href="javascript:void(0)"-->Status</a></th>
+                    <th class='style bb no'>No. </th>
+                    <th class='style bb'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tgl Stock Move</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="move_id" data-order="desc" href="javascript:void(0)"-->Stock Move</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="origin" data-order="desc" href="javascript:void(0)"-->Origin</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="lokasi_dari" data-order="desc" href="javascript:void(0)"-->Lokasi dari</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="lokasi_tujuan" data-order="desc" href="javascript:void(0)"-->Lokasi Tujuan</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="picking" data-order="desc" href="javascript:void(0)"-->Picking</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tgl Transaksi</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)"-->Kode Produk</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)"-->Nama Produk</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)"-->Lot</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)"-->Qty</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
+                    <th class='style bb'><!--a class="column_sort" id="status" data-order="desc" href="javascript:void(0)"-->Status</a></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -288,10 +300,11 @@
                       <td colspan="16" align="center">Tidak ada Data</td>
                     </tr>
                 </tbody>
-            </table>
-            <div id="example1_processing" class="table_processing" style="display: none">
-              Processing...
-            </div>                                
+              </table>
+              <div id="example1_processing" class="table_processing"  style="display: none; z-index:5;">
+                Processing...
+              </div>                                
+              </div>
           </div>
 
         </div>
@@ -1442,6 +1455,40 @@
 
     return;
   }
+
+  $('#btn-excel').click(function(){
+    if(arr_filter.length == 0) {
+      alert_modal_warning('Data Filter Kosong !');
+    }else{
+
+      $.ajax({
+          "type":'POST',
+          "url": "<?php echo site_url('warehouse/stockmoves/export_excel')?>",
+          "data": {data_filter:arr_filter},
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert("Export Excel error");
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status == "failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
+    }
+
+  });
+
 
 
 

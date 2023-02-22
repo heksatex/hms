@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     #pagination {
@@ -238,11 +239,11 @@
                           <div class="table-responsive over">
                             <table id="filterAdvanced" class="table over">
                               <thead>
-                                <th width="150px">element</th>
-                                <th width="100px">condition</th>
-                                <th width="200px">value</th>
-                                <th width="10px"></th>
-                                <th>delete</th>
+                                <th class="bb" width="150px">element</th>
+                                <th class="bb" width="100px">condition</th>
+                                <th class="bb" width="200px">value</th>
+                                <th class="bb" width="10px"></th>
+                                <th class="bb">delete</th>
                               </thead>
                               <tbody>
                                   <td>
@@ -280,27 +281,28 @@
           
              <!-- table -->
             <div class="col-xs-12 table-responsive example1 divListview">
-              <table id="example1" class="table">
+              <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                <table id="example1" class="table table-condesed table-hover" border="0">
                   <thead>
                     <tr>
-                      <th  class="style no">No. </th>
-                      <th  class='style'  width='80px'><!--a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)"-->Kode Produk</a></th>
-                      <th  class='style'  width='300px'><!--a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)"-->Nama Produk</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Dibuat</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Diterima</a></th>
-                      <th  class='style'  width='200px'><!--a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)"-->Lot</a></th>
-                      <th  class='style'  width='50px'><!--a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"-->Grade</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)"-->Qty</a></th>
-                      <th  class='style'  width='50px'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
-                      <th  class='style'  width='50px'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)"-->Qty Opname</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="lebar_greige data-order="desc" href="javascript:void(0)"-->Lbr.Greige</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)"-->Lbr.Jadi</a></th>
-                      <th  class='style'  width='200px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi</a></th>
-                      <th  class='style'  width='100px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi Fisik</a></th>
-                      <th  class='style'  width='200px'><!--a class="column_sort" id="reff_note" data-order="desc" href="javascript:void(0)"-->Reff Note</a></th>
-                      <th  class='style'  width='80px'><!--a class="column_sort" id="reserve_move" data-order="desc" href="javascript:void(0)"-->Reserve Move</a></th>
+                      <th  class="style bb no">No. </th>
+                      <th  class='style bb'  width='80px'><!--a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)"-->Kode Produk</a></th>
+                      <th  class='style bb'  width='300px'><!--a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)"-->Nama Produk</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Dibuat</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Diterima</a></th>
+                      <th  class='style bb'  width='200px'><!--a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)"-->Lot</a></th>
+                      <th  class='style bb'  width='50px'><!--a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"-->Grade</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)"-->Qty</a></th>
+                      <th  class='style bb'  width='50px'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
+                      <th  class='style bb'  width='50px'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)"-->Qty Opname</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="lebar_greige data-order="desc" href="javascript:void(0)"-->Lbr.Greige</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)"-->Lbr.Jadi</a></th>
+                      <th  class='style bb'  width='200px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi</a></th>
+                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi Fisik</a></th>
+                      <th  class='style bb'  width='200px'><!--a class="column_sort" id="reff_note" data-order="desc" href="javascript:void(0)"-->Reff Note</a></th>
+                      <th  class='style bb'  width='80px'><!--a class="column_sort" id="reserve_move" data-order="desc" href="javascript:void(0)"-->Reserve Move</a></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -308,9 +310,10 @@
                       <td colspan="18" align="center">Tidak ada Data</td>
                     </tr>
                   </tbody>
-              </table>
-              <div id="example1_processing" class="table_processing" style="display: none">
-                 Processing...
+                </table>
+                <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
+                  Processing...
+                </div>
               </div>
             </div>
 
