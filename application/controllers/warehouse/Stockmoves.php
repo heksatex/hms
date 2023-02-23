@@ -848,7 +848,7 @@ class Stockmoves extends MY_Controller
 		);
 
 		// header table
-		$table_head_columns  = array('No', 'Tgl Stock move','Stock Move', 'Origin', 'Lokasi dari', 'Lokasi Tujuan','Picking','Tgl Transaksi','Kode Produk','Nama Produk','Lot','Uom','Qty2','Uom2','Status');
+		$table_head_columns  = array('No', 'Tgl Stock move','Stock Move', 'Origin', 'Lokasi dari', 'Lokasi Tujuan','Picking','Tgl Transaksi','Kode Produk','Nama Produk','Lot','Qty','Uom','Qty2','Uom2','Status');
 
 		$column = 0;
 		foreach ($table_head_columns as $judul) {
@@ -858,7 +858,7 @@ class Stockmoves extends MY_Controller
 		}
 
         // set width and border
-		$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O');
+		$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P');
 		$loop = 0;
 		foreach ($index_header as $val) {
 			$object->getActiveSheet()->getStyle($val.'4')->applyFromArray($styleArray);
@@ -875,16 +875,17 @@ class Stockmoves extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->move_id);
 			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->origin);
 			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lokasi_dari);
-			$object->getActiveSheet()->SetCellValue('F'.$rowCount, ($val->lokasi_tujuan));
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lokasi_tujuan);
 			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->kode);
 			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->tanggal_transaksi);
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->kode_produk);
-			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->lot);
-			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty);
-			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->uom);
-			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->qty2);
-			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->uom2);
-			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->status);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->nama_produk);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->qty);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->uom);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->qty2);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->uom2);
+			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->status);
 
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -902,6 +903,7 @@ class Stockmoves extends MY_Controller
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
 
 
 			$rowCount++;
