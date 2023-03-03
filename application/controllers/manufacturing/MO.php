@@ -5253,12 +5253,17 @@ class MO extends MY_Controller
             $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
             //cek status mrp_production = cancel
             $cek2  = $this->m_mo->cek_status_mrp_production($kode,'cancel')->row_array();
+            //cek status mrp_production = hold
+            $cek3  = $this->m_mo->cek_status_mrp_production($kode,'hold')->row_array();
 
             if(!empty($cek1['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dihapus, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 $this->_module->unlock_tabel();
             }else if(!empty($cek2['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dihapus, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                $this->_module->unlock_tabel();
+            }else if(!empty($cek3['status'])){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Dihapus, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 $this->_module->unlock_tabel();
             }else{
 
@@ -5773,45 +5778,49 @@ class MO extends MY_Controller
             $callback = array('status' => 'failed','message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
 
-          $deptid     = $this->input->post('deptid');
-          $kode       = $this->input->post('kode');
-          $kode_produk= $this->input->post('kode_produk');
-          $move_id    = $this->input->post('move_id');
-          $origin_prod= $this->input->post('origin_prod');
-          $check      = $this->input->post('checkbox');
-          $countchek  = $this->input->post('countchek');
-          $sql_stock_move_items_batch = "";
-          $tgl        = date('Y-m-d H:i:s');
-          //$row        = explode("^,", $check);
-          $status     = "";
-          $status_brg = "ready";
-          $case       = "";
-          $where      = "";       
-          $qty_tmp    = "";
-          $kosong     = false;
+            $deptid     = $this->input->post('deptid');
+            $kode       = $this->input->post('kode');
+            $kode_produk= $this->input->post('kode_produk');
+            $move_id    = $this->input->post('move_id');
+            $origin_prod= $this->input->post('origin_prod');
+            $check      = $this->input->post('checkbox');
+            $countchek  = $this->input->post('countchek');
+            $sql_stock_move_items_batch = "";
+            $tgl        = date('Y-m-d H:i:s');
+            //$row        = explode("^,", $check);
+            $status     = "";
+            $status_brg = "ready";
+            $case       = "";
+            $where      = "";       
+            $qty_tmp    = "";
+            $kosong     = false;
 
-          //lock tabel
-          $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, departemen WRITE,  stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE'  );
+            //lock tabel
+            $this->_module->lock_tabel('stock_quant WRITE, stock_move_items WRITE,stock_move WRITE,stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, departemen WRITE,  stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE'  );
           
-          //cek status mrp_production = done
-          $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
-          //cek status mrp_production = cancel
-          $cek2  = $this->m_mo->cek_status_mrp_production($kode,'cancel')->row_array();
+            //cek status mrp_production = done
+            $cek1  = $this->m_mo->cek_status_mrp_production($kode,'done')->row_array();
+            //cek status mrp_production = cancel
+            $cek2  = $this->m_mo->cek_status_mrp_production($kode,'cancel')->row_array();
+            //cek status mrp_production = hold
+            $cek3  = $this->m_mo->cek_status_mrp_production($kode,'hold')->row_array();
 
-          if(!empty($cek1['status'])){
-            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-          }else if(!empty($cek2['status'])){
+            if(!empty($cek1['status'])){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else if(!empty($cek2['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-          }else{
+            }else if(!empty($cek3['status'])){
+                $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+            }else{
           
-              //get row order stock_move_items
-              $row_order  = $this->_module->get_row_order_stock_move_items_by_kode($move_id);
-              //get_lokasi dari by move id 
-              $location = $this->_module->get_location_by_move_id($move_id)->row_array();
-              // list product yang akan ditambah
-              $list_product = "";
-              $no           = 1;
-              foreach ($check as $data) {
+                //get row order stock_move_items
+                $row_order  = $this->_module->get_row_order_stock_move_items_by_kode($move_id);
+                //get_lokasi dari by move id 
+                $location = $this->_module->get_location_by_move_id($move_id)->row_array();
+                // list product yang akan ditambah
+                $list_product = "";
+                $no           = 1;
+                foreach ($check as $data) {
                     # code...
                     $cek_sq  = $this->_module->get_stock_quant_by_id($data)->row_array();
 
@@ -5847,92 +5856,92 @@ class MO extends MY_Controller
                         $kosong = true;
                     } 
 
-              }
-           /*
-              for($i=0; $i <= $countchek-1;$i++){
-                  $dt1  =  $row[$i];
-                  $row2 = explode("|", $dt1);
-                  $quantid     = $row2[8];
-         
-                  $kode_produk = $row2[0];
-                  $nama_produk = $row2[1];
-                  $lot         = $row2[2];
-                  $qty         = $row2[3];
-                  $uom         = $row2[4];
-                  $qty2        = $row2[5];
-                  $uom2        = $row2[6];
-                  $lokasi      = $row2[7];
+                }
+             /*
+                for($i=0; $i <= $countchek-1;$i++){
+                    $dt1  =  $row[$i];
+                    $row2 = explode("|", $dt1);
+                    $quantid     = $row2[8];
+            
+                    $kode_produk = $row2[0];
+                    $nama_produk = $row2[1];
+                    $lot         = $row2[2];
+                    $qty         = $row2[3];
+                    $uom         = $row2[4];
+                    $qty2        = $row2[5];
+                    $uom2        = $row2[6];
+                    $lokasi      = $row2[7];
 
-                  //cek product di stock quant
-                  $cq = $this->_module->cek_produk_di_stock_quant($quantid,$location['lokasi_dari'])->row_array();
-                 if(!empty($cq['quant_id'])){
+                    //cek product di stock quant
+                    $cq = $this->_module->cek_produk_di_stock_quant($quantid,$location['lokasi_dari'])->row_array();
+                    if(!empty($cq['quant_id'])){
 
-                    //insert ke stock move items
-                    $sql_stock_move_items_batch .= "('".$move_id."', '".$quantid."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes(trim($lot))."','".$qty."','".addslashes($uom)."','".$qty2."','".addslashes($uom2)."','ready','".$row_order."','".addslashes($origin_prod)."'), ";   
+                        //insert ke stock move items
+                        $sql_stock_move_items_batch .= "('".$move_id."', '".$quantid."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes(trim($lot))."','".$qty."','".addslashes($uom)."','".$qty2."','".addslashes($uom2)."','ready','".$row_order."','".addslashes($origin_prod)."'), ";   
 
-                    //update reserve move by quant id di stok quant                
-                    $case   .= "when quant_id = '".$quantid."' then '".$move_id."'";
-                    $where  .= "'".$quantid."',";
+                        //update reserve move by quant id di stok quant                
+                        $case   .= "when quant_id = '".$quantid."' then '".$move_id."'";
+                        $where  .= "'".$quantid."',";
 
-                    $row_order++;            
+                        $row_order++;            
 
-                 }else{
-                    $kosong = true;
-                 }
-              }
+                    }else{
+                        $kosong = true;
+                    }
+                }
              */ 
             
-              if(!empty($sql_stock_move_items_batch) AND $kosong == false){
-                  $sql_stock_move_items_batch = rtrim($sql_stock_move_items_batch, ', ');
-                  $this->_module->simpan_stock_move_items_batch($sql_stock_move_items_batch);
+                if(!empty($sql_stock_move_items_batch) AND $kosong == false){
+                    $sql_stock_move_items_batch = rtrim($sql_stock_move_items_batch, ', ');
+                    $this->_module->simpan_stock_move_items_batch($sql_stock_move_items_batch);
 
-                  // jika mo Dyeing maka update field berat
-                  if($deptid == 'DYE'){
-                    $qty2   = $this->m_mo->get_qty2_smi_kain_by_kode($move_id)->row_array();
+                    // jika mo Dyeing maka update field berat
+                    if($deptid == 'DYE'){
+                        $qty2   = $this->m_mo->get_qty2_smi_kain_by_kode($move_id)->row_array();
+                        
+                        //update berat di mrp production
+                        $sql_update_berat = "UPDATE mrp_production set berat = '".$qty2['jml_qty2']."' WHERE kode = '".$kode."' ";
+                        $this->_module->update_perbatch($sql_update_berat);
+                    }
                     
-                    //update berat di mrp production
-                    $sql_update_berat = "UPDATE mrp_production set berat = '".$qty2['jml_qty2']."' WHERE kode = '".$kode."' ";
-                    $this->_module->update_perbatch($sql_update_berat);
-                  }
-                
-                  if(!empty($case)){
-                    //update stock quant 
-                    $where = rtrim($where, ',');
-                    $sql_update_stock_quant  = "UPDATE stock_quant SET reserve_move =(case ".$case." end) WHERE  quant_id in (".$where.") ";
-                    $this->_module->update_perbatch($sql_update_stock_quant);
-                  }
+                    if(!empty($case)){
+                        //update stock quant 
+                        $where = rtrim($where, ',');
+                        $sql_update_stock_quant  = "UPDATE stock_quant SET reserve_move =(case ".$case." end) WHERE  quant_id in (".$where.") ";
+                        $this->_module->update_perbatch($sql_update_stock_quant);
+                    }
 
-                  $this->m_mo->update_status_mrp_production_rm_target($kode,addslashes($origin_prod),$status_brg,$move_id);  
-                  // cek type mo
-                  $to    = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
-                  if($to['type_mo'] != 'colouring' AND $deptid != 'DYE') {
+                    $this->m_mo->update_status_mrp_production_rm_target($kode,addslashes($origin_prod),$status_brg,$move_id);  
+                    // cek type mo
+                    $to    = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
+                    if($to['type_mo'] != 'colouring' AND $deptid != 'DYE') {
 
-                        //cek apa produk yang status nya ready atau done ?
-                        $cek_status = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready', 'done')->row_array();
-                        if(!empty($cek_status['status'])){
-                          $this->m_mo->update_status_mrp_production($kode,$status_brg);
-                          $this->m_mo->update_status_stock_move_produk_mo($move_id,addslashes($origin_prod),$status_brg);
-                          $cek_status2 = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
-                          if($cek_status2['status']=='ready'){
-                              $this->_module->update_status_stock_move($move_id,$status_brg);
+                            //cek apa produk yang status nya ready atau done ?
+                            $cek_status = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready', 'done')->row_array();
+                            if(!empty($cek_status['status'])){
+                            $this->m_mo->update_status_mrp_production($kode,$status_brg);
+                            $this->m_mo->update_status_stock_move_produk_mo($move_id,addslashes($origin_prod),$status_brg);
+                            $cek_status2 = $this->m_mo->cek_status_mrp_production($kode,'')->row_array();
+                            if($cek_status2['status']=='ready'){
+                                $this->_module->update_status_stock_move($move_id,$status_brg);
+                                }
                             }
-                        }
-                  }
+                    }
                   
-              }
+                }
 
-              //unlock table
-              $this->_module->unlock_tabel();        
-              if($kosong == false){
+                //unlock table
+                $this->_module->unlock_tabel();        
+                if($kosong == false){
 
-                $jenis_log   = "edit";
-                $note_log    = "Tambah Data Details -> <br> ".$list_product;
-                $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, addslashes($note_log), $username, $deptid);
-                $callback    = array('status'=>'success',  'message' => 'Detail Product Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success'); 
-              }else{
-                $callback    = array('status'=>'kosong',  'message' => 'Maaf, Product Sudah ada yang terpakai !',  'icon' =>'fa fa-check', 'type' => 'danger');  
-              }
-          }           
+                    $jenis_log   = "edit";
+                    $note_log    = "Tambah Data Details -> <br> ".$list_product;
+                    $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, addslashes($note_log), $username, $deptid);
+                    $callback    = array('status'=>'success',  'message' => 'Detail Product Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success'); 
+                }else{
+                    $callback    = array('status'=>'kosong',  'message' => 'Maaf, Product Sudah ada yang terpakai !',  'icon' =>'fa fa-check', 'type' => 'danger');  
+                }
+            }           
             
         }
         echo json_encode($callback);
