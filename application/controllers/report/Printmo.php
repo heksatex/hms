@@ -1018,7 +1018,7 @@ class Printmo extends MY_Controller
                 $pdf->SetFont('Arial','',9,'C');
                 // isi caption tengah
                 $pdf->setXY(113, 22);
-                $pdf->Multicell(20, 4, $mo_knitting, 0, 'L');
+                $pdf->Multicell(24, 4, $mo_knitting, 0, 'L');
                 $pdf->setXY(113, 26);
                 $pdf->Multicell(20, 4, $mc_knitting, 0, 'L');
 
@@ -1030,16 +1030,16 @@ class Printmo extends MY_Controller
                 $pdf->setXY(135, 26);
                 $pdf->Multicell(30, 4, 'Jenis Benang ', 0, 'L' );
 
-                $pdf->setXY(155, 22);
+                $pdf->setXY(156, 22);
                 $pdf->Multicell(20, 4, ':', 0, 'L');
-                $pdf->setXY(155, 26);
+                $pdf->setXY(156, 26);
                 $pdf->Multicell(20, 4, ':', 0, 'L');
 
                 $pdf->SetFont('Arial','',9,'C');
                 // isi caption tengah
-                $pdf->setXY(156, 22);
-                $pdf->Multicell(20, 4, $corak, 0, 'L');
-                $pdf->setXY(156, 26);
+                $pdf->setXY(157, 22);
+                $pdf->Multicell(40, 4, $corak, 0, 'L');
+                $pdf->setXY(157, 26);
                 $pdf->Multicell(40, 4, $jns_benang, 0, 'L');
 
                 $x1 = 38; // untuk header
