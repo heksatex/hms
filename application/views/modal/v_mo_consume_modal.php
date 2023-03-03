@@ -17,6 +17,14 @@
     }
 </style>
 
+<?php 
+    if($sisa_qty < 0){
+        $error_target = 'error_target';
+    }else{
+        $error_target = '';
+    }
+?>
+
 <form class="form-horizontal" id="form_consume" name="form_consume">
 	<div class="form-group">
 		<div class="col-md-12 col-xs-12">
@@ -28,7 +36,7 @@
 				<div class="col-md-12 col-xs-12">
 					<div class="col-xs-4"><label>Target Qty</label></div>
 					<div class="col-xs-8">
-						<input type="text" name="txtQty" id="txtQty" class="form-control input-sm" value="<?php echo $sisa_qty.' '.$uom_qty_sisa ?>" readonly="readonly" />
+						<input type="text" name="txtQty" id="txtQty" class="form-control input-lg <?php echo $error_target; ?>" value="<?php echo $sisa_qty.' '.$uom_qty_sisa ?>" readonly="readonly" />
 						<input type="hidden" name="qty_sisa" id="qty_sisa" class="form-control input-sm" value="<?php echo $sisa_qty?>" readonly="readonly" />
 						<input type="hidden" name="txtkode" id="txtkode" class="form-control input-sm" value="<?php echo $kode ?>"  />		
 						<input type="hidden" name="txtkode_produk" id="txtkode_produk" class="form-control input-sm" value="<?php echo $kode_produk ?>"  />		
@@ -321,6 +329,10 @@
 	.error2{
 		border:  1px solid red;
 	} 
+    .error_target{
+		border: 1px solid red;
+		color : red
+	}
 </style>
 
 <script>

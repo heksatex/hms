@@ -17,6 +17,11 @@
 		$item_rm = true;
 	}
 
+	if($sisa_qty < 0){
+		$error_target = 'error_target';
+	}else{
+		$error_target = '';
+	}
 ?>
 <form class="form-horizontal" id="form_produksi" name="form_produksi">
 	<div class="form-group">
@@ -26,18 +31,24 @@
 		    </div>
 		</div>
 	</div>
-	<div class="form-group">
+	<div class="form-group ">
 		<div class="col-md-6">
 			<div class="col-md-12 col-xs-12">
 	            <div class="col-xs-4"><label>Target Qty</label></div>
 	            <div class="col-xs-8">
-		           	<input type="text" name="txtQty" id="txtQty" class="form-control input-sm" value="<?php echo $sisa_qty.' '.$uom_qty_sisa ?>" readonly="readonly" />
+		           	<input type="text" name="txtQty" id="txtQty" class="form-control input-lg <?php echo $error_target; ?>" value="<?php echo $sisa_qty.' '.$uom_qty_sisa ?>" readonly="readonly" />
 		           	<input type="hidden" name="qty_sisa" id="qty_sisa" class="form-control input-sm" value="<?php echo $sisa_qty?>" readonly="readonly" />
 				 	<input type="hidden" name="txtkode" id="txtkode" class="form-control input-sm" value="<?php echo $kode ?>"  />		
 				 	<input type="hidden" name="txtkode_produk" id="txtkode_produk" class="form-control input-sm" value="<?php echo $kode_produk ?>"  />		
 				 	<input type="hidden" name="qty_prod" id="qty_prod" class="form-control input-sm" value="<?php echo $qty_prod ?>" />
 	            </div>  
 		    </div>
+			<div class="col-md-12 col-xs-12">
+				<div class="col-xs-4"><label>Sisa Target Qty</label></div>
+				<div class="col-xs-8">
+					<input type="text" name="txtQty_sisa" id="txtQty_sisa" class="form-control input-lg" value="<?php echo $sisa_qty.' '.$uom_qty_sisa ?>" readonly="readonly" />
+				</div>
+			</div>
 		</div>
 		<div class="col-md-6">
 		    <div class="col-md-12 col-xs-12">
@@ -227,10 +238,16 @@
 	.error2{
 		border:  1px solid red;
 	} 
+	.error_target{
+		border: 1px solid red;
+		color : red
+	}
 
 </style>
 
 <script type="text/javascript">
+
+	$("#tambah_data .modal-dialog .modal-content .modal-footer").html('<div class="col-md-2"></div><div class="col-md-6"><div class="col-xs-4"><label>Sisa Target Qty</label></div><div class="col-xs-8"><input type="text" name="sisa_target" id="sisa_target" class="form-control input-sm <?php echo $error_target; ?>" value="<?php echo $sisa_qty.' '.$uom_qty_sisa ?>" readonly="readonly" /></div></div><div class="col-md-4"><div class="col-xs-12"><button type="button" id="btn-tambah-produksi-batch" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button></div></div>');
 	
 	/*********************************
 	  START SCRTIPT TABEL PRODUCT LOT
@@ -256,12 +273,27 @@
 				qty_isi = 0;
 			}
 			tot_qty = tot_qty + parseFloat(qty_isi);
-		}	
+		}
 
 		document.getElementById('in_qty').value = tot_qty;
 
 		var qty_inp  = $('#in_qty').val();
 		var qty_prod = $('#qty_prod').val();
+		var qty_sisa = $('#qty_sisa').val();// sisa awal
+
+		var sisa_target = qty_sisa - tot_qty;// sisa target setelah ada inputan
+		var uom_target  = "<?php echo $uom_qty_sisa; ?>";
+
+		document.getElementById('sisa_target').value = sisa_target+" "+uom_target;
+		document.getElementById('txtQty_sisa').value = sisa_target+" "+uom_target;
+		if(sisa_target < 0){
+			$('#sisa_target').addClass('error_target');
+			$('#txtQty_sisa').addClass('error_target');
+		}else{
+			$('#sisa_target').removeClass('error_target');
+			$('#txtQty_sisa').removeClass('error_target');
+		}
+
 		if(qty_prod != '0'){
 			$('.qty_konsum').each(function(index,item){		
 				///hitung  = parseFloat(qty_prod) + parseFloat(qty_inp);
@@ -844,7 +876,7 @@
 		
 	}
 
-	$("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-tambah-produksi-batch" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+	
 
 	//simpan data 
 	$("#btn-tambah-produksi-batch").unbind( "click" );
