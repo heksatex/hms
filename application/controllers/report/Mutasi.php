@@ -32,6 +32,8 @@ class Mutasi extends MY_Controller
         $kode_produk     = '';
         $nama_produk    = '';
         $kode_transaksi = '';
+        $reff_note      = '';
+        $reff_picking   = '';
         $lot            = '';
         $view           = 'Global';
         $empty          = false;
@@ -67,6 +69,14 @@ class Mutasi extends MY_Controller
                 $lot = $filter['lot'];
             }
 
+            if($filter['reff_picking'] != ''){
+                $reff_picking = $filter['reff_picking'];
+            }
+
+            if($filter['reff_note'] != ''){
+                $reff_note = $filter['reff_note'];
+            }
+
 
             foreach($filter['view_arr'] as $val2){
                 $view = $val2;
@@ -99,10 +109,10 @@ class Mutasi extends MY_Controller
                     $mutasi_dept_rm = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'rm')->result();
                     if($view == "Global"){
                         $table          = 'acc_mutasi_'.strtolower($departemen).'_rm_global';
-                        $result_where   = $this->create_where('',$nama_produk,'','');
+                        $result_where   = $this->create_where('',$nama_produk,'','','','');
                     }else{ // detailproduk
                         $table          = 'acc_mutasi_'.strtolower($departemen).'_rm';
-                        $result_where   = $this->create_where($kode_produk,$nama_produk,'','');
+                        $result_where   = $this->create_where($kode_produk,$nama_produk,'','','','');
                     }
                     $result         = $this->create_header($view,$mutasi_dept_rm,false);
 
@@ -129,10 +139,10 @@ class Mutasi extends MY_Controller
                     $mutasi_dept_fg = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'fg')->result();
                     if($view == "Global"){
                         $table2         = 'acc_mutasi_'.strtolower($departemen).'_fg_global';
-                        $result_where   = $this->create_where('',$nama_produk,'','');
+                        $result_where   = $this->create_where('',$nama_produk,'','','','');
                     }else{ // detailproduk
                         $table2         = 'acc_mutasi_'.strtolower($departemen).'_fg';
-                        $result_where   = $this->create_where($kode_produk,$nama_produk,'','');
+                        $result_where   = $this->create_where($kode_produk,$nama_produk,'','','','');
                     }
                     $result2        = $this->create_header($view,$mutasi_dept_fg,false);
                     $fg_field          = $result2[0];
@@ -159,10 +169,10 @@ class Mutasi extends MY_Controller
                     $mutasi_dept = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'')->result();
                     if($view == "Global"){
                         $table       = 'acc_mutasi_'.strtolower($departemen).'_global';
-                        $result_where= $this->create_where('',$nama_produk,'','');
+                        $result_where= $this->create_where('',$nama_produk,'','','','');
                     }else{ // detailproduk
                         $table       = 'acc_mutasi_'.strtolower($departemen);
-                        $result_where= $this->create_where($kode_produk,$nama_produk,'','');
+                        $result_where= $this->create_where($kode_produk,$nama_produk,'','','','');
                     }
                     $result      = $this->create_header($view,$mutasi_dept,false);
 
@@ -203,7 +213,7 @@ class Mutasi extends MY_Controller
 
                     $table          = 'acc_mutasi_'.strtolower($departemen).'_rm_detail';
                     $result         = $this->create_header_detail(false);
-                    $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
+                    $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
                     $acc_mutasi_rm  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage,false);
                     $pagination_rm  = $this->get_pagination($acc_mutasi_rm[1],$recordPerPage);
                     $table_mutasi[] =  array('table_1'          => 'Yes',
@@ -217,7 +227,7 @@ class Mutasi extends MY_Controller
 
                     $table          = 'acc_mutasi_'.strtolower($departemen).'_fg_detail';
                     $result         = $this->create_header_detail(false);
-                    $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
+                    $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
                     $acc_mutasi_fg  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage,false);
                     $pagination_fg  = $this->get_pagination($acc_mutasi_fg[1],$recordPerPage);
 
@@ -234,7 +244,7 @@ class Mutasi extends MY_Controller
 
                     $table       = 'acc_mutasi_'.strtolower($departemen).'_detail';
                     $result      = $this->create_header_detail(false);
-                    $result_where= $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
+                    $result_where= $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
                     $acc_mutasi  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,$record,$recordPerPage,false);
                     $pagination = $this->get_pagination($acc_mutasi[1],$recordPerPage);
                     
@@ -323,7 +333,7 @@ class Mutasi extends MY_Controller
         return array($result,$result2,$result3);
     }
 
-    function create_where($kode_produk,$nama_produk,$kode_transaksi,$lot)
+    function create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note)
     {   
         $where = '';
         if($kode_produk != ''){
@@ -337,6 +347,12 @@ class Mutasi extends MY_Controller
         }
         if($lot != ''){
             $where  .= " AND m.lot LIKE '%".addslashes($lot)."%' ";
+        }
+        if($reff_picking != ''){
+            $where  .= " AND m.reff_picking LIKE '%".addslashes($reff_picking)."%' ";
+        }
+        if($reff_note != ''){
+            $where  .= " AND m.reff_note LIKE '%".addslashes($reff_note)."%' ";
         }
 
         return $where;
@@ -367,7 +383,7 @@ class Mutasi extends MY_Controller
             $head_table2_adj[]   = array('Lot','Mtr','Kg');
 
         }else{
-            $field   .= 'nama_category, id_category, kode_produk, nama_produk, s_awal_lot, s_awal_qty1, s_awal_qty1_uom, s_awal_qty2,  s_awal_qty2_uom, s_awal_qty_opname, s_awal_qty_opname_uom, '; 
+            $field   .= 'nama_category, id_category, kode_produk, nama_produk, product_parent, s_awal_lot, s_awal_qty1, s_awal_qty1_uom, s_awal_qty2,  s_awal_qty2_uom, s_awal_qty_opname, s_awal_qty_opname_uom, '; 
             // field saldo akhir
             $field   .= 's_akhir_lot, s_akhir_qty1, s_akhir_qty1_uom, s_akhir_qty2, s_akhir_qty2_uom, s_akhir_qty_opname, s_akhir_qty_opname_uom, ';
             // field adj in 
@@ -485,7 +501,7 @@ class Mutasi extends MY_Controller
         if($view == "Global"){
             $head_table1_info[]     = array('No.','Nama Produk');
         }else{
-            $head_table1_info[]     = array('No.','Kategori','Kode Produk', 'Nama Produk');
+            $head_table1_info[]     = array('No.','Kategori','Kode Produk', 'Nama Produk','Product Parent');
         }
         $head_table1_awal[]     = array('Saldo Awal');
         $head_table1_akhir[]    = array('Saldo Akhir');
@@ -523,9 +539,9 @@ class Mutasi extends MY_Controller
     {   
         $header  = [];
         if($excel == true){
-            $header  = array('No', 'Posisi Mutasi','Departemen','Tipe','Kode Transaksi','Tanggal Transaksi','Kode Produk','Nama Produk', 'Kategori','Lot','Qty','Uom1','Qty2','Uom2','Qty Opname','Uom Opname','Origin','Method', 'SC','MKT');
+            $header  = array('No', 'Posisi Mutasi','Departemen','Tipe','Kode Transaksi','Tanggal Transaksi','Kode Produk','Nama Produk', 'Kategori','Lot','Qty','Uom1','Qty2','Uom2','Qty Opname','Uom Opname','Origin','Method', 'SC','MKT', 'Reff Note');
         }else{
-            $header  = array('No', 'Posisi Mutasi','Departemen','Tipe','Kode Transaksi','Tanggal Transaksi','Kode Produk','Nama Produk', 'Kategori','Lot','Qty','Qty2','Qty Opname','Origin','Method', 'SC','MKT');
+            $header  = array('No', 'Posisi Mutasi','Departemen','Tipe','Kode Transaksi','Tanggal Transaksi','Kode Produk','Nama Produk', 'Kategori','Lot','Qty','Qty2','Qty Opname','Origin','Method', 'SC','MKT','Reff Note' );
 
         }
 
@@ -548,30 +564,79 @@ class Mutasi extends MY_Controller
     function export_excel_mutasi()
     {
 
-        $tanggal        = $this->input->post('tanggal');
-        $departemen     = addslashes($this->input->post('departemen'));
-        $kode_produk    = addslashes($this->input->post('kode_produk'));
-        $nama_produk    = addslashes($this->input->post('nama_produk'));
-        $kode_transaksi = addslashes($this->input->post('kode_transaksi'));
-        $lot            = addslashes($this->input->post('lot'));
-		$view_arr  		= $this->input->post('view[]');
+        $arr_filter     = $this->input->post('arr_filter');
+        $tanggal        = '';
+        $departemen     = '';
+        $kode_produk     = '';
+        $nama_produk    = '';
+        $kode_transaksi = '';
+        $reff_note      = '';
+        $reff_picking   = '';
+        $lot            = '';
+        $view           = 'Global';
+        foreach($arr_filter as $filter){
 
-        $view ='Global';
-		foreach($view_arr as $val2){
-			$view = $val2;
-			break;
-		}
+            if($filter['tanggal'] != ''){
+                $tanggal     = $filter['tanggal'];
+            } 
+            
+            if($filter['departemen']!= ''){
+                $departemen  = $filter['departemen'];
+            }
 
-        if($view == "Global" || $view == "DetailProduk"){
-            $this->export_excel_mutasi_global($view,$tanggal,$departemen,$kode_produk,$nama_produk);
+            if($filter['kode_produk'] != ''){
+                $kode_produk = $filter['kode_produk'];
+            }
+
+            if($filter['nama_produk'] != ''){
+                $nama_produk = $filter['nama_produk'];
+            }
+
+            if($filter['kode_transaksi'] != ''){
+                $kode_transaksi = $filter['kode_transaksi'];
+            }
+
+            if($filter['lot'] != ''){
+                $lot = $filter['lot'];
+            }
+
+            if($filter['reff_picking'] != ''){
+                $reff_picking = $filter['reff_picking'];
+            }
+
+            if($filter['reff_note'] != ''){
+                $reff_note = $filter['reff_note'];
+            }
+
+
+            foreach($filter['view_arr'] as $val2){
+                $view = $val2;
+                break;
+            }
+        }
+
+        if(empty($arr_filter) or empty($tanggal) or empty($departemen) or empty($view)){
+
+            $response =  array(
+                'status'    => 'failed',
+                'message'   => "Silahkan Generate terlebih dahulu !",
+            );
+        
+            die(json_encode($response));
+
         }else{
-            $this->export_excel_mutasi_detail($tanggal,$departemen,$kode_produk,$nama_produk,$kode_transaksi,$lot);
+
+            if($view == "Global" || $view == "DetailProduk"){
+                $this->export_excel_mutasi_global($view,$tanggal,$departemen,$kode_produk,$nama_produk);
+            }else{
+                $this->export_excel_mutasi_detail($tanggal,$departemen,$kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
+            }
         }
         
     }
 
 
-    function export_excel_mutasi_detail($tanggal,$departemen,$kode_produk,$nama_produk,$kode_transaksi,$lot)
+    function export_excel_mutasi_detail($tanggal,$departemen,$kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note)
     {
 
         $result = $this->cek_dept_mutasi($departemen);
@@ -582,7 +647,9 @@ class Mutasi extends MY_Controller
             $bulan      = date('n', strtotime($tanggal)); // example 8
             $dept       = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
 
+            ob_start();
             $object = new PHPExcel();
+            $object->setActiveSheetIndex(0);
             
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen);
             $type_dept = $get_dept->row_array();
@@ -590,7 +657,7 @@ class Mutasi extends MY_Controller
 
                 $table          = 'acc_mutasi_'.strtolower($departemen).'_rm_detail';
                 $result         = $this->create_header_detail(true);
-                $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
+                $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
                 $acc_mutasi_rm  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','',true);
                 $table_mutasi[] =  array('judul'            => "Laporan Mutasi Bahan Baku",
                                         'table_1'           => 'Yes',
@@ -600,7 +667,7 @@ class Mutasi extends MY_Controller
 
                 $table          = 'acc_mutasi_'.strtolower($departemen).'_fg_detail';
                 $result         = $this->create_header_detail(true);
-                $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
+                $result_where   = $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
                 $acc_mutasi_fg  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','',true);
 
                 $table_mutasi[] =  array('judul'            => "Laporan Mutasi Barang Jadi",
@@ -613,7 +680,7 @@ class Mutasi extends MY_Controller
 
                 $table       = 'acc_mutasi_'.strtolower($departemen).'_detail';
                 $result      = $this->create_header_detail(true);
-                $result_where= $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot);
+                $result_where= $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
                 $acc_mutasi  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','',true);
                 
                 $table_mutasi[] =  array('judul'            => "Laporan Mutasi",
@@ -628,15 +695,15 @@ class Mutasi extends MY_Controller
                 $object->createSheet();
                 $sheet1 = $object->setActiveSheetIndex(0);
                 $sheet1->setTitle('Bahan Baku');
-                $sheet1->getStyle("A1:T6")->getFont()->setBold(true);
+                $sheet1->getStyle("A1:U6")->getFont()->setBold(true);
 
                 $sheet2 = $object->setActiveSheetIndex(1);
                 $sheet2->setTitle('Barang Jadi');
-                $sheet2->getStyle("A1:T6")->getFont()->setBold(true);
+                $sheet2->getStyle("A1:U6")->getFont()->setBold(true);
 
             }else{// one table
                 $sheet1 = $object->setActiveSheetIndex(0);
-                $sheet1->getStyle("A1:T6")->getFont()->setBold(true);
+                $sheet1->getStyle("A1:U6")->getFont()->setBold(true);
             }
 
 
@@ -709,6 +776,7 @@ class Mutasi extends MY_Controller
                     $sheet->SetCellValue('R'.$rowCount, $row->method);
                     $sheet->SetCellValue('S'.$rowCount, $row->sc);
                     $sheet->SetCellValue('T'.$rowCount, $row->nama_sales_group);
+                    $sheet->SetCellValue('U'.$rowCount, $row->reff_note);
                     if($rowCount == 10000){
                         // break;
                     }
@@ -720,18 +788,32 @@ class Mutasi extends MY_Controller
                 $rowCount++;
             }
         
-            $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
-
             $name_file ='Mutasi Detail Lot '.$dept['nama'].' '.bln_indo(date('d-m-Y',strtotime($tanggal))).'.xlsx';
 
-            header('Content-Type: application/vnd.ms-excel'); //mime type
-            header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
-            header('Cache-Control: max-age=0'); //no cache
+            $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
             $object->save('php://output');
+    
+            $xlsData = ob_get_contents();
+            ob_end_clean();
+    
+            $response =  array(
+                'status'    => 'ok',
+                'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+                'filename'  => $name_file
+            );
+        
+            die(json_encode($response));
         
         }else{
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
-            echo "<script>alert('Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi');location.replace(history.back())</script>";
+
+            // echo "<script>alert('Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi');location.replace(history.back())</script>";
+            $response =  array(
+                'status'    => 'failed',
+                'message'   => "Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi",
+            );
+        
+            die(json_encode($response));
         }
 
     }
@@ -747,7 +829,9 @@ class Mutasi extends MY_Controller
             $bulan      = date('n', strtotime($tanggal)); // example 8
             $dept       = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
 
+            ob_start();
             $object = new PHPExcel();
+            $object->setActiveSheetIndex(0);
 
             // cek tipe departemen
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen);
@@ -757,10 +841,10 @@ class Mutasi extends MY_Controller
                 $mutasi_dept_rm = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'rm')->result();
                 if($view == "Global"){
                     $table          = 'acc_mutasi_'.strtolower($departemen).'_rm_global';
-                    $result_where   = $this->create_where('',$nama_produk,'','');
+                    $result_where   = $this->create_where('',$nama_produk,'','','','');
                 }else{ // detailproduk
                     $table          = 'acc_mutasi_'.strtolower($departemen).'_rm';
-                    $result_where   = $this->create_where($kode_produk,$nama_produk,'','');
+                    $result_where   = $this->create_where($kode_produk,$nama_produk,'','','','');
                 }
                 $result            = $this->create_header($view,$mutasi_dept_rm,true);
                 $rm_field          = $result[0];
@@ -782,10 +866,10 @@ class Mutasi extends MY_Controller
                 $mutasi_dept_fg = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'fg')->result();
                 if($view == "Global"){
                     $table2         = 'acc_mutasi_'.strtolower($departemen).'_fg_global';
-                    $result_where    = $this->create_where('',$nama_produk,'','');
+                    $result_where    = $this->create_where('',$nama_produk,'','','','');
                 }else{
                     $table2         = 'acc_mutasi_'.strtolower($departemen).'_fg';
-                    $result_where   = $this->create_where($kode_produk,$nama_produk,'','');
+                    $result_where   = $this->create_where($kode_produk,$nama_produk,'','','','');
                 }
                 $result2           = $this->create_header($view,$mutasi_dept_fg,true);
                 $fg_field          = $result2[0];
@@ -808,10 +892,10 @@ class Mutasi extends MY_Controller
                 $mutasi_dept = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'')->result();
                 if($view == "Global"){
                     $table       = 'acc_mutasi_'.strtolower($departemen).'_global';
-                    $result_where   = $this->create_where('',$nama_produk,'','');
+                    $result_where   = $this->create_where('',$nama_produk,'','','','');
                 }else{
                     $table       = 'acc_mutasi_'.strtolower($departemen);
-                    $result_where   = $this->create_where($kode_produk,$nama_produk,'','');
+                    $result_where   = $this->create_where($kode_produk,$nama_produk,'','','','');
                 }
                 $result      = $this->create_header($view,$mutasi_dept,true);
 
@@ -929,7 +1013,7 @@ class Mutasi extends MY_Controller
                 if($view == "Global"){
                     $column   = 2; // A,B, dst
                 }else{
-                    $column   = 4; // A,B,C,D dst
+                    $column   = 5; // A,B,C,D,E dst
                 }
                 $column_e = 1;
                 $rowCount = $rowCount + 1;
@@ -1123,24 +1207,26 @@ class Mutasi extends MY_Controller
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_category']);
                         $column_excel  = $this->cek_column_excel($column_awal+1);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['kode_produk']);
-                        $column = 12;
+                        $column = 13;
                         $column_awal = 4;
 
                         $column_excel  = $this->cek_column_excel($column_awal);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_produk']);
                         $column_excel  = $this->cek_column_excel($column_awal+1);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['product_parent']);
                         $column_excel  = $this->cek_column_excel($column_awal+2);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1']);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
                         $column_excel  = $this->cek_column_excel($column_awal+3);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1_uom']);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1']);
                         $column_excel  = $this->cek_column_excel($column_awal+4);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2']);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty1_uom']);
                         $column_excel  = $this->cek_column_excel($column_awal+5);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2_uom']);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2']);
                         $column_excel  = $this->cek_column_excel($column_awal+6);
-                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty_opname']);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty2_uom']);
                         $column_excel  = $this->cek_column_excel($column_awal+7);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty_opname']);
+                        $column_excel  = $this->cek_column_excel($column_awal+8);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_qty_opname_uom']);
 
                          // info uom
@@ -1609,22 +1695,35 @@ class Mutasi extends MY_Controller
             }
 
 
-            $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
-
             if($view == "Global"){
                 $name_file ='Mutasi Global '.$dept['nama'].' '.bln_indo(date('d-m-Y',strtotime($tanggal))).'.xlsx';
             }else{ // detail lot
                 $name_file ='Mutasi Detail Produk '.$dept['nama'].' '.bln_indo(date('d-m-Y',strtotime($tanggal))).'.xlsx';
             }
 
-            header('Content-Type: application/vnd.ms-excel'); //mime type
-            header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
-            header('Cache-Control: max-age=0'); //no cache
+            $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
             $object->save('php://output');
+    
+            $xlsData = ob_get_contents();
+            ob_end_clean();
+    
+            $response =  array(
+                'op'        => 'ok',
+                'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+                'filename'  => $name_file
+            );
+        
+            die(json_encode($response));
         
         }else{
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
-            echo "<script>alert('Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi');location.replace(history.back())</script>";
+            // echo "<script>alert('Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi');location.replace(history.back())</script>";
+            $response =  array(
+                'status'    => 'failed',
+                'message'   => "Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi",
+            );
+        
+            die(json_encode($response));
             
         }
 
@@ -1643,19 +1742,19 @@ class Mutasi extends MY_Controller
         $cat_total_qty_opname_out  =  0;
 
         $sheet->SetCellValue('B'.$rowCount, "Total Kategori ".$nama_category);
-        $sheet->mergeCells('B'.$rowCount.':D'.$rowCount);
+        $sheet->mergeCells('B'.$rowCount.':E'.$rowCount);
         $sheet->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
-        $sheet->SetCellValue('E'.$rowCount, $cat_total_lot_s_awal);
-        $sheet->SetCellValue('F'.$rowCount, $cat_total_qty_s_awal);
-        $sheet->SetCellValue('G'.$rowCount, $cat_qty1_uom_s_awal);
-        $sheet->SetCellValue('H'.$rowCount, $cat_total_qty2_s_awal);
-        $sheet->SetCellValue('I'.$rowCount, $cat_qty2_uom_s_awal);
-        $sheet->SetCellValue('J'.$rowCount, $cat_total_qty_opname_s_awal);
-        $sheet->SetCellValue('K'.$rowCount, $cat_opname_uom_s_awal);
+        $sheet->SetCellValue('F'.$rowCount, $cat_total_lot_s_awal);
+        $sheet->SetCellValue('G'.$rowCount, $cat_total_qty_s_awal);
+        $sheet->SetCellValue('H'.$rowCount, $cat_qty1_uom_s_awal);
+        $sheet->SetCellValue('I'.$rowCount, $cat_total_qty2_s_awal);
+        $sheet->SetCellValue('J'.$rowCount, $cat_qty2_uom_s_awal);
+        $sheet->SetCellValue('K'.$rowCount, $cat_total_qty_opname_s_awal);
+        $sheet->SetCellValue('L'.$rowCount, $cat_opname_uom_s_awal);
               
         $num_in = 0;
-        $column_total = 12;
+        $column_total = 13;
         for ($cin =  $count_in; $num_in < $cin; $num_in++ ) {
             $tot_lot_in  = 0;
             $tot_qty1_in = 0;

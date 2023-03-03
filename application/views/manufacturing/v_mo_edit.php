@@ -475,7 +475,7 @@
                               <th class="style">uom</th>
                               <th class="style" style="text-align: right;">Qty2</th>
                               <th class="style">uom2</th>
-                              <!--th class="style"></th-->
+                              <th class="style">Kg(%)</th
                             </tr>
                             <tbody>
                               <?php
@@ -490,9 +490,7 @@
                                   <td><?php echo $row->uom?></td>
                                   <td align="right"><?php echo number_format($row->tot_qty2,2)?></td>
                                   <td><?php echo $row->uom2?></td>
-                                  <!--td>
-                                    <a onclick="hapus('<?php  echo $row->kode ?>', '<?php  echo htmlentities($row->nama_produk) ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
-                                  </td-->
+                                  <td style="white-space: nowrap;"><?php echo ($row->persen_kg)." %"?></td>
                                 </tr>
                               <?php 
                                 }
@@ -1146,6 +1144,7 @@
     $("#lot_prefix_waste").attr("readonly", true);
     $("#btn-produksi").show();
     $("#btn-stok").show();
+    $("#btn-hold").show();
     $("#btn-done").show();
     $("#btn-print").show();
     $("#btn-produksi-batch").show();
@@ -1255,6 +1254,8 @@
         $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('tambah_quant');
         $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
 
+        $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
+
        var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
         $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
         $('.modal-title').text('Tambah Details Product Qty');
@@ -1313,6 +1314,7 @@
     $("#btn-waste").hide();//sembuyikan btn-waste
     $("#btn-consume").hide();// sembuyikan btn-consume
     $("#btn-stok").hide();//sembuyikan btn-produksi
+    $("#btn-hold").hide();//sembuyikan btn-hide
     $("#btn-done").hide();//sembuyikan btn-done
     $("#btn-print").hide();//sembuyikan btn-print
     $("#btn-cancel").attr('id','btn-cancel-edit');// ubah id btn-cancel jadi btn-cancel-edit
@@ -1419,7 +1421,7 @@
       show: true,
       backdrop: 'static',    
     });
-
+    $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
     $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
     $('.modal-title').text('Rekam Cacat Lot');
     $.post('<?php echo site_url()?>manufacturing/mO/rekam_cacat_modal',
@@ -1502,6 +1504,32 @@
       }
   }
 
+  $(document).on('click','#btn-hold',function(e){
+
+      bootbox.confirm({
+				message: "Apa anda yakin ingin menunda/Hold MO ini ?",
+				title: "<i class='fa fa-warning'></i> Hold !",
+				buttons: {
+					confirm: {
+						label: 'Yes',
+						className: 'btn-primary btn-sm'
+					},
+					cancel: {
+						label: 'No',
+						className: 'btn-default btn-sm'
+					},
+				},
+				callback: function (result) {
+					if(result == true){
+					
+					}else{
+						
+					}
+				}
+			});
+
+  });
+
   // modal produksi batch
   $("#btn-produksi-batch").unbind( "click" );
   $(document).on('click','#btn-produksi-batch',function(e){
@@ -1530,6 +1558,7 @@
       });
       $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('produksi_rm_batch');
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+      $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
 
       $("#btn-produksi").prop('disabled',true);
 
@@ -1587,6 +1616,7 @@
       });
       $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('produksi_rm');
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+      $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
       $("#btn-produksi-batch").prop('disabled',true);
 
       $(".produksi_rm").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
@@ -1642,7 +1672,7 @@
       });
       $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('waste_produksi');
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
-
+      $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
       $("#btn-produksi").prop('disabled',true);
 
       $(".waste_produksi").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
@@ -1699,6 +1729,7 @@
       });
       $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('consume');
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+      $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
 
       $("#btn-produksi").prop('disabled',true);
       $("#btn-produksi-batch").prop('disabled',true);
@@ -1787,6 +1818,7 @@
 
       $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('request_resep');
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+      $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
       
       //replace id btn tambah
       $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('id',"btn_request");

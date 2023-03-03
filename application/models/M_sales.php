@@ -285,9 +285,10 @@ class M_sales extends CI_Model
 	{
 		return $this->db->query("SELECT sci.sales_order, sci.due_date,sci.kode_produk,sci.nama_produk,sci.price,
 								sci.qty,sci.uom,sci.roll_info,sci.tax_id, sci.description,sci.tax_nama,sci.row_order,
-								tax.amount
+								tax.amount,mc.mc_id, mc.nama_mesin
 								FROM sales_contract_items sci 
 								LEFT JOIN tax tax ON sci.tax_id = tax.id
+								LEFT JOIN mesin mc ON sci.mc_id = mc.mc_id
 								WHERE sales_order = '$sales_order' ORDER BY row_order")->result();
 	}
 

@@ -235,9 +235,22 @@ class M_mo extends CI_Model
 								WHERE rm.kode = '".$kode."' AND rm.kode_produk = '".$kode_produk."' AND rm.additional = '".$additional."' ORDER BY rm.row_order")->result();
 	}
 
+	function get_qty_kg_all_by_kode($kode)
+	{
+		$query = $this->db->query("SELECT rmh.kode,  round(sum(if(smi.uom = 'kg', smi.qty, if(smi.uom = 'gr',smi.qty/1000, smi.qty2) )),2) as kg	
+								FROM mrp_production_rm_hasil as rmh
+								INNER JOIN stock_move_items as smi ON smi.move_id = rmh.move_id AND rmh.quant_id = smi.quant_id 
+								WHERE rmh.kode = '$kode' 
+								GROUP BY rmh.kode
+								")->row();
+		return $query->kg;
+	}
+
 	public function get_list_bahan_baku_hasil_group($kode,$additional)
 	{
-		return $this->db->query("SELECT rmh.kode, rmh.kode_produk, rmh.nama_produk, sum(rmh.qty) as tot_qty, rmh.uom, sum(smi.qty2) as tot_qty2, smi.uom2
+		$qty_kg_all = $this->get_qty_kg_all_by_kode($kode);
+		return $this->db->query("SELECT rmh.kode, rmh.kode_produk, rmh.nama_produk, sum(rmh.qty) as tot_qty, rmh.uom, sum(smi.qty2) as tot_qty2, smi.uom2,
+								round((sum(if(smi.uom = 'kg', smi.qty, if(smi.uom = 'gr',smi.qty/1000, smi.qty2) )) / $qty_kg_all * 100),2) persen_kg
 								FROM mrp_production_rm_hasil as rmh
 								INNER JOIN stock_move_items as smi ON smi.move_id = rmh.move_id AND rmh.quant_id = smi.quant_id 
 								WHERE rmh.kode = '$kode' AND rmh.additional = '$additional'

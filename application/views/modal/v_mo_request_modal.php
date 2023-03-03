@@ -30,6 +30,8 @@
 <script>
 
   $('#cmbVarian').select2({});
+
+  $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn_request" name="btn_request" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
     
   //klik button request
   $('#btn_request').click(function(){
