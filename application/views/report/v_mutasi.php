@@ -94,7 +94,7 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_mutasi" action="<?=base_url()?>report/mutasi/export_excel_mutasi">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_mutasi" >
               <div class="col-md-8">
                 <div class="form-group" >
                     <div class="col-md-12"> 
@@ -139,8 +139,8 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." >Generate</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                 <button type="button" class="btn btn-sm btn-default" name="btn-pdf" id="print-bap" > <i class="fa fa-file-pdf-o" style="color:red"></i> BAP Mutasi</button>
               </div>
               <div class="col-md-12">
@@ -200,6 +200,14 @@
                             </div>
                           </div>
                           <div class="col-md-4">
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Reff Note </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="reff_note" id="reff_note" >
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -390,22 +398,58 @@
       }
   });
 
-
-
-  // cek selisih saatu submit excel
-  $('#frm_mutasi').submit(function(){
+  $('#btn-excel').click(function(){
 
     tanggal    = $('#tanggal').val();
     departemen = $('#departemen').val();
 
+    var radio_arr = new Array(); 
+
+    var radio_arr = $('input[name="view[]"]').map(function(e, i) {
+            if(this.checked == true){
+              return i.value;
+            }
+
+    }).get();
+
     if(tanggal == ''){ 
-      alert_modal_warning('Periode Tanggal Harus diisi!');
-      return false;
+      alert_modal_warning('Periode Tanggal Harus diisi !');
+     
     }else if (departemen == null) {
       alert_modal_warning('Departemen Harus diisi !');
-      return false;
-    }
+      
+    }else if(radio_arr.length == 0) {
+      alert_modal_warning('View Harus Dipilih !');
 
+    }else if(arr_filter.length == 0) {
+      alert_modal_warning('Silahkan Generate terlebih dahulu !');
+
+    }else{
+
+      $.ajax({
+          "type":'POST',
+          "url": "<?php echo site_url('report/mutasi/export_excel_mutasi')?>",
+          "data": {arr_filter:arr_filter},
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status =="failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
+    }
   });
 
   // next pagination
@@ -455,15 +499,14 @@
       kode_produk     = $('#kode_produk').val();
       nama_produk     = $('#nama_produk').val();
       kode_transaksi  = $('#kode_transaksi').val();
+      reff_picking    = '',
+      reff_note       = $('#reff_note').val();
       lot             = $('#lot').val();
 
-      var radio_view= false;
       var radio_arr = new Array(); 
-
       var radio_arr = $('input[name="view[]"]').map(function(e, i) {
             if(this.checked == true){
-                check_status = true;
-              return i.value;
+                return i.value;
             }
 
       }).get();
@@ -473,6 +516,9 @@
 
       }else if (departemen == null) {
         alert_modal_warning('Departemen Harus diisi !');
+
+      }else if(radio_arr.length == 0) {
+        alert_modal_warning('View Harus Dipilih !');
 
       }else{
         
@@ -490,7 +536,7 @@
           //$("#example2 tbody").remove();
        
           // push array
-          arr_filter.push({tanggal:tanggal, departemen:departemen, kode_produk:kode_produk, nama_produk:nama_produk, kode_transaksi:kode_transaksi, lot:lot, view_arr:radio_arr});
+          arr_filter.push({tanggal:tanggal, departemen:departemen, kode_produk:kode_produk, nama_produk:nama_produk, kode_transaksi:kode_transaksi, lot:lot, reff_picking:reff_picking, reff_note:reff_note, view_arr:radio_arr});
           $.ajax({
                 type: "POST",
                 dataType : "JSON",
@@ -624,6 +670,7 @@
                         row2 += "<td class='white-space-nowrap'>"+value.method+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.sc+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.nama_sales_group+"</td>";
+                        row2 += "<td class='white-space-nowrap'>"+value.reff_note+"</td>";
 
                         row2 += "</tr>";
                     });
@@ -666,7 +713,7 @@
                                 }
                                 for ( var i = 0, l = b.length; i < l; i++ ) {
                                     $.each(b[i], function(c, d){
-                                        row += "<th class='style no text-center' "+colspan+" >";
+                                        row += "<th class='style no text-center white-space-nowrap' "+colspan+" >";
                                         row += d;
                                         row += "</th>";
                                     });
@@ -872,6 +919,7 @@
                             row3 += "<td class='white-space-nowrap'>"+value.nama_category+"</td>";
                             row3 += "<td class='white-space-nowrap'>"+value.kode_produk+"</td>";
                             row3 += "<td class='white-space-nowrap' >"+value.nama_produk+"</td>";
+                            row3 += "<td class='white-space-nowrap' >"+value.product_parent+"</td>";
                             // saldo awal
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty1)+" "+value.s_awal_qty1_uom+"</td>";
@@ -1211,7 +1259,7 @@
   {
                             let row3 = '';
                             row3 += "<tr>";
-                            row3 += "<td class='style_total' colspan='4' >Total Kategori "+ $nama_category +"</td>";
+                            row3 += "<td class='style_total' colspan='5' >Total Kategori "+ $nama_category +"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_lot_s_awal)+" </td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_s_awal)+" "+$cat_qty1_uom_s_awal+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty2_s_awal)+" "+$cat_qty2_uom_s_awal+"</td>";
