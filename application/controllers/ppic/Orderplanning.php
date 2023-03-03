@@ -71,9 +71,20 @@ class Orderplanning extends MY_Controller
 
     public function edit_details_modal()
     {
-        $sales_order = $this->input->post('sales_order');
-        $row_order   = $this->input->post('row_order');
-        $data['row'] = $this->m_orderPlanning->get_data_detail($sales_order,$row_order);
+        $sales_order = addslashes($this->input->post('sales_order'));
+        $row_order   = addslashes($this->input->post('row_order'));
+        $salescontract= $this->m_sales->get_data_by_kode($sales_order);
+        $get         = $this->m_orderPlanning->get_data_detail($sales_order,$row_order);
+        $data['row'] = $get;
+        $nama_produk = $get->nama_produk;
+        if(stripos($nama_produk, "Inspecting") !== FALSE){
+            $dept = "JAC";
+        }else{
+            $dept = "TRI";
+        }
+        $data['status'] = $salescontract->status;
+
+		$data['mesin']  = $this->_module->get_list_mesin_report($dept);
         return $this->load->view('modal/v_order_planning_edit_modal', $data);
     }
 
@@ -87,28 +98,44 @@ class Orderplanning extends MY_Controller
             $sub_menu  = $this->uri->segment(2);
             $username  = addslashes($this->session->userdata('username')); 
 
-            $sales_order = $this->input->post('sales_order');
-            $row_order   = $this->input->post('row_order');
-            $due_date    = $this->input->post('due_date');
-            $kode_produk    = $this->input->post('kode_produk');
+            $sales_order    = addslashes($this->input->post('sales_order'));
+            $row_order      = $this->input->post('row_order');
+            $due_date       = $this->input->post('due_date');
+            $kode_produk    = addslashes($this->input->post('kode_produk'));
             $nama_produk    = addslashes($this->input->post('nama_produk'));
             $desc           = addslashes($this->input->post('desc'));
+            $mc             = addslashes($this->input->post('mc'));
 
             ///lock table
-            $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE');
+            $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE, sales_contract as sc WRITE,  mst_sales_group as mst WRITE, mesin WRITE');
 
             // cek kode produk by row 
             $cek_items = $this->m_orderPlanning->cek_sales_contract_items_by_kode($sales_order,$kode_produk,$row_order);
             if(empty($cek_items['kode_produk'])){
-
                 $callback = array('status' => 'failed','message' => 'Maaf, Data Gagal Disimpan, Data Produk Tidak ditemukan', 'icon' =>'fa fa-warning', 'type' => 'danger');
-
             }else{
+                $salescontract= $this->m_sales->get_data_by_kode($sales_order);
+                $status_sc    = $salescontract->status;
+                $note_log_tmp = '';
+                $nm           = $this->m_orderPlanning->get_nama_mesin_by_id($mc);
+                if(!empty($nm)){
+                    $nama_mesin = $nm->nama_mesin;
+                }else{
+                    $nama_mesin = '';
+                }
+                
+                if($status_sc == 'waiting_date'){
+                    $this->m_orderPlanning->save_due_date($sales_order,$kode_produk,$row_order,$due_date,$mc);
+                    $note_log_tmp .= "Add Due Date | ".$sales_order."   ".$kode_produk."  ".$nama_produk."  ".$desc."  ".$row_order." -> ".$due_date." <br>";
+                    $note_log_tmp .= "Add Mesin | ".$sales_order."   ".$kode_produk."  ".$nama_produk."  ".$desc."  ".$row_order." -> ".$nama_mesin;
+                }else{
+                    $this->m_orderPlanning->save_mesin($sales_order,$kode_produk,$row_order,$mc);
+                    $note_log_tmp .= "Add Mesin | ".$sales_order."   ".$kode_produk."  ".$nama_produk."  ".$desc."  ".$row_order." -> ".$nama_mesin;
+                }
 
-                $this->m_orderPlanning->save_due_date($sales_order,$kode_produk,$row_order,$due_date);
-                $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+                $callback    = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                 $jenis_log   = "edit";
-                $note_log    = "Add Due Date | ".$sales_order." | ".$due_date." | ".$kode_produk." | ".$nama_produk." | ".$desc." | ".$row_order;
+                $note_log    = $note_log_tmp;
                 $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
             }
 

@@ -132,6 +132,7 @@
                             <th class="style" width="80px" style="text-align: right;" >Qty</th>
                             <th class="style" width="50px" >Uom</th>
                             <th class="style" width="150px">Due Date</th>
+                            <th class="style" width="150px">Mesin</th>
                             <th class="style " width="30"></th>
                           </tr>
                         </thead>
@@ -147,6 +148,7 @@
                               <td align="right"><?php echo $row->qty?></td>
                               <td><?php echo $row->uom?></td>
                               <td><?php echo $row->due_date?></td>
+                              <td><?php echo $row->nama_mesin?></td>
                               <td><a href="#" onclick="edit('<?php  echo $row->sales_order ?>', '<?php  echo $row->row_order ?>')" title="Edit" data-toggle="tooltip" style="color: #FFC107;" ddata-isi="<?php echo $row->row_order;?>"><i class="fa fa-edit"></i></a> </td>
                           <?php 
                             }     
@@ -203,30 +205,25 @@
 
 <script type="text/javascript">
   
-  //modal mode print
   function edit(sales_order, row_order){
 
     var status = $('#status').val();
     $("#edit_data").removeClass("lebar");
     $("#edit_data").addClass("lebar2");
 
-    if(status == 'waiting_date'){
-      //var kode = $('#kode').val();
-      $(".edit_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $("#edit_data").modal({
-          show: true,
+    //var kode = $('#kode').val();
+    $(".edit_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+    $("#edit_data").modal({
+      show: true,
           backdrop: 'static'
-      });
-      $('.modal-title').text('Edit Contract Lines');
-      $.post('<?php echo site_url()?>ppic/orderplanning/edit_details_modal',
+    });
+    $('.modal-title').text('Edit Contract Lines');
+    $.post('<?php echo site_url()?>ppic/orderplanning/edit_details_modal',
         { sales_order : sales_order,row_order : row_order },
-          function(html){
-            setTimeout(function() {$(".edit_data").html(html);  },1000);
+        function(html){
+          setTimeout(function() {$(".edit_data").html(html);  },1000);
         }   
-      );
-    }else{
-      alert_modal_warning('Maaf, Data Tidak bisa Edit !');
-    }
+    );
   }
 
    //klik button confirm date   

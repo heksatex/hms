@@ -98,9 +98,14 @@ class M_orderPlanning extends CI_Model
 		return $query->row();
 	}
 
-	public function save_due_date($sales_order,$kode_produk,$row_order,$due_date)
+	public function save_due_date($sales_order,$kode_produk,$row_order,$due_date,$mc_id)
 	{
-		return $this->db->query("UPDATE sales_contract_items SET due_date = '$due_date' WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order ='$row_order' ");
+		return $this->db->query("UPDATE sales_contract_items SET due_date = '$due_date', mc_id = '$mc_id' WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order ='$row_order' ");
+	}
+
+	public function save_mesin($sales_order,$kode_produk,$row_order,$mc_id)
+	{
+		return $this->db->query("UPDATE sales_contract_items SET  mc_id = '$mc_id' WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order ='$row_order' ");
 	}
 
 	public function cek_due_date_sales_conctract_items_by_kode($sales_order)
@@ -118,4 +123,12 @@ class M_orderPlanning extends CI_Model
 	{
 		$this->db->query("UPDATE sales_contract_items SET due_date = null WHERE sales_order = '$sales_order'");
 	}
+
+	public function get_nama_mesin_by_id($mc_id)
+	{
+		$query =  $this->db->query("SELECT nama_mesin FROM mesin  WHERE mc_id = '$mc_id' ")->row();
+		return $query;
+		
+	}
+
 }
