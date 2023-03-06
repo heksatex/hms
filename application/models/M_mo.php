@@ -243,7 +243,12 @@ class M_mo extends CI_Model
 								WHERE rmh.kode = '$kode' 
 								GROUP BY rmh.kode
 								")->row();
-		return $query->kg;
+		if(empty($query->kg)){
+			$kg = 0;
+			return $kg;
+		}else{
+			return $query->kg;
+		}
 	}
 
 	public function get_list_bahan_baku_hasil_group($kode,$additional)
