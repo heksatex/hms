@@ -696,7 +696,7 @@
                                     <th class="style">uom</th>
                                     <th class="style" style="text-align: right;">Qty2</th>
                                     <th class="style">uom2</th>
-                                    <!--th class="style"></th-->
+                                    <th class="style">Kg(%)</th>
                                   </tr>
                                   <tbody>
                                     <?php
@@ -711,9 +711,7 @@
                                         <td><?php echo $row->uom?></td>
                                         <td align="right"><?php echo number_format($row->tot_qty2,2)?></td>
                                         <td><?php echo $row->uom2?></td>
-                                        <!--td>
-                                          <a onclick="hapus('<?php  echo $row->kode ?>', '<?php  echo htmlentities($row->nama_produk) ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a>
-                                        </td-->
+                                        <td style="white-space: nowrap;"><?php echo ($row->persen_kg)." %"?></td>
                                       </tr>
                                     <?php 
                                       }
