@@ -3,6 +3,7 @@
 
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     h3 {
       display: block !important;
@@ -52,7 +53,7 @@
           </div>
           <div class="box-body">
 
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?= base_url() ?>report/Qualitycontrol/export_excel">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" >
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12">
@@ -92,8 +93,8 @@
 
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate">Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel"> <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." >Generate</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
 
             </form>
@@ -107,25 +108,25 @@
                       <table id="example1" class="table" border="0">
                         <thead>
                           <tr id="atas">
-                            <th class="style no" rowspan="2">No. </th>
-                            <th class='style' rowspan="2" style="min-width: 100px">Mesin</th>
-                            <th class='style' rowspan="2" style="min-width: 150px">Produk/Corak</th>
-                            <th class='style' rowspan="2" style="width: 5px; word-wrap: break-word; text-align: center;">Standar Mtr</th>
-                            <th class='style' rowspan="2" style="width: 5px; word-wrap: break-word; text-align: center;">Standar Kg</th>
-                            <th class='style' rowspan="2" style="text-align: center;">RPM</th>
-                            <th class='style' colspan="3" style="text-align: center;">Total Produksi</th>
-                            <th class='style' rowspan="2" style="text-align: center;">Efisensi (%)</th>
-                            <th class='style' colspan="3" style="text-align: center;">Grade</th>
-                            <th class='style' rowspan="2">Ket</th>
+                            <th class="style bb no" rowspan="2">No. </th>
+                            <th class='style bb' rowspan="2" style="min-width: 100px">Mesin</th>
+                            <th class='style bb' rowspan="2" style="min-width: 150px">Produk/Corak</th>
+                            <th class='style bb' rowspan="2" style="width: 5px; word-wrap: break-word; text-align: center;">Standar Mtr</th>
+                            <th class='style bb' rowspan="2" style="width: 5px; word-wrap: break-word; text-align: center;">Standar Kg</th>
+                            <th class='style bb' rowspan="2" style="text-align: center;">RPM</th>
+                            <th class='style bb' colspan="3" style="text-align: center;">Total Produksi</th>
+                            <th class='style bb' rowspan="2" style="text-align: center;">Efisensi (%)</th>
+                            <th class='style bb' colspan="3" style="text-align: center;">Grade</th>
+                            <th class='style bb' rowspan="2">Ket</th>
 
                           </tr>
                           <tr id="bawah">
-                            <th class='style' style="text-align: center;">Qty1</th>
-                            <th class='style' style="text-align: center;">Qty2</th>
-                            <th class='style' style="text-align: center;">Pcs</th>
-                            <th class='style' style="text-align: center;">A</th>
-                            <th class='style' style="text-align: center;">B</th>
-                            <th class='style' style="text-align: center;">C</th>
+                            <th class='style bb' style="text-align: center;">Qty1</th>
+                            <th class='style bb' style="text-align: center;">Qty2</th>
+                            <th class='style bb' style="text-align: center;">Pcs</th>
+                            <th class='style bb' style="text-align: center;">A</th>
+                            <th class='style bb' style="text-align: center;">B</th>
+                            <th class='style bb' style="text-align: center;">C</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -134,7 +135,7 @@
                           </tr>
                         </tbody>
                       </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
+                      <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                         Processing...
                       </div>
                     </div>
@@ -290,11 +291,11 @@
           success: function(data) {
 
             if (data.dataHari.length > 0) {
-              var header_parent = "<th colspan='" + data.jmlHari + "' class='style parentTgl'> Efisiensi/Tanggal(%)</th>";
+              var header_parent = "<th colspan='" + data.jmlHari + "' class='style parentTgl bb'> Efisiensi/Tanggal(%)</th>";
               $("#example1 thead tr[id='atas']").append(header_parent);
 
               $.each(data.dataHari, function(key, val) {
-                var header_child = '<th class="style childTgl">' + val.tgl + '</th>';
+                var header_child = '<th class="style childTgl bb">' + val.tgl + '</th>';
                 $("#example1 thead tr[id='bawah']").append(header_child);
               });
             }
@@ -378,11 +379,70 @@
           error: function(jqXHR, textStatus, errorThrown) {
             alert(jqXHR.responseText);
             //alert('error data');
+            $("#example1_processing").css('display', 'none'); // hidden loading
             $('#btn-generate').button('reset');
           }
         });
       }
     });
+
+    $('#btn-excel').click(function(){
+
+      var tgldari   = $('#tgldari').val();
+      var tglsampai = $('#tglsampai').val();
+      var id_dept   = $('#departemen').val();
+
+      var tgldari_2   = $('#tgldari').data("DateTimePicker").date();
+      var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+
+      var timeDiff = 0;
+      if (tgldari == '' || tglsampai == '') {
+        alert_modal_warning('Periode Tanggal Harus diisi !');
+      }else if (tglsampai_2) {
+          timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+      }
+      selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
+      if (id_dept == null) {
+        alert_modal_warning('Departemen Harus diisi !');
+
+      }else  if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
+        alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+
+      }else if(selisih > 6 ){
+        alert_modal_warning('Maaf,  Periode Tanggal tidak boleh lebih dari 7 hari !')
+      }else{
+        $.ajax({
+            "type":'POST',
+            "url": "<?php echo site_url('report/Qualitycontrol/export_excel')?>",
+            "dataType":'json',
+            "data":  {
+              tgldari: tgldari,
+              tglsampai: tglsampai,
+              id_dept: id_dept
+            },
+            beforeSend: function() {
+              $('#btn-excel').button('loading');
+            },error: function(){
+              alert("Export Excel error");
+              $('#btn-excel').button('reset');
+            }
+        }).done(function(data){
+            if(data.status == "failed"){
+              alert_modal_warning(data.message);
+            }else{
+              var $a = $("<a>");
+              $a.attr("href",data.file);
+              $("body").append($a);
+              $a.attr("download",data.filename);
+              $a[0].click();
+              $a.remove();
+            }
+            $('#btn-excel').button('reset');
+        });
+      }
+
+    });
+
   </script>
 
 </body>
