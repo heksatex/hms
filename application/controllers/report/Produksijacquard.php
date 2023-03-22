@@ -11,6 +11,7 @@ class Produksijacquard extends MY_Controller
 		$this->is_loggedin();//cek apakah user sudah login
         $this->load->model('_module');
 		$this->load->model('m_produksiJacquard');
+        $this->load->library('pagination');
 	}
 
     public function index()
@@ -39,6 +40,11 @@ class Produksijacquard extends MY_Controller
 
 	public function loadData($record=0)
     {
+
+        $recordPerPage = 100;
+        if($record != 0){
+           $record = ($record-1) * $recordPerPage;
+        }
     
  		$data_filter  = $this->input->post('data_filter'); 
         $data_filter_table= $this->input->post('data_filter_table'); //data filter dari table filer advanced
@@ -71,14 +77,22 @@ class Produksijacquard extends MY_Controller
                 $condition = 'OR';
 
                 // operator ex and, like, =, =>, ect
-                if($row['operator'] == 'LIKE'){
-                    $isi = "LIKE '%".addslashes($row['isi'])."%' ";
-                    $operator = 'LIKE';
+                if($row['operator'] == 'LIKE' OR $row['operator'] == 'NOT LIKE'){
+                    $isi = " ".$row['operator']." '%".addslashes($row['isi'])."%' ";
+                    $operator = $row['operator'] ;
                    // $whereAll .= "LIKE '%".$row['isi']."%' ".$condition;
+                }else if($row['operator'] == 'is'){
+                    if($row['isi'] == 'Empty'){
+                        $isi_  = ' IS NULL';
+                    }else{
+                        $isi_  = ' IS NOT NULL';
+                    }
+                    
+                    $isi =  $isi_;
+                    $operator = $row['operator'];
                 }else{
                     $isi = $row['operator']." '".addslashes($row['isi'])."' ";
                     $operator = $row['operator'];
-                    //$whereAll .= $row['operator']." '".$row['isi']."' ".$condition;
                 }
 
                 
@@ -186,15 +200,24 @@ class Produksijacquard extends MY_Controller
                             $data_ke++;
                         }
 
-                        if($operator == 'LIKE'){
-                            $isi_ = "LIKE '%".addslashes($isi)."%' ";
+                        if($operator == 'LIKE' OR $operator == 'NOT LIKE'){
+                            $isi_   = " ".$operator." '%".addslashes($isi)."%' ";
+                            $where .= '  '.$nama_field.' '.$isi_.'   '.$row['condition'].' ';// condition = OR
                             // $operator = 'LIKE';
+                        }else if($operator == 'is'){
+                            // $isi_   = "  '".addslashes($isi)."' ";
+                            if($isi == 'Empty'){
+                                $isi_  = ' IS NULL';
+                            }else{
+                                $isi_  = ' IS NOT NULL';
+                            }
+                            $where .= '  '.$nama_field.' '.$isi_.'   '.$row['condition'].' ';// condition = OR
                         }else{
-                            $isi_ = $operator." '".addslashes($isi)."' ";
+                            $isi_   = $operator." '".addslashes($isi)."' ";
                             // $operator = $row['operator'];
+                            $where .= '  '.$nama_field.' '.$isi_.'   '.$row['condition'].' ';// condition = OR
                         }
 
-                        $where .= $nama_field.' '.$isi_.' '.$row['condition'].' ';// condition = OR
                         $loop_data_ex++;
                     }
 
@@ -303,25 +326,39 @@ class Produksijacquard extends MY_Controller
         $courses        = '';
         $gb             = '';
         $run_in         = '';
-
+        $sisa_gl        = '';
 
         if(!empty($where)){
-	        $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done')  AND".$where;
+	        // $where ="where mrp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done')  AND".$where;
+	        $where ="WHERE pd.nama_produk LIKE '%Inspecting%'  AND ".$where;
         }else{
-	        $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done') ";
+	        $where ="WHERE pd.nama_produk LIKE '%Inspecting%'  ";
         }
 
-        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode($where,$id_dept);
+        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode($where,$id_dept,$record,$recordPerPage);
  
         foreach ($items as $row) {
 
-        	$mo   = $row->kode;
-        	$tgl_mo =  tgl_indo2(date('d-m-y',strtotime($row->tanggal)));
+        	$mo          = $row->kode;
+            if($row->tanggal != ''){
+                $tgl_mo      =  tgl_indo2(date('d-m-y',strtotime($row->tanggal)));
+            }else{
+                $tgl_mo      =  "";
+            }
         	$nama_mesin  = $row->nama_mesin;
         	$nama_produk = $row->nama_produk;
-        	$start_time  = tgl_indo2(date('d-m-y H:i:s',strtotime($row->start_time)));
-        	$finish_time = tgl_indo2(date('d-m-y H:i:s',strtotime($row->finish_time)));
-        	$meter       = $row->meter;
+            if($row->start_time != '' ){
+                $start_time  = tgl_indo2(date('d-m-y H:i:s',strtotime($row->start_time)));
+            }else{
+                $start_time  = "";
+            }
+            if($row->finish_time!= ''){
+                $finish_time = tgl_indo2(date('d-m-y H:i:s',strtotime($row->finish_time)));
+            }else{
+                $finish_time  = "";
+            }
+        	$target_mo   = $row->target_mo;
+			$buyer_code  = $row->buyer_code;
         	$hph_qty1    = $row->hph_qty1;
 			$hph_qty2    = $row->hph_qty2;
         	$gulung      = $row->gulung;
@@ -329,21 +366,24 @@ class Produksijacquard extends MY_Controller
       		$status      = $row->status;
             $lbr_greige  = $row->lebar_greige.' '.$row->uom_lebar_greige;
             $lbr_jadi    = $row->lebar_jadi.' '.$row->uom_lebar_jadi;
+            $mkt         = $row->nama_sales_group;
+            $pd          = $row->kode_prod;
+            $sales_contract = $row->sales_order;
 
-        	// explode origin
-        	$ex = explode('|', $row->origin);
-        	$i  = 0;
-        	foreach($ex as $exs){
+        	// // explode origin
+        	// $ex = explode('|', $row->origin);
+        	// $i  = 0;
+        	// foreach($ex as $exs){
 
-        		if($i== 0){ // SC
-        			$sales_contract = trim($exs);
-        			$mkt = $this->m_produksiJacquard->get_marketing_by_kode($sales_contract);
-        		}else if($i == 1){ // PD
-        			$pd = trim($exs);
-        		}
+        	// 	if($i== 0){ // SC
+        	// 		$sales_contract = trim($exs);
+        	// 		$mkt = $this->m_produksiJacquard->get_marketing_by_kode($sales_contract);
+        	// 	}else if($i == 1){ // PD
+        	// 		$pd = trim($exs);
+        	// 	}
 
-	        	$i++;
-        	}
+	        // 	$i++;
+        	// }
 
         	// explode reff_note
 
@@ -458,8 +498,9 @@ class Produksijacquard extends MY_Controller
 		        	$nama_mesin  = '';
 		        	$nama_produk = '';
 		        	$start_time  = '';
+		        	$buyer_code  = '';
 		        	$finish_time = '';
-		        	$meter       = '';
+		        	$target_mo   = '';
 		        	$hph_qty1    = '';
 					$hph_qty2    = '';
 		        	$gulung      = '';
@@ -479,10 +520,11 @@ class Produksijacquard extends MY_Controller
 			        $courses        = '';
 			        $gb             = '';
 			        $run_in         = '';
+                    $sisa_gl        = '';
 	        	}
 
 	        	// explode reff
-	        	$exp = explode('|', $val->reff);
+	        	$exp = explode('|', $val->reff_note);
 	        	$ke  = 0;
 	        	foreach ($exp as $exps) {
 	        		if($ke == 0){ // GB
@@ -494,6 +536,24 @@ class Produksijacquard extends MY_Controller
 	        		$ke++;
 	        	}
 
+                if($target_mo!= ''){
+                    $target_mo = number_format($target_mo,2);
+                }
+                if($hph_qty1 != ''){
+                    $hph_qty1 = number_format($hph_qty1,2);
+                }
+
+                if($hph_qty2 != ''){
+                    $hph_qty2 = number_format($hph_qty2,2);
+                }
+
+                if(is_numeric($gl)){
+                    $sisa_gl = $gl - $gulung;
+                }
+                if($sisa_target != ''){
+                    $sisa_target = number_format($sisa_target,2);
+                }
+
 	        	// buat array dataRecord
 	        	$dataRecord[] = array('kode'           => $mo, 
 	        						  'tgl_mo' 		   => $tgl_mo, 
@@ -501,14 +561,15 @@ class Produksijacquard extends MY_Controller
 	        						  'sc'             => $sales_contract,
 	        						  'pd'			   => $pd,
 	        						  'marketing'	   => $mkt,
+	        						  'buyer_code'     => $buyer_code,
 	        						  'corak'          => $nama_produk,
 	        						  'lbr_greige'     => $lbr_greige,
 	        						  'lbr_jadi'       => $lbr_jadi,
 	        						  'start_produksi' => $start_time,
 	        						  'finish_produksi'=> $finish_time,
-	        						  'meter'          => $meter,
+	        						  'target_mo'      => $target_mo,
 	        						  'gulung'         => $gl,
-	        						  'mtr_gl'	       => $mtr_gl,
+	        						  'mtr_gl'         => $mtr_gl,
 	        						  'pcs'            => $pcs,
 	        						  'gauge'          => $gauge,
 	        						  'stitch'         => $stitch,
@@ -516,20 +577,58 @@ class Produksijacquard extends MY_Controller
 	        						  'rpm'            => $rpm,
 	        						  'gb'             => $gb,
 	        						  'rm'             => $val->nama_produk,
-	        						  'target_qty'     => $val->target_qty,
+	        						  'target_qty'     => number_format($val->target_qty,2),
 	        						  'run_in'         => $run_in,
 	        						  'qty1'	       => $hph_qty1,
 	        						  'qty2'           => $hph_qty2,
 	        						  'h_gulung'	   => $gulung,
 	        						  'sisa'           => $sisa_target,
+	        						  'sisa_gl'        => $sisa_gl,
 	        						  'status'         => $status
 
 	        						 );
         		$boM++;
         	}
 
+            if($row->kode == ''){
+                	// buat array dataRecord
+	        	$dataRecord[] = array('kode'         => $mo, 
+                                    'tgl_mo' 		 => $tgl_mo, 
+                                    'mc' 			 => $nama_mesin,
+                                    'sc'             => $sales_contract,
+                                    'pd'			 => $pd,
+                                    'marketing'	     => $mkt,
+                                    'buyer_code'     => $buyer_code,
+                                    'corak'          => $nama_produk,
+                                    'lbr_greige'     => $lbr_greige,
+                                    'lbr_jadi'       => $lbr_jadi,
+                                    'start_produksi' => $start_time,
+                                    'finish_produksi'=> $finish_time,
+                                    'target_mo'      => $target_mo,
+                                    'gulung'         => $gl,
+                                    'mtr_gl'         => $mtr_gl,
+                                    'pcs'            => $pcs,
+                                    'gauge'          => $gauge,
+                                    'stitch'         => $stitch,
+                                    'courses'        => $courses,
+                                    'rpm'            => $rpm,
+                                    'gb'             => $gb,
+                                    'rm'             => "",
+                                    'target_qty'     => "",
+                                    'run_in'         => $run_in,
+                                    'qty1'	         => $hph_qty1,
+                                    'qty2'           => $hph_qty2,
+                                    'h_gulung'	     => $gulung,
+                                    'sisa'           => $sisa_target,
+	        						'sisa_gl'        => $sisa_gl,
+                                    'status'         => $status
+
+                                );
+            }
+
         	$sales_contract = '';
 	        $pd 		 	= '';
+	        $buyer_code 	= '';
 	        $mkt            = '';
 	        $gl             = '';
 	        $mtr_gl         = '';
@@ -542,13 +641,24 @@ class Produksijacquard extends MY_Controller
         	$courses        = '';
         	$gb             = '';
         	$run_in         = '';
+            $sisa_gl        = '';
 
         }
 
         $allcount           = $this->m_produksiJacquard->get_record_count_jacquard($where);
         $total_record       = 'Total Data : '. number_format($allcount);
 
-        $callback  = array('record' => $dataRecord, 'total_record'=>$total_record, 'dataArr' => $dataArr, 'query' => $where);
+        $config['base_url']         = base_url().'report/produksijacquard/loadData';
+        $config['use_page_numbers'] = TRUE;
+        $config['total_rows']       = $allcount;
+        $config['per_page']         = $recordPerPage;
+        $config['num_links']        = 1;
+        $config['next_link']        = '>';
+        $config['prev_link']        = '<';
+        $this->pagination->initialize($config);
+        $pagination         = $this->pagination->create_links();
+
+        $callback  = array('record' => $dataRecord,'pagination'=>$pagination,  'total_record'=>$total_record, 'dataArr' => $dataArr, 'query' => $where);
 
         echo json_encode($callback);
     }
@@ -557,8 +667,10 @@ class Produksijacquard extends MY_Controller
     function declaration_name_field($nama_field)
     {
     	
-    	if($nama_field == 'kode' OR $nama_field ==  'nama_produk' OR $nama_field == 'tanggal' OR $nama_field == 'status' OR $nama_field == 'origin' ){
-    		$where = 'mp.'.$nama_field;
+    	if($nama_field == 'kode' OR $nama_field == 'tanggal' OR $nama_field == 'status' ){
+    		$where = 'mrp.'.$nama_field;
+    	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order' OR $nama_field == 'kode_prod' OR $nama_field == 'nama_sales_group'){
+    		$where = 'pd.'.$nama_field;
     	}else if($nama_field =='nama_mesin'){
     		$where = 'ms.'.$nama_field;
     	}else{
@@ -571,12 +683,13 @@ class Produksijacquard extends MY_Controller
     function export_excel()
     {
 
-        $this->load->library("excel");
-
+        $this->load->library('excel');
+        ob_start();
+        
         $object = new PHPExcel();
         $object->setActiveSheetIndex(0);
 
-        $where = $this->input->post('query');
+        $where = $this->input->post('filter');
         $id_dept = 'JAC';
 
         $object->getActiveSheet()->SetCellValue('A1', 'Jadwal Produksi Jacquard');
@@ -584,7 +697,7 @@ class Produksijacquard extends MY_Controller
         $object->getActiveSheet()->mergeCells('A1:S1');
 
         // table header
-        $table_head_columns  = array('No', 'MO', 'Tgl.MO', 'MC', 'SC', 'PD', 'Corak','Marketing', 'Lebar', 'Greige','Jadi', 'Start Produksi', 'Finish Produksi', 'Total Order',  'Meter', 'Gulung', 'Mtr/Gl', 'Pcs', 'Gauge','Stitch/Cm' , 'Courses', 'RPM', 'GB', 'Bahan Baku', 'Target Qty', 'RUN IN','Hasil Produksi', 'HPH/Qty1','HPH/Qty2', 'Gulung','Sisa/Qty','Status');
+        $table_head_columns  = array('No', 'MO', 'Tgl.MO', 'MC', 'SC', 'PD','Buyer Code','Marketing','Corak', 'Lebar', 'Greige','Jadi', 'Start Produksi', 'Finish Produksi', 'Total Order',  'Meter', 'Gulung', 'Mtr/Gl', 'Pcs', 'Gauge','Stitch/Cm' , 'Courses', 'RPM', 'GB', 'Bahan Baku', 'Target Qty', 'RUN IN','Hasil Produksi', 'Qty1','Qty2', 'Gulung','Sisa Qty1','Sisa Gl','Status');
 
         $column = 0;
         $merge  = TRUE;
@@ -593,11 +706,11 @@ class Produksijacquard extends MY_Controller
         foreach ($table_head_columns as $field) {
 
             // merge cell baris ke 3-4
-            if($column < 8 OR ($column >= 11 AND $column <= 12) OR ($column >=17 AND $column <=25 ) OR $column == 31){
+            if($column < 9 OR ($column >= 12 AND $column <= 13) OR ($column >=18 AND $column <=26 ) OR $column >= 31){
 
-                if($column < 8 ){
+                if($column < 9 ){
                     $columns = $column;
-                }else if(($column >= 11 AND $column <= 12) OR ($column >=17 AND $column <=25) OR $column == 31) {
+                }else if(($column >= 12 AND $column <= 13) OR ($column >=18 AND $column <=26) OR $column >= 31) {
                     $columns = $column-$count_merge;
                 }
 
@@ -607,18 +720,18 @@ class Produksijacquard extends MY_Controller
 
 
             // merge cell lebar greige, lebar jadi
-            if(($column >= 8 AND $column <=10) OR ( $column >= 13 AND $column <=16) OR ($column >= 26 AND $column <=30)){
-                if($column == 13 OR $column == 26){$merge = TRUE;}
+            if(($column >= 9 AND $column <=11) OR ( $column >= 14 AND $column <=17) OR ($column >= 27 AND $column <=31)){
+                if($column == 14 OR $column == 27){$merge = TRUE;}
 
                 if($merge == TRUE){
                     $columns = $column-$count_merge;
                     $object->getActiveSheet()->setCellValueByColumnAndRow($columns, 3, $field);  
-                    if($column == 8){
-                        $object->getActiveSheet()->mergeCells('I3:J3');// merge cell lebar
-                    }elseif($column == 13){
-                        $object->getActiveSheet()->mergeCells('M3:O3');// megre cell total order
-                    }elseif($column == 26){
-                        $object->getActiveSheet()->mergeCells('Y3:AB3');// megre cell hasil produksi
+                    if($column == 9){
+                        $object->getActiveSheet()->mergeCells('J3:K3');// merge cell lebar
+                    }elseif($column == 14){
+                        $object->getActiveSheet()->mergeCells('N3:P3');// megre cell total order
+                    }elseif($column == 27){
+                        $object->getActiveSheet()->mergeCells('Z3:AB3');// megre cell hasil produksi
                     }
                     $count_merge++;
 
@@ -636,13 +749,13 @@ class Produksijacquard extends MY_Controller
 
 
         // setting align header
-        $object->getActiveSheet()->getStyle('E4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        $object->getActiveSheet()->getStyle('I3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        $object->getActiveSheet()->getStyle('M3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        $object->getActiveSheet()->getStyle('Y3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        // $object->getActiveSheet()->getStyle('E4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        // $object->getActiveSheet()->getStyle('I3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        // $object->getActiveSheet()->getStyle('M3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        // $object->getActiveSheet()->getStyle('Y3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
         // setting huruf tebal
-        $object->getActiveSheet()->getStyle("A1:AC4")->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle("A1:AE4")->getFont()->setBold(true);
 
 
         //Border 
@@ -687,7 +800,7 @@ class Produksijacquard extends MY_Controller
         );  
     
         // set column heeader
-        $index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC');
+        $index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE');
         $loop = 1;
         // set border, align center, set size width
         foreach ($index_header as $val) {
@@ -698,19 +811,19 @@ class Produksijacquard extends MY_Controller
             //$object->getActiveSheet()->getStyle($val.'4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $object->getActiveSheet()->getStyle($val.'3:'.$val.'4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER_CONTINUOUS);
 
-            if($loop <= 3 OR ($loop >= 5 AND $loop <= 6) OR $loop == 21){ // index A, B, C, E, F, U
+            if($loop <= 3 OR ($loop >= 5 AND $loop <= 6) OR $loop == 22){ // index A, B, C, E, F, U
                 $object->getSheet(0)->getColumnDimension($val)->setAutoSize(true);
             }else if($loop == 4){ // index D
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(19);
-            }else if($loop == 7){ // index G
-                $object->getSheet(0)->getColumnDimension($val)->setWidth(27);
-            }else if($loop == 8){// index H
+            }else if($loop == 7 or $loop == 8){ // index G,H
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(17);
-            }else if($loop== 9 OR $loop == 10 OR ($loop >= 13 AND $loop <=20) OR ($loop >=23 AND $loop <=  29) ){// index I, J,M,N,O, P, Q, R, S, T, W, X, Y, Z, AA, AB, AC
+            }else if($loop == 9 ){// index I
+                $object->getSheet(0)->getColumnDimension($val)->setWidth(27);
+            }else if($loop== 10 OR $loop == 11 OR ($loop >= 14 AND $loop <=21) OR ($loop >=24 AND $loop <=  30) ){// index  J,M,N,O, P, Q, R, S, T, W, X, Y, Z, AA, AB, AC
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(9);
-            }else if($loop == 11 OR $loop == 12){// index K, L
+            }else if($loop == 13 OR $loop == 13){// index K, L
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(10);
-            }else if($loop == 22){// index V
+            }else if($loop == 23){// index V
                 $object->getSheet(0)->getColumnDimension($val)->setWidth(22);
             }
 
@@ -724,15 +837,15 @@ class Produksijacquard extends MY_Controller
         }
 
         // set wrap text
-        $object->getActiveSheet()->getStyle('K3:K'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
-        $object->getActiveSheet()->getStyle('L3:L'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);  
+        $object->getActiveSheet()->getStyle('L3:L'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+        $object->getActiveSheet()->getStyle('M3:M'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);  
 
         // diatas column A5 tidak bergerak
         //$object->getActiveSheet()->freezePane('A5'); 
 
         // >> BODY
 
-        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode($where,$id_dept);
+        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode_no_limit($where,$id_dept);
         $no    = 1;
         $rowCount = 5;
         $sales_contract = '';
@@ -749,41 +862,44 @@ class Produksijacquard extends MY_Controller
         $courses        = '';
         $gb             = '';
         $run_in         = '';
+        $sisa_gl        = '';
  
         foreach ($items as $row) {
 
-            $mo   = $row->kode;
-            $tgl_mo =  tgl_indo2(date('d-m-y',strtotime($row->tanggal)));
-            $nama_mesin  = $row->nama_mesin;
-            $nama_produk = $row->nama_produk;
-            $start_time  = tgl_indo2(date('d-m-y H:i:s',strtotime($row->start_time)));
-            $finish_time = tgl_indo2(date('d-m-y H:i:s',strtotime($row->finish_time)));
-            $meter       = $row->meter;
-            $hph_qty1    = $row->hph_qty1;
-            $hph_qty2    = $row->hph_qty2;
-            $gulung      = $row->gulung;
-            $sisa_target = $row->sisa_target;
-            $status      = $row->status;
+            $mo          = $row->kode;
+            if($row->tanggal != ''){
+                $tgl_mo      =  tgl_indo2(date('d-m-y',strtotime($row->tanggal)));
+            }else{
+                $tgl_mo      =  "";
+            }
+        	$nama_mesin  = $row->nama_mesin;
+        	$nama_produk = $row->nama_produk;
+            if($row->start_time != '' ){
+                $start_time  = tgl_indo2(date('d-m-y H:i:s',strtotime($row->start_time)));
+            }else{
+                $start_time  = "";
+            }
+            if($row->finish_time!= ''){
+                $finish_time = tgl_indo2(date('d-m-y H:i:s',strtotime($row->finish_time)));
+            }else{
+                $finish_time  = "";
+            }
+        	$target_mo   = $row->target_mo;
+			$buyer_code  = $row->buyer_code;
+        	$hph_qty1    = $row->hph_qty1;
+			$hph_qty2    = $row->hph_qty2;
+        	$gulung      = $row->gulung;
+			$sisa_target = $row->sisa_target;
+      		$status      = $row->status;
             $lbr_greige  = $row->lebar_greige.' '.$row->uom_lebar_greige;
             $lbr_jadi    = $row->lebar_jadi.' '.$row->uom_lebar_jadi;
+            $mkt         = $row->nama_sales_group;
+            $pd          = $row->kode_prod;
+            $sales_contract = $row->sales_order;
+            $buyer_code = $row->buyer_code;
 
-            // explode origin
-            $ex = explode('|', $row->origin);
-            $i  = 0;
-            foreach($ex as $exs){
-
-                if($i== 0){ // SC
-                    $sales_contract = trim($exs);
-                    $mkt = $this->m_produksiJacquard->get_marketing_by_kode($sales_contract);
-                }else if($i == 1){ // PD
-                    $pd = trim($exs);
-                }
-
-                $i++;
-            }
 
             // explode reff_note
-
             $ex2 = explode('|', $row->reff_note);
             $a   = 0;
             foreach ($ex2 as $exs2) {
@@ -881,7 +997,6 @@ class Produksijacquard extends MY_Controller
                     }
                 }
 
-
                 $a++;
             } 
 
@@ -897,7 +1012,8 @@ class Produksijacquard extends MY_Controller
                     $nama_produk = '';
                     $start_time  = '';
                     $finish_time = '';
-                    $meter       = '';
+                    $target_mo   = '';
+                    $buyer_code   = '';
                     $hph_qty1    = '';
                     $hph_qty2    = '';
                     $gulung      = '';
@@ -918,10 +1034,11 @@ class Produksijacquard extends MY_Controller
                     $gb             = '';
                     $run_in         = '';
                     $num            = '';
+                    $sisa_gl        = '';
                 }
 
                 // explode reff
-                $exp = explode('|', $val->reff);
+                $exp = explode('|', $val->reff_note);
                 $ke  = 0;
                 foreach ($exp as $exps) {
                     if($ke == 0){ // GB
@@ -933,35 +1050,41 @@ class Produksijacquard extends MY_Controller
                     $ke++;
                 }
 
+                if(is_numeric($gl)){
+                    $sisa_gl = $gl - $gulung;
+                }
+
                 $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num));
                 $object->getActiveSheet()->SetCellValue('B'.$rowCount, $mo);
                 $object->getActiveSheet()->SetCellValue('C'.$rowCount, $tgl_mo);
                 $object->getActiveSheet()->SetCellValue('D'.$rowCount, $nama_mesin);
                 $object->getActiveSheet()->SetCellValue('E'.$rowCount, $sales_contract);
                 $object->getActiveSheet()->SetCellValue('F'.$rowCount, $pd);
-                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $nama_produk);
+                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $buyer_code);
                 $object->getActiveSheet()->SetCellValue('H'.$rowCount, $mkt);
-                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $lbr_greige);
-                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $lbr_jadi);
-                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $start_time);
-                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $finish_time);
-                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $meter);
-                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $gl);
-                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $mtr_gl);
-                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $pcs);
-                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $gauge);
-                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $stitch);
-                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $courses);
-                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $rpm);
-                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $gb);
-                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->nama_produk);
-                $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->target_qty);
-                $object->getActiveSheet()->SetCellValue('X'.$rowCount, $run_in);
-                $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $hph_qty1);
-                $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $hph_qty2);
-                $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $gulung);
-                $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $sisa_target);
-                $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $status);
+                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $nama_produk);
+                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $lbr_greige);
+                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_jadi);
+                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $start_time);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $finish_time);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_mo);
+                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $gl);
+                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $mtr_gl);
+                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $pcs);
+                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $gauge);
+                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $stitch);
+                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $courses);
+                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $rpm);
+                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $gb);
+                $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->nama_produk);
+                $object->getActiveSheet()->SetCellValue('X'.$rowCount, $val->target_qty);
+                $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $run_in);
+                $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $hph_qty1);
+                $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $hph_qty2);
+                $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $gulung);
+                $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $sisa_target);
+                $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $sisa_gl);
+                $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $status);
 
                 // set align 
                 $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -971,7 +1094,7 @@ class Produksijacquard extends MY_Controller
                 $object->getActiveSheet()->getStyle('K'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('L'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('U'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-                $object->getActiveSheet()->getStyle('AC'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('AE'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             
                 // set wrapText
                 $object->getActiveSheet()->getStyle('D'.$rowCount.':D'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
@@ -1013,9 +1136,101 @@ class Produksijacquard extends MY_Controller
                 $object->getActiveSheet()->getStyle('AB'.$rowCount)->applyFromArray($styleArray_left);
                 $object->getActiveSheet()->getStyle('AC'.$rowCount)->applyFromArray($styleArray_left);
                 $object->getActiveSheet()->getStyle('AD'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AF'.$rowCount)->applyFromArray($styleArray_left);
              
 
                 $boM++;
+                $rowCount++;
+            }
+            
+            if($row->kode == ''){
+
+                $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($no));
+                $object->getActiveSheet()->SetCellValue('B'.$rowCount, $mo);
+                $object->getActiveSheet()->SetCellValue('C'.$rowCount, $tgl_mo);
+                $object->getActiveSheet()->SetCellValue('D'.$rowCount, $nama_mesin);
+                $object->getActiveSheet()->SetCellValue('E'.$rowCount, $sales_contract);
+                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $pd);
+                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $buyer_code);
+                $object->getActiveSheet()->SetCellValue('H'.$rowCount, $mkt);
+                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $nama_produk);
+                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $lbr_greige);
+                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_jadi);
+                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $start_time);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $finish_time);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_mo);
+                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $gl);
+                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $mtr_gl);
+                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $pcs);
+                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $gauge);
+                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $stitch);
+                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $courses);
+                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $rpm);
+                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $gb);
+                $object->getActiveSheet()->SetCellValue('W'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('X'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('Y'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('Z'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('AA'.$rowCount,"");
+                $object->getActiveSheet()->SetCellValue('AB'.$rowCount,"");
+                $object->getActiveSheet()->SetCellValue('AC'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('AD'.$rowCount, "");
+                $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $status);
+
+                // set align 
+                $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('C'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('E'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('F'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('K'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('L'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('U'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                $object->getActiveSheet()->getStyle('AE'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+             
+                // set wrapText
+                $object->getActiveSheet()->getStyle('D'.$rowCount.':D'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+                $object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+                $object->getActiveSheet()->getStyle('H'.$rowCount.':H'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+                $object->getActiveSheet()->getStyle('K'.$rowCount.':K'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+                $object->getActiveSheet()->getStyle('L'.$rowCount.':L'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);  
+                $object->getActiveSheet()->getStyle('J'.$rowCount.':M'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);  
+                $object->getActiveSheet()->getStyle('V'.$rowCount.':V'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);  
+ 
+ 
+                $object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('Q'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('T'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('V'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('W'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('X'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('Y'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('Z'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AA'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AB'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AC'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AD'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray_left);
+                $object->getActiveSheet()->getStyle('AF'.$rowCount)->applyFromArray($styleArray_left);
+
                 $rowCount++;
             }
 
@@ -1048,6 +1263,8 @@ class Produksijacquard extends MY_Controller
                 $object->getActiveSheet()->getStyle('AA'.$rowCount)->applyFromArray($styleArray_top);
                 $object->getActiveSheet()->getStyle('AB'.$rowCount)->applyFromArray($styleArray_top);
                 $object->getActiveSheet()->getStyle('AC'.$rowCount)->applyFromArray($styleArray_top);
+                $object->getActiveSheet()->getStyle('AD'.$rowCount)->applyFromArray($styleArray_top);
+                $object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray_top);
 
 
             $no++;
@@ -1066,18 +1283,25 @@ class Produksijacquard extends MY_Controller
             $courses        = '';
             $gb             = '';
             $run_in         = '';
+            $sisa_gl        = '';
 
         }   
 
         // << BODY
+        
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
 
-        $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+		$xlsData = ob_get_contents();
+		ob_end_clean();
 
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="Jadwal Produksi Jacquard.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		$response =  array(
+				'op'        => 'ok',
+				'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+				'filename'  => "Jadwal Produksi Jacquard.xlsx"
+		);
 
+		die(json_encode($response));
     }
 
 
