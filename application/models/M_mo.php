@@ -175,7 +175,7 @@ class M_mo extends CI_Model
 
 	public function get_data_by_code($kode)
 	{
-		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, hd.nama_handling, w.nama_warna, w.kode_warna, wv.notes_varian as notes_varian, mrp.program, mrp.gramasi, wv.id as id_warna_varian, wv.nama_varian
+		$query = $this->db->query("SELECT mrp.kode, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.reff_note,mrp.id_warna, mrp.tanggal_jt, mrp.kode_bom, mrp.start_time, mrp.finish_time, mrp.source_location, mrp.air, mrp.berat, mrp.dept_id, mrp.mc_id, mrp.status, mrp.responsible, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.target_efisiensi,mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.type_production, mrp.id_handling, mrp.alasan, hd.nama_handling, w.nama_warna, w.kode_warna, wv.notes_varian as notes_varian, mrp.program, mrp.gramasi, wv.id as id_warna_varian, wv.nama_varian
 								  FROM mrp_production mrp 
 								  LEFT join  mst_handling hd ON mrp.id_handling = hd.id 
 								  LEFT JOIN warna w ON mrp.id_warna = w.id
@@ -452,7 +452,7 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT * FROM mesin where mc_id = '$mc_id' ");
 	}
 
-	public function update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program)
+	public function update_mo($kode,$berat,$air,$start,$finish,$reff_note,$mesin,$qty1_std,$qty2_std,$lot_prefix,$lot_prefix_waste,$target_efisiensi,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi,$type_production,$handling,$gramasi,$program,$alsan)
 	{
 		return $this->db->query("UPDATE mrp_production set berat = '$berat', air = '$air', start_time = '$start', 
 														   finish_time = '$finish',reff_note = '$reff_note', 
@@ -467,7 +467,8 @@ class M_mo extends CI_Model
 														   type_production = '$type_production',
 														   id_handling = '$handling',
 														   gramasi  = '$gramasi',
-														   program  = '$program'
+														   program  = '$program',
+														   alasan = '$alsan'
 														WHERE kode = '$kode' ");
 	}
 
@@ -1092,7 +1093,7 @@ class M_mo extends CI_Model
 										sum(if(mp.uom = 'Mtr',smi.qty,'')) as mtr,
 										sum(if(mp.uom = 'kg', smi.qty, smi.qty2)) as kg
 							from mrp_production_rm_target rm
-							INNER JOIN stock_move_items smi ON rm.kode_produk = smi.kode_produk AND rm.move_id = smi.move_id
+							INNER JOIN stock_move_items smi ON rm.origin_prod = smi.origin_prod AND rm.move_id = smi.move_id AND rm.kode_produk = smi.kode_produk
 							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
 							WHERE rm.kode ='$kode' AND smi.status = '$status'
 							GROUP BY smi.kode_produk
@@ -1261,6 +1262,15 @@ class M_mo extends CI_Model
 		return $query->num_rows();
 	}
 
+	public function update_alasan_hold_mrp_production($kode,$alasan,$status)
+	{
+		$this->db->query("UPDATE mrp_production set alasan = '$alasan', status_before_hold = '$status' WHERE kode ='$kode' ");
+	}
+
+	public function get_status_before_hold($kode)
+	{
+		return $this->db->query("SELECT status_before_hold FROM mrp_production where kode = '$kode'");
+	}
 
 
 }
