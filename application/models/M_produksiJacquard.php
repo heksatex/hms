@@ -61,7 +61,7 @@ class M_produksiJacquard extends CI_Model
 										GROUP BY a.sales_order,a.kode_produk, e.row_order
 										) pd
 								LEFT JOIN mrp_production mrp ON CONCAT(pd.sales_order,'|',pd.kode_prod,'|',pd.row_order) = mrp.origin AND mrp.dept_id = '$id_dept'
-								LEFT JOIN mesin ms ON  ms.mc_id = if(mrp.mc_id = '', pd.mc_id, mrp.mc_id)
+								LEFT JOIN mesin ms ON  ms.mc_id = IFNULL(mrp.mc_id,pd.mc_id)
 								$where
 								ORDER BY ms.row_order asc, mrp.tanggal asc, cast(mid(pd.sales_order,3,(length(pd.sales_order))-2) as unsigned) asc 
 								LIMIT $rowno, $recordPerPage
@@ -99,7 +99,7 @@ class M_produksiJacquard extends CI_Model
 										GROUP BY a.sales_order,a.kode_produk, e.row_order
 										) pd
 								LEFT JOIN mrp_production mrp ON CONCAT(pd.sales_order,'|',pd.kode_prod,'|',pd.row_order) = mrp.origin AND mrp.dept_id = '$id_dept'
-								LEFT JOIN mesin ms ON  ms.mc_id = if(mrp.mc_id = '', pd.mc_id, mrp.mc_id)
+								LEFT JOIN mesin ms ON  ms.mc_id = IFNULL(mrp.mc_id,pd.mc_id)
 								$where
 								ORDER BY ms.row_order asc, mrp.tanggal asc, cast(mid(pd.sales_order,3,(length(pd.sales_order))-2) as unsigned) asc 
 								")->result();
@@ -123,7 +123,7 @@ class M_produksiJacquard extends CI_Model
 										GROUP BY a.sales_order,a.kode_produk, e.row_order
 										) pd
 								LEFT JOIN mrp_production mrp ON CONCAT(pd.sales_order,'|',pd.kode_prod,'|',pd.row_order) = mrp.origin AND mrp.dept_id = 'JAC'
-								LEFT JOIN mesin ms ON  ms.mc_id = if(mrp.mc_id = '', pd.mc_id, mrp.mc_id)
+								LEFT JOIN mesin ms ON  ms.mc_id = IFNULL(mrp.mc_id,pd.mc_id)
 								$where ");
       	$result = $query->result_array();      
       	return $result[0]['allcount'];
