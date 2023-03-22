@@ -5,10 +5,10 @@
   <?php $this->load->view("admin/_partials/head.php") ?>
 
   <style>
-    button[id="btn-simpan"],button[id="btn-cancel"]{/*untuk hidden button simpan/cancel di top bar MO*/
+    button[id="btn-simpan"],button[id="btn-cancel"],button[id="btn-unhold"]{/*untuk hidden button simpan/cancel di top bar MO*/
       display: none;
     }
-    
+  
     .box-color {
        width: 100%;
       border: 1px solid;
@@ -53,6 +53,21 @@
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini">
+
+<style>
+    <?php 
+      if($list->status == 'hold'){
+    ?>
+      button[id="btn-edit"],button[id="btn-stok"],button[id="btn-hold"],button[id="btn-produksi"],button[id="btn-produksi-batch"],button[id="btn-consume"],button[id="btn-waste"]{
+        display: none;
+      }
+      button[id="btn-unhold"]{
+        display : inline
+      }
+    <?php 
+    }
+    ?>
+</style>
 <!-- Site wrapper -->
 <div class="wrapper">
 
@@ -367,10 +382,17 @@
                   <input type='text' class="form-control input-sm" name="lot_prefix" id="lot_prefix"  readonly="readonly"   value="<?php echo $lot_prefix;?>" />
                 </div>                                    
               </div>
-               <div class="col-md-12 col-xs-12">
+              <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4"><label>Lot Prefix Waste</label></div>
                 <div class="col-xs-8">
                   <input type='text' class="form-control input-sm" name="lot_prefix_waste" id="lot_prefix_waste"  readonly="readonly"   value="<?php echo $lot_prefix_waste;?>" />
+                </div>                                    
+              </div>
+
+              <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4"><label>Alasan</label></div>
+                <div class="col-xs-8">
+                  <input type='text' class="form-control input-sm" name="alasan" id="alasan"  readonly="readonly"   value="<?php echo $list->alasan;?>" />
                 </div>                                    
               </div>
 
@@ -1049,6 +1071,7 @@
 </div>
 <!--/. Site wrapper -->
 <?php $this->load->view("admin/_partials/js.php") ?>
+
 <!-- add js -->
 <script src="<?php echo base_url('dist/js/myscript.js') ?>"></script>
 
@@ -1124,7 +1147,6 @@
     
   });
 
-
   function readonly_textfield(){
     $('#btn-simpan').button('reset');
     $('#btn-simpan').hide();
@@ -1140,14 +1162,30 @@
     $("#type_production").attr("disabled", true);
     $("#lot_prefix").attr("readonly", true);
     $("#lot_prefix_waste").attr("readonly", true);
-    $("#btn-produksi").show();
-    $("#btn-stok").show();
-    $("#btn-hold").show();
-    $("#btn-done").show();
-    $("#btn-print").show();
-    $("#btn-produksi-batch").show();
-    $("#btn-waste").show();
-    $("#btn-consume").show();
+    var status = $('#status').val();
+   
+    if(status != "hold" ){
+      $("#btn-produksi").show();
+      $("#btn-stok").show();
+      $("#btn-hold").show();
+      $("#btn-done").show();
+      $("#btn-print").show();
+      $("#btn-produksi-batch").show();
+      $("#btn-waste").show();
+      $("#btn-consume").show();
+    }else{
+      $("#btn-unhold").show();
+      $("#btn-edit").hide();
+      $("#btn-produksi").hide();
+      $("#btn-stok").hide();
+      $("#btn-hold").hide();
+      $("#btn-done").show();
+      $("#btn-print").show();
+      $("#btn-produksi-batch").hide();
+      $("#btn-waste").hide();
+      $("#btn-consume").hide();
+    }
+    
     $('#mc').attr('disabled', true);
     $("#btn-cancel-edit").attr('id','btn-cancel');
     $("#lebar_jadi_mo").attr("readonly", true);
@@ -1242,6 +1280,8 @@
       var status = $('#status').val();
       if(status == 'done'){
          alert_modal_warning('Maaf, Anda tidak bisa tambah Quant, Proses Produksi telah Selesai ! ');
+      }else if(status == 'hold'){
+         alert_modal_warning('Maaf, Anda tidak bisa tambah Quant, Proses Produksi di Hold ! ');
       }else{
 
         $('#btn-tambah').button('reset');
@@ -1295,6 +1335,7 @@
     $("#target_efisiensi").attr("readonly", false);
     $("#qty1_std").attr("readonly", false);
     $("#qty2_std").attr("readonly", false);
+    $("#alasan").attr("readonly", false);
     // $("#lot_prefix_waste").attr("readonly", false);
 
     $('#type_production').attr('disabled', false).attr('id','type_production');
@@ -1504,27 +1545,169 @@
 
   $(document).on('click','#btn-hold',function(e){
 
+      var kode    = $("#kode").val();
+      var dept_id = "<?php echo $list->dept_id;?>";
+      var status  = $('#status').val();
+
+      if(status == 'done'){
+        alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+      }else if(status == 'cancel'){
+        alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+      }else{
+        bootbox.prompt({
+          message: "Apa anda yakin ingin menunda/Hold MO ini ?",
+          title: "<font color='red'><i class='fa fa-warning'></i></font> Hold !",
+          placeholder:" Alasan MO di Hold ",
+          buttons: {
+            confirm: {
+              label: 'Yes',
+              className: 'btn-primary btn-sm'
+            },
+            cancel: {
+              label: 'No',
+              className: 'btn-default btn-sm'
+            },
+          },
+          callback: function (result) {
+            if(result !== null){
+              // alert('Masuk = '+result)
+              $('#btn-hold').button('loading');
+              alasan = result;
+              $.ajax({
+                    type: "POST",
+                    url :'<?php echo base_url('manufacturing/mO/hold_mo')?>',
+                    dataType: 'JSON',
+                    data    : {kode:kode, deptid:dept_id, alasan:alasan},
+                    success: function(data){
+                      if(data.sesi=='habis'){
+                        //alert jika session habis
+                        alert_modal_warning(data.message);
+                        window.location.replace('../index');
+                        unblockUI( function(){});
+                        $('#btn-hold').button('reset');
+
+                      }else if(data.status == 'failed'){
+                        alert_modal_warning(data.message);
+                        unblockUI( function(){});
+                        $('#btn-hold').button('reset');
+                        refresh_mo();
+                      }else{
+                        // $("#tab_2").load(location.href + " #tab_2");
+                        // $("#status_bar").load(location.href + " #status_bar");
+                        // $("#foot").load(location.href + " #foot");
+                        $('#btn-hold').button('reset');
+                        unblockUI( function(){
+                          setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                        });
+                        refresh_mo();
+                        readonly_textfield();//refresh form/btn
+                        $("#mo").load(location.href + " #mo>*");
+                        $("#btn-edit").hide();
+                        $("#btn-stok").hide();
+                        $("#btn-produksi").hide();
+                        $("#btn-produksi-batch").hide();
+                        $("#btn-waste").hide();
+                        $("#btn-consume").hide();
+                        $("#btn-unhold").show();
+                        $("#btn-hold").hide();
+                      }
+
+                    },error: function (xhr, ajaxOptions, thrownError) {
+                      alert(xhr.responseText);
+                      unblockUI( function(){});
+                      $('#btn-hold').button('reset');
+                    }
+                });
+            
+            }else{
+              alert('ga jadi')
+            }
+          }
+        });
+      }
+
+  });
+
+  $(document).on('click','#btn-unhold',function(e){
+
+    var kode    = $("#kode").val();
+    var dept_id = "<?php echo $list->dept_id;?>";
+    var status  = $('#status').val();
+
+    if(status == 'done'){
+      alert_modal_warning('Maaf, Proses Produksi telah Selesai !');
+    }else if(status == 'cancel'){
+      alert_modal_warning('Maaf, Proses Produksi telah dibatalkan !');
+    }else{
       bootbox.confirm({
-				message: "Apa anda yakin ingin menunda/Hold MO ini ?",
-				title: "<i class='fa fa-warning'></i> Hold !",
-				buttons: {
-					confirm: {
-						label: 'Yes',
-						className: 'btn-primary btn-sm'
-					},
-					cancel: {
-						label: 'No',
-						className: 'btn-default btn-sm'
-					},
-				},
-				callback: function (result) {
-					if(result == true){
-					
-					}else{
-						
-					}
-				}
-			});
+        message: "Apa anda yakin ingin melanjutkan MO ini ?",
+        title: "<font color='red'><i class='fa fa-warning'></i></font> unHold !",
+        buttons: {
+          confirm: {
+            label: 'Yes',
+            className: 'btn-primary btn-sm'
+          },
+          cancel: {
+            label: 'No',
+            className: 'btn-default btn-sm'
+          },
+        },
+        callback: function (result) {
+          if(result !== null){
+            $('#btn-unhold').button('loading');
+            alasan = result;
+            $.ajax({
+                  type: "POST",
+                  url :'<?php echo base_url('manufacturing/mO/unhold_mo')?>',
+                  dataType: 'JSON',
+                  data    : {kode:kode, deptid:dept_id},
+                  success: function(data){
+                    if(data.sesi=='habis'){
+                      //alert jika session habis
+                      alert_modal_warning(data.message);
+                      window.location.replace('../index');
+                      unblockUI( function(){});
+                      $('#btn-unhold').button('reset');
+
+                    }else if(data.status == 'failed'){
+                      alert_modal_warning(data.message);
+                      unblockUI( function(){});
+                      $('#btn-unhold').button('reset');
+                      refresh_mo();
+                      readonly_textfield();//refresh form/btn
+                    }else{
+                      $('#btn-unhold').button('reset');
+                      $('#btn-unhold').hide();
+                      unblockUI( function(){
+                        setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){});}, 1000);
+                      });
+                      refresh_mo();
+                      readonly_textfield();//refresh form/btn   
+                      $("#mo").load(location.href + " #mo>*");
+                      $("#btn-edit").show();
+                      $("#btn-stok").show();
+                      $("#btn-produksi").show();
+                      $("#btn-produksi-batch").show();
+                      $("#btn-waste").show();
+                      $("#btn-consume").show();
+                      $("#btn-unhold").hide();
+                      $("#btn-hold").show();
+                      $("#btn-done").show();
+                      $("#btn-print").show();
+   
+                    }
+
+                  },error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.responseText);
+                    unblockUI( function(){});
+                    $('#btn-unhold').button('reset');
+                  }
+              });
+          
+          }
+        }
+      });
+    }
 
   });
 
@@ -1944,6 +2127,7 @@
                 gramasi     : $('#gramasi').val(),
                 program     : $('#program').val(),
                 origin      : $('#origin').val(),
+                alasan      : $('#alasan').val(),
 
           },success: function(data){
             if(data.sesi == "habis"){

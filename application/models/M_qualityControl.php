@@ -18,8 +18,8 @@ class M_qualityControl extends CI_Model
 
 	public function get_list_produk_by_tgl($mc_id, $id_dept, $tglDari, $tglSampai, $jmlHari)
 	{	
-		$tgldari = date('Y-m-d 07:00:00', strtotime($tglDari));
-		$tglsampai = date('Y-m-d 06:59:59', strtotime('+1 days', strtotime($tglSampai)));
+		$tgldari = date('Y-m-d 00:00:00', strtotime($tglDari));
+		$tglsampai = date('Y-m-d 23:59:59', strtotime($tglSampai));
 
 		$query = $this->db->query("SELECT  mp.kode_produk, mp.nama_produk, mp.mc_id, ms.nama_mesin, IFNULL(sum(mpfg.qty),0) as tot_mtr, IFNULL(sum(mpfg.qty2),0) as tot_kg, IFNULL(count(mpfg.lot),0) as tot_gl
 									,(SELECT sum(sq.target_efisiensi) FROM mrp_production sq WHERE sq.mc_id = mp.mc_id AND sq.kode IN (SELECT kode FROM mrp_production_fg_hasil sq3 WHERE sq3.create_date >= '$tgldari' AND sq3.create_date <= '$tglsampai'  AND sq3.kode_produk = mp.kode_produk  ) AND sq.kode_produk = mp.kode_produk ) as target_ef,
@@ -65,8 +65,8 @@ class M_qualityControl extends CI_Model
 
 	public function get_ef_hari_by_produk($mc_id, $id_dept, $tgldari, $kode_produk)
 	{	
-		$tgldari = date('Y-m-d 07:00:00', strtotime($tgldari));
-		$tglsampai = date('Y-m-d 06:59:59', strtotime('+1 days', strtotime($tgldari)));
+		$tgldari = date('Y-m-d 00:00:00', strtotime($tgldari));
+		$tglsampai = date('Y-m-d 23:59:59', strtotime($tgldari));
 
 		$query = $this->db->query("SELECT  mp.mc_id, mp.kode_produk, mp.target_efisiensi, sum(mpfg.qty) as tot_mtr,
 										 (SELECT IFNULL(sum(adji.qty_move),0) FROM adjustment_items adji

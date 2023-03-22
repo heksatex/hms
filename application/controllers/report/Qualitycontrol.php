@@ -42,8 +42,9 @@ class Qualitycontrol extends MY_Controller
 		$dataHari  = [];
 		$dataEfHari  = [];
 		$jmlhari    = 0;
-		$tglawal    = date('Y-m-d 07:00:00', strtotime($tgldari));
-		$tglakhir    = date('Y-m-d 07:00:00', strtotime('+1 days', strtotime($tglsampai)));
+		$tglawal    = date('Y-m-d 00:00:00', strtotime($tgldari));
+		// $tglakhir    = date('Y-m-d 07:00:00', strtotime('+1 days', strtotime($tglsampai)));
+		$tglakhir    = date('Y-m-d 23:59:59', strtotime($tglsampai));
 
 		$tgl1       = new DateTime($tglawal);
 		$tgl2       = new DateTime($tglakhir);
@@ -127,6 +128,10 @@ class Qualitycontrol extends MY_Controller
 				$dataEfHari = [];
 			}
 
+			if(empty($dataHari)){
+				$dataHari[] = array('tgl' => $tgldari);
+			}
+
 			$dataMesin[] = array(
 				'nama_mesin' => $rmc->nama_mesin,
 				'mrp' => $mrpRecord,
@@ -141,7 +146,7 @@ class Qualitycontrol extends MY_Controller
 			$mrpRecord = [];
 		}
 
-		$callback = array('sucess' => 'Yes', 'record' => $dataMesin, 'jmlHari' => $jmlhari, 'dataHari' => $dataHari);
+		$callback = array('sucess' => 'Yes', 'record' => $dataMesin, 'jmlHari' => $jmlhari+1, 'dataHari' => $dataHari);
 
 		echo json_encode($callback);
 	}
@@ -162,14 +167,16 @@ class Qualitycontrol extends MY_Controller
 	function export_excel()
 	{
 
-		$this->load->library('excel');
 		$tgldari   = date('Y-m-d', strtotime($this->input->post('tgldari')));
 		$tglsampai = date('Y-m-d', strtotime($this->input->post('tglsampai')));
-		$id_dept   = $this->input->post('departemen');
+		$id_dept   = $this->input->post('id_dept');
 		$dept      = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
 
-		$object = new PHPExcel();
-		$object->setActiveSheetIndex(0);
+		$this->load->library('excel');
+        ob_start();
+        
+        $object = new PHPExcel();
+        $object->setActiveSheetIndex(0);
 
 		// SET JUDUL
 		$object->getActiveSheet()->SetCellValue('A1', 'Laporan Quality Control [QC]');
@@ -275,8 +282,9 @@ class Qualitycontrol extends MY_Controller
 		$object->getActiveSheet()->getStyle('D5:J' . $object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
 
 
-		$tglawal   = date('Y-m-d 07:00:00', strtotime($tgldari));
-		$tglakhir  = date('Y-m-d 07:00:00', strtotime('+1 days', strtotime($tglsampai)));
+		$tglawal   = date('Y-m-d 00:00:00', strtotime($tgldari));
+		$tglakhir  = date('Y-m-d 23:59:59',  strtotime($tglsampai));
+		// $tglakhir  = date('Y-m-d 07:00:00', strtotime('+1 days', strtotime($tglsampai)));
 		$tgl1       = new DateTime($tglawal);
 		$tgl2       = new DateTime($tglakhir);
 		$diff_hari  = date_diff($tgl1, $tgl2);
@@ -304,7 +312,7 @@ class Qualitycontrol extends MY_Controller
 		}
 
 		/// buat border untuk header ef/tanggal(%)
-		$hari   = $jmlhari;
+		$hari   = $jmlhari+1;
 		foreach ($index_header2 as $val) {
 			// set border
 			$object->getActiveSheet()->getStyle($val . '5')->applyFromArray($styleArray);
@@ -425,19 +433,27 @@ class Qualitycontrol extends MY_Controller
 			$hari            = $jmlhari;
 			foreach ($index_header2 as $val2) {
 				$object->getActiveSheet()->getStyle($val2 . '' . $rowCount2)->applyFromArray($styleArray);
-				$hari--;
 				if ($hari == 0) {
 					break;
 				}
+				$hari--;
 			}
 
 			$rowCount2++;
 		}
 
-		$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');
-		header('Content-Type: application/vnd.ms-excel'); //mime type
-		header('Content-Disposition: attachment;filename=Laporan QC ' . $dept['nama'] . ' .xls '); //tell browser what's the file name
-		header('Cache-Control: max-age=0'); //no cache
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 		$object->save('php://output');
+
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+
+		$response =  array(
+				'op'        => 'ok',
+				'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+				'filename'  => 'Laporan QC ' . $dept['nama'] . ' .xlsx'
+		);
+
+		die(json_encode($response));
 	}
 }
