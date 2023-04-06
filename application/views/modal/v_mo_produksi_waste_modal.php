@@ -1638,7 +1638,7 @@
 					if(waste_rm_lot_valid == false){
 						alert_bootbox("Produk atau Lot  Konsumsi Bahan Baku tidak ada  ! ")
 					}
-					alert(rm_rows)
+					// alert(rm_rows)
 				}
 
 			}
