@@ -6,29 +6,29 @@
 class M_produksiJacquard extends CI_Model
 {	
 
-	// public function get_list_produksi_jacquard_by_kode($where,$id_dept)
-	// {
-	// 	return $this->db->query("SELECT mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.start_time, mp.finish_time, mp.qty as meter, mp.reff_note, mp.status, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi,
-	// 									(SELECT IFNULL(sum(mpfg.qty),0) as total_qty1
-	// 											 FROM mrp_production_fg_hasil mpfg
-	// 											 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept')) as hph_qty1,
+	public function get_list_produksi_jacquard_by_kode_2($where,$id_dept)
+	{
+		return $this->db->query("SELECT mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.start_time, mp.finish_time, mp.qty as meter, mp.reff_note, mp.status, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi,
+										(SELECT IFNULL(sum(mpfg.qty),0) as total_qty1
+												 FROM mrp_production_fg_hasil mpfg
+												 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept')) as hph_qty1,
 												 
-	// 									(SELECT IFNULL(sum(mpfg.qty2),0) as total_qty2
-	// 											 FROM mrp_production_fg_hasil mpfg
-	// 											 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept')) as hph_qty2,
- 	//    								    (SELECT count(mpfg.lot) as jml_lot 
-	// 												FROM mrp_production_fg_hasil mpfg													
-	// 												WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept') ) as gulung,
+										(SELECT IFNULL(sum(mpfg.qty2),0) as total_qty2
+												 FROM mrp_production_fg_hasil mpfg
+												 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept')) as hph_qty2,
+ 	   								    (SELECT count(mpfg.lot) as jml_lot 
+													FROM mrp_production_fg_hasil mpfg													
+													WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept') ) as gulung,
 													
-	// 									(SELECT IFNULL(mp.qty - IFNULL(sum(mpfg.qty),0),0) 
-	// 											 FROM mrp_production_fg_hasil mpfg
-	// 											 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept')) as sisa_target,
+										(SELECT IFNULL(mp.qty - IFNULL(sum(mpfg.qty),0),0) 
+												 FROM mrp_production_fg_hasil mpfg
+												 WHERE mpfg.kode = mp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = '$id_dept')) as sisa_target,
 										 
-	// 											ms.nama_mesin
-	// 							FROM mrp_production mp
-	// 							LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
-	// 							$where ORDER BY mp.tanggal asc ")->result();
-	// }
+												ms.nama_mesin
+								FROM mrp_production mp
+								LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
+								$where ORDER BY mp.tanggal asc ")->result();
+	}
 
 	public function get_list_produksi_jacquard_by_kode($where,$id_dept,$rowno,$recordPerPage)
 	{
@@ -129,15 +129,28 @@ class M_produksiJacquard extends CI_Model
       	return $result[0]['allcount'];
 	}
 
-    // public function get_marketing_by_kode($sc)
-	// {
-	// 	$query =  $this->db->query("SELECT mst.nama_sales_group as sales_group 
-	// 								FROM sales_contract sc 
-	// 								INNER JOIN mst_sales_group mst ON sc.sales_group =mst.kode_sales_group
-	// 								Where sc.sales_order = '$sc'");
-	// 	$result = $query->result_array();
-	// 	return $result[0]['sales_group'];
-	// }
+	public function get_record_count_jacquard_2($where)
+	{
+		$query  = $this->db->query("SELECT count(*) as allcount 	
+
+								FROM mrp_production mp
+								LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
+							
+								$where ");
+      	$result = $query->result_array();      
+      	return $result[0]['allcount'];
+	}
+	
+
+    public function get_marketing_by_kode($sc)
+	{
+		$query =  $this->db->query("SELECT mst.nama_sales_group as sales_group 
+									FROM sales_contract sc 
+									INNER JOIN mst_sales_group mst ON sc.sales_group =mst.kode_sales_group
+									Where sc.sales_order = '$sc'");
+		$result = $query->result_array();
+		return $result[0]['sales_group'];
+	}
 
 	public function get_list_bahan_baku_by_kode($kode)
 	{

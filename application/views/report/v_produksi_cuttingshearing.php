@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -14,6 +15,10 @@
       display: block;
       height: calc( 100vh - 250px );
       overflow-x: auto;
+    }
+    
+    .ws{
+      white-space: nowrap;
     }
 
   </style>
@@ -86,8 +91,8 @@
                             <div class="col-12 col-sm-8 col-md-8">
                               <form id="frm_excel" action="<?=base_url()?>report/produksicuttingshearing/export_excel" method="POST">
                                 <input type="hidden" name="query" id="query">
-                                <button type="submit" class="btn btn-default btn-sm" id="btn-excel" name="btn-excel">
-                                  <i class="fa fa-file-excel-o"></i>  Excel
+                                <button type="submit" class="btn btn-default btn-sm" id="btn-excel" name="btn-excel"data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                  <i class="fa fa-file-excel-o"  style="color:green"></i>  Excel
                                 </button>
                               </form>
                             </div>
@@ -99,11 +104,11 @@
                           <div class="table-responsive over">
                             <table id="filterAdvanced" class="table over">
                               <thead>
-                                <th width="150px">element</th>
-                                <th width="100px">condition</th>
-                                <th width="200px">value</th>
-                                <th width="10px"></th>
-                                <th>delete</th>
+                                <th class="bb" width="150px">element</th>
+                                <th class="bb"width="100px">condition</th>
+                                <th class="bb"width="200px">value</th>
+                                <th class="bb"width="10px"></th>
+                                <th class="bb">delete</th>
                               </thead>
                               <tbody>
                                   <td>
@@ -141,36 +146,34 @@
             
             <!-- table -->
             <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
-                  <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
+              <div class="col-xs-12 table-responsive example1 divListviewHead">
+                  <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                      <table id="example1" class="table table-condesed table-hover" border="0">
                           <thead>
                             <tr>
-                              <th  class="style no" >No. </th>
-                              <th  class='style'>MO</th>
-                              <th  class='style' style="min-width: 80px">Tgl.MO</th>
-                              <th  class='style' style="min-width: 50">MC</th>
-                              <th  class='style'>SC</th>
-                              <th  class='style'>PD</th>
-                              <th  class='style'>Marketing</th>
-                              <th  class='style' style="min-width: 150px">Corak</th>
-                              <th  class='style'>L.Greige</th>
-                              <th  class='style'>L.Jadi</th>
-                              <th  class='style' style="min-width: 80px">Start Produksi</th>
-                              <th  class='style' style="min-width: 80px">Finish Produksi</th>
-                              <th  class='style'>Meter</th>
-                              <th  class='style'>Gulung</th>
-                              <th  class='style'>Mtr/Gl</th>
-                              <th  class='style'>Pcs</th>
-                              <th  class='style' style="min-width: 150px">Bahan Baku</th>
-                              <th  class='style'>Target Qty</th>
-                              <th  class='style'>HPH/Qty1</th>
-                              <th  class='style'>HPH/Qty2</th>
-                              <th  class='style'>Gulung</th>
-                              <th  class='style'>Sisa/Qty</th>
-                              <th  class='style'>Status</th>
+                              <th  class="style bb ws no" >No. </th>
+                              <th  class='style bb ws'>MO</th>
+                              <th  class='style bb ws' style="min-width: 80px">Tgl.MO</th>
+                              <th  class='style bb ws' style="min-width: 50">MC</th>
+                              <th  class='style bb ws'>SC</th>
+                              <th  class='style bb ws'>PD</th>
+                              <th  class='style bb ws'>Marketing</th>
+                              <th  class='style bb ws' style="min-width: 150px">Corak</th>
+                              <th  class='style bb ws'>L.Greige</th>
+                              <th  class='style bb ws'>L.Jadi</th>
+                              <th  class='style bb ws' style="min-width: 80px">Start Produksi</th>
+                              <th  class='style bb ws' style="min-width: 80px">Finish Produksi</th>
+                              <th  class='style bb ws'>Meter</th>
+                              <th  class='style bb ws'>Gulung</th>
+                              <th  class='style bb ws'>Mtr/Gl</th>
+                              <th  class='style bb ws'>Pcs</th>
+                              <th  class='style bb ws' style="min-width: 150px">Bahan Baku</th>
+                              <th  class='style bb ws'>Target Qty</th>
+                              <th  class='style bb ws'>HPH/Qty1</th>
+                              <th  class='style bb ws'>HPH/Qty2</th>
+                              <th  class='style bb ws'>Gulung</th>
+                              <th  class='style bb ws'>Sisa/Qty</th>
+                              <th  class='style bb ws'>Status</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -179,17 +182,13 @@
                             </tr>
                           </tbody>
                       </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
+                      <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                         Processing...
                       </div>
                   </div>
                 </div>
-
               </div>
             </div>
-            </div>
-
-
 
         </div>
         <!-- /.box-body -->
