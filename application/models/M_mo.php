@@ -1223,7 +1223,7 @@ class M_mo extends CI_Model
 		$this->db->select('move_id, method');
 		$this->db->from('stock_move');
 		$this->db->where('origin', $origin);
-		$this->db->where('source_move',$move_id);
+		$this->db->like('source_move',$move_id);
 		$this->db->where('status', 'ready');
 		$this->db->order_by('cast(mid(move_id,3,(length(move_id))-2) as unsigned) asc' );
 		$query = $this->db->get();

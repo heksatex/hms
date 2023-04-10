@@ -330,9 +330,9 @@ class Produksijacquard extends MY_Controller
 
         if(!empty($where)){
 	        // $where ="where mrp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done')  AND".$where;
-	        $where ="WHERE pd.nama_produk LIKE '%Inspecting%'  AND ".$where;
+	        $where ="WHERE sc.nama_produk LIKE '%Inspecting%'  AND ".$where;
         }else{
-	        $where ="WHERE pd.nama_produk LIKE '%Inspecting%'  ";
+	        $where ="WHERE sc.nama_produk LIKE '%Inspecting%'  ";
         }
 
         $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode($where,$id_dept,$record,$recordPerPage);
@@ -357,7 +357,7 @@ class Produksijacquard extends MY_Controller
             }else{
                 $finish_time  = "";
             }
-        	$target_mo   = $row->target_mo;
+        	$target_pd   = $row->target_pd;
 			$buyer_code  = $row->buyer_code;
         	$hph_qty1    = $row->hph_qty1;
 			$hph_qty2    = $row->hph_qty2;
@@ -500,7 +500,7 @@ class Produksijacquard extends MY_Controller
 		        	$start_time  = '';
 		        	$buyer_code  = '';
 		        	$finish_time = '';
-		        	$target_mo   = '';
+		        	$target_pd   = '';
 		        	$hph_qty1    = '';
 					$hph_qty2    = '';
 		        	$gulung      = '';
@@ -536,8 +536,8 @@ class Produksijacquard extends MY_Controller
 	        		$ke++;
 	        	}
 
-                if($target_mo!= ''){
-                    $target_mo = number_format($target_mo,2);
+                if($target_pd!= ''){
+                    $target_pd = number_format($target_pd,2);
                 }
                 if($hph_qty1 != ''){
                     $hph_qty1 = number_format($hph_qty1,2);
@@ -567,7 +567,7 @@ class Produksijacquard extends MY_Controller
 	        						  'lbr_jadi'       => $lbr_jadi,
 	        						  'start_produksi' => $start_time,
 	        						  'finish_produksi'=> $finish_time,
-	        						  'target_mo'      => $target_mo,
+	        						  'target_pd'      => $target_pd,
 	        						  'gulung'         => $gl,
 	        						  'mtr_gl'         => $mtr_gl,
 	        						  'pcs'            => $pcs,
@@ -604,7 +604,7 @@ class Produksijacquard extends MY_Controller
                                     'lbr_jadi'       => $lbr_jadi,
                                     'start_produksi' => $start_time,
                                     'finish_produksi'=> $finish_time,
-                                    'target_mo'      => $target_mo,
+                                    'target_pd'      => $target_pd,
                                     'gulung'         => $gl,
                                     'mtr_gl'         => $mtr_gl,
                                     'pcs'            => $pcs,
@@ -667,16 +667,19 @@ class Produksijacquard extends MY_Controller
     function declaration_name_field($nama_field)
     {
     	
-    	if($nama_field == 'kode' OR $nama_field == 'tanggal' OR $nama_field == 'status' ){
+        if($nama_field == 'kode' OR $nama_field == 'tanggal' OR $nama_field == 'status' ){
     		$where = 'mrp.'.$nama_field;
-    	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order' OR $nama_field == 'kode_prod' OR $nama_field == 'nama_sales_group'){
-    		$where = 'pd.'.$nama_field;
-    	}else if($nama_field =='nama_mesin'){
+    	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order'){
+            $where = 'sc.'.$nama_field;
+    	}else if($nama_field =='kode_prod'){
+            $where = 'po.'.$nama_field;
+        }else if($nama_field == 'nama_sales_group'){
+            $where = 'sg.'.$nama_field;
+        }else if($nama_field =='nama_mesin'){
     		$where = 'ms.'.$nama_field;
     	}else{
     		$where='';
     	}
-
         return $where;
     }
 
@@ -884,7 +887,7 @@ class Produksijacquard extends MY_Controller
             }else{
                 $finish_time  = "";
             }
-        	$target_mo   = $row->target_mo;
+        	$target_pd   = $row->target_pd;
 			$buyer_code  = $row->buyer_code;
         	$hph_qty1    = $row->hph_qty1;
 			$hph_qty2    = $row->hph_qty2;
@@ -1012,7 +1015,7 @@ class Produksijacquard extends MY_Controller
                     $nama_produk = '';
                     $start_time  = '';
                     $finish_time = '';
-                    $target_mo   = '';
+                    $target_pd   = '';
                     $buyer_code   = '';
                     $hph_qty1    = '';
                     $hph_qty2    = '';
@@ -1067,7 +1070,7 @@ class Produksijacquard extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_jadi);
                 $object->getActiveSheet()->SetCellValue('L'.$rowCount, $start_time);
                 $object->getActiveSheet()->SetCellValue('M'.$rowCount, $finish_time);
-                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_mo);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_pd);
                 $object->getActiveSheet()->SetCellValue('O'.$rowCount, $gl);
                 $object->getActiveSheet()->SetCellValue('P'.$rowCount, $mtr_gl);
                 $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $pcs);
@@ -1159,7 +1162,7 @@ class Produksijacquard extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('K'.$rowCount, $lbr_jadi);
                 $object->getActiveSheet()->SetCellValue('L'.$rowCount, $start_time);
                 $object->getActiveSheet()->SetCellValue('M'.$rowCount, $finish_time);
-                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_mo);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $target_pd);
                 $object->getActiveSheet()->SetCellValue('O'.$rowCount, $gl);
                 $object->getActiveSheet()->SetCellValue('P'.$rowCount, $mtr_gl);
                 $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $pcs);

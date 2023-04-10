@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -14,6 +15,10 @@
       display: block;
       height: calc( 100vh - 250px );
       overflow-x: auto;
+    }
+    
+    .ws{
+      white-space: nowrap;
     }
 
   </style>
@@ -113,7 +118,7 @@
               </div>
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
               <br>
               <div class="col-md-12">
@@ -220,34 +225,32 @@
 
             <!-- table -->
             <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
-                  <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
+                <div class="col-xs-12 table-responsive example1 divListviewHead">
+                  <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                      <table id="example1" class="table table-condesed table-hover" border="0">
                           <thead>
                             <tr>
-                              <th  class="style no" >No. </th>
-                              <th  class='style'>MO</th>
-                              <th  class='style' style="min-width: 130px">No Mesin</th>
-                              <th  class='style'>SC</th>
-                              <th  class='style' style="min-width: 80px">Tgl HPH</th>
-                              <th  class='style'>Kode Produk</th>
-                              <th  class='style' style="min-width: 150px">Nama Produk</th>
-                              <th  class='style' style="min-width: 150px">Lot</th>
-                              <th  class='style'>Qty1</th>
-                              <th  class='style'>Uom1</th>
-                              <th  class='style'>Qty2</th>
-                              <th  class='style'>Uom2</th>
-                              <th  class='style'>Grade</th>
-                              <th  class='style'>L.Greige</th>
-                              <th  class='style'>L.Jadi</th>
-                              <th  class='style'>RPM</th>
-                              <th  class='style'>Stitch</th>
-                              <th  class='style'>Marketing</th>
-                              <th  class='style'>Reff Note </th>
-                              <th  class='style'>Lokasi </th>
-                              <th  class='style' style="min-width: 80px" >Nama User</th>
+                              <th  class="style bb ws no" >No. </th>
+                              <th  class='style bb ws'>MO</th>
+                              <th  class='style bb ws' style="min-width: 130px">No Mesin</th>
+                              <th  class='style bb ws'>SC</th>
+                              <th  class='style bb ws' style="min-width: 80px">Tgl HPH</th>
+                              <th  class='style bb ws'>Kode Produk</th>
+                              <th  class='style bb ws' style="min-width: 150px">Nama Produk</th>
+                              <th  class='style bb ws' style="min-width: 150px">Lot</th>
+                              <th  class='style bb ws'>Qty1</th>
+                              <th  class='style bb ws'>Uom1</th>
+                              <th  class='style bb ws'>Qty2</th>
+                              <th  class='style bb ws'>Uom2</th>
+                              <th  class='style bb ws'>Grade</th>
+                              <th  class='style bb ws'>L.Greige</th>
+                              <th  class='style bb ws'>L.Jadi</th>
+                              <th  class='style bb ws'>RPM</th>
+                              <th  class='style bb ws'>Stitch</th>
+                              <th  class='style bb ws'>Marketing</th>
+                              <th  class='style bb ws'>Reff Note </th>
+                              <th  class='style bb ws'>Lokasi </th>
+                              <th  class='style bb ws' style="min-width: 80px" >Nama User</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -256,14 +259,11 @@
                             </tr>
                           </tbody>
                       </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
+                      <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                         Processing...
                       </div>
                   </div>
                 </div>
-
-              </div>
-            </div>
             </div>
 
 

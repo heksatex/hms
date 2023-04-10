@@ -311,7 +311,7 @@ class Produksicuttingshearing extends MY_Controller
 	        $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done') ";
         }
 
-        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode($where,$id_dept);
+        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode_2($where,$id_dept);
  
         foreach ($items as $row) {
 
@@ -482,7 +482,7 @@ class Produksicuttingshearing extends MY_Controller
 	        	}
 
 	        	// explode reff
-	        	$exp = explode('|', $val->reff);
+	        	$exp = explode('|', $val->reff_note);
 	        	$ke  = 0;
 	        	foreach ($exp as $exps) {
 	        		if($ke == 0){ // GB
@@ -545,7 +545,7 @@ class Produksicuttingshearing extends MY_Controller
 
         }
 
-        $allcount           = $this->m_produksiJacquard->get_record_count_jacquard($where);
+        $allcount           = $this->m_produksiJacquard->get_record_count_jacquard_2($where);
         $total_record       = 'Total Data : '. number_format($allcount);
 
         $callback  = array('record' => $dataRecord, 'total_record'=>$total_record, 'dataArr' => $dataArr, 'query' => $where);
@@ -714,7 +714,7 @@ class Produksicuttingshearing extends MY_Controller
 
         // >> BODY
 
-        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode($where,$id_dept);
+        $items = $this->m_produksiJacquard->get_list_produksi_jacquard_by_kode_2($where,$id_dept);
         $no    = 1;
         $rowCount = 5;
         $sales_contract = '';
@@ -903,7 +903,7 @@ class Produksicuttingshearing extends MY_Controller
                 }
 
                 // explode reff
-                $exp = explode('|', $val->reff);
+                $exp = explode('|', $val->reff_note);
                 $ke  = 0;
                 foreach ($exp as $exps) {
                     if($ke == 0){ // GB
