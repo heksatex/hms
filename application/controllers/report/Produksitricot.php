@@ -331,9 +331,9 @@ class Produksitricot extends MY_Controller
 
         if(!empty($where)){
 	        // $where ="where mp.dept_id ='".$id_dept."' AND mp.status NOT IN ('cancel', 'done')  AND".$where;
-	        $where ="WHERE pd.nama_produk LIKE '%Tricot%' AND ".$where;
+	        $where ="WHERE sc.nama_produk LIKE '%Tricot%' AND ".$where;
         }else{
-	        $where ="WHERE pd.nama_produk LIKE '%Tricot%'  ";
+	        $where ="WHERE sc.nama_produk LIKE '%Tricot%'  ";
         }
 
         $items = $this->m_produksiTricot->get_list_produksi_tricot_by_kode($where,$record,$recordPerPage);
@@ -358,7 +358,7 @@ class Produksitricot extends MY_Controller
             }else{
                 $finish_time  = "";
             }
-        	$target_mo   = $row->target_mo;
+        	$target_pd   = $row->target_pd;
         	$hph_qty1    = $row->hph_qty1;
 			$hph_qty2    = $row->hph_qty2;
         	$gulung      = $row->gulung;
@@ -522,7 +522,7 @@ class Produksitricot extends MY_Controller
 		        	$nama_produk = '';
 		        	$start_time  = '';
 		        	$finish_time = '';
-		        	$target_mo   = '';
+		        	$target_pd   = '';
 		        	$hph_qty1    = '';
 					$hph_qty2    = '';
 		        	$gulung      = '';
@@ -560,8 +560,8 @@ class Produksitricot extends MY_Controller
 	        	}
 
         		$boM++;
-                if($target_mo!= ''){
-                    $target_mo = number_format($target_mo,2);
+                if($target_pd!= ''){
+                    $target_pd = number_format($target_pd,2);
                 }
 
                 if($hph_qty1 != ''){
@@ -586,7 +586,7 @@ class Produksitricot extends MY_Controller
                                       'lbr_jadi'       => $lbr_jadi,
                                       'start_produksi' => $start_time,
                                       'finish_produksi'=> $finish_time,
-                                      'target_mo'      => $target_mo,
+                                      'target_pd'      => $target_pd,
                                       'gulung'         => $gl,
                                       'mtr_gl'	       => $mtr_gl,
                                       'pcs'            => $pcs,
@@ -623,7 +623,7 @@ class Produksitricot extends MY_Controller
                                     'lbr_jadi'       => $lbr_jadi,
                                     'start_produksi' => $start_time,
                                     'finish_produksi'=> $finish_time,
-                                    'target_mo'      => $target_mo,
+                                    'target_pd'      => $target_pd,
                                     'gulung'         => $gl,
                                     'mtr_gl'	     => $mtr_gl,
                                     'pcs'            => $pcs,
@@ -691,9 +691,13 @@ class Produksitricot extends MY_Controller
     	
     	if($nama_field == 'kode' OR $nama_field == 'tanggal' OR $nama_field == 'status' ){
     		$where = 'mrp.'.$nama_field;
-    	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order' OR $nama_field == 'kode_prod' OR $nama_field == 'nama_sales_group'){
-    		$where = 'pd.'.$nama_field;
-    	}else if($nama_field =='nama_mesin'){
+    	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order'){
+            $where = 'sc.'.$nama_field;
+    	}else if($nama_field =='kode_prod'){
+            $where = 'po.'.$nama_field;
+        }else if($nama_field == 'nama_sales_group'){
+            $where = 'sg.'.$nama_field;
+        }else if($nama_field =='nama_mesin'){
     		$where = 'ms.'.$nama_field;
     	}else{
     		$where='';
@@ -908,7 +912,7 @@ class Produksitricot extends MY_Controller
             }else{
                 $finish_time  = "";
             }
-        	$target_mo   = $row->target_mo;
+        	$target_pd   = $row->target_pd;
         	$hph_qty1    = $row->hph_qty1;
 			$hph_qty2    = $row->hph_qty2;
         	$gulung      = $row->gulung;
@@ -1055,7 +1059,7 @@ class Produksitricot extends MY_Controller
                     $nama_produk = '';
                     $start_time  = '';
                     $finish_time = '';
-                    $target_mo   = '';
+                    $target_pd   = '';
                     $hph_qty1    = '';
                     $hph_qty2    = '';
                     $gulung      = '';
@@ -1105,7 +1109,7 @@ class Produksitricot extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('J'.$rowCount, $lbr_jadi);
                 $object->getActiveSheet()->SetCellValue('K'.$rowCount, $start_time);
                 $object->getActiveSheet()->SetCellValue('L'.$rowCount, $finish_time);
-                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $target_mo);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $target_pd);
                 $object->getActiveSheet()->SetCellValue('N'.$rowCount, $gl);
                 $object->getActiveSheet()->SetCellValue('O'.$rowCount, $mtr_gl);
                 $object->getActiveSheet()->SetCellValue('P'.$rowCount, $pcs);
@@ -1197,7 +1201,7 @@ class Produksitricot extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('J'.$rowCount, $lbr_jadi);
                 $object->getActiveSheet()->SetCellValue('K'.$rowCount, $start_time);
                 $object->getActiveSheet()->SetCellValue('L'.$rowCount, $finish_time);
-                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $target_mo);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $target_pd);
                 $object->getActiveSheet()->SetCellValue('N'.$rowCount, $gl);
                 $object->getActiveSheet()->SetCellValue('O'.$rowCount, $mtr_gl);
                 $object->getActiveSheet()->SetCellValue('P'.$rowCount, $pcs);
