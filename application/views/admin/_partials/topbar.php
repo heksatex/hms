@@ -51,6 +51,9 @@
         {
             $level_akses         = $this->_module->get_level_akses_by_user($username)->row_array();
             $data['level']       = $level_akses['level'];
+
+            // cek departemen by user
+            $cek_dept = $this->_module->cek_departemen_by_user($username)->row_array();
            
 
             $row      = $this->m_button->form_button($username, $this->uri->segment(2),$deptid);
@@ -60,7 +63,7 @@
               $akses_menu = true;
 
               if($val->jenis_button == 'hold' or $val->jenis_button == 'unhold'){
-                if($data['level'] == "Super Administrator" OR $data['level']  == "Administrator" OR $data['level']  == 'PPIC'){
+                if($data['level'] == "Super Administrator" OR $data['level']  == "Administrator" OR $cek_dept['dept'] == 'PPIC'){
                   ?>
                   <button type="button" id="<?php echo $val->id_button; ?>" class="<?php echo $val->class_button; ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."><i class="<?php echo $val->ikon; ?>"></i> <?php echo $val->caption; ?></button>
                   <?php

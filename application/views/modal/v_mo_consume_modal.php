@@ -216,13 +216,16 @@
     <div class="col-md-6 col-xs-12">
         <label style="font-size: 15px; color: #5F9EA0">Konsumsi Bahan</label>
     </div>		
-    <div class="col-md-6 col-xs-12">	
+    <?php if($cek_dept == 'PPIC' or $level == 'Super Administrator' or $level == 'Administrator'){
+    ?>	
+    <div class="col-md-6 col-xs-12">
         <div class="form-group">
 			<div class="pull-right text-right">
 			    <button type="button" id="btn-habis" class="btn btn-danger btn-sm"  onclick="habiskan_consume()" <?php if(count($konsumsi)== 0 )echo "disabled"?>>Habiskan Konsumsi Bahan </button>
 		    </div>					  
 	    </div>
     </div>
+    <?php } ?>
     
 	<div class="row">
 		<div class="col-md-12">		
@@ -249,6 +252,11 @@
 					$row_materials = false;
 					$total_qty1 = 0;
 					$total_qty2 = 0;
+                    if($cek_dept == 'PPIC' or $level == 'Super Administrator' or $level == 'Administrator'){
+                        $readonly   = '';
+                    }else{
+                        $readonly = "readonly";
+                    }
 		 	    	foreach ($konsumsi as $row) {
 						$row_materials = true;
 		 	    	?>
@@ -261,7 +269,7 @@
 						<td align="right"><?php echo number_format($row->qty,2)?></td>
 						<td><?php echo $row->uom;?></td>
 						<td>
-							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)">
+							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)" <?php echo $readonly?> >
 							<input type="hidden" name="jml_produk"  id="jml_produk" class="form-control input-sm jml_produk" value="<?php echo $row->jml_produk ?>">
 							<input type="hidden" name="qty_rm"  id="qty_rm" class="form-control input-sm qty_rm" value="<?php echo $row->qty_rm ?>">
 							<input type="hidden" name="quant_id"  id="quant_id" class="form-control input-sm quant_id" value="<?php echo $row->quant_id ?>">
@@ -287,7 +295,7 @@
 						</td>
 						<td align="right"><?php echo $row->qty2?></td>
 						<td><?php echo $row->uom2;?></td>
-						<td><input type="text" name="qty2_konsum"  id="qty2_konsum" class="form-control input-sm qty2_konsum" data-index="<?php echo $i;?>"></td>						
+						<td><input type="text" name="qty2_konsum"  id="qty2_konsum" class="form-control input-sm qty2_konsum" data-index="<?php echo $i;?>" <?php echo $readonly?> ></td>						
 					</tr>
 					<?php
 					 $i++; 
