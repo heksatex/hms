@@ -523,6 +523,12 @@ class M_sales extends CI_Model
 		return $query['tot_qty'];
 	}
 
+	public function cek_qty_color_lines_by_produk_2($sales_order,$kode_produk,$row_order)
+	{
+		$query =  $this->db->query("SELECT sum(qty) as tot_qty  FROM sales_color_line WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order = '$row_order' AND status  IN ('t','ng') GROUP BY kode_produk ")->row_array();
+		return $query['tot_qty'];
+	}
+
 	public function cek_uom_contract_line_by_produk($sales_order, $kode_produk, $uom)
 	{
 		$query = $this->db->query("SELECT uom FROM sales_contract_items WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND uom NOT IN ('$uom')  ");
