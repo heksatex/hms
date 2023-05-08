@@ -837,7 +837,11 @@
                 //$("#total").load(location.href + " #total");
                 $(".add-new").show();                   
                 this1.button('reset');
-                alert_notify(data.icon,data.message,data.type,function(){});
+                if(data.alert2 == 'yes'){
+                  alert_modal_warning(data.message);
+                }else{
+                  alert_notify(data.icon,data.message,data.type,function(){});
+                }
                 $("#btn-header").load(location.href + " #btn-header");
                 refresh_tab_and_div();
              }
@@ -1802,11 +1806,16 @@
                 alert_modal_warning(data.message);
                 window.location.replace('index');
               }else if(data.status == "failed"){
-                //jika ada form belum keiisi
-                unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                });
-                document.getElementById(data.field).focus();
+                if(data.alert2 == 'yes'){
+                  unblockUI( function(){});
+                  alert_modal_warning(data.message);
+                }else{
+                  //jika details masih kosong
+                  unblockUI( function() {
+                    setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                  });
+                  document.getElementById(data.field).focus();
+                }
               }else{
                //jika berhasil disimpan/diubah
                 unblockUI( function() {
@@ -1835,6 +1844,80 @@
 
       }else{
         alert_modal_warning('Maaf, Data tidak bisa diubah !')
+      }
+    });
+
+    //klik button cancel
+    $(document).on('click','#btn-cancel',function(e){
+      var status = $("#status").val();
+
+      if(status == 'draft' || status == 'waiting_date' ){
+
+        bootbox.dialog({
+          message: "Apakah Anda ingin membatalkan Sales Contract ?",
+          title: "<i class='glyphicon glyphicon-trash'></i> Cancel !",
+          buttons: {
+            danger: {
+                label    : "Yes ",
+                className: "btn-primary btn-sm",
+                callback : function() {
+                    $('#btn-cancel').button('loading');
+                    please_wait(function(){});
+                    $.ajax({
+                      type: "POST",
+                      dataType: "json",
+                      url :'<?php echo base_url('sales/salescontract/batal')?>',
+                      beforeSend: function(e) {
+                          if(e && e.overrideMimeType) {
+                              e.overrideMimeType("application/json;charset=UTF-8");
+                          }
+                      },
+                      data: {sales_order: $('#sales_order').val()},
+                      success: function(data){
+                          if(data.sesi == "habis"){
+                            //alert jika session habis
+                            alert_modal_warning(data.message);
+                            window.location.replace('index');
+                          }else if(data.status == "failed"){
+                            unblockUI( function(){});
+                            alert_modal_warning(data.message);
+                          }else{
+                          //jika berhasil 
+                            unblockUI( function() {
+                              setTimeout(function() { 
+                                alert_notify(data.icon,data.message,data.type, function(){
+                              },1000); 
+                              });
+                            });
+                            $("#foot").load(location.href + " #foot");
+                            $("#total").load(location.href + " #total");
+                            $("#ref_status").load(location.href + " #ref_status");
+                            $("#btn-header").load(location.href + " #btn-header");
+                            $("#status_bar").load(location.href + " #status_bar");
+
+                          }
+                          $('#btn-cancel').button('reset');
+
+                      },error: function (xhr, ajaxOptions, thrownError) {
+                          alert(xhr.responseText);
+                          unblockUI( function(){});
+                          $('#btn-cancel').button('reset');
+                      }
+                    });
+                }
+            },
+            success: {
+                  label    : "No",
+                  className: "btn-default  btn-sm",
+                  callback : function() {
+                    $('.bootbox').modal('hide');
+                  }
+            }
+          }
+        });
+
+      }else{
+        alert_modal_warning('Maaf, Data tidak bisa dibatalkan !')
       }
     });
 
@@ -1879,10 +1962,15 @@
               alert_modal_warning(data.message);
               window.location.replace('../index');
             }else if(data.status == "failed"){
-              //jika details masih kosong
-              unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-              });
+              if(data.alert2 == 'yes'){
+                unblockUI( function(){});
+                alert_modal_warning(data.message);
+              }else{
+                //jika details masih kosong
+                unblockUI( function() {
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                });
+              }
               $("#btn-header").load(location.href + " #btn-header");
               refresh_tab_and_div();
               $('#btn-confirm').button('reset');

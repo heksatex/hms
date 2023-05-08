@@ -136,10 +136,29 @@ class Salescontract extends MY_Controller
           }
           */
 
+          //cek status sales contract
+          $status     = "status IN ('done')";
+          $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
+
+          $status2     = "status IN ('cancel')";
+          $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+
+          $status3     = "status NOT IN ('draft','waiting_date','date_assigned')";
+          $cek_status3 = $this->m_sales->cek_status_sales_contract($sales_order,$status3)->row_array();
+
           // cek sales_person
           $sg = $this->m_sales->cek_sales_group_by_username($username)->row_array();
 
-          if(empty($customer)){
+          if(!empty($cek_status['sales_order'])){
+            $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Simpan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+          }elseif(!empty($cek_status2['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa di Simpan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+          }elseif(!empty($cek_status3['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Simpan !, Cek Status Sales Contract !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+       
+          }elseif(empty($customer)){
               $callback = array('status' => 'failed', 'field' => 'customer', 'message' => 'Customer Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
           }elseif(empty($invoice_address)){
               $callback = array('status' => 'failed', 'field' => 'invoice_address', 'message' => 'Invoice Address Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
@@ -196,6 +215,57 @@ class Salescontract extends MY_Controller
         }
 
         echo json_encode($callback);
+    }
+
+    public function batal()
+    {
+      if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+          // session habis
+          $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+      }else{
+
+          $sub_menu  = $this->uri->segment(2);
+          $username  = addslashes($this->session->userdata('username')); 
+
+          $sales_order  = addslashes($this->input->post('sales_order'));
+
+          //cek status sales contract
+          $status     = "status IN ('done')";
+          $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
+  
+          $status2     = "status IN ('cancel')";
+          $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+  
+          $status3     = "status NOT IN ('draft','waiting_date')";
+          $cek_status3 = $this->m_sales->cek_status_sales_contract($sales_order,$status3)->row_array();
+
+          
+          if(!empty($cek_status['sales_order'])){
+            $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa dibatalkan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+          }elseif(!empty($cek_status2['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa dibatalkan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+          }elseif(!empty($cek_status3['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Data tidak bisa dibatalkan !, Cek Status Sales Contract !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+          }else{
+
+            $this->m_sales->update_status_sales_contract($sales_order,'cancel');
+
+            $jenis_log   = "cancel";
+            $note_log    = "Batal SC | ".$sales_order;
+            $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
+
+            $callback = array('status' => 'success','message' => 'Sales Contract Berhasil dibatalkan !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+          }
+  
+
+      }
+
+      echo json_encode($callback);
+
     }
 
     public function edit($id = null)
@@ -275,28 +345,40 @@ class Salescontract extends MY_Controller
           $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, sales_contract_items as sci WRITE,  tax WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
 
           //cek status sales contract
-          $status     = "status NOT IN ('draft','waiting_date')";
+          $status     = "status IN ('done')";
           $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
-          
+ 
+          $status2     = "status IN ('cancel')";
+          $cek_status2 = $this->m_sales->cek_status_sales_contract($kode,$status2)->row_array();
+ 
+          $status3     = "status NOT IN ('draft','waiting_date')";
+          $cek_status3 = $this->m_sales->cek_status_sales_contract($kode,$status3)->row_array();
+ 
+ 
           if(!empty($cek_status['sales_order'])){
-            $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa di Simpan !, Cek Status Sales Order !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-
+            $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Simpan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+ 
+          }elseif(!empty($cek_status2['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa di Simpan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+ 
+          }elseif(!empty($cek_status3['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Simpan !, Cek Status Sales Contract !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
 
             if(!empty($row)){//update details
-              $tax = $this->m_sales->get_data_tax_by_kode($tax_id)->row_array();
-              $this->m_sales->update_contract_lines_detail($kode,$kode_prod,$prod,$desc,$qty,$uom,$roll,$price,$tax_id,addslashes($tax['nama']),$row);
-          
-              //update total di tabel sales_contract
-              $total = $this->m_sales->get_total_untaxed($kode)->row_array(); 
-              $total_val = $total['total_untaxed']+$total['total_tax'];
-              $this->m_sales->update_total_sales_contract($kode,$total['total_untaxed'],$total['total_tax'],$total_val);
+                $tax = $this->m_sales->get_data_tax_by_kode($tax_id)->row_array();
+                $this->m_sales->update_contract_lines_detail($kode,$kode_prod,$prod,$desc,$qty,$uom,$roll,$price,$tax_id,addslashes($tax['nama']),$row);
+            
+                //update total di tabel sales_contract
+                $total = $this->m_sales->get_total_untaxed($kode)->row_array(); 
+                $total_val = $total['total_untaxed']+$total['total_tax'];
+                $this->m_sales->update_total_sales_contract($kode,$total['total_untaxed'],$total['total_tax'],$total_val);
 
-              $jenis_log   = "edit";
-              $note_log    = "Edit data Details | ".$kode." | ".$kode_prod." | ".$prod." | ".$desc." | ".$qty." | ".$uom." | ".$roll." | ".$price." | ".addslashes($tax['nama']);;
-              $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+                $jenis_log   = "edit";
+                $note_log    = "Edit data Details | ".$kode." | ".$kode_prod." | ".$prod." | ".$desc." | ".$qty." | ".$uom." | ".$roll." | ".$price." | ".addslashes($tax['nama']);;
+                $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
 
-              $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+                $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                   
             }else{//simpan data baru
 
@@ -330,8 +412,8 @@ class Salescontract extends MY_Controller
     {
 
         if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
-            // session habis
-            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+          // session habis
+          $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
       	  $sub_menu  = $this->uri->segment(2);
           $username  = addslashes($this->session->userdata('username')); 
@@ -343,12 +425,25 @@ class Salescontract extends MY_Controller
           		$callback = array('status' => 'success','message' => 'Data Gagal Dihapus !', 'icon' =>'fa fa-warning', 'type' => 'danger');
         	}else{
 
-            //cek status sales contract
-            $status     = "status IN ('draft','waiting_date')";
+             //cek status sales contract
+            $status     = "status IN ('done')";
             $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
-
-            if(empty($cek_status['sales_order'])){
-              $callback = array('status' => 'failed','message' => 'Maaf, Data tidak bisa di Hapus !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+  
+            $status2     = "status IN ('cancel')";
+            $cek_status2 = $this->m_sales->cek_status_sales_contract($kode,$status2)->row_array();
+  
+            $status3     = "status IN ('draft','waiting_date')";
+            $cek_status3 = $this->m_sales->cek_status_sales_contract($kode,$status3)->row_array();
+  
+  
+            if(!empty($cek_status['sales_order'])){
+              $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Hapus !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+  
+            }elseif(!empty($cek_status2['sales_order'])){
+              $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa di Hapus !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+  
+            }elseif(empty($cek_status3['sales_order'])){
+              $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Hapus !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else{
           		$this->m_sales->delete_contract_lines_detail($kode,$row);
@@ -395,11 +490,24 @@ class Salescontract extends MY_Controller
           $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
 
           //cek status sales contract
-          $status     = "status IN ('draft')";
-          $cek_status  = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
-
-          if(empty($cek_status['sales_order'])){
-             $callback = array('status' => 'failed','message' => 'Maaf, Confirm Contract Sudah Dilakukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+          $status     = "status IN ('done')";
+          $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
+  
+          $status2     = "status IN ('cancel')";
+          $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+  
+          $status3     = "status IN ('draft')";
+          $cek_status3 = $this->m_sales->cek_status_sales_contract($sales_order,$status3)->row_array();
+  
+  
+          if(!empty($cek_status['sales_order'])){
+            $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Confirm !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+  
+          }elseif(!empty($cek_status2['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa di Confirm !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+  
+          }elseif(empty($cek_status3['sales_order'])){
+             $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Confirm Contract Sudah Dilakukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
           }else{
             $cek_details = $this->m_sales->cek_sales_contract_items_by_kode($sales_order)->num_rows();
@@ -441,11 +549,24 @@ class Salescontract extends MY_Controller
            $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
 
           //cek status sales contract
-          $status     = "status NOT IN ('date_assigned')";
+          $status     = "status IN ('done')";
           $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
-
+    
+          $status2     = "status IN ('cancel')";
+          $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+    
+          $status3     = "status NOT IN ('date_assigned')";
+          $cek_status3 = $this->m_sales->cek_status_sales_contract($sales_order,$status3)->row_array();
+    
           if(!empty($cek_status['sales_order'])){
-             $callback = array('status' => 'failed','message' => 'Maaf, Approve Contract Sudah Dilakukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+            $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Approve !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+    
+          }elseif(!empty($cek_status2['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa di Approve !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+    
+          }elseif(!empty($cek_status3['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Approve Contract Sudah Dilakukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
 
           }else{
           	$cek_details = $this->m_sales->cek_sales_contract_items_by_kode($sales_order)->num_rows();
@@ -487,11 +608,24 @@ class Salescontract extends MY_Controller
           $this->_module->lock_tabel('sales_contract WRITE, sales_contract_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_color_line WRITE');
 
           //cek status sales contract
-          $status     = "status IN ('waiting_color')";
+          $status     = "status IN ('done')";
           $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
+    
+          $status2     = "status IN ('cancel')";
+          $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+    
+          $status3     = "status IN ('waiting_color')";
+          $cek_status3 = $this->m_sales->cek_status_sales_contract($sales_order,$status3)->row_array();
+    
+          if(!empty($cek_status['sales_order'])){
+            $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa di Approve !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+    
+          }elseif(!empty($cek_status2['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa di Approve !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+    
+          }elseif(empty($cek_status3['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Approve Color Sudah Dilakukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-          if(empty($cek_status['sales_order'])){
-             $callback = array('status' => 'failed','message' => 'Maaf, Approve Color Sudah Dilakukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
 
             $cek_details = $this->m_sales->cek_sales_color_line_by_kode($sales_order)->num_rows();
@@ -593,10 +727,24 @@ class Salescontract extends MY_Controller
             $nama_warna = '';
           }
 
-          $status     = "status NOT IN ('waiting_color', 'product_generated')";
-          $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->num_rows();
-          if($cek_status > 0){
-            $callback = array('status' => 'failed','message' => 'Color Lines tidak bisa disimpan, Status Sales Contract tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+          //cek status sales contract
+          $status     = "status IN ('done')";
+          $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
+      
+          $status2     = "status IN ('cancel')";
+          $cek_status2 = $this->m_sales->cek_status_sales_contract($kode,$status2)->row_array();
+      
+          $status3     =  "status NOT IN ('waiting_color', 'product_generated')";
+          $cek_status3 = $this->m_sales->cek_status_sales_contract($kode,$status3)->num_rows();
+      
+          if(!empty($cek_status['sales_order'])){
+            $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Color Lines tidak bisa disimpan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+      
+          }elseif(!empty($cek_status2['sales_order'])){
+            $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Color Lines tidak bisa disimpan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+      
+          }elseif($cek_status3 > 0){
+              $callback = array('status' => 'failed' ,'alert2' => 'yes','message' => 'Maaf, Color Lines tidak bisa disimpan, Status Sales Contract tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
           }else{
 
@@ -723,10 +871,24 @@ class Salescontract extends MY_Controller
           if(empty($kode) && empty($row) ){
               $callback = array('status' => 'failed','message' => 'Data Gagal Dihapus !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
+
+            //cek status sales contract
+            $status     = "status IN ('done')";
+            $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
+        
+            $status2     = "status IN ('cancel')";
+            $cek_status2 = $this->m_sales->cek_status_sales_contract($kode,$status2)->row_array();
+            
             //check is Approve
             $check_approve = $this->m_sales->check_is_approve($kode,$row)->row_array();
+            
+            if(!empty($cek_status['sales_order'])){
+              $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Color Lines tidak bisa Dihapus !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+        
+            }elseif(!empty($cek_status2['sales_order'])){
+              $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Color Lines tidak bisa Dihapus !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-            if($check_approve['is_approve'] == 't' || $check_approve['is_approve'] == 'f'){
+            }else if($check_approve['is_approve'] == 't' || $check_approve['is_approve'] == 'f'){
               $callback = array('status' => 'failed',  'message' => 'Data Tidak bisa Dihapus !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
             }else{
               $this->m_sales->delete_color_lines_detail($kode,$row);
@@ -759,13 +921,26 @@ class Salescontract extends MY_Controller
             $tgl  = date('Y-m-d H:i:s');
 
             // lock tabel
-            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE');
+            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE, sales_contract WRITE');
+
+            //cek status sales contract
+            $status     = "status IN ('done')";
+            $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
+          
+            $status2     = "status IN ('cancel')";
+            $cek_status2 = $this->m_sales->cek_status_sales_contract($kode,$status2)->row_array();
 
             // cek validasi item apakah ada atau tidak
             // cek validasi apakah items tersebut sudah terbuat OW atau belum
             $items = $this->m_sales->cek_item_color_lines_by_kode($kode,$row)->row_array();
 
-            if(empty($items['sales_order'])){
+            if(!empty($cek_status['sales_order'])){
+              $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Create OW tidak Bisa dilakukan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+        
+            }elseif(!empty($cek_status2['sales_order'])){
+              $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Create OW tidak Bisa dilakukan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else  if(empty($items['sales_order'])){
               $callback = array('status' => 'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else if(!empty($items['ow'])){
@@ -816,7 +991,20 @@ class Salescontract extends MY_Controller
 
             $items = $this->m_sales->cek_item_color_lines_by_kode($sales_order,$row_order)->row_array();
 
-            if(empty($items['sales_order'])){
+            //cek status sales contract
+            $status     = "status IN ('done')";
+            $cek_status = $this->m_sales->cek_status_sales_contract($sales_order,$status)->row_array();
+              
+            $status2     = "status IN ('cancel')";
+            $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
+
+            if(!empty($cek_status['sales_order'])){
+              $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa Disimpan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+        
+            }elseif(!empty($cek_status2['sales_order'])){
+              $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa Disimpan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }elseif(empty($items['sales_order'])){
               $callback = array('status' => 'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else{
@@ -834,7 +1022,7 @@ class Salescontract extends MY_Controller
                 $cq_contract_lines = $this->m_sales->cek_qty_contract_lines_by_produk($sales_order,$kode_produk);
   
                 // cek qty by produk qty color line
-                $cq_color_lines = $this->m_sales->cek_qty_color_lines_by_produk($sales_order,$kode_produk);
+                $cq_color_lines = $this->m_sales->cek_qty_color_lines_by_produk_2($sales_order,$kode_produk,$row_order);
   
                 if($cq_color_lines > $cq_contract_lines){
                   $lebih_target = true;  
