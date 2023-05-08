@@ -209,6 +209,7 @@
                               <th  class='style bb ws' rowspan="2"style="min-width: 80px">Tgl.MO</th>
                               <th  class='style bb ws' rowspan="2"style="min-width: 130px">MC</th>
                               <th  class='style bb ws' rowspan="2">SC</th>
+                              <th  class='style bb ws' rowspan="2">Status SC</th>
                               <th  class='style bb ws' rowspan="2">PD</th>
                               <th  class='style bb ws' rowspan="2">Marketing</th>
                               <th  class='style bb ws' rowspan="2" style="min-width: 150px">Corak</th>
@@ -289,10 +290,23 @@
     });
 
     //filter default
-    $('#tags').tagsinput('add', { id: 1, text: 'Status = draft OR Status = ready OR MO is Empty' });
-    $('[data-role="tags-input"]').tagsinput('add','Status = draft OR Status = ready OR MO is Empty' );
-    arr_filter.push({caption:"Status = draft OR Status = ready OR MO is Empty", nama_field : "status^-|=^-|draft^-|,status^-|=^-|ready^-|,kode^-|is^-|Empty", operator:"kosong", isi:"kosong", condition:"OR", type:'table'});
+    $('#tags').tagsinput('add',{ id: 1, text: 'Status MO = draft OR Status MO = ready OR MO is Empty' });
+    $('[data-role="tags-input"]').tagsinput('add','Status MO = draft OR Status MO = ready OR MO is Empty');
     
+    // $('[data-role="tags-input"]').tagsinput('add','Status MO = draft OR Status MO = ready OR MO is Empty');
+    arr_filter.push({ caption:"Status MO = draft OR Status MO = ready OR MO is Empty", 
+                      nama_field : "status^-|=^-|draft^-|,status^-|=^-|ready^-|,kode^-|is^-|Empty", 
+                      operator:"kosong", isi:"kosong", condition:"OR", type:'table'
+                    } );
+    
+    // $('[data-role="tags-input"]').tagsinput('add','Status SC NOT LIKE cancel OR Status SC NOT LIKE done' );
+    // $('#tags').tagsinput('add',{id:2, text:'Status SC NOT LIKE cancel OR Status SC  NOT LIKE done'});
+    // arr_filter.push(
+    //                 { caption: "Status SC NOT LIKE cancel OR Status SC NOT LIKE done",
+    //                   nama_field : "nama_status^-|NOT LIKE^-|cancel^-|,nama_status^-|NOT LIKE^-|done", 
+    //                   operator:"kosong", isi:"kosong", condition:"OR", type:'table'
+    //                 });
+
     createBody(0);
 
     // event jika caption ditambahkan di texbox
@@ -355,6 +369,7 @@
                       $("<td>").text(value.tgl_mo),
                       $("<td>").text(value.mc),
                       $("<td>").text(value.sc),
+                      $("<td>").text(value.status_sc),
                       $("<td>").text(value.pd),
                       $("<td>").text(value.marketing),
                       $("<td>").text(value.corak),
@@ -457,6 +472,7 @@
                                   $("<td>").text(value.tgl_mo),
                                   $("<td>").text(value.mc),
                                   $("<td>").text(value.sc),
+                                  $("<td>").text(value.status_sc),
                                   $("<td>").text(value.pd),
                                   $("<td>").text(value.marketing),
                                   $("<td>").text(value.corak),
