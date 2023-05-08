@@ -465,11 +465,11 @@
                                   <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty) AND $row->status == 'ready')echo number_format($row->sum_qty,2); if($row->status == 'cancel' AND $row->sum_qty_cancel > 0) echo number_format($row->sum_qty_cancel,2); ?></td>
                                   <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
                                   <td><?php echo $row->reff?></td>
-                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0){?>
+                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0 ){?>
                                     <a href="javascript:void(0)" onclick="tambah_quant('<?php echo $row->kode_produk ?>','<?php echo $row->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                    <?php }?>
-                                    <!--a onclick="hapus('<?php  echo $row->kode ?>', '<?php  echo ($row->row_order) ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> </a-->
+                                  
                                   </td>
                                 </tr>
                               <?php 
@@ -618,7 +618,7 @@
                           <div class="box-header with-border">
                             <h3 class="box-title"><b>Additional</b></h3>
                             <?php 
-                            if( $akses_menu >0 AND ($type_mo['type_mo'] !='colouring' or $type_mo['type_mo'] !='knitting') ){
+                            if( $akses_menu >0 AND ($type_mo['type_mo'] !='colouring' or $type_mo['type_mo'] !='knitting')AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){
                               if(!empty($menu)){  ?>
                                 <div class=" pull-right text-right">
                                   <button class="btn btn-primary btn-sm" id="btn-request-add" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Request Additional</button>
@@ -676,7 +676,7 @@
                                                   <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="rm"><i class="fa fa-edit"></i></a>
                                                   <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
                                                   <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="rm" ><i class="fa fa-close"></i></a>
-                                          <?php }else if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0 AND $row->move_id != ''){?>
+                                          <?php }else if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0 AND $row->move_id != '' ){?>
                                                 <a href="javascript:void(0)" onclick="tambah_quant('<?php echo $row->kode_produk ?>','<?php echo $row->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                                 <span class="glyphicon  glyphicon-share"></span></a>
                                           <?php
@@ -689,7 +689,7 @@
                                     }
                                     ?>
                                   </tbody>
-                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0){ ?>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){ ?>
                                   <tfoot>
                                     <tr>
                                       <td colspan="6"> 
@@ -789,7 +789,7 @@
                                     }
                                     ?>
                                   </tbody>
-                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0){ ?>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){ ?>
                                   <tfoot>
                                     <tr>
                                       <td colspan="6"> 
@@ -834,7 +834,7 @@
                                           <?php if($row->status == 'draft' AND $row->move_id == ''){?>
                                                   <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-save"></i></a>
                                                   <a href="javascript:void(0)" class="edit" title="Edit" data-toggle="tooltip" style="color: #FFC107;" type_obat="AUX"><i class="fa fa-edit"></i></a>
-                                                  <a href="javascript:void(0)"  class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
+                                                  <a href="javascript:void(0)" class="delete" title="Hapus" data-toggle="tooltip" ><i class="fa fa-trash" style="color: red;"></i></a>
                                                   <a href="javascript:void(0)" class="cancel" title="Cancel" data-toggle="tooltip" style="margin-left: 20px;" type_obat="AUX"><i class="fa fa-close"></i></a>
                                           <?php }?> 
                                         </td>
@@ -844,7 +844,7 @@
                                     }
                                     ?>
                                   </tbody>
-                                  <?php if(($list->status == 'draft' or $list->status =='ready') AND $akses_menu >0){ ?>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready') AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){ ?>
                                   <tfoot>
                                     <tr>
                                       <td colspan="6"> 
@@ -1618,9 +1618,7 @@
                       $('#btn-hold').button('reset');
                     }
                 });
-            
-            }else{
-              alert('ga jadi')
+           
             }
           }
         });
@@ -2660,7 +2658,7 @@
                             alert_modal_warning(data.message);
                             window.location.replace('../index');
                         }else if(data.status == 'failed'){
-                            alert_modal_warning(data.message);
+                            alert_notify(data.icon,data.message,data.type,function(){});
                         }else{
                             alert_notify(data.icon,data.message,data.type,function(){});
                         }

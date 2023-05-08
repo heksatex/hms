@@ -1136,7 +1136,7 @@
 			              $("#tab_2").load(location.href + " #tab_2");             
 			              $("#foot").load(location.href + " #foot");
 			              $('#btn-tambah-produksi-batch').button('reset');
-			              alert(data.message);
+			              alert_modal_warning(data.message);
 						  unblockUI( function(){});
 			           	}else{
 			              //jika berhasil disimpan
@@ -1158,7 +1158,7 @@
 						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch'); 
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
-			          alert(jqXHR.responseTex+' error');
+			          alert("Error Simpan Produksi Batch");
 			          $('#btn-tambah-produksi-batch').button('reset');
 					  unblockUI( function(){});
 			        }

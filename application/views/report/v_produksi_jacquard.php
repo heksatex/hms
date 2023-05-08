@@ -209,6 +209,7 @@
                               <th  class='style bb ws'rowspan="2" style="min-width: 80px">Tgl.MO</th>
                               <th  class='style bb ws' rowspan="2"style="min-width: 130px">MC</th>
                               <th  class='style bb ws' rowspan="2">SC</th>
+                              <th  class='style bb ws' rowspan="2">Status SC</th>
                               <th  class='style bb ws' rowspan="2">PD</th>
                               <th  class='style bb ws' rowspan="2">Buyer Code</th>
                               <th  class='style bb ws' rowspan="2">Marketing</th>
@@ -231,7 +232,7 @@
                               <th  class='style bb ws' colspan="3" style="text-align: center;">HPH</th>
                               <th  class='style bb ws' rowspan="2">Sisa Qty1</th>
                               <th  class='style bb ws' rowspan="2">Sisa Gl</th>
-                              <th  class='style bb ws' rowspan="2">Status</th>
+                              <th  class='style bb ws' rowspan="2">Status MO</th>
                             </tr>
                             <tr>
                               <th  class='style bb ws' style="text-align: center;">Mtr</th>
@@ -291,9 +292,9 @@
     });
 
     //filter default
-    $('#tags').tagsinput('add', { id: 1, text: 'Status = draft OR Status = ready OR MO is Empty' });
-    $('[data-role="tags-input"]').tagsinput('add','Status = draft OR Status = ready OR MO is Empty' );
-    arr_filter.push({caption:"Status = draft OR Status = ready OR MO is Empty", nama_field : "status^-|=^-|draft^-|,status^-|=^-|ready^-|,kode^-|is^-|Empty", operator:"kosong", isi:"kosong", condition:"OR", type:'table'});
+    $('#tags').tagsinput('add', { id: 1, text: 'Status MO = draft OR Status MO = ready OR MO is Empty' });
+    $('[data-role="tags-input"]').tagsinput('add','Status MO = draft OR Status MO = ready OR MO is Empty' );
+    arr_filter.push({caption:"Status MO = draft OR Status MO = ready OR MO is Empty", nama_field : "status^-|=^-|draft^-|,status^-|=^-|ready^-|,kode^-|is^-|Empty", operator:"kosong", isi:"kosong", condition:"OR", type:'table'});
 
     createBody(0);
 
@@ -361,6 +362,7 @@
                       $("<td>").text(value.tgl_mo),
                       $("<td>").text(value.mc),
                       $("<td>").text(value.sc),
+                      $("<td>").text(value.status_sc),
                       $("<td>").text(value.pd),
                       $("<td>").text(value.buyer_code),
                       $("<td>").text(value.marketing),
@@ -465,6 +467,7 @@
                                   $("<td>").text(value.tgl_mo),
                                   $("<td>").text(value.mc),
                                   $("<td>").text(value.sc),
+                                  $("<td>").text(value.status_sc),
                                   $("<td>").text(value.pd),
                                   $("<td>").text(value.buyer_code),
                                   $("<td>").text(value.marketing),

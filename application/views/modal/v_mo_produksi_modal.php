@@ -446,7 +446,7 @@
 			              $("#tab_2").load(location.href + " #tab_2");             
 			              $("#foot").load(location.href + " #foot");
 			              $('#btn-tambah-produksi').button('reset');
-			              alert(data.message);
+			              alert_modal_warning(data.message);
 						  unblockUI( function(){});
 			           	}else{
 			              //jika berhasil disimpan
@@ -468,7 +468,7 @@
 						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm');
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
-			          alert(jqXHR.responseText);
+			          alert("Error Simpan Produksi");
 			          $('#btn-tambah-produksi').button('reset');
 					  unblockUI( function(){});
 			        }

@@ -227,7 +227,7 @@ class Dti extends MY_Controller
                   
                   $jenis_log   = "edit";
                   $note_log    = $warna." | ".$notes." | ".$kode_warna.' | '.$nama_sales_group." | ".$note_log_varian." ".$note_dye." ".$note_aux." ".$note_status_head;
-                  $this->_module->gen_history($sub_menu, $id, $jenis_log, $note_log, $username);
+                  $this->_module->gen_history($sub_menu, $id, $jenis_log, addslashes($note_log), $username);
                   $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                   
              	}else{
@@ -305,7 +305,7 @@ class Dti extends MY_Controller
            			$id_encr     = encrypt_url($last_id);
                 $jenis_log   = "create";
                 $note_log    = $note_logs;
-                $this->_module->gen_history($sub_menu, $last_id, $jenis_log, $note_log, $username);
+                $this->_module->gen_history($sub_menu, $last_id, $jenis_log, addslashes($note_log), $username);
                 $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $id_encr, 'icon' =>'fa fa-check', 'type' => 'success');
                 
           		}
@@ -490,7 +490,7 @@ class Dti extends MY_Controller
               $callback    = array('status'=>'success', 'message' => 'Varian Warna Baru Berhasil disimpan',  'icon' =>'fa fa-check', 'type' => 'success', 'id_varian' =>$id_var);
               $jenis_log   = "create";
               $note_log    = "Tambah Data Warna Varian  ".$new_var."  ".$note_dye."  ".$note_aux. " <br> Notes Varian -> ".$notes_varian ;
-              $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+              $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
             }
           }
@@ -636,7 +636,7 @@ class Dti extends MY_Controller
             $callback    = array('status'=>'success', 'message' => 'Data Berhasil Disimpan !',  'icon' =>'fa fa-check', 'type' => 'success');
             $jenis_log   = "create";
             $note_log    = "Tambah Data Varian[".$nama_varian."] | ".$kode_produk." ".$nama_produk."  ".$qty." ".$uom."  ".$reff_note ;
-            $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+            $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
           }else{// update dye /aux
 
@@ -650,7 +650,7 @@ class Dti extends MY_Controller
             $callback    = array('status'=>'success', 'message' => 'Data Berhasil Disimpan !',  'icon' =>'fa fa-check', 'type' => 'success');
             $jenis_log   = "edit";
             $note_log    = "Edit Data Varian[".$nama_varian."] | ".$before.' '.$kode_produk." ".$nama_produk."  ".$qty." ".$uom."  ".$reff_note ;
-            $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+            $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
           }
 
@@ -684,7 +684,7 @@ class Dti extends MY_Controller
 
         $jenis_log   = "cancel";
         $note_log    = "Hapus Data Varian[".$nama_varian."] | ".$kode_produk.' '.$product .' | '.$type_obat ;
-        $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+        $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
       }
 
@@ -792,7 +792,7 @@ class Dti extends MY_Controller
             
             $jenis_log   = "edit";
             $note_log    = "Generated" ;
-            $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+            $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
           }
       }
@@ -835,7 +835,7 @@ class Dti extends MY_Controller
 
               $jenis_log   = "cancel";
               $note_log    = "DTI ini dibatalkan " ;
-              $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+              $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
             }
 
@@ -875,7 +875,7 @@ class Dti extends MY_Controller
 
               $jenis_log   = "edit";
               $note_log    = "DTI Re-Active " ;
-              $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, $note_log, $username);
+              $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
 
           }

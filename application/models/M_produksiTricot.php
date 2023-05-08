@@ -8,7 +8,7 @@ class M_produksiTricot extends CI_Model
 
 	public function get_list_produksi_tricot_by_kode($where, $rowno, $recordPerPage)
 	{
-	return $this->db->query("SELECT sc.sales_order, sc.mc_id, sc.kode_produk, sc.nama_produk, sg.nama_sales_group, sc.status sc_status, po.kode_prod, poi.qty as target_pd, poi.status po_status, poi.row_order,mrp.kode, mrp.tanggal, mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.start_time, mrp.finish_time, mrp.qty as target_mo, mrp.reff_note, mrp.status,ms.nama_mesin,
+	return $this->db->query("SELECT sc.sales_order, sc.mc_id, sc.kode_produk, sc.nama_produk, sg.nama_sales_group, sc.nama_status status_sc, po.kode_prod, poi.qty as target_pd, poi.status po_status, poi.row_order,mrp.kode, mrp.tanggal, mrp.lebar_greige, mrp.uom_lebar_greige, mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.start_time, mrp.finish_time, mrp.qty as target_mo, mrp.reff_note, mrp.status,ms.nama_mesin,
 									(SELECT IFNULL(sum(mpfg.qty),0) as total_qty1
 																			FROM mrp_production_fg_hasil mpfg
 																			WHERE mpfg.kode = mrp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = 'TRI')) as hph_qty1,
@@ -24,9 +24,10 @@ class M_produksiTricot extends CI_Model
 											WHERE mpfg.kode = mrp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = 'TRI')) as sisa_target
 																			
 								FROM (
-									SELECT sc.sales_order, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group
+									SELECT sc.sales_order, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group, ms.nama_status
 									FROM sales_contract sc 
 									INNER JOIN sales_contract_items sci ON sc.sales_order = sci.sales_order
+									LEFT JOIN mst_status ms ON sc.status = ms.kode
 									WHERE sc.order_production ='true' AND sci.nama_produk LIKE '%tricot%'
 									GROUP BY sc.sales_order, sci.kode_produk
 								) sc
@@ -43,7 +44,7 @@ class M_produksiTricot extends CI_Model
 
 	public function get_list_produksi_tricot_by_kode_no_limit($where)
 	{
-		return $this->db->query("SELECT sc.sales_order, sc.mc_id, sc.kode_produk, sc.nama_produk, sg.nama_sales_group, sc.status sc_status, po.kode_prod, poi.qty as target_pd, poi.status po_status, poi.row_order, mrp.lebar_greige, mrp.uom_lebar_greige, mrp.kode, mrp.tanggal,mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.start_time, mrp.finish_time, mrp.qty as target_mo, mrp.reff_note, mrp.status,ms.nama_mesin,
+		return $this->db->query("SELECT sc.sales_order, sc.mc_id, sc.kode_produk, sc.nama_produk, sg.nama_sales_group, sc.nama_status as status_sc, po.kode_prod, poi.qty as target_pd, poi.status po_status, poi.row_order, mrp.lebar_greige, mrp.uom_lebar_greige, mrp.kode, mrp.tanggal,mrp.lebar_jadi, mrp.uom_lebar_jadi, mrp.start_time, mrp.finish_time, mrp.qty as target_mo, mrp.reff_note, mrp.status,ms.nama_mesin,
 										(SELECT IFNULL(sum(mpfg.qty),0) as total_qty1
 																				FROM mrp_production_fg_hasil mpfg
 																				WHERE mpfg.kode = mrp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = 'TRI')) as hph_qty1,
@@ -59,9 +60,10 @@ class M_produksiTricot extends CI_Model
 												WHERE mpfg.kode = mrp.kode AND mpfg.lokasi NOT IN (SELECT d.waste_location FROM departemen d WHERE d.kode = 'TRI')) as sisa_target
 																				
 									FROM (
-										SELECT sc.sales_order, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group
+										SELECT sc.sales_order, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group, ms.nama_status
 										FROM sales_contract sc 
 										INNER JOIN sales_contract_items sci ON sc.sales_order = sci.sales_order
+										LEFT JOIN mst_status ms ON sc.status = ms.kode
 										WHERE sc.order_production ='true' AND sci.nama_produk LIKE '%tricot%'
 										GROUP BY sc.sales_order, sci.kode_produk
 									) sc
@@ -79,9 +81,10 @@ class M_produksiTricot extends CI_Model
 		$query  = $this->db->query("SELECT count(sc.sales_order) as allcount
 																					
 																					FROM (
-										SELECT sc.sales_order, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group
+										SELECT sc.sales_order, sci.mc_id, sci.kode_produk, sci.nama_produk, sc.status, sc.sales_group, ms.nama_status
 										FROM sales_contract sc 
 										INNER JOIN sales_contract_items sci ON sc.sales_order = sci.sales_order
+										LEFT JOIN mst_status ms ON sc.status = ms.kode
 										WHERE sc.order_production ='true' AND sci.nama_produk LIKE '%tricot%'
 										GROUP BY sc.sales_order, sci.kode_produk
 									) sc

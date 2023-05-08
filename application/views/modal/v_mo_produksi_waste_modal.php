@@ -1789,6 +1789,9 @@
 				              $('#btn-produksi-waste').button('reset');
 				              alert_bootbox(data.message);
 							  unblockUI( function(){});
+							  if(data.close == 'yes'){
+								$('#tambah_data').modal('hide');
+							  }
 				           	}else{
 				              //jika berhasil disimpan
 				              $("#status_bar").load(location.href + " #status_bar");
