@@ -290,22 +290,25 @@
     });
 
     //filter default
-    $('#tags').tagsinput('add',{ id: 1, text: 'Status MO = draft OR Status MO = ready OR MO is Empty' });
+    $('#tags').tagsinput('add',{ id: 1, text: 'Status MO = draft OR Status MO = ready OR MO is Empty' },{id:2, text:'Status SC NOT LIKE cancel'},{id:2, text:'Status SC NOT LIKE done'});
     $('[data-role="tags-input"]').tagsinput('add','Status MO = draft OR Status MO = ready OR MO is Empty');
     
-    // $('[data-role="tags-input"]').tagsinput('add','Status MO = draft OR Status MO = ready OR MO is Empty');
     arr_filter.push({ caption:"Status MO = draft OR Status MO = ready OR MO is Empty", 
                       nama_field : "status^-|=^-|draft^-|,status^-|=^-|ready^-|,kode^-|is^-|Empty", 
                       operator:"kosong", isi:"kosong", condition:"OR", type:'table'
                     } );
     
-    // $('[data-role="tags-input"]').tagsinput('add','Status SC NOT LIKE cancel OR Status SC NOT LIKE done' );
-    // $('#tags').tagsinput('add',{id:2, text:'Status SC NOT LIKE cancel OR Status SC  NOT LIKE done'});
-    // arr_filter.push(
-    //                 { caption: "Status SC NOT LIKE cancel OR Status SC NOT LIKE done",
-    //                   nama_field : "nama_status^-|NOT LIKE^-|cancel^-|,nama_status^-|NOT LIKE^-|done", 
-    //                   operator:"kosong", isi:"kosong", condition:"OR", type:'table'
-    //                 });
+    $('[data-role="tags-input"]').tagsinput('add','Status SC NOT LIKE cancel');
+    arr_filter.push({caption: "Status SC NOT LIKE cancel",
+                      nama_field : "status_sc^-|NOT LIKE^-|cancel", 
+                      operator:"kosong", isi:"kosong", condition:"OR", type:'table'
+                    });
+
+    $('[data-role="tags-input"]').tagsinput('add','Status SC NOT LIKE done');
+    arr_filter.push({caption: "Status SC NOT LIKE done",
+                      nama_field : "status_sc^-|NOT LIKE^-|done", 
+                      operator:"kosong", isi:"kosong", condition:"OR", type:'table'
+                    });
 
     createBody(0);
 
