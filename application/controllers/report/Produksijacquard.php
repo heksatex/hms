@@ -676,7 +676,7 @@ class Produksijacquard extends MY_Controller
     		$where = 'mrp.'.$nama_field;
     	}else if($nama_field =='nama_produk' OR $nama_field == 'sales_order' OR $nama_field == 'status_sc'){
             if($nama_field == 'status_sc'){
-                $where = 'sc.status';
+                $where = 'sc.nama_status';
             }else{
                 $where = 'sc.'.$nama_field;
             }
