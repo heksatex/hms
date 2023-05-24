@@ -22,6 +22,10 @@
       white-space: nowrap !important;
     }
 
+    .white-space-normal {
+      white-space: normal !important;
+    }
+
     #pagination {
         display: inline-block;
         padding-left: 0;
@@ -660,7 +664,7 @@
                         row2 += "<td class='white-space-nowrap'>"+value.kode_transaksi+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.tanggal_transaksi+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.kode_produk+"</td>";
-                        row2 += "<td class='white-space-nowrap'>"+value.nama_produk+"</td>";
+                        row2 += "<td class='white-space-normal'>"+value.nama_produk+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.nama_category+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.lot+"</td>";
                         row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty)+" "+value.uom+"</td>";
@@ -918,7 +922,7 @@
                           if( view == "DetailProduk" ){
                             row3 += "<td class='white-space-nowrap'>"+value.nama_category+"</td>";
                             row3 += "<td class='white-space-nowrap'>"+value.kode_produk+"</td>";
-                            row3 += "<td class='white-space-nowrap' >"+value.nama_produk+"</td>";
+                            row3 += "<td class='white-space-normal' >"+value.nama_produk+"</td>";
                             row3 += "<td class='white-space-nowrap' >"+value.product_parent+"</td>";
                             // saldo awal
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
