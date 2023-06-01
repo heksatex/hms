@@ -26,7 +26,7 @@
                         $empty = TRUE;
                         foreach ($list as $row) {
                             $empty = FALSE;
-                            if($row->state == '1'){
+                            if($row->state == '0'){
                                 $color  = "";
                                 $status = 'UP';
                             }else{
