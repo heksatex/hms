@@ -16,7 +16,7 @@ class M_downtime extends CI_Model
                                 ROUND(TIMESTAMPDIFF(MINUTE, '$tgl_dari', '$tgl_sampai'),0) AS dct,
                                 ROUND(100/(TIMESTAMPDIFF(MINUTE, '$tgl_dari', '$tgl_sampai'))*COUNT(log.state),2) AS dcr
                                 FROM mesin mst
-                                JOIN log_mc log ON mst.devid_ard=log.devid AND mst.port_ard=log.port
+                                INNER JOIN log_mc log ON mst.devid_ard=log.devid AND mst.port_ard=log.port
                                 WHERE NOT ISNULL(devid_ard) 
                                 AND mst.dept_id = '$id_dept' 
                                 AND log.timelog BETWEEN '$tgl_dari' AND '$tgl_sampai'
@@ -35,10 +35,10 @@ class M_downtime extends CI_Model
    {
       $result = $this->db->query("SELECT log.timelog, state
                                  FROM mesin mst
-                                 JOIN log_mc log ON mst.devid_ard=log.devid AND mst.port_ard=log.port
+                                 INNER JOIN log_mc log ON mst.devid_ard=log.devid AND mst.port_ard=log.port
                                  WHERE NOT ISNULL(devid_ard)
                                  AND log.timelog BETWEEN '$tgl_dari' AND '$tgl_sampai' AND mst.mc_id = '$mc_id' AND mst.dept_id = '$id_dept'
-                                 order by row_order asc")->result();
+                                 order by log.timelog desc")->result();
       return $result;
    }
 

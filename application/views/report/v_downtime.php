@@ -114,7 +114,7 @@
                         <button type="button" class="btn btn-xs btn-default" name="btn-5" id="btn-6">30 Sebelum</button>
                 </div> -->
                 <div class="form-group">
-                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." >Generate</button>
+                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." > Generate</button>
                     <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                 </div>
               </div>
@@ -183,7 +183,7 @@
       defaultDate: new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
-      maxDate: new Date()
+      // maxDate: new Date()
     });
 
     // set date tglsampai
@@ -244,13 +244,6 @@
       var tgldari_2   = $('#tgldari').data("DateTimePicker").date();
       var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
       
-      var timeDiff = 0;
-      if (tglsampai_2) {
-          timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
-      }
-      
-      selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
-
       if (tgldari == '' || tglsampai == '') {
         alert_modal_warning('Periode Tanggal Harus diisi !');
 
@@ -305,8 +298,8 @@
               },
               success: function(data) {
                   // alert('berhasil');
-                  $('#tgldari').val(data.tgl_dari);
-                  $('#tglsampai').val(data.tgl_sampai);
+                  $('#tgldari').data('DateTimePicker').date(new Date(new Date(data.tgl_dari)));
+                  $('#tglsampai').data('DateTimePicker').date(new Date(new Date(data.tgl_sampai)));
                   process_downtime(this_btn);
                   // $('#tgldari').data("DateTimePicker").date(data.tgl_dari);
                   // $('#tglsampai').data("DateTimePicker").date(data.tgl_sampai);
@@ -416,14 +409,9 @@
       var tgldari_2   = $('#tgldari').data("DateTimePicker").date();
       var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
 
-      var timeDiff = 0;
       if (tgldari == '' || tglsampai == '') {
         alert_modal_warning('Periode Tanggal Harus diisi !');
-      }else if (tglsampai_2) {
-          timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
-      }
-      selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
-      if (id_dept == null) {
+      }else if (id_dept == null) {
         alert_modal_warning('Departemen Harus diisi !');
 
       }else  if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari

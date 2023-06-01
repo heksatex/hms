@@ -149,13 +149,13 @@ class Downtime extends MY_Controller
 	{	
 		if($shift == '1'){
 			$jam_mulai 		= "07:00:00"; 
-			$jam_selesai 	= '14:59:59';
+			$jam_selesai 	= '15:00:00';
 		}else if($shift == '2'){
 			$jam_mulai 		= "15:00:00";
-			$jam_selesai 	= '22:59:59';
+			$jam_selesai 	= '23:00:00';
 		}else{
 			$jam_mulai 		= '23:00:00';
-			$jam_selesai 	= '06:59:59';
+			$jam_selesai 	= '07:00:00';
 		}
 
 		return array($jam_mulai,$jam_selesai);
