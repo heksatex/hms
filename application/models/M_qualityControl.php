@@ -21,7 +21,7 @@ class M_qualityControl extends CI_Model
 		$tgldari = date('Y-m-d 00:00:00', strtotime($tglDari));
 		$tglsampai = date('Y-m-d 23:59:59', strtotime($tglSampai));
 
-		$query = $this->db->query("SELECT  mp.kode_produk, mp.nama_produk, mp.mc_id, ms.nama_mesin, IFNULL(sum(mpfg.qty),0) as tot_mtr, IFNULL(sum(mpfg.qty2),0) as tot_kg, IFNULL(count(mpfg.lot),0) as tot_gl
+		$query = $this->db->query("SELECT  mp.kode_produk, mp.nama_produk, mp.mc_id, ms.nama_mesin, mp.reff_note, IFNULL(sum(mpfg.qty),0) as tot_mtr, IFNULL(sum(mpfg.qty2),0) as tot_kg, IFNULL(count(mpfg.lot),0) as tot_gl
 									,(SELECT sum(sq.target_efisiensi) FROM mrp_production sq WHERE sq.mc_id = mp.mc_id AND sq.kode IN (SELECT kode FROM mrp_production_fg_hasil sq3 WHERE sq3.create_date >= '$tgldari' AND sq3.create_date <= '$tglsampai'  AND sq3.kode_produk = mp.kode_produk  ) AND sq.kode_produk = mp.kode_produk ) as target_ef,
 									
 									(SELECT sum(sq.target_efisiensi)*24*$jmlHari FROM mrp_production sq WHERE sq.mc_id = mp.mc_id AND sq.kode IN (SELECT kode FROM mrp_production_fg_hasil sq3 WHERE sq3.create_date >= '$tgldari' AND sq3.create_date <= '$tglsampai' AND sq3.kode_produk = mp.kode_produk  ) AND sq.kode_produk = mp.kode_produk ) as target_periode,

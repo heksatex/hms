@@ -289,7 +289,6 @@
             id_dept: id_dept
           },
           success: function(data) {
-
             if (data.dataHari.length > 0) {
               var header_parent = "<th colspan='" + data.jmlHari + "' class='style parentTgl bb'> Efisiensi/Tanggal(%)</th>";
               $("#example1 thead tr[id='atas']").append(header_parent);
@@ -329,7 +328,9 @@
                     $("<td>").html(no++),
                     $("<td>").text(v.nama_mesin),
                     $("<td>").text(v.nama_produk),
-                    $("<td colspan='3'>").text(''),
+                    $("<td align='right'>").text(v.mtr),
+                    $("<td>").text(''),
+                    $("<td align='right'>").text(v.rpm),
                     $("<td align='right'>").text(v.hph_mtr),
                     $("<td align='right'>").text(v.hph_kg),
                     $("<td align='right'>").text(v.hph_gl),
