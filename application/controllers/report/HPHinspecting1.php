@@ -273,6 +273,7 @@ class HPHinspecting1 extends MY_Controller
 	{
 		
 		$this->load->library('excel');
+		ob_start();
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$corak     = $this->input->post('corak');
@@ -651,12 +652,18 @@ class HPHinspecting1 extends MY_Controller
 	        $rowCount++;
 		}
 
-    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="HPH Inspecting1.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "HPH Inspecting1.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
     }
 
 

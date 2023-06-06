@@ -296,6 +296,7 @@ class HPHjacquard extends MY_Controller
 	{
 		
 		$this->load->library('excel');
+		ob_start();
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$corak     = $this->input->post('corak');
@@ -304,7 +305,7 @@ class HPHjacquard extends MY_Controller
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
-		$shift_arr = $this->input->post('shift[]');
+		$shift_arr = $this->input->post('shift');
 		$sales_group  = $this->input->post('sales_group');
 		$sales_order  = $this->input->post('sales_order');
 		$id_dept   = 'JAC';
@@ -741,12 +742,18 @@ class HPHjacquard extends MY_Controller
 		}
 
 
-    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="HPH Jacquard.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "HPH Jacquard.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
     }
 
 

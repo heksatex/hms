@@ -196,6 +196,7 @@ class HPHwarpingpanjang extends MY_Controller
 	{
 		
 		$this->load->library('excel');
+		ob_start();
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$nama_produk = $this->input->post('nama_produk');
@@ -204,7 +205,7 @@ class HPHwarpingpanjang extends MY_Controller
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
-		$shift_arr = $this->input->post('shift[]');		
+		$shift_arr = $this->input->post('shift');		
 		$id_dept   = 'WRP';
 		$where_date = '';
 		$loop       = 1;
@@ -460,12 +461,18 @@ class HPHwarpingpanjang extends MY_Controller
 
     	}
 
-        $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="HPH Warping Panjang.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "HPH Warping Panjang.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
 			
 	}
 
