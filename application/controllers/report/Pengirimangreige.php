@@ -117,7 +117,7 @@ class Pengirimangreige extends MY_Controller
 	{
 
 		$this->load->library('excel');
-
+		ob_start();
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
 		$departemen  = 'GRG';
@@ -126,8 +126,8 @@ class Pengirimangreige extends MY_Controller
 		$warna   		= addslashes($this->input->post('warna'));
 		$corak  		= addslashes($this->input->post('corak'));
 		$sales_group  	= $this->input->post('sales_group');
-		$view_arr  		= $this->input->post('view[]');
-		$status_arr 	= $this->input->post('status[]');
+		$view_arr  		= $this->input->post('view_arr');
+		$status_arr 	= $this->input->post('status_arr');
 
 		$dataRecord = [];
 
@@ -368,15 +368,18 @@ class Pengirimangreige extends MY_Controller
 			}
 		}
 
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file ='Pengiriman '.$dept['nama'].'.xlsx';
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
 		
-		$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-		$name_file ='Pengiriman '.$dept['nama'].'.xls';
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		die(json_encode($response));
 
 	}
 

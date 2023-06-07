@@ -52,7 +52,7 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/penerimaanharian/export_excel_in">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" >
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12"> 
@@ -125,8 +125,8 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" > <i class="fa fa-file-excel-o " style="color:green"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o " style="color:green"></i> Excel</button>
               </div>
               <br>
               <div class="col-md-12">
@@ -331,11 +331,18 @@
   });
 
 
-  // cek selisih saatu submit excel
-  $('#frm_periode').submit(function(){
+  // btn excel
+  $('#btn-excel').click(function(){
 
-    tgldari   = $('#tgldari').data("DateTimePicker").date();
-    tglsampai = $('#tglsampai').data("DateTimePicker").date();
+    tgldari    = $('#tgldari').val();
+    tglsampai  = $('#tglsampai').val();
+    departemen = $('#departemen').val();
+    dept_dari  = $('#dari').val();
+    kode       = $('#kode').val();
+    corak      = $('#corak').val();
+    tgldari_2     = $('#tgldari').data("DateTimePicker").date();
+    tglsampai_2   = $('#tglsampai').data("DateTimePicker").date();
+  
     var check_status   = false;
     var checkboxes_arr = new Array(); 
 
@@ -347,21 +354,57 @@
 
     }).get();
 
+    var radio_view= false;
+    var radio_arr = new Array(); 
+
+    var radio_arr = $('input[name="view[]"]').map(function(e, i) {
+          if(this.checked == true){
+              check_status = true;
+              return i.value;
+          }
+
+    }).get();
+
     var timeDiff = 0;
-    if (tglsampai) {
-        timeDiff = (tglsampai - tgldari) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+    if (tglsampai_2) {
+        timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
     }
     selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
 
-    if(tglsampai < tgldari){ // cek validasi tgl sampai kurang dari tgl Dari
+    if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
       alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
-      return false;
+      // return false;
     }else if (checkboxes_arr.length == 0) {
       alert_modal_warning('Status Harus Dipilih Salah satu !');
-      return false;
+      // return false;
     }else if( selisih > 30 ){
       alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 30 hari !')
-      return false;
+      // return false;
+    }else{
+      $.ajax({
+          "type":'POST',
+          "url" : "<?php echo site_url('report/penerimaanharian/export_excel_in')?>",
+          "data": {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr },
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert('Error Export Excel');
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status =="failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
     }
 
   });
