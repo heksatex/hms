@@ -32,6 +32,8 @@ class HPHfinbrushing extends MY_Controller
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
+		$no_go     = $this->input->post('no_go');
+		$warna     = $this->input->post('warna');
 		$sales_group  = $this->input->post('sales_group');
 		$sales_order  = $this->input->post('sales_order');
 		$shift_arr = $this->input->post('shift');// array shift pagi/siang/malam
@@ -172,6 +174,20 @@ class HPHfinbrushing extends MY_Controller
 				$where_sales_group  = '';
 			}
 
+
+			if(!empty($no_go)){
+				$where_no_go  = "AND pb.kode LIKE '%".addslashes($no_go)."%' ";
+			}else{
+				$where_no_go  = '';
+			}
+
+
+			if(!empty($warna)){
+				$where_warna  = "AND  LIKE '%".addslashes($warna)."%' ";
+			}else{
+				$where_warna  = '';
+			}
+
 			$dataRecord= [];
 
 			$lbr_jadi       = '';
@@ -179,7 +195,8 @@ class HPHfinbrushing extends MY_Controller
 	        $stitch         = '';
 	        $rpm            = '';
 
-			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ";
+			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ".$where_no_go." ".$where_warna;
+
 
 			$items = $this->m_HPHdf->get_list_HPH_df_by_kode($where);
 			foreach ($items as $val) {
@@ -187,39 +204,10 @@ class HPHfinbrushing extends MY_Controller
 				$mkt = $val->nama_sales_group;
 				$sc  = $val->sales_order;
 
-				// explode reff_note
-				$exp2  = explode('|', $val->reff_note);
-				$a     = 0;
-				foreach ($exp2 as $exps2) {
-					# code...
-					if($a == 9 ){// l.greige
-	                    $ex2 = explode('=', $exps2);
-						$b   = 1;
-						foreach ($ex2 as $exs2) {
-							if($b == 2){
-								$lbr_greige  = trim($exs2);
-							}
-							$b++;
-						}
-	                }
-	                if($a == 10){ // l.jadi
-	                    $ex2 = explode('=', $exps2);
-						$b   = 1;
-						foreach ($ex2 as $exs2) {
-							if($b == 2){
-								$lbr_jadi  = trim($exs2);
-							}
-							$b++;
-						}
-	                }
-	                
-	                $a++;
-				}
-
-
-				$dataRecord[] = array('kode' => $val->kode,
+					
+				$dataRecord[] = array('kode' 	   => $val->kode,
 									  'nama_mesin' => $val->nama_mesin,
-									  'sc'     => $sc,
+									  'sc'     	   => $sc,
 									  'tgl_hph'    => $val->tgl_hph,
 									  'kode_produk'=> $val->kode_produk,
 									  'nama_produk'=> $val->nama_produk,
@@ -236,7 +224,10 @@ class HPHfinbrushing extends MY_Controller
 									  'marketing'  => $mkt,
 									  'nama_user'  => $val->nama_user,
 									  'reff_note'  => $val->reff_note_sq,
-									  'lokasi'     => $val->lokasi
+									  'no_go'  	   => $val->no_go,
+									  'lokasi'     => $val->lokasi,
+									  'gl'		   => 1,
+									  'nama_warna' => $val->nama_warna
 									);
 				$lbr_jadi       = '';
 		        $lbr_greige     = '';
@@ -258,17 +249,20 @@ class HPHfinbrushing extends MY_Controller
 	{
 		
 		$this->load->library('excel');
+		ob_start();
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
-		$corak     = $this->input->post('corak');
 		$mo        = $this->input->post('mo');
+		$corak     = $this->input->post('corak');
 		$mc        = $this->input->post('mc');
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$jenis     = $this->input->post('jenis');
+		$no_go     = $this->input->post('no_go');
+		$warna     = $this->input->post('warna');
 		$sales_group  = $this->input->post('sales_group');
 		$sales_order  = $this->input->post('sales_order');
-		$shift_arr = $this->input->post('shift[]');
+		$shift_arr = $this->input->post('shift');// array shift pagi/siang/malam
 		$id_dept   = 'FBR';
 		$where_date = '';
 		$loop       = 1;
@@ -396,7 +390,7 @@ class HPHfinbrushing extends MY_Controller
 
 
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:U7")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:V7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -405,11 +399,19 @@ class HPHfinbrushing extends MY_Controller
 			      'style' => PHPExcel_Style_Border::BORDER_THIN
 			    )
 			  )
-		);	
+		);
+
+		$styleArray2 = array(
+			'borders' => array(
+			  'left' => array(
+				'style' => PHPExcel_Style_Border::BORDER_THIN
+			  )
+			)
+	  	);	
 
 
 		// header table
-    	$table_head_columns  = array('No', 'MG', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2','Grade','Lebar','Greige','Jadi','Marketing','Reff Note','Lokasi','User');
+		$table_head_columns  = array('No', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Warna', 'SC', 'MG', 'No Greige Out', 'No Mesin', 'Lot','GL','Qty1', 'Uom1','Qty2','Uom2', 'Grade', 'Lebar', 'Greige','Jadi','Marketing','Reff Note','Lokasi','User');
 
     	$column = 0;
     	$merge  = TRUE;
@@ -417,17 +419,17 @@ class HPHfinbrushing extends MY_Controller
         $count_merge = 0; // untuk jml yg di merge
     	foreach ($table_head_columns as $field) {
 
-    		if($column <= 12 OR $column >= 16){
+    		if($column <= 15 OR $column >= 19){
     			$columns = $column-$count_merge;
 	    		$object->getActiveSheet()->setCellValueByColumnAndRow($columns, 6, $field);  
     	        $object->getActiveSheet()->mergeCellsByColumnAndRow($columns, 6, $columns, 7);
     		}
 
-    		if($column >= 13 AND $column <= 15){
+    		if($column >= 16 AND $column <= 18){
     			if($merge == true){
 	    			$columns = $column;
 		    		$object->getActiveSheet()->setCellValueByColumnAndRow($columns, 6, $field);  
-	                $object->getActiveSheet()->mergeCells('N6:O6');// merge cell lebar
+	                $object->getActiveSheet(0)->mergeCells('Q6:R6');// merge cell lebar
 	                $count_merge++;
     			}else if($merge == false){
   					$columns = $column-$count_merge;
@@ -441,38 +443,38 @@ class HPHfinbrushing extends MY_Controller
     		$column++;
     	}
 
+
     	// set wraptext
-        $object->getActiveSheet()->getStyle('F6:F'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
+		$object->getActiveSheet()->getStyle('C6:C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 
 
-    	// set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S');
+    	// set wdith and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
     		$object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
             $object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
 
-            if($loop <= 1 OR $loop == 7){
-				$object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A, B, 
-            }else if($loop ==2){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(10); // index C
-            }else if($loop == 4){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index E
-            }else if($loop == 6 ){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(40); // index G
-            }else if($loop == 5 OR  ($loop >= 8 AND $loop <= 14)){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(9); // index F, I - Q
-            }else if($loop >=15 ){
-				$object->getSheet(0)->getColumnDimension($val)->setWidth(18); // index p-u
+            if($loop <= 0 or $loop == 5 or $loop == 6 or $loop == 7 or $loop == 9){
+				$object->getSheet(0)->getColumnDimension($val)->setAutoSize(true); // index A,F,G,H,J
+            }else if($loop == 1){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(20); // index B
+            }else if($loop == 2){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(9); // index C
+			}else if($loop == 3 or $loop == 4){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(40); // index D,E
+			}else if($loop == 8){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(10); // index I
+			}else if($loop >= 10 AND $loop <=17 ){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(10); // index K,L,M,N,O,P,Q
+			}else if($loop >=18 ){
+				$object->getSheet(0)->getColumnDimension($val)->setWidth(18); // index R
             }
 
            	$object->getActiveSheet()->getStyle($val.'6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
             $object->getActiveSheet()->getStyle($val.'7')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
-
-            $object->getActiveSheet()->getStyle($val.'6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
-            $object->getActiveSheet()->getStyle($val.'7')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
-
+            $object->getActiveSheet()->getStyle($val.'7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
 
             $loop++;
     	}
@@ -525,74 +527,73 @@ class HPHfinbrushing extends MY_Controller
 			$where_sales_group  = '';
 		}
 
+		if(!empty($no_go)){
+			$where_no_go  = "AND pb.kode LIKE '%".addslashes($no_go)."%' ";
+		}else{
+			$where_no_go  = '';
+		}
+
+
+		if(!empty($warna)){
+			$where_warna  = "AND w.nama_warna LIKE '%".addslashes($warna)."%' ";
+		}else{
+			$where_warna  = '';
+		}
+
     	//tbody
-		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ";
+		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ".$where_no_go." ".$where_warna;
     	$items = $this->m_HPHdf->get_list_HPH_df_by_kode($where);
     	$num   = 1;
+		$temp_mg 	= '';
+		$sum_mg  	= 0;
+		$sum_qty 	= 0;
+		$sum_qty2 	= 0;
 		foreach ($items as $val) {
 
 			$mkt = $val->nama_sales_group;
 			$sc  = $val->sales_order;
 
-			// explode reff_note
-			$exp2  = explode('|', $val->reff_note);
-			$a     = 0;
-			foreach ($exp2 as $exps2) {
-				# code...
-				if($a == 9 ){// l.greige
-                    $ex2 = explode('=', $exps2);
-					$b   = 1;
-					foreach ($ex2 as $exs2) {
-						if($b == 2){
-							$lbr_greige  = trim($exs2);
-						}
-						$b++;
-					}
-                }
-                if($a == 10){ // l.jadi
-                    $ex2 = explode('=', $exps2);
-					$b   = 1;
-					foreach ($ex2 as $exs2) {
-						if($b == 2){
-							$lbr_jadi  = trim($exs2);
-						}
-						$b++;
-					}
-                }
-                $a++;
+			if($temp_mg != '' && $temp_mg != $val->kode){
+				$this->total_group($object->getActiveSheet(),$temp_mg,$sum_mg,$sum_qty,$sum_qty2,$rowCount,$styleArray2);
+				$sum_mg = 0;
+				$sum_qty = 0;
+				$sum_qty2 = 0;
+				$num = 1;
+				$rowCount++;
 			}
 
 			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
-			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->kode);
-			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->nama_mesin);
-			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $sc);
-			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->tgl_hph);
-			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->kode_produk);
-			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->nama_produk);
-			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->lot);
-			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
-			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
-			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty2);
-			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->uom2);
-			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_grade);
-			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->lebar_greige.' '.$val->uom_lebar_greige);
-			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_jadi.' '.$val->uom_lebar_jadi);
-			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $mkt);
-			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->reff_note_sq);
-			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->lokasi);
-			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->nama_user);
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->tgl_hph);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->kode_produk);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->nama_produk);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->nama_warna);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $sc);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->kode);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->no_go);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->nama_mesin);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, 1);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->qty);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->uom);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->qty2);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->uom2);
+			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->nama_grade);
+			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->lebar_greige.' '.$val->uom_lebar_greige);
+			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->lebar_jadi.' '.$val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $mkt);
+			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->reff_note_sq);
+			$object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->lokasi);
+			$object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->nama_user);
 
-           	// set align
-            $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            $object->getActiveSheet()->getStyle('C'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            $object->getActiveSheet()->getStyle('D'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            $object->getActiveSheet()->getStyle('M'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			// set align
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $object->getActiveSheet()->getStyle('G'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $object->getActiveSheet()->getStyle('H'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $object->getActiveSheet()->getStyle('I'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $object->getActiveSheet()->getStyle('p'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             
-            // set wrapText
-            $object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-            $object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
-
-
+          
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
@@ -614,22 +615,52 @@ class HPHfinbrushing extends MY_Controller
 			$object->getActiveSheet()->getStyle('Q'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('T'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('V'.$rowCount)->applyFromArray($styleArray);
 
 		
 			$lbr_jadi       = '';
 	        $lbr_greige     = '';
 	        $stitch         = '';
 	        $rpm            = '';
+			$temp_mg 		= $val->kode;
+            $sum_qty 		= $sum_qty + ($val->qty);
+            $sum_qty2 		= $sum_qty2 + ($val->qty2);
+            $sum_mg++;
 	        $rowCount++;
 		}
 
-    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-        $nama_file = "HPH ".$cek['nama'].".xls";
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="'.$nama_file.'"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "HPH ".$cek['nama'].".xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
     }
+
+	function total_group($sheet,$mg,$sum_mg,$sum_qty,$sum_qty2,$rowCount,$styleArray2)
+  	{ 
+
+		$sheet->SetCellValue('A'.$rowCount, '');
+		$sheet->SetCellValue('F'.$rowCount, 'TOTAL '.$mg);
+		$sheet->mergeCells('F'.$rowCount.':G'.$rowCount);
+
+		$sheet->SetCellValue('K'.$rowCount, $sum_mg);
+		$sheet->SetCellValue('L'.$rowCount, $sum_qty);
+		$sheet->SetCellValue('N'.$rowCount, $sum_qty2);
+		$sheet->getStyle('A'.$rowCount)->applyFromArray($styleArray2);
+		$sheet->getStyle('W'.$rowCount)->applyFromArray($styleArray2);
+
+		$sheet->getStyle("A".$rowCount.":V".$rowCount)->getFont()->setBold(true);
+     
+      	return;
+  	}
 
 }
