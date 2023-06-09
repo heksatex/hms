@@ -348,6 +348,30 @@
                                   <select type="text" class="form-control input-sm" name="product_parent" id="product_parent" > </select>
                                 </div>                                    
                             </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4">Sub Parent</div>
+                                <div class="col-xs-8 col-md-8">
+                                  <select type="text" class="form-control input-sm" name="sub_parent" id="sub_parent" > </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4">Jenis Kain</div>
+                              <div class="col-xs-8">
+                                <select class="form-control input-sm" name="jenis_kain" id="jenis_kain" >
+                                  <option value=""></option>
+                                  <?php foreach ($jenis_kain as $row) {
+                                    if($row->id==$produk->id_jenis_kain){?>
+                                      <option value='<?php echo $row->id; ?>' selected><?php echo $row->nama_jenis_kain;?></option>
+                                  <?php
+                                    }else{?>                                    
+                                      <option value='<?php echo $row->id; ?>'><?php echo $row->nama_jenis_kain;?></option>
+                                  <?php 
+                                    }
+                                    }
+                                  ?>
+                                </select>                                
+                              </div>               
+                            </div>
                           </div>
                         </div>
                         
@@ -585,7 +609,7 @@
   });
 
   var id_parent      = "<?php echo $produk->id_parent ?>";
-  var nama_parent    = "<?php echo $produk->nama_parent ?>";
+  var nama_parent    = "<?php echo htmlspecialchars($produk->nama_parent) ?>";
     
   //untuk event selected select2 uom
   var $newOptionuom = $("<option></option>").val(id_parent).text(nama_parent);
@@ -611,6 +635,47 @@
                 results.push({
                     id:item.id,
                     text:item.nama
+                });
+              });
+              return {
+                results:results
+              };
+            },
+            error: function (xhr, ajaxOptions, thrownError){
+              //alert('Error data');
+              //alert(xhr.responseText);
+            }
+      }
+  });
+
+  
+  var id_sub_parent      = "<?php echo $produk->id_sub_parent ?>";
+  var nama_sub_parent    = "<?php echo htmlentities($produk->nama_sub_parent); ?>"; 
+    
+  //untuk event selected select2 id_sub_parent
+  var $newOptionuom = $("<option></option>").val(id_sub_parent).html(nama_sub_parent);
+  $("#sub_parent").empty().append($newOptionuom).trigger('change'); 
+
+  //select 2 produk parent
+  $('#sub_parent').select2({
+      allowClear: true,
+      placeholder: "",
+      ajax:{
+            dataType: 'JSON',
+            type : "POST",
+            url : "<?php echo base_url();?>warehouse/produk/get_product_sub_parent_select2",
+            //delay : 250,
+            data : function(params){
+              return{
+                nama:params.term,
+              };
+            }, 
+            processResults:function(data){
+              var results = [];
+              $.each(data, function(index,item){
+                results.push({
+                    id:item.id,
+                    text:item.nama_sub_parent
                 });
               });
               return {
@@ -671,6 +736,8 @@
                 tanggaldibuat   : $('#tanggaldibuat').val(),
                 note            : $('#note').val(),
                 product_parent  : $('#product_parent').val(),
+                sub_parent      : $('#sub_parent').val(),
+                jenis_kain      : $('#jenis_kain').val(),
                 statusproduk   : $('#status').val(),// aktif/tidak aktif
                 status          : 'edit',
 
