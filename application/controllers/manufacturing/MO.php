@@ -4434,7 +4434,7 @@ class MO extends MY_Controller
                     if($cek_ba['berat'] > 0 AND $cek_ba['air'] > 0 ){
 
                         //lock table
-                        $this->_module->lock_tabel('warna WRITE, warna_items WRITE, mrp_route WRITE, stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production_rm_target WRITE, mrp_production WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
+                        $this->_module->lock_tabel('warna WRITE, warna_items WRITE, mrp_route WRITE, stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production_rm_target WRITE, mrp_production WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, mst_produk WRITE');
                         
                         //cek_status= cek_status_warna;status=ready,request,done
                         $cek_status = $this->m_mo->cek_status_warna($warna)->row_array();
@@ -4472,159 +4472,176 @@ class MO extends MY_Controller
                             $rm_row   = 1;
                             $ba      = $this->m_mo->get_berat_air_by_kode($kode)->row_array();
                             $sm_row  = 1;///stock move row_order
-                            $empty_item = TRUE;
+                            $empty_item       = TRUE;
+                            $produk_aktif     = TRUE;
 
-                            foreach($route as $val){
-                          
-                                $mthd          = explode("|",$val->method);
-                                $method_dept   = trim($mthd[0]);
-                                $method_action = trim($mthd[1]);
-                                $smp_row    = 1;//stock move produk row_order
-
-                                //stock move 
-                                $origin = $orgn;
-                                $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin."','".$val->method."','".$val->lokasi_dari."','".$val->lokasi_tujuan."','draft','".$sm_row."','".$source_move."'), ";
-                                $sm_row = $sm_row + 1;
-                                
-
-                                if($method_action == 'OUT'){//pengiriman barang
-
-                                    if($i=="1"){
-                                       $arr_kode[$val->method]= $this->_module->get_kode_pengiriman($method_dept);
-                                    }else{
-                                       $arr_kode[$val->method]= $arr_kode[$val->method] + 1;
-                                    }
-                                    $dgt=substr("00000" . $arr_kode[$val->method],-5);            
-                                    $kode_out = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
-                                   
-                                    //pengiriman barang
-                                    $sql_out_batch  .= "('".$kode_out."','".$tgl."','".$tgl."','".$tgl."','','draft','".$method_dept."','".$origin."','".$move_id."','".$val->lokasi_dari."','".$val->lokasi_tujuan."'), ";
-                                   
-                                    //source move 
-                                    $source_move = $move_id;
-
-                                    //get mms kode berdasarkan dept_id
-                                    $mms = $this->_module->get_kode_sub_menu_deptid('pengirimanbarang',$method_dept)->row_array();
-                                    if(!empty($mms['kode'])){
-                                        $mms_kode = $mms['kode'];
-                                    }else{
-                                        $mms_kode = '';
-                                    }
-
-                                    //create log history pengiriman_barang
-                                    $note_log = $kode_out.' | '.$origin;
-                                    $date_log = date('Y-m-d H:i:s');
-                                    $sql_log_history_out .= "('".$date_log."','".$mms_kode."','".$kode_out."','create','".$note_log."','".$nama_user."'), ";
-
-                                    //upddate pengiriman reff picking
-                                    $reff_picking_out = $kode_out."|".$deptid;
-                                    $case4  .= "when kode = '".$kode_out."' then '".$reff_picking_out."'";
-                                    $where4 .= "'".$kode_out."',";
-    	                 
-
-                                }else if($method_action =='IN'){//penerimaan barang
-
-                                    if($i=="1"){
-                                      $arr_kode[$val->method]= $this->_module->get_kode_penerimaan($method_dept);
-                                    }else{
-                                      $arr_kode[$val->method]= $arr_kode[$val->method] + 1;
-                                    }
-                                    $dgt     = substr("00000" . $arr_kode[$val->method],-5);            
-                                    $kode_in = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
-                                  
-                                    //penerimaan barang 
-                                    $reff_picking_in = $kode_out."|".$kode_in;
-                                    $sql_in_batch   .= "('".$kode_in."','".$tgl."','".$tgl."','".$tgl."','','draft','".$method_dept."','".$origin."','".$move_id."','".$reff_picking_in."','".$val->lokasi_dari."','".$val->lokasi_tujuan."'), "; 
-
-                                    //upddate pengiriman
-                                    $reff_picking_out = $kode_out."|".$kode_in;
-                                    $case  .= "when kode = '".$kode_out."' then '".$reff_picking_out."'";
-                                    $where .= "'".$kode_out."',";
-                                    $kode_out    = "";
-
-                                    //source move 
-                                    $source_move = $move_id;
-
-                                     //get mms kode berdasarkan dept_id
-                                    $mms = $this->_module->get_kode_sub_menu_deptid('penerimaanbarang',$method_dept)->row_array();
-                                    if(!empty($mms['kode'])){
-                                        $mms_kode = $mms['kode'];
-                                    }else{
-                                        $mms_kode = '';
-                                    }
-
-                                    //create log history penerimaan_barang
-                                    $note_log = $kode_in.' | '.$origin;
-                                    $date_log = date('Y-m-d H:i:s');
-                                    $sql_log_history_in .= "('".$date_log."','".$mms_kode."','".$kode_in."','create','".addslashes($note_log)."','".$nama_user."'), ";
+                            // cek produk dti aktif/tidak 
+                            foreach($kode_warna as $row){
+                                $stat_produk = $this->_module->get_status_aktif_by_produk(addslashes($row->kode_produk))->row_array();// status produk aktif/tidak
+                                $empty_item = FALSE;
+                                if($stat_produk['status_produk']!= 't'){
+                                    $produk_aktif     = FALSE;
+                                    break;
                                 }
+                            }
 
-                                $last_num_origin = 1;
+                            if($produk_aktif == TRUE AND $empty_item == FALSE){
 
-                                foreach($kode_warna as $row){
-                                    $empty_item = FALSE;
+                                foreach($route as $val){
+                            
+                                    $mthd          = explode("|",$val->method);
+                                    $method_dept   = trim($mthd[0]);
+                                    $method_action = trim($mthd[1]);
+                                    $smp_row    = 1;//stock move produk row_order
 
-                                    $kode_prod  = $row->kode_produk;
-                                    $nama_prod  = $row->nama_produk;
-                                    $qty        = $row->qty;
-                                    $uom        = $row->uom;
-                                    $reff_notes = $row->reff_note;
-                                    $type_obat  = $row->type_obat;
-
-                                    if($type_obat =='DYE'){
-                                        $qty_asli  = $qty*$ba['berat']*10;
-                                    }else if($type_obat == 'AUX'){
-                                        $qty_asli  = $qty*$ba['air'];
-                                    }
-
-                                    if($method_action =='CON'){
-                                        $origin_prod = $kode_prod.'_'.$last_num_origin;
-                                    }else{
-                                        $origin_prod = $kode_prod.'_'.$last_num_origin;
-                                        //$origin_prod = '';
-                                    }
-
-                                    //stock move produk
-                                    $sql_stock_move_produk_batch .= "('".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."','".$origin_prod."'), ";
+                                    //stock move 
+                                    $origin = $orgn;
+                                    $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin."','".$val->method."','".$val->lokasi_dari."','".$val->lokasi_tujuan."','draft','".$sm_row."','".$source_move."'), ";
+                                    $sm_row = $sm_row + 1;
+                                    
 
                                     if($method_action == 'OUT'){//pengiriman barang
 
-                                        $sql_out_items_batch .= "('".$kode_out."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."','".$origin_prod."'), ";
-                                        $last_num_origin = $last_num_origin + 1;
-
-                                        //update reff notes pengiriman 
-                                        $case2  .= "when kode = '".$kode_out."' then '".$reff_notes."'";
-                                        $where2 .= "'".$kode_out."',";
+                                        if($i=="1"){
+                                        $arr_kode[$val->method]= $this->_module->get_kode_pengiriman($method_dept);
+                                        }else{
+                                        $arr_kode[$val->method]= $arr_kode[$val->method] + 1;
+                                        }
+                                        $dgt=substr("00000" . $arr_kode[$val->method],-5);            
+                                        $kode_out = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
                                     
+                                        //pengiriman barang
+                                        $sql_out_batch  .= "('".$kode_out."','".$tgl."','".$tgl."','".$tgl."','','draft','".$method_dept."','".$origin."','".$move_id."','".$val->lokasi_dari."','".$val->lokasi_tujuan."'), ";
+                                    
+                                        //source move 
+                                        $source_move = $move_id;
+
+                                        //get mms kode berdasarkan dept_id
+                                        $mms = $this->_module->get_kode_sub_menu_deptid('pengirimanbarang',$method_dept)->row_array();
+                                        if(!empty($mms['kode'])){
+                                            $mms_kode = $mms['kode'];
+                                        }else{
+                                            $mms_kode = '';
+                                        }
+
+                                        //create log history pengiriman_barang
+                                        $note_log = $kode_out.' | '.$origin;
+                                        $date_log = date('Y-m-d H:i:s');
+                                        $sql_log_history_out .= "('".$date_log."','".$mms_kode."','".$kode_out."','create','".$note_log."','".$nama_user."'), ";
+
+                                        //upddate pengiriman reff picking
+                                        $reff_picking_out = $kode_out."|".$deptid;
+                                        $case4  .= "when kode = '".$kode_out."' then '".$reff_picking_out."'";
+                                        $where4 .= "'".$kode_out."',";
+                            
+
                                     }else if($method_action =='IN'){//penerimaan barang
-                                       
-                                        $sql_in_items_batch   .= "('".$kode_in."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."'), "; 
-                                        //update reff notes penerimaan
-                                        $case3 .= "when kode = '".$kode_in."' then '".$reff_notes."'";
-                                        $where3 .= "'".$kode_in."',";
 
-                                    }else if($method_action =='CON'){
+                                        if($i=="1"){
+                                        $arr_kode[$val->method]= $this->_module->get_kode_penerimaan($method_dept);
+                                        }else{
+                                        $arr_kode[$val->method]= $arr_kode[$val->method] + 1;
+                                        }
+                                        $dgt     = substr("00000" . $arr_kode[$val->method],-5);            
+                                        $kode_in = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
+                                    
+                                        //penerimaan barang 
+                                        $reff_picking_in = $kode_out."|".$kode_in;
+                                        $sql_in_batch   .= "('".$kode_in."','".$tgl."','".$tgl."','".$tgl."','','draft','".$method_dept."','".$origin."','".$move_id."','".$reff_picking_in."','".$val->lokasi_dari."','".$val->lokasi_tujuan."'), "; 
 
-                                        $sql_rm_target_batch  .= "('".$kode."','".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','".$rm_row."','".$origin_prod."','draft','".$qty."','".$reff_notes."'), ";
-                                        //rm + 1
-                                        $rm_row =  $rm_row  + 1;
-                                        $last_num_origin = $last_num_origin + 1;
+                                        //upddate pengiriman
+                                        $reff_picking_out = $kode_out."|".$kode_in;
+                                        $case  .= "when kode = '".$kode_out."' then '".$reff_picking_out."'";
+                                        $where .= "'".$kode_out."',";
+                                        $kode_out    = "";
+
+                                        //source move 
+                                        $source_move = $move_id;
+
+                                        //get mms kode berdasarkan dept_id
+                                        $mms = $this->_module->get_kode_sub_menu_deptid('penerimaanbarang',$method_dept)->row_array();
+                                        if(!empty($mms['kode'])){
+                                            $mms_kode = $mms['kode'];
+                                        }else{
+                                            $mms_kode = '';
+                                        }
+
+                                        //create log history penerimaan_barang
+                                        $note_log = $kode_in.' | '.$origin;
+                                        $date_log = date('Y-m-d H:i:s');
+                                        $sql_log_history_in .= "('".$date_log."','".$mms_kode."','".$kode_in."','create','".addslashes($note_log)."','".$nama_user."'), ";
                                     }
 
-                                    //smp row_order + 1
-                                    $smp_row = $smp_row + 1;
+                                    $last_num_origin = 1;
 
-                                }
-                                //move id + 1
-                                $last_move = $last_move + 1;
-                                $move_id   = "SM".$last_move;
-                                //$i=$i+1;
+                                    foreach($kode_warna as $row){
+                                        $empty_item = FALSE;
 
-                            } // end foreach route
+                                        $kode_prod  = addslashes($row->kode_produk);
+                                        $nama_prod  = addslashes($row->nama_produk);
+                                        $qty        = $row->qty;
+                                        $uom        = $row->uom;
+                                        $reff_notes = addslashes($row->reff_note);
+                                        $type_obat  = $row->type_obat;
 
-                            if($empty_item == TRUE){
+                                        if($type_obat =='DYE'){
+                                            $qty_asli  = $qty*$ba['berat']*10;
+                                        }else if($type_obat == 'AUX'){
+                                            $qty_asli  = $qty*$ba['air'];
+                                        }
+
+                                        if($method_action =='CON'){
+                                            $origin_prod = $kode_prod.'_'.$last_num_origin;
+                                        }else{
+                                            $origin_prod = $kode_prod.'_'.$last_num_origin;
+                                            //$origin_prod = '';
+                                        }
+
+                                        //stock move produk
+                                        $sql_stock_move_produk_batch .= "('".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."','".$origin_prod."'), ";
+
+                                        if($method_action == 'OUT'){//pengiriman barang
+
+                                            $sql_out_items_batch .= "('".$kode_out."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."','".$origin_prod."'), ";
+                                            $last_num_origin = $last_num_origin + 1;
+
+                                            //update reff notes pengiriman 
+                                            $case2  .= "when kode = '".$kode_out."' then '".$reff_notes."'";
+                                            $where2 .= "'".$kode_out."',";
+                                        
+                                        }else if($method_action =='IN'){//penerimaan barang
+                                        
+                                            $sql_in_items_batch   .= "('".$kode_in."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','draft','".$smp_row."'), "; 
+                                            //update reff notes penerimaan
+                                            $case3 .= "when kode = '".$kode_in."' then '".$reff_notes."'";
+                                            $where3 .= "'".$kode_in."',";
+
+                                        }else if($method_action =='CON'){
+
+                                            $sql_rm_target_batch  .= "('".$kode."','".$move_id."','".$kode_prod."','".$nama_prod."','".$qty_asli."','".$uom."','".$rm_row."','".$origin_prod."','draft','".$qty."','".$reff_notes."'), ";
+                                            //rm + 1
+                                            $rm_row =  $rm_row  + 1;
+                                            $last_num_origin = $last_num_origin + 1;
+                                        }
+
+                                        //smp row_order + 1
+                                        $smp_row = $smp_row + 1;
+
+                                    }
+                                    //move id + 1
+                                    $last_move = $last_move + 1;
+                                    $move_id   = "SM".$last_move;
+                                    //$i=$i+1;
+
+                                } // end foreach route
+                            }
+
+                            if($produk_aktif == FALSE){
                                 //action sql query
-                                $callback = array('message' => 'Maaf, Resep Obat Dyeing Stuff atau AUX masih belum tersedia ! ',  'status' => 'failed' );
+                                $callback = array('message' => 'Maaf, Obat Dyeing Stuff atau Auxiliary tidak atkif  ! ',  'status' => 'failed' );
+                            }else if($empty_item == TRUE){
+                                //action sql query
+                                $callback = array('message' => 'Maaf, Resep Obat Dyeing Stuff atau Auxiliary masih belum tersedia ! ',  'status' => 'failed' );
 
                             }else{
 
