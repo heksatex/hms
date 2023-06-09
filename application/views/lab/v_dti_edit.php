@@ -706,6 +706,7 @@
                 $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
                 $('#btn-edit').show();
                 $('#btn-generate').show();
+                $('#btn-duplicate').show();
                 unsaved = false;
               }
             },
@@ -836,6 +837,7 @@
               $('#table_dyest tbody').remove();
               $('#table_aux tbody').remove();
               $('#add-varian').button('loading');
+              $("#btn-duplicate").hide();
           },
           success: function(data){
 
@@ -929,6 +931,8 @@
         $('#tab-list').append('<li id="btn_tabs"><button type="button" id="add-varian" class="btn btn-primary btn-sm" title="Tambah Varian Warna"> <i class="fa fa-plus"> Tambah Varian</i></button></li>');
         $('#btn-edit').show();
         $('#btn-generate').show();
+        $("#btn-duplicate").show();
+
   });
 
    // hapus row
@@ -953,6 +957,8 @@
       var empty = false;
       var empty2 = false;
       var empty3= false;
+      var dye_same = false;
+      var dye_same_arr = [];
 
       $("#table_dyest tbody[id='tbody_dye'] .kode_produk").each(function(index, element) {
             if ($(element).val()!=="" && $(element).val()!==null) {
@@ -964,7 +970,17 @@
                 uom 		    :$(element).parents("tr").find("#uom").val(),
                 reff_note 	:$(element).parents("tr").find("#reff").val(),
               });
-              $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+
+              value = $(element).val();
+              if(dye_same_arr.indexOf(value) == -1){
+                  dye_same_arr.push(value);
+                  $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+
+              }else{
+                  $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+                  dye_same = true;
+                  alert_notify('fa fa-warning','Product Dyeing Stuff tidak boleh sama ','danger',function(){});
+              }
             }else{
               empty = true;
               $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
@@ -1032,7 +1048,7 @@
       }); 
 
 
-      if(!empty && !empty2 && !empty3 ){
+      if(!empty && !empty2 && !empty3 && !dye_same){
 
         //alert(''+JSON.stringify(arr2));
         $('#save-varian').button('loading');
@@ -1052,8 +1068,11 @@
                 alert_modal_warning(data.message);
                 window.location.replace('../index');
             }else if(data.status == 'failed'){
-                alert_modal_warning(data.message);
-                //alert_notify(data.icon,data.message,data.type,function(){});
+              if(data.double == 'yes'){
+                  alert_notify(data.icon,data.message,data.type,function(){});
+                }else{
+                  alert_modal_warning(data.message);
+                }
             }else{
                 $(".add-new").show();                   
                 $("#foot").load(location.href + " #foot");
@@ -1143,6 +1162,9 @@
         var n_uom = $(tbl+" td input[name='Uom']");
 		    var inx_n_uom = n_uom.length-1;
 
+        // var dye_same = false;
+        var dye_same_arr = [];
+
         //cek Product apa ada yg kosong
         $(tbl+' .kode_produk').each(function(index,value){
           if($(value).val()=='' || $(value).val() == null){
@@ -1156,7 +1178,21 @@
               $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
               tambah = false;
           }else{
+            value = $(value).val();
+            if(table == 'table_dyest'){
+              if(dye_same_arr.indexOf(value) == -1){
+                  dye_same_arr.push(value);
+                  $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+              }else{
+                  // dye_same  = true;
+                  //tambah    = false;
+                  $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+                  alert_notify('fa fa-warning','Product Dyeing Stuff tidak boleh sama ','danger',function(){});
+              }
+            }else{
               $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+            }
+              
           }
         });
         
@@ -1671,6 +1707,8 @@
     var empty = false;
     var empty2= false;
     var empty3= false;
+    var dye_same = false;
+    var dye_same_arr = [];
 
     $("#table_dyest tbody[id='tbody_dye'] .kode_produk").each(function(index, element) {
 					if ($(element).val()!=="" && $(element).val()!==null) {
@@ -1682,7 +1720,17 @@
 							uom 		    :$(element).parents("tr").find("#uom").val(),
 							reff_note 	:$(element).parents("tr").find("#reff").val(),
 						});
-            $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+            // $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+            value = $(element).val();
+            if(dye_same_arr.indexOf(value) == -1){
+                dye_same_arr.push(value);
+                $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+
+            }else{
+                $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+                dye_same = true;
+                alert_notify('fa fa-warning','Product Dyeing Stuff tidak boleh sama ','danger',function(){});
+            }
 					}else{
             empty = true;
             $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
@@ -1750,7 +1798,7 @@
 		}); 
    
 
-    if(!empty && !empty2 && !empty3 ){
+    if(!empty && !empty2 && !empty3 && !dye_same){
     
       $('#btn-simpan').button('loading');
       please_wait(function(){});
@@ -1792,11 +1840,11 @@
                   setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
               $("#foot").load(location.href + " #foot");
+              reloadForm(id_varian)
             }
             $("#status_head").load(location.href + " #status_head");
             $("#status_bar").load(location.href + " #status_bar");
             $('#btn-simpan').button('reset');
-            reloadForm(id_varian)
           },error: function (xhr, ajaxOptions, thrownError) { 
             alert(xhr.responseText);
             setTimeout($.unblockUI, 1000); 
