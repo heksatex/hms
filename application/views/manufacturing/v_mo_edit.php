@@ -463,7 +463,7 @@
                                   <td align="right"><?php echo number_format($qty_rm_sisa,2)?></td>
                                   <td><?php echo $row->uom?></td>
                                   <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty) AND $row->status == 'ready')echo number_format($row->sum_qty,2); if($row->status == 'cancel' AND $row->sum_qty_cancel > 0) echo number_format($row->sum_qty_cancel,2); ?></td>
-                                  <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
+                                  <td><?php echo $row->status;?></td>
                                   <td><?php echo $row->reff?></td>
                                   <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0 ){?>
                                     <a href="javascript:void(0)" onclick="tambah_quant('<?php echo $row->kode_produk ?>','<?php echo $row->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
