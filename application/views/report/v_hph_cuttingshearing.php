@@ -251,10 +251,11 @@
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="21" align="center">Tidak ada Data</td>
+                              <td colspan="21">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
+                      <small><b>*Jika terdapat baris yang berwarna <font color="red">MERAH</font> maka Product/Lot tersebut telah di proses ADJUSTMENT !!</b></small>
                       <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                         Processing...
                       </div>
@@ -455,32 +456,37 @@
                     let empty = true;
 
                     $.each(data.record, function(key, value){
+                        if(value.lot_adj != ''){
+                          color = "style='color:red';";
+                        }else{
+                          color = "";
+                        }
                         empty = false;
                         var tr = $("<tr>").append(
-                                 $("<td>").text(no++),
-                                 $("<td>").text(value.kode),
-                                 $("<td>").text(value.nama_mesin),
-                                 $("<td>").text(value.sc),
-                                 $("<td>").text(value.tgl_hph),
-                                 $("<td>").text(value.kode_produk),
-                                 $("<td>").text(value.nama_produk),
-                                 $("<td>").text(value.lot),
-                                 $("<td align='right'>").text(value.qty1),
-                                 $("<td>").text(value.uom1),
-                                 $("<td align='right'>").text(value.qty2),
-                                 $("<td>").text(value.uom2),
-                                 $("<td>").text(value.grade),
-                                 $("<td>").text(value.lbr_greige),
-                                 $("<td>").text(value.lbr_jadi),
-                                 $("<td>").text(value.marketing),
-                                 $("<td>").text(value.reff_note),
-                                 $("<td>").text(value.lokasi),
-                                 $("<td>").text(value.nama_user),
+                                 $("<td "+color+">").text(no++),
+                                 $("<td "+color+">").text(value.kode),
+                                 $("<td "+color+">").text(value.nama_mesin),
+                                 $("<td "+color+">").text(value.sc),
+                                 $("<td "+color+">").text(value.tgl_hph),
+                                 $("<td "+color+">").text(value.kode_produk),
+                                 $("<td "+color+">").text(value.nama_produk),
+                                 $("<td "+color+">").text(value.lot),
+                                 $("<td "+color+" align='right'>").text(value.qty1),
+                                 $("<td "+color+">").text(value.uom1),
+                                 $("<td "+color+" align='right'>").text(value.qty2),
+                                 $("<td "+color+">").text(value.uom2),
+                                 $("<td "+color+">").text(value.grade),
+                                 $("<td "+color+">").text(value.lbr_greige),
+                                 $("<td "+color+">").text(value.lbr_jadi),
+                                 $("<td "+color+">").text(value.marketing),
+                                 $("<td "+color+">").text(value.reff_note),
+                                 $("<td "+color+">").text(value.lokasi),
+                                 $("<td "+color+">").text(value.nama_user),
                         );
                         tbody.append(tr);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='21' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='21'>").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);

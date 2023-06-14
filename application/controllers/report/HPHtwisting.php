@@ -194,7 +194,8 @@ class HPHtwisting extends MY_Controller
 									  'qty2'	   => $val->qty2,
 									  'uom2'       => $val->uom2,
 									  'nama_user'  => $val->nama_user,
-									  'reff_note'  => $val->reff_note,
+									  'reff_note'  => $val->reff_note,									  
+									  'lot_adj'    => $val->lot_adj
 									);
 			}
 
@@ -361,6 +362,18 @@ class HPHtwisting extends MY_Controller
 			    )
 			  )
 		);	
+		
+		$styleArrayColor = array(
+			'font'  => array(
+				'bold'  => true,
+				'color' => array('rgb' => 'FF0000'),
+			),
+			'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			)
+	  	);	
 
 
 		// header table
@@ -474,24 +487,30 @@ class HPHtwisting extends MY_Controller
 				$object->getActiveSheet()->SetCellValue('P'.$rowCount, $row->nama_user);
 
     		}
+
+			if($row->lot_adj != ''){
+				$styleCell = $styleArrayColor;
+			}else{
+				$styleCell = $styleArray;
+			}
 			//set border true
-			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleCell);
 			
 			$rowCount++;
 
