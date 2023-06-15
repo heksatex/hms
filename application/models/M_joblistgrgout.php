@@ -93,7 +93,7 @@ class M_joblistgrgout extends CI_Model
 		$this->db->where('dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		$this->db->where_in('pb.status',array('ready','draft'));
-		if($_POST['length'] != -1)
+		if(isset($_POST["length"]) && $_POST["length"] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
 		return $query->result();

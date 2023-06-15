@@ -23,31 +23,36 @@ class Lokasi extends MY_Controller
 
   function get_data()
   {
-    $list = $this->m_lokasi->get_datatables();
-    $data = array();
-    $no = $_POST['start'];
-    foreach ($list as $field) {
-          $kode_encrypt = encrypt_url($field->id);
-          $no++;
-          $row = array();
-          $row[] = $no;
-          $row[] = $field->departemen;
-          $row[] = '<a href="'.base_url('warehouse/lokasi/edit/'.$kode_encrypt).'">'.$field->kode_lokasi.'</a>';
-          $row[] = $field->nama_lokasi;
-          $row[] = $field->arah_panah;
-          $row[] = $field->nama_status;
+    if(isset($_POST['start']) && isset($_POST['draw'])){
 
-          $data[] = $row;
+      $list = $this->m_lokasi->get_datatables();
+      $data = array();
+      $no = $_POST['start'];
+      foreach ($list as $field) {
+            $kode_encrypt = encrypt_url($field->id);
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = $field->departemen;
+            $row[] = '<a href="'.base_url('warehouse/lokasi/edit/'.$kode_encrypt).'">'.$field->kode_lokasi.'</a>';
+            $row[] = $field->nama_lokasi;
+            $row[] = $field->arah_panah;
+            $row[] = $field->nama_status;
+
+            $data[] = $row;
+      }
+        
+      $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $this->m_lokasi->count_all(),
+            "recordsFiltered" => $this->m_lokasi->count_filtered(),
+            "data" => $data,
+      );
+        //output dalam format JSON
+      echo json_encode($output);
+    }else{
+      die();
     }
-      
-    $output = array(
-          "draw" => $_POST['draw'],
-          "recordsTotal" => $this->m_lokasi->count_all(),
-          "recordsFiltered" => $this->m_lokasi->count_filtered(),
-          "data" => $data,
-    );
-      //output dalam format JSON
-    echo json_encode($output);
   }
 
   public function add()
