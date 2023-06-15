@@ -175,7 +175,15 @@ class Colororder extends MY_Controller
             $sql_update_batch     = "";
             $case                 = "";
             $where                = "";
-            $sql_bom_batch         ="";
+            $case2                = "";
+            $where2               = "";
+            $case3                = "";
+            $where3               = "";
+            $case4                = "";
+            $where4               = "";
+            $case5                = "";
+            $where5               = "";
+            $sql_bom_batch        ="";
             $sql_bom_items_batch  ="";
             $source_move          = "";
             $sql_stock_move_batch        = "";
@@ -200,7 +208,7 @@ class Colororder extends MY_Controller
             $uom_rm_target        = '';
 
             // lock tabel
-            $this->m_colorOrder->lock_tabel('mst_produk WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE, color_order_detail as cod WRITE,color_order_detail WRITE, color_order co WRITE, bom WRITE, bom_items WRITE, stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, Warna WRITE, warna_items WRITE, color_order_detail as b WRITE, color_order as a WRITE, color_order WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, mst_category WRITE');
+            $this->m_colorOrder->lock_tabel('mst_produk WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE, color_order_detail as cod WRITE,color_order_detail WRITE, color_order co WRITE, bom WRITE, bom_items WRITE, stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, Warna WRITE, warna_items WRITE, color_order_detail as b WRITE, color_order as a WRITE, color_order WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, mst_category WRITE, mst_produk_sub_parent WRITE, mst_produk_parent WRITE, mst_jenis_kain WRITE');
 
             // cek status color_order_details
             $cek_status = $this->m_colorOrder->cek_status_color_order_details_by_row($kode_co,$row)->row_array();
@@ -219,10 +227,19 @@ class Colororder extends MY_Controller
                 $callback = array('status' => 'failed','message' => 'Maaf, Status tidak valid !', 'icon' =>'fa fa-check', 'type' => 'danger');
               }else{
 
-                $nama_produk_empty  = '';
                 $produk_empty       = FALSE;
                 $warna_empty        = FALSE;
                 $route_empty        = FALSE;
+                $id_parent_empty      = FALSE;
+                $id_jenis_kain_empty  = FALSE;
+                $id_sub_parent_empty  = FALSE;
+                $id_jenis_kain_empty  = FALSE;
+                $produk_aktif = TRUE;
+
+             
+                $nama_produk_empty  = '';
+                $nama_produk_parent_empty     = "";
+                $nama_produk_jenis_kain_empty = "";
 
                 $cdi  = $this->m_colorOrder->get_color_order_details_by_row($kode_co,$row);
                 foreach ($cdi as $val) {
@@ -241,33 +258,65 @@ class Colororder extends MY_Controller
                     break;
                   }
 
+                  $stat_produk = $this->_module->get_status_aktif_by_produk(addslashes($kode_produk))->row_array();// status produk aktif/tidak
+                  if($stat_produk['status_produk']!= 't'){
+                    $produk_aktif     = FALSE;
+                    break;
+                  }
+
                   // nama warna by id_warna
                   $cek_warna = $this->m_colorOrder->cek_warna_by_id_warna($id_warna)->row_array();
                   if(empty($cek_warna['id'])){
-                      $nama_warna   = 'Kosong';
-                      $warna_empty  = TRUE;
-                      break;
+                    $nama_warna   = 'Kosong';
+                    $warna_empty  = TRUE;
+                    break;
                   }
 
                   // cek route color order
                   $cek_route_co  = $this->m_colorOrder->cek_route_color_order($route_co)->num_rows();
-
                   if(empty($route_co) OR $cek_route_co == 0){
                     $route_empty = TRUE;
                     break;
                   }
 
+                  // cek product parent
+                  $cek_pp    = $this->m_colorOrder->cek_produk_parent_sub_parent_jenis_kain_by_kode_produk(addslashes($kode_produk))->row_array();
+                  if(empty($cek_pp['id_parent'])){
+                    $id_parent_empty              = TRUE;
+                    $nama_produk_parent_empty     = $nama_produk;
+                    break;
+                  }
+
+                  // cek jenis kain
+                  if(empty($cek_pp['id_jenis_kain'])){
+                    $id_jenis_kain_empty           = TRUE;
+                    $nama_produk_jenis_kain_empty  = $nama_produk;
+                    break;
+                  }
+
+
                 }// end loop cek cek
 
                 if($produk_empty == TRUE){
-                    $nama_produk_empty = rtrim($nama_produk,', ');
-                    $callback = array('status' => 'failed', 'message' => 'Maaf, Produk '.$nama_produk_empty.' Kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                  $nama_produk_empty = rtrim($nama_produk_empty,', ');
+                  $callback = array('status' => 'failed', 'message' => 'Maaf, Produk '.$nama_produk_empty.' Kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
                
-                }else if($warna_empty == TRUE){
-                   $callback = array('status' => 'failed', 'message' => 'Maaf, Warna tidak tersedia / Kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                }else if($produk_aktif == FALSE){
+                   $callback = array('status' => 'failed', 'message' => 'Maaf, Status Produk <b>Tidak Aktif </b> !', 'icon' =>'fa fa-check', 'type' => 'danger');
 
+                }else if($warna_empty == TRUE){
+                    $callback = array('status' => 'failed', 'message' => 'Maaf, Warna tidak tersedia / Kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
+ 
                 }else if($route_empty == TRUE){
-                    $callback = array('status' => 'failed', 'message' => 'Maaf, Route Color Order Kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                  $callback = array('status' => 'failed', 'message' => 'Maaf, Route Color Order Kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
+                }else if($id_parent_empty == TRUE){
+                  $nama_produk_parent_empty = rtrim($nama_produk_parent_empty,', ');
+                  $callback = array('status' => 'failed', 'message' => 'Maaf, Produk <b>'.$nama_produk_parent_empty.'</b> Product Parentnya masih kosong, Harap isi terlebih dahulu  !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
+                }else if($id_jenis_kain_empty == TRUE){
+                  $nama_produk_jenis_kain_empty = rtrim($nama_produk_jenis_kain_empty,', ');
+                  $callback = array('status' => 'failed', 'message' => 'Maaf, Produk ini <b>'.$nama_produk_jenis_kain_empty.'</b> Jenis Kain masih kosong, Harap isi terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
 
                 }else{
 
@@ -291,6 +340,31 @@ class Colororder extends MY_Controller
 
                     $head        = $this->m_colorOrder->get_data_by_code($kode_co);
                     $buyer_code  = "Buyer Code = ".$head->buyer_code ." | ";
+                  
+                    $id_parent     = 0;
+                    $id_sub_parent = 0;
+                    $id_jenis_kain = 0;
+
+                    $produk_aktif  = TRUE;
+                    $id_parent_empty      = FALSE;
+                    $id_sub_parent_empty  = FALSE;
+                    $id_jenis_kain_empty  = FALSE;
+                    $sql_insert_mst_sub_parent  = "";
+                    
+                    $nama_produk_parent_empty     = "";
+                    $nama_produk_jenis_kain_empty = "";
+
+                    $nama_produk_tidak_aktif = "";
+                    $sql_log_history_batch   = "";
+
+                    $id_sub_parent_new = $this->m_colorOrder->get_last_id_mst_sub_parent();                        
+
+                    $parent_produk_same           = TRUE;
+                    $nama_produk_parent_produk_not_same = "";
+                    $sub_parent_produk_same       = TRUE;
+                    $nama_sub_parent_produk_same  = "";
+                    $jenis_kain_same              = TRUE;
+                    $nama_jenis_kain_not_same     = "";
 
                     foreach ($cod as $val) {
 
@@ -316,6 +390,65 @@ class Colororder extends MY_Controller
                         $warna_empty  = TRUE;
                       }else{
                         $nama_warna   = $cek_warna['nama_warna'];
+                      }
+
+                      // product parent
+                      $cek_mst    = $this->m_colorOrder->cek_produk_parent_sub_parent_jenis_kain_by_kode_produk(addslashes($kode_prod_rm))->row_array();
+                      $parent     = $cek_mst['id_parent'];
+                            
+                      if(empty($parent)){
+                        $id_parent_empty            = TRUE;
+                        $nama_produk_parent_empty  .= $nama_produk.', ';
+                        break;
+                      }else{
+                        $id_parent = $parent;
+                      }
+
+                      //cek sub_parent
+                      $sub_parent = $cek_mst['id_sub_parent'];
+                      
+                      if(empty($sub_parent)){
+
+                        $nama_sub_parent_ex   = explode('"',$nama_produk);
+                        $nama_sub_parent      = trim($nama_sub_parent_ex[0]).'"';
+                        // cek ke mst sub parent 
+                        $cek_sp = $this->m_colorOrder->cek_sub_parent_by_nama(addslashes($nama_sub_parent))->row_array();
+                        if(empty($cek_sp['id'])){
+
+                          // create sub_parent
+                          $id_sub_parent  = $id_sub_parent_new ;  // sudah + 1
+                          
+                          // insert into mst sub parent
+                          $sql_insert_mst_sub_parent .= "('".$id_sub_parent_new."','".$tgl."','".addslashes($nama_sub_parent)."'), ";
+                          $id_sub_parent_new = $id_sub_parent_new + 1;  
+
+                        }else{
+                          $id_sub_parent = $cek_sp['id'];
+                          // update ke mst produk by produk color order
+                          $case3  .= "when kode_produk = '".addslashes($kode_prod_rm)."' then '".$id_sub_parent."'";
+                          $where3 .= "'".addslashes($kode_prod_rm)."',"; 
+
+                          //create log history mst produk
+                          $note_log = "Update Sub Parent -> ".$cek_sp['nama_sub_parent'];
+                          $date_log = date('Y-m-d H:i:s');
+                          $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod_rm."','edit','".addslashes($note_log)."','".$nama_user."'), ";
+
+                        }
+                                               
+                      }else{
+                        $id_sub_parent = $sub_parent;
+                      }
+
+
+                      // cek jenis kain
+                      $jenis_kain = $cek_mst['id_jenis_kain'];
+
+                      if(empty($jenis_kain)){
+                        $id_jenis_kain_empty           = TRUE;
+                        $nama_produk_jenis_kain_empty  .= '<br>'.$nama_produk.', ';
+                        break;
+                      }else{
+                        $id_jenis_kain = $jenis_kain;
                       }
 
                       $reff_picking_in  = "";
@@ -348,7 +481,7 @@ class Colororder extends MY_Controller
                         $product_dept     = $nama_dept['nama'];
                         $product_fullname = $product_warna." (".$product_dept.")";
 
-
+                
                         if ($method_action == 'PROD'){
                           $cek_prod2 = $this->m_colorOrder->cek_nama_product(addslashes($product_fullname))->row_array();
 
@@ -367,12 +500,93 @@ class Colororder extends MY_Controller
                             
                             $last_number = $last_number + 1;
                             $kode_prod    = "MF".$last_number;
-                            $sql_insert_batch .= "('".$kode_prod."','".addslashes($product_fullname)."','".$tgl."', '".$lebar_jadi."','".$uom_lebar_jadi."','".$kategori_produk."','".$bom_true_false."','".$type_produk."','".$uom."','".$uom_2."','".$status_produk."'), ";
+                            $sql_insert_batch .= "('".$kode_prod."','".addslashes($product_fullname)."','".$tgl."', '".$lebar_jadi."','".$uom_lebar_jadi."','".$kategori_produk."','".$bom_true_false."','".$type_produk."','".$uom."','".$uom_2."','".$status_produk."', '".$id_parent."','".$id_sub_parent."','".$id_jenis_kain."'), ";
+
+                            $cat_nm   = $this->m_colorOrder->get_nama_category_by_id($kategori_produk)->row_array();
+                            $get_pp   = $this->m_colorOrder->get_mst_parent_produk_by_id($id_parent)->row_array();
+                            $get_spp  = $this->m_colorOrder->cek_sub_parent_by_id($id_sub_parent)->row_array();
+                            $get_jk   = $this->m_colorOrder->get_mst_jenis_kain_by_id($id_jenis_kain)->row_array();
+
+
+                            $note_log = "Produk dibuat dari Generate Color Order No. ".$kode_co." -> ".$kode_prod.' '.$product_fullname.' '.$uom.' '.$uom_2.' '.$cat_nm['nama_category'].' '.$get_pp['nama'].' '.$get_spp['nama_sub_parent'].' '.$get_jk['nama_jenis_kain'];
+                            $date_log = date('Y-m-d H:i:s');
+                            $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod."','create','".addslashes($note_log)."','".$nama_user."'), ";
 
                           }else{
                             $kode_prod = $cek_prod2['kode_produk'];
                             $uom       = $cek_prod2['uom'];
                             $uom_2     = $cek_prod2['uom_2'];
+
+                            // cek status produk route color order
+                            $stat_produk = $this->_module->get_status_aktif_by_produk(addslashes($kode_prod))->row_array();// status produk aktif/tidak
+                            if($stat_produk['status_produk']!= 't'){
+                              $produk_aktif     = FALSE;
+                              $nama_produk_tidak_aktif .= '<br>'.$product_fullname.", ";
+                              // break;
+                            }
+
+                            // cek product parent
+                            $cek_mst_rp   = $this->m_colorOrder->cek_produk_parent_sub_parent_jenis_kain_by_kode_produk(addslashes($kode_prod))->row_array();
+                            $route_pp     = $cek_mst_rp['id_parent'];
+                            
+                            if(empty($route_pp)){
+                              $id_parent_empty    = TRUE;
+                              $nama_produk_parent_empty  .= '<br>'.$product_fullname.", ";
+                              // update id_parent produk route color order
+                              // $case2  .= "when kode_produk = '".addslashes($kode_prod)."' then '".$id_parent."'";
+                              // $where2 .= "'".addslashes($kode_prod)."',"; 
+                              break;
+                            }else{
+
+                              //cek apakah parent produk (CO) dan parent produk (grg) sama
+                              if($route_pp != $id_parent ){
+                                $parent_produk_same = FALSE;
+                                $nama_produk_parent_produk_not_same .= '<br>'.$product_fullname.', ';
+                                // break;
+                              }
+
+                            }
+
+
+                            //cek sub parent produk route color order
+                            $route_spp = $cek_mst_rp['id_sub_parent'];
+                            if(empty($route_spp)){
+                              // update sub parent
+                              $case3  .= "when kode_produk = '".addslashes($kode_prod)."' then '".$id_sub_parent."'";
+                              $where3 .= "'".addslashes($kode_prod)."',"; 
+
+                              $cek_sp_nm = $this->m_colorOrder->cek_sub_parent_by_id($id_sub_parent)->row_array();
+                            
+                              //create log history mst produk
+                              $note_log = "Update Sub Parent -> ".$cek_sp_nm['nama_sub_parent'];
+                              $date_log = date('Y-m-d H:i:s');
+                              $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod."','edit','".addslashes($note_log)."','".$nama_user."'), ";
+                              
+                            }else{
+                              if($route_spp != $id_sub_parent ){
+                                $sub_parent_produk_same = FALSE;
+                                $nama_sub_parent_produk_same .= '<br>'.$product_fullname.', ';
+                                // break;
+                              }
+                            }
+
+                            // cek jenis kain produk route color order
+                            $route_jk = $cek_mst_rp['id_jenis_kain'];
+                            if(empty($route_jk)){
+                              // update jenis kain
+                              // $case4  .= "when kode_produk = '".addslashes($kode_prod)."' then '".$id_jenis_kain."'";
+                              // $where4 .= "'".addslashes($kode_prod)."',"; 
+                              $id_jenis_kain_empty = TRUE;
+                              $nama_produk_jenis_kain_empty .= '<br>'.$product_fullname.", ";
+                              // break;
+                            }else{
+                              if($route_jk != $id_jenis_kain ){
+                                $jenis_kain_same = FALSE;
+                                $nama_jenis_kain_not_same .= '<br>'.$product_fullname.', ';
+                                // break;
+                              }
+                            }
+
                           }
                            
                           /*----------------------------------
@@ -385,6 +599,11 @@ class Colororder extends MY_Controller
                             $sql_bom_items_batch .= "('".$kode_bom."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','1000','".addslashes($uom)."','1'), ";
 
                             $last_bom  = $last_bom + 1;
+
+                            //create log history bom
+                            $note_log = "BoM dibuat dari Generate Color Order No. ".$kode_co."  -> <br> ".$kode_bom." ".$product_fullname." 1000 ".$uom;
+                            $date_log = date('Y-m-d H:i:s');
+                            $sql_log_history_batch .= "('".$date_log."','mms73','".$kode_bom."','create','".addslashes($note_log)."','".$nama_user."'), ";
 
                           }else{
                             // ambil kode bom
@@ -546,102 +765,157 @@ class Colororder extends MY_Controller
 
                     } //end foreach color order details / COD
                     
+                    if($id_parent_empty == FALSE AND $id_sub_parent_empty == FALSE AND $id_jenis_kain_empty == FALSE AND $produk_aktif == TRUE AND $jenis_kain_same == TRUE AND $parent_produk_same == TRUE AND $parent_produk_same == TRUE){
 
-                    if(!empty($sql_insert_batch)){
-                      $sql_insert_batch = rtrim($sql_insert_batch, ', ');
-                      $this->m_colorOrder->simpan_product_batch($sql_insert_batch);
-                    }
+                      if(!empty($sql_insert_batch)){
+                        $sql_insert_batch = rtrim($sql_insert_batch, ', ');
+                        $this->m_colorOrder->simpan_product_batch($sql_insert_batch);
+                      }
 
-                    if(!empty($sql_bom_batch)){
-                      $sql_bom_batch = rtrim($sql_bom_batch, ', ');
-                      $this->m_colorOrder->simpan_bom_batch($sql_bom_batch);
+                      if(!empty($sql_bom_batch)){
+                        $sql_bom_batch = rtrim($sql_bom_batch, ', ');
+                        $this->m_colorOrder->simpan_bom_batch($sql_bom_batch);
 
-                      $sql_bom_items_batch = rtrim($sql_bom_items_batch, ', ');
-                      $this->m_colorOrder->simpan_bom_items_batch($sql_bom_items_batch);
-                    }
+                        $sql_bom_items_batch = rtrim($sql_bom_items_batch, ', ');
+                        $this->m_colorOrder->simpan_bom_items_batch($sql_bom_items_batch);
+                      }
 
-                    if(!empty($sql_stock_move_batch)){
-                      $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
-                      $this->m_colorOrder->create_stock_move_batch($sql_stock_move_batch);
+                      if(!empty($sql_stock_move_batch)){
+                        $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
+                        $this->m_colorOrder->create_stock_move_batch($sql_stock_move_batch);
 
-                      $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
-                      $this->m_colorOrder->create_stock_move_produk_batch($sql_stock_move_produk_batch);
-                    }
+                        $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
+                        $this->m_colorOrder->create_stock_move_produk_batch($sql_stock_move_produk_batch);
+                      }
 
-                    if(!empty($sql_out_batch)){
-                      $sql_out_batch = rtrim($sql_out_batch, ', ');
-                      $this->m_colorOrder->simpan_pengiriman_batch($sql_out_batch);
+                      if(!empty($sql_log_history_batch)){
+                        $sql_log_history_batch = rtrim($sql_log_history_batch, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_batch);
+                        
+                      }
 
-                      $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
-                      $this->m_colorOrder->simpan_pengiriman_items_batch($sql_out_items_batch);
-                      
-                      $sql_log_history_out = rtrim($sql_log_history_out, ', ');
-                      $this->_module->simpan_log_history_batch($sql_log_history_out);
-                      
-                    }
+                      if(!empty($sql_in_batch)){
+                        $sql_in_batch = rtrim($sql_in_batch, ', ');
+                        $this->m_colorOrder->simpan_penerimaan_batch($sql_in_batch);
 
-                    if(!empty($sql_in_batch)){
-                      $sql_in_batch = rtrim($sql_in_batch, ', ');
-                      $this->m_colorOrder->simpan_penerimaan_batch($sql_in_batch);
+                        $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
+                        $this->m_colorOrder->simpan_penerimaan_items_batch($sql_in_items_batch);
 
-                      $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
-                      $this->m_colorOrder->simpan_penerimaan_items_batch($sql_in_items_batch);
+                        $where = rtrim($where, ',');
+                        $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
+                        $this->m_colorOrder->update_reff_picking_pengiriman_batch($sql_update_reff_out_batch);
+                        
+                        $sql_log_history_in = rtrim($sql_log_history_in, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_in);
+                        
+                      }
 
-                      $where = rtrim($where, ',');
-                      $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
-                      $this->m_colorOrder->update_reff_picking_pengiriman_batch($sql_update_reff_out_batch);
-                      
-                      $sql_log_history_in = rtrim($sql_log_history_in, ', ');
-                      $this->_module->simpan_log_history_batch($sql_log_history_in);
-                      
-                    }
+                      if(!empty($sql_mrp_prod_batch)){
+                        $sql_mrp_prod_batch = rtrim($sql_mrp_prod_batch, ', ');
+                        $this->m_colorOrder->simpan_mrp_production_batch($sql_mrp_prod_batch);
 
-                    if(!empty($sql_mrp_prod_batch)){
-                      $sql_mrp_prod_batch = rtrim($sql_mrp_prod_batch, ', ');
-                      $this->m_colorOrder->simpan_mrp_production_batch($sql_mrp_prod_batch);
+                        $sql_mrp_prod_rm_batch = rtrim($sql_mrp_prod_rm_batch, ', ');
+                        $this->m_colorOrder->simpan_mrp_production_rm_target_batch($sql_mrp_prod_rm_batch);
 
-                      $sql_mrp_prod_rm_batch = rtrim($sql_mrp_prod_rm_batch, ', ');
-                      $this->m_colorOrder->simpan_mrp_production_rm_target_batch($sql_mrp_prod_rm_batch);
+                        $sql_mrp_prod_fg_batch = rtrim($sql_mrp_prod_fg_batch, ', ');
+                        $this->m_colorOrder->simpan_mrp_production_fg_target_batch($sql_mrp_prod_fg_batch);
+                        
+                        $sql_log_history_mrp = rtrim($sql_log_history_mrp, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_mrp);
+                        
+                      }
 
-                      $sql_mrp_prod_fg_batch = rtrim($sql_mrp_prod_fg_batch, ', ');
-                      $this->m_colorOrder->simpan_mrp_production_fg_target_batch($sql_mrp_prod_fg_batch);
-                      
-                      $sql_log_history_mrp = rtrim($sql_log_history_mrp, ', ');
-                      $this->_module->simpan_log_history_batch($sql_log_history_mrp);
-                      
-                    }
+                      if(!empty($sql_insert_mst_sub_parent)){
+                        $sql_insert_mst_sub_parent = rtrim($sql_insert_mst_sub_parent, ', ');
+                        $this->m_colorOrder->simpan_mst_sub_parent_batch($sql_insert_mst_sub_parent);
+                      }
 
-                    // update reff_notes by row
-                    $this->m_colorOrder->update_reff_notes_color_order_items_by_row($kode_co,$row,addslashes($reff_notes));
+                      if(!empty($case3) AND !empty($where3)){
+                        
+                        //update sub parent produk
+                        $where3 = rtrim($where3, ',');
+                        $sql_update_sub_parent_produk = "UPDATE mst_produk SET id_sub_parent = (case ".$case3." end) WHERE  kode_produk in (".$where3.") ";
+                        $this->_module->update_reff_batch($sql_update_sub_parent_produk);
 
-                    $jenis_log   = "edit";
-                    $note_log    = "Update Reff Notes | ".$reff_notes;
-                    $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);
+                      }
+
+                      if(!empty($sql_out_batch)){
+                        $sql_out_batch = rtrim($sql_out_batch, ', ');
+                        $this->_module->simpan_pengiriman_batch($sql_out_batch);
+    
+                        $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
+                        $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
+    
+                          $sql_log_history_out = rtrim($sql_log_history_out, ', ');
+                          $this->_module->simpan_log_history_batch($sql_log_history_out);
+                      }
+
+                      // update reff_notes by row
+                      $this->m_colorOrder->update_reff_notes_color_order_items_by_row($kode_co,$row,addslashes($reff_notes));
+
+                      $jenis_log   = "edit";
+                      $note_log    = "Update Reff Notes | ".$reff_notes;
+                      $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);
 
 
-                    //update detail items jadi generate
-                    $this->m_colorOrder->update_status_color_order_items($kode_co,$row,'generated');
+                      //update detail items jadi generate
+                      $this->m_colorOrder->update_status_color_order_items($kode_co,$row,'generated');
 
-                    $cek_details = $this->m_colorOrder->cek_status_color_order_items($kode_co,'')->num_rows(); 
+                      $cek_details = $this->m_colorOrder->cek_status_color_order_items($kode_co,'')->num_rows(); 
 
-                    $where_status       = "AND status NOT IN ('generated','cancel')";
-                    $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
+                      $where_status       = "AND status NOT IN ('generated','cancel')";
+                      $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
 
-                    if($cek_details == 0  ){
-                      $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
-                    }else if($cek_details > 0){
-                      if($cek_details_status == 0){
-                        $this->m_colorOrder->ubah_status_color_order($kode_co,'done');
-                      }else{
+                      if($cek_details == 0  ){
                         $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
-                      } 
+                      }else if($cek_details > 0){
+                        if($cek_details_status == 0){
+                          $this->m_colorOrder->ubah_status_color_order($kode_co,'done');
+                        }else{
+                          $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
+                        } 
+                      }
+
+                      $jenis_log   = "generated";
+                      $note_log    = "Generated | ".$row;
+                      $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);  
+
+                      $callback = array('status' => 'success', 'message'=>'Generate Data Berhasil ! '.$kode_prod, 'icon' => 'fa fa-check', 'type'=>'success');
+
+                    }else{
+
+                      if($id_parent_empty == TRUE){
+                        $nama_produk_parent_empty = rtrim($nama_produk_parent_empty,', ');
+                        $callback = array('status' => 'failed','message' => 'Maaf, Product Parent Kosong ! <b>'.$nama_produk_parent_empty.'</b>.<br> Harap isi terlebih dahulu Product Parent !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
+                      }else if($produk_aktif == FALSE){
+                        $nama_produk_tidak_aktif = rtrim($nama_produk_tidak_aktif,', ');
+                        $callback = array('status' => 'failed', 'message' => 'Maaf, Status Produk Tidak Aktif  ! <b>'.$nama_produk_tidak_aktif.'</b>', 'icon' =>'fa fa-check', 'type' => 'danger');
+                      
+                      }else if($id_sub_parent_empty == TRUE){
+                        $callback = array('status' => 'failed','message' => 'Maaf, Sub Product Parent Kosong, Harap isi terlebih dahulu Sub Product Parent !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                        
+                      }else if( $id_jenis_kain_empty == TRUE){
+                        $nama_produk_jenis_kain_empty = rtrim($nama_produk_jenis_kain_empty,', ');
+                        $callback = array('status' => 'failed','message' => 'Maaf, Jenis Kain kosong ! <b>'.$nama_produk_jenis_kain_empty.'</b> </br>  Harap isi terlebih dahulu Jenis Kain !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                      
+                      }else if( $parent_produk_same == FALSE){
+                        $nama_produk_parent_produk_not_same = rtrim($nama_produk_parent_produk_not_same,', ');
+                        $callback = array('status' => 'failed','message' => 'Maaf, Product Parent Tidak Sama ! <b>'.$nama_produk_parent_produk_not_same.'</b> </br>  Harap samakan terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                        
+                      }else if( $sub_parent_produk_same == FALSE){
+                        $nama_sub_parent_produk_same = rtrim($nama_sub_parent_produk_same,', ');
+                        $callback = array('status' => 'failed','message' => 'Maaf, Sub Product Parent Tidak Sama ! <b>'.$nama_sub_parent_produk_same.'</b> </br>  Harap samakan terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
+                      }else if( $jenis_kain_same == FALSE){
+                        $nama_jenis_kain_not_same = rtrim($nama_jenis_kain_not_same,', ');
+                        $callback = array('status' => 'failed','message' => 'Maaf, Jenis Kain Tidak Sama ! <b>'.$nama_jenis_kain_not_same.'</b> </br>  Harap samakan terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                        
+                      }else{
+                        $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                      }
+
                     }
-
-                  $jenis_log   = "generated";
-                  $note_log    = "Generated | ".$row;
-                  $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);  
-
-                  $callback = array('status' => 'success', 'message'=>'Generate Data Berhasil ! ', 'icon' => 'fa fa-check', 'type'=>'success');
 
                 }// else cek
 
@@ -1140,6 +1414,8 @@ class Colororder extends MY_Controller
             $row[] = $field->tanggal_ow;
             $row[] = $field->status_scl;
             $row[] = $field->nama_produk;
+            $row[] = $field->nama_parent;
+            $row[] = $field->nama_jenis_kain;
             $row[] = $field->nama_warna;
             $row[] = $field->qty;
             $row[] = $field->uom;

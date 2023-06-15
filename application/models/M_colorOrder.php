@@ -16,8 +16,8 @@ class M_colorOrder extends CI_Model
 	var $order2  	    = array('a.create_date' => 'desc');
 
 	//var $table3 	    = 'sales_color_line';
-	var $column_order3  = array(null, 'ow','tanggal_ow','ms.nama_status','nama_produk', 'kode_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'rc.nama','piece_info','reff_notes');
-	var $column_search3 = array('ow','tanggal_ow','ms.nama_status','nama_produk', 'kode_warna', 'qty', 'uom','lebar_jadi', 'nama_handling', 'gramasi', 'piece_info', 'rc.nama', 'reff_notes');
+	var $column_order3  = array(null, 'ow','tanggal_ow','ms.nama_status','nama_produk', 'nama_parent','nama_jenis_kain','nama_warna', 'qty', 'uom', 'lebar_jadi', 'nama_handling','gramasi', 'rc.nama','piece_info','reff_notes');
+	var $column_search3 = array('ow','a.tanggal_ow','ms.nama_status','mp.nama_produk', 'nama_warna', 'qty', 'a.uom','a.lebar_jadi', 'c.nama_handling', 'a.gramasi', 'a.piece_info', 'rc.nama', 'reff_notes','mpp.nama','mjk.nama_jenis_kain');
 	var $order3  	    = array('tanggal_ow' => 'asc');
 
 
@@ -264,9 +264,12 @@ class M_colorOrder extends CI_Model
 	{
 		
 		//$this->db->from($this->table3);
-		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling, a.gramasi, a.route_co, rc.nama as nama_route, a.reff_notes, ms.nama_status as status_scl, a.status");
+		$this->db->select("a.kode_produk, a.nama_produk, a.id_warna, a.qty, a.uom, a.piece_info, a.row_order, a.ow, a.tanggal_ow, b.nama_warna, a.lebar_jadi,a.uom_lebar_jadi, a.id_handling, c.nama_handling, a.gramasi, a.route_co, rc.nama as nama_route, a.reff_notes, ms.nama_status as status_scl, a.status,mp.id_parent, mp.id_jenis_kain, mpp.nama as nama_parent, mjk.nama_jenis_kain");
 		$this->db->from("sales_color_line a");
 		$this->db->JOIN("mst_status ms", "a.status = ms.kode", "INNER");
+		$this->db->JOIN("mst_produk mp", "a.kode_produk = mp.kode_produk", "INNER");
+		$this->db->JOIN("mst_produk_parent mpp", "mp.id_parent = mpp.id", "LEFT");
+		$this->db->JOIN("mst_jenis_kain mjk","mp.id_jenis_kain = mjk.id","LEFT");
 		$this->db->JOIN("warna b", "a.id_warna = b.id", "LEFT");
 		$this->db->JOIN("mst_handling c", "a.id_handling =  c.id", "LEFT");
 		$this->db->JOIN("route_co rc","rc.kode = a.route_co","LEFT");
@@ -358,10 +361,13 @@ class M_colorOrder extends CI_Model
 
 	public function get_color_detail_by_id($kode_co, $row_order)
 	{
-		return $this->db->query("SELECT a.kode_co, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.reff_notes_mkt, a.status, a.row_order, a.ow, a.route_co, a.lebar_jadi, a.uom_lebar_jadi, a.id_handling, a.id_warna, b.nama_warna, a.gramasi
-								 FROM color_order_detail a 
-								 LEFT JOIN warna b ON a.id_warna = b.id 
-								 WHERE a.kode_co = '$kode_co' AND a.row_order = '$row_order' ");
+		return $this->db->query("SELECT a.kode_co, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.reff_notes_mkt, a.status, a.row_order, a.ow, a.route_co, a.lebar_jadi, a.uom_lebar_jadi, a.id_handling, a.id_warna, b.nama_warna, a.gramasi, mp.id_sub_parent, mp.id_jenis_kain, mpp.nama as nama_parent, mjk.nama_jenis_kain
+								FROM color_order_detail a 
+								INNER JOIN mst_produk mp ON a.kode_produk = mp.kode_produk
+								LEFT JOIN mst_produk_parent mpp ON mp.id_parent = mpp.id
+								LEFT JOIN mst_jenis_kain mjk ON mp.id_jenis_kain = mjk.id
+								LEFT JOIN warna b ON a.id_warna = b.id 
+								WHERE a.kode_co = '$kode_co' AND a.row_order = '$row_order' ");
 	}
 
 	public function ubah_color_detail($kode_co, $route_co, $row_order, $qty, $reff, $handling, $lebar_jadi, $uom_lebar_jadi,$gramasi)
@@ -390,7 +396,7 @@ class M_colorOrder extends CI_Model
 
 	public function simpan_product_batch($sql)
 	{
-		return $this->db->query("INSERT INTO mst_produk (kode_produk, nama_produk, create_date, lebar_jadi, uom_lebar_jadi, id_category, bom, type, uom, uom_2, status_produk) values $sql ");
+		return $this->db->query("INSERT INTO mst_produk (kode_produk, nama_produk, create_date, lebar_jadi, uom_lebar_jadi, id_category, bom, type, uom, uom_2, status_produk, id_parent, id_sub_parent, id_jenis_kain) values $sql ");
 	}
 
 	public function get_kode_product()
@@ -672,6 +678,55 @@ class M_colorOrder extends CI_Model
 		return $this->db->query("UPDATE color_order_detail SET reff_notes = '$reff_notes'  WHERE kode_co = '$kode_co' AND row_order = '$row_order' ");
 	}
 
+
+	public function cek_produk_parent_sub_parent_jenis_kain_by_kode_produk($kode_produk)
+	{
+		return $this->db->query("SELECT id_parent,id_jenis_kain,id_sub_parent FROM mst_produk WHERE kode_produk = '$kode_produk'");
+	}
+
+	public function get_last_id_mst_sub_parent()
+	{
+		$last_no =  $this->db->query("SELECT max(id) as nom FROM mst_produk_sub_parent");
+
+		$result = $last_no->row();
+		if(empty($result->nom)){
+			$no   = 1;
+		}else{
+     		$no   = (int)$result->nom + 1;
+		}
+		return $no;
+	}
+
+	public function simpan_mst_sub_parent_batch($sql)
+	{
+		return $this->db->query("INSERT INTO mst_produk_sub_parent (id, tanggal, nama_sub_parent) values $sql ");
+	}
+
+	public function cek_sub_parent_by_nama($nama_produk)
+	{
+		return $this->db->query("SELECT id, nama_sub_parent FROM mst_produk_sub_parent WHERE nama_sub_parent = '$nama_produk' ");
+	}
+
+	public function cek_sub_parent_by_id($id)
+	{
+		return $this->db->query("SELECT id, nama_sub_parent FROM mst_produk_sub_parent WHERE id = '$id'");
+	}
+
+	public function get_mst_parent_produk_by_id($id)
+	{
+		return $this->db->query("SELECT nama FROM mst_produk_parent WHERE id = '$id'");
+	}
+
+	public function get_mst_jenis_kain_by_id($id)
+	{
+		return $this->db->query("SELECT nama_jenis_kain FROM mst_jenis_kain WHERE id = '$id'");
+	}
+
+
+	public function get_nama_category_by_id($id)
+	{
+		return $this->db->query("SELECT id,nama_category FROM mst_category WHERE id = '$id'");
+	}
 
 
 }
