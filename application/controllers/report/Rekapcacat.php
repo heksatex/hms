@@ -159,7 +159,7 @@ class Rekapcacat extends MY_Controller
     	$this->load->library('excel');
 		$tgldari   = date('Y-m-d H:i:s',strtotime($this->input->post('tgldari')));
 		$tglsampai = date('Y-m-d 23:59:59',strtotime($this->input->post('tglsampai')));
-		$id_dept   = $this->input->post('departemen');
+		$id_dept   = $this->input->post('id_dept');
 		$dept      = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
 
 		$corak     = $this->input->post('corak');
@@ -203,6 +203,7 @@ class Rekapcacat extends MY_Controller
 
 
 		$object = new PHPExcel();
+		ob_start();
     	$object->setActiveSheetIndex(0);
 
     	    	// SET JUDUL
@@ -410,12 +411,19 @@ class Rekapcacat extends MY_Controller
 
     	}// end looping mrp_cacat
 
-
-		$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename=Rekap Cacat '.$dept['nama'].' .xls '); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');			
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$departemen = $dept['nama'];
+		$name_file = "Rekap Caca ".$departemen.".xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
 	}
 
 }

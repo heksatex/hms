@@ -128,11 +128,12 @@ class Adjustment extends MY_Controller
     	$this->load->library('excel');
 		$tgldari   = date('Y-m-d 00:00:00',strtotime($this->input->post('tgldari')));
 		$tglsampai = date('Y-m-d 23:59:59',strtotime($this->input->post('tglsampai')));
-		$id_dept   = $this->input->post('departemen');
+		$id_dept   = $this->input->post('id_dept');
 		$dept    = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
 		$kode_lokasi = $dept['stock_location'];// example WRD/Stock
 
 		$object = new PHPExcel();
+		ob_start();
     	//$object->setActiveSheetIndex(0);
 		$object->createSheet();
 		$sheet1 = $object->setActiveSheetIndex(0);
@@ -329,11 +330,19 @@ class Adjustment extends MY_Controller
 
 		}
 
-    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename=Laporan Adjustment '.$dept['nama'].' .xlsx '); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');	
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$departemen = $dept['nama'];
+		$name_file = "Laporan Adjustment ".$departemen.".xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
     
 
 	}
