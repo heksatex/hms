@@ -511,6 +511,9 @@ class Productionorder extends MY_Controller
 
             }else if(empty($cek_status['kode_produk'])){
                 $callback = array('status' => 'failed','message' => 'Maaf, Data yang akan Di Generate Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                
+            }else if($qty == 0){
+                $callback = array('status' => 'failed','message' => 'Maaf, Qty tidak boleh 0 !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else{           
 
