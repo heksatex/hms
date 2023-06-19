@@ -494,6 +494,21 @@ class Produksicuttingshearing extends MY_Controller
 	        		$ke++;
 	        	}
 
+                if($meter!= ''){
+                    $meter = number_format($meter,2);
+                }
+                
+                if($hph_qty1!= ''){
+                    $hph_qty1 = number_format($hph_qty1,2);
+                }
+
+                if($hph_qty2!= ''){
+                    $hph_qty2 = number_format($hph_qty2,2);
+                }
+
+                if($sisa_target!= ''){
+                    $sisa_target = number_format($sisa_target,2);
+                }
 	        	// buat array dataRecord
 	        	$dataRecord[] = array('kode'           => $mo, 
 	        						  'tgl_mo' 		   => $tgl_mo, 
@@ -506,7 +521,7 @@ class Produksicuttingshearing extends MY_Controller
 	        						  'lbr_jadi'       => $lbr_jadi,
 	        						  'start_produksi' => $start_time,
 	        						  'finish_produksi'=> $finish_time,
-	        						  'meter'          => number_format($meter,2),
+	        						  'meter'          => $meter,
 	        						  'gulung'         => $gl,
 	        						  'mtr_gl'	       => $mtr_gl,
 	        						  'pcs'            => $pcs,
@@ -518,10 +533,10 @@ class Produksicuttingshearing extends MY_Controller
 	        						  'rm'             => $val->nama_produk,
 	        						  'target_qty'     => number_format($val->target_qty,2),
 	        						  'run_in'         => $run_in,
-	        						  'qty1'	       => number_format($hph_qty1,2),
+	        						  'qty1'	       => $hph_qty1,
 	        						  'qty2'           => $hph_qty2,
 	        						  'h_gulung'	   => $gulung,
-	        						  'sisa'           => number_format($sisa_target,2),
+	        						  'sisa'           => $sisa_target,
 	        						  'status'         => $status
 
 	        						 );
