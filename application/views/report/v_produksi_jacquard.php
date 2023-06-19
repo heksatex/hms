@@ -724,6 +724,7 @@
           value += "<option>ready</option>";
           value += "<option>done</option>";
           value += "<option>cancel</option>";
+          value += "<option>hold</option>";
           value += "</select>";
     }
 
