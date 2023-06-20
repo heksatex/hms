@@ -235,8 +235,28 @@
                                   <select type="text" class="form-control input-sm" name="product_parent" id="product_parent" > </select>
                                 </div>
                             </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4">Sub Parent</div>
+                                <div class="col-xs-8 col-md-8">
+                                  <select type="text" class="form-control input-sm" name="sub_parent" id="sub_parent" >
+                                  </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4">Jenis Kain</div>
+                              <div class="col-xs-8">
+                                <select class="form-control input-sm" name="jenis_kain" id="jenis_kain" >
+                                  <option value=""></option>
+                                  <?php foreach ($jenis_kain as $row) {?>
+                                    <option value='<?php echo $row->id; ?>'><?php echo $row->nama_jenis_kain;?></option>
+                                  <?php  }?>
+                                </select>                                
+                              </div>               
+                            </div>
+                            
                           </div>
                         </div>
+                        
                         
                         <!-- gl accounts -->
                         <!-- <div class="col-md-12">
@@ -489,6 +509,39 @@
       }
   });
 
+  //select 2 sub parent
+  $('#sub_parent').select2({
+      allowClear: true,
+      placeholder: "",
+      ajax:{
+            dataType: 'JSON',
+            type : "POST",
+            url : "<?php echo base_url();?>warehouse/produk/get_product_sub_parent_select2",
+            //delay : 250,
+            data : function(params){
+              return{
+                nama:params.term,
+              };
+            }, 
+            processResults:function(data){
+              var results = [];
+              $.each(data, function(index,item){
+                results.push({
+                    id:item.id,
+                    text:item.nama_sub_parent
+                });
+              });
+              return {
+                results:results
+              };
+            },
+            error: function (xhr, ajaxOptions, thrownError){
+              //alert('Error data');
+              //alert(xhr.responseText);
+            }
+      }
+  });
+
   
   autogenerate_value = 0;
 
@@ -587,6 +640,8 @@
                 status          : 'tambah',
                 statusproduk    : $('#status').val(),
                 product_parent  : $('#product_parent').val(),
+                sub_parent      : $('#sub_parent').val(),
+                jenis_kain      : $('#jenis_kain').val(),
                 autogenerate    : autogenerate_value,
 
           },success: function(data){

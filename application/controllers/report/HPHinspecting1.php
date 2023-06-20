@@ -251,7 +251,8 @@ class HPHinspecting1 extends MY_Controller
 									  'marketing'  => $mkt,
 									  'nama_user'  => $val->nama_user,
 									  'reff_note'  => $val->reff_note_sq,
-									  'lokasi'     => $val->lokasi
+									  'lokasi'     => $val->lokasi,
+									  'lot_adj'    => $val->lot_adj
 									);
 				$lbr_jadi       = '';
 		        $lbr_greige     = '';
@@ -273,6 +274,7 @@ class HPHinspecting1 extends MY_Controller
 	{
 		
 		$this->load->library('excel');
+		ob_start();
 		$tgldari   = $this->input->post('tgldari');
 		$tglsampai = $this->input->post('tglsampai');
 		$corak     = $this->input->post('corak');
@@ -421,6 +423,18 @@ class HPHinspecting1 extends MY_Controller
 			    )
 			  )
 		);	
+
+		$styleArrayColor = array(
+			'font'  => array(
+				'bold'  => true,
+				'color' => array('rgb' => 'FF0000'),
+			),
+			'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			)
+	  	);	
 
 
 		// header table
@@ -620,28 +634,32 @@ class HPHinspecting1 extends MY_Controller
             $object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
             $object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 
-
+			if($val->lot_adj != ''){
+				$styleCell = $styleArrayColor;
+			}else{
+				$styleCell = $styleArray;
+			}
             //set border true
-			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('Q'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray);
-			$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('Q'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleCell);
+			$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleCell);
 
 		
 			$lbr_jadi       = '';
@@ -651,12 +669,18 @@ class HPHinspecting1 extends MY_Controller
 	        $rowCount++;
 		}
 
-    	$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="HPH Inspecting1.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "HPH Inspecting1.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
     }
 
 

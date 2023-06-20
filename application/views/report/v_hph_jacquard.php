@@ -53,7 +53,7 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/HPHjacquard/export_excel_hph">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" >
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12"> 
@@ -117,8 +117,8 @@
          
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." >Generate</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
               <br>
               <div class="col-md-12">
@@ -253,10 +253,11 @@
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="21" align="center">Tidak ada Data</td>
+                              <td colspan="21">Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
+                      <small><b>*Jika terdapat baris yang berwarna <font color="red">MERAH</font> maka Product/Lot tersebut telah di proses ADJUSTMENT !!</b></small>
                       <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                         Processing...
                       </div>
@@ -321,12 +322,22 @@
     }
   });
 
-  // cek selisih saatu submit excel
-  $('#frm_periode').submit(function(){
+  // btn excel
+  $('#btn-excel').click(function(){
 
-    tgldari   = $('#tgldari').data("DateTimePicker").date();
-    tglsampai = $('#tglsampai').data("DateTimePicker").date();
-    var check_shif    = false;
+    tgldari   = $('#tgldari').val();
+    tglsampai = $('#tglsampai').val();
+    mo        = $('#mo').val();
+    corak     = $('#corak').val();
+    mc        = $('#mc').val();
+    lot       = $('#lot').val();
+    user      = $('#user').val();
+    jenis     = $('#jenis').val();
+    sales_order     = $('#sales_order').val();
+    sales_group     = $('#sales_group').val();
+    tgldari_2 = $('#tgldari').data("DateTimePicker").date();
+    tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+    var check_shif  = false;
     var checkboxes_arr =  new Array(); 
 
     var checkboxes_arr = $('input[name="shift[]"]').map(function(e, i) {
@@ -338,19 +349,44 @@
     }).get();
 
     var timeDiff = 0;
-    if (tglsampai) {
-        timeDiff = (tglsampai - tgldari) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+    if (tglsampai_2) {
+        timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
     }
     selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
 
-    if(tglsampai < tgldari){ // cek validasi tgl sampai kurang dari tgl Dari
+    if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
       alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
-      return false;
+      // return false;
 
     }else if(check_shif == true && selisih > 30 ){
       alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
-      return false;
+      // return false;
       
+    }else{
+      $.ajax({
+          "type":'POST',
+          "url" : "<?php echo site_url('report/HPHjacquard/export_excel_hph')?>",
+          "data": {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group, user:user, jenis:jenis, shift :checkboxes_arr },
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert('Error Export Excel');
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status =="failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
     }
 
   });
@@ -424,34 +460,39 @@
                     let empty = true;
 
                     $.each(data.record, function(key, value){
+                        if(value.lot_adj != ''){
+                          color = "style='color:red';";
+                        }else{
+                          color = "";
+                        }
                         empty = false;
                         var tr = $("<tr>").append(
-                                 $("<td>").text(no++),
-                                 $("<td>").text(value.kode),
-                                 $("<td>").text(value.nama_mesin),
-                                 $("<td>").text(value.sc),
-                                 $("<td>").text(value.tgl_hph),
-                                 $("<td>").text(value.kode_produk),
-                                 $("<td>").text(value.nama_produk),
-                                 $("<td>").text(value.lot),
-                                 $("<td>").text(value.qty1),
-                                 $("<td>").text(value.uom1),
-                                 $("<td>").text(value.qty2),
-                                 $("<td>").text(value.uom2),
-                                 $("<td>").text(value.grade),
-                                 $("<td>").text(value.lbr_greige),
-                                 $("<td>").text(value.lbr_jadi),
-                                 $("<td>").text(value.rpm),
-                                 $("<td>").text(value.stitch),
-                                 $("<td>").text(value.marketing),
-                                 $("<td>").text(value.reff_note),
-                                 $("<td>").text(value.lokasi),
-                                 $("<td>").text(value.nama_user),
+                                 $("<td "+color+">").text(no++),
+                                 $("<td "+color+">").text(value.kode),
+                                 $("<td "+color+">").text(value.nama_mesin),
+                                 $("<td "+color+">").text(value.sc),
+                                 $("<td "+color+">").text(value.tgl_hph),
+                                 $("<td "+color+">").text(value.kode_produk),
+                                 $("<td "+color+">").text(value.nama_produk),
+                                 $("<td "+color+">").text(value.lot),
+                                 $("<td "+color+" align='right'>").text(value.qty1),
+                                 $("<td "+color+">").text(value.uom1),
+                                 $("<td "+color+" align='right'>").text(value.qty2),
+                                 $("<td "+color+">").text(value.uom2),
+                                 $("<td "+color+">").text(value.grade),
+                                 $("<td "+color+">").text(value.lbr_greige),
+                                 $("<td "+color+">").text(value.lbr_jadi),
+                                 $("<td "+color+">").text(value.rpm),
+                                 $("<td "+color+">").text(value.stitch),
+                                 $("<td "+color+">").text(value.marketing),
+                                 $("<td "+color+">").text(value.reff_note),
+                                 $("<td "+color+">").text(value.lokasi),
+                                 $("<td "+color+">").text(value.nama_user),
                         );
                         tbody.append(tr);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='21' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='21'>").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);

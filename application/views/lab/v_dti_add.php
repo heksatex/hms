@@ -152,24 +152,24 @@
 
 <script type="text/javascript">
 
-  $(".my-colorpicker").colorpicker();
+    $(".my-colorpicker").colorpicker();
 
-  $('.my-colorpicker').colorpicker().on('changeColor', function (e) {
-      $('#content_colors')[0].style.backgroundColor = e.color.toHex();
-  });
+    $('.my-colorpicker').colorpicker().on('changeColor', function (e) {
+        $('#content_colors')[0].style.backgroundColor = e.color.toHex();
+    });
 
-  //untuk mengatur lebar textarea sesuai value yang ada
-  $('.ta').on( 'change keyup keydown paste cut', 'textarea', function (){
-    $(this).height(0).height(this.scrollHeight);
-  }).find( 'textarea' ).change();
+    //untuk mengatur lebar textarea sesuai value yang ada
+    $('.ta').on( 'change keyup keydown paste cut', 'textarea', function (){
+      $(this).height(0).height(this.scrollHeight);
+    }).find( 'textarea' ).change();
 
 
-  function get_default(){
-    $('#kode_warna').val('');
-    $('#wstyle').css("background-color", "");
-  }
+    function get_default(){
+      $('#kode_warna').val('');
+      $('#wstyle').css("background-color", "");
+    }
  
-  //klik button simpan
+    //klik button simpan
     $('#btn-simpan').click(function(){
       $('#btn-simpan').button('loading');
       please_wait(function(){});

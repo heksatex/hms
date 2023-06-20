@@ -60,8 +60,7 @@
 								if( $akses_menu > 0){
 								?>
 									
-									<?php if((($row->status == 'ready' AND $type_mo['type_mo']!='colouring' ) OR $level == 'Super Administrator') ){?>
-										<!-- <a onclick="hapus_quant_mo('<?php  echo $row->move_id ?>', '<?php  echo ($row->quant_id) ?>', '<?php  echo ($row->origin_prod) ?>', '<?php  echo ($row->row_order) ?>',  '<?php  echo ($row->status) ?>')"  href="javascript:void(0)" data-toggle="tooltip" title="Hapus Data" style="padding-left:5px;"><i class="fa fa-trash" style="color: red"></i> </a> -->
+									<?php if((($row->status == 'ready' AND $type_mo['type_mo']!='colouring' ) ) ){?>
 
 										<input type="checkbox" class="checkItem" value="<?php echo $row->quant_id?>" data-valuetwo="<?php echo $row->row_order?>" data-valuetree="<?php echo $row->lot?>" data-toggle="tooltip" title="Pilih Hapus Product / Lot">
 								<?php }

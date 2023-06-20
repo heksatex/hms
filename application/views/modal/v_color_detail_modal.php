@@ -11,6 +11,8 @@
             <th>Tgl.OW</th>
             <th>Status OW</th>
             <th>Product</th>
+            <th>Product Parent</th>
+            <th>Jenis Kain</th>
             <th>Color</th>
             <th>Qty</th>
             <th>Uom</th>
@@ -56,17 +58,17 @@
            
             "columnDefs": [
               {
-               'targets':15,
+               'targets':17,
                'visible': false,
               },
               {
-               'targets':14,
-               'data' : 14,
+               'targets':16,
+               'data' : 16,
                 'checkboxes': {
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[15];
+                   var rowId = rowData[17];
                    if(rowId == 'f'){  
                       this.api().cell(td).checkboxes.disable();
                    }
@@ -82,9 +84,9 @@
               'style': 'multi'
             },
             "createdRow": function( row, data, dataIndex ) {
-              if (data[15]== 'f'){          
+              if (data[17]== 'f'){          
                 $(row).css("color","red");
-              }else if(data[15] == 'ng'){
+              }else if(data[17] == 'ng'){
                 $(row).css("color","blue");
               }
             },
@@ -110,7 +112,7 @@
   $("#btn-tambah").unbind( "click" );
   $('#btn-tambah').click(function(){
     
-      var myCheckboxes = table.column(14).checkboxes.selected();
+      var myCheckboxes = table.column(16).checkboxes.selected();
       var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
 

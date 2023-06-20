@@ -247,7 +247,7 @@
                 <div class="panel panel-default">
                     <div class="panel-collapse collapsed" role="tabpanel" aria-labelledby="result" >
                       <div class="panel-body" style="padding: 5px">
-                        <form name="input" class="form-horizontal" role="form" id="form_export"  action="<?=base_url()?>report/stock/export_excel_stock" method="POST">
+                        <form name="input" class="form-horizontal" role="form" id="form_export" method="POST">
                           <!-- kiri -->
                           <div class="col-12 col-sm-12 col-md-6">
                               <div class="form-group" style="margin-bottom: 0px;">
@@ -262,7 +262,7 @@
                                   <div class="col-12 col-sm-8 col-md-8">
                                   
                                       <input type="hidden" name="sql" id="sql">
-                                      <button type="submit" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm">
+                                      <button type="button" id="btn-excel" name="btn-excel" class="btn btn-default btn-sm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         <i class="fa fa-file-excel-o" style="color:green"></i>  Excel
                                       </button>
                                   
@@ -1091,7 +1091,7 @@
     
 
     // cek sql saat klik btn excel
-    $("#form_export").submit(function(event){
+    $('#btn-excel').click(function(){
 
         var sql = $('#sql').val();
         if(event.keyCode == 13){
@@ -1101,6 +1101,30 @@
           alert('Silahkan Filter Terlebih Dahulu !');
           return false;
         }else{
+          $.ajax({
+          "type":'POST',
+          "url" : "<?php echo site_url('report/stock/export_excel_stock')?>",
+          "data": {sql:sql},
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert('Error Export Excel');
+            $('#btn-excel').button('reset');
+          }
+          }).done(function(data){
+              if(data.status =="failed"){
+                alert_modal_warning(data.message);
+              }else{
+                var $a = $("<a>");
+                $a.attr("href",data.file);
+                $("body").append($a);
+                $a.attr("download",data.filename);
+                $a[0].click();
+                $a.remove();
+              }
+              $('#btn-excel').button('reset');
+          });
 
         }
     });

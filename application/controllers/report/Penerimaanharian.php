@@ -150,15 +150,15 @@ class Penerimaanharian extends MY_Controller
 	{
 
 		$this->load->library('excel');
-
+		ob_start();
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
 		$departemen  = addslashes($this->input->post('departemen'));
-		$dept_dari   = addslashes($this->input->post('dari'));
+		$dept_dari   = addslashes($this->input->post('dept_dari'));
 		$kode 		 = addslashes($this->input->post('kode'));
 		$corak       = addslashes($this->input->post('corak'));
-		$status_arr  = $this->input->post('status[]');
-		$view_arr  	 = $this->input->post('view[]');
+		$status_arr  = $this->input->post('status_arr');
+		$view_arr  	 = $this->input->post('view_arr');
 		$dataRecord  = [];
 
 		$dept    = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
@@ -464,17 +464,19 @@ class Penerimaanharian extends MY_Controller
 			}
 		}
 
-		$object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-		$name_file ='Penerimaan Harian '.$dept['nama'].'.xls';
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="'.$name_file.'"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file ='Penerimaan Harian '.$dept['nama'].'.xlsx';
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
 
 	}
-
-
 
 }

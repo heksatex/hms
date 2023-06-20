@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -14,6 +15,10 @@
       display: block;
       height: calc( 100vh - 250px );
       overflow-x: auto;
+    }
+
+    .ws{
+      white-space: nowrap;
     }
 
   </style>
@@ -48,7 +53,7 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/HPHfinishing/export_excel_hph">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode">
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12"> 
@@ -112,8 +117,8 @@
          
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o"  style="color:green"></i> Excel</button>
               </div>
               <br>
               <div class="col-md-12">
@@ -131,12 +136,12 @@
                           </div>
                           <div class="form-group">
                             <div class="col-md-5">
-                              <label>Lot </label>
+                              <label>No Go </label>
                             </div>
                             <div class="col-md-7">
-                                <input type="text" class="form-control input-sm" name="lot" id="lot" >
+                                <input type="text" class="form-control input-sm" name="no_go" id="no_go"  placeholder="No. Greige Out">
                             </div>
-                          </div> 
+                          </div>
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>Corak </label>
@@ -145,8 +150,24 @@
                                 <input type="text" class="form-control input-sm" name="corak" id="corak" placeholder="Corak / Nama Produk">
                             </div>
                           </div>
+                          <div class="form-group">
+                            <div class="col-md-5">
+                              <label>Warna </label>
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="warna" id="warna" >
+                            </div>
+                          </div> 
                         </div>
                         <div class="col-md-4">
+                          <div class="form-group">
+                            <div class="col-md-5">
+                              <label>Lot </label>
+                            </div>
+                            <div class="col-md-7">
+                                <input type="text" class="form-control input-sm" name="lot" id="lot" >
+                            </div>
+                          </div>
                           <div class="form-group">
                             <div class="col-md-5">
                               <label>No Mesin </label>
@@ -218,50 +239,47 @@
 
             <!-- table -->
             <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
-                  <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
+                <div class="col-xs-12 table-responsive example1 divListviewHead">
+                    <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                      <table id="example1" class="table table-condesed table-hover" border="0">
                           <thead>
                             <tr>
-                              <th  class="style no" >No. </th>
-                              <th  class='style'>MG</th>
-                              <th  class='style' style="min-width: 80px">No Mesin</th>
-                              <th  class='style'>SC</th>
-                              <th  class='style' style="min-width: 80px">Tgl HPH</th>
-                              <th  class='style'>Kode Produk</th>
-                              <th  class='style' style="min-width: 200px">Nama Produk</th>
-                              <th  class='style' style="min-width: 150px">Lot</th>
-                              <th  class='style'>Qty1</th>
-                              <th  class='style'>Uom1</th>
-                              <th  class='style'>Qty2</th>
-                              <th  class='style'>Uom2</th>
-                              <th  class='style'>Grade</th>
-                              <th  class='style'>L.Greige</th>
-                              <th  class='style'>L.Jadi</th>
-                              <th  class='style'>Marketing</th>
-                              <th  class='style'>Reff Note </th>
-                              <th  class='style'>Lokasi </th>
-                              <th  class='style' style="min-width: 80px" >Nama User</th>
+                              <th  class="style bb ws no" >No. </th>
+                              <th  class='style bb ws' style="min-width: 80px">Tgl HPH</th>
+                              <th  class='style bb ws'>Kode Produk</th>
+                              <th  class='style bb ws' style="min-width: 200px">Nama Produk</th>
+                              <th  class='style bb ws' style="min-width: 200px">Warna</th>
+                              <th  class='style bb ws'>SC</th>
+                              <th  class='style bb ws'>MG</th>
+                              <th  class='style bb ws'>No Greige Out </th>
+                              <th  class='style bb ws' style="min-width: 100px">No Mesin</th>
+                              <th  class='style bb ws' style="min-width: 150px">Lot</th>
+                              <th  class='style bb ws'>GL</th>
+                              <th  class='style bb ws'>Qty1</th>
+                              <th  class='style bb ws'>Uom1</th>
+                              <th  class='style bb ws'>Qty2</th>
+                              <th  class='style bb ws'>Uom2</th>
+                              <th  class='style bb ws'>Grade</th>
+                              <th  class='style bb ws'>L.Greige</th>
+                              <th  class='style bb ws'>L.Jadi</th>
+                              <th  class='style bb ws'>Marketing</th>
+                              <th  class='style bb ws'>Reff Note </th>
+                              <th  class='style bb ws'>Lokasi </th>
+                              <th  class='style bb ws' style="min-width: 100px" >Nama User</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="21" align="center">Tidak ada Data</td>
+                              <td colspan="21" >Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
+                      <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                         Processing...
                       </div>
-                  </div>
+                    </div>
                 </div>
-
-              </div>
             </div>
-            </div>
-
 
         </div>
         <!-- /.box-body -->
@@ -320,11 +338,24 @@
     }
   });
 
-  // cek selisih saatu submit excel
-  $('#frm_periode').submit(function(){
+  // cek selisih satu submit excel
+  $('#btn-excel').click(function(){
 
-    tgldari   = $('#tgldari').data("DateTimePicker").date();
-    tglsampai = $('#tglsampai').data("DateTimePicker").date();
+    tgldari   = $('#tgldari').val();
+    tglsampai = $('#tglsampai').val();
+    mo        = $('#mo').val();
+    corak     = $('#corak').val();
+    mc        = $('#mc').val();
+    lot       = $('#lot').val();
+    user      = $('#user').val();
+    jenis     = $('#jenis').val();
+    sales_order     = $('#sales_order').val();
+    sales_group     = $('#sales_group').val();
+    no_go           = $('#no_go').val();
+    warna           = $('#warna').val();
+    tgldari_2 = $('#tgldari').data("DateTimePicker").date();
+    tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+
     var check_shif    = false;
     var checkboxes_arr =  new Array(); 
 
@@ -337,19 +368,43 @@
     }).get();
 
     var timeDiff = 0;
-    if (tglsampai) {
-        timeDiff = (tglsampai - tgldari) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+    if (tglsampai_2) {
+        timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
     }
     selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
 
-    if(tglsampai < tgldari){ // cek validasi tgl sampai kurang dari tgl Dari
+    if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
       alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
-      return false;
+      // return false;
 
     }else if(check_shif == true && selisih > 30 ){
       alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
-      return false;
-      
+      // return false;
+    }else{
+      $.ajax({
+          "type":'POST',
+          "url": "<?php echo site_url('report/HPHfinishing/export_excel_hph')?>",
+          "data": {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group,  no_go:no_go, warna:warna, user:user, jenis:jenis, shift :checkboxes_arr},
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert('Error Export Excel');
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status =="failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
     }
 
   });
@@ -358,7 +413,6 @@
   // btn generate
   $("#btn-generate").on('click', function(){
       
-
       tgldari   = $('#tgldari').val();
       tglsampai = $('#tglsampai').val();
       mo        = $('#mo').val();
@@ -369,6 +423,8 @@
       jenis     = $('#jenis').val();
       sales_order     = $('#sales_order').val();
       sales_group     = $('#sales_group').val();
+      no_go           = $('#no_go').val();
+      warna           = $('#warna').val();
       tgldari_2 = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
       var check_shif  = false;
@@ -408,7 +464,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/HPHfinishing/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group,  user:user, jenis:jenis, shift :checkboxes_arr },
+                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group,no_go:no_go, warna:warna,  user:user, jenis:jenis, shift :checkboxes_arr },
                 success: function(data){
 
                   if(data.status == 'failed'){
@@ -421,18 +477,36 @@
                     let tbody = $("<tbody />");
                     let no    = 1;
                     let empty = true;
+                    let temp_mg = '';
+                    let sum_mg  = 0;
+                    let sum_qty = 0;
+                    let sum_qty2 = 0;
 
                     $.each(data.record, function(key, value){
                         empty = false;
+
+                        if(temp_mg != '' && temp_mg != value.kode){
+                          result =  total_group(temp_mg,sum_mg,sum_qty,sum_qty2);
+                          sum_mg = 0;
+                          sum_qty = 0;
+                          sum_qty2 = 0;
+                          temp_mg = value.kode
+                          tbody.append(result);
+                          no = 1;
+                        }
+
                         var tr = $("<tr>").append(
                                  $("<td>").text(no++),
-                                 $("<td>").text(value.kode),
-                                 $("<td>").text(value.nama_mesin),
-                                 $("<td>").text(value.sc),
                                  $("<td>").text(value.tgl_hph),
                                  $("<td>").text(value.kode_produk),
                                  $("<td>").text(value.nama_produk),
+                                 $("<td>").text(value.nama_warna),
+                                 $("<td>").text(value.sc),
+                                 $("<td>").text(value.kode),
+                                 $("<td>").text(value.no_go),
+                                 $("<td>").text(value.nama_mesin),
                                  $("<td>").text(value.lot),
+                                 $("<td align='right'>").text(value.gl),
                                  $("<td align='right'>").text(value.qty1),
                                  $("<td>").text(value.uom1),
                                  $("<td align='right'>").text(value.qty2),
@@ -446,9 +520,13 @@
                                  $("<td>").text(value.nama_user),
                         );
                         tbody.append(tr);
+                        temp_mg = value.kode;
+                        sum_mg++;
+                        sum_qty = sum_qty + parseFloat(value.qty1);
+                        sum_qty2 = sum_qty2 + parseFloat(value.qty2);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='21' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='21' >").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);
@@ -467,6 +545,25 @@
           
       }
   });
+
+  function total_group(mg,sum_mg,sum_qty,sum_qty2)
+  { 
+      let row = '';
+          row += "<tr>";
+          row += "<td class='style_total' colspan='5'></td>";
+          row += "<td class='style_total' colspan='2'>Total "+mg+"</td>";
+          row += "<td class='style_total' colspan='4' align='right'>"+sum_mg+"</td>";
+          row += "<td class='style_total' align='right'>"+formatNumber(sum_qty)+"</td>";
+          row += "<td class='style_total' ></td>";
+          row += "<td class='style_total' align='right'>"+formatNumber(sum_qty2)+"</td>";
+          row += "<td class='style_total' colspan='8'></td>";
+          row += "</tr>";
+      return row;
+  }
+
+  function formatNumber(n) {
+    return new Intl.NumberFormat('en-US').format(n);
+  }
 
 </script>
 

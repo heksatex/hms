@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -14,6 +15,10 @@
       display: block;
       height: calc( 100vh - 250px );
       overflow-x: auto;
+    }
+
+    .ws{
+      white-space: nowrap;
     }
 
   </style>
@@ -48,7 +53,7 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/rekapcacat/export_excel">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode">
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12"> 
@@ -94,8 +99,8 @@
          
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
               <br>
               <div class="col-md-12">
@@ -157,48 +162,42 @@
 
             <!-- table -->
             <div class="box-body">
-            <div class="col-sm-12 table-responsive">
-              <div class="table_scroll">
-                <div class="table_scroll_head">
-                  <div class="divListviewHead">
-                      <table id="example1" class="table" border="0">
-                          <thead>
-                            <tr>
-                              <th  class="style no"  >No. </th>
-                              <th  class='style' >MO</th>
-                              <th  class='style' style="min-width: 120px">No Mesin</th>
-                              <th  class='style' >SC</th>
-                              <th  class='style' style="min-width: 80px">Tgl HPH</th>
-                              <th  class='style' >kode Produk</th>
-                              <th  class='style'  style="min-width: 150px">Nama Produk</th>
-                              <th  class='style' >Lot</th>
-                              <th  class='style' >Qty1</th>
-                              <th  class='style' >Uom1</th>
-                              <th  class='style' >Qty2</th>
-                              <th  class='style' >Uom2</th>
-                              <th  class='style' >Grade</th>
-                              <th  class='style' >Point Cacat</th>
-                              <th  class='style' >Kode Cacat</th>
-                              <th  class='style' style="min-width: 120px" >Nama cacat</th>
-                              <th  class='style' style="min-width: 100px" >Nama User</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td colspan="16" align="center">Tidak ada Data</td>
-                            </tr>
-                          </tbody>
-                      </table>
-                      <div id="example1_processing" class="table_processing" style="display: none">
-                        Processing...
-                      </div>
+                <div class="col-xs-12 table-responsive example1 divListviewHead">
+                  <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                      <table id="example1" class="table table-condesed table-hover" border="0">
+                            <thead>
+                              <tr>
+                                <th  class="style bb ws no"  >No. </th>
+                                <th  class='style bb ws' >MO</th>
+                                <th  class='style bb ws' style="min-width: 120px">No Mesin</th>
+                                <th  class='style bb ws' >SC</th>
+                                <th  class='style bb ws' style="min-width: 80px">Tgl HPH</th>
+                                <th  class='style bb ws' >kode Produk</th>
+                                <th  class='style bb ws'  style="min-width: 150px">Nama Produk</th>
+                                <th  class='style bb ws' >Lot</th>
+                                <th  class='style bb ws' >Qty1</th>
+                                <th  class='style bb ws' >Uom1</th>
+                                <th  class='style bb ws' >Qty2</th>
+                                <th  class='style bb ws' >Uom2</th>
+                                <th  class='style bb ws' >Grade</th>
+                                <th  class='style bb ws' >Point Cacat</th>
+                                <th  class='style bb ws' >Kode Cacat</th>
+                                <th  class='style bb ws' style="min-width: 120px" >Nama cacat</th>
+                                <th  class='style bb ws' style="min-width: 100px" >Nama User</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td colspan="16" >Tidak ada Data</td>
+                              </tr>
+                            </tbody>
+                        </table>
+                        <div id="example1_processing" class="table_processing" style="display: none">
+                          Processing...
+                        </div>
                   </div>
                 </div>
-
-              </div>
             </div>
-            </div>
-
 
         </div>
         <!-- /.box-body -->
@@ -340,7 +339,7 @@
                       tbody.append(tr);
                   });
                 if(empty == true){
-                  var tr = $("<tr>").append($("<td colspan='16' align='center'>").text('Tidak ada Data'));
+                  var tr = $("<tr>").append($("<td colspan='16'>").text('Tidak ada Data'));
                   tbody.append(tr);
                 }
                 $("#example1").append(tbody);
@@ -358,6 +357,56 @@
       e.stopImmediatePropagation();
   });
 
+
+   // btn generate
+   $("#btn-excel").on('click', function(e){
+
+      e.preventDefault();
+
+      tgldari   = $('#tgldari').val();
+      tglsampai = $('#tglsampai').val();
+      id_dept   = $('#departemen').val();
+      corak     = $('#corak').val();
+      mc        = $('#mc').val();
+      lot       = $('#lot').val();
+      user      = $('#user').val();
+      jenis     = $('#jenis').val();      
+      grade     = $('#grade').val();      
+
+      if(tgldari == '' || tglsampai == ''){
+        alert_modal_warning('Periode Tanggal Harus diisi !');
+
+      }else if(id_dept == null){
+        alert_modal_warning('Departemen Harus diisi !');
+      }else{   
+
+        $.ajax({
+          "type":'POST',
+          "url" : "<?php echo site_url('report/rekapcacat/export_excel')?>",
+          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade },
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert('Error Export Excel');
+            $('#btn-excel').button('reset');
+          }
+        }).done(function(data){
+            if(data.status =="failed"){
+              alert_modal_warning(data.message);
+            }else{
+              var $a = $("<a>");
+              $a.attr("href",data.file);
+              $("body").append($a);
+              $a.attr("download",data.filename);
+              $a[0].click();
+              $a.remove();
+            }
+            $('#btn-excel').button('reset');
+        });
+    }
+
+   });
 
 </script>
 

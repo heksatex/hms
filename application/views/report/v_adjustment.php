@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
     
     h3{
@@ -12,8 +13,12 @@
 
     .divListviewHead table  {
       display: block;
-      height: calc( 100vh - 250px );
+      max-height: calc( 100vh - 250px );
       overflow-x: auto;
+    }
+
+    .ws{
+      white-space: nowrap;
     }
 
   </style>
@@ -48,7 +53,7 @@
         </div>
         <div class="box-body">
            
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" action="<?=base_url()?>report/adjustment/export_excel">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_periode" >
               <div class="col-md-8">
                 <div class="form-group">
                   <div class="col-md-12"> 
@@ -89,8 +94,8 @@
                
               </div>
               <div class="col-md-4">
-                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" >Generate</button>
-                <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
+                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
 
             </form>
@@ -104,42 +109,40 @@
                     </div>
                     <div class="col-xs-5 col-md-10" id="total_lot"><label>Total Lot : 0</label></div>
                 </div>
-                <div class="table_scroll">
-                  <div class="table_scroll_head">
-                    <div class="divListviewHead">
-                        <table id="example1" class="table" border="0">
+                <div class="col-xs-12 table-responsive example1 divListviewHead">
+                  <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                      <table id="example1" class="table table-condesed table-hover" border="0">
                             <thead>
                               <tr>
                                 <th  class="style no"  >No. </th>
-                                <th  class='style' style="min-width: 80px">Kode Adjustment</th>
-                                <th  class='style' style="min-width: 80px">Tanggal</th>
-                                <th  class='style' style="min-width: 150px">Nama Produk</th>
-                                <th  class='style' style="min-width: 80px">Lot</th>
-                                <th  class='style' >Qty Stock</th>
-                                <th  class='style' >Qty Adj</th>
-                                <th  class='style' >UoM</th>
-                                <th  class='style' >Qty2 Stock</th>
-                                <th  class='style' >Qty2 Adj</th>
-                                <th  class='style' >UoM2</th>
-                                <th  class='style' >Qty Move</th>
-                                <th  class='style' >Qty Move2</th>
-                                <th  class='style' style="min-width: 80px">User</th>
-                                <th  class='style' style="min-width: 100px">Notes</th>
+                                <th  class='style bb ws' style="min-width: 80px">Kode Adjustment</th>
+                                <th  class='style bb ws' style="min-width: 80px">Tanggal</th>
+                                <th  class='style bb ws' style="min-width: 150px">Nama Produk</th>
+                                <th  class='style bb ws' style="min-width: 80px">Lot</th>
+                                <th  class='style bb ws' >Qty Stock</th>
+                                <th  class='style bb ws' >Qty Adj</th>
+                                <th  class='style bb ws' >UoM</th>
+                                <th  class='style bb ws' >Qty2 Stock</th>
+                                <th  class='style bb ws' >Qty2 Adj</th>
+                                <th  class='style bb ws' >UoM2</th>
+                                <th  class='style bb ws' >Qty Move</th>
+                                <th  class='style bb ws' >Qty Move2</th>
+                                <th  class='style bb ws' style="min-width: 80px">User</th>
+                                <th  class='style bb ws' style="min-width: 100px">Notes</th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td colspan="15" align="center">Tidak ada Data</td>
+                                <td colspan="15" >Tidak ada Data</td>
                               </tr>
                             </tbody>
                         </table>
                         <div id="example1_processing" class="table_processing" style="display: none">
                           Processing...
                         </div>
-                    </div>
                   </div>
-
                 </div>
+
               </div>
             </div>
 
@@ -152,42 +155,40 @@
                     </div>
                     <div class="col-xs-5 col-md-10" id="total_lot2"><label>Total Lot : 0</label></div>
                 </div>
-                <div class="table_scroll">
-                  <div class="table_scroll_head">
-                    <div class="divListviewHead">
-                        <table id="example2" class="table" border="0">
+                <div class="col-xs-12 table-responsive example1 divListviewHead">
+                  <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                          <table id="example2" class="table table-condesed table-hover" border="0">
                             <thead>
                               <tr>
-                                <th  class="style no"  >No. </th>
-                                <th  class='style' style="min-width: 80px">Kode Adjustment</th>
-                                <th  class='style' style="min-width: 80px">Tanggal</th>
-                                <th  class='style' style="min-width: 150px">Nama Produk</th>
-                                <th  class='style' style="min-width: 80px">Lot</th>
-                                <th  class='style' >Qty Stock</th>
-                                <th  class='style' >Qty Adj</th>
-                                <th  class='style' >UoM</th>
-                                <th  class='style' >Qty2 Stock</th>
-                                <th  class='style' >Qty2 Adj</th>
-                                <th  class='style' >UoM2</th>
-                                <th  class='style' >Qty Move</th>
-                                <th  class='style' >Qty Move2</th>
-                                <th  class='style' style="min-width: 80px">User</th>
-                                <th  class='style' style="min-width: 100px">Notes</th>
+                                <th  class="style bb ws no"  >No. </th>
+                                <th  class='style bb ws' style="min-width: 80px">Kode Adjustment</th>
+                                <th  class='style bb ws' style="min-width: 80px">Tanggal</th>
+                                <th  class='style bb ws' style="min-width: 150px">Nama Produk</th>
+                                <th  class='style bb ws' style="min-width: 80px">Lot</th>
+                                <th  class='style bb ws' >Qty Stock</th>
+                                <th  class='style bb ws' >Qty Adj</th>
+                                <th  class='style bb ws' >UoM</th>
+                                <th  class='style bb ws' >Qty2 Stock</th>
+                                <th  class='style bb ws' >Qty2 Adj</th>
+                                <th  class='style bb ws' >UoM2</th>
+                                <th  class='style bb ws' >Qty Move</th>
+                                <th  class='style bb ws' >Qty Move2</th>
+                                <th  class='style bb ws' style="min-width: 80px">User</th>
+                                <th  class='style bb ws' style="min-width: 100px">Notes</th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td colspan="15" align="center">Tidak ada Data</td>
+                                <td colspan="15" >Tidak ada Data</td>
                               </tr>
                             </tbody>
                         </table>
                         <div id="example2_processing" class="table_processing" style="display: none">
                           Processing...
                         </div>
-                    </div>
                   </div>
-
                 </div>
+
               </div>
             </div>
 
@@ -306,6 +307,47 @@
       }
   });
 
+
+  // btn excel
+  $('#btn-excel').click(function(){
+
+    tgldari   = $('#tgldari').val();
+    tglsampai = $('#tglsampai').val();
+    id_dept   = $('#departemen').val();
+
+    if(tgldari == '' || tglsampai == ''){
+        alert_modal_warning('Periode Tanggal Harus diisi !');
+    }else if(id_dept == null){
+        alert_modal_warning('Departemen Harus diisi !');
+    }else{ 
+        $.ajax({
+          "type":'POST',
+          "url" : "<?php echo site_url('report/adjustment/export_excel')?>",
+          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept}, 
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert('Error Export Excel');
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status =="failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
+
+    }
+
+  });
 
   $(document).on("click", ".group1", function(e){
 
@@ -483,7 +525,7 @@
                   });
 
                   if(empty == true){
-                    var tr = $("<tr>").append($("<td colspan='15' align='center'>").text('Tidak ada Data'));
+                    var tr = $("<tr>").append($("<td colspan='15' >").text('Tidak ada Data'));
                     tbody = $("<tbody id='"+group+"'>").append(tr);
                     $("#"+id_table).append(tbody); // append parents
                   }

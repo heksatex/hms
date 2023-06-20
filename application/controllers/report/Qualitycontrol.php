@@ -111,37 +111,110 @@ class Qualitycontrol extends MY_Controller
 				// total gulung setelah dikurang tot gl adj
 				$tot_gl = $row->tot_gl - $row->tot_gl_adj;
 
+				$mtr   = '';
+				$rpm   = '';
+				if($id_dept == 'TRI'){
+					$exp2  = explode('|', $row->reff_note);
+					$a     = 0;
+					foreach ($exp2 as $exps2) {
+
+						if($a == 6){ // mtr
+							$ex2 = explode('=', $exps2);
+							$b   = 0 ;
+							foreach($ex2 as $exs2){
+								if($b == 1){
+									$mtr = trim($exs2);
+								}
+								$b++;
+							}
+						}
+
+						if($a == 13){ // rpm
+							$ex2 = explode('=', $exps2);
+							$b   = 0 ;
+							foreach($ex2 as $exs2){
+								if($b == 1){
+									$rpm = trim($exs2);
+								}
+								$b++;
+							}
+						}
+						$a++;
+					}
+				}
+
+				if($id_dept == 'JAC'){
+					$exp2  = explode('|', $row->reff_note);
+					$a     = 0;
+					foreach ($exp2 as $exps2) {
+
+						if($a == 8){ // mtr
+							$ex2 = explode('=', $exps2);
+							$b   = 0 ;
+							foreach($ex2 as $exs2){
+								if($b == 1){
+									$mtr = trim($exs2);
+								}
+								$b++;
+							}
+						}
+
+						if($a == 15){ // rpm
+							$ex2 = explode('=', $exps2);
+							$b   = 0 ;
+							foreach($ex2 as $exs2){
+								if($b == 1){
+									$rpm = trim($exs2);
+								}
+								$b++;
+							}
+						}
+						$a++;
+					}
+				}
+
 				// tot hph per periode
 				$mrpRecord[] = array(
-					'nama_mesin' => $row->nama_mesin,
-					'nama_produk' => $row->nama_produk,
-					'hph_mtr'    => number_format($tot_mtr, 2),
-					'hph_kg'     => number_format($row->tot_kg, 2),
-					'hph_gl'     => $tot_gl,
-					'efisisensi' => round($eff, 2),
-					'grade_A'   => ($row->grade_A),
-					'grade_B'   => ($row->grade_B),
-					'grade_C'   => ($row->grade_C),
-					'dataEfHari'  => $dataEfHari
+					'nama_mesin' 	=> $row->nama_mesin,
+					'nama_produk' 	=> $row->nama_produk,
+					'rpm' 		  	=> $rpm,
+					'mtr' 		  	=> $mtr,
+					'hph_mtr'    	=> number_format($tot_mtr, 2),
+					'hph_kg'     	=> number_format($row->tot_kg, 2),
+					'hph_gl'     	=> $tot_gl,
+					'efisisensi' 	=> round($eff, 2),
+					'grade_A'  		=> ($row->grade_A),
+					'grade_B'   	=> ($row->grade_B),
+					'grade_C'   	=> ($row->grade_C),
+					'dataEfHari'  	=> $dataEfHari
 				);
 
 				$dataEfHari = [];
 			}
 
 			if(empty($dataHari)){
-				$dataHari[] = array('tgl' => $tgldari);
+				$tgldari_loop = $tgldari;
+				$tglsampai_loop = $tglsampai;
+				$dataHari       = [];
+				
+				while ($tgldari_loop <= $tglsampai_loop) {
+					$dataHari[] = array('tgl' => $tgldari);
+					$tgldari_loop = date('Y-m-d', strtotime('+1 days', strtotime($tgldari_loop)));
+				}
 			}
 
 			$dataMesin[] = array(
-				'nama_mesin' => $rmc->nama_mesin,
-				'mrp' => $mrpRecord,
-				'hph_mtr' => 0,
-				'hph_kg' => 0,
-				'hph_gl' => 0,
-				'efisisensi' => 0,
-				'grade_A'   => 0,
-				'grade_B'   => 0,
-				'grade_C'   => 0,
+				'nama_mesin' 	=> $rmc->nama_mesin,
+				'mrp' 			=> $mrpRecord,
+				'rpm' 		  	=> '',
+				'mtr' 		  	=> '',
+				'hph_mtr' 		=> 0,
+				'hph_kg' 		=> 0,
+				'hph_gl' 		=> 0,
+				'efisisensi' 	=> 0,
+				'grade_A'   	=> 0,
+				'grade_B'   	=> 0,
+				'grade_C'   	=> 0,
 			);
 			$mrpRecord = [];
 		}
@@ -380,9 +453,75 @@ class Qualitycontrol extends MY_Controller
 					// total gulung setelah dikurang tot gl adj
 					$tot_gl = $row->tot_gl - $row->tot_gl_adj;
 
+					$mtr   = '';
+					$rpm   = '';
+					
+					if($id_dept == 'TRI'){
+						$exp2  = explode('|', $row->reff_note);
+						$a     = 0;
+						foreach ($exp2 as $exps2) {
+
+							if($a == 6){ // mtr
+								$ex2 = explode('=', $exps2);
+								$b   = 0 ;
+								foreach($ex2 as $exs2){
+									if($b == 1){
+										$mtr = trim($exs2);
+									}
+									$b++;
+								}
+							}
+
+							if($a == 13){ // rpm
+								$ex2 = explode('=', $exps2);
+								$b   = 0 ;
+								foreach($ex2 as $exs2){
+									if($b == 1){
+										$rpm = trim($exs2);
+									}
+									$b++;
+								}
+							}
+							$a++;
+						}
+					}
+
+					if($id_dept == 'JAC'){
+						$exp2  = explode('|', $row->reff_note);
+						$a     = 0;
+						foreach ($exp2 as $exps2) {
+
+							if($a == 8){ // mtr
+								$ex2 = explode('=', $exps2);
+								$b   = 0 ;
+								foreach($ex2 as $exs2){
+									if($b == 1){
+										$mtr = trim($exs2);
+									}
+									$b++;
+								}
+							}
+
+							if($a == 15){ // rpm
+								$ex2 = explode('=', $exps2);
+								$b   = 0 ;
+								foreach($ex2 as $exs2){
+									if($b == 1){
+										$rpm = trim($exs2);
+									}
+									$b++;
+								}
+							}
+							$a++;
+						}
+					}
+
+
 					$object->getActiveSheet()->SetCellValue('A' . $rowCount, ($num++));
 					$object->getActiveSheet()->SetCellValue('B' . $rowCount, $row->nama_mesin);
 					$object->getActiveSheet()->SetCellValue('C' . $rowCount, $row->nama_produk);
+					$object->getActiveSheet()->SetCellValue('D' . $rowCount, $mtr);
+					$object->getActiveSheet()->SetCellValue('F' . $rowCount, $rpm);
 					$object->getActiveSheet()->SetCellValue('G' . $rowCount, $tot_mtr);
 					$object->getActiveSheet()->SetCellValue('H' . $rowCount, $row->tot_kg);
 					$object->getActiveSheet()->SetCellValue('I' . $rowCount, $tot_gl);

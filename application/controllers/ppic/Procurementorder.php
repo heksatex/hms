@@ -580,6 +580,10 @@ class Procurementorder extends MY_Controller
                 $callback = array('status' => 'failed','message' => 'Maaf, Data yang akan Di Generate Kosong !', 'icon' =>'fa fa-check', 'type' => 'danger');
                 //unlock table
                 $this->_module->unlock_tabel();
+            }else if(($qty == 0)){
+                $callback = array('status' => 'failed','message' => 'Maaf, Qty tidak boleh 0 !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                //unlock table
+                $this->_module->unlock_tabel();
             }else{ 
 
                 //unlock table
@@ -603,6 +607,8 @@ class Procurementorder extends MY_Controller
                 $nama_produk_empty  = '';
                 $nama_bom           = '';
                 $origin             = '';
+                $arr_bi             = '';
+                $arr_bi2            = '';
 
             	if(empty($jen_route['route_produksi'])){//cek route produksi apakah ada ?
 
@@ -732,7 +738,7 @@ class Procurementorder extends MY_Controller
 
 
                             //jalankan jika produk dan bom nya ada
-                            if($produk_route_empty == FALSE AND $bom_empty == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE){
+                            if($produk_route_empty == FALSE AND $bom_empty == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE AND !empty($arr_bi) AND !empty($arr_bi2)){
 
                                 $generate_produk = TRUE;		                
                         
@@ -1010,7 +1016,7 @@ class Procurementorder extends MY_Controller
 
 
                             //jalankan jika produk dan bom nya ada
-                            if($produk_route_empty == FALSE AND $bom_empty == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE){
+                            if($produk_route_empty == FALSE AND $bom_empty == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE AND !empty($arr_bi) AND !empty($arr_bi2)){
 
                                 $generate_produk = TRUE;		                
                                 if($show_sc == 'yes'){

@@ -37,6 +37,10 @@
         min-width: 80px;;
     }
 
+    .error{
+	  	border:  1px solid red !important;
+  	}  
+
   </style>
 
 </head>
@@ -267,6 +271,19 @@
         }
     }
 
+    function enter(e,table){
+    if(e.keyCode === 13){
+	        e.preventDefault(); 
+          if(table == 'table_dyest'){
+            tambah_baris(false,'','','','','','') //panggil fungsi tambah baris
+          }else if(table == 'table_aux'){
+            tambah_baris_aux(false,'','','','','','') //panggil fungsi tambah baris
+          }else{
+            alert('Tidak ditemukan !');
+          }
+	    }
+	}
+
     <?php 
             $no = 1;
             foreach($dyest as $dye){
@@ -285,129 +302,199 @@
         }else{
             row  = parseInt($("#table_dyest tbody[id='tbody_dye'] tr:last-child td .row").val());
         }
-        var ro     = row+1;
-        delRow  = "delRow_dye(this)";
-       
-        var class_produk = 'kode_produk_'+ro;
-        var produk       = 'nama_produk'+ro;
-        var class_uom    = 'uom_'+ro;
-        var row        = '<tr class="num">'
-                    + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
-                    + '<td  class="min-width-200">'
-                        + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
-                        + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
-                    + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" value="'+qty+'"></td>'
-                    + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
-                    + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff">'+reff_note+'</textarea></td>'
-                    + '<td class="width-50" align="center"><a onclick="'+delRow+';"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
-                    + '</tr>';
 
-        $('#table_dyest tbody[id="tbody_dye"] ').append(row);
-        //$("#components tbody tr").eq(index + 1).find(".add, .edit").toggle();
-        $('[data-toggle="tooltip"]').tooltip();
+        var tambah  = true;
+        var tbl     = "#table_dyest tbody[id='tbody_dye'] ";       
+        var np      = $(tbl+" td input[name='Product']");
+        var inx_np  = np.length-1;
+        var n_qty   = $(tbl+" td input[name='Qty']");
+		    var inx_n_qty = n_qty.length-1;
+        var n_uom     = $(tbl+" td input[name='Uom']");
+		    var inx_n_uom = n_uom.length-1;
+        var dye_same_arr = [];
+        var event      = "enter(event,'table_dyest')";
 
-        var sel_produk  = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_produk);
-        var sel_uom     = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_uom);
-        var produk_hide = $('#table_dyest tbody[id="tbody_dye"] tr .'+produk);
-
-        if(data==true){
-            //untuk event selected select2 nama_produk
-            custom_nama = '['+kode_produk+'] '+nama_produk;
-            var $newOption = $("<option></option>").val(kode_produk).text(custom_nama);
-            sel_produk.empty().append($newOption).trigger('change');
-
-            var $newOption2 = $("<option></option>").val(uom).text(uom);
-            sel_uom.empty().append($newOption2).trigger('change');
-
-        }
-
-        //select 2 product
-        sel_produk.select2({
-            ajax:{
-                dataType: 'JSON',
-                type : "POST",
-                url : "<?php echo base_url();?>lab/dti/get_list_dye",
-                //delay : 250,
-                data : function(params){
-                    return{
-                    prod:params.term
-                    };
-                }, 
-                processResults:function(data){
-                    var results = [];
-
-                    $.each(data, function(index,item){
-                        results.push({
-                            id:item.kode_produk,
-                            text:'['+item.kode_produk+'] '+item.nama_produk
-                        });
-                    });
-                    return {
-                    results:results
-                    };
-                },
-                error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
-                    alert(xhr.responseText);
-                }
-            }
-        });
-
-        //jika nama produk diubah
-        sel_produk.change(function(){
+        //cek Product apa ada yg kosong
+        $(tbl+' .kode_produk').each(function(index,value){
+          if($(value).val()=='' || $(value).val() == null){
+              alert_notify('fa fa-warning','Product Harus Diisi !','danger',function(){});
+              var s2element = $(this).parents(tbl).find(np[inx_np]).siblings('select');
+              //var s2element = $(this).parents('td').find('.kode_produk').siblings('select');
+              s2element.select2('open');
+              s2element.on('select2:closing', function (e) {
+                  s2element.select2('focus');
+              });
+              $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+              tambah = false;
+          }else{
+              value = $(value).val();
             
-            $.ajax({
-                dataType: "JSON",
-                url : '<?php echo site_url('lab/dti/get_prod_by_id') ?>',
-                type: "POST",
-                data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
-                success: function(data){
-                    produk_hide.val(data.nama_produk);
-                    //untuk event selected select2 uom
-                    var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
-                    sel_uom.empty().append($newOptionuom).trigger('change');
-                },
-                error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
-                    alert(xhr.responseText);
-                }
-            });
+              if(dye_same_arr.indexOf(value) == -1){
+                  dye_same_arr.push(value);
+                  $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+              }else{
+                  tambah    = false;
+                  $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+                  alert_notify('fa fa-warning','Product Dyeing Stuff tidak boleh sama ','danger',function(){});
+              }
+              
+          }
         });
 
-         
-        //select 2 uom
-        sel_uom.select2({
-            allowClear: true,
-            placeholder: "",
-            ajax:{
-                    dataType: 'JSON',
-                    type : "POST",
-                    url : "<?php echo base_url();?>lab/dti/get_uom_select2",
-                    data : function(params){
-                        return{
-                            prod:params.term,
-                        };
-                    }, 
-                    processResults:function(data){
-                        var results = [];
-                        $.each(data, function(index,item){
-                            results.push({
-                                id:item.short,
-                                text:item.short
-                            });
-                        });
-                        return {
-                            results:results
-                        };
-                    },
-                    error: function (xhr, ajaxOptions, thrownError){
-                        alert('Error data');
-                        alert(xhr.responseText);
-                    }
-            }
+        //cek qty apa ada yg kosong
+        $(tbl+' .qty').each(function(index,value){
+          if($(value).val()==''){
+              alert_notify('fa fa-warning','Qty Harus Diisi !','danger',function(){});
+              $(this).parents(tbl).find(n_qty[inx_n_qty]).focus();
+              $(value).addClass('error'); 
+              tambah = false;
+          }else{
+              $(value).removeClass('error'); 
+          }
         });
 
-    };
+        //cek uom apa ada yg kosong
+        $(tbl+' .uom').each(function(index,value){
+          if($(value).val()=='' || $(value).val() == null){
+              alert_notify('fa fa-warning','Uom Harus Diisi !','danger',function(){});
+              var s2element = $(this).parents(tbl).find(uom[inx_n_uom]).siblings('select');
+              s2element.select2('open');
+              s2element.on('select2:closing', function (e) {
+                  s2element.select2('focus');
+              });
+              $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+              tambah = false;
+          }else{
+              $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+          }
+        });
+
+        
+        if(tambah){
+
+          var ro     = row+1;
+          delRow  = "delRow_dye(this)";
+
+          var class_produk = 'kode_produk_'+ro;
+          var produk       = 'nama_produk'+ro;
+          var class_uom    = 'uom_'+ro;
+          var row        = '<tr class="num">'
+                      + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
+                      + '<td  class="min-width-200">'
+                          + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
+                          + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
+                      + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" onkeypress="'+event+'" value="'+qty+'"></td>'
+                      + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
+                      + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff" onkeypress="'+event+'">'+reff_note+'</textarea></td>'
+                      + '<td class="width-50" align="center"><a onclick="'+delRow+';"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
+                      + '</tr>';
+
+          $('#table_dyest tbody[id="tbody_dye"] ').append(row);
+          //$("#components tbody tr").eq(index + 1).find(".add, .edit").toggle();
+          $('[data-toggle="tooltip"]').tooltip();
+
+          var sel_produk  = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_produk);
+          var sel_uom     = $('#table_dyest tbody[id="tbody_dye"] tr .'+class_uom);
+          var produk_hide = $('#table_dyest tbody[id="tbody_dye"] tr .'+produk);
+
+          if(data==true){
+              //untuk event selected select2 nama_produk
+              custom_nama = '['+kode_produk+'] '+nama_produk;
+              var $newOption = $("<option></option>").val(kode_produk).text(custom_nama);
+              sel_produk.empty().append($newOption).trigger('change');
+
+              var $newOption2 = $("<option></option>").val(uom).text(uom);
+              sel_uom.empty().append($newOption2).trigger('change');
+
+          }
+
+          //select 2 product
+          sel_produk.select2({
+              ajax:{
+                  dataType: 'JSON',
+                  type : "POST",
+                  url : "<?php echo base_url();?>lab/dti/get_list_dye",
+                  //delay : 250,
+                  data : function(params){
+                      return{
+                      prod:params.term
+                      };
+                  }, 
+                  processResults:function(data){
+                      var results = [];
+
+                      $.each(data, function(index,item){
+                          results.push({
+                              id:item.kode_produk,
+                              text:'['+item.kode_produk+'] '+item.nama_produk
+                          });
+                      });
+                      return {
+                      results:results
+                      };
+                  },
+                  error: function (xhr, ajaxOptions, thrownError){
+                      alert('Error data');
+                      alert(xhr.responseText);
+                  }
+              }
+          });
+
+          //jika nama produk diubah
+          sel_produk.change(function(){
+              
+              $.ajax({
+                  dataType: "JSON",
+                  url : '<?php echo site_url('lab/dti/get_prod_by_id') ?>',
+                  type: "POST",
+                  data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
+                  success: function(data){
+                      produk_hide.val(data.nama_produk);
+                      //untuk event selected select2 uom
+                      var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
+                      sel_uom.empty().append($newOptionuom).trigger('change');
+                  },
+                  error: function (xhr, ajaxOptions, thrownError){
+                      alert('Error data');
+                      alert(xhr.responseText);
+                  }
+              });
+          });
+
+          
+          //select 2 uom
+          sel_uom.select2({
+              allowClear: true,
+              placeholder: "",
+              ajax:{
+                      dataType: 'JSON',
+                      type : "POST",
+                      url : "<?php echo base_url();?>lab/dti/get_uom_select2",
+                      data : function(params){
+                          return{
+                              prod:params.term,
+                          };
+                      }, 
+                      processResults:function(data){
+                          var results = [];
+                          $.each(data, function(index,item){
+                              results.push({
+                                  id:item.short,
+                                  text:item.short
+                              });
+                          });
+                          return {
+                              results:results
+                          };
+                      },
+                      error: function (xhr, ajaxOptions, thrownError){
+                          alert('Error data');
+                          alert(xhr.responseText);
+                      }
+              }
+          });
+        }
+    }
 
     <?php 
             $no = 1;
@@ -429,130 +516,191 @@
         }else{
           row  = parseInt($("#table_aux tbody[id='tbody_aux'] tr:last-child td .row").val());
         }
-        var ro     = row+1;
-        delRow  = "delRow_aux(this)";
 
-        var class_produk = 'kode_produk_'+ro;
-        var produk       = 'nama_produk'+ro;
-        var class_uom    = 'uom_'+ro;
-        var row    = '<tr class="num">'
-                    + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
-                    + '<td  class="min-width-200">'
-                        + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
-                        + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
-                    + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" value="'+qty+'"></td>'
-                    + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
-                    + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff">'+reff_note+'</textarea></td>'
-                    + '<td class="width-50" align="center"><a onclick="'+delRow+'"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
-                    + '</tr>';
+        var tambah  = true;
+        var tbl     = "#table_aux tbody[id='tbody_aux'] ";       
+        var np      = $(tbl+" td input[name='Product']");
+        var inx_np  = np.length-1;
+        var n_qty   = $(tbl+" td input[name='Qty']");
+		    var inx_n_qty = n_qty.length-1;
+        var n_uom     = $(tbl+" td input[name='Uom']");
+		    var inx_n_uom = n_uom.length-1;
+       
+        var event      = "enter(event,'table_aux')";
+
+        //cek Product apa ada yg kosong
+        $(tbl+' .kode_produk').each(function(index,value){
+          if($(value).val()=='' || $(value).val() == null){
+              alert_notify('fa fa-warning','Product Harus Diisi !','danger',function(){});
+              var s2element = $(this).parents(tbl).find(np[inx_np]).siblings('select');
+              //var s2element = $(this).parents('td').find('.kode_produk').siblings('select');
+              s2element.select2('open');
+              s2element.on('select2:closing', function (e) {
+                  s2element.select2('focus');
+              });
+              $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+              tambah = false;
+          }else{
+            $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+          }
+        });
+
+        //cek qty apa ada yg kosong
+        $(tbl+' .qty').each(function(index,value){
+          if($(value).val()==''){
+              alert_notify('fa fa-warning','Qty Harus Diisi !','danger',function(){});
+              $(this).parents(tbl).find(n_qty[inx_n_qty]).focus();
+              $(value).addClass('error'); 
+              tambah = false;
+          }else{
+              $(value).removeClass('error'); 
+          }
+        });
+
+        //cek uom apa ada yg kosong
+        $(tbl+' .uom').each(function(index,value){
+          if($(value).val()=='' || $(value).val() == null){
+              alert_notify('fa fa-warning','Uom Harus Diisi !','danger',function(){});
+              var s2element = $(this).parents(tbl).find(uom[inx_n_uom]).siblings('select');
+              s2element.select2('open');
+              s2element.on('select2:closing', function (e) {
+                  s2element.select2('focus');
+              });
+              $(this).parents('td').find('span span.selection span.select2-selection').addClass('error'); 
+              tambah = false;
+          }else{
+              $(this).parents('td').find('span span.selection span.select2-selection').removeClass('error'); 
+          }
+        });
 
 
-        $('#table_aux tbody[id="tbody_aux"] ').append(row);
-        //$("#components tbody tr").eq(index + 1).find(".add, .edit").toggle();
-        $('[data-toggle="tooltip"]').tooltip();
+        if(tambah){
 
-        var sel_produk  = $('#table_aux tbody[id="tbody_aux"] tr .'+class_produk);
-        var sel_uom     = $('#table_aux tbody[id="tbody_aux"] tr .'+class_uom);
-        var produk_hide = $('#table_aux tbody[id="tbody_aux"] tr .'+produk);
+          var ro     = row+1;
+          delRow  = "delRow_aux(this)";
 
-        if(data==true){
-            //untuk event selected select2 nama_produk
-            custom_nama = '['+kode_produk+'] '+nama_produk;
-            var $newOption = $("<option></option>").val(kode_produk).text(custom_nama);
-            sel_produk.empty().append($newOption).trigger('change');
+          var class_produk = 'kode_produk_'+ro;
+          var produk       = 'nama_produk'+ro;
+          var class_uom    = 'uom_'+ro;
+          var row    = '<tr class="num">'
+                      + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
+                      + '<td  class="min-width-200">'
+                          + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="Product" id="kode_produk"></select>'
+                          + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
+                      + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" onkeypress="'+event+'" value="'+qty+'"></td>'
+                      + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
+                      + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff" onkeypress="'+event+'">'+reff_note+'</textarea></td>'
+                      + '<td class="width-50" align="center"><a onclick="'+delRow+'"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
+                      + '</tr>';
 
-            var $newOption2 = $("<option></option>").val(uom).text(uom);
-            sel_uom.empty().append($newOption2).trigger('change');
+
+          $('#table_aux tbody[id="tbody_aux"] ').append(row);
+          //$("#components tbody tr").eq(index + 1).find(".add, .edit").toggle();
+          $('[data-toggle="tooltip"]').tooltip();
+
+          var sel_produk  = $('#table_aux tbody[id="tbody_aux"] tr .'+class_produk);
+          var sel_uom     = $('#table_aux tbody[id="tbody_aux"] tr .'+class_uom);
+          var produk_hide = $('#table_aux tbody[id="tbody_aux"] tr .'+produk);
+
+          if(data==true){
+              //untuk event selected select2 nama_produk
+              custom_nama = '['+kode_produk+'] '+nama_produk;
+              var $newOption = $("<option></option>").val(kode_produk).text(custom_nama);
+              sel_produk.empty().append($newOption).trigger('change');
+
+              var $newOption2 = $("<option></option>").val(uom).text(uom);
+              sel_uom.empty().append($newOption2).trigger('change');
+          }
+
+
+          //select 2 product
+          sel_produk.select2({
+              ajax:{
+                  dataType: 'JSON',
+                  type : "POST",
+                  url : "<?php echo base_url();?>lab/dti/get_list_aux",
+                  //delay : 250,
+                  data : function(params){
+                      return{
+                      prod:params.term
+                      };
+                  }, 
+                  processResults:function(data){
+                      var results = [];
+
+                      $.each(data, function(index,item){
+                          results.push({
+                              id:item.kode_produk,
+                              text:'['+item.kode_produk+'] '+item.nama_produk
+                          });
+                      });
+                      return {
+                      results:results
+                      };
+                  },
+                  error: function (xhr, ajaxOptions, thrownError){
+                      alert('Error data');
+                      alert(xhr.responseText);
+                  }
+              }
+          });
+
+          //jika nama produk diubah
+          sel_produk.change(function(){
+              
+              $.ajax({
+                  dataType: "JSON",
+                  url : '<?php echo site_url('lab/dti/get_prod_by_id') ?>',
+                  type: "POST",
+                  data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
+                  success: function(data){
+                      produk_hide.val(data.nama_produk);
+                      //untuk event selected select2 uom
+                      var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
+                      sel_uom.empty().append($newOptionuom).trigger('change');
+                  },
+                  error: function (xhr, ajaxOptions, thrownError){
+                      alert('Error data');
+                      alert(xhr.responseText);
+                  }
+              });
+          });
+
+          
+          //select 2 uom
+          sel_uom.select2({
+              allowClear: true,
+              placeholder: "",
+              ajax:{
+                      dataType: 'JSON',
+                      type : "POST",
+                      url : "<?php echo base_url();?>lab/dti/get_uom_select2",
+                      data : function(params){
+                      return{
+                          prod:params.term,
+                      };
+                      }, 
+                      processResults:function(data){
+                          var results = [];
+                          $.each(data, function(index,item){
+                              results.push({
+                                  id:item.short,
+                                  text:item.short
+                              });
+                          });
+                          return {
+                              results:results
+                          };
+                      },
+                      error: function (xhr, ajaxOptions, thrownError){
+                          alert('Error data');
+                          alert(xhr.responseText);
+                      }
+              }
+          });
         }
 
-
-        //select 2 product
-        sel_produk.select2({
-            ajax:{
-                dataType: 'JSON',
-                type : "POST",
-                url : "<?php echo base_url();?>lab/dti/get_list_aux",
-                //delay : 250,
-                data : function(params){
-                    return{
-                    prod:params.term
-                    };
-                }, 
-                processResults:function(data){
-                    var results = [];
-
-                    $.each(data, function(index,item){
-                        results.push({
-                            id:item.kode_produk,
-                            text:'['+item.kode_produk+'] '+item.nama_produk
-                        });
-                    });
-                    return {
-                    results:results
-                    };
-                },
-                error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
-                    alert(xhr.responseText);
-                }
-            }
-        });
-
-        //jika nama produk diubah
-        sel_produk.change(function(){
-            
-            $.ajax({
-                dataType: "JSON",
-                url : '<?php echo site_url('lab/dti/get_prod_by_id') ?>',
-                type: "POST",
-                data: {kode_produk: $(this).parents("tr").find("#kode_produk").val() },
-                success: function(data){
-                    produk_hide.val(data.nama_produk);
-                    //untuk event selected select2 uom
-                    var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
-                    sel_uom.empty().append($newOptionuom).trigger('change');
-                },
-                error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
-                    alert(xhr.responseText);
-                }
-            });
-        });
-
-         
-        //select 2 uom
-        sel_uom.select2({
-            allowClear: true,
-            placeholder: "",
-            ajax:{
-                    dataType: 'JSON',
-                    type : "POST",
-                    url : "<?php echo base_url();?>lab/dti/get_uom_select2",
-                    data : function(params){
-                    return{
-                        prod:params.term,
-                    };
-                    }, 
-                    processResults:function(data){
-                        var results = [];
-                        $.each(data, function(index,item){
-                            results.push({
-                                id:item.short,
-                                text:item.short
-                            });
-                        });
-                        return {
-                            results:results
-                        };
-                    },
-                    error: function (xhr, ajaxOptions, thrownError){
-                        alert('Error data');
-                        alert(xhr.responseText);
-                    }
-            }
-        });
-
-    };
+    }
 
     // hapus row
     function delRow_dye(r){		
@@ -568,7 +716,6 @@
     //klik button simpan
     $('#btn-simpan').click(function(){
 
-
       var arr   = new Array();
       var arr2  = new Array();
       var id_warna  = '<?php echo $id_warna?>';
@@ -576,30 +723,30 @@
       var nama_warna = '<?php echo $color->nama_warna?>';
 
       $("#table_dyest tbody[id='tbody_dye'] .kode_produk").each(function(index, element) {
-					if ($(element).val()!=="") {
-						arr.push({
-							//0 : no++,
-							kode_produk :$(element).val(),
-							nama_produk :$(element).parents("tr").find("#nama_produk").val(),
-							qty 		    :$(element).parents("tr").find("#qty").val(),
-							uom 		    :$(element).parents("tr").find("#uom").val(),
-							reff_note 	:$(element).parents("tr").find("#reff").val(),
-						});
-					}
-			}); 
+            if ($(element).val()!=="") {
+              arr.push({
+                //0 : no++,
+                kode_produk :$(element).val(),
+                nama_produk :$(element).parents("tr").find("#nama_produk").val(),
+                qty 		    :$(element).parents("tr").find("#qty").val(),
+                uom 		    :$(element).parents("tr").find("#uom").val(),
+                reff_note 	:$(element).parents("tr").find("#reff").val(),
+              });
+            }
+      }); 
 
       $("#table_aux tbody[id='tbody_aux'] .kode_produk").each(function(index, element) {
-					if ($(element).val()!=="") {
-						arr2.push({
-							//0 : no++,
-							kode_produk :$(element).val(),
-							nama_produk :$(element).parents("tr").find("#nama_produk").val(),
-							qty 		    :$(element).parents("tr").find("#qty").val(),
-							uom 		    :$(element).parents("tr").find("#uom").val(),
-							reff_note 	:$(element).parents("tr").find("#reff").val(),
-						});
-					}
-			}); 
+            if ($(element).val()!=="") {
+              arr2.push({
+                //0 : no++,
+                kode_produk :$(element).val(),
+                nama_produk :$(element).parents("tr").find("#nama_produk").val(),
+                qty 		    :$(element).parents("tr").find("#qty").val(),
+                uom 		    :$(element).parents("tr").find("#uom").val(),
+                reff_note 	:$(element).parents("tr").find("#reff").val(),
+              });
+            }
+      }); 
 
       $('#btn-simpan').button('loading');
       please_wait(function(){});

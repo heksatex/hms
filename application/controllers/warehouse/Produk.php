@@ -67,6 +67,7 @@ class Produk extends MY_Controller
     $data['uom']      = $this->_module->get_list_uom();
     $data['category'] = $this->m_produk->get_list_category();
     $data['route']    = $this->m_produk->get_list_route();        
+    $data['jenis_kain'] = $this->m_produk->get_list_jenis_kain();        
     return $this->load->view('warehouse/v_produk_add', $data);
   }
 
@@ -74,6 +75,13 @@ class Produk extends MY_Controller
 	{
 		  $nama     = addslashes($this->input->post('nama'));
    		$callback = $this->m_produk->get_list_product_parent($nama);
+      echo json_encode($callback);
+	}
+
+  function get_product_sub_parent_select2()
+	{
+		  $nama     = addslashes($this->input->post('nama'));
+   		$callback = $this->m_produk->get_list_product_sub_parent($nama);
       echo json_encode($callback);
 	}
 
@@ -88,7 +96,7 @@ class Produk extends MY_Controller
     }else{
       
       //lock table
-      $this->_module->lock_tabel('mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, mst_status WRITE, mst_produk_parent WRITE');
+      $this->_module->lock_tabel('mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, mst_status WRITE, mst_produk_parent WRITE, mst_jenis_kain WRITE, mst_produk_sub_parent WRITE');
 
       //cek auto generate kode produk atau input sendiri
       $autogenerate = $this->input->post('autogenerate');
@@ -109,13 +117,15 @@ class Produk extends MY_Controller
       $dapatdijual    = $this->input->post('dapatdijual');
       $dapatdibeli    = $this->input->post('dapatdibeli');
       $kategoribarang = $this->input->post('kategoribarang');
-      $note           = $this->input->post('note');
+      $note           = addslashes($this->input->post('note'));
       $lebargreige    = addslashes($this->input->post('lebargreige'));
       $uom_lebargreige= addslashes($this->input->post('uom_lebargreige'));
       $lebarjadi      = addslashes($this->input->post('lebarjadi'));
       $uom_lebarjadi  = addslashes($this->input->post('uom_lebarjadi'));
       $product_parent = addslashes($this->input->post('product_parent'));
-      $statusproduk   = $this->input->post('statusproduk');
+      $sub_parent     = addslashes($this->input->post('sub_parent'));
+      $jenis_kain     = addslashes($this->input->post('jenis_kain'));
+      $statusproduk   = addslashes($this->input->post('statusproduk'));
 
       
       //get id kategori barang
@@ -146,6 +156,9 @@ class Produk extends MY_Controller
       }else if(empty($product_parent)){
         $callback = array('status' => 'failed', 'field' => 'product_parent', 'message' => 'Product Parent Harus Diisi !', 'icon' =>'fa fa-warning', 
               'type' => 'danger'  );
+      }else if(empty($jenis_kain) AND strpos($nmKategori['nama_category'], 'Kain') !== FALSE ){
+        $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain Harus disini jika Kategori Barangnya Kain !', 'icon' =>'fa fa-warning', 
+                    'type' => 'danger'  );
       }else{
         //cek kode produk apa sudah ada apa belum
         $cek = $this->m_produk->cek_produk_by_kode($kodeproduk)->row_array();
@@ -168,6 +181,12 @@ class Produk extends MY_Controller
         // cek mst parent by id
         $parent = $this->m_produk->get_mst_parent_produk_by_id($product_parent)->row_array();
 
+        // cek mst jenis kain
+        $jk    = $this->m_produk->get_mst_jenis_kain_by_id($jenis_kain)->row_array();
+
+        // cek mst sub parent by id
+        $sb    = $this->m_produk->get_mst_sub_parent_produk_by_id($sub_parent)->row_array();
+
         //get status aktif by kode f/t
         $status_aktif = $this->_module->get_mst_status_by_kode($statusproduk);
 
@@ -177,22 +196,22 @@ class Produk extends MY_Controller
             $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Nama Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );   
         }else if(!empty($cek['kode_produk'])){
           //update/edit produk
-          $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent);
+          $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
          
           $jenis_log   = "edit";
-          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." |".$status_aktif;
-          $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, $note_log, $username);
+          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." | ".$sb['nama_sub_parent']." | ".$jk['nama_jenis_kain']." | ".$status_aktif;
+          $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, ($note_log), $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
         }else{
           //insert/add produk
           $id_new = $this->m_produk->get_last_id_mst_produk();
 
-          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent);
+          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
           $kodeproduk_encr = encrypt_url($id_new);
 
           $jenis_log   = "create";
-          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." |".$status_aktif;
-          $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, $note_log, $username);
+          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." | ".$sb['nama_sub_parent']." | ".$jk['nama_jenis_kain']." | ".$status_aktif;
+          $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, ($note_log), $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kodeproduk_encr, 'icon' =>'fa fa-check', 'type' => 'success');
         }
       }
@@ -229,6 +248,7 @@ class Produk extends MY_Controller
         $data['moves']    = $this->m_produk->get_jml_moves($produk->kode_produk);
         $data['bom']      = $this->m_produk->get_jml_bom($produk->kode_produk);
         $data['mo']       = $this->m_produk->get_jml_mo($produk->kode_produk);
+        $data['jenis_kain'] = $this->m_produk->get_list_jenis_kain();        
 
         //$data['dyest']    = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'DYE');
         //$data['aux']      = $this->m_lab->get_data_dye_aux_by_code($kode_decrypt,'AUX');

@@ -124,112 +124,127 @@ class Dti extends MY_Controller
             	$cek = $this->m_lab->cek_color_by_color($warna)->row_array();
 
               // cek status warna
-            
-
               if(!empty($cek['nama_warna']) AND $status == 'tambah'){
-                  $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Warna Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
+                  $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Warna Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
 
               }else if(!empty($cek['nama_warna'])){
 
-                  $id_varian  = addslashes($this->input->post('id_varian'));
-
-                  // lock tabel
-                  $this->_module->lock_tabel('warna WRITE,warna_items WRITE, warna_varian WRITE');
-
-              		//update  Header
-                  $this->m_lab->update_color($id,$notes,$kode_warna,$sales_group);
-
-                  // update note varian
-                  $this->m_lab->update_note_varian_by_varian($id,$id_varian,$note_varian);
-
-                  
-                  $nama_varian = $this->m_lab->get_nama_varian_by_id($id_varian);
-                  $note_log_varian = "";
-                  $note_log_varian .=  "<br> <b> Edit Varian [".$nama_varian."] </b>";
-                  $note_log_varian .=  "<br> Notes Varian -> ".$note_varian;
-
-                  // get dti sebelum di edit
-                  $items_dye    = $this->m_lab->get_data_dye_aux_varians_by_code($id,'DYE',$id_varian);
-                  $note_log_dye = "";
-                  $num          = 1;
-                  foreach($items_dye as $dyes){
-                      $note_log_dye .= '('.$num.') '.$dyes->kode_produk." ".$dyes->nama_produk." ".$dyes->qty." ".$dyes->uom." ".$dyes->reff_note." ";
-                      $num++;
-                  }
-
-                  $items_aux    = $this->m_lab->get_data_dye_aux_varians_by_code($id,'AUX',$id_varian);
-                  $num          = 1;
-                  $note_log_aux = "";
-                  foreach($items_aux as $dyes){
-                      $note_log_aux .= '('.$num.') '.$dyes->kode_produk." ".$dyes->nama_produk." ".$dyes->qty." ".$dyes->uom." ".$dyes->reff_note." ";
-                      $num++;
-                  }
-
-                  // hapus warna item by varian
-                  $this->m_lab->delete_warna_item_by_kode($id,$id_varian);
-
                   $array_dye    = json_decode($this->input->post('arr_dye'),true); 
-                  $array_aux    = json_decode($this->input->post('arr_aux'),true); 
-                
-                  // simpan warna item baru by new varian, id_warna
-                  $row           = 1;
-                  $sql_dti_items = "";
-                  $note_dye      = "";
-                  $note_aux      = "";
+                  $array_aux    = json_decode($this->input->post('arr_aux'),true);
+
+                  $arr_cek_double_dye = [];
+                  $dye_double         = false;
                   foreach($array_dye as $dye){
-                    $sql_dti_items .= "('".$id."', '".$id_varian."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
-                    $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
-                    $row++;
-                  }
-                  $row           = 1;
-                  foreach($array_aux as $aux){
-                    $sql_dti_items .= "('".$id."', '".$id_varian."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
-                    $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
-
-                    $row++;
+                    foreach($arr_cek_double_dye as $cek){
+                      if($dye['kode_produk'] == $cek){
+                        $dye_double = true;
+                        break;
+                      }
+                    }
+                    array_push($arr_cek_double_dye,$dye['kode_produk']);
                   }
 
-                  if(!empty($note_dye) OR !empty($note_log_dye)){
-                    $note_dye = rtrim($note_dye,', ');
-                    $note_dye = '<br> Dyeing Stuff : '.$note_log_dye.' <b> -> </b>'.$note_dye;
+                  if($dye_double == true){
+                    $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Product Dyeing Stuff tidak boleh sama !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
                   }else{
-                    $note_dye = "";
-                  }
 
-                  if(!empty($note_aux) OR !empty($note_log_aux)){
-                    $note_aux = rtrim($note_aux,', ');
-                    $note_aux = '<br> Auxiliary :  '.$note_log_aux.' <b> -> </b>'.$note_aux;
-                  }else{
-                    $note_aux = "";
-                  }
+                    $id_varian  = addslashes($this->input->post('id_varian'));
 
+                    // lock tabel
+                    $this->_module->lock_tabel('warna WRITE,warna_items WRITE, warna_varian WRITE');
 
-                  // simpan dti item batch
-                  if(!empty($sql_dti_items)){
-                    $sql_dti_items = rtrim($sql_dti_items, ', ');
-                    $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
+                    //update  Header
+                    $this->m_lab->update_color($id,$notes,$kode_warna,$sales_group);
+
+                    // update note varian
+                    $this->m_lab->update_note_varian_by_varian($id,$id_varian,$note_varian);
+
                     
-                  }
+                    $nama_varian = $this->m_lab->get_nama_varian_by_id($id_varian);
+                    $note_log_varian = "";
+                    $note_log_varian .=  "<br> <b> Edit Varian [".$nama_varian."] </b>";
+                    $note_log_varian .=  "<br> Notes Varian -> ".$note_varian;
 
-                   //cek item warna (DYE, FIN)
-                  $cek_item = $this->m_lab->cek_item_dye_aux_by_id_warna($id)->num_rows();
-                  $note_status_head  = '';
-                  if($cek_item == 0){
+                    // get dti sebelum di edit
+                    $items_dye    = $this->m_lab->get_data_dye_aux_varians_by_code($id,'DYE',$id_varian);
+                    $note_log_dye = "";
+                    $num          = 1;
+                    foreach($items_dye as $dyes){
+                        $note_log_dye .= '('.$num.') '.$dyes->kode_produk." ".$dyes->nama_produk." ".$dyes->qty." ".$dyes->uom." ".$dyes->reff_note." ";
+                        $num++;
+                    }
 
-                    $head = $this->m_lab->get_data_color_by_code($id);
-                    // update head jadi draft
-                    $this->m_lab->update_status_warna($id,'draft');
-                    $note_status_head = ' <br> Update Status warna '.$head->status.' -> draft';
-                  }
+                    $items_aux    = $this->m_lab->get_data_dye_aux_varians_by_code($id,'AUX',$id_varian);
+                    $num          = 1;
+                    $note_log_aux = "";
+                    foreach($items_aux as $dyes){
+                        $note_log_aux .= '('.$num.') '.$dyes->kode_produk." ".$dyes->nama_produk." ".$dyes->qty." ".$dyes->uom." ".$dyes->reff_note." ";
+                        $num++;
+                    }
 
-                  // unlock warna
-                  $this->_module->unlock_tabel();
+                    // hapus warna item by varian
+                    $this->m_lab->delete_warna_item_by_kode($id,$id_varian);
                   
-                  $jenis_log   = "edit";
-                  $note_log    = $warna." | ".$notes." | ".$kode_warna.' | '.$nama_sales_group." | ".$note_log_varian." ".$note_dye." ".$note_aux." ".$note_status_head;
-                  $this->_module->gen_history($sub_menu, $id, $jenis_log, addslashes($note_log), $username);
-                  $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
-                  
+                    // simpan warna item baru by new varian, id_warna
+                    $row           = 1;
+                    $sql_dti_items = "";
+                    $note_dye      = "";
+                    $note_aux      = "";
+                
+                    foreach($array_dye as $dye){                
+                      $sql_dti_items .= "('".$id."', '".$id_varian."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
+                      $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';                   
+                      $row++;
+                    }
+                    $row           = 1;
+                    foreach($array_aux as $aux){
+                      $sql_dti_items .= "('".$id."', '".$id_varian."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
+                      $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
+
+                      $row++;
+                    }
+
+                    if(!empty($note_dye) OR !empty($note_log_dye)){
+                      $note_dye = rtrim($note_dye,', ');
+                      $note_dye = '<br> Dyeing Stuff : '.$note_log_dye.' <b> -> </b>'.$note_dye;
+                    }else{
+                      $note_dye = "";
+                    }
+
+                    if(!empty($note_aux) OR !empty($note_log_aux)){
+                      $note_aux = rtrim($note_aux,', ');
+                      $note_aux = '<br> Auxiliary :  '.$note_log_aux.' <b> -> </b>'.$note_aux;
+                    }else{
+                      $note_aux = "";
+                    }
+
+
+                    // simpan dti item batch
+                    if(!empty($sql_dti_items)){
+                      $sql_dti_items = rtrim($sql_dti_items, ', ');
+                      $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
+                      
+                    }
+
+                    //cek item warna (DYE, FIN)
+                    $cek_item = $this->m_lab->cek_item_dye_aux_by_id_warna($id)->num_rows();
+                    $note_status_head  = '';
+                    if($cek_item == 0){
+
+                      $head = $this->m_lab->get_data_color_by_code($id);
+                      // update head jadi draft
+                      $this->m_lab->update_status_warna($id,'draft');
+                      $note_status_head = ' <br> Update Status warna '.$head->status.' -> draft';
+                    }
+
+                    // unlock warna
+                    $this->_module->unlock_tabel();
+                    
+                    $jenis_log   = "edit";
+                    $note_log    = $warna." | ".$notes." | ".$kode_warna.' | '.$nama_sales_group." | ".$note_log_varian." ".$note_dye." ".$note_aux." ".$note_status_head;
+                    $this->_module->gen_history($sub_menu, $id, $jenis_log, addslashes($note_log), $username);
+                    $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+                  }
              	}else{
                 
                 if($status2 =='requested'){
@@ -241,73 +256,94 @@ class Dti extends MY_Controller
                 // lock tabel
                 $this->_module->lock_tabel('warna WRITE,warna_items WRITE, warna_varian WRITE');
 
-                $last_id = $this->m_lab->get_last_id_warna();
+                $array_dye    = json_decode($this->input->post('arr_dye'),true); 
+                $array_aux    = json_decode($this->input->post('arr_aux'),true);
 
-          			//insert warna
-          			$this->m_lab->save_color($warna,$tanggal,$notes,$status_head,$kode_warna,$sales_group);
-
-                // insert varian A
-                $this->m_lab->save_new_varian_by_id_warna('A',$last_id,$note_varian);
-
-                if($duplicate == 'true'){// jika simpan duplicate warna
-                    
-                    $array_dye    = json_decode($this->input->post('arr_dye'),true); 
-                    $array_aux    = json_decode($this->input->post('arr_aux'),true); 
-
-			              $nama_warna_before   = addslashes($this->input->post('nama_warna'));
-			              $id_varian_before    = addslashes($this->input->post('id_varian'));
-                    $nama_varian = $this->m_lab->get_nama_varian_by_id($id_varian_before);
-
-                    // get id_varian baru
-                    $id_var = $this->m_lab->get_id_new_varian_by_kode($last_id,'A');
-                  
-                    // simpan warna item baru by new varian, id_warna
-                    $row           = 1;
-                    $sql_dti_items = "";
-                    $note_dye      = "";
-                    $note_aux      = "";
-                    foreach($array_dye as $dye){
-                      $sql_dti_items .= "('".$last_id."', '".$id_var."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
-                      $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
-                      $row++;
+                $arr_cek_double_dye = [];
+                $dye_double         = false;
+                if(count($array_dye) > 0){
+                  foreach($array_dye as $dye){
+                    foreach($arr_cek_double_dye as $cek){
+                      if($dye['kode_produk'] == $cek){
+                        $dye_double = true;
+                        break;
+                      }
                     }
-                    $row           = 1;
-                    foreach($array_aux as $aux){
-                      $sql_dti_items .= "('".$last_id."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
-                      $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
-
-                      $row++;
-                    }
-
-                    if(!empty($note_dye)){
-                      $note_dye = rtrim($note_dye,', ');
-                      $note_dye = '<br> Dyeing Stuff -> '.$note_dye;
-                    }
-
-                    if(!empty($note_aux)){
-                      $note_aux = rtrim($note_aux,', ');
-                      $note_aux = '<br> Auxiliary -> '.$note_aux;
-                    }
-
-                    // simpan dti item batch
-                    if(!empty($sql_dti_items)){
-                      $sql_dti_items = rtrim($sql_dti_items, ', ');
-                      $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
-                    }
-                    $note_logs = 'Duplicate dari Warna '.$nama_warna_before.' Varian ['.$nama_varian.'] '.$note_dye.' '.$note_aux;
-                }else{
-                    $note_logs    = $warna." | ".$notes." | ".$kode_warna." | ".$nama_sales_group;
+                    array_push($arr_cek_double_dye,$dye['kode_produk']);
+                  }
                 }
 
-                // unlock warna
-                $this->_module->unlock_tabel();
+                if($dye_double == true){
+                  $callback = array('status' => 'failed', 'field' => 'warna', 'message' => 'Product Dyeing Stuff tidak boleh sama !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
+                }else{
 
-           			$id_encr     = encrypt_url($last_id);
-                $jenis_log   = "create";
-                $note_log    = $note_logs;
-                $this->_module->gen_history($sub_menu, $last_id, $jenis_log, addslashes($note_log), $username);
-                $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $id_encr, 'icon' =>'fa fa-check', 'type' => 'success');
-                
+                  $last_id = $this->m_lab->get_last_id_warna();
+
+                  //insert warna
+                  $this->m_lab->save_color($warna,$tanggal,$notes,$status_head,$kode_warna,$sales_group);
+
+                  // insert varian A
+                  $this->m_lab->save_new_varian_by_id_warna('A',$last_id,$note_varian);
+
+                  if($duplicate == 'true'){// jika simpan duplicate warna
+                      
+                      $array_dye    = json_decode($this->input->post('arr_dye'),true); 
+                      $array_aux    = json_decode($this->input->post('arr_aux'),true); 
+
+                      $nama_warna_before   = addslashes($this->input->post('nama_warna'));
+                      $id_varian_before    = addslashes($this->input->post('id_varian'));
+                      $nama_varian = $this->m_lab->get_nama_varian_by_id($id_varian_before);
+
+                      // get id_varian baru
+                      $id_var = $this->m_lab->get_id_new_varian_by_kode($last_id,'A');
+                    
+                      // simpan warna item baru by new varian, id_warna
+                      $row           = 1;
+                      $sql_dti_items = "";
+                      $note_dye      = "";
+                      $note_aux      = "";
+                      foreach($array_dye as $dye){
+                        $sql_dti_items .= "('".$last_id."', '".$id_var."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
+                        $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
+                        $row++;
+                      }
+                      $row           = 1;
+                      foreach($array_aux as $aux){
+                        $sql_dti_items .= "('".$last_id."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
+                        $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
+
+                        $row++;
+                      }
+
+                      if(!empty($note_dye)){
+                        $note_dye = rtrim($note_dye,', ');
+                        $note_dye = '<br> Dyeing Stuff -> '.$note_dye;
+                      }
+
+                      if(!empty($note_aux)){
+                        $note_aux = rtrim($note_aux,', ');
+                        $note_aux = '<br> Auxiliary -> '.$note_aux;
+                      }
+
+                      // simpan dti item batch
+                      if(!empty($sql_dti_items)){
+                        $sql_dti_items = rtrim($sql_dti_items, ', ');
+                        $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
+                      }
+                      $note_logs = 'Duplicate dari Warna '.$nama_warna_before.' Varian ['.$nama_varian.'] '.$note_dye.' '.$note_aux;
+                  }else{
+                      $note_logs    = $warna." | ".$notes." | ".$kode_warna." | ".$nama_sales_group;
+                  }
+
+                  // unlock warna
+                  $this->_module->unlock_tabel();
+
+                  $id_encr     = encrypt_url($last_id);
+                  $jenis_log   = "create";
+                  $note_log    = $note_logs;
+                  $this->_module->gen_history($sub_menu, $last_id, $jenis_log, addslashes($note_log), $username);
+                  $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $id_encr, 'icon' =>'fa fa-check', 'type' => 'success');
+                }
           		}
 
           	}
@@ -443,54 +479,71 @@ class Dti extends MY_Controller
 
               $callback = array('message' => 'Maaf, Varian tidak bisa ditambah lagi !',  'status' => 'failed', 'icon' =>'fa fa-warning', 'type' => 'danger' );
             }else{
-              
-              // simpan varian baru by id_warna
-              $this->m_lab->save_new_varian_by_id_warna($new_var,$id_warna,$notes_varian);
 
-              // get id_varian baru
-              $id_var = $this->m_lab->get_id_new_varian_by_kode($id_warna,$new_var);
-
-              // simpan warna item baru by new varian, id_warna
-              $row           = 1;
-              $sql_dti_items = "";
-              $note_dye      = "";
-              $note_aux      = "";
+              $arr_cek_double_dye = [];
+              $dye_double         = false;
               foreach($array_dye as $dye){
-                $sql_dti_items .= "('".$id_warna."', '".$id_var."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
-                $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
-                $row++;
-              }
-              $row           = 1;
-              foreach($array_aux as $aux){
-                $sql_dti_items .= "('".$id_warna."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
-                $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
-
-                $row++;
+                foreach($arr_cek_double_dye as $cek){
+                  if($dye['kode_produk'] == $cek){
+                    $dye_double = true;
+                    break;
+                  }
+                }
+                array_push($arr_cek_double_dye,$dye['kode_produk']);
               }
 
-              if(!empty($note_dye)){
-                $note_dye = rtrim($note_dye,', ');
-                $note_dye = '| Dyeing Stuff -> '.$note_dye;
-              }
+              if($dye_double == true){
+                $callback = array('status' => 'failed', 'double' => 'yes', 'message' => 'Product Dyeing Stuff tidak boleh sama !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
+              }else{
+                
+                // simpan varian baru by id_warna
+                $this->m_lab->save_new_varian_by_id_warna($new_var,$id_warna,$notes_varian);
 
-              if(!empty($note_aux)){
-                $note_aux = rtrim($note_aux,', ');
-                $note_aux = '| Auxiliary -> '.$note_aux;
-              }
+                // get id_varian baru
+                $id_var = $this->m_lab->get_id_new_varian_by_kode($id_warna,$new_var);
 
-              // simpan dti item batch
-              if(!empty($sql_dti_items)){
-                $sql_dti_items = rtrim($sql_dti_items, ', ');
-                $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
+                // simpan warna item baru by new varian, id_warna
+                $row           = 1;
+                $sql_dti_items = "";
+                $note_dye      = "";
+                $note_aux      = "";
+                foreach($array_dye as $dye){
+                  $sql_dti_items .= "('".$id_warna."', '".$id_var."','DYE', '".addslashes($dye['kode_produk'])."','".addslashes($dye['nama_produk'])."','".$dye['qty']."','".$dye['uom']."','".addslashes($dye['reff_note'])."', '".$row."'), ";
+                  $note_dye .= '('.$row.') '.addslashes($dye['kode_produk']).' '.addslashes($dye['nama_produk']).' '.$dye['qty'].' '.$dye['uom'].' '.addslashes($dye['reff_note']). ', ';
+                  $row++;
+                }
+                $row           = 1;
+                foreach($array_aux as $aux){
+                  $sql_dti_items .= "('".$id_warna."', '".$id_var."','AUX', '".addslashes($aux['kode_produk'])."','".addslashes($aux['nama_produk'])."','".$aux['qty']."','".$aux['uom']."','".addslashes($aux['reff_note'])."', '".$row."'), ";
+                  $note_aux .= '('.$row.') '.addslashes($aux['kode_produk']).' '.addslashes($aux['nama_produk']).' '.$aux['qty'].'  '.$aux['uom'].' '.addslashes($aux['reff_note']). ', ';
+
+                  $row++;
+                }
+
+                if(!empty($note_dye)){
+                  $note_dye = rtrim($note_dye,', ');
+                  $note_dye = '| Dyeing Stuff -> '.$note_dye;
+                }
+
+                if(!empty($note_aux)){
+                  $note_aux = rtrim($note_aux,', ');
+                  $note_aux = '| Auxiliary -> '.$note_aux;
+                }
+
+                // simpan dti item batch
+                if(!empty($sql_dti_items)){
+                  $sql_dti_items = rtrim($sql_dti_items, ', ');
+                  $this->m_lab->simpan_warna_items_batch($sql_dti_items);               
+                }
+                
+                //unlock table
+                $this->_module->unlock_tabel();
+                
+                $callback    = array('status'=>'success', 'message' => 'Varian Warna Baru Berhasil disimpan',  'icon' =>'fa fa-check', 'type' => 'success', 'id_varian' =>$id_var);
+                $jenis_log   = "create";
+                $note_log    = "Tambah Data Warna Varian  ".$new_var."  ".$note_dye."  ".$note_aux. " <br> Notes Varian -> ".$notes_varian ;
+                $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
               }
-              
-              //unlock table
-              $this->_module->unlock_tabel();
-              
-              $callback    = array('status'=>'success', 'message' => 'Varian Warna Baru Berhasil disimpan',  'icon' =>'fa fa-check', 'type' => 'success', 'id_varian' =>$id_var);
-              $jenis_log   = "create";
-              $note_log    = "Tambah Data Warna Varian  ".$new_var."  ".$note_dye."  ".$note_aux. " <br> Notes Varian -> ".$notes_varian ;
-              $this->_module->gen_history($sub_menu, $id_warna, $jenis_log, addslashes($note_log), $username);
 
             }
           }

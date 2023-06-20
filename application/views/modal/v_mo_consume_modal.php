@@ -389,52 +389,60 @@
                 var total_qty1_konsum = 0;
                 var total_qty2_konsum = 0;
                 var qty_konsum_show   = false;
-                $('.qty_konsum').each(function(index,item){
-                    qty_konsum_show = true;	
-                    var qty_konsum 	= $(item).val();
-                    var qty_smi		= $(this).parents("tr").eq(0).find(".qty_smi").val();
-                    var qty_rm 		= $(this).parents("tr").eq(0).find(".qty_rm").val();
-                    var jml_produk 	= $(this).parents("tr").eq(0).find(".jml_produk").val();
-                    var qty2 		= $(this).parents("tr").eq(0).find(".qty2").val();
-                    var hitung 		= (qty_rm/qty_prod)*qty_inp;
-                    //var sum_con = (hitung/qty_rm)*qty_smi;//hitung qty dikonsumsi
-                    var sum_con 	= (hitung/jml_produk);//hitung qty dikonsumsi
-                    // alert(sum_con)
-                    if(sum_con > qty_smi){
-                        $(item).eq(0).val(qty_smi);
-                        if(qty_smi == '' || qty_smi == 0){
-                            hitung2 = 0;	
+                if(qty_prod > 0){
+                    $('.qty_konsum').each(function(index,item){
+                        qty_konsum_show = true;	
+                        var qty_konsum 	= $(item).val();
+                        var qty_smi		= $(this).parents("tr").eq(0).find(".qty_smi").val();
+                        var qty_rm 		= $(this).parents("tr").eq(0).find(".qty_rm").val();
+                        var jml_produk 	= $(this).parents("tr").eq(0).find(".jml_produk").val();
+                        var qty2 		= $(this).parents("tr").eq(0).find(".qty2").val();
+                        if(qty_prod != 0){
+                            var hitung 		= (qty_rm/qty_prod)*qty_inp;
+                            //var sum_con = (hitung/qty_rm)*qty_smi;//hitung qty dikonsumsi
+                            var sum_con 	= (hitung/jml_produk);//hitung qty dikonsumsi
                         }else{
-                            hitung2 =  (qty2/qty_smi)*qty_smi;
+                            sum_con = 0;
                         }
-                        hitung2_fix = hitung2.toFixed(2);
-                        $(this).parents("tr").eq(0).find(".qty2_konsum").val(hitung2_fix);
-                        tot_qty1 = qty_smi;
-                        tot_qty2 = hitung2_fix;
-                    }else{
-                        var sum_con_fix = sum_con.toFixed(2);				
-                        // var sum_con_fix = sum_con;		
-                        $(item).eq(0).val(sum_con_fix);
-                        if(qty_smi == '' || qty_smi == 0){
-                            hitung2 = 0;	
+                        // alert(sum_con)
+                        if(sum_con > qty_smi){
+                            $(item).eq(0).val(qty_smi);
+                            if(qty_smi == '' || qty_smi == 0){
+                                hitung2 = 0;	
+                            }else{
+                                hitung2 =  (qty2/qty_smi)*qty_smi;
+                            }
+                            hitung2_fix = hitung2.toFixed(2);
+                            $(this).parents("tr").eq(0).find(".qty2_konsum").val(hitung2_fix);
+                            tot_qty1 = qty_smi;
+                            tot_qty2 = hitung2_fix;
                         }else{
-                            hitung2 =  (qty2/qty_smi)*sum_con_fix;
+                            var sum_con_fix = sum_con.toFixed(2);				
+                            // var sum_con_fix = sum_con;		
+                            $(item).eq(0).val(sum_con_fix);
+                            if(qty_smi == '' || qty_smi == 0){
+                                hitung2 = 0;	
+                            }else{
+                                hitung2 =  (qty2/qty_smi)*sum_con_fix;
+                            }
+                            hitung2_fix = hitung2.toFixed(2);
+                            $(this).parents("tr").eq(0).find(".qty2_konsum").val(hitung2_fix);
+                            //  console.log("qty2 = ("+qty2+"/"+qty_smi+")*"+sum_con_fix);
+                            tot_qty1 = sum_con_fix;
+                            tot_qty2 = hitung2_fix;
                         }
-                        hitung2_fix = hitung2.toFixed(2);
-                        $(this).parents("tr").eq(0).find(".qty2_konsum").val(hitung2_fix);
-                        //  console.log("qty2 = ("+qty2+"/"+qty_smi+")*"+sum_con_fix);
-                        tot_qty1 = sum_con_fix;
-                        tot_qty2 = hitung2_fix;
-                    }
 
-                    // remove class error
-                    $(item).removeClass('error');
-                    $(item).parents("tr").find('#qty2_konsum').removeClass('error');
+                        // remove class error
+                        $(item).removeClass('error');
+                        $(item).parents("tr").find('#qty2_konsum').removeClass('error');
 
 
-                    total_qty1_konsum = total_qty1_konsum + parseFloat(tot_qty1);
-                    total_qty2_konsum = total_qty2_konsum + parseFloat(tot_qty2);
-                });
+                        total_qty1_konsum = total_qty1_konsum + parseFloat(tot_qty1);
+                        total_qty2_konsum = total_qty2_konsum + parseFloat(tot_qty2);
+                    });
+                }else{
+                    alert_bootbox("Maaf, Qty Target MO 0, Jadi tidak bisa mengkonsumsi bahan baku !");
+                }
                 if(qty_konsum_show){
                     document.getElementById('total_qty1_konsum').value = formatNumber(total_qty1_konsum.toFixed(2));
                     document.getElementById('total_qty2_konsum').value = formatNumber(total_qty2_konsum.toFixed(2));

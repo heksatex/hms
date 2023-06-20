@@ -286,7 +286,7 @@
                                 <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order;?>"><?php echo $no++.".";?></td>
                                 <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk?></a></td>
                                 <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date;?>"><?php echo $row->schedule_date?></td>
-                                <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
+                                <td data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
                                 <td><?php echo $row->uom?></td>
                                 <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_notes);?>" class="text-wrap width-200"> <?php echo $row->reff_notes?></td>                               
                                 <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
@@ -520,6 +520,18 @@
       });
 
 
+      // validasi untuk qty = 0
+      input.each(function(){
+        if($(this).attr('name') =='Qty'){
+          qty_val = parseFloat($(this).val());
+          if(qty_val == false){
+            alert_notify('fa fa-warning',$(this).attr('name')+ ' tidak boleh 0 !','danger',function(){});
+            empty = true;
+          }
+        }
+      });
+
+
       // validasi untuk inputan textbox
       input.each(function(){
         if(!$(this).val() && $(this).attr('name')!='reff'){
@@ -601,7 +613,7 @@
                 ignoreReadonly: true,
              });
           }else if($(this).attr('data-id')=='qty'){
-            $(this).html('<input type="text"  class="form-control" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" onkeyup="validAngka(this)"> ');
+            $(this).html('<input type="text"  class="form-control" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)"> ');
           }else if($(this).attr('data-id')=="reff"){
             $(this).html('<textarea type="text" class="form-control input-sm" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
           }

@@ -23,6 +23,18 @@
             </div>  
         </div>
         <div class="col-md-12 col-xs-12">
+          <div class="col-xs-4"><label>Product Parent</label></div>
+            <div class="col-xs-8">
+              <input type="text" name="product_parent" id="product_parent" class="form-control input-sm"  value="<?php echo htmlentities($get['nama_parent']) ?>" readonly="readonly"/>
+            </div>  
+        </div>
+        <div class="col-md-12 col-xs-12">
+          <div class="col-xs-4"><label>Jenis Kain</label></div>
+            <div class="col-xs-8">
+              <input type="text" name="jenis_kain" id="jenis_kain" class="form-control input-sm"  value="<?php echo htmlentities($get['nama_jenis_kain']) ?>" readonly="readonly"/>
+            </div>  
+        </div>
+        <div class="col-md-12 col-xs-12">
           <div class="col-xs-4"><label>Color</label></div>
           <div class="col-xs-8">
              	<input type="text" name="color" id="color" class="form-control input-sm"   value="<?php echo $get['nama_warna'] ?>" readonly="readonly"/>
