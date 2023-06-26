@@ -528,6 +528,9 @@
                     if(empty == true){
                       var tr = $("<tr>").append($("<td colspan='21' >").text('Tidak ada Data'));
                       tbody.append(tr);
+                    }else{
+                      result =  total_group(temp_mg,sum_mg,sum_qty,sum_qty2);
+                      tbody.append(result);
                     }
                     $("#example1").append(tbody);
                 }
