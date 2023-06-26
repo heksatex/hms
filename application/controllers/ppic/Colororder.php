@@ -794,6 +794,17 @@ class Colororder extends MY_Controller
                         
                       }
 
+                      if(!empty($sql_out_batch)){
+                        $sql_out_batch = rtrim($sql_out_batch, ', ');
+                        $this->_module->simpan_pengiriman_batch($sql_out_batch);
+    
+                        $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
+                        $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
+    
+                        $sql_log_history_out = rtrim($sql_log_history_out, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_out);
+                      }
+
                       if(!empty($sql_in_batch)){
                         $sql_in_batch = rtrim($sql_in_batch, ', ');
                         $this->m_colorOrder->simpan_penerimaan_batch($sql_in_batch);
@@ -839,16 +850,7 @@ class Colororder extends MY_Controller
 
                       }
 
-                      if(!empty($sql_out_batch)){
-                        $sql_out_batch = rtrim($sql_out_batch, ', ');
-                        $this->_module->simpan_pengiriman_batch($sql_out_batch);
-    
-                        $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
-                        $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
-    
-                          $sql_log_history_out = rtrim($sql_log_history_out, ', ');
-                          $this->_module->simpan_log_history_batch($sql_log_history_out);
-                      }
+                    
 
                       // update reff_notes by row
                       $this->m_colorOrder->update_reff_notes_color_order_items_by_row($kode_co,$row,addslashes($reff_notes));
@@ -880,7 +882,7 @@ class Colororder extends MY_Controller
                       $note_log    = "Generated | ".$row;
                       $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);  
 
-                      $callback = array('status' => 'success', 'message'=>'Generate Data Berhasil ! '.$kode_prod, 'icon' => 'fa fa-check', 'type'=>'success');
+                      $callback = array('status' => 'success', 'message'=>'Generate Data Berhasil ! '.$sql_update_reff_out_batch, 'icon' => 'fa fa-check', 'type'=>'success');
 
                     }else{
 
