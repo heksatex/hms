@@ -183,7 +183,7 @@ class HPHpadding extends MY_Controller
 
 
 			if(!empty($warna)){
-				$where_warna  = "AND  LIKE '%".addslashes($warna)."%' ";
+				$where_warna  = "AND w.nama_warna  LIKE '%".addslashes($warna)."%' ";
 			}else{
 				$where_warna  = '';
 			}
