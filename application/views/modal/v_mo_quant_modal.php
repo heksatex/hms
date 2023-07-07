@@ -60,7 +60,7 @@
 								if( $akses_menu > 0){
 								?>
 									
-									<?php if((($row->status == 'ready' AND $type_mo['type_mo']!='colouring' ) ) ){?>
+									<?php if((($row->status == 'ready') ) ){?>
 
 										<input type="checkbox" class="checkItem" value="<?php echo $row->quant_id?>" data-valuetwo="<?php echo $row->row_order?>" data-valuetree="<?php echo $row->lot?>" data-toggle="tooltip" title="Pilih Hapus Product / Lot">
 								<?php }
