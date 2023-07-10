@@ -169,6 +169,14 @@
                           <div class="col-md-4" >
                             <div class="form-group">
                               <div class="col-md-5">
+                                <label>Parent </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="parent" id="parent" >
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
                                 <label>Kode Produk </label>
                               </div>
                               <div class="col-md-7">
@@ -183,6 +191,14 @@
                                   <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" >
                               </div>
                             </div> 
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Warna </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="warna" id="warna" >
+                              </div>
+                            </div>
                            
                           </div>
                           <div class="col-md-4">
@@ -202,8 +218,46 @@
                                   <input type="text" class="form-control input-sm" name="lot" id="lot" >
                               </div>
                             </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>No GO </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="text" class="form-control input-sm" name="no_go" id="no_go" >
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Route </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <select class="form-control input-sm" name="route" id="route" >
+                                  <option value="">Pilih Route</option>
+                                  <?php 
+                                    foreach ($route as $row) {
+                                    ?>
+                                        <option value="<?php echo $row->nama;?>"><?php echo $row->nama;?></option>
+                                    <?php
+                                    }?>
+                                </select>
+                              </div>
+                            </div>
+                           
                           </div>
                           <div class="col-md-4">
+                            <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Jenis Kain </label>
+                              </div>
+                              <div class="col-md-7">
+                                <select class="form-control input-sm" name="jenis_kain" id="jenis_kain" >
+                                  <option value="">Pilih Jenis Kain</option>
+                                  <?php foreach ($jenis_kain as $row) {?>
+                                    <option value='<?php echo $row->nama_jenis_kain; ?>'><?php echo $row->nama_jenis_kain;?></option>
+                                  <?php  }?>
+                                </select>
+                              </div>
+                            </div>
                             <div class="form-group">
                               <div class="col-md-5">
                                 <label>Reff Note </label>
@@ -247,7 +301,7 @@
                 <div class="col-md-12">
                       <div class="divListviewHead">
                         <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
-                          <table id="example1" class="table table-condesed table-hover" border="0">
+                          <table id="example1" class="table table-condesed table-hover" border="1">
                               <thead>
                                 <tr>
                                   <th  class="style bb no" >No. </th>
@@ -294,7 +348,7 @@
                   <div class="col-md-12">
                     <div class="divListviewHead">
                       <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
-                        <table id="example2" class="table table-condesed table-hover" border="0" >
+                        <table id="example2" class="table table-condesed table-hover" border="1" >
                             <thead>
                               <tr>
                                 <th  class="style bb no" >No. </th>
@@ -376,7 +430,7 @@
       ajax: {
         dataType: 'JSON',
         type: "POST",
-        url: "<?php echo base_url(); ?>report/penerimaanharian/get_departement_select2",
+        url: "<?php echo base_url(); ?>report/mutasi/get_departement_mutasi_select2",
         //delay : 250,
         data: function(params) {
           return {
@@ -438,6 +492,7 @@
           beforeSend: function() {
             $('#btn-excel').button('loading');
           },error: function(){
+            alert('Error Export Excel');
             $('#btn-excel').button('reset');
           }
       }).done(function(data){
@@ -506,6 +561,11 @@
       reff_picking    = '',
       reff_note       = $('#reff_note').val();
       lot             = $('#lot').val();
+      parent          = $('#parent').val();
+      warna           = $('#warna').val();
+      no_go           = $('#no_go').val();
+      route           = $('#route').val();
+      jenis_kain      = $('#jenis_kain').val();
 
       var radio_arr = new Array(); 
       var radio_arr = $('input[name="view[]"]').map(function(e, i) {
@@ -540,7 +600,7 @@
           //$("#example2 tbody").remove();
        
           // push array
-          arr_filter.push({tanggal:tanggal, departemen:departemen, kode_produk:kode_produk, nama_produk:nama_produk, kode_transaksi:kode_transaksi, lot:lot, reff_picking:reff_picking, reff_note:reff_note, view_arr:radio_arr});
+          arr_filter.push({tanggal:tanggal, departemen:departemen, kode_produk:kode_produk, nama_produk:nama_produk, kode_transaksi:kode_transaksi, lot:lot, reff_picking:reff_picking, reff_note:reff_note, parent:parent,warna:warna,no_go:no_go,jenis_kain:jenis_kain,route:route,view_arr:radio_arr});
           $.ajax({
                 type: "POST",
                 dataType : "JSON",
@@ -583,38 +643,56 @@
                     if(table == 'all' || table == 'fg'){
                       $("#example2 thead").remove();
                     }
-                    $.each(data.result, function(key, value){ 
-                      if(value.table_1 == "Yes"){
-                        if(data.view == "Global" || data.view == "DetailProduk"){
-                          create_table('example1',data.view, value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
-                        }else{
-                          create_table_detail('example1', value.head_table,value.record);
+                    if(data.format == '1'){
+                      $.each(data.result, function(key, value){ 
+                        if(value.table_1 == "Yes"){
+                          if(data.view == "Global" || data.view == "DetailProduk"){
+                            create_table('example1',data.view, value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                          }else{
+                            create_table_detail('example1', value.head_table,value.record);
+                          }
+                          $('#info_table1').html('');
+                          $('#total_record').html('Total Data : '+value.count_record);
+                          $('#pagination').html(value.pagination);
                         }
+
+                        if(value.table_2 == "Yes"){
+                          if(data.view == "Global" || data.view == "DetailProduk"){
+                            create_table('example2',data.view,value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                          }else{
+                            create_table_detail('example2', value.head_table,value.record);
+                          }
+
+                          $('#table_2').css('display','');
+                          $('#info_table1').html('Mutasi Bahan Baku');
+                          $('#info_table2').html('Mutasi Barang Jadi');
+                          $('#total_record2').html('Total Data : '+value.count_record);
+                          $('#pagination2').html(value.pagination);
+                        }else if(value.table_2 == "No"){
+                          $('#info_table1').html('');
+                          $('#info_table2').html('');
+                          $('#table_2').css('display','none');
+                          $('#total_record2').html('Total Data : '+value.count_record);
+                          $('#pagination2').html(value.pagination);
+                        }
+                      });
+                    }else if(data.format == '2'){
+                      $.each(data.result,function(key,value){
+
+                        create_table_format2('example1',data.view,value.head_table1,value.record,value.field_view,departemen);
                         $('#info_table1').html('');
                         $('#total_record').html('Total Data : '+value.count_record);
                         $('#pagination').html(value.pagination);
-                      }
 
-                      if(value.table_2 == "Yes"){
-                        if(data.view == "Global" || data.view == "DetailProduk"){
-                          create_table('example2',data.view,value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
-                        }else{
-                          create_table_detail('example2', value.head_table,value.record);
-                        }
+                      });
 
-                        $('#table_2').css('display','');
-                        $('#info_table1').html('Mutasi Bahan Baku');
-                        $('#info_table2').html('Mutasi Barang Jadi');
-                        $('#total_record2').html('Total Data : '+value.count_record);
-                        $('#pagination2').html(value.pagination);
-                      }else if(value.table_2 == "No"){
-                        $('#info_table1').html('');
-                        $('#info_table2').html('');
-                        $('#table_2').css('display','none');
-                        $('#total_record2').html('Total Data : '+value.count_record);
-                        $('#pagination2').html(value.pagination);
-                      }
-                    });
+                      $('#info_table1').html('');
+                      $('#info_table2').html('');
+                      $('#table_2').css('display','none');
+
+                    }else{
+                      alert_modal_warning("Desain tidak ditemukan !");
+                    }
                   }
                     
                 $('#btn-generate').button('reset');
@@ -1401,6 +1479,271 @@
                             row3 += "</tr>";
 
                             return row3;
+  }
+
+
+  function create_table_format2(tableId,view,head_table1,body,field_view,departement){
+        let thead = $("<thead />");
+        let row   = '';
+        let row2   = '';
+        let row3   = '';
+
+        $.each(head_table1, function(key, value){ // loop
+
+          $.each(value, function(a,b){
+            // judul atas
+            if(a == 'info'){
+              for (var i = 0, l = b.length; i<l; i++){
+                  $.each(b[i], function(c,d){
+                      row += "<th class='style no bb white-space-nowrap'  rowspan='3'>";
+                      row += d;
+                      row += "</th>";                
+                  });                             
+              }
+            }else if(a == 'awal' || a == 'akhir'  || a == 'adj_in' || a == 'adj_out' || a == 'prod' || a == 'con'){
+              if(a.length > 0 ){
+                $.each(b,function(e,f){
+                  if(f.row == 2){
+                    rowspan = 'rowspan = "2" ';
+                  }else{
+                    rowspan = '';
+                  }
+                  row += "<th class='style no text-center white-space-nowrap'  colspan='"+f.count_child+"' "+rowspan+">";
+                  row += f.nama;
+                  row += "</th>";
+                     
+                });
+              
+              }
+            }else if( a == 'in' || a== 'out' || a == "process"){
+              if(a.length > 0 ){
+                $.each(b,function(e,f){
+                  
+                  row += "<th class='style no text-center white-space-nowrap'  colspan='"+f.count_child+"'  >";
+                  row += f.nama;
+                  row += "</th>";
+                     
+                });
+              
+              }
+
+            }
+
+          });
+          tr = $("<tr>").append(row);
+          thead.append(tr); 
+          
+          // child1
+          $.each(value, function(a,b){
+            if(a == 'awal' || a == 'akhir' || a == 'adj_in' || a == 'adj_out' || a == 'prod' || a == 'con' || a == 'in' || a == 'out' || a  == "process") {
+                if(a.length > 0 ){
+                  $.each(b,function(e,f){// baris pertama
+                  
+                    if(a == 'awal' || a == 'con' || a == 'adj_in' || a == 'prod' || a == 'con' || a == 'adj_out' || a == 'akhir'){
+                      // for (var i = 0, l = b.length; i<=l; i++){
+                            $.each(f.child, function(g,h){
+                              row3 += "<th class='style bb white-space-nowrap' >";
+                              row3 += h;
+                              row3 += "</th>"; 
+                            });
+                      // }
+                    }else if(a == 'in' || a == 'out' || a == "process"){
+                     
+                      for (var i = 0, l = f.child.length; i<l; i++){
+                        $.each(f.child[i], function(g,h){
+                          
+                              if(Array.isArray(h)){
+                                  $.each(h, function(x,y){
+                                    row3 += "<th class='style bb white-space-nowrap'  >";
+                                    row3 += y;
+                                    row3 += "</th>"; 
+                                  });
+                                // }
+                              }else{
+                                if(view == "Global" || view == "DetailProduk"){
+                                  colspan = 'colspan = "4" ';
+                                }else{
+                                  colspan = 'colspan = "3" ';
+                                }
+                                row2 += "<th class='style no text-center white-space-nowrap'  "+colspan+" >";
+                                row2 += h;
+                                row2 += "</th>"; 
+                              }
+                          });
+                      }
+                    }
+                    
+                  });
+                 
+                }
+            }
+
+          });
+          tr2 = $("<tr>").append(row2);
+          thead.append(tr2)
+          tr3 = $("<tr>").append(row3);
+          thead.append(tr3)
+
+        });
+       
+        $('#'+tableId).append(thead);
+
+        let tbody = $("<tbody />");
+        let row4  = '';
+        let no    = 1;
+
+        $.each(body, function(key, value){ // loop body
+
+            row4 += "<tr>";
+            row4 += "<td >"+ (no++) +"</td>";
+
+            // info
+            if(view == "Global"){
+              row4 += "<td class='white-space-nowrap'>"+value.product_parent+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.nama_jenis_kain+"</td>";
+
+            }else if(view == "DetailProduk"){
+              row4 += "<td class='white-space-nowrap'>"+value.nama_produk+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.product_parent+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.nama_jenis_kain+"</td>";
+            }else{ // detail
+              row4 += "<td class='white-space-nowrap'>"+value.lot+"</td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.go_qty1)+" "+value.go_qty1_uom+"</td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.go_qty2)+" "+value.go_qty2_uom+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.no_go+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.route+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.nama_produk+"</td>";
+              row4 += "<td class=''>"+value.warna+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.product_parent+"</td>";
+              row4 += "<td class='white-space-nowrap'>"+value.nama_jenis_kain+"</td>";
+            }
+
+            // saldo awal
+            if(view == "Global" || view == "DetailProduk" ){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
+            }
+
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty1)+" "+value.s_awal_qty1_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty2)+" "+value.s_awal_qty2_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty_opname)+" "+value.s_awal_qty_opname_uom+" </td>";
+
+            // penerimaan / IN
+            $.each(field_view, function(a,b){
+                  for (var i = 0, l = b.in.length; i<l; i++){
+                    $.each(b.in[i], function(c,d){
+                                      
+                        // lot = "in_"+d+"_qty";
+                        in_qty1      = "in_"+d+"_qty1";
+                        in_qty1_uom  = "in_"+d+"_qty1_uom";
+                        in_qty2      = "in_"+d+"_qty2";
+                        in_qty2_uom  = "in_"+d+"_qty2_uom";
+                        in_qty_op      = "in_"+d+"_qty_opname";
+                        in_qty_op_uom  = "in_"+d+"_qty_opname_uom";
+                        if(view == "Global" || view == 'DetailProduk'){
+                          lot = "in_"+d+"_lot";
+                          row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
+                        }
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty1])+" "+value[in_qty1_uom]+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty2])+" "+value[in_qty2_uom]+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty_op])+" "+value[in_qty_op_uom]+"</td>";
+                    });                             
+                  }
+            });
+
+            // consume
+            if(view == "Global" || view == "DetailProduk" ){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
+            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty1)+" "+value.con_qty1_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty2)+" "+value.con_qty2_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
+
+            // ADJ IN 
+            if(view == "Global" || view == "DetailProduk" ){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
+            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty1)+" "+value.adj_in_qty1_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty2)+" "+value.adj_in_qty2_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+" </td>";
+
+            // produce
+            if(view == "Global" || view == "DetailProduk" ){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
+            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty1)+" "+value.prod_qty1_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty2)+" "+value.prod_qty2_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
+
+            if(view == "DetailLot" && (departement == 'FIN' || departemen == 'DF'))
+            // process
+            $.each(field_view, function(a,b){
+                  for (var i = 0, l = b.in.length; i<l; i++){
+                    $.each(b.process[i], function(c,d){
+                                      
+                        hph_qty1      = "hph_"+d+"_qty1";
+                        hph_qty1_uom  = "hph_"+d+"_qty1_uom";
+                        hph_qty2      = "hph_"+d+"_qty2";
+                        hph_qty2_uom  = "hph_"+d+"_qty2_uom";
+                        hph_qty_op      = "hph_"+d+"_qty_opname";
+                        hph_qty_op_uom  = "hph_"+d+"_qty_opname_uom";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty1])+" "+value[hph_qty1_uom]+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty2])+" "+value[hph_qty2_uom]+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty_op])+" "+value[hph_qty_op_uom]+"</td>";
+                    });                             
+                  }
+            });
+
+
+            // pengiriman / OUt
+            $.each(field_view, function(a,b){
+                  for (var i = 0, l = b.in.length; i<l; i++){
+                    $.each(b.out[i], function(c,d){
+                                      
+                        lot = "out_"+d+"_qty";
+                        out_qty1      = "out_"+d+"_qty1";
+                        out_qty1_uom  = "out_"+d+"_qty1_uom";
+                        out_qty2      = "out_"+d+"_qty2";
+                        out_qty2_uom  = "out_"+d+"_qty2_uom";
+                        out_qty_op      = "out_"+d+"_qty_opname";
+                        out_qty_op_uom  = "out_"+d+"_qty_opname_uom";
+                        if(view == "Global" || view == 'DetailProduk'){
+                          lot = "out_"+d+"_lot";
+                          row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
+                        }
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty1])+" "+value[out_qty1_uom]+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty2])+" "+value[out_qty2_uom]+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty_op])+" "+value[out_qty_op_uom]+"</td>";
+                    });                             
+                  }
+            });
+
+            // ADJ OUT
+            if(view == "Global" || view == "DetailProduk" ){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_lot)+"</td>";
+            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty1)+" "+value.adj_out_qty1_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty2)+" "+value.adj_out_qty2_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+" </td>";
+
+            // saldo akhir
+             if(view == "Global" || view == "DetailProduk" ){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_lot)+"</td>";
+            }
+
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty1)+" "+value.s_akhir_qty1_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty2)+" "+value.s_akhir_qty2_uom+" </td>";
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty_opname)+" "+value.s_akhir_qty_opname_uom+" </td>";
+
+            
+        });
+
+        if(body.length == 0){
+          row4 = $("<tr>").append($("<td colspan='20'>").text('Tidak ada Data'));
+        }
+
+        tbody.append(row4);
+        $('#'+tableId).append(tbody);
+
   }
 
   $('#print-bap').click(function(e){

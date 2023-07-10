@@ -76,4 +76,28 @@ class M_mutasi extends CI_Model
                                 ");
     }
 
+    public function acc_mutasi_df_by_kode($field,$nama_tabel,$tahun,$bulan,$where,$order,$record,$recordPerPage)
+    {
+        return $this->db->query("SELECT $field
+                                FROM $nama_tabel
+                                WHERE periode_th = '$tahun'  AND periode_bln = '$bulan' $where
+                                $order
+                                LIMIT $record, $recordPerPage
+                                ");
+    }
+
+    public function acc_mutasi_df_by_kode_no_limit($field,$nama_tabel,$tahun,$bulan,$where,$order)
+    {
+        return $this->db->query("SELECT $field
+                                FROM $nama_tabel
+                                WHERE periode_th = '$tahun'  AND periode_bln = '$bulan' $where
+                                $order
+                                ");
+    }
+
+    public function get_list_route_co()
+	{
+		return $this->db->query("SELECT kode, nama FROM route_co ORDER BY kode ")->result();
+	}
+
 }
