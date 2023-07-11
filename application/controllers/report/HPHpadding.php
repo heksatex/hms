@@ -183,7 +183,7 @@ class HPHpadding extends MY_Controller
 
 
 			if(!empty($warna)){
-				$where_warna  = "AND  LIKE '%".addslashes($warna)."%' ";
+				$where_warna  = "AND w.nama_warna  LIKE '%".addslashes($warna)."%' ";
 			}else{
 				$where_warna  = '';
 			}
@@ -629,6 +629,10 @@ class HPHpadding extends MY_Controller
             $sum_qty2 		= $sum_qty2 + ($val->qty2);
             $sum_mg++;
 	        $rowCount++;
+		}
+
+		if(!empty($items)){
+			$this->total_group($object->getActiveSheet(),$temp_mg,$sum_mg,$sum_qty,$sum_qty2,$rowCount,$styleArray2);
 		}
 
 		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  

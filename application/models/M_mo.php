@@ -599,7 +599,7 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT smi.move_id, smi.quant_id,smi.kode_produk, smi.nama_produk, 
 								smi.lot, smi.qty, smi.uom,smi.origin_prod,smi.qty2,smi.uom2, rm.qty as qty_rm,rm.additional, sq.reff_note,sq.nama_grade,mp.type,
 								(SELECT count(kode_produk) as jml_prod FROM stock_move_items smi2 WHERE 
-									smi2.kode_produk = smi.kode_produk AND smi2.move_id = smi.move_id AND smi2.status = '$status') as jml_produk,
+									smi2.kode_produk = smi.kode_produk AND smi2.move_id = smi.move_id AND smi2.origin_prod = smi.origin_prod AND smi2.status = '$status' ) as jml_produk,
 								smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, sq.sales_order, sq.sales_group
 								FROM stock_move_items smi
 								INNER JOIN mrp_production_rm_target rm ON smi.origin_prod = rm.origin_prod AND rm.move_id = smi.move_id

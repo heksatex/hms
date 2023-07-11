@@ -156,9 +156,12 @@ class Produk extends MY_Controller
       }else if(empty($product_parent)){
         $callback = array('status' => 'failed', 'field' => 'product_parent', 'message' => 'Product Parent Harus Diisi !', 'icon' =>'fa fa-warning', 
               'type' => 'danger'  );
-      }else if(empty($jenis_kain) AND strpos($nmKategori['nama_category'], 'Kain') !== FALSE ){
+      }else if(empty($jenis_kain) AND (strpos($nmKategori['nama_category'], 'Kain') !== FALSE) ){
         $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain Harus disini jika Kategori Barangnya Kain !', 'icon' =>'fa fa-warning', 
                     'type' => 'danger'  );
+      // }else if(empty($jenis_kain) AND (strpos($nmKategori['nama_category'], 'Dyeing') !== FALSE or strpos($nmKategori['nama_category'], 'Setting') !== FALSE OR strpos($nmKategori['nama_category'], 'Padding') !== FALSE OR strpos($nmKategori['nama_category'], 'Brushing') !== FALSE OR strpos($nmKategori['nama_category'], 'Finishing') !== FALSE  OR strpos($nmKategori['nama_category'], 'Finbrushing') !== FALSE) ){
+                    // $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain Harus disini jika Kategori Barangnya Kain !', 'icon' =>'fa fa-warning', 
+                                // 'type' => 'danger'  );
       }else{
         //cek kode produk apa sudah ada apa belum
         $cek = $this->m_produk->cek_produk_by_kode($kodeproduk)->row_array();

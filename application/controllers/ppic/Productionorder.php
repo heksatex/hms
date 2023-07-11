@@ -907,8 +907,10 @@ class Productionorder extends MY_Controller
     	              $sql_out_batch = rtrim($sql_out_batch, ', ');
     	              $this->_module->simpan_pengiriman_batch($sql_out_batch);
 
-    	              $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
-    	              $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
+                      if(!empty($sql_out_items_batch)){
+                        $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
+                        $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
+                      }
 
                       $sql_log_history_out = rtrim($sql_log_history_out, ', ');
                       $this->_module->simpan_log_history_batch($sql_log_history_out);
@@ -918,8 +920,10 @@ class Productionorder extends MY_Controller
     	              $sql_in_batch = rtrim($sql_in_batch, ', ');
     	              $this->_module->simpan_penerimaan_batch($sql_in_batch);
 
-    	              $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
-    	              $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
+                      if(!empty($sql_in_items_batch)){
+                        $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
+                        $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
+                      }
 
     	              $where = rtrim($where, ',');
     	              $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
@@ -933,11 +937,15 @@ class Productionorder extends MY_Controller
     	              $sql_mrp_prod_batch = rtrim($sql_mrp_prod_batch, ', ');
     	              $this->_module->simpan_mrp_production_batch($sql_mrp_prod_batch);
 
-    	              $sql_mrp_prod_rm_batch = rtrim($sql_mrp_prod_rm_batch, ', ');
-    	              $this->_module->simpan_mrp_production_rm_target_batch($sql_mrp_prod_rm_batch);
+                      if(!empty($sql_mrp_prod_rm_batch)){
+                        $sql_mrp_prod_rm_batch = rtrim($sql_mrp_prod_rm_batch, ', ');
+                        $this->_module->simpan_mrp_production_rm_target_batch($sql_mrp_prod_rm_batch);
+                      }
 
-    	              $sql_mrp_prod_fg_batch = rtrim($sql_mrp_prod_fg_batch, ', ');
-    	              $this->_module->simpan_mrp_production_fg_target_batch($sql_mrp_prod_fg_batch);
+                      if(!empty($sql_mrp_prod_fg_batch)){
+                        $sql_mrp_prod_fg_batch = rtrim($sql_mrp_prod_fg_batch, ', ');
+                        $this->_module->simpan_mrp_production_fg_target_batch($sql_mrp_prod_fg_batch);
+                      }
 
                       $sql_log_history_mo = rtrim($sql_log_history_mo, ', ');
                       $this->_module->simpan_log_history_batch($sql_log_history_mo);

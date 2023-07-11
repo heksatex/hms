@@ -191,7 +191,7 @@
       defaultDate: new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
-      maxDate: new Date(),
+      // maxDate: new Date(),
       //minDate : 
       //maxDate: new Date(),
       //startDate: StartDate,
