@@ -372,5 +372,28 @@ class M_produk extends CI_Model
 		return $this->db->query("SELECT id,nama_sub_parent FROM mst_produk_sub_parent WHERE id = '$id'");
 	}
 
+	public function cek_sub_parent_by_nama($nama_produk)
+	{
+		return $this->db->query("SELECT id, nama_sub_parent FROM mst_produk_sub_parent WHERE nama_sub_parent = '$nama_produk' ");
+	}
+
+	public function get_last_id_mst_sub_parent()
+	{
+		$last_no =  $this->db->query("SELECT max(id) as nom FROM mst_produk_sub_parent");
+
+		$result = $last_no->row();
+		if(empty($result->nom)){
+			$no   = 1;
+		}else{
+     		$no   = (int)$result->nom + 1;
+		}
+		return $no;
+	}
+
+	public function simpan_mst_sub_parent_batch($sql)
+	{
+		return $this->db->query("INSERT INTO mst_produk_sub_parent (id, tanggal, nama_sub_parent) values $sql ");
+	}
+
 
 }
