@@ -758,6 +758,9 @@
                 setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               $("#foot").load(location.href + " #foot");
+    
+              var $newOptionuom = $("<option></option>").val(data.id).html(data.nama);
+              $("#sub_parent").empty().append($newOptionuom).trigger('change'); 
             }
             $('#btn-simpan').button('reset');
 
