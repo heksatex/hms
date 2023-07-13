@@ -187,35 +187,41 @@ class MO extends MY_Controller
     {   
         $sub_menu = $this->uri->segment(2);
         $id_dept  = $this->input->post('id_dept');
-        $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,$id_dept)->row_array();
-        $list = $this->m_mo->get_datatables($id_dept,$kode['kode']);
-        $data = array();
-        $no = $_POST['start'];
-        foreach ($list as $field) {
-            $kode_encrypt = encrypt_url($field->kode);
-            $no++;
-            $row = array();
-            $row[] = $no;
-            $row[] = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
-            $row[] = $field->tanggal;
-            $row[] = $field->nama_produk;
-            $row[] = $field->qty;
-            $row[] = $field->uom;
-            $row[] = $field->reff_note;
-            $row[] = $field->responsible;
-            $row[] = $field->nama_status;
- 
-            $data[] = $row;
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+
+            $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,$id_dept)->row_array();
+            $list = $this->m_mo->get_datatables($id_dept,$kode['kode']);
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $kode_encrypt = encrypt_url($field->kode);
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
+                $row[] = $field->tanggal;
+                $row[] = $field->nama_produk;
+                $row[] = $field->qty;
+                $row[] = $field->uom;
+                $row[] = $field->reff_note;
+                $row[] = $field->responsible;
+                $row[] = $field->nama_status;
+    
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_mo->count_all($id_dept,$kode['kode']),
+                "recordsFiltered" => $this->m_mo->count_filtered($id_dept,$kode['kode']),
+                "data" => $data,
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+            
+        }else{
+            die();
         }
- 
-        $output = array(
-            "draw" => $_POST['draw'],
-            "recordsTotal" => $this->m_mo->count_all($id_dept,$kode['kode']),
-            "recordsFiltered" => $this->m_mo->count_filtered($id_dept,$kode['kode']),
-            "data" => $data,
-        );
-        //output dalam format JSON
-        echo json_encode($output);
     }
 
     public function edit($kode = null)

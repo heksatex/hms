@@ -71,7 +71,7 @@ class M_mo extends CI_Model
 		$this->_get_datatables_query();
 		$this->db->where('dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		if($_POST['length'] != -1)
+		if(isset($_POST["length"]) && $_POST["length"] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
 		return $query->result();
