@@ -147,6 +147,13 @@
                           </tr>
                         </tbody>
                       </table>
+                      <b>Keterangan :</b><br>
+                          Data Collect (dc) = Real sensor dibaca (kali). <br>
+
+                          Data Collect Target (dct) = Target sensor yang harus dibaca (kali). <br>
+
+                          Data Collect Ratio (dcr) = Persentase akurasi data (dc/dct). <br>
+                      </small>
                       <div id="example1_processing" class="table_processing" style="display: none; z-index:5;">
                         Processing...
                       </div>
