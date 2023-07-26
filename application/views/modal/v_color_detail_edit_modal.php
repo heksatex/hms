@@ -98,25 +98,6 @@
           </div>  
       </div>
       <div class="col-md-12 col-xs-12">
-          <div class="col-xs-4"><label>Lebar Jadi</label></div>
-          <div class="col-xs-5">
-              <input type="text" name="lebar_jadi" id="lebar_jadi" class="form-control input-sm" value="<?php echo $get['lebar_jadi'] ?>" />
-          </div>  
-          <div class="col-xs-3">
-              <select class="form-control input-sm" name="uom_lebar_jadi" id="uom_lebar_jadi" >
-                  <option value=""></option>
-                  <?php foreach ($uom as $row) {
-                          if($row->short == $get['uom_lebar_jadi']){
-                              echo "<option selected value='".$row->short."'>".$row->short."</option>";
-                          }else{
-                              echo "<option value='".$row->short."'>".$row->short."</option>";
-                          }
-                        }
-                  ?>
-              </select>
-          </div>  
-      </div>
-      <div class="col-md-12 col-xs-12">
           <div class="col-xs-4"><label>Route</label></div>
           <div class="col-xs-8">
             <select class="form-control input-sm" name="route_co" id="route_co" >
