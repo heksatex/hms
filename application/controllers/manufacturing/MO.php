@@ -4164,6 +4164,10 @@ class MO extends MY_Controller
                     foreach($list_sm_rm as $sm){
                         $this->_module->update_status_stock_move($sm->move_id,$status);
                     }
+
+                    // insert table mo done
+                    $this->m_mo->simpan_done_mo($kode,$deptid,$rm_done->mtr,$rm_done->kg,$fg_prod->mtr,$fg_prod->kg,$fg_waste->mtr,$fg_waste->kg,$fg_adj->mtr,$fg_adj->kg,'done');
+
                     $jenis_log   = "edit";
                     $note_log    = "Done ". $kode;
                     $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username, $deptid);   
@@ -6752,13 +6756,18 @@ class MO extends MY_Controller
             $pdf->setXY(3,1);
             $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
 
+            $pdf->SetFont('Arial','B',12,'C'); // set font
+            
+            $pdf->setXY(3,12);
+            $pdf->Multicell(74,5,"Lot : ".$barcode,0,'L');// Lot
+
             $pdf->SetFont('Arial','',12,'C'); // set font
 
-            $pdf->setXY(3,12);
+            $pdf->setXY(3,17);
             $pdf->Multicell(74,5,"Qty : ".$qty." ".$uom,0,'L'); // qty
 
             $pdf->setXY(3,17);
-            $pdf->Multicell(74,5,"MC : ".$mesin,0,'L');// MC TWS
+            $pdf->Multicell(74,5,"MC : ".$mesin,0,'R');// MC TWS
 
             $pdf->setXY(3,22);
             $pdf->Multicell(30,5,"Tgl.HPH   :",0,'L');// Tgl buat/hph

@@ -882,7 +882,7 @@ class Colororder extends MY_Controller
                       $note_log    = "Generated | ".$row;
                       $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);  
 
-                      $callback = array('status' => 'success', 'message'=>'Generate Data Berhasil ! '.$sql_update_reff_out_batch, 'icon' => 'fa fa-check', 'type'=>'success');
+                      $callback = array('status' => 'success', 'message'=>'Generate Data Berhasil ! ', 'icon' => 'fa fa-check', 'type'=>'success');
 
                     }else{
 

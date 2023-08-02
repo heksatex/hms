@@ -285,7 +285,7 @@ class _module extends CI_Model
 
 	public function cek_bom_by_kode_bom($kode_bom)//production_order
 	{
-		return $this->db->query("SELECT kode_produk,kode_bom,qty,nama_bom FROM bom WHERE kode_bom  = '$kode_bom'");
+		return $this->db->query("SELECT kode_produk,kode_bom,qty,nama_bom,status_bom FROM bom WHERE kode_bom  = '$kode_bom'");
 	}
 
 	public function simpan_mrp_production_batch($sql)

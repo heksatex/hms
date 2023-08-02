@@ -536,6 +536,8 @@ class Productionorder extends MY_Controller
                 $nama_produk_arr_bi2    = '';
                 $nama_bom           = '';
                 $nama_produk_empty  = '';
+                $kg_bom_same        = TRUE;
+                $bom_aktif          = TRUE;
 
             	if(empty($jen_route['route_produksi'])){//cek route produksi apakah ada ?
 
@@ -589,18 +591,31 @@ class Productionorder extends MY_Controller
                                     //cek bom by kode_bom
                                     $cek_bom_set = $this->_module->cek_bom_by_kode_bom($kode_bom_set)->row_array();
                                     if(!empty($cek_bom_set['kode_bom'])){
-                                        $qty_bom_set = $cek_bom_set['qty'];
 
-                                        $bi = $this->_module->get_bom_items_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
-                                        $arr_bi = $bi->result_array();
-
-                                        $bi2 = $this->_module->get_bom_items_all_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
-                                        $arr_bi2 = $bi2->result_array();
-
-                                    
-                                        if(empty($arr_bi) or empty($arr_bi2)){
-                                            $bom_empty = TRUE;
-                                        }  
+                                        // cek apa bom aktif atau tidak
+                                        if($cek_bom_set['status_bom'] == 't'){
+                                            $qty_bom_set = $cek_bom_set['qty'];
+                                            
+                                            $bi = $this->_module->get_bom_items_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
+                                            $arr_bi = $bi->result_array();
+                                            
+                                            $bi2 = $this->_module->get_bom_items_all_by_kode($cek_bom_set['kode_bom'],$qty_bom_set,$qty);
+                                            $arr_bi2 = $bi2->result_array();
+                                            
+                                            // cek qty kg bom 
+                                            $kg_head_bom = $this->m_productionOrder->get_kg_bom_by_kode($cek_bom_set['kode_bom'])->row_array();
+                                            $kg_items_bom = $this->m_productionOrder->get_kg_bom_items_by_kode($cek_bom_set['kode_bom'])->row_array();
+                                            
+                                            if($kg_head_bom['kg'] != $kg_items_bom['kg'] ){
+                                                $kg_bom_same = FALSE;
+                                            }
+                                            
+                                            if(empty($arr_bi) or empty($arr_bi2)){
+                                                $bom_empty = TRUE;
+                                            }  
+                                        }else{
+                                            $bom_aktif = FALSE;
+                                        }
 
                                     }else{
                                         // cek bom = 1 atau 0
@@ -704,7 +719,7 @@ class Productionorder extends MY_Controller
 
 
                         //jalankan jika produk dan bom nya ada
-                        if($produk_empty == FALSE AND $bom_empty == FALSE AND $produk_tidak_aktif == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE){
+                        if($produk_empty == FALSE AND $bom_empty == FALSE AND $produk_tidak_aktif == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE AND $kg_bom_same == TRUE AND $bom_aktif == TRUE){
 
                         $generate_produk = TRUE;
     	           
@@ -1110,6 +1125,12 @@ class Productionorder extends MY_Controller
                         }else if($produk_bom_item_tidak_aktif == TRUE){
                             $nama_produk_arr_bi2  = rtrim($nama_produk_arr_bi2,', ');
                             $callback = array('status' => 'failed','message' => 'Maaf, Produk BOM Items '.$nama_produk_arr_bi2.' Tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+                        }else if($bom_aktif == FALSE){
+                            $callback = array('status' => 'failed','message' => 'Maaf,  Bill of Materials (BOM) tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                        
+                        }else if($kg_bom_same == FALSE){
+                            $callback = array('status' => 'failed','message' => 'Maaf, Qty (kg)  Bill of Materials (BOM) tidak sama !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
                         }else{
                             $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');

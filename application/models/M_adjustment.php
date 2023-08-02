@@ -10,8 +10,8 @@ class M_adjustment extends CI_Model
 	var $order  	  = array('create_date' => 'desc');
 
 	var $table2  	    = 'stock_quant';
-	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'reff_note', 'reserve_move');
-	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'reff_note', 'reserve_move');
+	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
+	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
 	var $order2  	    = array('nama_produk' => 'asc');
 
 	private function _get_datatables_query()
