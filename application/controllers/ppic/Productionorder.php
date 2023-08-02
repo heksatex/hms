@@ -538,6 +538,7 @@ class Productionorder extends MY_Controller
                 $nama_produk_empty  = '';
                 $kg_bom_same        = TRUE;
                 $bom_aktif          = TRUE;
+                $kg_bom_empty       = FALSE;
 
             	if(empty($jen_route['route_produksi'])){//cek route produksi apakah ada ?
 
@@ -606,8 +607,12 @@ class Productionorder extends MY_Controller
                                             $kg_head_bom = $this->m_productionOrder->get_kg_bom_by_kode($cek_bom_set['kode_bom'])->row_array();
                                             $kg_items_bom = $this->m_productionOrder->get_kg_bom_items_by_kode($cek_bom_set['kode_bom'])->row_array();
                                             
-                                            if($kg_head_bom['kg'] != $kg_items_bom['kg'] ){
+                                            if($kg_head_bom['kg'] != $kg_items_bom['kg']){
                                                 $kg_bom_same = FALSE;
+                                            }
+
+                                            if(empty($kg_head_bom['kg']) || empty($kg_items_bom['kg']) || $kg_head_bom['kg'] == 0 || $kg_items_bom['kg'] == 0){
+                                                $kg_bom_empty = TRUE;
                                             }
                                             
                                             if(empty($arr_bi) or empty($arr_bi2)){
@@ -719,7 +724,7 @@ class Productionorder extends MY_Controller
 
 
                         //jalankan jika produk dan bom nya ada
-                        if($produk_empty == FALSE AND $bom_empty == FALSE AND $produk_tidak_aktif == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE AND $kg_bom_same == TRUE AND $bom_aktif == TRUE){
+                        if($produk_empty == FALSE AND $bom_empty == FALSE AND $produk_tidak_aktif == FALSE AND $produk_bom_tidak_aktif == FALSE AND $produk_bom_item_tidak_aktif == FALSE AND $kg_bom_same == TRUE AND $bom_aktif == TRUE AND $kg_bom_empty == FALSE ){
 
                         $generate_produk = TRUE;
     	           
@@ -1131,6 +1136,9 @@ class Productionorder extends MY_Controller
                         
                         }else if($kg_bom_same == FALSE){
                             $callback = array('status' => 'failed','message' => 'Maaf, Qty (kg)  Bill of Materials (BOM) tidak sama !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+                        }else if($kg_bom_empty == TRUE){
+                            $callback = array('status' => 'failed','message' => 'Maaf, Qty (kg)  Bill of Materials (BOM) tidak boleh 0 !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
                         }else{
                             $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
