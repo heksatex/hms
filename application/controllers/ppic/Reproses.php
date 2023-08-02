@@ -477,7 +477,7 @@ class Reproses extends MY_Controller
           $row_order_adj_in = 1;
 
           // ADJ IN
-          $note_adj_in  = 'ADJ | Mengadakan. Dibuat dari Fitur Reproses. Jenis '.$jenis_reproses.' No.'.$kode_reproses;
+          $note_adj_in  = 'ADJ | Mengadakan. Dibuat dari Fitur Reproses. No.'.$kode_reproses.' Jenis '.$jenis_reproses;
 
           // get dept id GRG
           $dept_grg        = $this->_module->get_nama_dept_by_kode('GRG')->row_array();
@@ -537,7 +537,7 @@ class Reproses extends MY_Controller
                     $list_produk4 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
                   }else{
 
-                    $note_adj_out = 'ADJ | Menghilangkan. Dibuat dari Fitur Reproses. Jenis '.$jenis_reproses.'  No.'.$kode_reproses;
+                    $note_adj_out = 'ADJ | Menghilangkan. Dibuat dari Fitur Reproses. No.'.$kode_reproses.' Jenis '.$jenis_reproses;
                   
                     $datas     = explode("/",$lokasi_asal);
                     $loop_ex   = 0;
