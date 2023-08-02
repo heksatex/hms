@@ -130,7 +130,7 @@
                                 <th  class="style bb nowrap text-center" colspan = "2">Waste</th>
                                 <th  class="style bb nowrap text-center" colspan = "2">Adjustment</th>
                                 <th  class="style bb nowrap text-center" colspan = "2">Total</th>
-                                <th  class="style bb nowrap text-center" colspan = "2">Adjustment Terbaru</th>
+                                <th  class="style bb nowrap text-center" colspan = "2">Adjustment Setelah Done</th>
                             </tr>
                             <tr>  
                                 <th  class="style bb nowrap">Mtr</th>

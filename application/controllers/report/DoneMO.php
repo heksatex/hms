@@ -174,7 +174,7 @@ class DoneMO extends MY_Controller
         $object->getActiveSheet()->setCellValueByColumnAndRow(12, 8, 'Mtr');   // M
         $object->getActiveSheet()->setCellValueByColumnAndRow(13, 8, 'Kg');   // N
 
-        $object->getActiveSheet()->setCellValueByColumnAndRow(14, 7, 'Adjustment Terbaru');   // O
+        $object->getActiveSheet()->setCellValueByColumnAndRow(14, 7, 'Adjustment Setelah Done');   // O
         $object->getActiveSheet()->mergeCells('O7:P7');  
         $object->getActiveSheet()->getStyle('O7')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
         $object->getActiveSheet()->getStyle('O7')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
