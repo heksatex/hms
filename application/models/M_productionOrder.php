@@ -319,5 +319,25 @@ class M_productionOrder extends CI_Model
 	}
 
 
+	public function get_kg_bom_by_kode($kode_bom)
+	{
+		return $this->db->query("SELECT round(sum(if(uom = 'Kg', qty, if(uom2 = 'Kg', qty2, 0) )),2) as kg	
+								FROM bom
+								WHERE kode_bom  = '$kode_bom' 
+								GROUP BY kode_bom ");
+	}
+
+
+	public function get_kg_bom_items_by_kode($kode_bom)
+	{
+		return $this->db->query("SELECT round(sum(if(uom = 'Kg', qty, if(uom2 = 'Kg', qty2, 0) )),2) as kg	
+								FROM bom_items
+								WHERE kode_bom  = '$kode_bom' 
+								GROUP BY kode_bom ");
+	}
+
+
+	
+
 
 }

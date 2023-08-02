@@ -2,6 +2,13 @@
 <html>
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+
+  <style>
+    button[id="btn-edit"], button[id="btn-cancel"]{/*untuk hidden button edit di top bar */
+      display: none;
+    }
+  </style>
+
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini">
@@ -56,6 +63,12 @@
                   </div>
                 </div>
                 <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Tanggal Dibuat </label></div>
+                  <div class="col-xs-8">
+                    <input type="text" class="form-control input-sm" name="tanggal" id="tanggal" value="<?php echo date('Y-m-d H:i:s');?>"  readonly="readonly">
+                  </div>
+                </div>
+                <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Nama Produk </label></div>
                   <div class="col-xs-8">
                     <select type="text" class="form-control input-sm" name="sel2_nama_produk" id="sel2_nama_produk"/></select>
@@ -74,7 +87,18 @@
                     <input type="text" class="form-control input-sm" name="qty" id="qty" onkeyup="validAngka(this)"  />
                   </div>
                   <div class="col-xs-4">
-                     <select class="form-control input-sm" name="sel2_uom" id="sel2_uom" >
+                     <select class="form-control input-sm sel2_uom" name="sel2_uom" id="sel2_uom" >
+                  </select>    
+                  </div>
+                </div>
+
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Qty2 </label></div>
+                  <div class="col-xs-4">
+                    <input type="text" class="form-control input-sm" name="qty2" id="qty2" onkeyup="validAngka(this)"  />
+                  </div>
+                  <div class="col-xs-4">
+                     <select class="form-control input-sm sel2_uom" name="sel2_uom2" id="sel2_uom2" >
                   </select>    
                   </div>
                 </div>
@@ -95,7 +119,6 @@
   <!-- /.content-wrapper -->
 
   <footer class="main-footer">
-   <?php $this->load->view("admin/_partials/modal.php") ?>
    <?php $this->load->view("admin/_partials/footer.php") ?>
   </footer>
 
@@ -108,7 +131,7 @@
     function validAngka(a){
       if(!/^[0-9.]+$/.test(a.value)){
         a.value = a.value.substring(0,a.value.length-1000);
-        alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger');
+        alert_notify('fa fa-warning','Maaf, Inputan Qty Hanya Berupa Angka !','danger',function(){});
       }
     }
 
@@ -161,18 +184,20 @@
             //$('#sel2_uom').val(data.uom);
             var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
             $("#sel2_uom").empty().append($newOptionuom).trigger('change');
+            var $newOptionuom2 = $("<option></option>").val(data.uom2).text(data.uom2);
+            $("#sel2_uom2").empty().append($newOptionuom2).trigger('change');
 
           },
           error: function (xhr, ajaxOptions, thrownError){
               alert('Error data');
-              alert(xhr.responseText);
+              // alert(xhr.responseText);
           }
       });
     });
 
 
     //select 2 uom 
-    $('#sel2_uom').select2({
+    $('.sel2_uom').select2({
         allowClear: true,
         placeholder: "",
         ajax:{
@@ -222,7 +247,9 @@
                   kode_produk    : $('#sel2_nama_produk').val(),
                   nama_produk    : $('#nama_produk').val(),
                   qty            : $('#qty').val(),
-                  uom            : $('#sel2_uom').val()
+                  uom            : $('#sel2_uom').val(),
+                  qty2           : $('#qty2').val(),
+                  uom2           : $('#sel2_uom2').val()
 
             },success: function(data){
               if(data.sesi == "habis"){
@@ -232,7 +259,7 @@
               }else if(data.status == "failed"){
                 //jika ada form belum keiisi
                 unblockUI( function() {
-                  setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
+                  setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                 });
               }else{
                 //jika berhasil disimpan

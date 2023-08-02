@@ -6,14 +6,40 @@ class M_bom extends CI_Model
 {
 
 	var $table 		  = 'bom';
-	var $column_order = array(null, 'kode_bom','nama_bom','kode_produk','nama_produk',  'qty', 'uom');
-	var $column_search= array(  'kode_bom','nama_bom','kode_produk','nama_produk',  'qty', 'uom');
-	var $order  	  = array('nama_bom' => 'asc');
+	var $column_order = array(null, 'kode_bom','tanggal','nama_bom','kode_produk','nama_produk',  'qty', 'uom', 'qty2', 'uom2','nama_status');
+	var $column_search= array(  'kode_bom','tanggal','nama_bom','kode_produk','nama_produk',  'qty', 'uom', 'qty2', 'uom2','nama_status');
+	var $order  	  = array('tanggal' => 'desc');
 
 	private function _get_datatables_query()
 	{		
 
-		$this->db->from($this->table);
+		// $this->db->from($this->table);
+
+		if($this->input->post('kode_bom'))
+        {
+    		$this->db->like('b.kode_bom',$this->input->post('kode_bom'));
+        }
+		if($this->input->post('nama_bom'))
+        {
+    		$this->db->like('b.nama_bom',$this->input->post('nama_bom'));
+        }
+		if($this->input->post('kode_produk'))
+        {
+    		$this->db->like('b.kode_produk',$this->input->post('kode_produk'));
+        }
+		if($this->input->post('nama_produk'))
+        {
+    		$this->db->like('b.nama_produk',$this->input->post('nama_produk'));
+        }
+		if($this->input->post('status'))
+        {
+    		$this->db->where('b.status_bom',$this->input->post('status'));
+        }
+
+
+		$this->db->select("b.kode_bom, b.tanggal, b.nama_bom, b.kode_produk, b.nama_produk, b.qty, b.uom, b.qty2, b.uom2, b.status_bom, ms.nama_status");
+		$this->db->from("bom b");
+		$this->db->join("mst_status ms", "b.status_bom = ms.kode", "left");
 		$i = 0;
 	
 		foreach ($this->column_search as $item) // loop column 
@@ -51,7 +77,7 @@ class M_bom extends CI_Model
 	function get_datatables()
 	{
 		$this->_get_datatables_query();	
-		if($_POST['length'] != -1)
+		if(isset($_POST["length"]) && $_POST["length"] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
 		return $query->result();
@@ -66,8 +92,10 @@ class M_bom extends CI_Model
 
 	public function count_all()
 	{
-		
-		$this->db->from($this->table);
+		$this->db->select("b.kode_bom, b.tanggal, b.nama_bom, b.kode_produk, b.nama_produk, b.qty, b.uom, b.qty2, b.uom2, b.status_bom, ms.nama_status");
+		$this->db->from("bom b");
+		$this->db->join("mst_status ms", "b.status_bom = ms.kode", "left");
+		// $this->db->from($this->table);
 		return $this->db->count_all_results();
 	}
 
@@ -99,20 +127,20 @@ class M_bom extends CI_Model
 
 	public function get_produk_by_kode($kode_produk)
 	{
-		return $this->db->query("SELECT kode_produk, nama_produk, uom 
+		return $this->db->query("SELECT kode_produk, nama_produk, uom, uom_2
 								FROM  mst_produk 
 								WHERE kode_produk = '$kode_produk' ");
 	}
 
-	public function save_bom($kode_bom,$tanggal,$nama_bom,$kode_produk,$nama_produk,$qty,$uom)
+	public function save_bom($kode_bom,$tanggal,$nama_bom,$kode_produk,$nama_produk,$qty,$uom,$qty2,$uom2)
 	{
-		$this->db->query("INSERT INTO bom (kode_bom,tanggal,nama_bom,kode_produk,nama_produk,qty,uom) VALUES ('$kode_bom','$tanggal','$nama_bom','$kode_produk','$nama_produk','$qty','$uom')");
+		$this->db->query("INSERT INTO bom (kode_bom,tanggal,nama_bom,kode_produk,nama_produk,qty,uom,qty2,uom2) VALUES ('$kode_bom','$tanggal','$nama_bom','$kode_produk','$nama_produk','$qty','$uom','$qty2','$uom2')");
 	}
 
-	public function update_bom($kode_bom,$nama_bom,$kode_produk,$nama_produk,$qty,$uom)
+	public function update_bom($kode_bom,$nama_bom,$kode_produk,$nama_produk,$qty,$uom,$qty2,$uom2,$status)
 	{
 		$this->db->query("UPDATE bom SET nama_bom = '$nama_bom', kode_produk = '$kode_produk', 
-										 nama_produk = '$nama_produk', qty = '$qty', uom = '$uom' 
+										 nama_produk = '$nama_produk', qty = '$qty', uom = '$uom', qty2 = '$qty2', uom2 = '$uom2' , status_bom = '$status'
 									WHERE kode_bom = '$kode_bom'");
 	}
 
@@ -157,6 +185,33 @@ class M_bom extends CI_Model
 	public function delete_bom_items($kode_bom,$kode_produk,$row_order)
 	{
 		$this->db->query("DELETE FROM bom_items where kode_bom = '$kode_bom' AND kode_produk = '$kode_produk' AND row_order = '$row_order'");
+	}
+
+
+	public function get_nama_category_by_kode_produk($kode_produk)
+	{
+		return $this->db->query("SELECT mp.kode_produk, mp.id_category, cat.id,cat.nama_category
+						FROM mst_produk mp
+						LEFT JOIN mst_category cat ON mp.id_category = cat.id
+						WHERE mp.kode_produk = '$kode_produk' ");
+	}
+
+	public function get_kg_bom_by_kode($kode_bom)
+	{
+		return $this->db->query("SELECT round(sum(if(uom = 'Kg', qty, if(uom2 = 'Kg', qty2, 0) )),2) as kg	
+								FROM bom
+								WHERE kode_bom  = '$kode_bom' 
+								GROUP BY kode_bom ");
+	}
+
+	public function simpan_bom_items_batch($sql)
+	{
+		return $this->db->query("INSERT INTO bom_items (kode_bom,kode_produk,nama_produk,qty,uom,qty2,uom2,note,row_order) values $sql");
+	}
+
+	public function delete_bom_items_all_by_kode($kode_bom)
+	{
+		$this->db->query("DELETE FROM bom_items WHERE kode_bom = '$kode_bom' ");	
 	}
 
 }
