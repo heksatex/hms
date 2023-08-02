@@ -207,6 +207,7 @@ class Adjustment extends MY_Controller
           $row[] = $field->lot;
           $row[] = number_format($field->qty,2)." ".$field->uom;
           $row[] = number_format($field->qty2,2)." ".$field->uom2;
+          $row[] = $field->nama_grade;
           $row[] = $field->reff_note;
           $row[] = $field->reserve_move;
           $row[] = $field->quant_id;
