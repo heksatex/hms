@@ -1272,5 +1272,13 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT status_before_hold FROM mrp_production where kode = '$kode'");
 	}
 
+	public function simpan_done_mo($kode,$deptid,$rm_done_mtr,$rm_done_kg,$fg_prod_mtr,$fg_prod_kg,$fg_waste_mtr,$fg_waste_kg,$fg_adj_mtr,$fg_adj_kg,$status)
+	{	
+		$tgl = date('Y-m-d H:i:s');
+		return $this->db->query("INSERT INTO mrp_production_done (kode,tanggal,dept_id,con_mtr,con_kg,prod_mtr,prod_kg, waste_mtr,waste_kg,adj_mtr,adj_kg,status) 
+								values ('$kode','$tgl','$deptid','$rm_done_mtr','$rm_done_kg','$fg_prod_mtr','$fg_prod_kg','$fg_waste_mtr','$fg_waste_kg','$fg_adj_mtr','$fg_adj_kg','$status') ");
+
+	}
+
 
 }
