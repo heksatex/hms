@@ -234,7 +234,7 @@ class Billofmaterials extends MY_Controller
 							$kg_bom_head  = $qty2;
 						}
 
-						if($kg_bom_head != $total_kg_items AND $empty_items == false){
+						if(round($kg_bom_head,2) != round($total_kg_items,2) AND $empty_items == false){
 							$kg_bom_same   = false;
 						}
 					}
