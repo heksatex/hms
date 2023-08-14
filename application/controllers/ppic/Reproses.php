@@ -528,7 +528,7 @@ class Reproses extends MY_Controller
                     $list_produk  .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." (".$lokasi_asal.") <br>";
                   }else if($reserve_move != ''){
                     $reserve_move_empty = false;
-                    $list_produk2 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot."   (".$sq['reserve_move'].") <br>";
+                    $list_produk2 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." (".$sq['reserve_move'].") <br>";
                   }else if($sq['qty'] != $row->qty){
                     $qty_not_same = true;
                     $list_produk3 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
@@ -579,10 +579,10 @@ class Reproses extends MY_Controller
                     $method         = $id_dept.'|ADJ';
                     $lokasi_dari    = $lokasi_asal;
                     $lokasi_tujuan  = $lokasi_adj;
-                    $origin         = $kode_adjustment.'|1';
+                    $origin_out     = $kode_adjustment.'|1';
 
                     // insert stock_move
-                    $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
+                    $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin_out."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
 
                     // insert stock_move_produk
                     $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".$row->uom."','".$status_done."','1',''), ";
@@ -604,10 +604,10 @@ class Reproses extends MY_Controller
                     $method         = 'GRG|ADJ';
                     $lokasi_dari    = $dept_grg['adjustment_location'];
                     $lokasi_tujuan  = $stock_location_greige;
-                    $origin         = $kode_adjustment.'|1';
+                    $origin_in      = $kode_adjustment_in.'|'.$row_order_adj_in;
 
                     // insert stock_move
-                    $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
+                    $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin_in."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
 
                     // insert stock_move_produk
                     $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($cek_prod['kode_produk'])."','".addslashes($cek_prod['nama_produk'])."','".$row->qty."','".$row->uom."','".$status_done."','1',''), ";

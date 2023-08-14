@@ -119,7 +119,7 @@
                             <tr>
                               <th  class="style bb no" rowspan="3">No. </th>
                               <th  class='style bb' rowspan="3">MO</th>
-                              <th  class='style bb' style="min-width: 80px" rowspan="3">Tgl.MO</th>
+                              <th  class='style bb' style="min-width: 80px" rowspan="3">Tgl.MO Done</th>
                               <th  class='style bb' rowspan="3">Departemen</th>
                               <th  class='style bb nowrap text-center' rowspan="2" colspan = "2" >Consume Bahan Baku</th>
                               <th  class='style bb nowrap text-center' colspan = "10">Barang Jadi</th>
@@ -185,7 +185,7 @@
     // set date tgldari
     $('#tgldari').datetimepicker({
         
-        defaultDate : new Date(year, month, day, 00, 00, 00),
+        defaultDate : new Date(year, month, day, 1, 00, 00),
         format : 'D-MMMM-YYYY HH:mm:ss',
         ignoreReadonly: true,
         //maxDate: new Date(),

@@ -123,7 +123,7 @@ class DoneMO extends MY_Controller
         $object->getActiveSheet()->getStyle('B6')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
         $object->getActiveSheet()->getStyle('B6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 
-        $object->getActiveSheet()->setCellValueByColumnAndRow(2, 6, 'Tgl.MO');   // C
+        $object->getActiveSheet()->setCellValueByColumnAndRow(2, 6, 'Tgl.MO Done');   // C
         $object->getActiveSheet()->mergeCells('C6:C8');  
         $object->getActiveSheet()->getStyle('C6')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
         $object->getActiveSheet()->getStyle('C6')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
