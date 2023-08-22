@@ -2,6 +2,13 @@
 <html>
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+
+  <style type="text/css">
+    button[id="btn-duplicate"]{/*untuk hidden button di top bar */
+        display: none;
+    }
+  </style>
+
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini">
@@ -35,7 +42,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title">Form Tambah</h3>
+          <h3 class="box-title">Form Add</h3>
         </div>
         <div class="box-body">
           <form class="form-horizontal">
