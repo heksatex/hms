@@ -279,7 +279,7 @@ class Reproses extends MY_Controller
               if($item_add == true){
                 if(!empty($lot_sama)){
                   $lot_sama = rtrim($lot_sama, ', ');
-                  $callback = array('status'=>'success',  'message' => ' Reproses Detail Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success', 'msg2'=>'Yes', 'message2'=> 'Lot ( '.$lot_sama.' )</br> Sudah Pernah Diinput !'); 
+                  $callback = array('status'=>'success',  'message' => 'Reproses Detail Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success', 'msg2'=>'Yes', 'message2'=> 'Lot ( '.$lot_sama.' )</br> Sudah Pernah Diinput !'); 
                 }else{
                   $callback = array('status'=>'success',  'message' => 'Reproses Detail Berhasil Ditambahkan !',  'icon' =>'fa fa-check', 'type' => 'success'); 
                 }
@@ -436,16 +436,13 @@ class Reproses extends MY_Controller
           $move_id     = "SM".$last_move; //Set kode stock_move
           // get quant_id
           $start       = $this->_module->get_last_quant_id();
-
+          // get kode adj
           $get_kode_adjustment   = $this->_module->get_kode_adj();      
-          
 
-          if($head->id_jenis == 1){// reproses
-            $add_char_lot = "R";
-          }else if($head->id_jenis == 2){ // oper warna
-            $add_char_lot = "W";
-          }else{ // 3 ex setting
-            $add_char_lot = "S";
+          $inisial_reproses  = true;
+          
+          if($head->inisial == ''){// reproses
+            $inisial_reproses = false;
           }
 
           $jenis_reproses = $this->m_reproses->get_jenis_reproses_by_id($head->id_jenis);
@@ -475,6 +472,7 @@ class Reproses extends MY_Controller
           $case3  = "";
           $where2  = "";  
           $row_order_adj_in = 1;
+          $sql_log_history_batch  = "";
 
           // ADJ IN
           $note_adj_in  = 'ADJ | Mengadakan. Dibuat dari Fitur Reproses. No.'.$kode_reproses.' Jenis '.$jenis_reproses;
@@ -490,164 +488,185 @@ class Reproses extends MY_Controller
           // insert into adj 
           $sql_adjustment .= "('".$kode_adjustment_in."', '".$tanggal."','".$nama_dept_grg."','".$stock_location_greige."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."'), ";
 
+          //create log history adjustment in 
+          $note_log_adj_in = $kode_adjustment_in." ini dibuat dari Fitur Reproses";
+          $date_log = date('Y-m-d H:i:s');
+          $sql_log_history_batch .= "('".$date_log."','mms72','".$kode_adjustment_in."','create','".addslashes($note_log_adj_in)."','".$nama_user['nama']."'), ";
+
           $get_kode_adjustment++;
           
-          $items = $this->m_reproses->get_reproses_detail_by_code($kode_reproses);
-          foreach($items as $row){
+          $jumlah_adj_in = 0;
+          
+          if($inisial_reproses == true){
+            $items = $this->m_reproses->get_reproses_detail_by_code($kode_reproses);
+            foreach($items as $row){
 
-            $lokasi_asal  = $row->lokasi_asal;
+              $lokasi_asal  = $row->lokasi_asal;
 
-            if($row->quant_id > 0){
-              
-              $get_dept     = explode('-',$row->nama_produk);
-              $dept_nm      = $get_dept[0];
-              
-              if($dept_nm == 'TRC'){
-                $nama_dept = "Tricot";
-              }else if($dept_nm == "J"){
-                $nama_dept = "Inspecting";
-              }else{
-                $nama_dept = "Kosong";
-              }
-
-              $prod_ori     = explode('"',$row->nama_produk);
-              $product_fullname = $prod_ori[0].'" ('.$nama_dept.')';
-
-              $cek_prod = $this->_module->cek_nama_product(addslashes($product_fullname))->row_array();//get kode_produk
-
-              if(!empty($cek_prod['nama_produk'])){
-
-                $sq = $this->m_adjustment->get_stock_quant_by_quant_id($row->quant_id)->row_array();
-
-                if(!empty($sq)){
-
-                  $reserve_move = $sq['reserve_move'];
-
-                  if($row->lokasi_asal != $sq['lokasi'] ){
-                    $lokasi_produk_valid = false;
-                    $list_produk  .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." (".$lokasi_asal.") <br>";
-                  }else if($reserve_move != ''){
-                    $reserve_move_empty = false;
-                    $list_produk2 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." (".$sq['reserve_move'].") <br>";
-                  }else if($sq['qty'] != $row->qty){
-                    $qty_not_same = true;
-                    $list_produk3 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
-                  }else if($sq['qty2'] != $row->qty2){
-                    $qty2_not_same = true;
-                    $list_produk4 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
-                  }else{
-
-                    $note_adj_out = 'ADJ | Menghilangkan. Dibuat dari Fitur Reproses. No.'.$kode_reproses.' Jenis '.$jenis_reproses;
-                  
-                    $datas     = explode("/",$lokasi_asal);
-                    $loop_ex   = 0;
-                    $id_dept   = '';
-                    $lokasi_adj = '';
-                    foreach($datas as $data){
-                        if($loop_ex == 0){
-                          $id_dept = $data;
-                        }
-                        $loop_ex++;
-                    }
-                    
-                    $nm_dept         = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
-                    $nama_departemen = $nm_dept['nama'];
-                    $lokasi_adj      = $nm_dept['adjustment_location'];
-
-                    $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
-                    $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
-
-                    $lot_new           = $row->lot."".$add_char_lot;
-
-                    // insert into adj 
-                    $sql_adjustment .= "('".$kode_adjustment."', '".$tanggal."','".$nama_departemen."','".$lokasi_asal."','".$note_adj_out."','".$status_done."','".$nama_user['nama']."'), ";
-
-                    // loop adj
-                    $row_order_adj= 1;
-
-                    $qty1_move = 0 - $row->qty;
-                    $qty2_move = 0 - $row->qty2;
-                    
-                    // ADJ OUT
-                    // insert to adj items
-                    $sql_adjustment_items .= "('".$kode_adjustment."','".$row->quant_id."','".$row->kode_produk."','".$row->lot."','".$row->uom."','".$row->qty."',0,'".$row->uom2."','".$row->qty2."',0,'".$move_id."','".$qty1_move."','".$qty2_move."',$row_order_adj), ";
-
-                    // update lokasi to adj 
-                    $case .= " when quant_id = '".$row->quant_id."' then '".$lokasi_adj."'";
-                    $where.= "'".$row->quant_id."',";
-
-                    $method         = $id_dept.'|ADJ';
-                    $lokasi_dari    = $lokasi_asal;
-                    $lokasi_tujuan  = $lokasi_adj;
-                    $origin_out     = $kode_adjustment.'|1';
-
-                    // insert stock_move
-                    $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin_out."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
-
-                    // insert stock_move_produk
-                    $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".$row->uom."','".$status_done."','1',''), ";
-
-                    
-                    // insert stock_move_items
-                    $sql_stock_move_items_batch .= "('".$move_id."', '".$row->quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$row->qty."','".$row->uom."','".$row->qty2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($sq['lokasi_fisik'])."','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
-
-                    $last_move = $last_move + 1;
-                    $move_id   = "SM".$last_move;
-                  
-
-                    // ADJ IN
-                    $sql_adjustment_items .= "('".$kode_adjustment_in."','".$start."','".$cek_prod['kode_produk']."','".$lot_new."','".$row->uom."',0,'".$row->qty."','".$row->uom2."',0,'".$row->qty2."','".$move_id."','".$row->qty."','".$row->qty2."',$row_order_adj_in), ";
-
-                    // insert stock_quant
-                    $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($cek_prod['kode_produk'])."','".addslashes($cek_prod['nama_produk'])."','".addslashes(trim($lot_new))."','".addslashes($sq['nama_grade'])."','".$row->qty."','".$row->uom."','".$row->qty2."','".$row->uom2."','".$stock_location_greige."','".addslashes($sq['reff_note'])."','','','".$tanggal."','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."','".addslashes($sq['sales_order'])."','".addslashes($sq['sales_group'])."'), ";
-
-                    $method         = 'GRG|ADJ';
-                    $lokasi_dari    = $dept_grg['adjustment_location'];
-                    $lokasi_tujuan  = $stock_location_greige;
-                    $origin_in      = $kode_adjustment_in.'|'.$row_order_adj_in;
-
-                    // insert stock_move
-                    $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin_in."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
-
-                    // insert stock_move_produk
-                    $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($cek_prod['kode_produk'])."','".addslashes($cek_prod['nama_produk'])."','".$row->qty."','".$row->uom."','".$status_done."','1',''), ";
-                      
-                    // insert stock_move_items
-                    $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($cek_prod['kode_produk'])."', '".addslashes($cek_prod['nama_produk'])."','".addslashes(trim($lot_new))."','".$row->qty."','".($row->uom)."','".$row->qty2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
-
-                    // update lot new
-                    $case2 .= " when quant_id = '".$row->quant_id."' then '".$start."'";
-                    $case3 .= " when quant_id = '".$row->quant_id."' then '".$lot_new."'";
-                    $where2.= "'".$row->quant_id."',";
-
-                    $last_move = $last_move + 1;
-                    $move_id   = "SM".$last_move;
-                    // $row_order_adj++;
-                    $row_order_adj_in++;
-                    $start++;
-
-                    $get_kode_adjustment++;
-
-                  }
-
+              if($row->quant_id > 0){
+                
+                $get_dept     = explode('-',$row->nama_produk);
+                $dept_nm      = $get_dept[0];
+                
+                if($dept_nm == 'TRC'){
+                  $nama_dept = "Tricot";
+                }else if($dept_nm == "J"){
+                  $nama_dept = "Inspecting";
                 }else{
-                  $item_empty = true;
-                  $item_empty_produk  .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
+                  $nama_dept = "Kosong";
                 }
-              }else{
-                $produk_empty        = true;
-                $nama_produk_empty  .= $product_fullname.' <br>';
-              }
 
-            }else{
-              $item_empty = true;
-              $item_empty_produk  .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
+                $prod_ori     = explode('"',$row->nama_produk);
+                $product_fullname = $prod_ori[0].'" ('.$nama_dept.')';
+
+                $cek_prod = $this->_module->cek_nama_product(addslashes($product_fullname))->row_array();//get kode_produk
+
+                if(!empty($cek_prod['nama_produk'])){
+
+                  $sq = $this->m_adjustment->get_stock_quant_by_quant_id($row->quant_id)->row_array();
+
+                  if(!empty($sq)){
+
+                    $reserve_move = $sq['reserve_move'];
+
+                    if($row->lokasi_asal != $sq['lokasi'] ){
+                      $lokasi_produk_valid = false;
+                      $list_produk  .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." (".$lokasi_asal.") <br>";
+                    }else if($reserve_move != ''){
+                      $reserve_move_empty = false;
+                      $list_produk2 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." (".$sq['reserve_move'].") <br>";
+                    }else if($sq['qty'] != $row->qty){
+                      $qty_not_same = true;
+                      $list_produk3 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
+                    }else if($sq['qty2'] != $row->qty2){
+                      $qty2_not_same = true;
+                      $list_produk4 .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
+                    }else{
+
+                      $note_adj_out = 'ADJ | Menghilangkan. Dibuat dari Fitur Reproses. No.'.$kode_reproses.' Jenis '.$jenis_reproses;
+                    
+                      $datas     = explode("/",$lokasi_asal);
+                      $loop_ex   = 0;
+                      $id_dept   = '';
+                      $lokasi_adj = '';
+                      foreach($datas as $data){
+                          if($loop_ex == 0){
+                            $id_dept = $data;
+                          }
+                          $loop_ex++;
+                      }
+                      
+                      $nm_dept         = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
+                      $nama_departemen = $nm_dept['nama'];
+                      $lokasi_adj      = $nm_dept['adjustment_location'];
+
+                      $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
+                      $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
+
+                      $lot_new           = $row->lot."".$head->inisial;
+
+                      // insert into adj 
+                      $sql_adjustment .= "('".$kode_adjustment."', '".$tanggal."','".$nama_departemen."','".$lokasi_asal."','".$note_adj_out."','".$status_done."','".$nama_user['nama']."'), ";
+
+                      // loop adj
+                      $row_order_adj= 1;
+
+                      $qty1_move = 0 - $row->qty;
+                      $qty2_move = 0 - $row->qty2;
+                      
+                      // ADJ OUT
+                      // insert to adj items
+                      $sql_adjustment_items .= "('".$kode_adjustment."','".$row->quant_id."','".$row->kode_produk."','".$row->lot."','".$row->uom."','".$row->qty."',0,'".$row->uom2."','".$row->qty2."',0,'".$move_id."','".$qty1_move."','".$qty2_move."',$row_order_adj), ";
+
+                      // log history ADJ OUT
+                      $note_log_adj_out = $kode_adjustment." ini dibuat dari Fitur Reproses";
+                      $sql_log_history_batch .= "('".$date_log."','mms72','".$kode_adjustment."','create','".addslashes($note_log_adj_out)."','".$nama_user['nama']."'), ";
+
+                      // log history ADJ OUT
+                      $note_log_adj_out_2 = "Generate Adjustment ini di generate otomatis dari Fitur Reproses | Jumlah Adjustment 1 ";
+                      $sql_log_history_batch .= "('".$date_log."','mms72','".$kode_adjustment."','generate','".addslashes($note_log_adj_out_2)."','".$nama_user['nama']."'), ";
+
+
+                      // update lokasi to adj 
+                      $case .= " when quant_id = '".$row->quant_id."' then '".$lokasi_adj."'";
+                      $where.= "'".$row->quant_id."',";
+
+                      $method         = $id_dept.'|ADJ';
+                      $lokasi_dari    = $lokasi_asal;
+                      $lokasi_tujuan  = $lokasi_adj;
+                      $origin_out     = $kode_adjustment.'|1';
+
+                      // insert stock_move
+                      $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin_out."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
+
+                      // insert stock_move_produk
+                      $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".$row->uom."','".$status_done."','1',''), ";
+
+                      
+                      // insert stock_move_items
+                      $sql_stock_move_items_batch .= "('".$move_id."', '".$row->quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$row->qty."','".$row->uom."','".$row->qty2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($sq['lokasi_fisik'])."','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
+
+                      $last_move = $last_move + 1;
+                      $move_id   = "SM".$last_move;
+                    
+
+                      // ADJ IN
+                      $sql_adjustment_items .= "('".$kode_adjustment_in."','".$start."','".$cek_prod['kode_produk']."','".$lot_new."','".$row->uom."',0,'".$row->qty."','".$row->uom2."',0,'".$row->qty2."','".$move_id."','".$row->qty."','".$row->qty2."',$row_order_adj_in), ";
+                      $jumlah_adj_in++;
+
+                      // insert stock_quant
+                      $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($cek_prod['kode_produk'])."','".addslashes($cek_prod['nama_produk'])."','".addslashes(trim($lot_new))."','".addslashes($sq['nama_grade'])."','".$row->qty."','".$row->uom."','".$row->qty2."','".$row->uom2."','".$stock_location_greige."','".addslashes($sq['reff_note'])."','','','".$tanggal."','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."','".addslashes($sq['sales_order'])."','".addslashes($sq['sales_group'])."'), ";
+
+                      $method         = 'GRG|ADJ';
+                      $lokasi_dari    = $dept_grg['adjustment_location'];
+                      $lokasi_tujuan  = $stock_location_greige;
+                      $origin_in      = $kode_adjustment_in.'|'.$row_order_adj_in;
+
+                      // insert stock_move
+                      $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin_in."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
+
+                      // insert stock_move_produk
+                      $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($cek_prod['kode_produk'])."','".addslashes($cek_prod['nama_produk'])."','".$row->qty."','".$row->uom."','".$status_done."','1',''), ";
+                        
+                      // insert stock_move_items
+                      $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($cek_prod['kode_produk'])."', '".addslashes($cek_prod['nama_produk'])."','".addslashes(trim($lot_new))."','".$row->qty."','".($row->uom)."','".$row->qty2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
+
+                      // update lot new
+                      $case2 .= " when quant_id = '".$row->quant_id."' then '".$start."'";
+                      $case3 .= " when quant_id = '".$row->quant_id."' then '".$lot_new."'";
+                      $where2.= "'".$row->quant_id."',";
+
+                      $last_move = $last_move + 1;
+                      $move_id   = "SM".$last_move;
+                      // $row_order_adj++;
+                      $row_order_adj_in++;
+                      $start++;
+
+                      $get_kode_adjustment++;
+
+                    }
+
+                  }else{
+                    $item_empty = true;
+                    $item_empty_produk  .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
+                  }
+                }else{
+                  $produk_empty        = true;
+                  $nama_produk_empty  .= $product_fullname.' <br>';
+                }
+
+              }else{
+                $item_empty = true;
+                $item_empty_produk  .= $row->kode_produk." ".$row->nama_produk." ".$row->lot." <br>";
+              }
 
             }
-
           }
 
-          if($item_empty == false && $lokasi_produk_valid == true && $reserve_move_empty == true && $qty_not_same == false && $qty2_not_same == false && $produk_empty == false){
+          $note_log_adj_in_2 = "Generate Adjustment ini di generate otomatis dari Fitur Reproses | Jumlah Adjustment ".$jumlah_adj_in;
+          $sql_log_history_batch .= "('".$date_log."','mms72','".$kode_adjustment_in."','generate','".addslashes($note_log_adj_in_2)."','".$nama_user['nama']."'), ";
+
+          if($item_empty == false && $lokasi_produk_valid == true && $reserve_move_empty == true && $qty_not_same == false && $qty2_not_same == false && $produk_empty == false && $inisial_reproses == true){
 
             // simpan adjustment
             if(!empty($sql_adjustment)){
@@ -700,10 +719,15 @@ class Reproses extends MY_Controller
               $sql_update_reproses_items = "UPDATE reproses_items SET quant_id_new = (case ".$case2." end), lot_new = (case ".$case3." end)  WHERE quant_id in (".$where2.") AND kode_reproses = '".$kode_reproses."' ";
               $this->_module->update_reff_batch($sql_update_reproses_items);
             }
-
+          
             // update reproses
             $sql_update_status_reproses = "UPDATE reproses SET status = '".$status_done."'  WHERE kode_reproses = '".$kode_reproses."' ";
             $this->_module->update_reff_batch($sql_update_status_reproses);
+
+            if(!empty($sql_log_history_batch)){
+              $sql_log_history_batch = rtrim($sql_log_history_batch, ', ');
+              $this->_module->simpan_log_history_batch($sql_log_history_batch);
+            }
 
             $jenis_log   = "generated";
             $note_log    = "Generate Reproses | ".$kode_reproses;
@@ -730,6 +754,9 @@ class Reproses extends MY_Controller
 
             }else if($qty2_not_same == true){
               $callback = array('status' => 'failed','message' => 'Qty 2 yang akan di Reproses tidak sama dengan Qty 2 yang  ada di Stock !! <br> '.$list_produk4, 'icon' =>'fa fa-warning', 'type' => 'danger');
+
+            }else if($inisial_reproses == false){
+              $callback = array('status' => 'failed','message' => 'Jenis Reproses tidak ditemukan / tidak valid !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else{
               $callback = array('status'=>'failed',  'message' => 'Reproses Gagal di Generate !',  'icon' =>'fa fa-check', 'type' => 'danger');

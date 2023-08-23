@@ -1752,6 +1752,8 @@ class MO extends MY_Controller
 
                 //get row order stock_move_items produksi
                 $row_order_smi  = $this->_module->get_row_order_stock_move_items_by_kode($move_id_fg);
+                $list_lot_fg    = '';
+                $list_lot_waste = '';
 
                 if(!empty($array_fg) ){
 
@@ -1822,6 +1824,8 @@ class MO extends MY_Controller
                     */
 
                     $cek_dl     = $this->m_mo->cek_validasi_double_lot_by_dept($deptid);
+
+                    
 
                     //simpan fg hasil
                     foreach ($array_fg as $row) {
@@ -1922,6 +1926,7 @@ class MO extends MY_Controller
                         $row_order_smi++;
                         $row_order_smi_tujuan++;
                         $jml_lot_fg++;
+                        $list_lot_fg .= trim($row['lot']).' <br> ';
                     }//foreach array_fg
                     
 
@@ -1987,6 +1992,8 @@ class MO extends MY_Controller
                         $row_order++;
                         $row_order_smi++;
                         $jml_lot_waste++;
+                        $list_lot_waste .= trim($lot_remark).' <br> ';
+
                     }//foreach array_waste
 
                 }//jika array_waste tidak kosong
@@ -2356,19 +2363,30 @@ class MO extends MY_Controller
                     }
                     
                     if(!empty($array_fg) OR !empty($array_waste)){ 
-                        
+
+                        if(!empty($list_lot_fg)){
+                            $lot_fg = " <br> List Lot : <br> ".$list_lot_fg;
+                        }else{
+                            $lot_fg = '';
+                        }
+
+                        if(!empty($list_lot_waste)){
+                            $lot_waste = "<br> List Waste : <br> ".$list_lot_waste;
+                        }else{
+                            $lost_waste = '';
+                        }
 
                         if(!empty($array_fg) AND !empty($array_waste)){
-                            $note_log    = "Produksi Batch ". $kode.' | LOT : '.$jml_lot_fg.' & Waste :'.$jml_lot_waste;
+                            $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' & Jumlah Waste :'.$jml_lot_waste.' '.$lot_fg.' '.$lot_waste;
                         }else if(!empty($array_fg)){
-                            $note_log    = "Produksi Batch ". $kode.' | LOT : '.$jml_lot_fg;
+                            $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' '.$lot_fg;
                         }else{
-                            $note_log    = "Produksi Batch ". $kode.' | Waste : '.$jml_lot_waste;
+                            $note_log    = "Produksi Batch ". $kode.' | Jumlah Waste : '.$jml_lot_waste.' '.$lot_waste;;
                         }
 
                         $jenis_log   = "edit";
                         $note_log    = $note_log;
-                        $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, $note_log, $username,$deptid);          
+                        $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, addslashes($note_log), $username,$deptid);          
                     }
 
                 }else{

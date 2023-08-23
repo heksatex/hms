@@ -223,7 +223,7 @@ class M_reproses extends CI_Model
 
     public function get_reproses_by_kode($kode)
 	{
-		$query = $this->db->query("SELECT re.kode_reproses, re.tanggal, re.note, re.status, re.id_jenis, rej.nama_jenis
+		$query = $this->db->query("SELECT re.kode_reproses, re.tanggal, re.note, re.status, re.id_jenis, rej.nama_jenis, rej.inisial
                                 FROM reproses re
                                 INNER JOIN reproses_jenis rej ON re.id_jenis = rej.id
                                 where re.kode_reproses = '".$kode."' ");

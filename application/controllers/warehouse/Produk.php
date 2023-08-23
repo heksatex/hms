@@ -61,14 +61,38 @@ class Produk extends MY_Controller
       echo json_encode($output);
   }
 
+  // public function add()
+  // { 
+  //   $data['id_dept']  ='MPROD';
+  //   $data['uom']      = $this->_module->get_list_uom();
+  //   $data['category'] = $this->m_produk->get_list_category();
+  //   $data['route']    = $this->m_produk->get_list_route();        
+  //   $data['jenis_kain'] = $this->m_produk->get_list_jenis_kain();        
+  //   return $this->load->view('warehouse/v_produk_add', $data);
+  // }
+
   public function add()
-  { 
+  {	
     $data['id_dept']  ='MPROD';
+    $id         = $this->input->get('id');
+    $kode_produk= $this->input->get('kode_produk');
+    $duplicate  = $this->input->get('duplicate');
     $data['uom']      = $this->_module->get_list_uom();
     $data['category'] = $this->m_produk->get_list_category();
     $data['route']    = $this->m_produk->get_list_route();        
-    $data['jenis_kain'] = $this->m_produk->get_list_jenis_kain();        
-    return $this->load->view('warehouse/v_produk_add', $data);
+    $data['jenis_kain'] = $this->m_produk->get_list_jenis_kain(); 
+    
+    if($duplicate == 'true'){
+      $produk           = $this->m_produk->get_produk_by_kode($id);//id auto increment
+      $data['produk']   = $produk;
+      if(empty($produk)){
+        show_404();
+      }else{
+        return $this->load->view('warehouse/v_produk_duplicate', $data);
+      }
+    }else{
+      return $this->load->view('warehouse/v_produk_add', $data);
+    }
   }
 
   function get_product_parent_select2()
@@ -127,6 +151,7 @@ class Produk extends MY_Controller
       $sub_parent     = addslashes($this->input->post('sub_parent'));
       $jenis_kain     = addslashes($this->input->post('jenis_kain'));
       $statusproduk   = addslashes($this->input->post('statusproduk'));
+			$duplicate      = addslashes($this->input->post('duplicate'));
 
       $sql_insert_mst_sub_parent= '';
       $nama_sub_parent = 0;
@@ -234,7 +259,7 @@ class Produk extends MY_Controller
             $callback = array('status' => 'failed', 'field' => 'kodeproduk', 'message' => 'Kode Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
         }elseif($nama_double == TRUE){
             $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Nama Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger' );   
-        }else if(!empty($cek['kode_produk'])){
+        }else if(!empty($cek['kode_produk']) AND $status == 'edit'){
 
           //update/edit produk
           $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
@@ -252,7 +277,6 @@ class Produk extends MY_Controller
           //insert/add produk
           $id_new = $this->m_produk->get_last_id_mst_produk();
           
-
           $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
           $kodeproduk_encr = encrypt_url($id_new);
 
@@ -261,10 +285,19 @@ class Produk extends MY_Controller
             $this->m_produk->simpan_mst_sub_parent_batch($sql_insert_mst_sub_parent);
           }
 
+          if($duplicate == true){
+            $kode_produk_before      = addslashes($this->input->post('kode_produk_before'));
+            $nama_produk_before      = addslashes($this->input->post('nama_produk_before'));
+
+            $note_logs  = "Duplicate dari Produk ".addslashes($kode_produk_before)." ".addslashes($nama_produk_before). "<br>".  $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." | ".$nama_sub_parent." | ".$jk['nama_jenis_kain']." | ".$status_aktif;;
+          }else{
+            $note_logs  =  $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." | ".$nama_sub_parent." | ".$jk['nama_jenis_kain']." | ".$status_aktif;
+          }
+
           $jenis_log   = "create";
-          $note_log    = $kodeproduk." | ".$namaproduk." | ".$uomproduk." | ".$uomproduk2." | ".$lebargreige." ".$uom_lebargreige." | ".$lebarjadi." ".$uom_lebarjadi." | ".$routeproduksi." | ".$typeproduk." | ".$dapatdibeli." | ".$dapatdijual." | ".$nmKategori['nama_category']." | ".$log_bom." | ".$parent['nama']." | ".$nama_sub_parent." | ".$jk['nama_jenis_kain']." | ".$status_aktif;
+          $note_log    = $note_logs;
           $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, ($note_log), $username);
-          $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kodeproduk_encr, 'icon' =>'fa fa-check', 'type' => 'success', 'id'=>$sub_parent, 'nama'=>$nama_sub_parent );
+          $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kodeproduk_encr, 'icon' =>'fa fa-check', 'type' => 'success',  );
         }
       }
 
