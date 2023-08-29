@@ -17,6 +17,7 @@
               <th>Lot</th>
               <th>Qty</th>
               <th>Qty2</th>
+              <th>Grade</th>
               <th>Reff Note</th>
               <th width="50px"></th>
             </tr>
@@ -54,13 +55,13 @@
            
             "columnDefs": [
               {
-               'targets':7,
-               'data' : 7,
+               'targets':8,
+               'data' : 8,
                'checkboxes': {
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[7];
+                   var rowId = rowData[8];
                 },
               },
               { 
@@ -73,7 +74,7 @@
             },
             'rowCallback': function(row, data, dataIndex){
                // Get row ID
-               var rowId = data[7];
+               var rowId = data[8];
                // If row ID is in the list of selected row IDs
             }
         });
@@ -90,7 +91,7 @@
   //simpan details ketika button simpan di klik
   $("#btn-tambah").unbind( "click" );
   $('#btn-tambah').click(function(){
-      var myCheckboxes = table.column(7).checkboxes.selected();
+      var myCheckboxes = table.column(8).checkboxes.selected();
       var myCheckboxes_arr = new Array();
       var message = 'Silahkan pilih data terlebih dahulu !';
 
