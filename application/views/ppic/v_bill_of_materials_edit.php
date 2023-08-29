@@ -587,12 +587,12 @@
                               + '<td><input type="hidden"  name="row" class="row" value="'+ro+'"></td>'
                               + '<td  class="min-width-200">'
                                   + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+'" name="tProduct" id="tkode_produk"></select>'
-                                  + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="Product" id="tnama_produk" value="'+nama_produk+'"></td>'
+                                  + '<input type="text" class="form-control input-sm nama_produk '+produk+'" name="Product" id="tnama_produk" value="'+htmlentities_script(nama_produk)+'"></td>'
                               + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="tqty"  onkeyup="validAngka(this)" onkeypress="'+event+'"  value="'+qty+'"></td>'
                               + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="tuom"></select></td>'
                               + '<td class="min-width-100"><input type="text" class="form-control input-sm qty2" name="Qty2" id="tqty2"  onkeyup="validAngka(this)" onkeypress="'+event+'"  value="'+qty2+'"></td>'
                               + '<td class="min-width-100"><select type="text" class="form-control input-sm uom2 '+class_uom2+'" name="Uom2" id="tuom2"></select></td>'
-                              + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="treff" onkeypress="'+event+'"  >'+reff_note+'</textarea></td>'
+                              + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="treff" onkeypress="'+event+'"  >'+htmlentities_script(reff_note)+'</textarea></td>'
                               + '<td class="width-50" align="center"><a onclick="'+delRow+'"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
                               + '</tr>';
 
