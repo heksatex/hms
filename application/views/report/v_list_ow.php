@@ -79,7 +79,7 @@
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-sm btn-default" name="btn-filter" id="btn-filter" >Proses</button>
-                    <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o"></i> Excel</button>
+                    <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                 </div>
                 <div class="col-md-12">
                     <div class="form-group">
@@ -161,12 +161,14 @@
                             </div>
                             <div class="col-md-7">
                                   <select class="form-control input-sm" id="status_ow" name="status_ow" >
-                                    <?php $arr_stat = array('','t','f','ng');
+                                    <?php $arr_stat = array('','t','f','ng','r');
                                           foreach($arr_stat as $stats){
                                             if($stats == 't'){
                                               $status = 'Aktif';
                                             }else if($stats == 'ng'){
                                               $status = 'Not Good';
+                                            }else if($stats == 'r'){
+                                              $status = 'Reproses';
                                             }else if($stats == 'f'){
                                               $status = 'Tidak Aktif';
                                             }else{
@@ -385,6 +387,8 @@
                 $(row).css("color","red");
               }else if(data[20]=='ng'){
                 $(row).css("color","blue");
+              }else if(data[20]=='r'){
+                $(row).css("color","purple");
               }
             },
         });

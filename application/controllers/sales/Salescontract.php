@@ -1013,6 +1013,8 @@ class Salescontract extends MY_Controller
                 $status = $ow.' Aktif';
               }else if($value == 'ng'){
                 $status = $ow.' Not Good';
+              }else if($value == 'r'){
+                $status = $ow.' Reproses';
               }else{
                 $status = $ow.' Tidak Aktif';
               }
@@ -1026,7 +1028,7 @@ class Salescontract extends MY_Controller
   
                 if($cq_color_lines > $cq_contract_lines){
                   $lebih_target = true;  
-                  $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines1', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                  $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }
 
                 // tambah qty yg akan di aktifkan
