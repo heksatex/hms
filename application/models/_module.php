@@ -242,7 +242,7 @@ class _module extends CI_Model
 
 	public function get_list_departement()
 	{
-		return $this->db->query("SELECT kode,nama FROM departemen ORDER BY nama ")->result();
+		return $this->db->query("SELECT kode,nama FROM departemen WHERE show_dept = 'true'  ORDER BY nama ")->result();
 	}
 
 	public function get_route_product($route)
