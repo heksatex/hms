@@ -11,8 +11,8 @@ class M_penerimaanBarang extends CI_Model
 	var $order  	  = array('kode' => 'desc');
 
 	var $table3  	    = 'stock_quant';
-	var $column_order3  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
-	var $column_search3 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'reff_note');
+	var $column_order3  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note');
+	var $column_search3 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note');
 	var $order3  	    = array('create_date' => 'asc');
 
 	private function _get_datatables_query()
@@ -236,7 +236,7 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid, smi.lebar_greige,smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid, smi.lebar_greige,smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, sq.nama_grade
 								FROM stock_move_items smi 
 								INNER JOIN penerimaan_barang pb ON smi.move_id = pb.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id

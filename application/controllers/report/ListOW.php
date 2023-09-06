@@ -35,6 +35,8 @@ class ListOW extends MY_Controller
                 $status_scl = 'Aktif';
             }else if($field->status_scl == 'ng'){
                 $status_scl = 'Not Good';
+            }else if($field->status_scl == 'r'){
+                $status_scl = 'Reproses';
             }else{
                 $status_scl = 'Tidak Aktif';
             }
@@ -184,6 +186,8 @@ class ListOW extends MY_Controller
                 $status_scl = 'Aktif';
             }else if($val->status_scl == 'ng'){
                 $status_scl = 'Not Good';
+            }else if($val->status_scl == 'r'){
+                $status_scl = 'Reproses';
             }else{
                 $status_scl = 'Tidak Aktif';
             }

@@ -8,7 +8,7 @@ class M_cacat extends CI_Model
 
 	public function get_list_departement_select2($nama)
 	{
-		return $this->db->query("SELECT kode,nama FROM departemen  WHERE nama LIKE '%$nama%' ORDER BY nama ")->result();
+		return $this->db->query("SELECT kode,nama FROM departemen  WHERE show_dept = 'true' AND nama LIKE '%$nama%' ORDER BY nama ")->result();
 	}
 
 

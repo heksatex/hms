@@ -162,11 +162,9 @@
                         <small><b>*Jika terdapat baris yang berwarna <font color="red">MERAH</font> maka Product/Lot tersebut telah di proses ADJUSTMENT !!</b></small>
 				    </div>
                     <div class="col-md-12">	
-                		<div class="form-group">
 							<div class=" pull-right text-right">
 					            <button type="button" id="btn-copy" class="btn btn-success btn-sm"  onclick="calculate_consume()" <?php if($empty == true OR count($konsumsi) == 0)echo "disabled"?>>Hitung Konsumsi Bahan </button>
 							</div>					  
-						</div>
                 	</div>
                 </div>
             </div>

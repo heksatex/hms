@@ -376,6 +376,8 @@
                                       $style = 'style="color:red"';
                                     }else if($row->status == 'ng'){
                                       $style = 'style="color:blue"';
+                                    }else if($row->status == 'r'){
+                                      $style = 'style="color:purple"';
                                     }else{
                                       $style = '';
                                     }
@@ -400,10 +402,12 @@
                                     <td style="min-width:80px;" >
                                         <?php if(!empty($row->ow)){ ?>
                                         <select class="form-control input-sm status_scl" id="status_scl" name="status_scl" sc="<?php echo $row->sales_order;?>" row_order="<?php echo $row->row_order;?>" ow="<?php echo $row->ow;?>" kode_produk="<?php echo htmlentities($row->kode_produk);?>", qty="<?php echo $row->qty?>" >
-                                          <?php $arr_stat = array('t','f','ng');
+                                          <?php $arr_stat = array('t','f','ng','r');
                                                 foreach($arr_stat as $stats){
                                                   if($stats == 't'){
                                                     $status = 'Aktif';
+                                                  }else if($stats == 'r'){
+                                                    $status = 'Reproses';
                                                   }else if($stats == 'ng'){
                                                     $status = 'Not Good';
                                                   }else{

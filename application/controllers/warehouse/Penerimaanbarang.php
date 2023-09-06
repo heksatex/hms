@@ -985,6 +985,7 @@ class Penerimaanbarang extends MY_Controller
             $row[] = $field->lot;
             $row[] = number_format($field->qty,2)." ".$field->uom;
             $row[] = number_format($field->qty2,2)." ".$field->uom2;
+            $row[] = $field->nama_grade;
             $row[] = $field->reff_note;
             $row[] = $field->quant_id;
             //$row[] = '';//buat checkbox
@@ -1067,6 +1068,7 @@ class Penerimaanbarang extends MY_Controller
             $qty2        = $cek_sq['qty2'];
             $uom2        = $cek_sq['uom2'];
             $lokasi      = $cek_sq['lokasi'];
+            $nama_grade  = $cek_sq['nama_grade'];
             $lokasi_fisik = $cek_sq['lokasi_fisik'];
             $lebar_greige     = $cek_sq['lebar_greige'];
             $uom_lebar_greige = $cek_sq['uom_lebar_greige'];
@@ -1085,7 +1087,7 @@ class Penerimaanbarang extends MY_Controller
                 $case       .= "when quant_id = '".$quantid."' then '".$move_id."'";
                 $where      .= "'".$quantid."',";
 
-                $list_product .= "(".$no.") ".$kode_produk." ".$nama_produk." ".$lot." ".$qty." ".$uom." ".$qty2." ".$uom2." <br>";
+                $list_product .= "(".$no.") ".$kode_produk." ".$nama_produk." ".$lot." ".$qty." ".$uom." ".$qty2." ".$uom2." ".$nama_grade." <br>";
                 $no++;
 
             }else{
@@ -1299,11 +1301,14 @@ class Penerimaanbarang extends MY_Controller
                         $this->_module->update_status_stock_move($move_id,'ready');
                     }
                 }
+
+                $cek_sq  = $this->_module->get_stock_quant_by_id($quant_id)->row_array();
+                $nama_grade = $cek_sq['nama_grade'];
                 
                 //unlock table
                 $this->_module->unlock_tabel();
 
-                $note_log_produk  =  $get_smi['origin_prod'].' '.$get_smi['nama_produk'].' '.$get_smi['lot'].' '.$get_smi['qty'].' '.$get_smi['uom'].' '.$get_smi['qty2'].' '.$get_smi['uom2'];
+                $note_log_produk  =  $get_smi['origin_prod'].' '. $get_smi['kode_produk'].' '.$get_smi['nama_produk'].' '.$get_smi['lot'].' '.$get_smi['qty'].' '.$get_smi['uom'].' '.$get_smi['qty2'].' '.$get_smi['uom2'].' '.$nama_grade;
                 
                 $jenis_log   = "cancel";
                 $note_log    =  "Hapus Data Details - > <br>".$note_log_produk;

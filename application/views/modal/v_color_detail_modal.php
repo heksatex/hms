@@ -88,6 +88,8 @@
                 $(row).css("color","red");
               }else if(data[17] == 'ng'){
                 $(row).css("color","blue");
+              }else if(data[17]=='r'){
+                $(row).css("color","purple");
               }
             },
             'rowCallback': function(row, data, dataIndex){
