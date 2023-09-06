@@ -71,12 +71,12 @@ class M_stock extends CI_Model
 
 	public function get_list_departement_stock()
 	{
-		return $this->db->query("SELECT DISTINCT stock_location  FROM departemen ORDER BY stock_location ")->result();
+		return $this->db->query("SELECT DISTINCT stock_location  FROM departemen WHERE show_dept = 'true' ORDER BY stock_location ")->result();
 	}
 
 	public function get_list_departemen_outputlocation()
 	{
-		return $this->db->query("SELECT DISTINCT output_location FROM departemen ORDER BY output_location")->result();
+		return $this->db->query("SELECT DISTINCT output_location FROM departemen WHERE show_dept = 'true'  ORDER BY output_location")->result();
 	}
 
 	
