@@ -4,7 +4,7 @@
     <head>
 
         <?php $this->load->view("admin/_partials/head.php") ?>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/4.0.0-alpha.1/css/bootstrap-switch.min.css">
+        <link rel="stylesheet" href="<?php echo base_url('dist/css/bootstrap-switch.min.css') ?>">
     </head>
 
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -64,7 +64,7 @@
         </div>
 
         <?php $this->load->view("admin/_partials/js.php") ?>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/4.0.0-alpha.1/js/bootstrap-switch.min.js"></script>
+        <script src="<?php echo base_url('dist/js/bootstrap-switch.min.js') ?>"></script>
         <script>
 
             var table;
