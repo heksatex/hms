@@ -25,7 +25,7 @@ class WaGroup extends MY_Controller {
         $this->is_loggedin(); //cek apakah user sudah login
         $this->load->model("m_WaGroup"); //load model m_Group
         $this->load->model("_module");
-        $this->load->library('response');
+//        $this->load->library('response');
     }
 
     public function index() {
