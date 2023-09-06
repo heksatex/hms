@@ -49,7 +49,7 @@ class WaGroup extends MY_Controller {
             $data['wa'] = $this->m_WaGroup->getDataByID($kode_decrypt);
             $data["id"] = $id;
             $data['id_dept'] = 'MUSR';
-            $data['mms']        = $this->_module->get_data_mms_for_log_history($data['id_dept']);
+            $data['mms'] = $this->_module->get_data_mms_for_log_history($data['id_dept']);
             return $this->load->view('setting/v_wa_group_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -103,13 +103,13 @@ class WaGroup extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0]);
             }
             $wagroup = $this->input->post("wa_group");
-            if(!$this->m_WaGroup->update($kode_decrypt,addslashes($wagroup))){
+            if (!$this->m_WaGroup->update($kode_decrypt, addslashes($wagroup))) {
                 throw new \Exception("Gagal Merubah Data");
             }
             $this->_module->gen_history($sub_menu, $wagroup, 'Update', 'Edit WA Group ' . $wagroup, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil'))); 
+                    ->set_output(json_encode(array('message' => 'Berhasil')));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
             $this->output->set_status_header(500)
@@ -136,6 +136,7 @@ class WaGroup extends MY_Controller {
 
             echo json_encode(array("draw" => $_POST['draw'],
                 "recordsTotal" => count($data),
+                "recordsFiltered" => count($data),
                 "data" => $data,
             ));
             exit();
