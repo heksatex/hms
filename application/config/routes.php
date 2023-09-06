@@ -61,3 +61,10 @@ $route['lab']			= 'lab/lab';
 $route['sales']			= 'sales/sales';
 $route['setting']	 	= 'setting/setting';
 $route['report']	 	= 'report/report';
+//WA Group
+$route['setting/wa_group']['GET'] = 'setting/WaGroup/index';
+$route['setting/wa_group/add']['GET'] = 'setting/WaGroup/add';
+$route['setting/wa_group/edit/([a-zA-Z0-9]+)']['GET'] = 'setting/WaGroup/edit/$1';
+$route['setting/wa_group/update']['POST'] = 'setting/WaGroup/update';
+$route['setting/wa_group/simpan']['POST'] = 'setting/WaGroup/simpan';
+$route['setting/wa_group/get_data']['POST'] = 'setting/WaGroup/getData';
