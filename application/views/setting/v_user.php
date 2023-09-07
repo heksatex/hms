@@ -97,9 +97,9 @@
                             "targets": [0],
                             "orderable": false,
                         },
-                    ],  
+                    ],
                     "fnDrawCallback": function (setting, json) {
-                        $('[name="switch"]').bootstrapSwitch({
+                        $('.switch_aktif').bootstrapSwitch({
                             onColor: 'primary',
                             offColor: 'danger',
                             onSwitchChange: function (event, state) {
@@ -155,7 +155,7 @@
                     }
                 });
 
-               
+
 
             });
 

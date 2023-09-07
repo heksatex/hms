@@ -35,7 +35,7 @@ class User extends MY_Controller {
             $row[] = $field->level;
             $row[] = $field->nama_departemen;
             $row[] = $field->telepon_wa;
-            $row[] = $field->aktif ? '<input class="switch-state-' . $field->username . '" type="checkbox" name="switch" value="' . $field->aktif . '" checked>' : '<input class="switch-state-' . $field->username . '" type="checkbox" value="' . $field->aktif . '" name="switch">';
+            $row[] = $field->aktif ? '<input class="switch_aktif switch-state-' . $field->username . '" type="checkbox" name="switch" value="' . $field->aktif . '" checked>' : '<input  class="switch_aktif switch-state-' . $field->username . '" type="checkbox" value="' . $field->aktif . '" name="switch">';
             $data[] = $row;
         }
 
