@@ -48,7 +48,7 @@
                           </form>',
                 buttons: {
                     ok: {
-                        label: "I'm an OK button!",
+                        label: "Login",
                         className: 'btn-info',
                         callback: function (result) {
                             if (result) {
