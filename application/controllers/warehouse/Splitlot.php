@@ -108,7 +108,7 @@ class Splitlot extends MY_Controller
                 $no++;
                 $row = array();
                 $row[] = $no.".";
-                $row[] = '<a href="#" class="pilih" quant_id="'.$field->quant_id.'" kode_produk="'.$field->kode_produk.'"  nama_produk="'.htmlentities($field->nama_produk).'" lot ="'.$field->lot.'" qty="'.$field->qty.'" uom="'.$field->uom.'" qty2="'.$field->qty2.'" uom2="'.$field->uom2.'" data-togle="tooltip" title="Pilih Produk">'.$field->kode_produk.'</a>';
+                $row[] = $field->kode_produk;
                 $row[] = $field->nama_produk;
                 $row[] = $field->lot;
                 $row[] = number_format($field->qty,2)." ".$field->uom;
@@ -116,6 +116,7 @@ class Splitlot extends MY_Controller
                 $row[] = $field->nama_grade;
                 $row[] = $field->reff_note;
                 $row[] = $field->reserve_move;
+                $row[] = '<a href="#" class="btn btn-primary btn-xs pilih" quant_id="'.$field->quant_id.'" kode_produk="'.$field->kode_produk.'"  nama_produk="'.htmlentities($field->nama_produk).'" lot ="'.$field->lot.'" qty="'.$field->qty.'" uom="'.$field->uom.'" qty2="'.$field->qty2.'" uom2="'.$field->uom2.'" data-togle="tooltip" title="Pilih Produk"><i  class="fa fa-check"></i> Pilih</a>';
                 $data[] = $row;
             }
             $output = array(
@@ -184,6 +185,8 @@ class Splitlot extends MY_Controller
                     $callback = array('status' => 'failed', 'field' => 'kode_produk', 'message' => 'Data yang akan di Split tidak ditemukan !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                 }else if($sq['lokasi'] != $cek_lc['stock_location']){/// cek lokasi
                     $callback = array('status' => 'failed', 'field' => 'kode_produk',  'message' => 'Lokasi Produk tidak sama / sudah tidak lagi di Lokasi '.$cek_lc['stock_location'].' !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
+                }else if(!empty($sq['reserve_move'])){/// cek apa terpesan oleh dokumen lain atau tidak
+                    $callback = array('status' => 'failed', 'field' => 'kode_produk',  'message' => 'Produk sudah terpesan oleh dokumen lain !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                 }else if($sq['qty'] != $qty){// cek qty yg di post dan yg ter baru
                     $callback = array('status' => 'failed',  'field' => 'qty', 'message' => 'Qty Produk tidak sama dengan Stock yang sekarang !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                 }else if($sq['qty2'] != 0 AND $sq['qty2'] != $qty2){// cek qty2 yg di post dan yg ter baru

@@ -14,6 +14,7 @@
               <th>Grade</th>
               <th>Reff Notes</th>
               <th>Reserve Move</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -44,11 +45,22 @@
                 "data":{"departemen" : "<?php echo $departemen;?>"}
             },
             "columnDefs": [
+              {
+                "targets" : 9,
+                "orderable": false, 
+                "createdCell": function (td, cellData, rowData, row, col) {
+                   var rowId = rowData[8];
+                   if(rowId.includes('SM') == true){  
+                      $(td).html('');
+                   }
+                }, 
+              },
               { 
                 "targets": [0], 
                 "orderable": false, 
               }
             ],
+            
         });
 
   });
