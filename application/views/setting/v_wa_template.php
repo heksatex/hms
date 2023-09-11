@@ -28,13 +28,13 @@
                     <div class="box">
                         <div class="box-body">
                             <div class="col-xs-12 table-responsive">
-                                <table id="tableWaGroup" class="table table-striped">
+                                <table id="tableWaTemplate" class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>WA Group</th>
-                                            <th>Departemen</th>
-                                            <th>Dibuat</th>               
+                                            <th>nama</th>
+                                            <th>Template</th>
+                                            <th>Created At</th>               
                                         </tr>
                                     </thead>
                                 </table>
@@ -51,7 +51,7 @@
 
         <script>
             $(function () {
-                const table = $('#tableWaGroup').DataTable({
+                const table = $('#tableWaTemplate').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
@@ -64,12 +64,12 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('setting/wa_group/get_data') ?>",
+                        "url": "<?php echo site_url('setting/wa_template/get_data') ?>",
                         "type": "POST"
                     },
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0,2],
                             "orderable": false,
                         },
                     ]

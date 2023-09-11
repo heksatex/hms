@@ -32,63 +32,13 @@
 <script src="<?php echo base_url('dist/notify/bootstrap-notify.min.js') ?>"></script>
 <!-- Tags Input -->
 <script src="<?php echo base_url('dist/tags-input/bootstrap-tagsinput.js') ?>"></script>
-
+<script type="module" src="<?php echo site_url('dist/js/main_module.js') ?>"></script>
 
 <script>
-
     $(document).ajaxError(function (event, xhr, options) {
         if (xhr.status === 401) {
-            unblockUI(function () {});
-            bootbox.dialog({
-                title: 'Login',
-                message: '<form id="form-login" class="form-horizontal" name="form-login">\
-                    <input type="text" name="username" id="username" class="form-control" placeholder="Username" autocomplete="off" required autofocus /><br/>\
-                            <input type="password" name="password" id="password" class="form-control" placeholder="Password" autocomplete="off" required autofocus />\
-                            <button type="submit" id="form-login-submit" style="display: block;"></button> \
-                          </form>',
-                buttons: {
-                    ok: {
-                        label: "Login",
-                        className: 'btn-info',
-                        callback: function (result) {
-                            if (result) {
-                                please_wait(function () {});
-                                $.ajax({
-                                    type: "POST",
-                                    dataType: "json",
-                                    url: '<?php echo base_url('login/aksi_login'); ?>',
-                                    data: {
-                                        username: $("#username").val(),
-                                        password: $("#password").val()
-
-                                    },
-                                    beforeSend: function (e) {
-                                        if (e && e.overrideMimeType) {
-                                            e.overrideMimeType("application/json;charset=UTF-8");
-                                        }
-                                    }, success: function (data) {
-                                        unblockUI(function () {
-                                            setTimeout(function () {
-                                                alert_notify(data.icon, data.message, data.type, function () {}, 1000);
-                                            });
-                                        });
-                                    }, error: function (xhr, ajaxOptions, thrownError) {
-                                        unblockUI(function () {
-                                            setTimeout(function () {
-                                                alert_notify(data.icon, data.message, data.type, function () {}, 1000);
-                                            });
-                                        });
-                                    }
-
-                                });
-                            }
-
-                        }
-                    }
-                }
-
-            });
-            $('#form-login').submit(false);
+            loginFunc('<?php echo base_url('login/aksi_login'); ?>');
+//            $('#form-login').submit(false);
         }
 
     });</script>
