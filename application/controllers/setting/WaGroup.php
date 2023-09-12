@@ -130,7 +130,7 @@ class WaGroup extends MY_Controller {
             if (!$this->m_WaGroup->finishTransaction()) {
                 throw new \Exception('Gagal Merubah Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $wagroup, 'Update', 'Edit WA Group ' . $wagroup, $username);
+            $this->_module->gen_history($sub_menu, $wagroup, 'Edit', 'Edit WA Group ' . $wagroup, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil')));

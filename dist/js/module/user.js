@@ -5,7 +5,7 @@ const login = function (urls) {
         message: '<form id="form-login" class="form-horizontal" name="form-login">\
                     <input type="text" name="username" id="username" class="form-control" placeholder="Username" autocomplete="off" required /><br/>\
                             <input type="password" name="password" id="password" class="form-control" placeholder="Password" autocomplete="off" required />\
-                            <button type="submit" id="form-login-submit" style="display: block;"></button> \
+                            <button type="submit" id="form-login-submit" style="display: none;"></button> \
                           </form>',
         buttons: {
             ok: {
