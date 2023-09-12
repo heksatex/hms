@@ -49,7 +49,7 @@ class Login extends CI_Controller {
                 $this->session->set_userdata($data_session);
                 $this->output->set_status_header(200)
                         ->set_content_type('application/json', 'utf-8')
-                        ->set_output(json_encode(array('message' => 'Berhasil')));
+                        ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
             } catch (Exception $ex) {
                 $this->output->set_status_header(500)
                         ->set_content_type('application/json', 'utf-8')

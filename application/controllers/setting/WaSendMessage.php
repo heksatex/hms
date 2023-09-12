@@ -18,8 +18,6 @@ class WaSendMessage extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'MUSR';
-//       $das = $this->Send_Message_WA->sendMessageToUser('tester',['{saidi}'=>'sadidi'],'achramdan');
-        $this->wa_message->sendMessageToGroupByDepth('tester',['{saidi}'=>'Tester'],['FIN','CST']);
         return $this->load->view('setting/v_wa_send_message', $data);
     }
 
