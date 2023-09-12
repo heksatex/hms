@@ -75,3 +75,6 @@ $route['setting/wa_template/edit/([a-zA-Z0-9]+)']['GET'] = 'setting/WaTemplate/e
 $route['setting/wa_template/get_data']['POST'] = 'setting/WaTemplate/getData';
 $route['setting/wa_template/simpan']['POST'] = 'setting/WaTemplate/simpan';
 $route['setting/wa_template/update']['POST'] = 'setting/WaTemplate/update';
+//WA Send Message
+$route['setting/wa_send_message']['GET'] = 'setting/WaSendMessage/index';
+$route['setting/wa_send_message/get_data']['POST'] = 'setting/WaSendMessage/getData';
