@@ -61,3 +61,17 @@ $route['lab']			= 'lab/lab';
 $route['sales']			= 'sales/sales';
 $route['setting']	 	= 'setting/setting';
 $route['report']	 	= 'report/report';
+//WA Group
+$route['setting/wa_group']['GET'] = 'setting/WaGroup/index';
+$route['setting/wa_group/add']['GET'] = 'setting/WaGroup/add';
+$route['setting/wa_group/edit/([a-zA-Z0-9]+)']['GET'] = 'setting/WaGroup/edit/$1';
+$route['setting/wa_group/update']['POST'] = 'setting/WaGroup/update';
+$route['setting/wa_group/simpan']['POST'] = 'setting/WaGroup/simpan';
+$route['setting/wa_group/get_data']['POST'] = 'setting/WaGroup/getData';
+//WA Template
+$route['setting/wa_template']['GET'] = 'setting/WaTemplate/index';
+$route['setting/wa_template/add']['GET'] = 'setting/WaTemplate/add';
+$route['setting/wa_template/edit/([a-zA-Z0-9]+)']['GET'] = 'setting/WaTemplate/edit/$1';
+$route['setting/wa_template/get_data']['POST'] = 'setting/WaTemplate/getData';
+$route['setting/wa_template/simpan']['POST'] = 'setting/WaTemplate/simpan';
+$route['setting/wa_template/update']['POST'] = 'setting/WaTemplate/update';
