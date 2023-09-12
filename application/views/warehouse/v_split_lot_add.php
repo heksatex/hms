@@ -371,134 +371,150 @@
 	  	document.getElementById("table_items").deleteRow(i);
 	}
 
-
-  //klik button simpan
-  $(document).on("click", "#btn-generate", function(e){
-
-    e.preventDefault();
-   
-    let tambah      = true;
-    let items_split = false;
-    let quant_id    = $('#quant_id').val();
-    let kode_produk = $('#kode_produk').val();
-    let nama_produk = $('#nama_produk').val();
-    let lot         = $('#lot').val();
-    let qty         = $('#qty').val();
-    let uom_qty     = $('#uom_qty').val();
-    let qty2        = $('#qty2').val();
-    let uom_qty2    = $('#uom_qty2').val();    
-    let departemen  = $('#departemen').val();
-    let note        = $('#note').val();
-    let arr         = new Array();
-
-    if(departemen == ''){
-        alert_notify('fa fa-warning','Departemen Harus dipilih !','danger',function(){});
-    }else if(kode_produk == ''){
-        alert_notify('fa fa-warning','Kode Produk tidak boleh kosong !','danger',function(){});
-    }else if(nama_produk == ''){
-        alert_notify('fa fa-warning','Nama Produk tidak boleh kosong !','danger',function(){});
-    }else if(lot == ''){
-        alert_notify('fa fa-warning','Barcode / Lot tidak boleh kosong !','danger',function(){});
-    }else if(qty == '' || qty == 0){
-        alert_notify('fa fa-warning','Qty1 tidak boleh kosong !','danger',function(){});
-    }else if(uom_qty == ''){
-        alert_notify('fa fa-warning','Uom Qty1 tidak boleh kosong !','danger',function(){});
-    }else{
-
-
-        $('.tbl_qty').each(function(index,value){
-            if ($(value).val()!=="") {
-                arr.push({
-                    qty1        : $(value).parents("tr").find("#tbl_qty1").val(),
-                    uom_qty1    : $(value).parents("tr").find("#tbl_uom").val(),
-                    qty2        : $(value).parents("tr").find("#tbl_qty2").val(),
-                    uom_qty2    : $(value).parents("tr").find("#tbl_uom2").val(),
-                });
-                items_split = true;
-            }
-        });
-
-
-        // cek tbl_qty
-        $('.tbl_qty').each(function(index,value){
-			if($(value).val()==''){
-                alert_notify('fa fa-warning','Qty1 tidak boleh kosong !','danger',function(){});
-                $(value).addClass('error'); 
-		   	  tambah = false;
-			}else{
-			    $(value).removeClass('error'); 
-			}
-		});	
-
-        $('.tbl_qty2').each(function(index,value){
-            // alert($("#qty2").val());
-            qty2_stock = parseFloat($("#qty2").val());
-			if($(value).val() === "" && (qty2_stock !==0) ){
-                alert_notify('fa fa-warning','Qty2 tidak boleh kosong !','danger',function(){});
-                $(value).addClass('error'); 
-                tambah = false;
-			}else{
-			    $(value).removeClass('error'); 
-			}
-		});	
-
-        if(tambah){
+    //klik button Generate
+    $(document).on("click", "#btn-generate", function(e){
         
-            if(items_split == false ){
-                alert_notify('fa fa-warning','Split Items masih Kosong  !','danger',function(){});
-            }else{
+        e.preventDefault();
+   
+        let tambah      = true;
+        let items_split = false;
+        let quant_id    = $('#quant_id').val();
+        let kode_produk = $('#kode_produk').val();
+        let nama_produk = $('#nama_produk').val();
+        let lot         = $('#lot').val();
+        let qty         = $('#qty').val();
+        let uom_qty     = $('#uom_qty').val();
+        let qty2        = $('#qty2').val();
+        let uom_qty2    = $('#uom_qty2').val();    
+        let departemen  = $('#departemen').val();
+        let note        = $('#note').val();
+        let arr         = new Array();
 
-                $.ajax({
-                    type: "POST",
-                    dataType: "json",
-                    url :'<?php echo base_url('warehouse/splitlot/generate_split')?>',
-                    beforeSend: function(e) {
-                        please_wait(function(){});
-                        $('#btn-generate').button('loading');
-                        if(e && e.overrideMimeType) {
-                            e.overrideMimeType("application/json;charset=UTF-8");
+        if(departemen == ''){
+            alert_notify('fa fa-warning','Departemen Harus dipilih !','danger',function(){});
+        }else if(kode_produk == ''){
+            alert_notify('fa fa-warning','Kode Produk tidak boleh kosong !','danger',function(){});
+        }else if(nama_produk == ''){
+            alert_notify('fa fa-warning','Nama Produk tidak boleh kosong !','danger',function(){});
+        }else if(lot == ''){
+            alert_notify('fa fa-warning','Barcode / Lot tidak boleh kosong !','danger',function(){});
+        }else if(qty == '' || qty == 0){
+            alert_notify('fa fa-warning','Qty1 tidak boleh kosong !','danger',function(){});
+        }else if(uom_qty == ''){
+            alert_notify('fa fa-warning','Uom Qty1 tidak boleh kosong !','danger',function(){});
+        }else{
+
+
+            $('.tbl_qty').each(function(index,value){
+                if ($(value).val()!=="") {
+                    arr.push({
+                        qty1        : $(value).parents("tr").find("#tbl_qty1").val(),
+                        uom_qty1    : $(value).parents("tr").find("#tbl_uom").val(),
+                        qty2        : $(value).parents("tr").find("#tbl_qty2").val(),
+                        uom_qty2    : $(value).parents("tr").find("#tbl_uom2").val(),
+                    });
+                    items_split = true;
+                }
+            });
+
+
+            // cek tbl_qty
+            $('.tbl_qty').each(function(index,value){
+                if($(value).val()==''){
+                    alert_notify('fa fa-warning','Qty1 tidak boleh kosong !','danger',function(){});
+                    $(value).addClass('error'); 
+                        tambah = false;
+                }else{
+                    $(value).removeClass('error'); 
+                }
+            });	
+
+            $('.tbl_qty2').each(function(index,value){
+                // alert($("#qty2").val());
+                qty2_stock = parseFloat($("#qty2").val());
+                if($(value).val() === "" && (qty2_stock !==0) ){
+                    alert_notify('fa fa-warning','Qty2 tidak boleh kosong !','danger',function(){});
+                    $(value).addClass('error'); 
+                    tambah = false;
+                }else{
+                    $(value).removeClass('error'); 
+                }
+            });	
+
+            if(tambah){
+        
+                if(items_split == false ){
+                    alert_notify('fa fa-warning','Split Items masih Kosong  !','danger',function(){});
+                }else{
+
+                    bootbox.dialog({
+                    message: "Apakah Anda yakin ingin Generate Data ?",
+                    title  : "<i class='fa fa-gear'></i> Generate Data !",
+                    buttons: {
+                        danger: {
+                            label    : "Yes ",
+                            className: "btn-primary btn-sm",
+                            callback : function() {
+                                please_wait(function(){});
+                                $('#btn-generate').button('loading');
+
+                                $.ajax({
+                                    type: "POST",
+                                    dataType: "json",
+                                    url :'<?php echo base_url('warehouse/splitlot/generate_split')?>',
+                                    beforeSend: function(e) {
+                                        if(e && e.overrideMimeType) {
+                                            e.overrideMimeType("application/json;charset=UTF-8");
+                                        }
+                                    },
+                                    data: {lot:lot, quant_id:quant_id, kode_produk:kode_produk, nama_produk:nama_produk, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, departemen:departemen, note:note, data_split: JSON.stringify(arr),
+                                    },success: function(data){
+                                        if(data.sesi == "habis"){
+                                            //alert jika session habis
+                                            alert_modal_warning(data.message);
+                                            window.location.replace('index');
+                                        }else if(data.status == "failed"){
+                                            //jika ada form belum keiisi
+                                            unblockUI( function() {
+                                                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                                            });
+                                            document.getElementById(data.field).focus();
+                                            
+                                        }else{
+                                        //jika berhasil disimpan
+                                            unblockUI( function() {
+                                                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){
+                                                    window.location.replace('edit/'+data.isi);
+                                                }); }, 1000);
+                                            });
+                                        }
+                                        $('#btn-generate').button('reset');
+
+                                    },error: function (xhr, ajaxOptions, thrownError) {
+                                        alert(xhr.responseText);
+                                        unblockUI( function(){});
+                                        $('#btn-generate').button('reset');
+
+                                    }
+                                });
+                           
+                            }
+                        },
+                        success: {
+                            label    : "No",
+                            className: "btn-default  btn-sm",
+                            callback : function() {
+                                $('.bootbox').modal('hide');
+                            }
                         }
-                    },
-                    data: {lot:lot, quant_id:quant_id, kode_produk:kode_produk, nama_produk:nama_produk, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, departemen:departemen, note:note, data_split: JSON.stringify(arr),
-                    },success: function(data){
-                        if(data.sesi == "habis"){
-                            //alert jika session habis
-                            alert_modal_warning(data.message);
-                            window.location.replace('index');
-                        }else if(data.status == "failed"){
-                            //jika ada form belum keiisi
-                            unblockUI( function() {
-                                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                            });
-                            document.getElementById(data.field).focus();
-                            
-                        }else{
-                        //jika berhasil disimpan
-                            unblockUI( function() {
-                                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){
-                                    window.location.replace('edit/'+data.isi);
-                                }); }, 1000);
-                            });
-                        }
-                        $('#btn-generate').button('reset');
-
-                    },error: function (xhr, ajaxOptions, thrownError) {
-                        alert(xhr.responseText);
-                        unblockUI( function(){});
-                        $('#btn-generate').button('reset');
-
                     }
-                });
+                    });
+                }
             }
-
         }
+    });
 
 
-    }
-    
-
-  
-  });
 
    
 </script>

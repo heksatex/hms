@@ -162,7 +162,9 @@
                             <?php
                               $no = 1;
                               foreach ($detail as $row) {
-                                if($row->status == 'cancel') $color = 'red'; else $color = '';
+                                if($row->status == 'cancel') $color = 'red';
+                                else if($row->status == 'ng') $color = 'blue';
+                                else $color = '';
                             ?>
                               <tr class="num" style="color:<?php echo $color;?>">
                                 <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order ?>" ></td>
@@ -183,12 +185,32 @@
                                 <td><?php echo $row->route_co?></td>
                                 <td><?php echo $row->reff_notes?></td>
                                 <td><?php echo $row->reff_notes_mkt?></td>
-                                <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
+                                <td style="min-width:100px;"><?php 
+                                    if($row->status == 'ng' or $row->status == 'generated'){
+                                        ?>
+                                    <select class="form-control input-sm status_cod" id="status_cod" name="status_cod" cod="<?php echo $row->kode_co;?>" row_order="<?php echo $row->row_order;?>">
+                                          <?php 
+                                                $list_status_cod = array( array('kode' => 'generated', 'nama'=> 'Generated'), array( 'kode'=>'ng', 'nama'=>'Not Good'));
+                                                foreach($list_status_cod as $stats){
+                                                  if($row->status == $stats['kode']){
+                                                    echo '<option value="'.$stats['kode'].'" selected>'.$stats['nama'].'</option>';
+                                                  }else{
+                                                    echo '<option value="'.$stats['kode'].'">'.$stats['nama'].'</option>';
+                                                  }
+                                                }
+                                          ?>
+                                    </select>
+                                    <?php
+                                    }else {
+                                      echo $row->nama_status;
+                                    }
+                                     ?>
+                                </td>
                                 <td width="50px"><i class="box-color" style="background-color:<?php echo $row->kode_warna; ?>"></i></td>
                                 <td  align="center" >
                             
                                 <?php
-                                      if($row->status == 'generated' OR $row->status == 'cancel'){?>
+                                      if($row->status == 'generated' OR $row->status == 'cancel' or $row->status == 'ng'){?>
                                  <!--View Detail yang terbentuk-->
                                        <a href="javascript:void(0)" data-toggle="tooltip" title="Details" onclick="view_detail('<?php echo $colororder->kode_sc; ?>','<?php echo $row->kode_co; ?>','<?php echo $row->kode_produk; ?>','<?php echo htmlentities($row->nama_produk); ?>','<?php echo $row->row_order?>','<?php echo $row->ow?>','<?php echo $row->route_co?>')"><span class="glyphicon  glyphicon-share"></span></a>
 
@@ -202,7 +224,7 @@
                                   <!-- button Genarate dan batal CO -->
                                   <?php if($row->status == 'draft' AND $akses_menu > 0){?>
                                     <button type="button" class="btn btn-primary btn-xs btn-generate" title="Generate" data-toggle="tooltip" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Generate</button>
-                                  <?php }else if($row->status == 'generated' AND $akses_menu > 0){?>
+                                  <?php }else if(($row->status == 'generated' or $row->status == 'ng') AND $akses_menu > 0){?>
                                      <button type="button" class="btn btn-danger btn-xs btn-cancel-items width-btn" title="Batal Items" data-toggle="tooltip" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Batal</button>
                                   <?php }?>
                                 </td>
@@ -481,7 +503,7 @@
                   },
                   error: function (xhr, ajaxOptions, thrownError){
                     alert('Error data');
-                    alert(xhr.responseText);
+                    // alert(xhr.responseText);
                     refresh_color_order();
                     unblockUI( function(){});
                   }
@@ -501,48 +523,39 @@
 
     }); 
 
+  // untuk ubah status color order items generete / not good
+  $(document).on("change", ".status_cod", function(){
 
-/*
-    $("#btn-generate").unbind( "click" );
-    $('#btn-generate').click(function(){
-      $('#btn-generate').button('loading');
-      please_wait(function(){});
-      var baseUrl = '<?php echo base_url(); ?>';
-      var message = 'Waktu Anda Telah Habis !';
-      $.ajax({
-         dataType: "json",
-         type: "POST",
-         url :'<?php echo base_url('ppic/colororder/generate')?>',
-         data: {kode_co    : $('#kode_co').val()},
-         success: function(data){
+    var kode_co     = $(this).attr('cod');
+    var row_order   = $(this).attr('row_order');
+    var value       = $(this).val();
+    $.ajax({
+          dataType: "JSON",
+          url : '<?php echo site_url('ppic/colororder/update_status_color_order_details') ?>',
+          type: "POST",
+          data: {kode_co      : kode_co, 
+                row_order     : row_order,
+                value         : value},
+          success: function(data){
             if(data.sesi=='habis'){
               //alert jika session habis
               alert_modal_warning(data.message);
-              window.location = baseUrl;//replace ke halaman login
-
-            }else if(data.status=='kosong'){
-              //jika color details masih kosong
-              unblockUI(function(){
-                 alert_modal_warning(data.message);
-              });
+              window.location.replace('../index');
+            }else if(data.status == 'failed'){
               refresh_color_order();
+              alert_modal_warning(data.message);
             }else{
-              unblockUI( function() {
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
-              });
               refresh_color_order();
+              alert_notify(data.icon,data.message,data.type,function(){});
             }
-            $('#btn-generate').button('reset');
-
-          },error: function (xhr, ajaxOptions, thrownError) {
-            //alert(xhr.responseText);
-            alert('Error Generate Data');
-            unblockUI( function(){});
-            $('#btn-generate').button('reset');
+          },
+          error: function (xhr, ajaxOptions, thrownError){
+            alert('Error data');
           }
       });
-    });
-    */
+        
+
+  });
 
 
   //edit color details

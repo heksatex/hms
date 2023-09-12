@@ -865,7 +865,7 @@ class Colororder extends MY_Controller
 
                       $cek_details = $this->m_colorOrder->cek_status_color_order_items($kode_co,'')->num_rows(); 
 
-                      $where_status       = "AND status NOT IN ('generated','cancel')";
+                      $where_status       = "AND status NOT IN ('generated','cancel','ng')";
                       $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
 
                       if($cek_details == 0  ){
@@ -1201,8 +1201,8 @@ class Colororder extends MY_Controller
                         $where_status       = "AND status NOT IN ('cancel')";
                         $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
 
-                        $where_status2       = "AND status NOT IN ('generated','cancel')";
-                        $cek_details_status2 = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
+                        $where_status2       = "AND status IN ('draft')";
+                        $cek_details_status2 = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status2)->num_rows();
 
                         if($cek_details > 0  ){
                
@@ -1210,7 +1210,9 @@ class Colororder extends MY_Controller
                             $this->m_colorOrder->ubah_status_color_order($kode_co,'cancel');
                           }else if($cek_details_status2 > 0){
                             $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
-                          } 
+                          }else{
+                            $this->m_colorOrder->ubah_status_color_order($kode_co,'done');
+                          }
                         }
 
                   }//end if batal_items == true
@@ -1290,16 +1292,16 @@ class Colororder extends MY_Controller
 
           $cek_details = $this->m_colorOrder->cek_status_color_order_items($kode_co,'')->num_rows();
 
-          $where_status       = "AND status NOT IN ('generated')";
+          $where_status       = "AND status IN ('generated','ng')";
           $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
 
-          $where_status2       = "AND status NOT IN ('draft','generated')";
+          $where_status2       = "AND status NOT IN ('cancel','generated','ng')";
           $cek_details_status2 = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status2)->num_rows();
 
           if($cek_details == 0  ){
               $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
           }else if($cek_details > 0){
-              if($cek_details_status == 0){
+              if($cek_details_status > 0){
                   $this->m_colorOrder->ubah_status_color_order($kode_co,'done');
               }else if($cek_details_status2 == 0){
                   $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
@@ -1397,6 +1399,78 @@ class Colororder extends MY_Controller
             }
             echo json_encode($callback);
         }
+
+    }
+
+    public function update_status_color_order_details()
+    {
+        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+            // session habis
+            $callback = array('status' => 'failed','message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+        }else{
+
+            $sub_menu  = $this->uri->segment(2);
+            $username  = addslashes($this->session->userdata('username'));
+
+            $kode_co    = addslashes($this->input->post('kode_co'));
+            $row_order  = $this->input->post('row_order');
+            $status_cod = addslashes($this->input->post('value'));// generated / ng (not good)
+
+            
+            if(empty($kode_co) OR empty($row_order) OR empty($status_cod)){
+              $callback = array('status' => 'failed','message' => 'Maaf, status Gagal Dirubah !', 'icon' =>'fa fa-check', 'type' => 'danger');
+            }else{
+
+              $cek_status = $this->m_colorOrder->cek_status_color_order_details_by_row($kode_co,$row_order)->row_array();
+
+              if($cek_status['status'] == 'draft'){
+                $callback = array('status' => 'failed','message' => 'Maaf, Status Product masih Draft !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
+              }else if($cek_status['status'] == 'cancel'){
+                $callback = array('status' => 'failed','message' => 'Maaf, Status Product sudah dibatalkan !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
+              }else{
+
+                //update detail items
+                $this->m_colorOrder->update_status_color_order_items($kode_co,$row_order,$status_cod);
+                
+                $status_cod_lama = $this->_module->get_mst_status_by_kode($cek_status['status']);
+                $status_cod_baru = $this->_module->get_mst_status_by_kode($status_cod);
+
+                $cek_details = $this->m_colorOrder->cek_status_color_order_items($kode_co,'')->num_rows();
+
+                $where_status       = "AND status NOT IN ('generated','ng')";
+                $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
+      
+                $where_status2       = "AND status NOT IN ('draft','generated','ng')";
+                $cek_details_status2 = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status2)->num_rows();
+      
+                if($cek_details == 0  ){
+                    $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
+                }else if($cek_details > 0){
+                    if($cek_details_status == 0){
+                        $this->m_colorOrder->ubah_status_color_order($kode_co,'done');
+                    }else if($cek_details_status2 == 0){
+                        $this->m_colorOrder->ubah_status_color_order($kode_co,'draft');
+                    }else{
+                        $this->m_colorOrder->ubah_status_color_order($kode_co,'cancel');
+                    }
+                }
+
+                $jenis_log   = "edit";
+                $note_log    = "Edit Status Details | ".$row_order." <br>".$status_cod_lama." -> ".$status_cod_baru;
+                $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, $note_log, $username);
+                $callback = array('status' => 'success', 'message'=>'Data Berhasil diubah !', 'icon' => 'fa fa-check', 'type'=>'success');
+                
+              }
+
+
+            }
+
+
+        }
+
+        echo json_encode($callback);
 
     }
 
