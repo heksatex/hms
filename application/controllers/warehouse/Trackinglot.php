@@ -150,6 +150,32 @@ class Trackinglot extends MY_Controller
                                     );
                 }
 
+                // reproses
+                $rep = $this->m_trackingLot->get_reproses_by_lot($txtlot);
+                foreach($rep as $reps){
+                  $kode_encrypt = encrypt_url($reps->kode_reproses);
+                  $result_record[] = array('tanggal' => $reps->tanggal, 
+                                    'kode'        => $reps->kode_reproses,
+                                    'link'        => 'ppic/reproses/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Reproses : Jenis '.$reps->nama_jenis.'  di  '.$reps->lokasi_asal.'. dari Lot '.$reps->lot.' menjadi Lot '.$reps->lot_new,
+                                    'status'      => $reps->nama_status,
+                                    'user'        => $reps->nama_user,
+                                  );
+                }
+
+                // SPLIT
+                $split = $this->m_trackingLot->get_split_by_lot($txtlot);
+                foreach($split as $splits){
+                  $kode_encrypt = encrypt_url($splits->kode_split);
+                  $result_record[] = array('tanggal' => $splits->tanggal, 
+                                    'kode'        => $splits->kode_split,
+                                    'link'        => 'warehouse/splitlot/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Lot ini di Split di '.$splits->nama_departemen.' Sebanyak '.$splits->total_split,
+                                    'status'      => '-',
+                                    'user'        => $splits->nama_user,
+                                  );
+                }
+
 
                 // arsort($result_record);
                 $result_record  =  $this->urutkan($result_record);
