@@ -119,11 +119,7 @@
                                         users: uclass,
                                         aktif: valUpdate
                                     }, success: function (data) {
-                                        if (data.sesi == "habis") {
-                                            //alert jika session habis
-                                            alert_modal_warning(data.message);
-                                            window.location.replace('index');
-                                        } else if (data.status == "failed") {
+                                       if (data.status == "failed") {
                                             //jika ada form belum keiisi
                                             unblockUI(function () {
                                                 setTimeout(function () {
@@ -143,7 +139,7 @@
                                         }
 
                                     }, error: function (xhr, ajaxOptions, thrownError) {
-                                        alert(xhr.responseText);
+                                        loginFunc('<?php echo base_url('login/aksi_login'); ?>');
                                         unblockUI(function () {});
                                         $("."+uclass).trigger('switchChange');
                                     }

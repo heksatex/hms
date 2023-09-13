@@ -21,7 +21,7 @@ class Wa_message {
         $this->model->load->model("m_WaTemplate");
         $this->model->load->model("m_user");
     }
-    
+
     public function sendMessageToUser(string $templateName, array $value, string $username): bool {
 
         $this->val = $value;
@@ -53,30 +53,67 @@ class Wa_message {
         if (!$this->getTemplate($templateName)) {
             return false;
         }
+        $this->setUserByDept($deptID);
         foreach ($this->user as $key => $value) {
             $this->save($value->nama . ';' . $value->telepon_wa);
         }
-        true;
+        return true;
+    }
+
+    public function sendMessageToGroup(string $templateName, array $value, array $group): bool {
+
+        $this->val = $value;
+        if (!$this->getTemplate($templateName)) {
+            return false;
+        }
+        foreach ($group as $key => $value) {
+            $this->setGroup($value);
+            $this->save($this->group->wa_group, 'togroup');
+        }
+
+        return true;
+    }
+    
+    public function sendMessageToGroupByDepth(string $templateName, array $value, array $depthkode): bool {
+
+        $this->val = $value;
+        if (!$this->getTemplate($templateName)) {
+            return false;
+        }
+        $this->setGroupByDept($depthkode);
+        foreach ($this->group as $key => $value) {
+            $this->save($value->wa_group, 'togroup');
+        }
+
+        return true;
     }
 
     protected function getTemplate($templateName): bool {
         $data = $this->model->m_WaTemplate->getDataByName($templateName);
-        
+
         if (!is_object($data)) {
             return false;
         }
-        
+
         $this->template = $data->template;
         return true;
     }
 
-    protected function setToTemplate():string {
+    protected function setToTemplate(): string {
         return strtr($this->template, $this->val);
     }
 
     protected function setUser($username) {
-        
+
         $this->user = $this->model->m_user->get_user_by_username($username);
+    }
+
+    protected function setGroup($group) {
+        $this->group = $this->model->m_WaGroup->getDataByNama($group);
+    }
+
+    protected function setGroupByDept(array $depth) {
+        $this->group = $this->model->m_WaGroup->getDataByDepth($depth);
     }
 
     protected function setUserByDept($dept) {

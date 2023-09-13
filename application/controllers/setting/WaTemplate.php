@@ -126,7 +126,7 @@ class WaTemplate extends MY_Controller {
             if (!$this->m_WaTemplate->update(['id'=>$kode_decrypt], ['nama'=>$nama,'template'=>$template])) {
                 throw new \Exception("Gagal Merubah Data template",500);
             }
-            $this->_module->gen_history($sub_menu, $nama, 'Update', 'Mengubah Template WA ' . $nama . ' | ' . $template, $username);
+            $this->_module->gen_history($sub_menu, $nama, 'Edit', 'Mengubah Template WA ' . $nama . ' | ' . $template, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil')));

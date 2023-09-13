@@ -12,10 +12,11 @@ class M_WaGroup extends CI_Model {
     var $column_search = array('wg.wa_group');
     var $order = array('wg.wa_group', 'asc');
     var $table = "wa_group";
+
     protected function getDataQuery() {
         $this->db->select('wg.*,b.kode');
         $this->db->from('wa_group as wg');
-        $this->db->join('(select wa_group_id, GROUP_CONCAT(department_kode) as kode from wa_group_departemen GROUP BY wa_group_id) as b','b.wa_group_id = wg.id','LEFT');
+        $this->db->join('(select wa_group_id, GROUP_CONCAT(department_kode) as kode from wa_group_departemen GROUP BY wa_group_id) as b', 'b.wa_group_id = wg.id', 'LEFT');
 
         foreach ($this->column_search as $key => $value) {
             if ($_POST["search"]["value"]) {
@@ -48,12 +49,25 @@ class M_WaGroup extends CI_Model {
     }
 
     public function getDataByID($id) {
-        
+
         $this->db->from('wa_group as wg');
-        $this->db->where('wg.id',$id);
+        $this->db->where('wg.id', $id);
         //$this->db->query('select wg.*,kode from ' . $this->table . ' as wg where wg.id = ' . $id);
-        $this->db->join('(select wa_group_id, GROUP_CONCAT(department_kode) as kode from wa_group_departemen GROUP BY wa_group_id) as b','b.wa_group_id = wg.id','LEFT');
+        $this->db->join('(select wa_group_id, GROUP_CONCAT(department_kode) as kode from wa_group_departemen GROUP BY wa_group_id) as b', 'b.wa_group_id = wg.id', 'LEFT');
         return $this->db->select('wg.*,b.kode')->get()->row();
+    }
+
+    public function getDataByNama($group) {
+        $this->db->from('wa_group');
+        $this->db->where('wa_group', $group);
+        return $this->db->select('*')->get()->row();
+    }
+
+    public function getDataByDepth(array $kodedepth) {
+        $this->db->from('wa_group as a');
+        $this->db->join('wa_group_departemen as b','a.id = b.wa_group_id');
+        $this->db->where_in('department_kode', $kodedepth);
+        return $this->db->select('*')->get()->result();
     }
 
     public function getData() {
