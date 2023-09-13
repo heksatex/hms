@@ -638,7 +638,7 @@ class Procurementpurchase extends MY_Controller
                 //unlock table
                 $this->_module->unlock_tabel();
                 
-                $jenis_log   = "generated";
+                $jenis_log   = "generate";
                 $note_log    = "Generated | ".$kode;
                 $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
                 
