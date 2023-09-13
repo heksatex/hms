@@ -157,7 +157,7 @@
                               <th class="style" width="80px">Uom</th>
                               <th class="style" style="width:100px;" >Qty2</th>
                               <th class="style" width="80px">Uom2</th>
-                              <th class="style" width="100px">Lot New</th>
+                              <th class="style" width="100px">Lot Baru</th>
                               <th class="style" width="50px"></th>
                             </tr>
                           </thead>
