@@ -721,7 +721,7 @@ class Reproses extends MY_Controller
             }
           
             // update reproses
-            $sql_update_status_reproses = "UPDATE reproses SET status = '".$status_done."'  WHERE kode_reproses = '".$kode_reproses."' ";
+            $sql_update_status_reproses = "UPDATE reproses SET status = '".$status_done."', tanggal = '".$tanggal."'  WHERE kode_reproses = '".$kode_reproses."' ";
             $this->_module->update_reff_batch($sql_update_status_reproses);
 
             if(!empty($sql_log_history_batch)){
@@ -729,7 +729,8 @@ class Reproses extends MY_Controller
               $this->_module->simpan_log_history_batch($sql_log_history_batch);
             }
 
-            $jenis_log   = "generated";
+
+            $jenis_log   = "generate";
             $note_log    = "Generate Reproses | ".$kode_reproses;
             $this->_module->gen_history($sub_menu, $kode_reproses, $jenis_log, $note_log, $username);
             $callback = array('status'=>'success',  'message' => 'Reproses Berhasil !',  'icon' =>'fa fa-check', 'type' => 'success'); 
