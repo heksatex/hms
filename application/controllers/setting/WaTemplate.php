@@ -45,12 +45,12 @@ class WaTemplate extends MY_Controller {
     }
 
     public function index() {
-        $data['id_dept'] = 'MUSR';
+        $data['id_dept'] = 'MWT';
         return $this->load->view('setting/v_wa_template', $data);
     }
 
     public function add() {
-        $data['id_dept'] = 'MUSR';
+        $data['id_dept'] = 'MWT';
         return $this->load->view('setting/v_wa_template_add', $data);
     }
     
@@ -62,7 +62,7 @@ class WaTemplate extends MY_Controller {
             }
             $data['template'] = $this->m_WaTemplate->getDataByID($kode_decrypt);
             $data["id"] = $id;
-            $data['id_dept'] = 'MUSR';
+            $data['id_dept'] = 'MWT';
             $data['mms'] = $this->_module->get_data_mms_for_log_history($data['id_dept']);
             return $this->load->view('setting/v_wa_template_edit', $data);
         } catch (Exception $ex) {
@@ -94,7 +94,7 @@ class WaTemplate extends MY_Controller {
             $this->_module->gen_history($sub_menu, $nama, 'create', 'Membuat Template WA ' . $nama . ' | ' . $template, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil')));
+                    ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
             $this->output->set_status_header(500)
@@ -129,7 +129,7 @@ class WaTemplate extends MY_Controller {
             $this->_module->gen_history($sub_menu, $nama, 'Edit', 'Mengubah Template WA ' . $nama . ' | ' . $template, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil')));
+                    ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')

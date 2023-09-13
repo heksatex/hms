@@ -94,7 +94,7 @@
 
                     "columnDefs": [
                         {
-                            "targets": [0,6],
+                            "targets": [0, 6],
                             "orderable": false,
                         },
                     ],
@@ -119,13 +119,13 @@
                                         users: uclass,
                                         aktif: valUpdate
                                     }, success: function (data) {
-                                       if (data.status == "failed") {
+                                        if (data.status == "failed") {
                                             //jika ada form belum keiisi
                                             unblockUI(function () {
                                                 setTimeout(function () {
                                                     alert_notify(data.icon, data.message, data.type, function () {});
                                                 }, 1000);
-                                                $("."+uclass).trigger('switchChange');
+                                                $("." + uclass).trigger('switchChange');
                                             });
 
                                         } else {
@@ -134,14 +134,17 @@
                                                 setTimeout(function () {
                                                     alert_notify(data.icon, data.message, data.type, function () {});
                                                 }, 1000);
-                                                 $("."+uclass).val(valUpdate)
+                                                $("." + uclass).val(valUpdate)
                                             });
                                         }
 
                                     }, error: function (xhr, ajaxOptions, thrownError) {
-                                        loginFunc('<?php echo base_url('login/aksi_login'); ?>');
+                                        if (xhr.status === 401) {
+
+                                            loginFunc('<?php echo base_url('login/aksi_login'); ?>');
+                                        }
                                         unblockUI(function () {});
-                                        $("."+uclass).trigger('switchChange');
+                                        $("." + uclass).trigger('switchChange');
                                     }
                                 });
 //                                $("."+test).trigger('switchChange')
