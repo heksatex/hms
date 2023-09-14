@@ -43,9 +43,11 @@ class M_WaScheduleMessage extends CI_Model {
         return $this->db->insert_id() ?? null;
     }
 
-    public function update($id, array $data) {
+    public function update($id, $pesan, $waktu_kirim) {
         $this->db->where('id', $id);
-        $this->db->update($this->table, $data);
+        $this->db->set('message', $pesan);
+        $this->db->set('send_time', $waktu_kirim);
+        $this->db->update($this->table);
         return is_array($this->db->error());
     }
 
@@ -65,9 +67,12 @@ class M_WaScheduleMessage extends CI_Model {
         return is_array($this->db->error());
     }
 
+    public function deleteSchedule($id) {
+        $this->db->query('delete from wa_schedule_message where id =' . $id);
+    }
+
     public function deleteDays($id) {
         $this->db->query('delete from wa_schedule_message_days where wa_schedule_message_id =' . $id);
-        ;
     }
 
     public function deleteGroup($id) {

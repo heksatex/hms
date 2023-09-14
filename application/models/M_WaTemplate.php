@@ -7,7 +7,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
  */
 
 class M_WaTemplate extends CI_Model {
-    var $column_order = array(null, 'wt.nama', 'wt.created_at');
+    var $column_order = array(null, 'wt.nama', 'wt.template','wt.created_at');
     var $column_search = array('wt.nama');
     var $order = array('wt.created_at', 'asc');
     var $table = "wa_template";
