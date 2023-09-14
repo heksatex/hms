@@ -232,12 +232,14 @@ class User extends MY_Controller {
                 throw new \Exception("Gagal Merubah Aktif User");
             }
             $jenis_log = "edit";
+
             $note_log = end($users) . "| ";
             $note_log .= $val ? 'Set Aktif' : 'Set Non Aktif';
             $this->_module->gen_history($sub_menu, end($users), $jenis_log, $note_log, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+         
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')

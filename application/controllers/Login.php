@@ -32,6 +32,7 @@ class Login extends CI_Controller {
             'password' => md5($password)
         );
         $cek = $this->m_login->cek_login("user", $where)->row(); //cek apa username dan password sama
+
         if ($this->input->is_ajax_request()) {
             try {
                 if (empty($cek)) {
@@ -57,28 +58,7 @@ class Login extends CI_Controller {
             }
             return;
         }
-        if (!empty($cek)) {
-            if (!$cek->aktif) {
-                $this->session->set_flashdata('gagal', 'Status User Tidak aktif');
-                redirect(base_url("login"));
-            }
-            //login berhasil
-            $row = $this->m_login->cek_nama($username)->row_array(); //mengambil data nama 
-            $data_session = array(
-                'username' => $username,
-                'nama' => $row,
-                'status' => "login"
-            );
-            $row = $this->m_login->cek_menu_default($username)->row_array(); //mengambil data menu default
 
-            $this->session->set_userdata($data_session);
-
-            redirect(base_url($row['inisial_class']));
-        } else {
-            //login gagal;
-            $this->session->set_flashdata('gagal', 'Username atau Password Salah !');
-            redirect(base_url("login"));
-        }
     }
 
     function logout() {

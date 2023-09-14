@@ -34,7 +34,7 @@
                                             <th class="no">No</th>
                                             <th>WA Group</th>
                                             <th>Departemen</th>
-                                            <th>Dibuat</th>               
+                                            <th>Dibuat</th> 
                                         </tr>
                                     </thead>
                                 </table>

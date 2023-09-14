@@ -8,6 +8,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_WaGroup extends CI_Model {
 
+
     var $column_order = array(null, 'wg.wa_group', 'kode','wg.created_at');
     var $column_search = array('wg.wa_group');
     var $order = array('wg.wa_group', 'asc');
@@ -17,7 +18,6 @@ class M_WaGroup extends CI_Model {
         $this->db->select('wg.*,b.kode');
         $this->db->from('wa_group as wg');
         $this->db->join('(select wa_group_id, GROUP_CONCAT(department_kode) as kode from wa_group_departemen GROUP BY wa_group_id) as b', 'b.wa_group_id = wg.id', 'LEFT');
-
         foreach ($this->column_search as $key => $value) {
             if ($_POST["search"]["value"]) {
                 $this->db->or_like($value, $_POST["search"]["value"]);
@@ -110,4 +110,5 @@ class M_WaGroup extends CI_Model {
             return true;
         }
     }
+
 }

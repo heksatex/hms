@@ -5,6 +5,7 @@
 
         <?php $this->load->view("admin/_partials/head.php") ?>
         <link rel="stylesheet" href="<?php echo base_url('dist/css/bootstrap-switch.min.css') ?>">
+
     </head>
 
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -119,6 +120,7 @@
                                         users: uclass,
                                         aktif: valUpdate
                                     }, success: function (data) {
+
                                         if (data.status == "failed") {
                                             //jika ada form belum keiisi
                                             unblockUI(function () {
@@ -134,13 +136,14 @@
                                                 setTimeout(function () {
                                                     alert_notify(data.icon, data.message, data.type, function () {});
                                                 }, 1000);
+
                                                 $("." + uclass).val(valUpdate)
                                             });
                                         }
 
                                     }, error: function (xhr, ajaxOptions, thrownError) {
-                                        if (xhr.status === 401) {
 
+                                        if (xhr.status === 401) {
                                             loginFunc('<?php echo base_url('login/aksi_login'); ?>');
                                         }
                                         unblockUI(function () {});
