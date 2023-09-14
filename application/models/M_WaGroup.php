@@ -13,7 +13,7 @@ class M_WaGroup extends CI_Model {
     var $order = array('wg.wa_group', 'asc');
     var $table = "wa_group";
 
-    protected function getDataQuery() {
+    protected function _getDataQuery() {
         $this->db->select('wg.*,b.kode');
         $this->db->from('wa_group as wg');
         $this->db->join('(select wa_group_id, GROUP_CONCAT(department_kode) as kode from wa_group_departemen GROUP BY wa_group_id) as b', 'b.wa_group_id = wg.id', 'LEFT');
@@ -72,7 +72,7 @@ class M_WaGroup extends CI_Model {
 
     public function getData() {
         try {
-            $this->getDataQuery();
+            $this->_getDataQuery();
             if ($_POST['length'] != -1)
                 $this->db->limit($_POST['length'], $_POST['start']);
             $query = $this->db->get();
@@ -91,6 +91,10 @@ class M_WaGroup extends CI_Model {
             'wa_group_id' => $groupid,
             'department_kode' => $kodeDept
         ));
+    }
+    
+    public function getDataQuery() {
+        return $this->db->query('select id,wa_group from wa_group')->result();
     }
 
     public function startTransaction() {

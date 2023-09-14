@@ -29,12 +29,12 @@ class WaGroup extends MY_Controller {
     }
 
     public function index() {
-        $data['id_dept'] = 'MUSR';
+        $data['id_dept'] = 'MWG';
         return $this->load->view('setting/v_wa_group', $data);
     }
 
     public function add() {
-        $data['id_dept'] = 'MUSR';
+        $data['id_dept'] = 'MWG';
         $data['list_dept'] = $this->_module->get_list_departement();
         return $this->load->view('setting/v_wa_group_add', $data);
     }
@@ -53,7 +53,7 @@ class WaGroup extends MY_Controller {
                 $data['wa']->kode = explode(',', $data['wa']->kode);
             }
             
-            $data['id_dept'] = 'MUSR';
+            $data['id_dept'] = 'MWG';
             $data['list_dept'] = $this->_module->get_list_departement();
             $data['mms'] = $this->_module->get_data_mms_for_log_history($data['id_dept']);
             return $this->load->view('setting/v_wa_group_edit', $data);
@@ -78,20 +78,20 @@ class WaGroup extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
             $wagroup = $this->input->post("wa_group");
-            $this->m_WaGroup->startTransaction();
+            $this->_module->startTransaction();
             if ($status = $this->m_WaGroup->simpan(addslashes($wagroup))) {
 
                 foreach ($this->input->post('department') as $key => $value) {
                     $this->m_WaGroup->addWaDepartment($status, addslashes($value));
                 }
             }
-            if (!$this->m_WaGroup->finishTransaction()) {
+            if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Membuat Group', 500);
             }
             $this->_module->gen_history($sub_menu, $wagroup, 'create', 'Membuat WA Group ' . $wagroup, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil')));
+                    ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
             $this->output->set_status_header($ex->getCode() ?? 500)
@@ -121,19 +121,19 @@ class WaGroup extends MY_Controller {
             if (!$this->m_WaGroup->update($kode_decrypt, addslashes($wagroup))) {
                 throw new \Exception("Gagal Merubah Data", 500);
             }
-            $this->m_WaGroup->startTransaction();
+            $this->_module->startTransaction();
             $this->m_WaGroup->deleteWaDepartmen($kode_decrypt);
             foreach ($this->input->post('department') as $key => $value) {
                 $this->m_WaGroup->addWaDepartment($kode_decrypt, addslashes($value));
             }
 
-            if (!$this->m_WaGroup->finishTransaction()) {
+            if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Merubah Data', 500);
             }
             $this->_module->gen_history($sub_menu, $wagroup, 'Edit', 'Edit WA Group ' . $wagroup, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil')));
+                    ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
         } catch (\Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')

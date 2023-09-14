@@ -78,3 +78,10 @@ $route['setting/wa_template/update']['POST'] = 'setting/WaTemplate/update';
 //WA Send Message
 $route['setting/wa_send_message']['GET'] = 'setting/WaSendMessage/index';
 $route['setting/wa_send_message/get_data']['POST'] = 'setting/WaSendMessage/getData';
+//WA Schedule Message
+$route['setting/wa_schedule']['GET'] = 'setting/WaScheduleMessage/index';
+$route['setting/wa_schedule/add']['GET'] = 'setting/WaScheduleMessage/add';
+$route['setting/wa_schedule/edit/([a-zA-Z0-9]+)']['GET'] = 'setting/WaScheduleMessage/edit/$1';
+$route['setting/wa_schedule/get_data']['POST'] = 'setting/WaScheduleMessage/getData';
+$route['setting/wa_schedule/simpan']['POST'] = 'setting/WaScheduleMessage/simpan';
+$route['setting/wa_schedule/update']['POST'] = 'setting/WaScheduleMessage/update';

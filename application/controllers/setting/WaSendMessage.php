@@ -17,7 +17,7 @@ class WaSendMessage extends MY_Controller {
     }
 
     public function index() {
-        $data['id_dept'] = 'MUSR';
+        $data['id_dept'] = 'MWSM';
         return $this->load->view('setting/v_wa_send_message', $data);
     }
 

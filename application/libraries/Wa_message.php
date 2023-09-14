@@ -29,6 +29,9 @@ class Wa_message {
             return false;
         }
         $this->setUser($username);
+        if (!array_key_exists('nama', $this->user)) {
+            return false;
+        }
         $this->save($this->user->nama . ';' . $this->user->telepon_wa);
         return true;
     }
@@ -41,6 +44,9 @@ class Wa_message {
         }
         foreach ($username as $key => $value) {
             $this->setUser($value);
+            if (!array_key_exists('nama', $this->user)) {
+                return false;
+            }
             $this->save($this->user->nama . ';' . $this->user->telepon_wa);
         }
 
@@ -55,6 +61,9 @@ class Wa_message {
         }
         $this->setUserByDept($deptID);
         foreach ($this->user as $key => $value) {
+            if (!array_key_exists('nama', $value)) {
+                return false;
+            }
             $this->save($value->nama . ';' . $value->telepon_wa);
         }
         return true;
@@ -68,12 +77,15 @@ class Wa_message {
         }
         foreach ($group as $key => $value) {
             $this->setGroup($value);
+            if (!array_key_exists('wa_group', $this->group)) {
+                return false;
+            }
             $this->save($this->group->wa_group, 'togroup');
         }
 
         return true;
     }
-    
+
     public function sendMessageToGroupByDepth(string $templateName, array $value, array $depthkode): bool {
 
         $this->val = $value;
@@ -105,19 +117,19 @@ class Wa_message {
 
     protected function setUser($username) {
 
-        $this->user = $this->model->m_user->get_user_by_username($username);
+        $this->user = $this->model->m_user->get_user_by_username($username) ?? [];
     }
 
     protected function setGroup($group) {
-        $this->group = $this->model->m_WaGroup->getDataByNama($group);
+        $this->group = $this->model->m_WaGroup->getDataByNama($group) ?? [];
     }
 
     protected function setGroupByDept(array $depth) {
-        $this->group = $this->model->m_WaGroup->getDataByDepth($depth);
+        $this->group = $this->model->m_WaGroup->getDataByDepth($depth) ?? [];
     }
 
     protected function setUserByDept($dept) {
-        $this->user = $this->model->m_user->get_user_by_dept($dept);
+        $this->user = $this->model->m_user->get_user_by_dept($dept) ?? [];
     }
 
     protected function save($value, $touser = 'touser') {
