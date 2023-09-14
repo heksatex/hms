@@ -965,7 +965,7 @@ class Adjustment extends MY_Controller
           // update status adjustment = done
           $this->m_adjustment->update_status_adjustment($kode_adjustment,$status_done);
 
-          $jenis_log   = "generated";
+          $jenis_log   = "generate";
           $note_log    = "Generate Adjustment | ".$kode_adjustment." | Jumlah Adjustment ".$jml_adj;
           $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
 

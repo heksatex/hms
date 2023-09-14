@@ -376,6 +376,8 @@
                                       $style = 'style="color:red"';
                                     }else if($row->status == 'ng'){
                                       $style = 'style="color:blue"';
+                                    }else if($row->status == 'r'){
+                                      $style = 'style="color:purple"';
                                     }else{
                                       $style = '';
                                     }
@@ -389,7 +391,7 @@
                                     <td class="text-wrap" data-content="edit" data-name="Finishing" data-id="handling"  data-isi="<?php echo $row->id_handling;?>"><?php echo $row->nama_handling?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Route CO" data-id="route_co"  data-isi="<?php echo $row->route_co;?>"><?php echo $row->nama_route_co?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Gramasi" data-id="gramasi"  data-isi="<?php echo $row->gramasi;?>"><?php echo $row->gramasi?></td>
-                                    <td align="right" data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>"><?php echo $row->qty?></td>
+                                    <td align="right" data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>"><?php echo number_format($row->qty,2)?></td>
                                     <td ><?php echo $row->uom?></td>
                                     <td class="text-wrap width-150" data-content="edit" data-name="Piece Info" data-id="piece_info" data-isi="<?php echo $row->piece_info;?>"><?php echo htmlentities($row->piece_info)?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Lebar Jadi" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
@@ -397,28 +399,19 @@
                                     <td class="text-wrap" data-content="edit" data-name="Reff Note" data-id="reff_notes"  data-isi="<?php echo htmlentities($row->reff_notes);?>"><?php echo $row->reff_notes?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Delivery Date" data-id="delivery_date_items"  data-isi="<?php echo htmlentities($row->delivery_date_items);?>"><?php echo $row->delivery_date_items?></td>
                                     <td ><?php echo $row->ow?></td>
-                                    <td style="min-width:80px;" >
-                                        <?php if(!empty($row->ow)){ ?>
+                                    <td style="min-width:100px;" >
                                         <select class="form-control input-sm status_scl" id="status_scl" name="status_scl" sc="<?php echo $row->sales_order;?>" row_order="<?php echo $row->row_order;?>" ow="<?php echo $row->ow;?>" kode_produk="<?php echo htmlentities($row->kode_produk);?>", qty="<?php echo $row->qty?>" >
-                                          <?php $arr_stat = array('t','f','ng');
-                                                foreach($arr_stat as $stats){
-                                                  if($stats == 't'){
-                                                    $status = 'Aktif';
-                                                  }else if($stats == 'ng'){
-                                                    $status = 'Not Good';
+                                          <?php 
+                                                foreach($list_status_ow as $stats){
+                                                  if($row->status == $stats['kode']){
+                                                    echo '<option value="'.$stats['kode'].'" selected>'.$stats['nama'].'</option>';
                                                   }else{
-                                                    $status = 'Tidak Aktif';
-                                                  }
-
-                                                  if($row->status == $stats){
-                                                    echo '<option value="'.$row->status.'" selected>'.$status.'</option>';
-                                                  }else{
-                                                    echo '<option value="'.$stats.'">'.$status.'</option>';
+                                                    echo '<option value="'.$stats['kode'].'">'.$stats['nama'].'</option>';
                                                   }
                                                 }
                                           ?>
                                         </select>
-                                        <?php } ?>
+                                        
                                     <td>
                                       <?php if(empty($row->ow)){?>
                                         <a class="add-color-lines" title="Simpan" data-toggle="tooltip" row_id='tes'><i class="fa fa-save"></i></a>
@@ -1131,6 +1124,9 @@
           + '<td><textarea type="text" class="form-control  input-sm width-100 set_textarea" onkeyup="textAreaAdjust(this)"  name="Reff Notes" id="reff_notes"></textarea></td>'
           + '<td><input type="text" class="form-control input-sm delivery_date_items width-100 " name="Delivery Date" id="delivery_date_items" value="'+deliv_head+'" ></td>'
           + '<td></td>'
+          + '<td><select type="text" class="form-control input-sm width-80 status_ow" name="Status OW" id="status_ow"><?php 
+          foreach($list_status_ow as $owr){?><option value="<?php echo $owr['kode']; ?>"><?php echo $owr['nama'];?></option>"<?php }?></select></td>'
+          + '<td></td>'
           + '<td><button type="button" class="btn btn-primary btn-xs add-color-lines width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit-color-lines" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal-color-lines width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
           + '</tr>';
 
@@ -1314,17 +1310,12 @@
           empty2 = true;
         }
 
-        if(!$(this).val() && $(this).attr('name')=='Gramasi'){
-          alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
-          empty2 = true;
-        }
-
         if(!$(this).val() && $(this).attr('name')=='Uom Lebar Jadi'){
           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
           empty2 = true;
         }
 
-        if(!$(this).val() && $(this).attr('name')=='Delivery Date'){
+        if(!$(this).val() && $(this).attr('name')=='Status OW'){
           alert_notify('fa fa-warning', $(this).attr('name')+ ' Harus Diisi !', 'danger',function(){});
           empty2 = true;
         }
@@ -1357,6 +1348,7 @@
         var reff_note   = $(this).parents("tr").find("#reff_notes").val();
         var delivery_date = $(this).parents("tr").find("#delivery_date_items").val();
         var row_order   = $(this).parents("tr").find("#row_order").val();
+        var status_ow   = $(this).parents("tr").find("#status_ow").val();
         //var dat = $(this).parents("tr").find('input[type="text"]').val();
         this1.button('loading');
         $.ajax({
@@ -1379,6 +1371,7 @@
                 uom_lebar_jadi  : uom_lebar_jadi,
                 reff_note   : reff_note,
                 delivery_date   : delivery_date,
+                status_ow   : status_ow,
                 row_order   : row_order  },
           success: function(data){
             if(data.sesi=='habis'){

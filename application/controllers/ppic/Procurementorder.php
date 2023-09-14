@@ -1395,7 +1395,7 @@ class Procurementorder extends MY_Controller
                         }
 
 
-                        $jenis_log   = "generated";
+                        $jenis_log   = "generate";
                         $note_log    = "Generated | ".$kode." | ".$nama_produk." | ".$row_order;
                         $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                 

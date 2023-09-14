@@ -222,10 +222,14 @@ class Stockquants extends MY_Controller
             $group   = true;
 
         }else{
+           
 
             if(!empty($where)){
                 //$where = rtrim($where, $condition);
-                $where ="where ".$where;
+                $where = "where lokasi NOT IN (SELECT empty_location FROM departemen WHERE show_dept = 'FALSE') AND ".$where;
+                $whereAll = $where;
+            }else{
+                $where = "where lokasi NOT IN (SELECT empty_location FROM departemen WHERE show_dept = 'FALSE') ";
                 $whereAll = $where;
             }
 
@@ -292,11 +296,11 @@ class Stockquants extends MY_Controller
         $groupBy  = $this->declaration_name_field($by,$id_dept);
 
         if(!empty($where)){
-            $where1 = "where ".$where;
+            $where1 = "where lokasi NOT IN (SELECT empty_location FROM departemen WHERE show_dept = 'FALSE') AND ".$where;
         }else{
-            $where1 = $where;
+            $where1 = "where lokasi NOT IN (SELECT empty_location FROM departemen WHERE show_dept = 'FALSE') ";
         }
-
+       
         $tmp_arr_group = [];
         $jml_group     = 0;
 
@@ -371,9 +375,9 @@ class Stockquants extends MY_Controller
         $groupBy2  = $this->declaration_name_field($by2,$id_dept);
 
         if(!empty($where)){
-            $where1 = "where ".$where;
+            $where = "where lokasi NOT IN (SELECT empty_location FROM departemen WHERE show_dept = 'FALSE') AND ".$where;
         }else{
-            $where1 = $where;
+            $where1 = "where lokasi NOT IN (SELECT empty_location FROM departemen WHERE show_dept = 'FALSE') ";
         }
 
         $group1   = $this->m_stockQuants->get_list_stock_quant_grouping($groupBy,$where1);
@@ -724,9 +728,10 @@ class Stockquants extends MY_Controller
         $result     = $this->create_where($data_filter,'',$data_grouping,$id_dept);
         $filter     = $result[0];
         $where_post = '';
+        $where_post2 = '';
 
         if(!empty($filter)){
-            $where_post .= $filter.' AND '; 
+            $where_post .= ' AND '.$filter.'  '; 
         }else{
             $where_post .= ''; 
         }
@@ -747,7 +752,7 @@ class Stockquants extends MY_Controller
         }
 
         if(!empty($isi_arr)){
-            $where_post .= $isi_arr.' AND ';
+            $where_post2 .= ' AND '.$isi_arr.' AND ';
         }
 
         $where      = '';
@@ -762,7 +767,7 @@ class Stockquants extends MY_Controller
            $record = ($record-1) * $recordPerPage;
         }
 
-        $where     .= "WHERE ".$where_post.' '.$group_by." = '".$kode."' ";
+        $where     .= "WHERE lokasi NOT IN (SELECT empty_location FROM departemen WHERE show_dept = 'FALSE')  ".$where_post.' '.$where_post2.' '.$group_by." = '".$kode."' ";
         $whereCount =  $where;
         $allcount = 0;
         if($group_ke == $jml_group){

@@ -121,7 +121,7 @@ class M_sales extends CI_Model
 
 	public function get_list_departement()
 	{
-		return $this->db->query("SELECT kode,nama FROM departemen ORDER BY nama ")->result();
+		return $this->db->query("SELECT kode,nama FROM departemen WHERE show_dept = 'true' ORDER BY nama ")->result();
 	}
 
 	public function get_list_currency()
@@ -466,10 +466,10 @@ class M_sales extends CI_Model
 		return $this->db->query("SELECT row_order  FROM sales_color_line WHERE sales_order = '$sales_order' order by row_order desc LIMIT 1");
 	}
 
-    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date)
+    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$status_ow)
 	{
-		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi,route_co,reff_notes,tanggal_ow,delivery_date_items)
-			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi','$route_co','$reff_note','$date','$delivery_date')");
+		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi,route_co,reff_notes,tanggal_ow,delivery_date_items,status)
+			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi','$route_co','$reff_note','$date','$delivery_date','$status_ow')");
 	}
 
 	public function delete_color_lines_detail($sales_order,$row_order)
@@ -525,7 +525,7 @@ class M_sales extends CI_Model
 
 	public function cek_qty_color_lines_by_produk_2($sales_order,$kode_produk,$row_order)
 	{
-		$query =  $this->db->query("SELECT sum(qty) as tot_qty  FROM sales_color_line WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order = '$row_order' AND status  IN ('t','ng') GROUP BY kode_produk ")->row_array();
+		$query =  $this->db->query("SELECT sum(qty) as tot_qty  FROM sales_color_line WHERE sales_order = '$sales_order' AND kode_produk = '$kode_produk' AND row_order != '$row_order' AND status  IN ('t','ng') GROUP BY kode_produk ")->row_array();
 		return $query['tot_qty'];
 	}
 

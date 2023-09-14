@@ -268,25 +268,31 @@
         $('#jml').text('');
         
         if(txtlot == ''){
-            alert_modal_warning('Barcode / Lot tidak boleh kosong');
+            alert_notify('fa fa-warning','Barcode / Lot tidak boleh kosong !','danger',function(){});
+            $("#example1 tbody").remove();
             $('#txtlot').focus();
+            $("#example1").append("<tr><td colspan='6' align='center'>Tidak Ada Data</td></tr>");
         }else{
             $('#btn-proses').button('loading');
             $("#example1_processing").css('display','');// show loading processing in table
-            $("#example1 tbody").remove();
+           
             $.ajax({
             type     : "POST",
             dataType : "json",
             url :'<?php echo base_url('warehouse/trackinglot/search_barcode')?>',
+            beforeSend: function(e) {
+                if(e && e.overrideMimeType) {
+                    e.overrideMimeType("application/json;charset=UTF-8");
+                }
+                $("#example1 tbody").remove();
+               
+            },
             data: {txtlot : txtlot},
             success: function(data){
                 if(data.sesi == "habis"){
                     //alert jika session habis
                     alert_modal_warning(data.message);
                     window.location.replace('index');
-                }else if(data.status == "failed"){
-                    alert_modal_warning(data.message);
-                    $('#txtlot').focus();
                 }else{
                     empty = true;
                     $.each(data.info, function(key, value) {
@@ -305,20 +311,6 @@
                         //alert(value.lot)
                     });
 
-                    if(empty){
-                        $('#lot').text('');
-                        $('#tgl_dibuat').text('');
-                        $('#kode_produk').text('');
-                        $('#nama_produk').text('');
-                        $('#grade').text('');
-                        $('#qty').text('');
-                        $('#qty2').text('');
-                        $('#lokasi').text('');
-                        $('#lokasi_fisik').text('');
-                        $('#reff_note').text('');
-                        $('#jml').text('');
-                       
-                    }
 
                     var tbody = $("<tbody />");
                     var no    = 1;
@@ -353,7 +345,7 @@
                 $('#btn-proses').button('reset');
 
                 },error: function (xhr, ajaxOptions, thrownError) {
-                alert(xhr.responseText);
+                    alert(xhr.responseText);
                     $('#btn-proses').button('reset');
                     $("#example1_processing").css('display','none');// hidden loading processing in table
                 }

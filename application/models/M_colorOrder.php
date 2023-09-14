@@ -148,11 +148,12 @@ class M_colorOrder extends CI_Model
 	{
 		$query = $this->db->query("SELECT a.kode_co, a.ow, a.kode_produk, a.nama_produk,  a.qty, a.uom, a.reff_notes, a.status, a.row_order, 
 												 b.kode as kode_route,b.nama as route_co,
-												 a.id_warna, c.nama_warna, c.kode_warna, a.id_handling, d.nama_handling, a.lebar_jadi, a.uom_lebar_jadi, a.gramasi, a.reff_notes_mkt
+												 a.id_warna, c.nama_warna, c.kode_warna, a.id_handling, d.nama_handling, a.lebar_jadi, a.uom_lebar_jadi, a.gramasi, a.reff_notes_mkt, e.nama_status
 									FROM color_order_detail a 
 									LEFT JOIN route_co b ON a.route_co = b.kode
 									LEFT JOIN warna c ON a.id_warna = c.id
 									LEFT JOIN mst_handling d ON d.id = a.id_handling
+									LEFT JOIN mst_status e ON a.status = e.kode
 									where a.kode_co = '".$kode_co."' ORDER BY row_order");
 		return $query->result();
 	}

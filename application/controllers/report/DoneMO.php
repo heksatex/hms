@@ -38,7 +38,7 @@ class DoneMO extends MY_Controller
                 // $rm_done            = $this->m_mo->get_sum_qty_rm_done($row->kode,'done')->row();
                 // $fg_prod            = $this->m_mo->get_sum_qty_fg_produce($row->kode)->row();
                 // $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($row->kode)->row();
-                $fg_adj_real           = $this->m_mo->get_sum_qty_fg_adj($row->kode)->row();
+                $fg_adj_real           = $this->m_doneMO->get_sum_qty_fg_adj_update($row->kode)->row();
 
                 $total_qty1         = ($row->prod_mtr + $row->waste_mtr ) - $row->adj_mtr ;
                 $total_qty2         = ($row->prod_kg + $row->waste_kg ) - $row->adj_kg; 
@@ -195,7 +195,7 @@ class DoneMO extends MY_Controller
 		foreach($get as $row){
 
                 
-                $fg_adj_real        = $this->m_mo->get_sum_qty_fg_adj($row->kode)->row();
+                $fg_adj_real        = $this->m_doneMO->get_sum_qty_fg_adj_update($row->kode)->row();
 
                 $total_qty1         = ($row->prod_mtr + $row->waste_mtr ) - $row->adj_mtr;
                 $total_qty2         = ($row->prod_kg + $row->waste_kg ) - $row->adj_kg; 

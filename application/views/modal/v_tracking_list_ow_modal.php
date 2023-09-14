@@ -84,7 +84,14 @@
 
                 $href     = 'collapse'.$cod->row_order;
                 $id_panel = 'panel'.$cod->row_order;
-                $panel_title   = "<a data-toggle='collapse' title='Lihat Route OW' data-parent='#accordion' href='#".$href."' >".$num.". ".$cod->nama_produk .' '.number_format($cod->qty,2).' '.$cod->uom .' - '.$cod->nama_status." ( ".$cod->route_co." ) ".$last_done."</a>";
+                if($cod->status == 'cancel'){
+                    $color = "style='color:red'";
+                }else if($cod->status == 'ng'){
+                    $color = "style='color:blue'";
+                }else{
+                    $color = "style='color:#333'";
+                }
+                $panel_title   = "<a data-toggle='collapse' title='Lihat Route OW' data-parent='#accordion' href='#".$href."'  ".$color.">".$num.". ".$cod->nama_produk .' '.number_format($cod->qty,2).' '.$cod->uom ." ( ".$cod->route_co." ) ".$last_done."</a> <label class='pull-right' ".$color .">".$cod->nama_status."</p>";
             }else{
                 $href           = '';
                 $id_panel       = '';

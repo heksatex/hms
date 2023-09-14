@@ -1,57 +1,14 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
-  <style>
-    
-    .bs-glyphicons {
-      padding-left: 0;
-      padding-bottom: 1px;
-      margin-bottom: 20px;
-      list-style: none;
-      overflow: hidden;
-    }
 
-    .bs-glyphicons li {
-      float: left;
-      width: 25%;
-      height: 50px;
-      padding: 10px;
-      margin: 0 -1px -1px 0;
-      font-size: 12px;
-      line-height: 1.4;
-      text-align: elft;
-      border: 1px solid #ddd;
+  <style type="text/css">
+    button[id="btn-duplicate"]{/*untuk hidden button di top bar */
+        display: none;
     }
+  </style>
 
-    .bs-glyphicons .glyphicon {
-      margin-top: 5px;
-      margin-bottom: 10px;
-      font-size: 20px;
-    }
-
-    .bs-glyphicons .glyphicon-class {
-      display: inline-block;
-      text-align: center;
-      word-wrap: break-word; /* Help out IE10+ with class names */
-    }
-
-    .bs-glyphicons li:hover {
-      background-color: rgba(86, 61, 124, .1);
-    }
-
-    @media (min-width: 768px) {
-      .bs-glyphicons li {
-        width: 50%;
-      }
-    }
-
-    .pointer{
-      cursor:pointer;
-    }
-    </style>
-    
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini">
@@ -85,7 +42,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>Form Edit - <?php echo $produk->kode_produk?></b></h3>
+          <h3 class="box-title">Form Add (Duplicate)</h3>
         </div>
         <div class="box-body">
           <form class="form-horizontal">
@@ -99,72 +56,26 @@
             <div class="form-group">
               
               <div class="col-md-12">
-                <div class="col-md-8 col-xs-12">
+                <div class="col-md-12 col-xs-12">                  
                   <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-4"><label>Kode Produk </label></div>
-                    <div class="col-xs-8">
-                      <input type="text" class="form-control input-sm" name="kodeproduk" id="kodeproduk" readonly="readonly" value="<?php echo $produk->kode_produk?>"/>
+                    <div class="col-xs-2"><label>Kode Produk </label></div>
+                    <div class="col-xs-6">
+                      <input type="text" class="form-control input-sm" name="kodeproduk" id="kodeproduk">
+                    </div>                                    
+                    <div class="col-xs-2">
+                      <input type="checkbox" name="auto_generate" id="auto_generate">
+                      <label>Auto Generate</label>
                     </div>                                    
                   </div>
                   <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-4"><label>Nama Produk </label></div>
+                    <div class="col-xs-2"><label>Nama Produk </label></div>
                     <div class="col-xs-8">
-                      <input type="text" class="form-control input-sm" name="namaproduk" id="namaproduk" title="<?php echo htmlentities($produk->nama_produk)?>" data-toggle="tooltip" value="<?php echo htmlentities($produk->nama_produk)?>"/>
+                      <input type="text" class="form-control input-sm" name="namaproduk" id="namaproduk" value="<?php echo htmlentities($produk->nama_produk.' - Copy')?>">
                     </div>                                    
                   </div>
-                 <!--  <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-8">
-                      <?php if($produk->dapat_dijual == 0){?>
-                        <input type="checkbox" name="dapatdijual" id="dapatdijual" value="true">
-                      <?php }else{ ?>
-                        <input type="checkbox" name="dapatdijual" id="dapatdijual" checked value="true">
-                      <?php } ?>
-                      <label>Dapat Dijual</label>
-                    </div>
-                    <div class="col-xs-8">                      
-                      <?php if($produk->dapat_dibeli == 0){?>
-                        <input type="checkbox" name="dapatdibeli" id="dapatdibeli" value="true">
-                      <?php }else{ ?>
-                        <input type="checkbox" name="dapatdibeli" id="dapatdibeli" checked value="true">
-                      <?php } ?>                           
-                      <label>Dapat Dibeli</label>
-                    </div>
-                  </div> -->
-                </div>
-
-                <div class="col-md-4 col-xs-12">
-                <ul class="bs-glyphicons">
-                  <li>
-                    <span class="glyphicon glyphicon-inbox"></span>            
-                    <span class="glyphicon-class"><?php echo $onhand->qty_onhand ?> On Hand</span>
-                  </li>                        
-                  <li>
-                    <span class="glyphicon glyphicon-transfer"></span>
-                    <span class="glyphicon-class"><?php echo $moves->jml_moves ?> Moves</span>
-                  </li>
-                  <li class="pointer" onclick="cek_bom('<?php echo $produk->kode_produk ?>','<?php echo htmlentities($produk->nama_produk) ?>')" data-toggle="tooltip" title="Lihat BoM Produk">
-                    <span class="glyphicon glyphicon-list-alt"></span>
-                    <span class="glyphicon-class"><?php echo $bom->jml_bom ?> BoM</span>
-                  </li>                        
-                  <li class="pointer" onclick="cek_mo('<?php echo $produk->kode_produk ?>','<?php echo htmlentities($produk->nama_produk) ?>' )"  data-toggle="tooltip" title="Lihat MO Produk">
-                    <span class="glyphicon glyphicon-cog" ></span>
-                    <span class="glyphicon-class"><?php echo $mo->jml_mo ?> MO</span>
-                  </li>
-                  <!--
-                  <li>
-                    <span class="glyphicon glyphicon-shopping-cart"></span> Purchases
-                    <span class="glyphicon-class"></span>
-                  </li>                        
-                  <li>
-                    <span class="glyphicon glyphicon-usd"></span> Sales
-                    <span class="glyphicon-class"></span>
-                  </li>
-                  -->
-                </ul>
+                </div>                
               </div>
-
-              </div>
-
+              
             </div> 
           </form>
 
@@ -191,22 +102,22 @@
                         <!-- kiri -->
                         <div class="col-md-6">
                           <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-4">Lebar Greige</div>
+                           <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4">Lebar Greige </div>
                               <div class="col-xs-4">
-                                <input type="text" class="form-control input-sm" name="lebargreige" id="lebargreige" value="<?php echo $produk->lebar_greige;?>" style="text-align:right;">
+                                <input type="text" class="form-control input-sm" name="lebargreige" id="lebargreige" style="text-align:right" value="<?php echo $produk->lebar_greige; ?>">
                               </div>
                               <div class="col-xs-3">
                                 <select class="form-control input-sm" name="uom_lebargreige" id="uom_lebargreige" >
                                   <option value=""></option>
                                     <?php foreach ($uom as $row) {
                                             if($row->short == $produk->uom_lebar_greige){
-                                              echo "<option selected value='".$row->short."'>".$row->short."</option>";
+                                                echo "<option selected value='".$row->short."'>".$row->short."</option>";
 
                                             }else{
-                                              echo "<option value='".$row->short."'>".$row->short."</option>";
+                                                echo "<option value='".$row->short."'>".$row->short."</option>";
                                             }
-                                          }
+                                        }
                                     ?>
                                 </select>
                               </div>
@@ -214,17 +125,17 @@
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Lebar Jadi </div>
                               <div class="col-xs-4">
-                                <input type="text" class="form-control input-sm" name="lebarjadi" id="lebarjadi" value="<?php echo $produk->lebar_jadi;?>" style="text-align:right;">
+                                <input type="text" class="form-control input-sm" name="lebarjadi" id="lebarjadi" style="text-align:right" value="<?php echo $produk->lebar_jadi; ?>">
                               </div>
                               <div class="col-xs-3">
                                 <select class="form-control input-sm" name="uom_lebarjadi" id="uom_lebarjadi" >
                                   <option value=""></option>
                                     <?php foreach ($uom as $row) {
                                             if($row->short == $produk->uom_lebar_jadi){
-                                              echo "<option selected value='".$row->short."'>".$row->short."</option>";
-                                            }else{
-                                              echo "<option value='".$row->short."'>".$row->short."</option>";
-                                            }
+                                                echo "<option selected value='".$row->short."'>".$row->short."</option>";
+                                              }else{
+                                                echo "<option value='".$row->short."'>".$row->short."</option>";
+                                              }
                                           }
                                     ?>
                                 </select>
@@ -232,9 +143,9 @@
                             </div>
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Type</div>
-                              <div class="col-xs-4">                                
+                              <div class="col-xs-4">
                                 <select class="form-control input-sm" name="typeproduk" id="typeproduk" />
-                                  <?php 
+                                 <?php 
                                   $val = array('stockable','consumable');
                                   for($i=0;$i<=1;$i++) {
                                     if(strtolower($val[$i]) == strtolower($produk->type)){?>
@@ -249,31 +160,31 @@
                             </div>
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">UOM/Satuan</div>
-                              <div class="col-xs-4">                                
-                                <select class="form-control input-sm" name="uomproduk" id="uomproduk" />
+                              <div class="col-xs-4">
+                                <select class="form-control input-sm" name="uom" id="uomproduk" />
                                   <option value=""></option>
-                                  <?php foreach ($uom as $row) {
-                                    if($row->short==$produk->uom){?>
-                                      <option value='<?php echo $row->short; ?>' selected><?php echo $row->short;?></option>
-                                  <?php
-                                    }else{?>                                    
-                                      <option value='<?php echo $row->short; ?>'> <?php echo $row->short;?></option>
-                                  <?php  }}?>
+                                    <?php foreach ($uom as $row) {
+                                        if($row->short==$produk->uom){?>
+                                        <option value='<?php echo $row->short; ?>' selected><?php echo $row->short;?></option>
+                                    <?php
+                                        }else{?>                                    
+                                        <option value='<?php echo $row->short; ?>'> <?php echo $row->short;?></option>
+                                    <?php  }}?>
                                 </select>
                               </div>               
-                            </div> 
+                            </div>
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">UOM/Satuan 2</div>
                               <div class="col-xs-4">
                                 <select class="form-control input-sm" name="uom2" id="uomproduk2" />
                                   <option value=""></option>
-                                  <?php foreach ($uom as $row) {
-                                    if($row->short==$produk->uom_2){?>
-                                      <option value='<?php echo $row->short; ?>' selected><?php echo $row->short;?></option>
-                                  <?php
-                                    }else{?>                                    
-                                      <option value='<?php echo $row->short; ?>'> <?php echo $row->short;?></option>
-                                  <?php  }}?>
+                                    <?php foreach ($uom as $row) {
+                                        if($row->short==$produk->uom_2){?>
+                                        <option value='<?php echo $row->short; ?>' selected><?php echo $row->short;?></option>
+                                    <?php
+                                        }else{?>                                    
+                                        <option value='<?php echo $row->short; ?>'> <?php echo $row->short;?></option>
+                                    <?php  }}?>
                                 </select>
                               </div>               
                             </div>                            
@@ -311,31 +222,32 @@
                                   <?php  }}?>
                                 </select>                                
                               </div>               
-                            </div>   
+                            </div>
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">BoM</div>
                               <div class="col-xs-8">
                                 <select class="form-control input-sm" name="bom" id="bom">
-                                  <?php 
-                                  $arr_bm = array(array('value' => '1', 'text' => 'True'), array( 'value'=> '0', 'text' => 'False'));
-                                  foreach ($arr_bm as $val) {
-                                    if($produk->bom == $val['value']){
+                                    <?php 
+                                    $arr_bm = array(array('value' => '1', 'text' => 'True'), array( 'value'=> '0', 'text' => 'False'));
+                                    foreach ($arr_bm as $val) {
+                                        if($produk->bom == $val['value']){
+                                        ?>
+                                        <option value="<?php echo $val['value']; ?>" selected><?php echo $val['text']?></option>
+                                    <?php 
+                                        }else{ ?>
+                                        <option value="<?php echo $val['value']; ?>" ><?php echo $val['text']?></option>
+                                    <?php  
+                                        }
+                                    } 
                                     ?>
-                                      <option value="<?php echo $val['value']; ?>" selected><?php echo $val['text']?></option>
-                                  <?php 
-                                    }else{ ?>
-                                     <option value="<?php echo $val['value']; ?>" ><?php echo $val['text']?></option>
-                                  <?php  
-                                    }
-                                  } ?>
                                 </select>
                               </div>
-                            </div>                             
+                            </div>                            
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Tanggal Dibuat</div>
                               <div class="col-xs-8 col-md-8">
                                 <div class='input-group date' id='tanggaldibuat' >
-                                  <input type='text' class="form-control input-sm" name="tanggaldibuat" id="tanggaldibuat" readonly="readonly" value="<?php echo $produk->create_date?>"/>
+                                  <input type='text' class="form-control input-sm" name="tgldibuat" id="tgldibuat" readonly="readonly" />
                                   <span class="input-group-addon">
                                       <span class="glyphicon glyphicon-calendar"></span>
                                   </span>
@@ -346,12 +258,13 @@
                                 <div class="col-xs-4">Product Parent</div>
                                 <div class="col-xs-8 col-md-8">
                                   <select type="text" class="form-control input-sm" name="product_parent" id="product_parent" > </select>
-                                </div>                                    
+                                </div>
                             </div>
                             <div class="col-md-12 col-xs-12">
                                 <div class="col-xs-4">Sub Parent</div>
                                 <div class="col-xs-8 col-md-8">
-                                  <select type="text" class="form-control input-sm" name="sub_parent" id="sub_parent" > </select>
+                                  <select type="text" class="form-control input-sm" name="sub_parent" id="sub_parent" >
+                                  </select>
                                 </div>
                             </div>
                             <div class="col-md-12 col-xs-12">
@@ -360,20 +273,22 @@
                                 <select class="form-control input-sm" name="jenis_kain" id="jenis_kain" >
                                   <option value=""></option>
                                   <?php foreach ($jenis_kain as $row) {
-                                    if($row->id==$produk->id_jenis_kain){?>
-                                      <option value='<?php echo $row->id; ?>' selected><?php echo $row->nama_jenis_kain;?></option>
-                                  <?php
-                                    }else{?>                                    
-                                      <option value='<?php echo $row->id; ?>'><?php echo $row->nama_jenis_kain;?></option>
-                                  <?php 
-                                    }
+                                        if($row->id==$produk->id_jenis_kain){?>
+                                        <option value='<?php echo $row->id; ?>' selected><?php echo $row->nama_jenis_kain;?></option>
+                                    <?php
+                                        }else{?>                                    
+                                        <option value='<?php echo $row->id; ?>'><?php echo $row->nama_jenis_kain;?></option>
+                                    <?php 
+                                        }
                                     }
                                   ?>
                                 </select>                                
                               </div>               
                             </div>
+                            
                           </div>
                         </div>
+                        
                         
                         <!-- gl accounts -->
                         <!-- <div class="col-md-12">
@@ -412,6 +327,7 @@
                             </div>
                           </div>
                         </div> -->
+                        
                         <!-- kanan -->
                         <div class="col-md-6">
                         </div>
@@ -427,26 +343,17 @@
                               <div class="col-xs-4">Status</div>
                               <div class="col-xs-4">
                                 <select class="form-control input-sm" name="status" id="status">
-                                  <?php 
-                                    $arr_status = array(array('value' => 't', 'text' => 'Aktif'), array( 'value'=> 'f', 'text' => 'Tidak Aktif'));
-                                    foreach ($arr_status as $val) {
-                                      if($val['value'] == $produk->status_produk){?>
-                                        <option value="<?php echo $val['value']; ?>" selected><?php echo $val['text'];?></option>
-                                      <?php
-                                      }else{?>
-                                        <option value="<?php echo $val['value']; ?>" ><?php echo $val['text'];?></option>
-                                      <?php  
-                                      }
-                                  }?>
-                                </select>                 
+                                  <option value="t">Aktif</option>
+                                  <option value="f">Tidak Aktif</option>
+                                </select>              
                               </div>               
-                            </div>                                                        
+                            </div>                            
                           </div>
                         </div>
                         <!-- kanan -->
                         <div class="col-md-6">
                         </div>
-                        
+
                         <!-- reff note -->
                         <div class="col-md-12">
                           <p class="text-light-blue"><strong>Notes</strong></p>
@@ -457,7 +364,7 @@
                             <div class="col-md-12 col-xs-12">
                               <div class="col-xs-4">Deskripsi Barang</div>
                               <div id="ta" class="col-md-8 col-xs-8">
-                                <textarea class="form-control input-sm" name="note" id="note"><?php echo $produk->note?></textarea>
+                                <textarea class="form-control input-sm" name="note" id="note"></textarea>
                               </div>
                             </div>
                           </div>
@@ -553,7 +460,7 @@
                               <div class="col-xs-4">UOM Pembelian</div>
                               <div class="col-xs-4">
                                 <select class="form-control input-sm" name="uompembelian" id="uompembelian">
-                                  <option value=""></option>
+                                  <option value="">-- Pilih Satuan --</option>
                                     <?php foreach ($uom as $row) {?>
                                       <option value='<?php echo $row->short; ?>'><?php echo $row->short;?></option>
                                     <?php  }?>
@@ -583,13 +490,7 @@
 
   <footer class="main-footer">
    <?php $this->load->view("admin/_partials/modal.php") ?>
-    <div id="foot">
-     <?php 
-        $data['kode'] =  $produk->kode_produk;
-        $data['mms']  =  $mms->kode;
-        $this->load->view("admin/_partials/footer.php",$data) 
-     ?>
-    </div>
+   <?php $this->load->view("admin/_partials/footer.php") ?>
   </footer>
 
 </div>
@@ -597,17 +498,17 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
-
-
+  
   //set tgl buat
   var datenow=new Date();  
   datenow.setMonth(datenow.getMonth());
-  $('#tanggal').datetimepicker({
+  $('#tanggaldibuat').datetimepicker({
       defaultDate: datenow,
       format : 'YYYY-MM-DD HH:mm:ss',
       ignoreReadonly: true,
   });
 
+  
   var id_parent      = "<?php echo $produk->id_parent ?>";
   var nama_parent    = "<?php echo htmlspecialchars($produk->nama_parent) ?>";
     
@@ -648,7 +549,6 @@
       }
   });
 
-  
   var id_sub_parent      = "<?php echo $produk->id_sub_parent ?>";
   var nama_sub_parent    = "<?php echo htmlentities($produk->nama_sub_parent); ?>"; 
     
@@ -656,7 +556,7 @@
   var $newOptionuom = $("<option></option>").val(id_sub_parent).html(nama_sub_parent);
   $("#sub_parent").empty().append($newOptionuom).trigger('change'); 
 
-  //select 2 produk parent
+  //select 2 sub parent
   $('#sub_parent').select2({
       allowClear: true,
       placeholder: "",
@@ -689,10 +589,64 @@
       }
   });
 
+  
+  autogenerate_value = 0;
+
+  //auto generate
+  $('#auto_generate').change(function(){
+    var auto_generate   = $('#auto_generate').is(":checked");    
+    if (auto_generate == true) {
+      autogenerate_value = 1;      
+      $('#kodeproduk').val('');
+      $('#kodeproduk').attr('disabled','disabled');
+    }else{
+      autogenerate_value = 0;
+      $('#kodeproduk').removeAttr('disabled');
+      $('#kodeproduk').val('');
+    }    
+  });
+
+  //select2 glacc
+  $('.glacc').select2({
+    allowClear: true,
+    placeholder: "",
+    ajax:{
+          dataType: 'JSON',
+          type : "POST",
+          url : "<?php echo base_url();?>warehouse/produk/get_coa_list",
+          //delay : 250,
+          data : function(params){
+            return{
+              glacc:params.term,
+            };
+          }, 
+          processResults:function(data){
+            var results = [];
+
+            $.each(data, function(index,item){
+                results.push({        
+                    id:item.kode_coa,            
+                    text:item.nama_coa
+                });
+            });
+            return {
+              results:results
+            };
+          },
+          error: function (xhr, ajaxOptions, thrownError){
+            //alert('Error data');
+            alert(xhr.responseText);
+          }
+    }
+  });
+
   //klik button simpan
     $('#btn-simpan').click(function(){
+     
+      kode_produk_before = "<?php echo $produk->kode_produk; ?>";
+      nama_produk_before = "<?php echo htmlentities($produk->nama_produk); ?>";
+
       $('#btn-simpan').button('loading');
-      var id            = '<?php echo $produk->id; ?>';
       
       var dapatdijual   = $('#dapatdijual').is(":checked");
       if (dapatdijual == true) {
@@ -718,28 +672,31 @@
                 e.overrideMimeType("application/json;charset=UTF-8");
             }
          },
-         data: {id              : id,
-                kodeproduk      : $('#kodeproduk').val(),
+         data: {kodeproduk      : $('#kodeproduk').val(),
                 namaproduk      : $('#namaproduk').val(),
                 dapatdijual     : dapatdijual_value,
                 dapatdibeli     : dapatdibeli_value,
+                typeproduk      : $('#typeproduk').val().toLowerCase(),
+                uomproduk       : $('#uomproduk').val(),
+                uomproduk2      : $('#uomproduk2').val(),
                 lebarjadi       : $('#lebarjadi').val(),
                 uom_lebarjadi   : $('#uom_lebarjadi').val(),
                 lebargreige     : $('#lebargreige').val(),
                 uom_lebargreige : $('#uom_lebargreige').val(),
-                typeproduk      : $('#typeproduk').val().toLowerCase(),
-                uomproduk       : $('#uomproduk').val(),
-                uomproduk2      : $('#uomproduk2').val(),
                 kategoribarang  : $('#kategoribarang').val(),
                 routeproduksi   : $('#routeproduksi').val(),
                 bom             : $('#bom').val(),
-                tanggaldibuat   : $('#tanggaldibuat').val(),
+                tanggaldibuat   : $('#tgldibuat').val(),
                 note            : $('#note').val(),
+                status          : 'tambah',
+                statusproduk    : $('#status').val(),
                 product_parent  : $('#product_parent').val(),
                 sub_parent      : $('#sub_parent').val(),
                 jenis_kain      : $('#jenis_kain').val(),
-                statusproduk   : $('#status').val(),// aktif/tidak aktif
-                status          : 'edit',
+                autogenerate    : autogenerate_value,
+                duplicate       : true,
+                kode_produk_before : kode_produk_before,
+                nama_produk_before : nama_produk_before
 
           },success: function(data){
             if(data.sesi == "habis"){
@@ -748,19 +705,20 @@
               window.location.replace('index');
             }else if(data.status == "failed"){
               //jika ada form belum keiisi
+              $('#btn-simpan').button('reset');
               unblockUI( function() {
                 setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
               });
-              document.getElementById(data.field).focus();
+              document.getElementById(data.field).focus();              
             }else{
              //jika berhasil disimpan/diubah
-              unblockUI( function() {                
-                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+              unblockUI( function() {
+                setTimeout(function() { 
+                  alert_notify(data.icon,data.message,data.type, function(){
+                  window.location.replace('edit/'+data.isi);
+                },1000); 
                 });
-              $("#foot").load(location.href + " #foot");
-    
-              var $newOptionuom = $("<option></option>").val(data.id).html(data.nama);
-              $("#sub_parent").empty().append($newOptionuom).trigger('change'); 
+              });
             }
             $('#btn-simpan').button('reset');
 
@@ -770,55 +728,6 @@
             $('#btn-simpan').button('reset');
           }
       });
-    });
-
-
-    // cek list bom produk
-    function cek_bom(kode_produk,nama_produk){
-      $("#view_data").modal({
-          show: true,
-          backdrop: 'static'
-      })
-      $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $('.modal-title').text('List BoM '+nama_produk);
-      $.post('<?php echo site_url()?>warehouse/produk/view_list_bom_produk_modal',
-          {kode_produk : kode_produk},
-          function(html){
-            setTimeout(function() {$(".view_body").html(html);  },1000);
-          }   
-      );
-    }
-
-
-    // cek list MO produk
-    function cek_mo(kode_produk,nama_produk){
-      $("#view_data").modal({
-          show: true,
-          backdrop: 'static'
-      })
-      $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-      $('.modal-title').text('List MO '+nama_produk);
-      $.post('<?php echo site_url()?>warehouse/produk/view_list_mo_produk_modal',
-          {kode_produk : kode_produk},
-          function(html){
-            setTimeout(function() {$(".view_body").html(html);  },1000);
-          }   
-      );
-    }
-
-    // duplicate produk
-    $(document).on('click','#btn-duplicate',function(e){
-          e.preventDefault();
-          var id          = "<?php echo $produk->id; ?>";
-          var kode_produk = "<?php echo $produk->kode_produk; ?>";
-          var duplicate   = 'true';
-
-          if(id == "" || kode_produk == ""){
-            alert_modal_warning('Kode Produk Kosong !');
-          }else{
-            var url = '<?php echo base_url() ?>warehouse/produk/add';
-            window.open(url+'?id='+ id+'&&duplicate='+duplicate+'&&kode_produk='+kode_produk,'_blank');
-          }
     });
    
 </script>
