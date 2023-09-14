@@ -97,8 +97,7 @@ class WaGroup extends MY_Controller {
                     ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
-            $this->output->set_status_header($ex->getCode() ?? 500)=======
-        
+            $this->output->set_status_header($ex->getCode() ?? 500)        
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
