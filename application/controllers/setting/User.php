@@ -35,7 +35,7 @@ class User extends MY_Controller {
             $row[] = $field->level;
             $row[] = $field->nama_departemen;
             $row[] = $field->telepon_wa;
-            $row[] = $field->aktif ? '<input class="switch-state-' . $field->username . '" type="checkbox" name="switch" value="' . $field->aktif . '" checked>' : '<input class="switch-state-' . $field->username . '" type="checkbox" value="' . $field->aktif . '" name="switch">';
+            $row[] = $field->aktif ? '<input class="switch_aktif switch-state-' . $field->username . '" type="checkbox" name="switch" value="' . $field->aktif . '" checked>' : '<input  class="switch_aktif switch-state-' . $field->username . '" type="checkbox" value="' . $field->aktif . '" name="switch">';
             $data[] = $row;
         }
 
@@ -232,11 +232,14 @@ class User extends MY_Controller {
                 throw new \Exception("Gagal Merubah Aktif User");
             }
             $jenis_log = "edit";
-            $note_log = $username . "| Set Aktif";
-            $this->_module->gen_history($sub_menu, $username, $jenis_log, $note_log, $username);
+
+            $note_log = end($users) . "| ";
+            $note_log .= $val ? 'Set Aktif' : 'Set Non Aktif';
+            $this->_module->gen_history($sub_menu, end($users), $jenis_log, $note_log, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+         
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')

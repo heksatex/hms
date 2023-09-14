@@ -150,27 +150,53 @@ class Trackinglot extends MY_Controller
                                     );
                 }
 
+                // reproses
+                $rep = $this->m_trackingLot->get_reproses_by_lot($txtlot);
+                foreach($rep as $reps){
+                  $kode_encrypt = encrypt_url($reps->kode_reproses);
+                  $result_record[] = array('tanggal' => $reps->tanggal, 
+                                    'kode'        => $reps->kode_reproses,
+                                    'link'        => 'ppic/reproses/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Reproses : Jenis '.$reps->nama_jenis.'  di  '.$reps->lokasi_asal.'. dari Lot '.$reps->lot.' menjadi Lot '.$reps->lot_new,
+                                    'status'      => $reps->nama_status,
+                                    'user'        => $reps->nama_user,
+                                  );
+                }
+
+                // SPLIT
+                $split = $this->m_trackingLot->get_split_by_lot($txtlot);
+                foreach($split as $splits){
+                  $kode_encrypt = encrypt_url($splits->kode_split);
+                  $result_record[] = array('tanggal' => $splits->tanggal, 
+                                    'kode'        => $splits->kode_split,
+                                    'link'        => 'warehouse/splitlot/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Lot ini di Split di '.$splits->nama_departemen.' Sebanyak '.$splits->total_split,
+                                    'status'      => '-',
+                                    'user'        => $splits->nama_user,
+                                  );
+                }
+
 
                 // arsort($result_record);
-                $result_record  =  $this->urutkan($result_record);
-                $sql_insert     = '';
-                foreach($result_record as $row){
-                  $sql_insert .= "('".$get['lot']."','".$row['tanggal']."','".$row['kode']."','".$row['keterangan']."','".$row['status']."','".$row['user']."','".$row['link']."' ), ";
-                }
+                $result_record1  =  $this->urutkan($result_record);
+                // $sql_insert     = '';
+                // foreach($result_record as $row){
+                //   $sql_insert .= "('".$get['lot']."','".$row['tanggal']."','".$row['kode']."','".$row['keterangan']."','".$row['status']."','".$row['user']."','".$row['link']."' ), ";
+                // }
                 
-                if(!empty($sql_insert)){
-                  $sql_insert = rtrim($sql_insert, ', ');
-                  $this->m_trackingLot->insert_tmp_tracking_lot_batch($sql_insert);
+                // if(!empty($sql_insert)){
+                //   $sql_insert = rtrim($sql_insert, ', ');
+                //   $this->m_trackingLot->insert_tmp_tracking_lot_batch($sql_insert);
                   
-                  $result_tmp = $this->m_trackingLot->get_tmp_tracking_lot_by_lot($txtlot);
-                }
+                //   $result_tmp = $this->m_trackingLot->get_tmp_tracking_lot_by_lot($txtlot);
+                // }
               
-                // delete tmp_tracking_by_lot()
-                $this->m_trackingLot->delete_tmp_tracking_lot_by_lot($txtlot);
+                // // delete tmp_tracking_by_lot()
+                // $this->m_trackingLot->delete_tmp_tracking_lot_by_lot($txtlot);
 
-                $callback = array('status' => 'success', 'message' => 'Data Barcode / Lot ditemukan !', 'icon' =>'fa fa-check', 'type' => 'success', 'info' => $result_info, 'record' => $result_tmp);
+                $callback = array('status' => 'success', 'message' => 'Data Barcode / Lot ditemukan !', 'icon' =>'fa fa-check', 'type' => 'success', 'info' => $result_info, 'record' => $result_record1);
             }else{
-                $callback = array('status' => 'success', 'message' => 'Data Barcode / Lot tidak ditemukan !', 'icon' =>'fa fa-check', 'type' => 'danger', 'info' => $result_info, 'record' => $result_record);
+                $callback = array('status' => 'failed', 'message' => 'Data Barcode / Lot tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger', 'info' => $result_info, 'record' => $result_record1);
             }
         }
     }
@@ -183,22 +209,44 @@ class Trackinglot extends MY_Controller
   function urutkan(array $result_record)
   {
     //print_r($result_record);
+    $result_record1  = [];
+    $result_record2  = [];
+    foreach($result_record as $rr){
+      if($rr['status'] == "Ready"){
+        $result_record1[] = array('tanggal' => $rr['tanggal'], 
+                                  'kode'        => $rr['kode'], 
+                                  'link'        => $rr['link'], 
+                                  'keterangan'  => $rr['keterangan'], 
+                                  'status'      => $rr['status'], 
+                                  'user'        => $rr['user'], 
+                                  );
+      }else{
+        $result_record2[] = array('tanggal' => $rr['tanggal'],  
+                                'kode'        => $rr['kode'], 
+                                'link'        => $rr['link'], 
+                                'keterangan'  => $rr['keterangan'], 
+                                'status'      => $rr['status'], 
+                                'user'        => $rr['user'], 
+                                );
+      }
+    }
 
-    $count = count($result_record);
+    $count = count($result_record2);
     for($i = 1; $i<$count; $i++){
-
-        $j = $i-1;
-        $element  = $result_record[$i];
-        while($j >= 0  && $result_record[$j] > $element){
-            $result_record[$j + 1] = $result_record[$j];
-            $result_record[$j] = $element;
+      // var_dump($result_record2[$i]['status']);
+      $j = $i-1;
+        $element  = $result_record2[$i];
+        while($j >= 0  && $result_record2[$j] > $element){
+          $result_record2[$j + 1] = $result_record2[$j];
+          $result_record2[$j] = $element;
             $j = $j - 1;
 
         }
 
     }
-    return $result_record;
-    //print_r($result_record);
+
+    // print_r($result_record);
+    return array_merge($result_record2, $result_record1);
   }
 
 }

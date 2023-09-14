@@ -28,13 +28,15 @@
                     <div class="box">
                         <div class="box-body">
                             <div class="col-xs-12 table-responsive">
-                                <table id="tableWaGroup" class="table table-striped">
+                                <table id="tableWaTemplate" class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>WA Group</th>
-                                            <th>Departemen</th>
-                                            <th>Dibuat</th> 
+                                            <th>Pesan</th>
+                                            <th>Group</th>
+                                            <th>Hari</th>
+                                            <th>Waktu Kirim</th>
+                                            <th>#</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -51,7 +53,7 @@
 
         <script>
             $(function () {
-                const table = $('#tableWaGroup').DataTable({
+                const table = $('#tableWaTemplate').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
@@ -64,15 +66,25 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('setting/wa_group/get_data') ?>",
+                        "url": "<?php echo site_url('setting/wa_schedule/get_data') ?>",
                         "type": "POST"
                     },
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0, 2, 3],
                             "orderable": false,
-                        },
+                        }
                     ]
+                });
+                $('#tableWaTemplate tbody').on('click', '.btn-delete-doc', function () {
+                    let dataid = $(this).data('id');
+                    deleteDocument('<?= site_url('setting/wa_schedule/delete') ?>', {id: dataid})
+                            .then(resp => {
+                                location.reload();
+                            }).catch(err => {
+                        let error = err.responseJSON;
+                        alert_notify(error.icon, error.message, error.type, function () {});
+                    });
                 });
             })
         </script>

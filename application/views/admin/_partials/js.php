@@ -32,93 +32,98 @@
 <script src="<?php echo base_url('dist/notify/bootstrap-notify.min.js') ?>"></script>
 <!-- Tags Input -->
 <script src="<?php echo base_url('dist/tags-input/bootstrap-tagsinput.js') ?>"></script>
- 
+<script type="module" src="<?php echo site_url('dist/js/main_module.js') ?>"></script>
 
+<script>
+    $(document).ajaxError(function (event, xhr, options) {
+        if (xhr.status === 401) {
+            loginFunc('<?php echo base_url('login/aksi_login'); ?>');
+//            $('#form-login').submit(false);
+        }
+
+    });</script>
 <script type="text/javascript">
     $(function () {
         $('#datetimepicker1').datetimepicker({
-            format : 'YYYY-MM-DD HH:mm:ss',
+            format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
         });
         $('#datetimepicker2').datetimepicker({
-            format : 'YYYY-MM-DD HH:mm:ss',
+            format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
         });
         $('#datetimepicker3').datetimepicker({
-            format : 'YYYY-MM-DD HH:mm:ss',
+            format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
         });
         $('#datetimepicker4').datetimepicker({
-            format : 'YYYY-MM-DD HH:mm:ss',
+            format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
         });
     });
+    //untuk alert notify
+    function alert_notify(icon, message, type, callback) {
+        $.notify({
+            icon: icon,
+            message: message,
+        }, {
+            type: type,
+            allow_dismiss: true,
+            newest_on_top: false,
+            showProgressbar: false,
+            placement: {
+                from: "top",
+                align: "right"
+            },
+            z_index: 2000,
+            //delay: 500,
+            timer: 500,
+        });
+        callback();
+    }
 
- 
-  //untuk alert notify
-  function alert_notify(icon,message,type,callback){
-    $.notify({
-      icon: icon,
-      message: message,  
-    },{
-      type : type,
-      allow_dismiss: true,
-      newest_on_top: false,
-      showProgressbar: false,
-      placement: {
-        from: "top",
-        align: "right"
-      },
-      z_index: 2000,
-      //delay: 500,
-      timer: 500,
-    });
-    callback();
-  }
+    //untuk  loading saat proses klik button
+    function please_wait(callback) {
+        //$('#block-page').block({ 
+        $.blockUI({
+            message: '<h4><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br> Please wait...</h4>',
+            //theme: false,
+            baseZ: 2000,
+            css: {
+                border: 'none',
+                padding: '0px',
+                backgroundColor: '#000',
+                '-webkit-border-radius': '10px',
+                '-moz-border-radius': '10px',
+                opacity: .5,
+                color: '#fff',
+                clear: "both",
+            },
+        });
+        callback();
+    }
 
-  //untuk  loading saat proses klik button
-  function please_wait(callback){
-    //$('#block-page').block({ 
-   $.blockUI({ 
-      message:  '<h4><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br> Please wait...</h4>',
-      //theme: false,
-      baseZ: 2000,
-      css: { 
-          border: 'none', 
-          padding: '0px', 
-          backgroundColor: '#000', 
-              '-webkit-border-radius': '10px', 
-              '-moz-border-radius': '10px', 
-          opacity: .5, 
-          color: '#fff',
-          clear: "both",
-    },
+    //unblock UI 
+    function unblockUI(callback) {
+        setTimeout($.unblockUI, 1000);
+        callback();
+    }
 
-    });
-    callback();
-  }
-
-  //unblock UI 
-  function unblockUI(callback){
-     setTimeout($.unblockUI, 1000);
-     callback();
-  }
-
-  //alert modal Warning
-  function alert_modal_warning(message){
-    bootbox.alert({
+    //alert modal Warning
+    function alert_modal_warning(message) {
+        bootbox.alert({
             title: "<font color='red'><li class='fa fa-warning'></li></font> Warning !",
             message: message,
-           // size: 'small',
-            buttons:{
-              ok: {
-                label: "ok",
-                className: 'btn-sm btn-primary',
-              }
+            // size: 'small',
+            buttons: {
+                ok: {
+                    label: "ok",
+                    className: 'btn-sm btn-primary',
+                }
             }
-    });
-    //callback();
-    return true;
-  }
+        });
+        //callback();
+        return true;
+    }
 
 </script>

@@ -878,7 +878,7 @@ class Colororder extends MY_Controller
                         } 
                       }
 
-                      $jenis_log   = "generated";
+                      $jenis_log   = "generate";
                       $note_log    = "Generated | ".$row;
                       $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);  
 

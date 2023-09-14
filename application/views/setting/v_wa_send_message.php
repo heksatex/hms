@@ -28,13 +28,14 @@
                     <div class="box">
                         <div class="box-body">
                             <div class="col-xs-12 table-responsive">
-                                <table id="tableWaGroup" class="table table-striped">
+                                <table id="tableWaSend" class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>WA Group</th>
-                                            <th>Departemen</th>
-                                            <th>Dibuat</th> 
+                                            <th>User</th>
+                                            <th>Group</th>
+                                            <th>Status</th>
+                                            <th>Created At</th>               
                                         </tr>
                                     </thead>
                                 </table>
@@ -48,10 +49,9 @@
             <?php $this->load->view("admin/_partials/modal.php") ?>
         </div>
         <?php $this->load->view("admin/_partials/js.php") ?>
-
         <script>
-            $(function () {
-                const table = $('#tableWaGroup').DataTable({
+        $(function () {
+                const table = $('#tableWaSend').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
@@ -64,7 +64,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('setting/wa_group/get_data') ?>",
+                        "url": "<?php echo site_url('setting/wa_send_message/get_data') ?>",
                         "type": "POST"
                     },
                     "columnDefs": [

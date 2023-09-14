@@ -4,7 +4,8 @@
     <head>
 
         <?php $this->load->view("admin/_partials/head.php") ?>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/4.0.0-alpha.1/css/bootstrap-switch.min.css">
+        <link rel="stylesheet" href="<?php echo base_url('dist/css/bootstrap-switch.min.css') ?>">
+
     </head>
 
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -64,7 +65,7 @@
         </div>
 
         <?php $this->load->view("admin/_partials/js.php") ?>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/4.0.0-alpha.1/js/bootstrap-switch.min.js"></script>
+        <script src="<?php echo base_url('dist/js/bootstrap-switch.min.js') ?>"></script>
         <script>
 
             var table;
@@ -94,13 +95,12 @@
 
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0, 6],
                             "orderable": false,
                         },
                     ],
-                    "initComplete": function (setting, json) {
-                        $('[name="switch"]').bootstrapSwitch({
-                            size: 'large',
+                    "fnDrawCallback": function (setting, json) {
+                        $('.switch_aktif').bootstrapSwitch({
                             onColor: 'primary',
                             offColor: 'danger',
                             onSwitchChange: function (event, state) {
@@ -120,17 +120,14 @@
                                         users: uclass,
                                         aktif: valUpdate
                                     }, success: function (data) {
-                                        if (data.sesi == "habis") {
-                                            //alert jika session habis
-                                            alert_modal_warning(data.message);
-                                            window.location.replace('index');
-                                        } else if (data.status == "failed") {
+
+                                        if (data.status == "failed") {
                                             //jika ada form belum keiisi
                                             unblockUI(function () {
                                                 setTimeout(function () {
                                                     alert_notify(data.icon, data.message, data.type, function () {});
                                                 }, 1000);
-                                                $("."+uclass).trigger('switchChange');
+                                                $("." + uclass).trigger('switchChange');
                                             });
 
                                         } else {
@@ -139,14 +136,18 @@
                                                 setTimeout(function () {
                                                     alert_notify(data.icon, data.message, data.type, function () {});
                                                 }, 1000);
-                                                 $("."+uclass).val(valUpdate)
+
+                                                $("." + uclass).val(valUpdate)
                                             });
                                         }
 
                                     }, error: function (xhr, ajaxOptions, thrownError) {
-                                        alert(xhr.responseText);
+
+                                        if (xhr.status === 401) {
+                                            loginFunc('<?php echo base_url('login/aksi_login'); ?>');
+                                        }
                                         unblockUI(function () {});
-                                        $("."+uclass).trigger('switchChange');
+                                        $("." + uclass).trigger('switchChange');
                                     }
                                 });
 //                                $("."+test).trigger('switchChange')

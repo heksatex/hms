@@ -99,6 +99,13 @@ class M_user extends CI_Model {
         return $this->db->query("SELECT * FROM user where username = '$username' ")->row();
     }
 
+    public function get_user_by_dept(array $kodeDept) {
+        $this->db->from('user');
+        $this->db->where_in('dept', $kodeDept);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function get_priv_by_username($username) {
         return $this->db->query("SELECT main_menu_sub_kode FROM user_priv where username = '$username' ")->result();
     }

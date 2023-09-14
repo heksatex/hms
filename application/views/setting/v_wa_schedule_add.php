@@ -28,10 +28,10 @@
                     <!--  box content -->
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Form Edit - <?= $wa->wa_group ?></h3>
+                            <h3 class="box-title">Form Tambah</h3>
                         </div>
                         <div class="box-body">
-                            <form class="form-horizontal" name="form-wa-group" id="form-wa-group" method="POST" action="<?= base_url('setting/wa_group/update') ?>">
+                            <form  method="post" class="form-horizontal" name="form-wa-schedule" id="form-wa-schedule" action="<?= base_url('setting/wa_schedule/simpan') ?>">
                                 <div class="form-group">                  
                                     <div class="col-md-12" >
                                     </div>
@@ -40,31 +40,44 @@
                                     <div class="col-md-12">
                                         <div class="col-md-6 col-xs-12">
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label class="form-label required">WA Group</label></div>
+                                                <div class="col-xs-6"><label class="form-label required">Waktu Kirim</label></div>
                                                 <div class="col-xs-6">
-                                                    <input type="text" class="form-control input-sm" name="wa_group" value="<?= $wa->wa_group ?>" required/>
-                                                    <input type="hidden" name="id" value="<?= $id ?>">
+                                                    <input type="time" class="form-control input-sm" name="waktu_kirim"  required/>
                                                 </div>
                                                 <button type="submit" id="form_simpan" style="display: none"></button>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label>Departemen</label></div>
+                                                <div class="col-xs-6"><label>Group</label></div>
                                                 <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="department[]" multiple>
+                                                    <select class="form-control input-sm select2" name="group[]" multiple>
                                                         <?php
-                                                        foreach ($list_dept as $key => $value) {
-                                                            $seleced = '';
-                                                            if (!is_null($wa->kode)) {
-                                                                $seleced = in_array($value->kode, $wa->kode) ? 'selected' : '';
-                                                            }
-
-                                                            echo "<option value='$value->kode' $seleced>$value->nama</option>";
+                                                        foreach ($group as $key => $value) {
+                                                            echo "<option value='$value->id'>$value->wa_group</option>";
                                                         }
                                                         ?>
                                                     </select>
                                                 </div>
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Hari</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm select2" name="hari[]" multiple required>
+                                                        <?php
+                                                        foreach ($days as $key => $value) {
+                                                            echo "<option value='$key'>$value</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required" >Pesan</label></div>
+                                                <div class="col-xs-6">
+                                                    <textarea type="text" class="form-control input-sm" name="pesan" required></textarea>
+                                                </div>                                    
+                                            </div>
                                         </div>
+
                                     </div>
                                 </div>
                             </form>
@@ -76,17 +89,17 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
-
                 $('.select2').select2();
 
-                const formWaGroup = document.forms.namedItem("form-wa-group");
-                formWaGroup.addEventListener(
+                const formschedule = document.forms.namedItem("form-wa-schedule");
+                formschedule.addEventListener(
                         "submit",
                         (event) => {
-                    request("form-wa-group").then(
+                    please_wait(function () {});
+                    request("form-wa-schedule").then(
                             response => {
                                 if (response.status === 200)
-                                    window.location.replace('<?php echo base_url('setting/wa_group') ?>');
+                                    window.location.replace('<?php echo base_url('setting/wa_schedule') ?>');
 
                                 if (response.status === 401) {
                                     loginFunc('<?php echo base_url('login/aksi_login'); ?>');
