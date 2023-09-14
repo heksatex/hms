@@ -35,7 +35,8 @@
                                             <th>Pesan</th>
                                             <th>Group</th>
                                             <th>Hari</th>
-                                            <th>Waktu Kirim</th>          
+                                            <th>Waktu Kirim</th>
+                                            <th>#</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -70,10 +71,20 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0,2,3],
+                            "targets": [0, 2, 3],
                             "orderable": false,
-                        },
+                        }
                     ]
+                });
+                $('#tableWaTemplate tbody').on('click', '.btn-delete-doc', function () {
+                    let dataid = $(this).data('id');
+                    deleteDocument('<?= site_url('setting/wa_schedule/delete') ?>', {id: dataid})
+                            .then(resp => {
+                                location.reload();
+                            }).catch(err => {
+                        let error = err.responseJSON;
+                        alert_notify(error.icon, error.message, error.type, function () {});
+                    });
                 });
             })
         </script>

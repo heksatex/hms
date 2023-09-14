@@ -103,17 +103,17 @@ class WaScheduleMessage extends MY_Controller {
 
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
-            $group = $this->input->post('group') ?? [];
-            $hari = $this->input->post('hari') ?? [];
+            $group = $this->input->post('group');
+            $hari = $this->input->post('hari');
             $this->_module->startTransaction();
             if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu)) {
-                foreach ($hari as $key => $value) {
+                foreach ($this->input->post('hari') as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Hari Yang Dipilih', 500);
                         break;
                     }
                 }
-                foreach ($group as $key => $value) {
+                foreach ($this->input->post('group') as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanGroup($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Group Yang Dipilih', 500);
                         break;
@@ -137,6 +137,7 @@ class WaScheduleMessage extends MY_Controller {
 
     public function update() {
         try {
+
             if (empty($this->session->userdata('status'))) {
                 throw new \Exception('Waktu Anda Telah Habis', 401);
             }
@@ -152,15 +153,14 @@ class WaScheduleMessage extends MY_Controller {
             }
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
-            $group = $this->input->post('group') ?? [];
-            $hari = $this->input->post('hari') ?? [];
+            $group = $this->input->post('group');
+            $hari = $this->input->post('hari');
             $this->_module->startTransaction();
 
-            if (!$this->m_WaScheduleMessage->update($kode_decrypt, ['message' => $pesan, 'send_time' => $waktu])) {
+            if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu)) {
                 throw new \Exception("Gagal Mengubah Data", 500);
             }
             $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
-            $this->m_WaScheduleMessage->deleteGroup($kode_decrypt);
 
             foreach ($hari as $key => $value) {
                 if (!$this->m_WaScheduleMessage->simpanDays($kode_decrypt, $value)) {
@@ -168,9 +168,8 @@ class WaScheduleMessage extends MY_Controller {
                     break;
                 }
             }
-            log_message('error', json_encode($group));
+            $this->m_WaScheduleMessage->deleteGroup($kode_decrypt);
             foreach ($group as $key => $value) {
-                
                 if (!$this->m_WaScheduleMessage->simpanGroup($kode_decrypt, $value)) {
                     throw new Exception('Gagal Mengubah Data,Cek Group Yang Dipilih', 500);
                     break;
@@ -182,6 +181,39 @@ class WaScheduleMessage extends MY_Controller {
                 throw new \Exception('Gagal Mengubah Data', 500);
             }
             $this->_module->gen_history($sub_menu, 'wa_schedule', 'Edit', 'Mengubah Pesan Schedule ' . $pesan, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->finishTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function delete() {
+        try {
+            if (empty($this->session->userdata('status'))) {
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $kode_decrypt = decrypt_url($this->input->post('id'));
+            if (!$kode_decrypt) {
+                throw new \Exception('Gagal Menghapus Data', 500);
+            }
+
+            $this->_module->startTransaction();
+            $this->m_WaScheduleMessage->deleteSchedule($kode_decrypt);
+            $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
+            $this->m_WaScheduleMessage->deleteGroup($kode_decrypt);
+
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Mengubah Data', 500);
+            }
+            
+            $this->_module->gen_history($sub_menu, 'wa_schedule', 'DELETE', 'Menghapus Pesan Schedule ID:' . $kode_decrypt, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -207,6 +239,7 @@ class WaScheduleMessage extends MY_Controller {
                     $field->groupname,
                     $field->day,
                     $field->send_time,
+                    '<button type="button" class="btn btn-danger btn-sm btn-delete-doc" data-id="' . $kode_encrypt . '"><i class="fa fa-trash"></></button'
                 );
                 $data[] = $row;
             }

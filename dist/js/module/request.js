@@ -21,4 +21,42 @@ const requests = function (form_name) {
 
 }
 
-export {requests}
+const requestDelete = function (uri, objectData = {}) {
+
+
+    return new Promise((resolve, reject) => {
+        let dialog = bootbox.confirm({
+            size: 'small',
+            message: 'Yakin Menghapus Dokumen?',
+            callback: function (result) {
+                if (!result) {
+
+                    return true;
+                }
+                please_wait(function () {});
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: uri,
+                    data: objectData,
+                    success: function (data) {
+                        dialog.modal('hide');
+                        unblockUI(function (){})
+                        resolve(data)
+                    },
+                    error: function (error) {
+                        dialog.modal('hide');
+                        unblockUI(function (){})
+                        reject(error)
+                    }
+                });
+
+            }
+        });
+
+    });
+
+
+}
+
+export {requests, requestDelete}

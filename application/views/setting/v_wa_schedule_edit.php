@@ -43,9 +43,9 @@
                                                 <div class="col-xs-6"><label class="form-label required">Waktu Kirim</label></div>
                                                 <div class="col-xs-6">
                                                     <input type="time" class="form-control input-sm" name="waktu_kirim" value="<?= $datas->send_time ?>" required/>
-                                                    <input type="hidden" name="id" value="<?=$id?>">
+                                                    <input type="hidden" name="id" value="<?= $id ?>">
                                                 </div>
-                                                
+
                                                 <button type="submit" id="form_simpan" style="display: none"></button>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -53,11 +53,10 @@
                                                 <div class="col-xs-6">
                                                     <select class="form-control input-sm select2" name="group[]" multiple>
                                                         <?php
-                                                                        
                                                         foreach ($group as $key => $value) {
                                                             $seleced = '';
                                                             if (!is_null($datas->groupid)) {
-                                                                $seleced = in_array($value->id, [7,8]) ? 'selected' : '';
+                                                                $seleced = in_array($value->id, [7, 8]) ? 'selected' : '';
                                                             }
                                                             echo "<option value='$value->id' $seleced>$value->wa_group</option>";
                                                         }
@@ -106,7 +105,9 @@
                 formschedule.addEventListener(
                         "submit",
                         (event) => {
+                    const formData = new FormData($('#form-wa-schedule')[0]);
                     please_wait(function () {});
+
                     request("form-wa-schedule").then(
                             response => {
                                 if (response.status === 200)

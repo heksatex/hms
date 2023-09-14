@@ -8,7 +8,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_WaGroup extends CI_Model {
 
-    var $column_order = array(null, 'wg.wa_group', 'wg.created_at');
+    var $column_order = array(null, 'wg.wa_group', 'kode','wg.created_at');
     var $column_search = array('wg.wa_group');
     var $order = array('wg.wa_group', 'asc');
     var $table = "wa_group";

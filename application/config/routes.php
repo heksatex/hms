@@ -85,3 +85,4 @@ $route['setting/wa_schedule/edit/([a-zA-Z0-9]+)']['GET'] = 'setting/WaScheduleMe
 $route['setting/wa_schedule/get_data']['POST'] = 'setting/WaScheduleMessage/getData';
 $route['setting/wa_schedule/simpan']['POST'] = 'setting/WaScheduleMessage/simpan';
 $route['setting/wa_schedule/update']['POST'] = 'setting/WaScheduleMessage/update';
+$route['setting/wa_schedule/delete']['POST'] = 'setting/WaScheduleMessage/delete';
