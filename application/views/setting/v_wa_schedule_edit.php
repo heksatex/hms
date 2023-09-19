@@ -42,7 +42,7 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required">Waktu Kirim</label></div>
                                                 <div class="col-xs-6">
-                                                    <input type="time" class="form-control input-sm" name="waktu_kirim" value="<?= $datas->send_time ?>" required/>
+                                                    <input type="text" class="form-control input-sm time" name="waktu_kirim" value="<?= $datas->send_time ?>" required/>
                                                     <input type="hidden" name="id" value="<?= $id ?>">
                                                 </div>
 
@@ -56,7 +56,7 @@
                                                         foreach ($group as $key => $value) {
                                                             $seleced = '';
                                                             if (!is_null($datas->groupid)) {
-                                                                $seleced = in_array($value->id, [7, 8]) ? 'selected' : '';
+                                                                $seleced = in_array($value->id, $datas->groupid) ? 'selected' : '';
                                                             }
                                                             echo "<option value='$value->id' $seleced>$value->wa_group</option>";
                                                         }
@@ -100,7 +100,9 @@
         <script>
             $(function () {
                 $('.select2').select2();
-
+                $(".time").datetimepicker({
+                    format: 'HH:mm:ss'
+                });
                 const formschedule = document.forms.namedItem("form-wa-schedule");
                 formschedule.addEventListener(
                         "submit",

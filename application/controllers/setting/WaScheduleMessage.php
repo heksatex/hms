@@ -37,13 +37,13 @@ class WaScheduleMessage extends MY_Controller {
         ]
     );
     protected $days = array(
-        'monday' => 'SENIN',
-        'tuesday' => 'SELASA',
-        'wednesday' => 'RABU',
-        'thursday' => 'KAMIS',
-        'friday' => 'JUMAT',
-        'saturday' => 'SABTU',
-        'sunday' => 'MINGGU'
+        'monday' => 'Monday',
+        'tuesday' => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+        'sunday' => 'Sunday'
     );
 
     public function __construct() {

@@ -42,7 +42,7 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required">Waktu Kirim</label></div>
                                                 <div class="col-xs-6">
-                                                    <input type="time" class="form-control input-sm" name="waktu_kirim"  required/>
+                                                    <input type="text" class="form-control input-sm time" name="waktu_kirim"  required/>
                                                 </div>
                                                 <button type="submit" id="form_simpan" style="display: none"></button>
                                             </div>
@@ -89,6 +89,9 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
+                $(".time").datetimepicker({
+                    format: 'HH:mm:ss',
+                });
                 $('.select2').select2();
 
                 const formschedule = document.forms.namedItem("form-wa-schedule");
