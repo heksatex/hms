@@ -914,62 +914,62 @@ class Productionorder extends MY_Controller
 
                     //jika GENERATE produk TRUE 
                     if($generate_produk == TRUE){
-    	            
-    	            if(!empty($sql_stock_move_batch)){
-    	              $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
-    	              $this->_module->create_stock_move_batch($sql_stock_move_batch);
+                        
+                        if(!empty($sql_stock_move_batch)){
+                        $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
+                        $this->_module->create_stock_move_batch($sql_stock_move_batch);
 
-    	              $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
-    	              $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
-    	            }
+                        $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
+                        $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
+                        }
 
-    	            if(!empty($sql_out_batch)){
-    	              $sql_out_batch = rtrim($sql_out_batch, ', ');
-    	              $this->_module->simpan_pengiriman_batch($sql_out_batch);
+                        if(!empty($sql_out_batch)){
+                        $sql_out_batch = rtrim($sql_out_batch, ', ');
+                        $this->_module->simpan_pengiriman_batch($sql_out_batch);
 
-                      if(!empty($sql_out_items_batch)){
-                        $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
-                        $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
-                      }
+                        if(!empty($sql_out_items_batch)){
+                            $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
+                            $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
+                        }
 
-                      $sql_log_history_out = rtrim($sql_log_history_out, ', ');
-                      $this->_module->simpan_log_history_batch($sql_log_history_out);
-    	            }
+                        $sql_log_history_out = rtrim($sql_log_history_out, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_out);
+                        }
 
-    	            if(!empty($sql_in_batch)){
-    	              $sql_in_batch = rtrim($sql_in_batch, ', ');
-    	              $this->_module->simpan_penerimaan_batch($sql_in_batch);
+                        if(!empty($sql_in_batch)){
+                        $sql_in_batch = rtrim($sql_in_batch, ', ');
+                        $this->_module->simpan_penerimaan_batch($sql_in_batch);
 
-                      if(!empty($sql_in_items_batch)){
-                        $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
-                        $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
-                      }
+                        if(!empty($sql_in_items_batch)){
+                            $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
+                            $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);
+                        }
 
-    	              $where = rtrim($where, ',');
-    	              $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
-    	              $this->_module->update_reff_batch($sql_update_reff_out_batch);
+                        $where = rtrim($where, ',');
+                        $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
+                        $this->_module->update_reff_batch($sql_update_reff_out_batch);
 
-                      $sql_log_history_in = rtrim($sql_log_history_in, ', ');
-                      $this->_module->simpan_log_history_batch($sql_log_history_in);
-    	            }
+                        $sql_log_history_in = rtrim($sql_log_history_in, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_in);
+                        }
 
-    	            if(!empty($sql_mrp_prod_batch)){
-    	              $sql_mrp_prod_batch = rtrim($sql_mrp_prod_batch, ', ');
-    	              $this->_module->simpan_mrp_production_batch($sql_mrp_prod_batch);
+                        if(!empty($sql_mrp_prod_batch)){
+                        $sql_mrp_prod_batch = rtrim($sql_mrp_prod_batch, ', ');
+                        $this->_module->simpan_mrp_production_batch($sql_mrp_prod_batch);
 
-                      if(!empty($sql_mrp_prod_rm_batch)){
-                        $sql_mrp_prod_rm_batch = rtrim($sql_mrp_prod_rm_batch, ', ');
-                        $this->_module->simpan_mrp_production_rm_target_batch($sql_mrp_prod_rm_batch);
-                      }
+                        if(!empty($sql_mrp_prod_rm_batch)){
+                            $sql_mrp_prod_rm_batch = rtrim($sql_mrp_prod_rm_batch, ', ');
+                            $this->_module->simpan_mrp_production_rm_target_batch($sql_mrp_prod_rm_batch);
+                        }
 
-                      if(!empty($sql_mrp_prod_fg_batch)){
-                        $sql_mrp_prod_fg_batch = rtrim($sql_mrp_prod_fg_batch, ', ');
-                        $this->_module->simpan_mrp_production_fg_target_batch($sql_mrp_prod_fg_batch);
-                      }
+                        if(!empty($sql_mrp_prod_fg_batch)){
+                            $sql_mrp_prod_fg_batch = rtrim($sql_mrp_prod_fg_batch, ', ');
+                            $this->_module->simpan_mrp_production_fg_target_batch($sql_mrp_prod_fg_batch);
+                        }
 
-                      $sql_log_history_mo = rtrim($sql_log_history_mo, ', ');
-                      $this->_module->simpan_log_history_batch($sql_log_history_mo);
-    	            }
+                        $sql_log_history_mo = rtrim($sql_log_history_mo, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_mo);
+                        }
 
     	            	//Start Method IN baru setelah route produksi di atas
 
@@ -1085,30 +1085,30 @@ class Productionorder extends MY_Controller
     		            }
     		            //finish method IN baru
     		        
-    		        //update detail items jadi generate
-    		        $this->m_productionOrder->update_status_production_order_items($kode,$row_order,$status);
+    		            //update detail items jadi generate
+                        $this->m_productionOrder->update_status_production_order_items($kode,$row_order,$status);
 
-       				$cek_details = $this->m_productionOrder->cek_status_production_order_items($kode,'')->num_rows(); 
+                        $cek_details = $this->m_productionOrder->cek_status_production_order_items($kode,'')->num_rows(); 
 
-                    $where_status       = "AND status NOT IN ('generated','cancel')";
-                    $cek_details_status = $this->m_productionOrder->cek_status_production_order_items($kode,$where_status)->num_rows();
+                        $where_status       = "AND status NOT IN ('generated','cancel')";
+                        $cek_details_status = $this->m_productionOrder->cek_status_production_order_items($kode,$where_status)->num_rows();
 
-    	        	if($cek_details == 0  ){
-    	        		$this->m_productionOrder->update_status_production_order($kode,'draft');
-    	        	}else if($cek_details > 0){
-    	        		if($cek_details_status == 0){
-    	        			$this->m_productionOrder->update_status_production_order($kode,'done');
-    	        		}else{
-    	        			$this->m_productionOrder->update_status_production_order($kode,'draft');
-    	        		}	
-    	        	}
+                        if($cek_details == 0  ){
+                            $this->m_productionOrder->update_status_production_order($kode,'draft');
+                        }else if($cek_details > 0){
+                            if($cek_details_status == 0){
+                                $this->m_productionOrder->update_status_production_order($kode,'done');
+                            }else{
+                                $this->m_productionOrder->update_status_production_order($kode,'draft');
+                            }	
+                        }
 
-    	            
-    	            $jenis_log   = "generate";
-    	            $note_log    = "Generated | ".$kode." | ".$nama_produk." | ".$row_order;
-    	            $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);            
-    					
-    	            $callback = array('status' => 'success','message' => 'Generate Data Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
+                        
+                        $jenis_log   = "generate";
+                        $note_log    = "Generated | ".$kode." | ".$nama_produk." | ".$row_order;
+                        $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);            
+                            
+                        $callback = array('status' => 'success','message' => 'Generate Data Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
 
                     }// end if cek produk generate
 

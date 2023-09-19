@@ -236,7 +236,7 @@ class _module extends CI_Model {
     }
 
     public function cek_bom($kode_produk) {//production_order, procurement_order, procurement_purchase
-        return $this->db->query("SELECT kode_produk,kode_bom,qty FROM bom WHERE kode_produk  = '$kode_produk'");
+        return $this->db->query("SELECT kode_produk,kode_bom,qty,status_bom FROM bom WHERE kode_produk  = '$kode_produk' ORDER BY tanggal desc");
     }
 
     public function cek_required_bom_by_kode_produk($kode_produk) {
