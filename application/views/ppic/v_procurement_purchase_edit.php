@@ -312,7 +312,7 @@
     var index = $("#procurements tbody tr:last-child").index();
     var row   ='<tr class="">'
           + '<td></td>'
-          + '<td><select type="text" class="form-control input-sm width-150 prod" name="Product" id="product"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
+          + '<td><select type="text" class="form-control input-sm width-150 prod" name="Product" id="product" style="min-width:100%"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
           + '<td><div class="input-group width-150 date" id="sch_date" ><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
           + '<td><input type="text" class="form-control input-sm width-100 qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>'
           + '<td><select type="text" class="form-control input-sm width-80 uom" name="Uom" id="uom"><option value=""></option><?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
