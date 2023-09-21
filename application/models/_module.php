@@ -753,15 +753,16 @@ class _module extends CI_Model {
     }
 
     public function startTransaction() {
-        $this->db->trans_begin();
+        $this->db->trans_start();
     }
 
     public function finishTransaction() {
+        $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE) {
-            $this->db->trans_rollback();
+//            $this->db->trans_rollback();
             return false;
         } else {
-            $this->db->trans_commit();
+//            $this->db->trans_commit();
             return true;
         }
     }
