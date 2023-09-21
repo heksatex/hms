@@ -34,7 +34,7 @@
                                             <th class="no">No</th>
                                             <th>Pesan</th>
                                             <th>Group</th>
-                                            <th>Hari</th>
+                                            <th>Hari / Tanggal</th>
                                             <th>Waktu Kirim</th>
                                             <th>#</th>
                                         </tr>

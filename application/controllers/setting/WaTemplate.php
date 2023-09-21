@@ -164,7 +164,7 @@ class WaTemplate extends MY_Controller {
         }
     }
 
-    protected function getValue($template):array {
+    protected function getValue($template): array {
         preg_match_all('/{(.*?)}/', $template, $match);
         return $match[1] ?? [];
     }

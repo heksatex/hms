@@ -32,6 +32,7 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
+                                            <th>Message</th>
                                             <th>User</th>
                                             <th>Group</th>
                                             <th>Status</th>
@@ -50,7 +51,7 @@
         </div>
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
-        $(function () {
+            $(function () {
                 const table = $('#tableWaSend').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -69,8 +70,14 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0, 1],
                             "orderable": false,
+                        },
+                        {
+                            "targets": 1,
+                            render: function (data, type, full, meta) {
+                                return "<div class='text-wrap width-400'>" + data + "</div>";
+                            }
                         },
                     ]
                 });

@@ -59,12 +59,24 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label class="form-label required">Hari</label></div>
+                                                <div class="col-xs-6"><label class="form-label required">Setiap (Hari)</label></div>
                                                 <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="hari[]" multiple required>
+                                                    <select class="form-control input-sm select2" name="hari[]" id="byhari" multiple>
                                                         <?php
                                                         foreach ($days as $key => $value) {
                                                             echo "<option value='$key'>$value</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Setiap (Tanggal)</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm select2" name="tanggal[]" id="bytanggal" multiple>
+                                                        <?php
+                                                        for ($i = 1; $i <= 31; $i++) {
+                                                            echo "<option value='$i'>$i</option>";
                                                         }
                                                         ?>
                                                     </select>
@@ -93,7 +105,14 @@
                     format: 'HH:mm:ss',
                 });
                 $('.select2').select2();
-
+                $('#bytanggal').on("select2:selecting", function (e) {
+                    $('#byhari').val(null).trigger('change');
+                });
+                
+                $('#byhari').on("select2:selecting", function (e) {
+                    $('#bytanggal').val(null).trigger('change');
+                });
+                
                 const formschedule = document.forms.namedItem("form-wa-schedule");
                 formschedule.addEventListener(
                         "submit",
