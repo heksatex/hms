@@ -53,7 +53,7 @@
                                                     <select class="form-control input-sm select2" name="department[]" multiple>
                                                         <?php
                                                         foreach ($list_dept as $key => $value) {
-                                                            echo "<option value='$value->kode'>$value->nama</option>";
+                                                            echo "<option value='$value->kode'>$value->nama_departemen</option>";
                                                         }
                                                         ?>
                                                     </select>

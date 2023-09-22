@@ -40,6 +40,15 @@
                                     <div class="col-md-12">
                                         <div class="col-md-6 col-xs-12">
                                             <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Nama</label></div>
+                                                <div class="col-xs-6">
+                                                    <input type="text" class="form-control input-sm" name="nama" required/>
+
+                                                </div>
+
+                                                <button type="submit" id="form_simpan" style="display: none"></button>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required">Waktu Kirim</label></div>
                                                 <div class="col-xs-6">
                                                     <input type="text" class="form-control input-sm time" name="waktu_kirim"  required/>
@@ -47,9 +56,9 @@
                                                 <button type="submit" id="form_simpan" style="display: none"></button>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label>Group</label></div>
+                                                <div class="col-xs-6"><label class="form-label required">Group</label></div>
                                                 <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="group[]" multiple>
+                                                    <select class="form-control input-sm select2" name="group[]" required multiple>
                                                         <?php
                                                         foreach ($group as $key => $value) {
                                                             echo "<option value='$value->id'>$value->wa_group</option>";
@@ -83,9 +92,23 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Setiap (Custom)</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm select2" name="custom[]" id="bycustom" multiple>
+                                                       
+                                                        <!--<option value="last_month">Akhir Bulan</option>-->
+                                                        <?php
+                                                        foreach ($customSchedule as $key => $value) {
+                                                            echo "<option value='$key'>$value</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required" >Pesan</label></div>
                                                 <div class="col-xs-6">
-                                                    <textarea type="text" class="form-control input-sm" name="pesan" required></textarea>
+                                                    <textarea type="text" class="form-control input-sm resize-ta" id="pesan" name="pesan" required></textarea>
                                                 </div>                                    
                                             </div>
                                         </div>
@@ -104,15 +127,25 @@
                 $(".time").datetimepicker({
                     format: 'HH:mm:ss',
                 });
-                $('.select2').select2();
+                $('.select2').select2({
+                    allowClear: true,
+                    placeholder: 'Pilih',
+
+                });
                 $('#bytanggal').on("select2:selecting", function (e) {
                     $('#byhari').val(null).trigger('change');
+                    $('#bycustom').val(null).trigger('change');
                 });
-                
+
                 $('#byhari').on("select2:selecting", function (e) {
                     $('#bytanggal').val(null).trigger('change');
+                    $('#bycustom').val(null).trigger('change');
                 });
-                
+                $('#bycustom').on("select2:selecting", function (e) {
+                    $('#bytanggal').val(null).trigger('change');
+                    $('#byhari').val(null).trigger('change');
+                });
+                $('#pesan').keyup();
                 const formschedule = document.forms.namedItem("form-wa-schedule");
                 formschedule.addEventListener(
                         "submit",

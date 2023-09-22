@@ -8,8 +8,8 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_WaScheduleMessage extends CI_Model {
 
-    var $column_order = array(null, 'wsm.message', 'groupname', 'day', 'wsm.send_time');
-    var $column_search = array('wsm.message');
+    var $column_order = array(null, 'wsm.nama', 'wsm.message', 'groupname', 'day', 'wsm.send_time');
+    var $column_search = array('wsm.message', 'wsm.nama');
     var $order = array('wsm.id', 'desc');
     var $table = "wa_schedule_message";
 
@@ -18,7 +18,7 @@ class M_WaScheduleMessage extends CI_Model {
         $this->db->from($this->table . ' as wsm');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(day) as day from wa_schedule_message_days GROUP BY wa_schedule_message_id) as b', 'b.wa_schedule_message_id = wsm.id', 'LEFT');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(wa_group_id) as groupid,GROUP_CONCAT(d.wa_group) as groupname from wa_schedule_message_group as c '
-                . ' join wa_group as d on d.id = c.wa_group_id GROUP BY wa_schedule_message_id) d', 'b.wa_schedule_message_id = wsm.id', 'LEFT');
+                . ' join wa_group as d on d.id = c.wa_group_id GROUP BY wa_schedule_message_id) d', 'd.wa_schedule_message_id = wsm.id', 'LEFT');
         $this->db->group_by('wsm.id');
         foreach ($this->column_search as $key => $value) {
             if ($_POST["search"]["value"]) {
@@ -33,7 +33,7 @@ class M_WaScheduleMessage extends CI_Model {
             $this->db->order_by(key($order), $order[key($order)]);
         }
     }
-    
+
     public function getCountDataFiltered() {
         $this->getDataQuery();
         $query = $this->db->get();
@@ -46,8 +46,9 @@ class M_WaScheduleMessage extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function simpan($pesan, $waktu_kirim) {
+    public function simpan($pesan, $waktu_kirim, $nama) {
         $this->db->insert($this->table, array(
+            'nama' => $nama,
             'message' => addslashes($pesan),
             'send_time' => addslashes($waktu_kirim),
             'created_at' => date('Y-m-d H:i:s')
@@ -55,10 +56,14 @@ class M_WaScheduleMessage extends CI_Model {
         return $this->db->insert_id() ?? null;
     }
 
-    public function update($id, $pesan, $waktu_kirim) {
+    public function update($id, $pesan, $waktu_kirim, $nama, $setNullLastExe = false) {
         $this->db->where('id', $id);
         $this->db->set('message', $pesan);
+        $this->db->set('nama', $nama);
         $this->db->set('send_time', $waktu_kirim);
+        if ($setNullLastExe) {
+            $this->db->set('last_execution', null);
+        }
         $this->db->update($this->table);
         return is_array($this->db->error());
     }
