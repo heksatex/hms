@@ -22,7 +22,14 @@ class Wa_message {
         $this->model->load->model("m_user");
     }
 
-    public function sendMessageToUser(string $templateName, array $value, string $username): bool {
+    /**
+     * 
+     * @param string $templateName
+     * @param array $valueForTemplate
+     * @param string $username
+     * @return bool
+     */
+    public function sendMessageToUser(string $templateName, array $valueForTemplate, string $username): bool {
 
         $this->val = $value;
         if (!$this->getTemplate($templateName)) {
@@ -36,7 +43,14 @@ class Wa_message {
         return true;
     }
 
-    public function sendMessageToUsers(string $templateName, array $value, array $username): bool {
+    /**
+     * 
+     * @param string $templateName
+     * @param array $valueForTemplate
+     * @param array $username
+     * @return bool
+     */
+    public function sendMessageToUsers(string $templateName, array $valueForTemplate, array $username): bool {
 
         $this->val = $value;
         if (!$this->getTemplate($templateName)) {
@@ -53,7 +67,14 @@ class Wa_message {
         return true;
     }
 
-    public function sendMessageToUserByDept(string $templateName, array $value, array $deptID): bool {
+    /**
+     * 
+     * @param string $templateName
+     * @param array $valueForTemplate
+     * @param array $deptID
+     * @return bool
+     */
+    public function sendMessageToUserByDept(string $templateName, array $valueForTemplate, array $deptID): bool {
 
         $this->val = $value;
         if (!$this->getTemplate($templateName)) {
@@ -69,7 +90,14 @@ class Wa_message {
         return true;
     }
 
-    public function sendMessageToGroup(string $templateName, array $value, array $group): bool {
+    /**
+     * 
+     * @param string $templateName
+     * @param array $valueForTemplate
+     * @param array $group
+     * @return bools
+     */
+    public function sendMessageToGroup(string $templateName, array $valueForTemplate, array $group): bool {
 
         $this->val = $value;
         if (!$this->getTemplate($templateName)) {
@@ -86,7 +114,14 @@ class Wa_message {
         return true;
     }
 
-    public function sendMessageToGroupByDepth(string $templateName, array $value, array $depthkode): bool {
+    /**
+     * 
+     * @param string $templateName
+     * @param array $valueForTemplate
+     * @param array $depthkode
+     * @return bool
+     */
+    public function sendMessageToGroupByDepth(string $templateName, array $valueForTemplate, array $depthkode): bool {
 
         $this->val = $value;
         if (!$this->getTemplate($templateName)) {

@@ -31,17 +31,18 @@ class WaSendMessage extends MY_Controller {
                 $no++;
                 $row = array(
                     $no,
-                    $field->touser ? '<a href="' . base_url('setting/wa_send_message/edit/' . $kode_encrypt) . '">' . $field->touser . '</a>' : '',
-                    $field->togroup ? '<a href="' . base_url('setting/wa_send_message/edit/' . $kode_encrypt) . '">' . $field->togroup . '</a>' : '',
-                    $field->status == 0 ? '<button type="button" class="btn btn-outline-success">Success</button>' : $field->status == 1 ? '<button type="button" class="btn btn-outline-danger">Failed</button>' : '<button type="button" class="btn btn-outline-info">Menunggu</button>',
+                    $field->message,
+                    $field->touser,
+                    $field->togroup,
+                    $field->status == 0 ? '<span class="text-success">Success</span>' : ($field->status == 1 ? '<span class="text-danger">Failed</span>' : '<span class="text-warning">Menunggu</span>'),
                     date('D m, Y H:i:s', strtotime($field->created_at)),
                 );
                 $data[] = $row;
             }
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => count($data),
-                "recordsFiltered" => count($data),
+                "recordsTotal" => $this->m_WaSendMessage->getCountAllData(),
+                "recordsFiltered" => $this->m_WaSendMessage->getCountDataFiltered(),
                 "data" => $data,
             ));
             exit();
