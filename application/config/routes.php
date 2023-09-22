@@ -67,6 +67,7 @@ $route['setting/wa_group/add']['GET'] = 'setting/WaGroup/add';
 $route['setting/wa_group/edit/([a-zA-Z0-9]+)']['GET'] = 'setting/WaGroup/edit/$1';
 $route['setting/wa_group/update']['POST'] = 'setting/WaGroup/update';
 $route['setting/wa_group/simpan']['POST'] = 'setting/WaGroup/simpan';
+
 $route['setting/wa_group/get_data']['POST'] = 'setting/WaGroup/getData';
 //WA Template
 $route['setting/wa_template']['GET'] = 'setting/WaTemplate/index';
@@ -86,3 +87,4 @@ $route['setting/wa_schedule/get_data']['POST'] = 'setting/WaScheduleMessage/getD
 $route['setting/wa_schedule/simpan']['POST'] = 'setting/WaScheduleMessage/simpan';
 $route['setting/wa_schedule/update']['POST'] = 'setting/WaScheduleMessage/update';
 $route['setting/wa_schedule/delete']['POST'] = 'setting/WaScheduleMessage/delete';
+

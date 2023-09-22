@@ -31,6 +31,7 @@
                             <h3 class="box-title">Form Tambah</h3>
                         </div>
                         <div class="box-body">
+
                             <form  method="post" class="form-horizontal" name="form-wa-group" id="form-wa-group" action="<?=base_url('setting/wa_group/simpan')?>">
                                 <div class="form-group">                  
                                     <div class="col-md-12" >
@@ -59,7 +60,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </form>
@@ -97,6 +97,7 @@
                         unblockUI(function () {});
                         alert_modal_warning("Hubungi Dept IT");
                     });
+
                     event.preventDefault();
                 },
                         false

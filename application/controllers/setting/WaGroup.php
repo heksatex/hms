@@ -49,13 +49,16 @@ class WaGroup extends MY_Controller {
             }
             $data['wa'] = $this->m_WaGroup->getDataByID($kode_decrypt);
             $data["id"] = $id;
-            if (!is_null($data['wa']->kode)) {
+
+            if (!is_null($data['wa']->kode)) {            
                 $data['wa']->kode = explode(',', $data['wa']->kode);
             }
 
             $data['id_dept'] = 'MWG';
             $data['list_dept'] = $this->_module->get_list_departement();
             $data['mms'] = $this->_module->get_data_mms_for_log_history($data['id_dept']);
+
+
             return $this->load->view('setting/v_wa_group_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -111,6 +114,7 @@ class WaGroup extends MY_Controller {
             $kode_decrypt = decrypt_url($this->input->post("id"));
             if (!$kode_decrypt) {
                 throw new \Exception("data tidak ditemukan", 500);
+     
             }
             $this->load->library('form_validation');
             $this->form_validation->set_rules($this->valForm);
@@ -118,6 +122,7 @@ class WaGroup extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0]);
             }
             $wagroup = $this->input->post("wa_group");
+
             if (!$this->m_WaGroup->update($kode_decrypt, addslashes($wagroup))) {
                 throw new \Exception("Gagal Merubah Data", 500);
             }
@@ -153,6 +158,7 @@ class WaGroup extends MY_Controller {
                     $no,
                     '<a href="' . base_url('setting/wa_group/edit/' . $kode_encrypt) . '">' . $field->wa_group . '</a>',
                     $field->kode,
+
                     date('D m, Y H:i:s', strtotime($field->created_at)),
                 );
                 $data[] = $row;

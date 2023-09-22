@@ -417,7 +417,7 @@ class Procurementpurchase extends MY_Controller
                 $items  = $this->m_procurementPurchase->get_data_detail_by_code($kode);
 
                 //lock table
-                $this->_module->lock_tabel('procurement_purchase WRITE, procurement_purchase_items WRITE, cfb WRITE,  cfb_items WRITE, stock_move WRITE, stock_move_produk WRITE, departemen d WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_route mr WRITE, mrp_route WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, departemen WRITE, log_history WRITE, main_menu_sub WRITE');
+                $this->_module->lock_tabel('procurement_purchase WRITE, procurement_purchase_items WRITE, cfb WRITE,  cfb_items WRITE, stock_move WRITE, stock_move_produk WRITE, departemen d WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_route mr WRITE, mrp_route WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, departemen WRITE, log_history WRITE, main_menu_sub WRITE, mst_produk WRITE');
                 
                 $sql_stock_move_batch        = "";
                 $sql_stock_move_produk_batch = "";
@@ -427,7 +427,9 @@ class Procurementpurchase extends MY_Controller
                 $sm_row              = 1; 
                 $source_move         = ""; 
                 $i                   = 1; //set count kode out
-                $arr_kode           = [];                         
+                $arr_kode           = [];    
+                $status_produk_aktif = TRUE; 
+                $produk_tidak_aktif  = "";
 
                 $last_move   = $this->_module->get_kode_stock_move();
                 $move_id     = "SM".$last_move; //Set kode stock_move
@@ -472,17 +474,25 @@ class Procurementpurchase extends MY_Controller
                         $sql_out_batch  .= "('".$kode_out."','".$tgl."','".$tgl."','".$tgl_jt."','".addslashes($head->notes)."','draft','".$method_dept."','".$origin."','".$move_id."','".$rp->lokasi_dari."','".$rp->lokasi_tujuan."'), ";
 
                         $out_row = 1;
+                        $num     = 1;
                         foreach ($items as $row) {//get data in procurement_purchase_items 
 
-                            //simpan ke pengiriman barang items
-                            $sql_out_items_batch .= "('".$kode_out."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$out_row."',''), ";
+                            $stat_produk = $this->_module->get_status_aktif_by_produk(addslashes($row->kode_produk))->row_array();// status produk aktif/tidak
+                            if($stat_produk['status_produk'] != 't'){
+                                $status_produk_aktif = FALSE; 
+                                $produk_tidak_aktif  .= $num.'. '.$row->kode_produk.' '.$row->nama_produk.' <br>';
+                                $num++;
+                            }else{
+                                //simpan ke pengiriman barang items
+                                $sql_out_items_batch .= "('".$kode_out."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$out_row."',''), ";
                                 
-                            //simpan ke stock move produk 
-                            $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$out_row."',''), ";
-
-                            $source_move = $move_id;
-
-                            $out_row = $out_row + 1;                 
+                                //simpan ke stock move produk 
+                                $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$out_row."',''), ";
+                                
+                                $source_move = $move_id;
+                                
+                                $out_row = $out_row + 1;                 
+                            }
                     
                         }//end foreach items procurement purchase
 
@@ -502,148 +512,151 @@ class Procurementpurchase extends MY_Controller
                     }//end if out                
 
                 }//end foreach route
-                
 
-                if(!empty($sql_stock_move_batch)){
-                    $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
-                    $this->_module->create_stock_move_batch($sql_stock_move_batch);
+                if($status_produk_aktif == FALSE){
+                    $callback = array('status' => 'failed','message' => 'Maaf, Status Produk Tidak Aktif ! <br>'.$produk_tidak_aktif, 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-                    $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
-                    $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
-                }
-
-                if(!empty($sql_out_batch)){
-                    $sql_out_batch = rtrim($sql_out_batch, ', ');
-                    $this->_module->simpan_pengiriman_batch($sql_out_batch);
-
-                    $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
-                    $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
-
-                    $sql_log_history_out = rtrim($sql_log_history_out, ', ');
-                    $this->_module->simpan_log_history_batch($sql_log_history_out);
-                }
-                
-
-                /*----  Generate IN  -------------*/
-
-                $sql_in_batch        = "";
-                $sql_in_items_batch  = "";
-                $sql_cfb_items       = "";
-                $sql_stock_move_batch        = "";
-                $sql_stock_move_produk_batch = "";
-                $sql_log_history_in = "";
-                $sql_log_history_cfb="";
-
-                $last_move   = $this->_module->get_kode_stock_move();
-                $move_id     = "SM".$last_move; //Set kode stock_move           
-
-                $warehouse     = $head->warehouse;
-                $method_action = 'IN';
-                $method        = $warehouse.'|'.$method_action;
-                $output_location = $this->_module->get_output_location_by_kode('RCV')->row_array();
-                $lokasi_dari   = $output_location['output_location'];
-                $loc      = $this->_module->get_nama_dept_by_kode($warehouse)->row_array();
-                $lokasi_tujuan = $loc['stock_location'];
-                
-                //$lokasi_tujuan = $warehouse.'/Stock';
-                $method_dept   = $warehouse;            
-
-                $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','draft','1','".$source_move."'), ";                  
-                     
-                // Generate penerimaan barang
-                $kode_= $this->_module->get_kode_penerimaan($method_dept);
-                $get_kode_in= $kode_;
-
-                $dgt     =substr("00000" . $get_kode_in,-5);            
-                $kode_in = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
-
-                $ld_dept = $this->_module->get_leadtime_by_dept($method_dept)->row_array();
-                $leadtime_dept = $ld_dept['manf_leadtime'];
-
-                $tgl_jt  =  date('Y-m-d H:i:s', strtotime(-$leadtime_dept.' days', strtotime($head->schedule_date)));
-
-                $reff_picking_in = $kode_out."|".$kode_in;
-                $sql_in_batch   .= "('".$kode_in."','".$tgl."','".$tgl."','".$tgl."','".addslashes($head->notes)."','draft','".$method_dept."','".$origin."','".$move_id."','".$reff_picking_in."','".$lokasi_dari."','".$lokasi_tujuan."'), "; 
-                $in_row=1;
-
-                //get mms kode berdasarkan dept_id
-                $mms = $this->_module->get_kode_sub_menu_deptid('penerimaanbarang',$method_dept)->row_array();
-                if(!empty($mms['kode'])){
-                    $mms_kode = $mms['kode'];
                 }else{
-                    $mms_kode = '';
-                }
 
-                //create log history penerimaan_barang
-                $note_log = $kode_in.'|'.$origin;
-                $date_log = date('Y-m-d H:i:s');
-                $sql_log_history_in .= "('".$date_log."','".$mms_kode."','".$kode_in."','create','".$note_log."','".$nama_user."'), ";
+                    if(!empty($sql_stock_move_batch)){
+                        $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
+                        $this->_module->create_stock_move_batch($sql_stock_move_batch);
 
-                foreach ($items as $row) {
-                    //simpan ke penermaan_barang_items
-                    $sql_in_items_batch   .= "('".$kode_in."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->reff_notes)."','draft','".$in_row."'), ";
-                    //simpan ke stock move produk 
-                    $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$in_row."',''), ";
-                     //sql insert tbl cfb_items
-                    $sql_cfb_items .= "('".$kode_cfb."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->schedule_date."','".$row->qty."','".addslashes($row->uom)."','draft','".addslashes($row->reff_notes)."','".$in_row."'), ";
-                    $in_row = $in_row + 1; 
+                        $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
+                        $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
+                    }
+
+                    if(!empty($sql_out_batch)){
+                        $sql_out_batch = rtrim($sql_out_batch, ', ');
+                        $this->_module->simpan_pengiriman_batch($sql_out_batch);
+
+                        $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
+                        $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
+
+                        $sql_log_history_out = rtrim($sql_log_history_out, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_out);
+                    }
                     
-                }
-            
-                //sql insert tbl cfb head   
-                $sql_cfb_head = "INSERT INTO cfb (kode_cfb, create_date, schedule_date, sales_order, kode_prod, kode_pp, priority, warehouse, notes, status) values ('".$kode_cfb."','".$tgl."','".$tgl."','".$head->sales_order."','".$head->kode_prod."','".$kode."','".$head->priority."','".$head->warehouse."','".addslashes($head->notes)."','draft')";
 
-                //create log history cfb 
-                $note_log = $kode_cfb.' | '.$kode.' | '.$head->warehouse;
-                $date_log = date('Y-m-d H:i:s');
-                $sql_log_history_cfb .= "('".$date_log."','','".$kode_cfb."','create','".$note_log."','".$nama_user."'), ";        
-                
-                if(!empty($sql_cfb_items)){
-                    $this->m_procurementPurchase->save_cfb_batch($sql_cfb_head);
+                    /*----  Generate IN  -------------*/
 
-                    $sql_cfb_items = rtrim($sql_cfb_items, ', ');
-                    $this->m_procurementPurchase->save_cfb_items_batch($sql_cfb_items); 
+                    $sql_in_batch        = "";
+                    $sql_in_items_batch  = "";
+                    $sql_cfb_items       = "";
+                    $sql_stock_move_batch        = "";
+                    $sql_stock_move_produk_batch = "";
+                    $sql_log_history_in = "";
+                    $sql_log_history_cfb="";
 
-                    $sql_log_history_cfb = rtrim($sql_log_history_cfb, ', ');
-                    $this->_module->simpan_log_history_batch($sql_log_history_cfb);      
-                }
+                    $last_move   = $this->_module->get_kode_stock_move();
+                    $move_id     = "SM".$last_move; //Set kode stock_move           
 
-                if(!empty($sql_stock_move_batch)){
-                    $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
-                    $this->_module->create_stock_move_batch($sql_stock_move_batch);
+                    $warehouse     = $head->warehouse;
+                    $method_action = 'IN';
+                    $method        = $warehouse.'|'.$method_action;
+                    $output_location = $this->_module->get_output_location_by_kode('RCV')->row_array();
+                    $lokasi_dari   = $output_location['output_location'];
+                    $loc      = $this->_module->get_nama_dept_by_kode($warehouse)->row_array();
+                    $lokasi_tujuan = $loc['stock_location'];
+                    
+                    //$lokasi_tujuan = $warehouse.'/Stock';
+                    $method_dept   = $warehouse;            
 
-                    $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
-                    $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
-                }
-
-                if(!empty($sql_in_batch)){
-                    $sql_in_batch = rtrim($sql_in_batch, ', ');
-                    $this->_module->simpan_penerimaan_batch($sql_in_batch);
-
-                    $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
-                    $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);  
-                   
-                    $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking = '".$reff_picking_in."' WHERE  kode = '".$kode_out."' ";
-                    $this->_module->update_reff_batch($sql_update_reff_out_batch);   
-
-                    $sql_log_history_in = rtrim($sql_log_history_in, ', ');
-                    $this->_module->simpan_log_history_batch($sql_log_history_in);        
-                }
-
-                //update status procurement_purchase
-                $this->m_procurementPurchase->update_status_procurement_purchase($kode, 'done');
-                //update status procurement_purchase_items
-                $this->m_procurementPurchase->update_status_procurement_purchase_items($kode, 'generated');            
-
-                //unlock table
-                $this->_module->unlock_tabel();
-                
-                $jenis_log   = "generate";
-                $note_log    = "Generated | ".$kode;
-                $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
-                
+                    $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','draft','1','".$source_move."'), ";                  
                         
-                $callback = array('status' => 'success','message' => 'Generate Data Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
+                    // Generate penerimaan barang
+                    $kode_= $this->_module->get_kode_penerimaan($method_dept);
+                    $get_kode_in= $kode_;
+
+                    $dgt     =substr("00000" . $get_kode_in,-5);            
+                    $kode_in = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
+
+                    $ld_dept = $this->_module->get_leadtime_by_dept($method_dept)->row_array();
+                    $leadtime_dept = $ld_dept['manf_leadtime'];
+
+                    $tgl_jt  =  date('Y-m-d H:i:s', strtotime(-$leadtime_dept.' days', strtotime($head->schedule_date)));
+
+                    $reff_picking_in = $kode_out."|".$kode_in;
+                    $sql_in_batch   .= "('".$kode_in."','".$tgl."','".$tgl."','".$tgl."','".addslashes($head->notes)."','draft','".$method_dept."','".$origin."','".$move_id."','".$reff_picking_in."','".$lokasi_dari."','".$lokasi_tujuan."'), "; 
+                    $in_row=1;
+
+                    //get mms kode berdasarkan dept_id
+                    $mms = $this->_module->get_kode_sub_menu_deptid('penerimaanbarang',$method_dept)->row_array();
+                    if(!empty($mms['kode'])){
+                        $mms_kode = $mms['kode'];
+                    }else{
+                        $mms_kode = '';
+                    }
+
+                    //create log history penerimaan_barang
+                    $note_log = $kode_in.'|'.$origin;
+                    $date_log = date('Y-m-d H:i:s');
+                    $sql_log_history_in .= "('".$date_log."','".$mms_kode."','".$kode_in."','create','".$note_log."','".$nama_user."'), ";
+                    foreach ($items as $row) {
+                        //simpan ke penermaan_barang_items
+                        $sql_in_items_batch   .= "('".$kode_in."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$in_row."'), ";
+                        //simpan ke stock move produk 
+                        $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$in_row."',''), ";
+                        //sql insert tbl cfb_items
+                        $sql_cfb_items .= "('".$kode_cfb."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->schedule_date."','".$row->qty."','".addslashes($row->uom)."','draft','".addslashes($row->reff_notes)."','".$in_row."'), ";
+                        $in_row = $in_row + 1; 
+                        
+                    }
+                
+                    //sql insert tbl cfb head   
+                    $sql_cfb_head = "INSERT INTO cfb (kode_cfb, create_date, schedule_date, sales_order, kode_prod, kode_pp, priority, warehouse, notes, status) values ('".$kode_cfb."','".$tgl."','".$tgl."','".$head->sales_order."','".$head->kode_prod."','".$kode."','".$head->priority."','".$head->warehouse."','".addslashes($head->notes)."','draft')";
+
+                    //create log history cfb 
+                    $note_log = $kode_cfb.' | '.$kode.' | '.$head->warehouse;
+                    $date_log = date('Y-m-d H:i:s');
+                    $sql_log_history_cfb .= "('".$date_log."','','".$kode_cfb."','create','".$note_log."','".$nama_user."'), ";        
+                    
+                    if(!empty($sql_cfb_items)){
+                        $this->m_procurementPurchase->save_cfb_batch($sql_cfb_head);
+
+                        $sql_cfb_items = rtrim($sql_cfb_items, ', ');
+                        $this->m_procurementPurchase->save_cfb_items_batch($sql_cfb_items); 
+
+                        $sql_log_history_cfb = rtrim($sql_log_history_cfb, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_cfb);      
+                    }
+
+                    if(!empty($sql_stock_move_batch)){
+                        $sql_stock_move_batch = rtrim($sql_stock_move_batch, ', ');
+                        $this->_module->create_stock_move_batch($sql_stock_move_batch);
+
+                        $sql_stock_move_produk_batch = rtrim($sql_stock_move_produk_batch, ', ');
+                        $this->_module->create_stock_move_produk_batch($sql_stock_move_produk_batch);
+                    }
+
+                    if(!empty($sql_in_batch)){
+                        $sql_in_batch = rtrim($sql_in_batch, ', ');
+                        $this->_module->simpan_penerimaan_batch($sql_in_batch);
+
+                        $sql_in_items_batch = rtrim($sql_in_items_batch, ', ');
+                        $this->_module->simpan_penerimaan_items_batch($sql_in_items_batch);  
+                    
+                        $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking = '".$reff_picking_in."' WHERE  kode = '".$kode_out."' ";
+                        $this->_module->update_reff_batch($sql_update_reff_out_batch);   
+
+                        $sql_log_history_in = rtrim($sql_log_history_in, ', ');
+                        $this->_module->simpan_log_history_batch($sql_log_history_in);        
+                    }
+
+                    //update status procurement_purchase
+                    $this->m_procurementPurchase->update_status_procurement_purchase($kode, 'done');
+                    //update status procurement_purchase_items
+                    $this->m_procurementPurchase->update_status_procurement_purchase_items($kode, 'generated');            
+
+                    //unlock table
+                    $this->_module->unlock_tabel();
+                    
+                    $jenis_log   = "generate";
+                    $note_log    = "Generated | ".$kode;
+                    $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+                            
+                    $callback = array('status' => 'success','message' => 'Generate Data Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success');
+                }
             }
         }
 
