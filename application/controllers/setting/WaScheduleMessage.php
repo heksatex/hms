@@ -19,12 +19,29 @@ class WaScheduleMessage extends MY_Controller {
             ]
         ],
         [
+            'field' => 'nama',
+            'label' => 'Nama',
+            'rules' => ['required', 'max_length[100]'],
+            'errors' => [
+                'required' => '{field} Harus Diisi',
+                'max_length' => '{field} Maksimal {param} karakter.',
+            ]
+        ],
+        [
             'field' => 'waktu_kirim',
             'label' => 'Waktu Kirim',
             'rules' => ['required', 'regex_match[#^[01]?[0-9]|2[0-3]:[0-5][0-9](:[0-5][0-9])?$#]'],
             'errors' => [
                 'required' => 'Waktu Kirim Harus Diisi',
                 'regex_match' => 'Format {field} Harus HH:MM'
+            ]
+        ],
+        [
+            'field' => 'group[]',
+            'label' => 'Group',
+            'rules' => ['required'],
+            'errors' => [
+                'required' => '{field} Harus Diisi',
             ]
         ],
         [
@@ -35,21 +52,24 @@ class WaScheduleMessage extends MY_Controller {
     );
 
     public function check_berdasarkan($str, $tanggal): bool {
-        if (empty($str) && empty($this->input->post($tanggal))) {
-            $this->form_validation->set_message('check_berdasarkan', 'Hari / Tanggal Harus Diisi');
+        if (empty($str) && empty($this->input->post($tanggal)) && empty($this->input->post('custom'))) {
+            $this->form_validation->set_message('check_berdasarkan', 'Hari / Tanggal / Custom harap diisi salah satu');
             return false;
         }
         return true;
     }
 
     protected $days = array(
-        'monday' => 'Monday',
-        'tuesday' => 'Tuesday',
-        'wednesday' => 'Wednesday',
-        'thursday' => 'Thursday',
-        'friday' => 'Friday',
-        'saturday' => 'Saturday',
-        'sunday' => 'Sunday'
+        'Monday' => 'Monday',
+        'Tuesday' => 'Tuesday',
+        'Wednesday' => 'Wednesday',
+        'Thursday' => 'Thursday',
+        'Friday' => 'Friday',
+        'Saturday' => 'Saturday',
+        'Sunday' => 'Sunday'
+    );
+    protected $customSchedule = array(
+        'last_month' => 'Akhir Bulan'
     );
 
     public function __construct() {
@@ -69,6 +89,7 @@ class WaScheduleMessage extends MY_Controller {
         $data['id_dept'] = 'MWSSM';
         $data['group'] = $this->m_WaGroup->getDataQuery();
         $data['days'] = $this->days;
+        $data['customSchedule'] = $this->customSchedule;
         return $this->load->view('setting/v_wa_schedule_add', $data);
     }
 
@@ -82,6 +103,7 @@ class WaScheduleMessage extends MY_Controller {
             $data['days'] = $this->days;
             $data["id"] = $id;
             $data['datas'] = $this->m_WaScheduleMessage->getDataByID($kode_decrypt);
+            $data['customSchedule'] = $this->customSchedule;
             if (!is_null($data['datas']->groupid)) {
                 $data['datas']->groupid = explode(',', $data['datas']->groupid);
             }
@@ -107,12 +129,15 @@ class WaScheduleMessage extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
 
+            $nama = $this->input->post('nama');
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
             $group = $this->input->post('group');
-            $berdasarkan = $this->data_berdasarkan([$this->input->post('hari'), $this->input->post('tanggal')]);
+            $hari = (array)$this->input->post('hari');
+            $hari = array_intersect($this->days,$hari);
+            $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
-            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu)) {
+            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama)) {
                 foreach ($berdasarkan as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Hari Yang Dipilih', 500);
@@ -157,13 +182,17 @@ class WaScheduleMessage extends MY_Controller {
             if ($this->form_validation->run() == FALSE) {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
+            $nama = $this->input->post('nama');
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
+            $waktu_sblm = $this->input->post('waktu_kirim_sblm');
             $group = $this->input->post('group');
-            $berdasarkan = $this->data_berdasarkan([$this->input->post('hari'), $this->input->post('tanggal')]);
+            $hari = (array)$this->input->post('hari');
+            $hari = array_intersect($this->days,$hari);
+            $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
-
-            if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu)) {
+            $setLastExe = ($waktu <= $waktu_sblm) ? false : true;
+            if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu, $nama, $setLastExe)) {
                 throw new \Exception("Gagal Mengubah Data", 500);
             }
             $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
@@ -241,9 +270,10 @@ class WaScheduleMessage extends MY_Controller {
                 $no++;
                 $row = array(
                     $no,
-                    '<a href="' . base_url('setting/wa_schedule/edit/' . $kode_encrypt) . '">' . $field->message . '</a>',
+                    '<a href="' . base_url('setting/wa_schedule/edit/' . $kode_encrypt) . '">' . $field->nama ?? '-' . '</a>',
+                    $field->message,
                     $field->groupname,
-                    $field->day,
+                    str_replace("_", " ", $field->day),
                     $field->send_time,
                     '<button type="button" class="btn btn-danger btn-sm btn-delete-doc" data-id="' . $kode_encrypt . '"><i class="fa fa-trash"></></button'
                 );
