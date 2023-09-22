@@ -76,6 +76,7 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
+
                 $('.select2').select2();
 
                 const formWaGroup = document.forms.namedItem("form-wa-group");
@@ -106,7 +107,6 @@
                         );
 
                 $("#btn-simpan").on('click', function () {
-
                     $("#form_simpan").trigger("click");
                 });
 
