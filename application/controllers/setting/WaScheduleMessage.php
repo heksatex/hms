@@ -268,9 +268,10 @@ class WaScheduleMessage extends MY_Controller {
             foreach ($list as $field) {
                 $kode_encrypt = encrypt_url($field->id);
                 $no++;
+                $nama = $field->nama ?? "Default";
                 $row = array(
                     $no,
-                    '<a href="' . base_url('setting/wa_schedule/edit/' . $kode_encrypt) . '">' . $field->nama ?? '-' . '</a>',
+                    '<a href="' . base_url('setting/wa_schedule/edit/' . $kode_encrypt) . '">' . $nama . '</a>',
                     $field->message,
                     $field->groupname,
                     str_replace("_", " ", $field->day),
