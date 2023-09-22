@@ -58,7 +58,7 @@
                                                                 $seleced = in_array($value->kode, $wa->kode) ? 'selected' : '';
                                                             }
 
-                                                            echo "<option value='$value->kode' $seleced>$value->nama</option>";
+                                                            echo "<option value='$value->kode' $seleced>$value->nama_departemen</option>";
                                                         }
                                                         ?>
                                                     </select>

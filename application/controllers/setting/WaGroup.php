@@ -35,7 +35,7 @@ class WaGroup extends MY_Controller {
 
     public function add() {
         $data['id_dept'] = 'MWG';
-        $data['list_dept'] = $this->_module->get_list_departement();
+        $data['list_dept'] = $this->_module->get_list_departemen_all();
         return $this->load->view('setting/v_wa_group_add', $data);
     }
 
@@ -55,7 +55,7 @@ class WaGroup extends MY_Controller {
             }
 
             $data['id_dept'] = 'MWG';
-            $data['list_dept'] = $this->_module->get_list_departement();
+            $data['list_dept'] = $this->_module->get_list_departemen_all();
             $data['mms'] = $this->_module->get_data_mms_for_log_history($data['id_dept']);
 
 
@@ -81,11 +81,13 @@ class WaGroup extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
             $wagroup = $this->input->post("wa_group");
+            $dept = $this->input->post('department');
             $this->_module->startTransaction();
             if ($status = $this->m_WaGroup->simpan(addslashes($wagroup))) {
-
-                foreach ($this->input->post('department') as $key => $value) {
-                    $this->m_WaGroup->addWaDepartment($status, addslashes($value));
+                if (!empty($dept)) {
+                    foreach ($dept as $key => $value) {
+                        $this->m_WaGroup->addWaDepartment($status, addslashes($value));
+                    }
                 }
             }
             if (!$this->_module->finishTransaction()) {
@@ -122,14 +124,16 @@ class WaGroup extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0]);
             }
             $wagroup = $this->input->post("wa_group");
-
+            $dept = $this->input->post('department');
             if (!$this->m_WaGroup->update($kode_decrypt, addslashes($wagroup))) {
                 throw new \Exception("Gagal Merubah Data", 500);
             }
             $this->_module->startTransaction();
             $this->m_WaGroup->deleteWaDepartmen($kode_decrypt);
-            foreach ($this->input->post('department') as $key => $value) {
-                $this->m_WaGroup->addWaDepartment($kode_decrypt, addslashes($value));
+            if (!empty($dept)) {
+                foreach ($this->input->post('department') as $key => $value) {
+                    $this->m_WaGroup->addWaDepartment($kode_decrypt, addslashes($value));
+                }
             }
 
             if (!$this->_module->finishTransaction()) {

@@ -32,9 +32,10 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
+                                            <th>Nama</th>
                                             <th>Pesan</th>
                                             <th>Group</th>
-                                            <th>Hari / Tanggal</th>
+                                            <th>Setiap</th>
                                             <th>Waktu Kirim</th>
                                             <th>#</th>
                                         </tr>

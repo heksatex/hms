@@ -40,18 +40,28 @@
                                     <div class="col-md-12">
                                         <div class="col-md-6 col-xs-12">
                                             <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Nama</label></div>
+                                                <div class="col-xs-6">
+                                                    <input type="text" class="form-control input-sm" name="nama" value="<?= $datas->nama ?>" required/>
+
+                                                </div>
+
+                                                <button type="submit" id="form_simpan" style="display: none"></button>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required">Waktu Kirim</label></div>
                                                 <div class="col-xs-6">
                                                     <input type="text" class="form-control input-sm time" name="waktu_kirim" value="<?= $datas->send_time ?>" required/>
+                                                    <input type="hidden" name="waktu_kirim_sblm" value="<?= $datas->send_time ?>"/>
                                                     <input type="hidden" name="id" value="<?= $id ?>">
                                                 </div>
 
                                                 <button type="submit" id="form_simpan" style="display: none"></button>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label>Group</label></div>
+                                                <div class="col-xs-6"><label class="form-label required">Group</label></div>
                                                 <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="group[]" multiple>
+                                                    <select class="form-control input-sm select2" name="group[]" required multiple>
                                                         <?php
                                                         foreach ($group as $key => $value) {
                                                             $seleced = '';
@@ -97,9 +107,26 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Setiap (Custom)</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm select2" name="custom[]" id="bycustom" multiple>
+                                                       
+                                                        <?php
+                                                        foreach ($customSchedule as $key => $value) {
+                                                            $seleced = '';
+                                                            if (!is_null($datas->day)) {
+                                                                $seleced = in_array($key, $datas->day) ? 'selected' : '';
+                                                            }
+                                                            echo "<option value='$key' $seleced>$value</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required" >Pesan</label></div>
                                                 <div class="col-xs-6">
-                                                    <textarea class="form-control input-sm" name="pesan" required><?= $datas->message ?></textarea>
+                                                    <textarea class="form-control input-sm resize-ta" id="pesan" name="pesan" required><?= $datas->message ?></textarea>
                                                 </div>                                    
                                             </div>
                                         </div>
@@ -119,14 +146,22 @@
                 $(".time").datetimepicker({
                     format: 'HH:mm:ss'
                 });
-                
+
                 $('#bytanggal').on("select2:selecting", function (e) {
+                    $('#byhari').val(null).trigger('change');
+                    $('#bycustom').val(null).trigger('change');
+                });
+
+                $('#byhari').on("select2:selecting", function (e) {
+                    $('#bytanggal').val(null).trigger('change');
+                    $('#bycustom').val(null).trigger('change');
+                });
+                $('#bycustom').on("select2:selecting", function (e) {
+                    $('#bytanggal').val(null).trigger('change');
                     $('#byhari').val(null).trigger('change');
                 });
                 
-                $('#byhari').on("select2:selecting", function (e) {
-                    $('#bytanggal').val(null).trigger('change');
-                });
+                $('#pesan').keyup();
                 const formschedule = document.forms.namedItem("form-wa-schedule");
                 formschedule.addEventListener(
                         "submit",
