@@ -154,8 +154,8 @@ class WaTemplate extends MY_Controller {
             }
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => count($data),
-                "recordsFiltered" => count($data),
+                "recordsTotal" => $this->m_WaTemplate->getCountAllData(),
+                "recordsFiltered" => $this->m_WaTemplate->getCountDataFiltered(),
                 "data" => $data,
             ));
             exit();

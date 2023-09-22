@@ -41,8 +41,8 @@ class WaSendMessage extends MY_Controller {
             }
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => count($data),
-                "recordsFiltered" => count($data),
+                "recordsTotal" => $this->m_WaSendMessage->getCountAllData(),
+                "recordsFiltered" => $this->m_WaSendMessage->getCountDataFiltered(),
                 "data" => $data,
             ));
             exit();

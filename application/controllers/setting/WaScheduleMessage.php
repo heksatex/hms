@@ -251,8 +251,8 @@ class WaScheduleMessage extends MY_Controller {
             }
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => count($data),
-                "recordsFiltered" => count($data),
+                "recordsTotal" => $this->m_WaScheduleMessage->getCountAllData(),
+                "recordsFiltered" => $this->m_WaScheduleMessage->getCountDataFiltered(),
                 "data" => $data,
             ));
             exit();

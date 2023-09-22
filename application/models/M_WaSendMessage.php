@@ -33,6 +33,17 @@ class M_WaSendMessage extends CI_Model {
     public function getDataByID($id) {
         return $this->db->query('select * from ' . $this->table . ' where id = ' . $id)->row();
     }
+    
+    public function getCountDataFiltered() {
+        $this->getDataQuery();
+        $query = $this->db->get();
+        return $query->num_rows();;
+    }
+    
+    public function getCountAllData() {
+        $this->db->from($this->table);
+        return $this->db->count_all_results();
+    }
 
     public function save($message, array $to) {
         $data = array_merge(array(

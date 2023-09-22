@@ -31,6 +31,18 @@ class M_WaGroup extends CI_Model {
             $this->db->order_by(key($order), $order[key($order)]);
         }
     }
+    
+    public function getCountDataFiltered() {
+        $this->_getDataQuery();
+        $query = $this->db->get();
+        return $query->num_rows();
+        ;
+    }
+
+    public function getCountAllData() {
+        $this->db->from($this->table);
+        return $this->db->count_all_results();
+    }
 
     public function simpan($wagroup) {
         $this->db->insert($this->table, array(
