@@ -33,6 +33,18 @@ class M_WaScheduleMessage extends CI_Model {
             $this->db->order_by(key($order), $order[key($order)]);
         }
     }
+    
+    public function getCountDataFiltered() {
+        $this->getDataQuery();
+        $query = $this->db->get();
+        return $query->num_rows();
+        ;
+    }
+
+    public function getCountAllData() {
+        $this->db->from($this->table);
+        return $this->db->count_all_results();
+    }
 
     public function simpan($pesan, $waktu_kirim) {
         $this->db->insert($this->table, array(
@@ -84,7 +96,7 @@ class M_WaScheduleMessage extends CI_Model {
         $this->db->from($this->table . ' as wsm');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(day) as day from wa_schedule_message_days GROUP BY wa_schedule_message_id) as b', 'b.wa_schedule_message_id = wsm.id', 'LEFT');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(wa_group_id) as groupid,GROUP_CONCAT(d.wa_group) as groupname from wa_schedule_message_group as c '
-                . ' join wa_group as d on d.id = c.wa_group_id GROUP BY wa_schedule_message_id) d', 'b.wa_schedule_message_id = wsm.id', 'LEFT');
+                . ' join wa_group as d on d.id = c.wa_group_id GROUP BY wa_schedule_message_id) d', 'd.wa_schedule_message_id = wsm.id', 'LEFT');
         $this->db->where('wsm.id', $id);
         $this->db->group_by('wsm.id');
         return $this->db->select('wsm.*,day,groupid')->get()->row();

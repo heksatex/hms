@@ -50,10 +50,10 @@ class WaGroup extends MY_Controller {
             $data['wa'] = $this->m_WaGroup->getDataByID($kode_decrypt);
             $data["id"] = $id;
 
-            if(!is_null($data['wa']->kode)) {
+            if (!is_null($data['wa']->kode)) {            
                 $data['wa']->kode = explode(',', $data['wa']->kode);
             }
-            
+
             $data['id_dept'] = 'MWG';
             $data['list_dept'] = $this->_module->get_list_departement();
             $data['mms'] = $this->_module->get_data_mms_for_log_history($data['id_dept']);
@@ -94,7 +94,7 @@ class WaGroup extends MY_Controller {
             $this->_module->gen_history($sub_menu, $wagroup, 'create', 'Membuat WA Group ' . $wagroup, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
             $this->output->set_status_header($ex->getCode() ?? 500)
@@ -138,7 +138,7 @@ class WaGroup extends MY_Controller {
             $this->_module->gen_history($sub_menu, $wagroup, 'Edit', 'Edit WA Group ' . $wagroup, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (\Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
@@ -165,8 +165,8 @@ class WaGroup extends MY_Controller {
             }
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => count($data),
-                "recordsFiltered" => count($data),
+                "recordsTotal" => $this->m_WaGroup->getCountAllData(),
+                "recordsFiltered" => $this->m_WaGroup->getCountDataFiltered(),
                 "data" => $data,
             ));
             exit();

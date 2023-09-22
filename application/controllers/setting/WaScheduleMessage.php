@@ -30,20 +30,26 @@ class WaScheduleMessage extends MY_Controller {
         [
             'field' => 'hari[]',
             'label' => 'Hari',
-            'rules' => ['required'],
-            'errors' => [
-                'required' => 'Hari Harus Diisi',
-            ]
+            'rules' => ['callback_check_berdasarkan[tanggal]'],
         ]
     );
+
+    public function check_berdasarkan($str, $tanggal): bool {
+        if (empty($str) && empty($this->input->post($tanggal))) {
+            $this->form_validation->set_message('check_berdasarkan', 'Hari / Tanggal Harus Diisi');
+            return false;
+        }
+        return true;
+    }
+
     protected $days = array(
-        'monday' => 'SENIN',
-        'tuesday' => 'SELASA',
-        'wednesday' => 'RABU',
-        'thursday' => 'KAMIS',
-        'friday' => 'JUMAT',
-        'saturday' => 'SABTU',
-        'sunday' => 'MINGGU'
+        'monday' => 'Monday',
+        'tuesday' => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+        'sunday' => 'Sunday'
     );
 
     public function __construct() {
@@ -104,10 +110,10 @@ class WaScheduleMessage extends MY_Controller {
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
             $group = $this->input->post('group');
-            $hari = $this->input->post('hari');
+            $berdasarkan = $this->data_berdasarkan([$this->input->post('hari'), $this->input->post('tanggal')]);
             $this->_module->startTransaction();
             if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu)) {
-                foreach ($this->input->post('hari') as $key => $value) {
+                foreach ($berdasarkan as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Hari Yang Dipilih', 500);
                         break;
@@ -154,7 +160,7 @@ class WaScheduleMessage extends MY_Controller {
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
             $group = $this->input->post('group');
-            $hari = $this->input->post('hari');
+            $berdasarkan = $this->data_berdasarkan([$this->input->post('hari'), $this->input->post('tanggal')]);
             $this->_module->startTransaction();
 
             if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu)) {
@@ -162,7 +168,7 @@ class WaScheduleMessage extends MY_Controller {
             }
             $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
 
-            foreach ($hari as $key => $value) {
+            foreach ($berdasarkan as $key => $value) {
                 if (!$this->m_WaScheduleMessage->simpanDays($kode_decrypt, $value)) {
                     throw new Exception('Gagal Mengubah Data,Cek Hari Yang Dipilih', 500);
                     break;
@@ -212,7 +218,7 @@ class WaScheduleMessage extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Mengubah Data', 500);
             }
-            
+
             $this->_module->gen_history($sub_menu, 'wa_schedule', 'DELETE', 'Menghapus Pesan Schedule ID:' . $kode_decrypt, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -245,13 +251,23 @@ class WaScheduleMessage extends MY_Controller {
             }
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => count($data),
-                "recordsFiltered" => count($data),
+                "recordsTotal" => $this->m_WaScheduleMessage->getCountAllData(),
+                "recordsFiltered" => $this->m_WaScheduleMessage->getCountDataFiltered(),
                 "data" => $data,
             ));
             exit();
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
         }
+    }
+
+    protected function data_berdasarkan(array $val): array {
+        $rst = [];
+        foreach ($val as $key => $value) {
+            if (is_array($value)) {
+                $rst = array_merge($rst, $value);
+            }
+        }
+        return $rst;
     }
 }
