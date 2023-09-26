@@ -31,7 +31,7 @@ class Wa_message {
      */
     public function sendMessageToUser(string $templateName, array $valueForTemplate, string $username): bool {
 
-        $this->val = $value;
+        $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
             return false;
         }
@@ -52,7 +52,7 @@ class Wa_message {
      */
     public function sendMessageToUsers(string $templateName, array $valueForTemplate, array $username): bool {
 
-        $this->val = $value;
+        $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
             return false;
         }
@@ -76,7 +76,7 @@ class Wa_message {
      */
     public function sendMessageToUserByDept(string $templateName, array $valueForTemplate, array $deptID): bool {
 
-        $this->val = $value;
+        $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
             return false;
         }
@@ -99,7 +99,7 @@ class Wa_message {
      */
     public function sendMessageToGroup(string $templateName, array $valueForTemplate, array $group): bool {
 
-        $this->val = $value;
+        $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
             return false;
         }
@@ -123,7 +123,7 @@ class Wa_message {
      */
     public function sendMessageToGroupByDepth(string $templateName, array $valueForTemplate, array $depthkode): bool {
 
-        $this->val = $value;
+        $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
             return false;
         }
