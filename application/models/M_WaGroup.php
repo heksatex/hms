@@ -8,10 +8,9 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_WaGroup extends CI_Model {
 
-
-    var $column_order = array(null, 'wg.wa_group', 'kode','wg.created_at');
+    var $column_order = array(null, 'wg.wa_group', 'kode', 'wg.created_at');
     var $column_search = array('wg.wa_group');
-    var $order = array('wg.wa_group', 'asc');
+    var $order = array('wg.created_at' => 'desv');
     var $table = "wa_group";
 
     protected function _getDataQuery() {
@@ -31,7 +30,7 @@ class M_WaGroup extends CI_Model {
             $this->db->order_by(key($order), $order[key($order)]);
         }
     }
-    
+
     public function getCountDataFiltered() {
         $this->_getDataQuery();
         $query = $this->db->get();
@@ -77,7 +76,7 @@ class M_WaGroup extends CI_Model {
 
     public function getDataByDepth(array $kodedepth) {
         $this->db->from('wa_group as a');
-        $this->db->join('wa_group_departemen as b','a.id = b.wa_group_id');
+        $this->db->join('wa_group_departemen as b', 'a.id = b.wa_group_id');
         $this->db->where_in('department_kode', $kodedepth);
         return $this->db->select('*')->get()->result();
     }
@@ -104,7 +103,7 @@ class M_WaGroup extends CI_Model {
             'department_kode' => $kodeDept
         ));
     }
-    
+
     public function getDataQuery() {
         return $this->db->query('select id,wa_group from wa_group')->result();
     }
@@ -122,5 +121,4 @@ class M_WaGroup extends CI_Model {
             return true;
         }
     }
-
 }

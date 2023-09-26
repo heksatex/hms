@@ -133,11 +133,12 @@ class WaScheduleMessage extends MY_Controller {
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
             $group = $this->input->post('group');
-            $hari = (array)$this->input->post('hari');
-            $hari = array_intersect($this->days,$hari);
+            $hari = (array) $this->input->post('hari');
+            $hari = array_intersect($this->days, $hari);
+            $setLastExe = ($waktu <= date("H:i:s")) ? false : true;
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
-            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama)) {
+            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama,$setLastExe)) {
                 foreach ($berdasarkan as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Hari Yang Dipilih', 500);
@@ -187,8 +188,8 @@ class WaScheduleMessage extends MY_Controller {
             $waktu = $this->input->post('waktu_kirim');
             $waktu_sblm = $this->input->post('waktu_kirim_sblm');
             $group = $this->input->post('group');
-            $hari = (array)$this->input->post('hari');
-            $hari = array_intersect($this->days,$hari);
+            $hari = (array) $this->input->post('hari');
+            $hari = array_intersect($this->days, $hari);
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
             $setLastExe = ($waktu <= $waktu_sblm) ? false : true;
