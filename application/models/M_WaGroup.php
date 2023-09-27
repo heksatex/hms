@@ -10,7 +10,7 @@ class M_WaGroup extends CI_Model {
 
     var $column_order = array(null, 'wg.wa_group', 'kode', 'wg.created_at');
     var $column_search = array('wg.wa_group');
-    var $order = array('wg.created_at' => 'desv');
+    var $order = array('wg.created_at' => 'desc');
     var $table = "wa_group";
 
     protected function _getDataQuery() {
