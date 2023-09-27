@@ -35,7 +35,7 @@ class WaSendMessage extends MY_Controller {
                     $field->touser,
                     $field->togroup,
                     $field->status == 0 ? '<span class="text-success">Success</span>' : ($field->status == 1 ? '<span class="text-danger">Failed</span>' : '<span class="text-warning">Menunggu</span>'),
-                    date('D m, Y H:i:s', strtotime($field->created_at)),
+                    date('D d m, Y H:i:s', strtotime($field->created_at)),
                 );
                 $data[] = $row;
             }

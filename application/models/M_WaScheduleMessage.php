@@ -10,7 +10,7 @@ class M_WaScheduleMessage extends CI_Model {
 
     var $column_order = array(null, 'wsm.nama', 'wsm.message', 'groupname', 'day', 'wsm.send_time');
     var $column_search = array('wsm.message', 'wsm.nama');
-    var $order = array('wsm.id', 'desc');
+    var $order = ['wsm.id' => 'desc'];
     var $table = "wa_schedule_message";
 
     protected function getDataQuery() {
@@ -46,12 +46,13 @@ class M_WaScheduleMessage extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function simpan($pesan, $waktu_kirim, $nama) {
+    public function simpan($pesan, $waktu_kirim, $nama, $setNullLastExe = false) {
         $this->db->insert($this->table, array(
             'nama' => $nama,
             'message' => addslashes($pesan),
             'send_time' => addslashes($waktu_kirim),
-            'created_at' => date('Y-m-d H:i:s')
+            'created_at' => date('Y-m-d H:i:s'),
+            'last_execution' => (!$setNullLastExe) ? date('Y-m-d H:i:s') : null
         ));
         return $this->db->insert_id() ?? null;
     }

@@ -148,7 +148,7 @@ class WaTemplate extends MY_Controller {
                     $no,
                     '<a href="' . base_url('setting/wa_template/edit/' . $kode_encrypt) . '">' . $field->nama . '</a>',
                     $field->template,
-                    date('D m, Y H:i:s', strtotime($field->created_at)),
+                    date('D d m, Y H:i:s', strtotime($field->created_at)),
                 );
                 $data[] = $row;
             }

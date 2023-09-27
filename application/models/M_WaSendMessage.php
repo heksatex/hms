@@ -5,11 +5,12 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/EmptyPHP.php to edit this template
  */
+
 class M_WaSendMessage extends CI_Model {
 
-    var $column_order = array(null, null,'touser', 'togroup', 'status','created_at');
+    var $column_order = array(null, null, 'touser', 'togroup', 'status', 'created_at');
     var $column_search = array('touser', 'togroup', 'status');
-    var $order = array('created_at', 'desc');
+    var $order = ['created_at' => 'desc'];
     var $table = "wa_send_message";
 
     protected function getDataQuery() {
@@ -33,13 +34,14 @@ class M_WaSendMessage extends CI_Model {
     public function getDataByID($id) {
         return $this->db->query('select * from ' . $this->table . ' where id = ' . $id)->row();
     }
-    
+
     public function getCountDataFiltered() {
         $this->getDataQuery();
         $query = $this->db->get();
-        return $query->num_rows();;
+        return $query->num_rows();
+        ;
     }
-    
+
     public function getCountAllData() {
         $this->db->from($this->table);
         return $this->db->count_all_results();
