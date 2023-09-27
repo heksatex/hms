@@ -13,6 +13,9 @@ class Wa_message {
     protected $user;
     protected $group;
     protected $model;
+    protected $to = [];
+    protected $has_mention = null;
+    protected $status = true;
 
     public function __construct() {
         $this->model = & get_instance();
@@ -27,20 +30,24 @@ class Wa_message {
      * @param string $templateName
      * @param array $valueForTemplate
      * @param string $username
-     * @return bool
+     * @return bool|$this
      */
-    public function sendMessageToUser(string $templateName, array $valueForTemplate, string $username): bool {
+    public function sendMessageToUser(string $templateName, array $valueForTemplate, string $username) {
 
         $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
-            return false;
+            $this->status = false;
         }
         $this->setUser($username);
         if (!array_key_exists('nama', $this->user)) {
-            return false;
+            $this->status = false;
         }
-        $this->save($this->user->nama . ';' . $this->user->telepon_wa);
-        return true;
+        if ($this->status) {
+            $this->to[] = ['touser' => $this->user->nama . ';' . $this->user->telepon_wa];
+        }
+//        $this->save($this->user->nama . ';' . $this->user->telepon_wa);
+
+        return $this;
     }
 
     /**
@@ -48,23 +55,29 @@ class Wa_message {
      * @param string $templateName
      * @param array $valueForTemplate
      * @param array $username
-     * @return bool
+     * @return bool|$this
      */
-    public function sendMessageToUsers(string $templateName, array $valueForTemplate, array $username): bool {
+    public function sendMessageToUsers(string $templateName, array $valueForTemplate, array $username) {
 
         $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
-            return false;
+            $this->status = false;
         }
         foreach ($username as $key => $value) {
             $this->setUser($value);
             if (!array_key_exists('nama', $this->user)) {
-                return false;
+                $this->status = false;
+                continue;
             }
-            $this->save($this->user->nama . ';' . $this->user->telepon_wa);
+
+            if ($this->status) {
+                $this->to[] = ['touser' => $this->user->nama . ';' . $this->user->telepon_wa];
+                $this->status = true;
+            }
+//            $this->save($this->user->nama . ';' . $this->user->telepon_wa);
         }
 
-        return true;
+        return $this;
     }
 
     /**
@@ -72,22 +85,27 @@ class Wa_message {
      * @param string $templateName
      * @param array $valueForTemplate
      * @param array $deptID
-     * @return bool
+     * @return bool|$this
      */
-    public function sendMessageToUserByDept(string $templateName, array $valueForTemplate, array $deptID): bool {
+    public function sendMessageToUserByDept(string $templateName, array $valueForTemplate, array $deptID) {
 
         $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
-            return false;
+            $this->status = false;
         }
         $this->setUserByDept($deptID);
         foreach ($this->user as $key => $value) {
             if (!array_key_exists('nama', $value)) {
-                return false;
+                $this->status = false;
+                continue;
             }
-            $this->save($value->nama . ';' . $value->telepon_wa);
+            if ($this->status) {
+                $this->to[] = ['touser' => $value->nama . ';' . $value->telepon_wa];
+                $this->status = true;
+            }
+//            $this->save($value->nama . ';' . $value->telepon_wa);
         }
-        return true;
+        return $this;
     }
 
     /**
@@ -95,23 +113,28 @@ class Wa_message {
      * @param string $templateName
      * @param array $valueForTemplate
      * @param array $group
-     * @return bools
+     * @return bool|$this
      */
-    public function sendMessageToGroup(string $templateName, array $valueForTemplate, array $group): bool {
+    public function sendMessageToGroup(string $templateName, array $valueForTemplate, array $group) {
 
         $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
-            return false;
+            $this->status = false;
         }
         foreach ($group as $key => $value) {
             $this->setGroup($value);
             if (!array_key_exists('wa_group', $this->group)) {
-                return false;
+                $this->status = false;
+                continue;
             }
-            $this->save($this->group->wa_group, 'togroup');
+            if ($this->status) {
+                $this->to[] = ['togroup' => $this->group->wa_group];
+                $this->status = true;
+            }
+//            $this->save($this->group->wa_group, 'togroup');
         }
 
-        return true;
+        return $this;
     }
 
     /**
@@ -119,9 +142,9 @@ class Wa_message {
      * @param string $templateName
      * @param array $valueForTemplate
      * @param array $depthkode
-     * @return bool
+     * @return bool|$this
      */
-    public function sendMessageToGroupByDepth(string $templateName, array $valueForTemplate, array $depthkode): bool {
+    public function sendMessageToGroupByDepth(string $templateName, array $valueForTemplate, array $depthkode) {
 
         $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
@@ -129,10 +152,34 @@ class Wa_message {
         }
         $this->setGroupByDept($depthkode);
         foreach ($this->group as $key => $value) {
-            $this->save($value->wa_group, 'togroup');
+//            $this->save($value->wa_group, 'togroup');
+            if ($this->status) {
+                $this->to [] = ['togroup' => $value->wa_group];
+            }
         }
 
-        return true;
+        return $this;
+    }
+
+    /**
+     * 
+     * @param array $phoneNumber
+     * @return $this
+     */
+    public function setMentions(array $phoneNumber) {
+        $this->has_mention = json_encode($phoneNumber);
+        return $this;
+    }
+
+    /**
+     * KSave Database
+     */
+    public function send() {
+        foreach ($this->to as $value) {
+            foreach ($value as $key => $values) {
+                $this->save($values, $key);
+            }
+        }
     }
 
     protected function getTemplate($templateName): bool {
@@ -168,6 +215,6 @@ class Wa_message {
     }
 
     protected function save($value, $touser = 'touser') {
-        $this->model->m_WaSendMessage->save($this->setToTemplate(), [$touser => $value]);
+        $this->model->m_WaSendMessage->save($this->setToTemplate(), [$touser => $value, 'has_mention' => $this->has_mention]);
     }
 }

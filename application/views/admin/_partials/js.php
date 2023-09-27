@@ -134,7 +134,10 @@
     }
 
     let textarea = document.querySelector(".resize-ta");
-    textarea.addEventListener("keyup", () => {
-        textarea.style.height = calcHeight(textarea.value) + "px";
-    });
+    if (textarea != null) {
+        textarea.addEventListener("keyup", () => {
+            textarea.style.height = calcHeight(textarea.value) + "px";
+        });
+    }
+
 </script>

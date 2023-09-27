@@ -163,7 +163,7 @@ class WaGroup extends MY_Controller {
                     '<a href="' . base_url('setting/wa_group/edit/' . $kode_encrypt) . '">' . $field->wa_group . '</a>',
                     $field->kode,
 
-                    date('D m, Y H:i:s', strtotime($field->created_at)),
+                    date('D d m, Y H:i:s', strtotime($field->created_at)),
                 );
                 $data[] = $row;
             }

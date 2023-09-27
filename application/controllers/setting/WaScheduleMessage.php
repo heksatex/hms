@@ -69,8 +69,17 @@ class WaScheduleMessage extends MY_Controller {
         'Sunday' => 'Sunday'
     );
     protected $customSchedule = array(
-        'last_month' => 'Akhir Bulan'
+        'last_month' => 'last_month'
     );
+
+    protected function dates(): array {
+        $arr = [];
+        for ($i = 1; $i <= 31; $i++) {
+            $arr[$i] = $i;
+        }
+
+        return $arr;
+    }
 
     public function __construct() {
         parent::__construct();
@@ -133,11 +142,12 @@ class WaScheduleMessage extends MY_Controller {
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
             $group = $this->input->post('group');
-            $hari = (array)$this->input->post('hari');
-            $hari = array_intersect($this->days,$hari);
+            $hari = (array) $this->input->post('hari');
+            $hari = array_intersect($this->days, $hari);
+            $setLastExe = ($waktu <= date("H:i:s")) ? false : true;
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
-            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama)) {
+            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama, $setLastExe)) {
                 foreach ($berdasarkan as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Hari Yang Dipilih', 500);
@@ -187,8 +197,8 @@ class WaScheduleMessage extends MY_Controller {
             $waktu = $this->input->post('waktu_kirim');
             $waktu_sblm = $this->input->post('waktu_kirim_sblm');
             $group = $this->input->post('group');
-            $hari = (array)$this->input->post('hari');
-            $hari = array_intersect($this->days,$hari);
+            $hari = (array) $this->input->post('hari');
+            $hari = array_intersect($this->days, $hari);
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
             $setLastExe = ($waktu <= $waktu_sblm) ? false : true;
@@ -269,6 +279,7 @@ class WaScheduleMessage extends MY_Controller {
                 $kode_encrypt = encrypt_url($field->id);
                 $no++;
                 $nama = $field->nama ?? "Default";
+                $field->day = $this->orderDays($field->day);
                 $row = array(
                     $no,
                     '<a href="' . base_url('setting/wa_schedule/edit/' . $kode_encrypt) . '">' . $nama . '</a>',
@@ -280,7 +291,7 @@ class WaScheduleMessage extends MY_Controller {
                 );
                 $data[] = $row;
             }
-
+            $this->orderDays([]);
             echo json_encode(array("draw" => $_POST['draw'],
                 "recordsTotal" => $this->m_WaScheduleMessage->getCountAllData(),
                 "recordsFiltered" => $this->m_WaScheduleMessage->getCountDataFiltered(),
@@ -300,5 +311,16 @@ class WaScheduleMessage extends MY_Controller {
             }
         }
         return $rst;
+    }
+
+    protected function orderDays($day): string {
+        $data = array_merge($this->days, $this->customSchedule, $this->dates());
+        if (is_array($day)) {
+            return implode(',', $day);
+        }
+        $days = explode(',', $day);
+        return implode(',', array_intersect($data, $days));
+        ;
+//        return json_encode(array_intersect($data, $days));
     }
 }
