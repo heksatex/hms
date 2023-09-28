@@ -34,6 +34,7 @@
                                             <th class="no">No</th>
                                             <th>Nama</th>
                                             <th>Pesan</th>
+                                            <th>Footer</th>
                                             <th>Group</th>
                                             <th>Setiap</th>
                                             <th>Waktu Kirim</th>
@@ -72,7 +73,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 2, 3, 4,6],
+                            "targets": [0,2,3,7],
                             "orderable": false,
                         }
                     ]

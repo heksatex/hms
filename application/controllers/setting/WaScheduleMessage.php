@@ -87,6 +87,7 @@ class WaScheduleMessage extends MY_Controller {
         $this->load->model("m_WaScheduleMessage");
         $this->load->model("_module");
         $this->load->model("m_WaGroup");
+        $this->load->model("m_WaTemplate");
     }
 
     public function index() {
@@ -99,6 +100,7 @@ class WaScheduleMessage extends MY_Controller {
         $data['group'] = $this->m_WaGroup->getDataQuery();
         $data['days'] = $this->days;
         $data['customSchedule'] = $this->customSchedule;
+        $data['template_footer'] = $this->m_WaTemplate->getFooterTemplate();
         return $this->load->view('setting/v_wa_schedule_add', $data);
     }
 
@@ -113,6 +115,7 @@ class WaScheduleMessage extends MY_Controller {
             $data["id"] = $id;
             $data['datas'] = $this->m_WaScheduleMessage->getDataByID($kode_decrypt);
             $data['customSchedule'] = $this->customSchedule;
+            $data['template_footer'] = $this->m_WaTemplate->getFooterTemplate();
             if (!is_null($data['datas']->groupid)) {
                 $data['datas']->groupid = explode(',', $data['datas']->groupid);
             }
@@ -143,11 +146,11 @@ class WaScheduleMessage extends MY_Controller {
             $waktu = $this->input->post('waktu_kirim');
             $group = $this->input->post('group');
             $hari = (array) $this->input->post('hari');
-            $hari = array_intersect($this->days, $hari);
+            $footer = $this->input->post('footer');
             $setLastExe = ($waktu <= date("H:i:s")) ? false : true;
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
-            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama, $setLastExe)) {
+            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama, $setLastExe,$footer)) {
                 foreach ($berdasarkan as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Hari Yang Dipilih', 500);
@@ -198,11 +201,11 @@ class WaScheduleMessage extends MY_Controller {
             $waktu_sblm = $this->input->post('waktu_kirim_sblm');
             $group = $this->input->post('group');
             $hari = (array) $this->input->post('hari');
-            $hari = array_intersect($this->days, $hari);
+            $footer = $this->input->post('footer');
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
             $setLastExe = ($waktu <= $waktu_sblm) ? false : true;
-            if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu, $nama, $setLastExe)) {
+            if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu, $nama, $setLastExe,$footer)) {
                 throw new \Exception("Gagal Mengubah Data", 500);
             }
             $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
@@ -284,6 +287,7 @@ class WaScheduleMessage extends MY_Controller {
                     $no,
                     '<a href="' . base_url('setting/wa_schedule/edit/' . $kode_encrypt) . '">' . $nama . '</a>',
                     $field->message,
+                    $field->footer,
                     $field->groupname,
                     str_replace("_", " ", $field->day),
                     $field->send_time,

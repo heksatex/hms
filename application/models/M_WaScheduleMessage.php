@@ -8,14 +8,15 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_WaScheduleMessage extends CI_Model {
 
-    var $column_order = array(null, 'wsm.nama', 'wsm.message', 'groupname', 'day', 'wsm.send_time');
+    var $column_order = array(null, 'wsm.nama', null, null, 'groupname', 'day', 'wsm.send_time');
     var $column_search = array('wsm.message', 'wsm.nama');
     var $order = ['wsm.id' => 'desc'];
     var $table = "wa_schedule_message";
 
     protected function getDataQuery() {
-        $this->db->select('wsm.*,day,groupid,groupname');
+        $this->db->select('wsm.*,day,groupid,groupname,tmp.template as footer');
         $this->db->from($this->table . ' as wsm');
+        $this->db->join('wa_template as tmp', 'tmp.nama = wsm.footer_nama', 'left');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(day) as day from wa_schedule_message_days GROUP BY wa_schedule_message_id) as b', 'b.wa_schedule_message_id = wsm.id', 'LEFT');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(wa_group_id) as groupid,GROUP_CONCAT(d.wa_group) as groupname from wa_schedule_message_group as c '
                 . ' join wa_group as d on d.id = c.wa_group_id GROUP BY wa_schedule_message_id) d', 'd.wa_schedule_message_id = wsm.id', 'LEFT');
@@ -46,22 +47,24 @@ class M_WaScheduleMessage extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function simpan($pesan, $waktu_kirim, $nama, $setNullLastExe = false) {
+    public function simpan($pesan, $waktu_kirim, $nama, $setNullLastExe = false, $footer = null) {
         $this->db->insert($this->table, array(
             'nama' => $nama,
             'message' => addslashes($pesan),
             'send_time' => addslashes($waktu_kirim),
             'created_at' => date('Y-m-d H:i:s'),
+            'footer_nama' => $footer,
             'last_execution' => (!$setNullLastExe) ? date('Y-m-d H:i:s') : null
         ));
         return $this->db->insert_id() ?? null;
     }
 
-    public function update($id, $pesan, $waktu_kirim, $nama, $setNullLastExe = false) {
+    public function update($id, $pesan, $waktu_kirim, $nama, $setNullLastExe = false, $footer = null) {
         $this->db->where('id', $id);
         $this->db->set('message', $pesan);
         $this->db->set('nama', $nama);
         $this->db->set('send_time', $waktu_kirim);
+        $this->db->set('footer_nama', $footer);
         if ($setNullLastExe) {
             $this->db->set('last_execution', null);
         }
