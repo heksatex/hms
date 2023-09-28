@@ -18,6 +18,7 @@ class WaSendMessage extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'MWSM';
+//        $this->wa_message->sendMessageToUser('saidi', ['{saidi}' => 'Satu'], 'achramdan')->setFooter('footer_default')->send();
         return $this->load->view('setting/v_wa_send_message', $data);
     }
 
