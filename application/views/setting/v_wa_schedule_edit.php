@@ -110,7 +110,7 @@
                                                 <div class="col-xs-6"><label class="form-label required">Setiap (Custom)</label></div>
                                                 <div class="col-xs-6">
                                                     <select class="form-control input-sm select2" name="custom[]" id="bycustom" multiple>
-                                                       
+
                                                         <?php
                                                         foreach ($customSchedule as $key => $value) {
                                                             $seleced = '';
@@ -129,6 +129,22 @@
                                                     <textarea class="form-control input-sm resize-ta" id="pesan" name="pesan" required><?= $datas->message ?></textarea>
                                                 </div>                                    
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label">Template Footer</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm select2" name="footer">
+                                                        <?php
+                                                        foreach ($template_footer as $key => $value) {
+                                                            $seleced = '';
+                                                            if (!is_null($datas->footer_nama)) {
+                                                                $seleced = in_array($value->nama, $datas->footer_nama) ? 'selected' : '';
+                                                            }
+                                                            echo "<option value='$value->nama' $seleced>$value->nama</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
 
                                     </div>
@@ -142,7 +158,10 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
-                $('.select2').select2();
+                $('.select2').select2({
+                    allowClear: true,
+                    placeholder: 'Pilih',
+                });
                 $(".time").datetimepicker({
                     format: 'HH:mm:ss'
                 });
@@ -160,7 +179,7 @@
                     $('#bytanggal').val(null).trigger('change');
                     $('#byhari').val(null).trigger('change');
                 });
-                
+
                 $('#pesan').keyup();
                 const formschedule = document.forms.namedItem("form-wa-schedule");
                 formschedule.addEventListener(

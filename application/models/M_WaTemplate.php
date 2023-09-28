@@ -66,6 +66,13 @@ class M_WaTemplate extends CI_Model {
 
         return is_array($this->db->error());
     }
+    
+    public function getFooterTemplate() {
+        $this->db->select('id,nama');
+        $this->db->from($this->table);
+        $this->db->like('nama','footer');
+        return $this->db->get()->result();        
+    }
 
     public function getData() {
         try {
