@@ -16,6 +16,7 @@ class Wa_message {
     protected $to = [];
     protected $has_mention = null;
     protected $status = true;
+    protected $footer = "";
 
     public function __construct() {
         $this->model = & get_instance();
@@ -170,6 +171,22 @@ class Wa_message {
         $this->has_mention = json_encode($phoneNumber);
         return $this;
     }
+    /**
+     * 
+     * @param string $footer_name
+     * @return $this
+     */
+    public function setFooter(string $footer_name) {
+        $data = $this->model->m_WaTemplate->getFooter($footer_name);
+
+        if (!is_object($data)) {
+            $this->footer = "";
+        } else {
+            $this->footer = $data->template;
+        }
+        
+        return $this;
+    }
 
     /**
      * KSave Database
@@ -215,6 +232,6 @@ class Wa_message {
     }
 
     protected function save($value, $touser = 'touser') {
-        $this->model->m_WaSendMessage->save($this->setToTemplate(), [$touser => $value, 'has_mention' => $this->has_mention]);
+        $this->model->m_WaSendMessage->save($this->setToTemplate(), [$touser => $value, 'has_mention' => $this->has_mention, 'footer' => $this->footer]);
     }
 }
