@@ -1561,9 +1561,9 @@
                                 // }
                               }else{
                                 if(view == "Global" || view == "DetailProduk"){
-                                  colspan = 'colspan = "4" ';
+                                  colspan = 'colspan = "5" ';
                                 }else{
-                                  colspan = 'colspan = "3" ';
+                                  colspan = 'colspan = "4" ';
                                 }
                                 row2 += "<th class='style no text-center white-space-nowrap'  "+colspan+" >";
                                 row2 += h;
@@ -1618,7 +1618,9 @@
               row4 += "<td class='white-space-nowrap'>"+value.nama_jenis_kain+"</td>";
             }
 
+            
             // saldo awal
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_proses)+"</td>";
             if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
             }
@@ -1633,12 +1635,14 @@
                     $.each(b.in[i], function(c,d){
                                       
                         // lot = "in_"+d+"_qty";
+                        in_proses    = "in_"+d+"_proses";
                         in_qty1      = "in_"+d+"_qty1";
                         in_qty1_uom  = "in_"+d+"_qty1_uom";
                         in_qty2      = "in_"+d+"_qty2";
                         in_qty2_uom  = "in_"+d+"_qty2_uom";
                         in_qty_op      = "in_"+d+"_qty_opname";
                         in_qty_op_uom  = "in_"+d+"_qty_opname_uom";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_proses])+"</td>";
                         if(view == "Global" || view == 'DetailProduk'){
                           lot = "in_"+d+"_lot";
                           row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
@@ -1651,6 +1655,7 @@
             });
 
             // consume
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_proses)+"</td>";
             if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
             }
@@ -1659,6 +1664,7 @@
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
 
             // ADJ IN 
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_proses)+"</td>";
             if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
             }
@@ -1667,6 +1673,7 @@
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+" </td>";
 
             // produce
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_proses)+"</td>";
             if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
             }
@@ -1680,12 +1687,14 @@
                   for (var i = 0, l = b.in.length; i<l; i++){
                     $.each(b.process[i], function(c,d){
                                       
+                        hph_proses    = "hph_"+d+"_proses";
                         hph_qty1      = "hph_"+d+"_qty1";
                         hph_qty1_uom  = "hph_"+d+"_qty1_uom";
                         hph_qty2      = "hph_"+d+"_qty2";
                         hph_qty2_uom  = "hph_"+d+"_qty2_uom";
                         hph_qty_op      = "hph_"+d+"_qty_opname";
                         hph_qty_op_uom  = "hph_"+d+"_qty_opname_uom";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_proses])+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty1])+" "+value[hph_qty1_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty2])+" "+value[hph_qty2_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty_op])+" "+value[hph_qty_op_uom]+"</td>";
@@ -1699,13 +1708,14 @@
                   for (var i = 0, l = b.in.length; i<l; i++){
                     $.each(b.out[i], function(c,d){
                                       
-                        lot = "out_"+d+"_qty";
+                        out_proses    = "out_"+d+"_proses";
                         out_qty1      = "out_"+d+"_qty1";
                         out_qty1_uom  = "out_"+d+"_qty1_uom";
                         out_qty2      = "out_"+d+"_qty2";
                         out_qty2_uom  = "out_"+d+"_qty2_uom";
                         out_qty_op      = "out_"+d+"_qty_opname";
                         out_qty_op_uom  = "out_"+d+"_qty_opname_uom";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_proses])+"</td>";
                         if(view == "Global" || view == 'DetailProduk'){
                           lot = "out_"+d+"_lot";
                           row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
@@ -1718,6 +1728,7 @@
             });
 
             // ADJ OUT
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_proses)+"</td>";
             if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_lot)+"</td>";
             }
@@ -1726,7 +1737,8 @@
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+" </td>";
 
             // saldo akhir
-             if(view == "Global" || view == "DetailProduk" ){
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_proses)+"</td>";
+            if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_lot)+"</td>";
             }
 

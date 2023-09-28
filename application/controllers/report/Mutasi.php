@@ -758,11 +758,11 @@ class Mutasi extends MY_Controller
             $field            .= 's_awal_lot,con_lot,adj_in_lot,prod_lot,adj_out_lot,s_akhir_lot,'; // lot
 
             if($excel == true){
-                $child             = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
-                $count_child       = 7;
+                $child             = array('Proses','Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
+                $count_child       = 8;
             }else{
-                $child             = array('Lot','Qty1', 'Qty2','Qty Opname');
-                $count_child       = 4;
+                $child             = array('Proses','Lot','Qty1', 'Qty2','Qty Opname');
+                $count_child       = 5;
             }
 
             $s_awal[]          = array('nama' => "Saldo Awal", 'child' => $child, 'count_child'=>$count_child, 'row'=>2);
@@ -788,11 +788,11 @@ class Mutasi extends MY_Controller
             $field             .= 's_awal_lot,con_lot,adj_in_lot,prod_lot,adj_out_lot,s_akhir_lot,'; // lot
 
             if($excel == true){
-                $child             = array('Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
-                $count_child       = 7;
+                $child             = array('Proses','Lot','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
+                $count_child       = 8;
             }else{
-                $child             = array('Lot','Qty1', 'Qty2','Qty Opname');
-                $count_child       = 4;
+                $child             = array('Proses','Lot','Qty1', 'Qty2','Qty Opname');
+                $count_child       = 5;
             }
 
             $s_awal[]           = array('nama' => "Saldo Awal", 'child' => $child, 'count_child'=>$count_child, 'row'=>2);
@@ -814,12 +814,12 @@ class Mutasi extends MY_Controller
         }else{
             if($excel == true){
                 $head_utama[]       = array('No.','LOT', 'Qty1 (Mtr)','Uom1', 'Qty2 (Kg)','Uom2','GO','Route','Nama Produk','Warna','Parent','Jenis Kain');
-                $child              = array('Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
-                $count_child        = 6;
+                $child              = array('Proses','Qty1','Uom1','Qty2','Uom2','Qty Opname','Uom Opname');
+                $count_child        = 7;
             }else{
                 $head_utama[]       = array('No.','LOT', 'Qty1 (Mtr)', 'Qty2 (Kg)','GO','Route','Nama Produk','Warna','Parent','Jenis Kain');
-                $child              = array('Qty1', 'Qty2','Qty Opname');
-                $count_child        = 3;
+                $child              = array('Proses','Qty1', 'Qty2','Qty Opname');
+                $count_child        = 4;
             }
 
             $field             .= 'lot,go_qty1,go_qty1_uom,go_qty2,go_qty2_uom,go_qty_opname,go_qty_opname_uom,no_go,route,kode_produk,nama_produk,warna,product_parent,nama_jenis_kain,';
@@ -843,26 +843,26 @@ class Mutasi extends MY_Controller
 
         }
             
-            $field .= 's_awal_qty1,s_awal_qty1_uom,s_awal_qty2,s_awal_qty2_uom,s_awal_qty_opname,s_awal_qty_opname_uom,';
-            $field .= 'con_qty1,con_qty1_uom,con_qty2,con_qty2_uom,con_qty_opname,con_qty_opname_uom,';
-            $field .= 'adj_in_qty1,adj_in_qty1_uom,adj_in_qty2,adj_in_qty2_uom,adj_in_qty_opname,adj_in_qty_opname_uom,';
-            $field .= 'prod_qty1,prod_qty1_uom,prod_qty2,prod_qty2_uom,prod_qty_opname,prod_qty_opname_uom,';
-            $field .= 'adj_out_qty1,adj_out_qty1_uom,adj_out_qty2,adj_out_qty2_uom,adj_out_qty_opname,adj_out_qty_opname_uom,';
-            $field .= 's_akhir_qty1,s_akhir_qty1_uom,s_akhir_qty2,s_akhir_qty2,s_akhir_qty2_uom,s_akhir_qty_opname,s_akhir_qty_opname_uom,';
+            $field .= 's_awal_proses,s_awal_qty1,s_awal_qty1_uom,s_awal_qty2,s_awal_qty2_uom,s_awal_qty_opname,s_awal_qty_opname_uom,';
+            $field .= 'con_proses,con_qty1,con_qty1_uom,con_qty2,con_qty2_uom,con_qty_opname,con_qty_opname_uom,';
+            $field .= 'adj_in_proses,adj_in_qty1,adj_in_qty1_uom,adj_in_qty2,adj_in_qty2_uom,adj_in_qty_opname,adj_in_qty_opname_uom,';
+            $field .= 'prod_proses,prod_qty1,prod_qty1_uom,prod_qty2,prod_qty2_uom,prod_qty_opname,prod_qty_opname_uom,';
+            $field .= 'adj_out_proses,adj_out_qty1,adj_out_qty1_uom,adj_out_qty2,adj_out_qty2_uom,adj_out_qty_opname,adj_out_qty_opname_uom,';
+            $field .= 's_akhir_proses,s_akhir_qty1,s_akhir_qty1_uom,s_akhir_qty2,s_akhir_qty2,s_akhir_qty2_uom,s_akhir_qty_opname,s_akhir_qty_opname_uom,';
 
         if($departemen == 'DYE2'){
             if($view == 'Global' || $view == 'DetailProduk'){
                 $field .= 'in_grg_lot,in_set_lot,out_fin_lot,out_grg_lot,';
                 if($excel == true){
-                    $count_child_head  = 14;
+                    $count_child_head  = 16;
                 }else{
-                    $count_child_head  = 8;
+                    $count_child_head  = 10;
                 }
             }else{
                 if($excel == true){
-                    $count_child_head  = 12;
+                    $count_child_head  = 14;
                 }else{
-                    $count_child_head  = 6;
+                    $count_child_head  = 8;
                 }
             }
             // penerimaan
@@ -876,11 +876,11 @@ class Mutasi extends MY_Controller
             $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head,'row'=>3);
 
 
-            $field .= 'in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
-            $field .= 'in_set_qty1,in_set_qty1_uom,in_set_qty2,in_set_qty2_uom,in_set_qty_opname,in_set_qty_opname_uom,';
+            $field .= 'in_grg_proses,in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
+            $field .= 'in_set_proses,in_set_qty1,in_set_qty1_uom,in_set_qty2,in_set_qty2_uom,in_set_qty_opname,in_set_qty_opname_uom,';
 
-            $field .= 'out_fin_qty1,out_fin_qty1_uom,out_fin_qty2,out_fin_qty2_uom,out_fin_qty_opname,out_fin_qty_opname_uom,';
-            $field .= 'out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
+            $field .= 'out_fin_proses,out_fin_qty1,out_fin_qty1_uom,out_fin_qty2,out_fin_qty2_uom,out_fin_qty_opname,out_fin_qty_opname_uom,';
+            $field .= 'out_grg_proses,out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
 
             $mutasi_dept = 'acc_mutasi_dye_1_';
 
@@ -893,24 +893,24 @@ class Mutasi extends MY_Controller
             if($view == 'Global' || $view == 'DetailProduk'){
                 $field .= 'in_grg_lot,in_dye_lot,out_ins2_lot,out_grg_lot,out_dye_lot,';
                 if($excel == true){
-                    $count_child_head1  = 14;
-                    $count_child_head2  = 18;
+                    $count_child_head1  = 16;
+                    $count_child_head2  = 20;
+                }else{
+                    $count_child_head1  = 10;
+                    $count_child_head2  = 15;
+                }
+            }else{
+                $field .= 'hph_set_proses, hph_set_qty1, hph_set_qty1_uom, hph_set_qty2, hph_set_qty2_uom, hph_set_qty_opname, hph_set_qty_opname_uom,';
+                $field .= 'hph_fin_proses, hph_fin_qty1, hph_fin_qty1_uom, hph_fin_qty2, hph_fin_qty2_uom, hph_fin_qty_opname, hph_fin_qty_opname_uom,';
+                $field .= 'hph_brs_proses, hph_brs_qty1, hph_brs_qty1_uom, hph_brs_qty2, hph_brs_qty2_uom, hph_brs_qty_opname, hph_brs_qty_opname_uom,';
+                $field .= 'hph_fbr_proses, hph_fbr_qty1, hph_fbr_qty1_uom, hph_fbr_qty2, hph_fbr_qty2_uom, hph_fbr_qty_opname, hph_fbr_qty_opname_uom,';
+                $field .= 'hph_pad_proses, hph_pad_qty1, hph_pad_qty1_uom, hph_pad_qty2, hph_pad_qty2_uom, hph_pad_qty_opname, hph_pad_qty_opname_uom,';
+                if($excel == true){
+                    $count_child_head1  = 16;
+                    $count_child_head2  = 20;
                 }else{
                     $count_child_head1  = 8;
                     $count_child_head2  = 12;
-                }
-            }else{
-                $field .= 'hph_set_qty1, hph_set_qty1_uom, hph_set_qty2, hph_set_qty2_uom, hph_set_qty_opname, hph_set_qty_opname_uom,';
-                $field .= 'hph_fin_qty1, hph_fin_qty1_uom, hph_fin_qty2, hph_fin_qty2_uom, hph_fin_qty_opname, hph_fin_qty_opname_uom,';
-                $field .= 'hph_brs_qty1, hph_brs_qty1_uom, hph_brs_qty2, hph_brs_qty2_uom, hph_brs_qty_opname, hph_brs_qty_opname_uom,';
-                $field .= 'hph_fbr_qty1, hph_fbr_qty1_uom, hph_fbr_qty2, hph_fbr_qty2_uom, hph_fbr_qty_opname, hph_fbr_qty_opname_uom,';
-                $field .= 'hph_pad_qty1, hph_pad_qty1_uom, hph_pad_qty2, hph_pad_qty2_uom, hph_pad_qty_opname, hph_pad_qty_opname_uom,';
-                if($excel == true){
-                    $count_child_head1  = 12;
-                    $count_child_head2  = 18;
-                }else{
-                    $count_child_head1  = 6;
-                    $count_child_head2  = 9;
                 }
                 // detail proses
                 $head_process_dept[]   = array('nama'=> 'SET','child' => $child, );
@@ -919,9 +919,9 @@ class Mutasi extends MY_Controller
                 $head_process_dept[]   = array('nama'=> 'FBR','child' => $child, );
                 $head_process_dept[]   = array('nama'=> 'PAD','child' => $child, );
                 if($excel == true){
-                    $count_childx = 20;
+                    $count_childx = 25;
                 }else{
-                    $count_childx = 15;
+                    $count_childx = 20;
                 }
                 $head_process[]        = array('nama' => 'Detail Process', 'child' => $head_process_dept, 'count_child'=>$count_childx,'row'=>3);
             }
@@ -938,12 +938,12 @@ class Mutasi extends MY_Controller
             $head_out_dept[]   = array('nama'=> 'DYE','child' => $child, );
             $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
 
-            $field .= 'in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
-            $field .= 'in_dye_qty1,in_dye_qty1_uom,in_dye_qty2,in_dye_qty2_uom,in_dye_qty_opname,in_dye_qty_opname_uom,';
+            $field .= 'in_grg_proses, in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
+            $field .= 'in_dye_proses, in_dye_qty1,in_dye_qty1_uom,in_dye_qty2,in_dye_qty2_uom,in_dye_qty_opname,in_dye_qty_opname_uom,';
 
-            $field .= 'out_ins2_qty1,out_ins2_qty1_uom,out_ins2_qty2,out_ins2_qty2_uom,out_ins2_qty_opname,out_ins2_qty_opname_uom,';
-            $field .= 'out_dye_qty1,out_dye_qty1_uom,out_dye_qty2,out_dye_qty2_uom,out_dye_qty_opname,out_dye_qty_opname_uom,';
-            $field .= 'out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
+            $field .= 'out_ins2_proses, out_ins2_qty1,out_ins2_qty1_uom,out_ins2_qty2,out_ins2_qty2_uom,out_ins2_qty_opname,out_ins2_qty_opname_uom,';
+            $field .= 'out_dye_proses, out_dye_qty1,out_dye_qty1_uom,out_dye_qty2,out_dye_qty2_uom,out_dye_qty_opname,out_dye_qty_opname_uom,';
+            $field .= 'out_grg_proses, out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
 
             $mutasi_dept = 'acc_mutasi_fin_1_';
 
@@ -960,24 +960,24 @@ class Mutasi extends MY_Controller
                     $count_child_head1  = 7;
                     $count_child_head2  = 14;
                 }else{
-                    $count_child_head1  = 4;
-                    $count_child_head2  = 8;
+                    $count_child_head1  = 5;
+                    $count_child_head2  = 10;
                 }
             }else{
                 if($excel == true){
                     $count_child_head1  = 6;
                     $count_child_head2  = 9;
                 }else{
-                    $count_child_head1  = 3;
-                    $count_child_head2  = 6;
+                    $count_child_head1  = 4;
+                    $count_child_head2  = 8;
                 }
 
-                $field .= 'hph_dye_qty1, hph_dye_qty1_uom, hph_dye_qty2, hph_dye_qty2_uom, hph_dye_qty_opname, hph_dye_qty_opname_uom,';
-                $field .= 'hph_set_qty1, hph_set_qty1_uom, hph_set_qty2, hph_set_qty2_uom, hph_set_qty_opname, hph_set_qty_opname_uom,';
-                $field .= 'hph_fin_qty1, hph_fin_qty1_uom, hph_fin_qty2, hph_fin_qty2_uom, hph_fin_qty_opname, hph_fin_qty_opname_uom,';
-                $field .= 'hph_brs_qty1, hph_brs_qty1_uom, hph_brs_qty2, hph_brs_qty2_uom, hph_brs_qty_opname, hph_brs_qty_opname_uom,';
-                $field .= 'hph_fbr_qty1, hph_fbr_qty1_uom, hph_fbr_qty2, hph_fbr_qty2_uom, hph_fbr_qty_opname, hph_fbr_qty_opname_uom,';
-                $field .= 'hph_pad_qty1, hph_pad_qty1_uom, hph_pad_qty2, hph_pad_qty2_uom, hph_pad_qty_opname, hph_pad_qty_opname_uom,';
+                $field .= 'hph_dye_proses, hph_dye_qty1, hph_dye_qty1_uom, hph_dye_qty2, hph_dye_qty2_uom, hph_dye_qty_opname, hph_dye_qty_opname_uom,';
+                $field .= 'hph_set_proses, hph_set_qty1, hph_set_qty1_uom, hph_set_qty2, hph_set_qty2_uom, hph_set_qty_opname, hph_set_qty_opname_uom,';
+                $field .= 'hph_fin_proses, hph_fin_qty1, hph_fin_qty1_uom, hph_fin_qty2, hph_fin_qty2_uom, hph_fin_qty_opname, hph_fin_qty_opname_uom,';
+                $field .= 'hph_brs_proses, hph_brs_qty1, hph_brs_qty1_uom, hph_brs_qty2, hph_brs_qty2_uom, hph_brs_qty_opname, hph_brs_qty_opname_uom,';
+                $field .= 'hph_fbr_proses, hph_fbr_qty1, hph_fbr_qty1_uom, hph_fbr_qty2, hph_fbr_qty2_uom, hph_fbr_qty_opname, hph_fbr_qty_opname_uom,';
+                $field .= 'hph_pad_proses, hph_pad_qty1, hph_pad_qty1_uom, hph_pad_qty2, hph_pad_qty2_uom, hph_pad_qty_opname, hph_pad_qty_opname_uom,';
                 
                 // detail proses
                 $head_process_dept[]   = array('nama'=> 'DYE','child' => $child, );
@@ -987,9 +987,9 @@ class Mutasi extends MY_Controller
                 $head_process_dept[]   = array('nama'=> 'FBR','child' => $child, );
                 $head_process_dept[]   = array('nama'=> 'PAD','child' => $child, );
                 if($excel == true){
-                    $count_childx = 24;
+                    $count_childx = 30;
                 }else{
-                    $count_childx = 18;
+                    $count_childx = 24;
                 }
                 $head_process[]        = array('nama' => 'Detail Process', 'child' => $head_process_dept, 'count_child'=>$count_childx,'row'=>3);
 
@@ -1005,10 +1005,10 @@ class Mutasi extends MY_Controller
             $head_out_dept[]   = array('nama'=> 'GRG','child' => $child, );
             $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
 
-            $field .= 'in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
+            $field .= 'in_grg_proses, in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
 
-            $field .= 'out_ins2_qty1,out_ins2_qty1_uom,out_ins2_qty2,out_ins2_qty2_uom,out_ins2_qty_opname,out_ins2_qty_opname_uom,';
-            $field .= 'out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
+            $field .= 'out_ins2_proses, out_ins2_qty1,out_ins2_qty1_uom,out_ins2_qty2,out_ins2_qty2_uom,out_ins2_qty_opname,out_ins2_qty_opname_uom,';
+            $field .= 'out_grg_proses, out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
 
             $mutasi_dept = 'acc_mutasi_df_1_';
 
@@ -1269,11 +1269,11 @@ class Mutasi extends MY_Controller
                                         $column_child++;
                                     }
                                     if($view == "Global" or $view == "DetailProduk"){
+                                        $column_e = $column_e + 8;
+                                        $column   = $column + 8;
+                                    }else{
                                         $column_e = $column_e + 7;
                                         $column   = $column + 7;
-                                    }else{
-                                        $column_e = $column_e + 6;
-                                        $column   = $column + 6;
                                     }
                                     $column_excel_finish = $this->cek_column_excel($column_e-1);
                                     if($field2 == 'awal'){
@@ -1307,11 +1307,11 @@ class Mutasi extends MY_Controller
                                             $column_excel_start2  = $this->cek_column_excel($column_e2);
                                             $sheet->setCellValueByColumnAndRow($column_child, $rowCount+1, $field4['nama']);
                                             if($view == "Global" or $view == "DetailProduk"){
+                                                $column_e2 = $column_e2 + 8;
+                                                $column_child = $column_child + 8;
+                                            }else{
                                                 $column_e2 = $column_e2 + 7;
                                                 $column_child = $column_child + 7;
-                                            }else{
-                                                $column_e2 = $column_e2 + 6;
-                                                $column_child = $column_child + 6;
                                             }
                                             $column_excel_finish2 = $this->cek_column_excel($column_e2-1);
                                             $sheet->mergeCells($column_excel_start2.''.$rowCountMerge.':'.$column_excel_finish2.''.$rowCountMerge);
@@ -1358,8 +1358,10 @@ class Mutasi extends MY_Controller
                         $column_excel  = $this->cek_column_excel($column_awal+1);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_jenis_kain']);
                         $column_excel  = $this->cek_column_excel($column_awal+2);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_proses']);
+                        $column_excel  = $this->cek_column_excel($column_awal+3);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
-                        $column = 5;
+                        $column = 6;
                     }else if($view == "DetailProduk"){
                         $column_excel  = $this->cek_column_excel($column_awal);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_produk']);
@@ -1368,8 +1370,10 @@ class Mutasi extends MY_Controller
                         $column_excel  = $this->cek_column_excel($column_awal+2);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_jenis_kain']);
                         $column_excel  = $this->cek_column_excel($column_awal+3);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_proses']);
+                        $column_excel  = $this->cek_column_excel($column_awal+4);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_lot']);
-                        $column = 6;
+                        $column = 7;
                     }else{ // detailLot
 
                         $column_excel  = $this->cek_column_excel($column_awal);
@@ -1394,7 +1398,9 @@ class Mutasi extends MY_Controller
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['product_parent']);
                         $column_excel  = $this->cek_column_excel($column_awal+10);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['nama_jenis_kain']);
-                        $column = 13;
+                        $column_excel  = $this->cek_column_excel($column_awal+11);
+                        $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_awal_proses']);
+                        $column = 14;
                     }
                 
                     // SALDO AWAL
@@ -1417,6 +1423,10 @@ class Mutasi extends MY_Controller
                     foreach($tm['field_view'] as $fview ){
                         for ( $i = 0, $l = count($fview['in'][$ke]); $i<$l; $i++){
                             foreach($fview['in'] as $fviews ){
+                                $in_proses    = $row['in_'.$fviews[$i].'_proses'];
+                                $column_excel  = $this->cek_column_excel($column);
+                                $sheet->SetCellValue($column_excel.''.$rowCount, $in_proses); 
+                                $column++;
                                 if($view == "Global" || $view == "DetailProduk" ){
                                     $in_lot = $row['in_'.$fviews[$i].'_lot'];
                                     $column_excel  = $this->cek_column_excel($column);
@@ -1448,6 +1458,9 @@ class Mutasi extends MY_Controller
                     }
 
                     // consume
+                    $column_excel  = $this->cek_column_excel($column);
+                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['con_proses']);
+                    $column++;
                     if($view == "Global" || $view == "DetailProduk" ){
                         $column_excel  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['con_lot']);
@@ -1469,6 +1482,9 @@ class Mutasi extends MY_Controller
                     $column = $column + 6;
 
                     // ADJ IN 
+                    $column_excel  = $this->cek_column_excel($column);
+                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['adj_in_proses']);
+                    $column++;
                     if($view == "Global" || $view == "DetailProduk" ){
                         $column_excel  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['adj_in_lot']);
@@ -1489,6 +1505,9 @@ class Mutasi extends MY_Controller
                     $column = $column + 6;
                    
                     // produce
+                    $column_excel  = $this->cek_column_excel($column);
+                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['prod_proses']);
+                    $column++;
                     if($view == "Global" || $view == "DetailProduk" ){
                         $column_excel  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['prod_lot']);
@@ -1515,6 +1534,7 @@ class Mutasi extends MY_Controller
                             for ( $i = 0, $l = count($fview['process'][$ke]); $i<$l; $i++){
                                 foreach($fview['process'] as $fviews ){
                                    
+                                    $hph_proses      = $row['hph_'.$fviews[$i].'_proses'];
                                     $hph_qty1      = $row['hph_'.$fviews[$i].'_qty1'];
                                     $hph_qty1_uom  = $row['hph_'.$fviews[$i].'_qty1_uom'];
                                     $hph_qty2      = $row['hph_'.$fviews[$i].'_qty2'];
@@ -1522,18 +1542,20 @@ class Mutasi extends MY_Controller
                                     $hph_qty_op    = $row['hph_'.$fviews[$i].'_qty_opname'];
                                     $hph_qty1_op_uom  = $row['hph_'.$fviews[$i].'_qty_opname_uom'];
                                     $column_excel  = $this->cek_column_excel($column);
-                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty1);
+                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_proses);
                                     $column_excel  = $this->cek_column_excel($column+1);
-                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty1_uom);
+                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty1);
                                     $column_excel  = $this->cek_column_excel($column+2);
-                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty2);
+                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty1_uom);
                                     $column_excel  = $this->cek_column_excel($column+3);
-                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty2_uom);
+                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty2);
                                     $column_excel  = $this->cek_column_excel($column+4);
-                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty_op);
+                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty2_uom);
                                     $column_excel  = $this->cek_column_excel($column+5);
+                                    $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty_op);
+                                    $column_excel  = $this->cek_column_excel($column+6);
                                     $sheet->SetCellValue($column_excel.''.$rowCount, $hph_qty1_op_uom);
-                                    $column = $column + 6;
+                                    $column = $column + 7;
                                 }
                             }
                             $ke++;
@@ -1544,18 +1566,24 @@ class Mutasi extends MY_Controller
                     foreach($tm['field_view'] as $fview ){
                         for ( $i = 0, $l = count($fview['out'][$ke]); $i<$l; $i++){
                             foreach($fview['out'] as $fviews ){
+                                $out_proses    = $row['out_'.$fviews[$i].'_proses'];
+                                $column_excel  = $this->cek_column_excel($column);
+                                $sheet->SetCellValue($column_excel.''.$rowCount, $out_proses);
+                                $column++;
                                 if($view == "Global" || $view == "DetailProduk" ){
                                     $out_lot = $row['out_'.$fviews[$i].'_lot'];
                                     $column_excel  = $this->cek_column_excel($column);
                                     $sheet->SetCellValue($column_excel.''.$rowCount, $out_lot);
                                     $column++;
                                 }
+                                
                                 $out_qty1      = $row['out_'.$fviews[$i].'_qty1'];
                                 $out_qty1_uom  = $row['out_'.$fviews[$i].'_qty1_uom'];
                                 $out_qty2      = $row['out_'.$fviews[$i].'_qty2'];
                                 $out_qty2_uom  = $row['out_'.$fviews[$i].'_qty2_uom'];
                                 $out_qty_op    = $row['out_'.$fviews[$i].'_qty_opname'];
                                 $out_qty1_op_uom  = $row['out_'.$fviews[$i].'_qty_opname_uom'];
+                         
                                 $column_excel  = $this->cek_column_excel($column);
                                 $sheet->SetCellValue($column_excel.''.$rowCount, $out_qty1);
                                 $column_excel  = $this->cek_column_excel($column+1);
@@ -1575,6 +1603,9 @@ class Mutasi extends MY_Controller
                     }
 
                     // ADJ OUT
+                    $column_excel  = $this->cek_column_excel($column);
+                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['adj_out_proses']);
+                    $column++;
                     if($view == "Global" || $view == "DetailProduk" ){
                         $column_excel  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['adj_out_lot']);
@@ -1593,9 +1624,11 @@ class Mutasi extends MY_Controller
                     $column_excel  = $this->cek_column_excel($column+5);
                     $sheet->SetCellValue($column_excel.''.$rowCount, $row['adj_out_qty_opname_uom']);
                     $column = $column + 6;
-                    
-        
+                            
                     // saldo akhir
+                    $column_excel  = $this->cek_column_excel($column);
+                    $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_akhir_proses']);
+                    $column++;
                     if($view == "Global" || $view == "DetailProduk" ){
                         $column_excel  = $this->cek_column_excel($column);
                         $sheet->SetCellValue($column_excel.''.$rowCount, $row['s_akhir_lot']);
