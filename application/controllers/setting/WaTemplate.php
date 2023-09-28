@@ -117,7 +117,7 @@ class WaTemplate extends MY_Controller {
             $this->load->library('form_validation');
             $this->form_validation->set_rules($this->valForm);
             if ($this->form_validation->run() == FALSE) {
-                throw new \Exception(array_values($this->form_validation->error_array())[0]);
+                throw new \Exception(array_values($this->form_validation->error_array())[0],500);
             }
             $nama = $this->input->post("nama");
             $template = $this->input->post("template");

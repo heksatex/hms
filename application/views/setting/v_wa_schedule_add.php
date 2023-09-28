@@ -95,7 +95,7 @@
                                                 <div class="col-xs-6"><label class="form-label required">Setiap (Custom)</label></div>
                                                 <div class="col-xs-6">
                                                     <select class="form-control input-sm select2" name="custom[]" id="bycustom" multiple>
-                                                       
+
                                                         <!--<option value="last_month">Akhir Bulan</option>-->
                                                         <?php
                                                         foreach ($customSchedule as $key => $value) {
@@ -110,6 +110,18 @@
                                                 <div class="col-xs-6">
                                                     <textarea type="text" class="form-control input-sm resize-ta" id="pesan" name="pesan" required></textarea>
                                                 </div>                                    
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label">Template Footer</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm select2" name="footer">
+                                                        <?php
+                                                        foreach ($template_footer as $key => $value) {
+                                                            echo "<option value='$value->nama'>$value->nama</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
 
