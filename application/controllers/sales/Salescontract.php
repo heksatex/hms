@@ -947,13 +947,15 @@ class Salescontract extends MY_Controller
 
             $sub_menu  = $this->uri->segment(2);
             $username  = addslashes($this->session->userdata('username')); 
+            $this->load->library('wa_message');
+
 
             $kode = addslashes($this->input->post('kode'));
             $row  = $this->input->post('row_order');
             $tgl  = date('Y-m-d H:i:s');
 
             // lock tabel
-            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE, sales_contract WRITE');
+            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE, sales_contract WRITE, wa_template WRITE, wa_group WRITE, wa_send_message WRITE, sales_contract as sc WRITE, mst_sales_group as mst WRITE, mst_sales_group WRITE, wa_group as a WRITE, wa_group_departemen as b WRITE');
 
             //cek status sales contract
             $status     = "status IN ('done')";
@@ -982,13 +984,40 @@ class Salescontract extends MY_Controller
 
               // get last no ow
               $no_ow = $this->m_sales->no_OW();
-
+         
               // update tangal ow dan no ow
               $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
 
               $jenis_log   = "edit";
               $note_log    = "Membuat OW | ".$no_ow." | ". $row;
               $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+
+              // SEND WA MESSAGE  -->>
+              $data_head = $this->m_sales->get_data_by_kode($kode);
+              $kode_mkt  = $data_head->sales_group ?? '';
+              $reff_note = addslashes($data_head->note);
+              $nama_mkt  = $this->_module->get_nama_sales_Group_by_kode($kode_mkt);
+              $template_name = 'create_ow';
+              $list_value = array(
+                            '{no_sc}'     => $kode,
+                            '{mkt}'       => $nama_mkt,
+                            '{no_ow}'     => $no_ow,
+                            '{reff_note}' => $reff_note
+                            );
+              $list_dept = array('GRG','LAB','PPIC-DF');
+              $this->wa_message->sendMessageToGroupByDepth($template_name,$list_value,$list_dept);
+              
+              // mention
+              $list_number  = $this->_module->get_list_number_user_by_dept($list_dept);
+              $list_numbers = array_column($list_number,'telepon_wa');
+              $this->wa_message->setMentions($list_numbers);
+              
+              //footer
+              $default_footer_wa = 'footer_hms';
+              $this->wa_message->setFooter($default_footer_wa);
+              
+              $this->wa_message->send();
+              // SEND WA MESSAGE  <<--              
 
               $callback = array('status' => 'success','message' => ' OW telah berhasil dibuat !', 'icon' =>'fa fa-check', 'type' => 'success');
             }
