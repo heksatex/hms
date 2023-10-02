@@ -115,6 +115,7 @@
                                                 <div class="col-xs-6"><label class="form-label">Template Footer</label></div>
                                                 <div class="col-xs-6">
                                                     <select class="form-control input-sm select2" name="footer">
+                                                        <option></option>
                                                         <?php
                                                         foreach ($template_footer as $key => $value) {
                                                             echo "<option value='$value->nama'>$value->nama</option>";
