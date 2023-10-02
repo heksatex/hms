@@ -43,6 +43,7 @@ class Reproses extends MY_Controller
             $tglsampai = date('Y-m-d H:i:s', strtotime($tglsampai));
 
             $dataRecord = [];
+            $total_record = "Total Data : 0 ";
          
             $items = $this->m_reportReproses->get_list_reproses_by_kode($tgldari,$tglsampai);
             foreach ($items as $val) {
@@ -68,10 +69,9 @@ class Reproses extends MY_Controller
                 $allcount = $this->m_reportReproses->get_count_record_reproses($tgldari,$tglsampai);
                 $total_record = 'Total Data : ' . number_format($allcount);
 
-                $callback = array('record' => $dataRecord, 'total_record' => $total_record);
             }
 
-
+            $callback = array('record' => $dataRecord, 'total_record' => $total_record);
 
         }
 
@@ -151,6 +151,7 @@ class Reproses extends MY_Controller
         $total_qty_all  = 0;
         $total_qty2_all = 0;
         $tmp_id_jenis = '';
+        $nama_sub_parent = '';
 		$list  	  = $this->m_reportReproses->get_list_reproses_by_kode($tgldari_2,$tglsampai_2);
 		foreach ($list as $val) {
 
@@ -204,7 +205,12 @@ class Reproses extends MY_Controller
 
         $object->getActiveSheet()->mergeCells('A'.$rowCount.':G'.$rowCount);
         $object->getActiveSheet()->getStyle('A'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-        $object->getActiveSheet()->SetCellValue('A'.$rowCount, "Total Sub Parent : ".$nama_sub_parent);
+        if($nama_sub_parent  == ''){
+            $total_sub_parent = '';
+        }else{
+            $total_sub_parent = "Total Sub Parent : ".$nama_sub_parent;
+        }
+        $object->getActiveSheet()->SetCellValue('A'.$rowCount, $total_sub_parent);
         $object->getActiveSheet()->SetCellValue('I'.$rowCount, ($total_gl));
         $object->getActiveSheet()->SetCellValue('J'.$rowCount, ($total_qty));
         $object->getActiveSheet()->SetCellValue('L'.$rowCount, ($total_qty2));
