@@ -618,7 +618,7 @@
                           <div class="box-header with-border">
                             <h3 class="box-title"><b>Additional</b></h3>
                             <?php 
-                            if( $akses_menu >0 AND ($type_mo['type_mo'] !='colouring' or $type_mo['type_mo'] !='knitting')AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){
+                            if( $akses_menu >0 AND ($type_mo['type_mo'] !='colouring' or $type_mo['type_mo'] !='knitting')AND ($level == 'Super Administrator' or $level == 'Administrator' or strpos($cek_dept, 'PPIC') !== false)){
                               if(!empty($menu)){  ?>
                                 <div class=" pull-right text-right">
                                   <button class="btn btn-primary btn-sm" id="btn-request-add" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Request Additional</button>
@@ -689,7 +689,7 @@
                                     }
                                     ?>
                                   </tbody>
-                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){ ?>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or strpos($cek_dept, 'PPIC') !== false)){ ?>
                                   <tfoot>
                                     <tr>
                                       <td colspan="6"> 

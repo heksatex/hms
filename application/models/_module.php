@@ -766,4 +766,11 @@ class _module extends CI_Model {
             return true;
         }
     }
+
+    public function get_list_number_user_by_dept($dept){
+        $this->db->where_in('dept',$dept);
+        $this->db->SELECT('telepon_wa');
+        $result = $this->db->get('user');
+        return $result->result();
+    }
 }
