@@ -68,7 +68,8 @@ class WaSendMessage extends MY_Controller {
                     'children' => [
                         array(
                             'id' => $value->telepon_wa,
-                            'text' => $value->nama
+                            'text' => $value->nama,
+                            'disabled' => $value->telepon_wa ? false : true
                         )
                     ]
                 ]);
