@@ -150,7 +150,7 @@ class Wa_message {
 
         $this->val = $valueForTemplate;
         if (!$this->getTemplate($templateName)) {
-            return false;
+            $this->status = false;
         }
         $this->setGroupByDept($depthkode);
         foreach ($this->group as $key => $value) {

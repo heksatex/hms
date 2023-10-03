@@ -77,6 +77,7 @@ class M_WaGroup extends CI_Model {
     public function getDataByDepth(array $kodedepth) {
         $this->db->from('wa_group as a');
         $this->db->join('wa_group_departemen as b', 'a.id = b.wa_group_id');
+        $this->db->group_by('a.id');
         $this->db->where_in('department_kode', $kodedepth);
         return $this->db->select('*')->get()->result();
     }
