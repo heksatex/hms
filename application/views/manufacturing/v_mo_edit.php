@@ -789,7 +789,7 @@
                                     }
                                     ?>
                                   </tbody>
-                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){ ?>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready' ) AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or  strpos($cek_dept, 'PPIC') !== false)){ ?>
                                   <tfoot>
                                     <tr>
                                       <td colspan="6"> 
@@ -844,7 +844,7 @@
                                     }
                                     ?>
                                   </tbody>
-                                  <?php if(($list->status == 'draft' or $list->status =='ready') AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or $cek_dept == 'PPIC')){ ?>
+                                  <?php if(($list->status == 'draft' or $list->status =='ready') AND $akses_menu >0 AND ($level == 'Super Administrator' or $level == 'Administrator' or strpos($cek_dept, 'PPIC') !== false)){ ?>
                                   <tfoot>
                                     <tr>
                                       <td colspan="6"> 

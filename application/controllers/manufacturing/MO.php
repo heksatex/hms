@@ -373,7 +373,7 @@ class MO extends MY_Controller
             }else if(!empty($cek3['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Proses Produksi ditunda / Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
 
-            }else if(($level != "Super Administrator" AND $level  != "Administrator" AND  strpos($cek_dept['dept'], 'PPIC') !== true) ){
+            }else if(($level != "Super Administrator" AND $level  != "Administrator" AND  strpos($cek_dept['dept'], 'PPIC') === false) ){
                 // AND   $cek_dept['dept'] != 'PPIC'
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Anda tidak bisa menyimpan Addtional !', 'icon' => 'fa fa-warning', 'type'=>'danger');
 
@@ -508,7 +508,7 @@ class MO extends MY_Controller
             }else if(!empty($cek3['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Proses Produksi ditunda / Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 $this->_module->unlock_tabel();
-            }else if(($level != "Super Administrator" AND $level  != "Administrator" AND  strpos($cek_dept['dept'], 'PPIC') !== true) ){
+            }else if(($level != "Super Administrator" AND $level  != "Administrator" AND  strpos($cek_dept['dept'], 'PPIC') === false) ){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Anda tidak bisa mengahapus Addtional !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 $this->_module->unlock_tabel();
             }else if(empty($get['kode_produk'])){
@@ -576,7 +576,7 @@ class MO extends MY_Controller
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Proses Produksi telah dibatalkan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if(!empty($cek3['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Proses Produksi ditunda / Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-            }else if(($level != "Super Administrator" AND $level  != "Administrator" AND  $cek_dept['dept'] != 'PPIC')){
+            }else if($level != "Super Administrator" AND $level  != "Administrator" AND  strpos($cek_dept['dept'], 'PPIC') === false ){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Anda tidak bisa melakukan Request Addtional !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if(empty($status_kain['status']) AND $tp['type_mo'] == 'colouring'){
                 $callback = array('message' => 'Maaf, Produk (kain) belum Ready !',  'status' => 'failed', 'icon' => 'fa fa-warning', 'type'=>'danger');
