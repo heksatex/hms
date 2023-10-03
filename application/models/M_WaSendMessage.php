@@ -47,6 +47,20 @@ class M_WaSendMessage extends CI_Model {
         return $this->db->count_all_results();
     }
 
+    public function getUser($cari = null) {
+        $this->db->select('nama,telepon_wa,dept');
+        $this->db->from('user');
+        if (!is_null($cari)) {
+            $this->db->or_like('nama', $cari);
+            $this->db->or_like('telepon_wa', $cari);
+            $this->db->or_like('dept', $cari);
+        }
+        $this->db->where("telepon_wa !=", "");
+        $this->db->limit(15);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function save($message, array $to) {
         $data = array_merge(array(
             'message' => $message,

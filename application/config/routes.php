@@ -78,7 +78,10 @@ $route['setting/wa_template/simpan']['POST'] = 'setting/WaTemplate/simpan';
 $route['setting/wa_template/update']['POST'] = 'setting/WaTemplate/update';
 //WA Send Message
 $route['setting/wa_send_message']['GET'] = 'setting/WaSendMessage/index';
+$route['setting/wa_send_message/add']['GET'] = 'setting/WaSendMessage/add';
 $route['setting/wa_send_message/get_data']['POST'] = 'setting/WaSendMessage/getData';
+$route['setting/wa_send_message/kirim']['POST'] = 'setting/WaSendMessage/kirim';
+$route['setting/wa_send_message/get_user']['POST'] = 'setting/WaSendMessage/getListUser';
 //WA Schedule Message
 $route['setting/wa_schedule']['GET'] = 'setting/WaScheduleMessage/index';
 $route['setting/wa_schedule/add']['GET'] = 'setting/WaScheduleMessage/add';
