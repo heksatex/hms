@@ -498,7 +498,7 @@ class M_sales extends CI_Model
 
 	public function cek_item_color_lines_by_kode($sales_order,$row_order)
 	{
-		return $this->db->query("SELECT sales_order,ow,qty,uom FROM sales_color_line WHERE sales_order = '$sales_order' AND row_order = '$row_order' ");
+		return $this->db->query("SELECT sales_order,ow,qty,uom,reff_notes FROM sales_color_line WHERE sales_order = '$sales_order' AND row_order = '$row_order' ");
 	}
 
 	public function simpan_no_ow_sales_color_line($kode,$row_order,$ow,$tgl)
