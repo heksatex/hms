@@ -17,6 +17,7 @@ class Wa_message {
     protected $has_mention = null;
     protected $status = true;
     protected $footer = "";
+    protected $pesan = "";
 
     public function __construct() {
         $this->model = & get_instance();
@@ -164,13 +165,26 @@ class Wa_message {
 
     /**
      * 
+     * @param string $pesan
+     * @return $this
+     */
+    public function setMessageNoTemplate(string $pesan) {
+        $this->pesan = $pesan;
+        return $this;
+    }
+
+    /**
+     * 
      * @param array $phoneNumber
      * @return $this
      */
     public function setMentions(array $phoneNumber) {
-        $this->has_mention = json_encode($phoneNumber);
+        if (count($phoneNumber) > 0) {
+            $this->has_mention = json_encode($phoneNumber);
+        }
         return $this;
     }
+
     /**
      * 
      * @param string $footer_name
@@ -184,7 +198,7 @@ class Wa_message {
         } else {
             $this->footer = $data->template;
         }
-        
+
         return $this;
     }
 
@@ -200,6 +214,10 @@ class Wa_message {
     }
 
     protected function getTemplate($templateName): bool {
+        if ($this->pesan !== "" || trim($this->pesan) !== "") {
+            $this->template = $this->pesan;
+            return true;
+        }
         $data = $this->model->m_WaTemplate->getDataByName($templateName);
 
         if (!is_object($data)) {
