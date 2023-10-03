@@ -40,7 +40,7 @@ class WaSendMessage extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'MWSM';
-//        $this->wa_message->sendMessageToUser('saidi', ['{saidi}' => 'Satu'], 'achramdan')->setFooter('footer_default')->send();
+//        $this->wa_message->sendMessageToGroupByDepth('saidi', ['{saidi}' => 'Satu'], ['ACC','BOM'])->setFooter('footer_default')->send();
         return $this->load->view('setting/v_wa_send_message', $data);
     }
 
@@ -97,7 +97,7 @@ class WaSendMessage extends MY_Controller {
             $footer = $this->input->post('footer');
 
             $send = $this->wa_message->setMessageNoTemplate($pesan)->setMentions($mention)->setFooter($footer)->sendMessageToGroup('', [], $group)->send();
-
+            $this->_module->gen_history($sub_menu, 'wa_send_message', 'create', 'Kirim Pesan ' . $pesan, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
