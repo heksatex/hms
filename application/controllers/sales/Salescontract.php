@@ -986,7 +986,7 @@ class Salescontract extends MY_Controller
               $no_ow = $this->m_sales->no_OW();
          
               // update tangal ow dan no ow
-              // $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
+              $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
 
               $jenis_log   = "edit";
               $note_log    = "Membuat OW | ".$no_ow." | ". $row;
@@ -995,7 +995,7 @@ class Salescontract extends MY_Controller
               // SEND WA MESSAGE  -->>
               $data_head = $this->m_sales->get_data_by_kode($kode);
               $kode_mkt  = $data_head->sales_group ?? '';
-              $reff_note = addslashes($data_head->note);
+              $reff_note = addslashes($items['reff_notes']);
               $nama_mkt  = $this->_module->get_nama_sales_Group_by_kode($kode_mkt);
               $template_name = 'create_ow';
               $list_value = array(
