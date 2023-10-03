@@ -221,7 +221,7 @@ class Penerimaanbarang extends MY_Controller
  
         if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
           $data['show_delete']   = true;
-        }else if($cek_dept['dept'] == 'PPIC'){
+        }else if(strpos($cek_dept['dept'], 'PPIC') !== false){
           $data['show_delete']  = true;
         }else{
           $data['show_delete'] = false;
@@ -1239,7 +1239,7 @@ class Penerimaanbarang extends MY_Controller
       
         if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
           $delete_items   = true;
-        }else if($cek_dept['dept'] == 'QC' OR $cek_dept['dept'] == 'PPIC'){
+        }else if($cek_dept['dept'] == 'QC' OR strpos($cek_dept['dept'], 'PPIC') !== false){
           $delete_items  = true;
         }else{
           $delete_items = false;

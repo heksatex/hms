@@ -31,7 +31,7 @@
                             <h3 class="box-title">Form Tambah</h3>
                         </div>
                         <div class="box-body">
-                            <form  method="post" class="form-horizontal" name="form-wa-schedule" id="form-wa-schedule" action="<?= base_url('setting/wa_schedule/simpan') ?>">
+                            <form  method="post" class="form-horizontal" name="form-wa-message" id="form-wa-message" action="<?= base_url('setting/wa_send_message/kirim') ?>">
                                 <div class="form-group">                  
                                     <div class="col-md-12" >
                                     </div>
@@ -39,69 +39,25 @@
                                 <div class="form-group">
                                     <div class="col-md-12">
                                         <div class="col-md-6 col-xs-12">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label class="form-label required">Nama</label></div>
-                                                <div class="col-xs-6">
-                                                    <input type="text" class="form-control input-sm" name="nama" required/>
 
-                                                </div>
+                                            <button type="submit" id="form_simpan" style="display: none"></button>
 
-                                                <button type="submit" id="form_simpan" style="display: none"></button>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label class="form-label required">Waktu Kirim</label></div>
-                                                <div class="col-xs-6">
-                                                    <input type="text" class="form-control input-sm time" name="waktu_kirim"  required/>
-                                                </div>
-                                                <button type="submit" id="form_simpan" style="display: none"></button>
-                                            </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required">Group</label></div>
                                                 <div class="col-xs-6">
                                                     <select class="form-control input-sm select2" name="group[]" required multiple>
                                                         <?php
                                                         foreach ($group as $key => $value) {
-                                                            echo "<option value='$value->id'>$value->wa_group</option>";
+                                                            echo "<option value='$value->wa_group'>$value->wa_group</option>";
                                                         }
                                                         ?>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label class="form-label required">Setiap (Hari)</label></div>
+                                                <div class="col-xs-6"><label class="form-label">Mention</label></div>
                                                 <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="hari[]" id="byhari" multiple>
-                                                        <?php
-                                                        foreach ($days as $key => $value) {
-                                                            echo "<option value='$key'>$value</option>";
-                                                        }
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label class="form-label required">Setiap (Tanggal)</label></div>
-                                                <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="tanggal[]" id="bytanggal" multiple>
-                                                        <?php
-                                                        for ($i = 1; $i <= 31; $i++) {
-                                                            echo "<option value='$i'>$i</option>";
-                                                        }
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-6"><label class="form-label required">Setiap (Custom)</label></div>
-                                                <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="custom[]" id="bycustom" multiple>
-
-                                                        <!--<option value="last_month">Akhir Bulan</option>-->
-                                                        <?php
-                                                        foreach ($customSchedule as $key => $value) {
-                                                            echo "<option value='$key'>$value</option>";
-                                                        }
-                                                        ?>
+                                                    <select class="form-control input-sm" id="list_user" name="mention[]" multiple>
                                                     </select>
                                                 </div>
                                             </div>
@@ -137,37 +93,40 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
-                $(".time").datetimepicker({
-                    format: 'HH:mm:ss',
-                });
                 $('.select2').select2({
                     allowClear: true,
                     placeholder: 'Pilih',
 
                 });
-                $('#bytanggal').on("select2:selecting", function (e) {
-                    $('#byhari').val(null).trigger('change');
-                    $('#bycustom').val(null).trigger('change');
-                });
+                $("#list_user").select2({
+                    ajax: {
+                        url: "<?= base_url('setting/wa_send_message/get_user') ?>",
+                        delay: 250,
+                        type: "POST",
+                        data: function (params) {
+                            var query = {
+                                search: params.term,
+                            }
 
-                $('#byhari').on("select2:selecting", function (e) {
-                    $('#bytanggal').val(null).trigger('change');
-                    $('#bycustom').val(null).trigger('change');
-                });
-                $('#bycustom').on("select2:selecting", function (e) {
-                    $('#bytanggal').val(null).trigger('change');
-                    $('#byhari').val(null).trigger('change');
+                            return query;
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: JSON.parse(data)
+                            };
+                        }
+                    }
                 });
                 $('#pesan').keyup();
-                const formschedule = document.forms.namedItem("form-wa-schedule");
+                const formschedule = document.forms.namedItem("form-wa-message");
                 formschedule.addEventListener(
                         "submit",
                         (event) => {
                     please_wait(function () {});
-                    request("form-wa-schedule").then(
+                    request("form-wa-message").then(
                             response => {
                                 if (response.status === 200)
-                                    window.location.replace('<?php echo base_url('setting/wa_schedule') ?>');
+                                    window.location.replace('<?php echo base_url('setting/wa_send_message') ?>');
 
                                 if (response.status === 401) {
                                     loginFunc('<?php echo base_url('login/aksi_login'); ?>');

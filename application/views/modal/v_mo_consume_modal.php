@@ -214,7 +214,7 @@
     <div class="col-md-6 col-xs-12">
         <label style="font-size: 15px; color: #5F9EA0">Konsumsi Bahan</label>
     </div>		
-    <?php if($cek_dept == 'PPIC' or $level == 'Super Administrator' or $level == 'Administrator'){
+    <?php if(strpos($cek_dept, 'PPIC') !== false or $level == 'Super Administrator' or $level == 'Administrator'){
     ?>	
     <div class="col-md-6 col-xs-12">
         <div class="form-group">
@@ -250,7 +250,7 @@
 					$row_materials = false;
 					$total_qty1 = 0;
 					$total_qty2 = 0;
-                    if($cek_dept == 'PPIC' or $level == 'Super Administrator' or $level == 'Administrator'){
+                    if(strpos($cek_dept, 'PPIC') !== false or $level == 'Super Administrator' or $level == 'Administrator'){
                         $readonly   = '';
                     }else{
                         $readonly = "readonly";

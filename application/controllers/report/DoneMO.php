@@ -40,8 +40,8 @@ class DoneMO extends MY_Controller
                 // $fg_waste           = $this->m_mo->get_sum_qty_fg_waste($row->kode)->row();
                 $fg_adj_real           = $this->m_doneMO->get_sum_qty_fg_adj_update($row->kode)->row();
 
-                $total_qty1         = ($row->prod_mtr + $row->waste_mtr ) - $row->adj_mtr ;
-                $total_qty2         = ($row->prod_kg + $row->waste_kg ) - $row->adj_kg; 
+                $total_qty1         = ($row->prod_mtr + $row->waste_mtr );
+                $total_qty2         = ($row->prod_kg + $row->waste_kg ); 
 
 				$dataRecord[] = array('kode' 		=> $row->kode,
 									'tanggal'       => $row->tanggal,
@@ -197,8 +197,8 @@ class DoneMO extends MY_Controller
                 
                 $fg_adj_real        = $this->m_doneMO->get_sum_qty_fg_adj_update($row->kode)->row();
 
-                $total_qty1         = ($row->prod_mtr + $row->waste_mtr ) - $row->adj_mtr;
-                $total_qty2         = ($row->prod_kg + $row->waste_kg ) - $row->adj_kg; 
+                $total_qty1         = ($row->prod_mtr + $row->waste_mtr );
+                $total_qty2         = ($row->prod_kg + $row->waste_kg ); 
 
                 $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
 				$object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->kode);

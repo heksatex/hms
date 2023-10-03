@@ -363,7 +363,7 @@ class Pengirimanbarang extends MY_Controller
 
         if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
           $data['show_qc']   = true;
-        }else if($cek_dept['dept'] == 'QC' OR $cek_dept['dept'] == 'PPIC'){
+        }else if($cek_dept['dept'] == 'QC' OR strpos($cek_dept['dept'], 'PPIC') !== false ){
           $data['show_qc']  = true;
         }else{
           $data['show_qc'] = false;
@@ -2455,7 +2455,7 @@ class Pengirimanbarang extends MY_Controller
      
         if($level_akses['level'] == 'Administrator' OR $level_akses['level'] == 'Super Administrator'){
           $check_qc   = true;
-        }else if($cek_dept['dept'] == 'QC' OR $cek_dept['dept'] == 'PPIC'){
+        }else if($cek_dept['dept'] == 'QC' OR strpos($cek_dept['dept'], 'PPIC') !== false){
           $check_qc  = true;
         }else{
           $check_qc = false;
