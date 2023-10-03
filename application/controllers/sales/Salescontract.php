@@ -986,7 +986,7 @@ class Salescontract extends MY_Controller
               $no_ow = $this->m_sales->no_OW();
          
               // update tangal ow dan no ow
-              $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
+              // $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
 
               $jenis_log   = "edit";
               $note_log    = "Membuat OW | ".$no_ow." | ". $row;
@@ -1010,7 +1010,10 @@ class Salescontract extends MY_Controller
               // mention
               $list_number  = $this->_module->get_list_number_user_by_dept($list_dept);
               $list_numbers = array_column($list_number,'telepon_wa');
-              $this->wa_message->setMentions($list_numbers);
+              $telp_me      = $this->_module->cek_telepon_wa_by_user($username);
+              $telp_mes     = array_column($telp_me,'telepon_wa');
+              $list_number_group = array_merge($list_numbers,$telp_mes);
+              $this->wa_message->setMentions($list_number_group);
               
               //footer
               $default_footer_wa = 'footer_hms';

@@ -773,4 +773,11 @@ class _module extends CI_Model {
         $result = $this->db->get('user');
         return $result->result();
     }
+
+    public function cek_telepon_wa_by_user($username) {
+        $this->db->where('username',$username);
+        $this->db->SELECT('telepon_wa');
+        $result = $this->db->get('user');
+        return $result->result();
+    }
 }
