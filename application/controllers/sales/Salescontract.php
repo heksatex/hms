@@ -1005,7 +1005,9 @@ class Salescontract extends MY_Controller
                             '{reff_note}' => $reff_note
                             );
               $list_dept = array('GRG','LAB','PPIC-DF');
-              $this->wa_message->sendMessageToGroupByDepth($template_name,$list_value,$list_dept);
+
+              $wa_send = $this->wa_message->sendMessageToGroupByDepth($template_name,$list_value,$list_dept);
+
               
               // mention
               $list_number  = $this->_module->get_list_number_user_by_dept($list_dept);
@@ -1017,9 +1019,9 @@ class Salescontract extends MY_Controller
               
               //footer
               $default_footer_wa = 'footer_hms';
-              $this->wa_message->setFooter($default_footer_wa);
+              $wa_send->setFooter($default_footer_wa);;
               
-              $this->wa_message->send();
+              $wa_send->send();
               // SEND WA MESSAGE  <<--              
 
               $callback = array('status' => 'success','message' => ' OW telah berhasil dibuat !', 'icon' =>'fa fa-check', 'type' => 'success');
