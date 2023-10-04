@@ -767,14 +767,11 @@ class Salescontract extends MY_Controller
             // cek qty by produk qty color line
             $cq_color_lines = $this->m_sales->cek_qty_color_lines_by_produk($kode,$kode_prod);
 
-            if($status_ow == 't'){
-              $status_ow_ = 'Aktif';
-            }else if($status_ow == 'ng'){
-              $status_ow_ =  'Not Good';
-            }else if($status_ow == 'r'){
-              $status_ow_ = ' Reproses';
-            }else{
-              $status_ow_ = ' Tidak Aktif';
+            foreach($this->list_status_ow() as $st){
+                if($status_ow == $st['kode']){
+                  $status_ow_ = $st['nama'];
+                  break;
+                }
             }
 
             if(!empty($row)){//update details
@@ -944,18 +941,17 @@ class Salescontract extends MY_Controller
               // session habis
               $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
+            $this->load->library('wa_message');
 
             $sub_menu  = $this->uri->segment(2);
             $username  = addslashes($this->session->userdata('username')); 
-            $this->load->library('wa_message');
-
 
             $kode = addslashes($this->input->post('kode'));
             $row  = $this->input->post('row_order');
             $tgl  = date('Y-m-d H:i:s');
 
             // lock tabel
-            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE, sales_contract WRITE, wa_template WRITE, wa_group WRITE, wa_send_message WRITE, sales_contract as sc WRITE, mst_sales_group as mst WRITE, mst_sales_group WRITE, wa_group as a WRITE, wa_group_departemen as b WRITE');
+            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE, sales_contract WRITE, wa_template WRITE, wa_group WRITE, wa_send_message WRITE, sales_contract as sc WRITE, mst_sales_group as mst WRITE, mst_sales_group WRITE, wa_group as a WRITE, wa_group_departemen as b WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE');
 
             //cek status sales contract
             $status     = "status IN ('done')";
@@ -996,19 +992,20 @@ class Salescontract extends MY_Controller
               $data_head = $this->m_sales->get_data_by_kode($kode);
               $kode_mkt  = $data_head->sales_group ?? '';
               $reff_note = addslashes($items['reff_notes']);
+              $status_ow = $items['nama_status'];// Aktif, Tidak Aktif, Not Good, Reproses
               $nama_mkt  = $this->_module->get_nama_sales_Group_by_kode($kode_mkt);
               $template_name = 'create_ow';
               $list_value = array(
                             '{no_sc}'     => $kode,
                             '{mkt}'       => $nama_mkt,
                             '{no_ow}'     => $no_ow,
-                            '{reff_note}' => $reff_note
+                            '{reff_note}' => $reff_note,
+                            '{status_ow}' => $status_ow
                             );
               $list_dept = array('GRG','LAB','PPIC-DF');
 
               $wa_send = $this->wa_message->sendMessageToGroupByDepth($template_name,$list_value,$list_dept);
 
-              
               // mention
               $list_number  = $this->_module->get_list_number_user_by_dept($list_dept);
               $list_numbers = array_column($list_number,'telepon_wa');
@@ -1057,6 +1054,8 @@ class Salescontract extends MY_Controller
           $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
 
+            $this->load->library('wa_message');
+            
             $sub_menu  = $this->uri->segment(2);
             $username  = addslashes($this->session->userdata('username')); 
 
@@ -1088,15 +1087,16 @@ class Salescontract extends MY_Controller
 
             }else{
 
-              if($value == 't'){
-                $status = $ow.' Aktif';
-              }else if($value == 'ng'){
-                $status = $ow.' Not Good';
-              }else if($value == 'r'){
-                $status = $ow.' Reproses';
-              }else{
-                $status = $ow.' Tidak Aktif';
+              $status_ow_lama = $items['nama_status'];
+
+              $status_ow_baru = "";
+              foreach($this->list_status_ow() as $st){
+                  if($value == $st['kode']){
+                    $status_ow_baru = $st['nama'];
+                    break;
+                  }
               }
+
               $lebih_target = false;
               if($value == 't' or $value =='ng' ){
                 // cek qty by produk qty contract line
@@ -1122,10 +1122,49 @@ class Salescontract extends MY_Controller
                 // update status sales Color Lines
                 $this->m_sales->update_status_color_line_by_row($sales_order,$row_order,$value,$ow);
 
+                $note_status= $ow.' '.$status_ow_lama.' -> '.$status_ow_baru;
+
                 $jenis_log   = "edit";
-                $note_log    = "Update Status | ".$status;
+                $note_log    = "Update Status | ".$note_status;
                 $this->_module->gen_history($sub_menu, $sales_order, $jenis_log, $note_log, $username);
                 $callback = array('status' => 'success','message' => ' Status Berhasil di Rubah!', 'icon' =>'fa fa-check', 'type' => 'success');
+
+                if($ow != ''){
+                  // SEND WA MESSAGE  -->>
+                  $data_head = $this->m_sales->get_data_by_kode($sales_order);
+                  $kode_mkt  = $data_head->sales_group ?? '';
+                  $reff_note = addslashes($items['reff_notes']);
+                  $status_ow = $items['nama_status'];// Aktif, Tidak Aktif, Not Good, Reproses
+                  $nama_mkt  = $this->_module->get_nama_sales_Group_by_kode($kode_mkt);
+                  $template_name = 'edit_status_ow';
+                  $list_value = array(
+                                '{no_sc}'     => $sales_order,
+                                '{mkt}'       => $nama_mkt,
+                                '{no_ow}'     => $ow,
+                                '{reff_note}' => $reff_note,
+                                '{status_ow_lama}' => $status_ow_lama,
+                                '{status_ow_baru}' => $status_ow_baru
+                                );
+                  $list_dept = array('GRG','LAB','PPIC-DF');
+
+                  $wa_send = $this->wa_message->sendMessageToGroupByDepth($template_name,$list_value,$list_dept);
+
+                  // mention
+                  $list_number  = $this->_module->get_list_number_user_by_dept($list_dept);
+                  $list_numbers = array_column($list_number,'telepon_wa');
+                  $telp_me      = $this->_module->cek_telepon_wa_by_user($username);
+                  $telp_mes     = array_column($telp_me,'telepon_wa');
+                  $list_number_group = array_merge($list_numbers,$telp_mes);
+                  $this->wa_message->setMentions($list_number_group);
+                  
+                  //footer
+                  $default_footer_wa = 'footer_hms';
+                  $wa_send->setFooter($default_footer_wa);;
+                  
+                  $wa_send->send();
+                  // SEND WA MESSAGE  <<-- 
+                }
+
               }
             }
 
