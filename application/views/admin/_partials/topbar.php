@@ -63,7 +63,7 @@
               $akses_menu = true;
 
               if($val->jenis_button == 'hold' or $val->jenis_button == 'unhold'){
-                if($data['level'] == "Super Administrator" OR $data['level']  == "Administrator" OR $cek_dept['dept'] == 'PPIC'){
+                if($data['level'] == "Super Administrator" OR $data['level']  == "Administrator" OR strpos($cek_dept['dept'], 'PPIC') !== false){
                   ?>
                   <button type="button" id="<?php echo $val->id_button; ?>" class="<?php echo $val->class_button; ?>" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."><i class="<?php echo $val->ikon; ?>"></i> <?php echo $val->caption; ?></button>
                   <?php
