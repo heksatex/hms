@@ -116,9 +116,9 @@ class MO extends MY_Controller
         $this->load->view('manufacturing/v_mo', $data);
     }
 
-    public function Packing()
+    public function Gudangjadi()
     {
-        $data['id_dept']='PAC';
+        $data['id_dept']='GJD';
         $this->load->view('manufacturing/v_mo', $data);
     }
 

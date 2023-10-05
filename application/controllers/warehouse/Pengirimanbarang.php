@@ -136,6 +136,12 @@ class Pengirimanbarang extends MY_Controller
     $this->load->view('warehouse/v_pengiriman_barang',$data);
   }
 
+  public function Gudangjadi()
+  {
+    $data['id_dept']='GJD';
+    $this->load->view('warehouse/v_pengiriman_barang',$data);
+  }
+
   public function add()
   {
     $data['id_dept']   = $this->input->get('departemen');

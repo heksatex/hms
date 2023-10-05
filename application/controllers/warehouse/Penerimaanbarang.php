@@ -131,6 +131,12 @@ class Penerimaanbarang extends MY_Controller
         $this->load->view('warehouse/v_penerimaan_barang',$data);
     }
 
+    public function Gudangjadi()
+    {
+        $data['id_dept']='GJD';
+        $this->load->view('warehouse/v_penerimaan_barang',$data);
+    }
+
     function limit_words($string, $awal_start, $awal_length, $akhir_start, $akhir_length){
         
         //$jml_kata = str_word_count($string);
