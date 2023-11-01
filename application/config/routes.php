@@ -91,3 +91,6 @@ $route['setting/wa_schedule/simpan']['POST'] = 'setting/WaScheduleMessage/simpan
 $route['setting/wa_schedule/update']['POST'] = 'setting/WaScheduleMessage/update';
 $route['setting/wa_schedule/delete']['POST'] = 'setting/WaScheduleMessage/delete';
 
+$route['print/check'] = 'print/prints/check';
+$route['setting/wa_template/test']['GET'] = 'setting/WaTemplate/test';
+

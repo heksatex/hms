@@ -161,3 +161,5 @@ date_default_timezone_set('Asia/Jakarta'); //default waktu jakarta
     }
 
 </style>
+<div id="printed" style="display: none">
+</div>

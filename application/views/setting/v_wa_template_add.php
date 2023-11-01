@@ -31,36 +31,36 @@
                             <h3 class="box-title">Form Tambah</h3>
                         </div>
                         <div class="box-body">
-                            <form  method="post" class="form-horizontal" name="form-wa-template" id="form-wa-template" action="<?=base_url('setting/wa_template/simpan')?>">
+                            <form  method="post" class="form-horizontal" name="form-wa-template" id="form-wa-template" action="<?= base_url('setting/wa_template/simpan') ?>">
                                 <div class="form-group">                  
                                     <div class="col-md-12" >
                                     </div>
-                                
-                                <div class="form-group">
-                                    <div class="col-md-12">
-                                        <div class="col-md-6 col-xs-12">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required" >Nama</label></div>
-                                                <div class="col-xs-6">
-                                                    <input type="text" class="form-control input-sm" name="nama" placeholder="Nama Template" required/>
-                                                    <small class="form-text text-muted text-sm">
-                                                        Hanya alphanumeric
-                                                    </small>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <div class="col-md-6 col-xs-12">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4"><label class="form-label required" >Nama</label></div>
+                                                    <div class="col-xs-6">
+                                                        <input type="text" class="form-control input-sm" name="nama" id="nama" placeholder="Nama Template" required/>
+                                                        <small class="form-text text-muted text-sm">
+                                                            Hanya alphanumeric
+                                                        </small>
+                                                    </div>
+                                                    <button type="submit" id="form_simpan" style="display: none"></button>
                                                 </div>
-                                                <button type="submit" id="form_simpan" style="display: none"></button>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required" >Template</label></div>
-                                                <div class="col-xs-8">
-                                                    <textarea type="text" class="form-control input-sm" name="template" required></textarea>
-                                                    <small class="form-text text-muted text-sm">
-                                                        {....} untuk diganti dengan value dinamis <strong>Contoh</strong>: No {sku} sudah tersedia.
-                                                    </small>
-                                                </div>                                    
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4"><label class="form-label required" >Template</label></div>
+                                                    <div class="col-xs-8">
+                                                        <textarea type="text" class="form-control input-sm" name="template" required></textarea>
+                                                        <small class="form-text text-muted text-sm">
+                                                            {....} untuk diganti dengan value dinamis <strong>Contoh</strong>: No {sku} sudah tersedia.
+                                                        </small>
+                                                    </div>                                    
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                             </form>
                         </div>
                     </div>
@@ -69,6 +69,9 @@
         </div>
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
+
+
+
             $(function () {
 
 
@@ -93,7 +96,7 @@
                                     }, 1000);
                                 });
                             }).catch(err => {
-                            unblockUI(function () {});
+                        unblockUI(function () {});
                         alert_modal_warning("Hubungi Dept IT");
                     });
                     event.preventDefault();
@@ -103,7 +106,7 @@
 
                 $("#btn-simpan").on('click', function () {
                     $("#form_simpan").trigger("click");
-                   
+
                 });
 
             });
