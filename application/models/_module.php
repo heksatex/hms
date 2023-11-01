@@ -71,6 +71,19 @@ class _module extends CI_Model {
 								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]')");
     }
 
+    public function gen_history_ip($sub_menu, $username, $data_history){
+
+        $nama_user  = $this->_module->get_nama_user($username)->row_array();
+        $kode       = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+        $ip         = $this->input->ip_address();
+
+        $add_data_history = array('nama_user'=> $nama_user['nama'],'main_menu_sub_kode' => $kode['kode'], 'ip_address'=> $ip);
+        $data_history_all = array_merge($data_history,$add_data_history);
+
+        $this->db->insert('log_history',$data_history_all);
+        return is_array($this->db->error());
+    }
+
     public function get_kode_stock_move() {
         $last_no = $this->db->query("SELECT mid(move_id,3,(length(move_id))-2) as 'nom' 
 						 from stock_move where left(move_id,2)='SM'
@@ -780,4 +793,44 @@ class _module extends CI_Model {
         $result = $this->db->get('user');
         return $result->result();
     }
+
+    // public function get_stock_quant_by_lot($lot){
+    //     $this->db->where('lot', $lot);
+    //     return $this->db->get('stock_quant');
+    // }
+
+
+    public function get_list_jenis_kain(){
+        $this->db->order_by("id",'asc');
+        $result = $this->db->get('mst_jenis_kain');
+        return $result->result();
+    }
+    
+    public function get_list_quality(){
+        $this->db->order_by('nama','asc');
+        $result = $this->db->get('mst_quality');
+        return $result->result();
+    }
+
+    public function get_list_kode_k3l(){
+        $result = $this->db->get('mst_kode_k3l');
+        return $result->result();
+    }
+
+    public function get_list_desain_barcode_by_type($type){
+        if($type){
+            $this->db->where('type',$type);
+        }
+        $this->db->order_by('kode_desain','asc');
+        $result = $this->db->get('mst_desain_barcode');
+        return $result->result();
+    }
+
+    public function get_mst_quality_by_id($id){
+        $this->db->where("id",$id);
+        return $this->db->get('mst_quality');
+    }
+
+
 }
+
