@@ -772,10 +772,10 @@ class _module extends CI_Model {
     public function finishTransaction() {
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE) {
-//            $this->db->trans_rollback();
+            $this->db->trans_rollback();
             return false;
         } else {
-//            $this->db->trans_commit();
+            $this->db->trans_commit();
             return true;
         }
     }
@@ -793,12 +793,6 @@ class _module extends CI_Model {
         $result = $this->db->get('user');
         return $result->result();
     }
-
-    // public function get_stock_quant_by_lot($lot){
-    //     $this->db->where('lot', $lot);
-    //     return $this->db->get('stock_quant');
-    // }
-
 
     public function get_list_jenis_kain(){
         $this->db->order_by("id",'asc');
