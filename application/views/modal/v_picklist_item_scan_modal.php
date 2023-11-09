@@ -8,10 +8,10 @@
         <div class="row">
             <form class="form-horizontal" method="POST" name="form-picklist-scan" id="form-picklist-scan" action="<?= base_url('warehouse/picklist/add_list_item_scan') ?>">
                 <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-4">Search</div>
+                    <div class="col-xs-4">Scan</div>
                     <div class="col-xs-8">
-                        <input class="form-control input-sm" placeholder="Search" name="search" id="search" required>
-                        <button type="submit" id="form_submit"></button>
+                        <input class="form-control input-sm" placeholder="Scan" name="search" id="search" required>
+                        <button type="submit" id="form_submit" style="display: none;"></button>
                     </div>
                 </div>
             </form>
@@ -26,8 +26,8 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12">
-        <table id="picklist-item" class="table table-striped">
+    <div class="col-md-12 table-responsive over">
+        <table id="picklist-item" class="table table-condesed table-hover rlstable  over" width="100%">
             <thead>
                 <tr>
                     <th class="no"></th>
@@ -53,6 +53,7 @@
             placeholder: 'Filter'
         });
         const dTable = $('#picklist-item').DataTable({
+            "lengthChange": false,
             columnDefs: [
                 {
                     data: null,

@@ -40,7 +40,7 @@ class Prints extends MY_Controller {
         try {
             $code = new Code\Code128New();
             $gen_code = $code->generate("A123456789", "", 60, "vertical");
-            $this->prints->setView('print/e');
+            $this->prints->setView('print/t');
             $this->prints->addData('pattern', 'Test Printed');
             $this->prints->addData('isi_color', 'warna kuning matahari');
             $this->prints->addData('isi_satuan_lebar', 'WIDTH (cm)');

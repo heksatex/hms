@@ -16,7 +16,7 @@ class Picklist extends MY_Controller {
         $this->load->model("m_Picklist");
         $this->load->model("m_PicklistDetail");
         $this->load->library("token");
-        $this->load->model("m_stockQuants");
+        $this->load->model("m_Pickliststockquant");
         $this->load->library('prints');
     }
 
@@ -84,6 +84,7 @@ class Picklist extends MY_Controller {
             $data['picklist'] = $this->m_Picklist->getDataByID($kode_decrypt);
             $data['bulk'] = $this->m_Picklist->getTypeBulk();
             $data['sales'] = $this->m_Picklist->getSales();
+//            log_message('error', $_SERVER['REMOTE_ADDR']);
             $this->load->view('warehouse/v_picklist_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -128,6 +129,7 @@ class Picklist extends MY_Controller {
             }
             $data["pl"] = $this->input->post("pl");
             $data["ids"] = $this->input->post("ids");
+            $data['sales'] = $this->m_Picklist->getSales();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(['data' => $this->load->view('modal/v_picklist_item_manual_modal', $data, true)]));
@@ -161,12 +163,15 @@ class Picklist extends MY_Controller {
                 throw new \Exception('Waktu Anda Telah Habis', 410);
             }
             $data = array();
-            $condition = null;
+            $condition = [];
+            $in = [];
             if ($this->input->post('filter') !== "" && $_POST["search"]["value"] !== "") {
-                $condition = [$this->input->post('filter') . " LIKE", '%' . $_POST["search"]["value"] . '%'];
+                $condition = array_merge($condition, ['stock_quant.' . $this->input->post('filter') . " LIKE" => '%' . $_POST["search"]["value"] . '%']);
             }
-
-            $list = $this->m_stockQuants->getDataItemPicklist($condition);
+            if (!is_string($this->input->post('marketing'))) {
+                $in = array_merge($in, ['`stock_quant`.`sales_group`' => $this->input->post('marketing')]);
+            }
+            $list = $this->m_Pickliststockquant->getDataItemPicklist($condition, $in);
             $no = $_POST['start'];
             foreach ($list as $field) {
                 $field->status = 'draft';
@@ -180,15 +185,14 @@ class Picklist extends MY_Controller {
                     $field->warna_remark,
                     $field->qty_jual . " " . $field->uom_jual,
                     $field->qty2_jual . " " . $field->uom2_jual,
-                    $field->warna_remark,
                     $field->lokasi_fisik,
                     json_encode($field)
                 );
                 $data[] = $row;
             }
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_stockQuants->count_all(),
-                "recordsFiltered" => $this->m_stockQuants->count_filteredItemPicklist($condition),
+                "recordsTotal" => $this->m_Pickliststockquant->count_all(),
+                "recordsFiltered" => $this->m_Pickliststockquant->count_filteredItemPicklist($condition),
                 "data" => $data,
             ));
             exit();
@@ -205,7 +209,7 @@ class Picklist extends MY_Controller {
                 throw new \Exception('Waktu Anda Telah Habis', 410);
             }
             $condition = ["lot" => $this->input->post('search')];
-            $list = $this->m_stockQuants->getDataItemPicklistScan($condition);
+            $list = $this->m_Pickliststockquant->getDataItemPicklistScan($condition);
             if (count($list) !== 1) {
                 throw new \Exception('Jumlah atau Barcode Tidak ditemukan', 500);
             }
@@ -219,7 +223,7 @@ class Picklist extends MY_Controller {
         }
     }
 
-    public function list_item() {
+    public function list_item($page = null) {
         try {
             if (empty($this->session->userdata('status'))) {
                 throw new \Exception('Waktu Anda Telah Habis', 410);
@@ -229,18 +233,21 @@ class Picklist extends MY_Controller {
             $list = $this->m_PicklistDetail->getData($condition);
             $no = $_POST['start'];
             $data = array();
+            
             foreach ($list as $field) {
+                $status = ($field->valid === 'draft') ? "<button class='btn btn-danger status_item' data-id='" . $field->barcode_id . "' data-pl='" . $field->no_pl . "'><fa class='fa fa-trash'></fa></button>" : '';
                 $no++;
                 $row = array(
                     $no,
                     $field->barcode_id,
-                    $field->kode_produk,
-                    $field->nama_produk,
+                    $field->corak_remark,
+                    $field->warna_remark,
                     $field->qty . " " . $field->uom,
                     $field->qty2 . " " . $field->uom2,
                     $field->lokasi_fisik,
                     $field->valid,
-                    $field->valid_date
+                    $field->valid_date,
+                    $status
                 );
                 $data[] = $row;
             }
@@ -269,7 +276,7 @@ class Picklist extends MY_Controller {
             $this->_module->startTransaction();
             foreach ($data as $key => $value) {
                 $value = json_decode($value);
-                $check = $this->m_stockQuants->checkItemAvailable($value->quant_id);
+                $check = $this->m_Pickliststockquant->checkItemAvailable($value->quant_id);
                 switch (true) {
                     case $check->reserve_move !== "":
                         throw new \Exception("Barcode " . $value->barcode . " reserve move " . $value->reserve_move, 500);
@@ -286,11 +293,11 @@ class Picklist extends MY_Controller {
                 }
 
                 $sc = explode("|", $value->reserve_origin);
-                $insrt = $this->m_PicklistDetail->insertItem([
-                    'id' => null,
-                    'barcode_id' => $value->barcode,
-                    'quant_id' => $value->quant_id,
-                    'no_pl' => $pl,
+                $datainsert = [
+                    "id" => null,
+                    "barcode_id" => $value->barcode,
+                    "quant_id" => $value->quant_id,
+                    "no_pl" => $pl,
                     'kode_produk' => $value->kode_produk,
                     'nama_produk' => $value->nama_produk,
                     'warna_remark' => $value->warna_remark,
@@ -301,21 +308,49 @@ class Picklist extends MY_Controller {
                     'qty2' => $value->qty2_jual ?? 0.00,
                     'uom' => $value->uom_jual,
                     'uom2' => $value->uom2_jual,
-                    'sales_order' => $sc[0] ?? "",
+                    'sales_order' => isset($sc[0]) ? $sc[0] : "",
                     'lokasi_fisik' => $value->lokasi_fisik,
                     'tanggal_masuk' => date('Y-m-d H:i:s'),
                     'valid' => $value->status ?? "draft",
-                    'row_order' => $key + 1
-                ]);
+                    'row_order' => $key + 1];
+
+                $insrt = $this->m_PicklistDetail->insertItem($datainsert);
 
                 if (!empty($insrt)) {
                     throw new \Exception($insrt, 500);
                 }
+                $this->_module->gen_history($sub_menu, $pl, 'create', logArrayToString('=', $datainsert), $username);
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $pl, 'create', json_encode($datas), $username);
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->finishTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function delete_item() {
+        try {
+            if (empty($this->session->userdata('status'))) {
+                throw new \Exception('Waktu Anda Telah Habis', 410);
+            }
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $id = $this->input->post('id');
+            $pl = $this->input->post('pl');
+            $this->_module->startTransaction();
+            $this->m_PicklistDetail->deleteItem(['barcode_id' => $id]);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Menghapus Data', 500);
+            }
+            $this->_module->gen_history($sub_menu, $pl, 'delete', 'Menghapus barcode ' . $id, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -355,7 +390,7 @@ class Picklist extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $this->input->post('no_pl'), 'edit', json_encode($input), $username);
+            $this->_module->gen_history($sub_menu, $this->input->post('no_pl'), 'edit', logArrayToString('=', $input), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $this->input->post('ids'))));
@@ -400,10 +435,47 @@ class Picklist extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $this->_module->gen_history($sub_menu, $input["no"], 'create', json_encode($input), $username);
+            $this->_module->gen_history($sub_menu, $input["no"], 'create', logArrayToString('=', $input), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => encrypt_url($id))));
+        } catch (Exception $ex) {
+            $this->_module->finishTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function update_status() {
+        try {
+            $pl = $this->input->post('pl');
+            $status = $this->input->post('status');
+            $condition = [];
+            $updates = [];
+            switch ($status) {
+                case "draft":
+                    $condition = ['no_pl' => $pl, 'valid' => $status];
+                    $updates = ['status' => 'realisasi'];
+                    break;
+                case "realisasi":
+                    $condition = ['no_pl' => $pl, 'valid' => $status];
+                    $updates = ['status' => 'validasi'];
+                    break;
+            }
+            $dt = $this->m_PicklistDetail->getCountAllData($condition);
+            if ($dt > 0) {
+                throw new Exception('Item di Picklist ' . $pl . ' masih ada yang status ' . strtoupper($status), 500);
+            }
+            $this->_module->startTransaction();
+            $this->m_Picklist->update($updates, ['no' => $pl]);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Menyimpan Data', 500);
+            }
+//            $this->_module->gen_history($sub_menu, $input["no"], 'create', logArrayToString('=', $input), $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)

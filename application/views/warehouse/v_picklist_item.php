@@ -10,19 +10,19 @@
                         <tr>
                             <th class="style" width="10px">No</th>
                             <th class="style" >Barcode</th>
-                            <th class="style" width="70px">Kode Produk</th>
-                            <th class="style">Nama Produk</th>
+                            <th class="style">Corak Remark</th>
+                            <th class="style">Warna Remark</th>
                             <th class="style" style="width:80px;" >Qty 1</th>
                             <th class="style" width="80px">Qty 2</th>
                             <th class="style" >Lokasi Fisik</th>
                             <th class="style" >Status</th>
                             <th class="style">Validasi Di</th>
-                            <!--<th class="style">#</th>-->
+                            <th class="style">#</th>
                         </tr>
                     </thead>
                     <tfoot id="tfooter">
                         <tr>
-                        <tr>
+                        <tr style="display: none;">
                             <td colspan="8">
                                 <a class="add-new-scan"><i class="fa fa-plus"></i> Tambah Data dengan Scan</a>
                             </td>
@@ -46,7 +46,7 @@
             "serverSide": true,
             "order": [],
             "paging": true,
-            "lengthChange": true,
+            "lengthChange": false,
             "searching": true,
             "ordering": true,
             "info": true,
@@ -56,16 +56,63 @@
                 "type": "POST",
                 "data": function (d) {
                     d.filter = "<?= $pl ?>";
+                },
+                "dataSrc": function (data) {
+                    if (data.data.length < 1) {
+                        $(".header-status").hide();
+                    }
+                    return data.data;
                 }
             },
             "columnDefs": [
                 {
-                    "targets": [0, 5],
+                    "targets": [0, 7, 8, 9],
                     "orderable": false
                 }
-            ]
+            ],
+            "dom": 'Bfrtip',
+            "buttons": [
+                {
+                    "text": '<i class="fa fa-plus"> <span>Tambah Data Scan</span>',
+                    "className": "btn btn-default",
+                    "action": function (e, dt, node, config) {
+                        $(".add-new-scan").trigger("click");
+                    }
+                },
+                {
+                    "text": '<i class="fa fa-plus"> <span>Tambah Data Manual</span>',
+                    "className": "btn btn-default",
+                    "action": function (e, dt, node, config) {
+                        $(".add-new-manual").trigger("click");
+                    }
+                }
+            ],
+            "fnDrawCallback": function () {
+                $(".status_item").on('click', function () {
+                    please_wait(function () {});
+                    $.ajax({
+                        "url": "<?= base_url('warehouse/picklist/delete_item') ?>",
+                        "type": "POST",
+                        "data": {
+                            id: $(this).attr("data-id"),
+                            pl: $(this).attr("data-pl")
+                        },
+                        "success": function (data) {
+                            location.reload();
+                        },
+                        "error": function (xhr, ajaxOptions, thrownError) {
+                            let data = JSON.parse(xhr.responseText);
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify(data.icon, data.message, data.type, function () {});
+                                }, 1000);
+                            });
+                        }
+                    });
+                });
+            }
         });
-    })
+    });
 
 
     $(".add-new-manual").on('click', function (e) {

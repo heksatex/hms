@@ -56,9 +56,9 @@ class M_PicklistDetail extends CI_Model {
         }
     }
 
-    public function getData(array $condition = null) {
+    public function getData(array $condition = []) {
         $this->_getDataItem();
-        if (!is_null($condition)) {
+        if (count($condition) > 0) {
             $this->db->where($condition);
         }
         if ($_POST['length'] != -1)
@@ -67,18 +67,18 @@ class M_PicklistDetail extends CI_Model {
         return $query->result();
     }
 
-    public function getCountDataFiltered(array $condition = null) {
+    public function getCountDataFiltered(array $condition = []) {
         $this->_getDataItem();
-        if (!is_null($condition)) {
+        if (count($condition) > 0) {
             $this->db->where($condition);
         }
         $query = $this->db->get();
         return $query->num_rows();
     }
 
-    public function getCountAllData(array $condition = null) {
+    public function getCountAllData(array $condition = []) {
         $this->db->from($this->table);
-        if (!is_null($condition)) {
+        if (count($condition) > 0) {
             $this->db->where($condition);
         }
         return $this->db->count_all_results();
@@ -100,6 +100,38 @@ class M_PicklistDetail extends CI_Model {
         $this->db->where($condition);
         $this->db->select('qty,uom');
         return $this->db->get()->result();
+    }
+
+    public function deleteItem($condition) {
+        $this->db->delete($this->table, $condition);
+    }
+
+    public function detailData(array $condition) {
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        return $this->db->select('*')->get()->row();
+    }
+
+    public function statusCount(array $condition) {
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        $this->db->group_by('valid');
+        return $this->db->select('valid,COUNT(id) as cnt')->get()->result();
+    }
+
+    public function updateStatus(array $condition, array $data) {
+        try {
+            $this->db->set($data);
+            $this->db->where($condition);
+            $this->db->update($this->table);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
     }
 
     public function __destruct() {

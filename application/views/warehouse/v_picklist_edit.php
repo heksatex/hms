@@ -30,6 +30,23 @@
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Form Edit <strong> <?= $picklist->no ?> </strong></h3>
+                            <div class="pull-right text-right header-status" id="btn-header">
+                                <?php
+                                switch ($picklist->status) {
+                                    case "draft":
+                                        echo '<button class="btn btn-primary btn-sm" id="btn-confirm" data-value="draft" data-loading-text="<i class=`fa fa-spinner fa-spin `></i> processing...">Confirm</button>';
+                                        break;
+                                    case "realisasi":
+                                        echo '<button class="btn btn-primary btn-sm" id="btn-confirm" data-value="realisasi" data-loading-text="<i class=`fa fa-spinner fa-spin `></i> processing...">Confirm Realisasi</button>';
+                                        break;
+                                    case "validasi":
+//                                        echo '<button class="btn btn-primary btn-sm" id="btn-confirm" data-value="validasi" data-loading-text="<i class=`fa fa-spinner fa-spin `></i> processing...">Confirm Validasi</button>';
+                                        break;
+                                    default:
+                                }
+                                ?>
+
+                            </div>
                         </div>
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-picklist" id="form-picklist" action="<?= base_url('warehouse/picklist/update') ?>">
@@ -137,7 +154,7 @@
                         var query = {
                             search: params.term
                         };
-                        
+
                         return query;
                     },
                     processResults: function (data) {
@@ -159,7 +176,7 @@
             $("#customer").on('select2:unselect', function (e) {
                 $("#alamat").val("");
             });
-            
+
             $("#btn-simpan").on('click', function () {
                 $("#btn_form_edit").trigger("click");
             });
@@ -167,7 +184,7 @@
                 window.open('<?= base_url('warehouse/picklist/print?nopl=' . $picklist->no) ?>', '_blank');
             });
             const formpicklist = document.forms.namedItem("form-picklist");
-            
+
             formpicklist.addEventListener(
                     "submit",
                     (event) => {
@@ -176,8 +193,8 @@
                         response => {
                             if (response.status === 200)
                                 window.location.replace('<?= base_url('warehouse/picklist/edit/') ?>' + response.data.data);
-                            
-                            
+
+
                         }).catch(err => {
                     unblockUI(function () {});
                     alert_modal_warning("Hubungi Dept IT");
@@ -186,7 +203,27 @@
             },
                     false
                     );
-            
+            $("#btn-confirm").on('click', function () {
+                please_wait(function () {});
+                $.ajax({
+                    url: "<?= base_url('warehouse/picklist/update_status') ?>",
+                    type: "post",
+                    data: {
+                        pl: "<?= $picklist->no ?>",
+                        status: $(this).attr("data-value")
+                    },
+                    success: function (data) {
+                        location.reload();
+                    },
+                    error: function (req, error) {
+                        unblockUI(function () {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                            }, 1000);
+                        });
+                    }
+                });
+            });
         </script>
     </body>
 </html>
