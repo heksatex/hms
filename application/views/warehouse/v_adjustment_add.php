@@ -73,10 +73,29 @@
 
               <div class="col-md-6">
                 <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Type Adjustment</label></div>
+                  <div class="col-xs-8">
+                    <select class="form-control input-sm" name="type_adjustment" id="type_adjustment" />
+                    <option value="">Pilih Type</option>
+                      <?php $disabled = '';
+                            foreach ($type as $row) { 
+                              if($row->view == '0'){
+                                $disabled = "disabled";
+                              }
+                      ?>
+                              <option value='<?php echo $row->id; ?>' <?php echo $disabled;?> ><?php echo $row->name_type;?></option>
+                      <?php 
+                              $disabled = '';
+                            }
+                      ?>
+                    </select>
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Lokasi Adjustment</label></div>
                   <div class="col-xs-8">
                     <select class="form-control input-sm" name="lokasi_adjustment" id="lokasi_adjustment" />
-                    <option value=""></option>
+                    <option value="">Pilih Lokasi</option>
                       <?php foreach ($warehouse as $row) { ?>
                         <option value='<?php echo $row->kode; ?>'><?php echo $row->nama;?></option>
                       <?php }?>
@@ -158,6 +177,7 @@
               kode_lokasi       : $('#kode_lokasi').val(),
               note              : $('#note').val(),
               status            : 'draft',
+              type_adjustment   : $("#type_adjustment").val(),
 
         },success: function(data){
           if(data.sesi == "habis"){

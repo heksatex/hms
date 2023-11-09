@@ -460,6 +460,7 @@
                 },error : function(jqXHR, textStatus, errorThrown){
                   alert(jqXHR.responseText);
                   //alert('error data');
+                  $("#example1_processing").css('display','none'); // hidden loading
                   $('#btn-generate').button('reset');
                 }
           });

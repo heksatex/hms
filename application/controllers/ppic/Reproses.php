@@ -486,7 +486,8 @@ class Reproses extends MY_Controller
           $kode_adjustment_in   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment_in;
 
           // insert into adj 
-          $sql_adjustment .= "('".$kode_adjustment_in."', '".$tanggal."','".$nama_dept_grg."','".$stock_location_greige."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."'), ";
+          $type_adjustement = 4; // 4 = Reproses
+          $sql_adjustment .= "('".$kode_adjustment_in."', '".$tanggal."','".$nama_dept_grg."','".$stock_location_greige."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."', '".$type_adjustement."'), ";
 
           //create log history adjustment in 
           $note_log_adj_in = $kode_adjustment_in." ini dibuat dari Fitur Reproses";
@@ -566,7 +567,7 @@ class Reproses extends MY_Controller
                       $lot_new           = $row->lot."".$head->inisial;
 
                       // insert into adj 
-                      $sql_adjustment .= "('".$kode_adjustment."', '".$tanggal."','".$nama_departemen."','".$lokasi_asal."','".$note_adj_out."','".$status_done."','".$nama_user['nama']."'), ";
+                      $sql_adjustment .= "('".$kode_adjustment."', '".$tanggal."','".$nama_departemen."','".$lokasi_asal."','".$note_adj_out."','".$status_done."','".$nama_user['nama']."', '".$type_adjustement."'), ";
 
                       // loop adj
                       $row_order_adj= 1;

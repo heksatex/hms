@@ -247,7 +247,8 @@ class Splitlot extends MY_Controller
                         $note_adj_in  = 'ADJ | Dibuat dari Fitur Split. No.'.$kode_split;
 
                         // insert into adj 
-                        $sql_adjustment .= "('".$kode_adjustment."', '".$tgl."','".$nama_departemen."','".$lokasi_stock."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."'), ";
+                        $type_adjustment = 6; // 6 = split
+                        $sql_adjustment .= "('".$kode_adjustment."', '".$tgl."','".$nama_departemen."','".$lokasi_stock."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."', '".$type_adjustment."'), ";
 
                         $method         = $departemen.'|ADJ';
                         $lokasi_dari    = $lokasi_stock;
@@ -266,7 +267,7 @@ class Splitlot extends MY_Controller
                         $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin_out."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
                         
                         // insert stock_move_items
-                        $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".($kode_produk)."', '".($nama_produk)."','".$lot."','".$qty."','".($uom_qty)."','".$qty."','".$uom_qty2."','".$status_done."','1','','".$tgl."','','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
+                        $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".($kode_produk)."', '".($nama_produk)."','".$lot."','".$qty."','".($uom_qty)."','".$qty2."','".$uom_qty2."','".$status_done."','1','','".$tgl."','','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
                         
                         $last_move = $last_move + 1;
                         $move_id   = "SM".$last_move;

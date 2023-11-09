@@ -24,6 +24,8 @@ class M_doneMO extends CI_Model
 
     public function get_sum_qty_fg_adj_update($kode)
     {
+        // tipe adjustment
+		// 1=Koreksi MO, 2=Koreksi Salah INput User
         return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
                             from (
                             SELECT smi.kode_produk, smi.nama_produk, 
@@ -36,7 +38,7 @@ class M_doneMO extends CI_Model
                             INNER JOIN stock_move_items smi ON adji.quant_id = smi.quant_id AND adji.move_id = smi.move_id
                             INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
                             INNER JOIN mrp_production_done mrp_done ON fgt.kode = mrp_done.kode
-                            WHERE fg.kode ='$kode' AND smi.status = 'done'  AND fg.lokasi LIKE '%stock%' AND adj.status = 'done' 
+                            WHERE fg.kode ='$kode' AND smi.status = 'done'  AND fg.lokasi LIKE '%stock%' AND adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2')
                             AND adj.create_date > mrp_done.tanggal 
                             GROUP BY smi.kode_produk
                             ) as gp");

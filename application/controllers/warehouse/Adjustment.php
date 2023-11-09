@@ -35,6 +35,7 @@ class Adjustment extends MY_Controller
           $row[] = $field->create_date;
           $row[] = $field->lokasi_adjustment;
           $row[] = $field->kode_lokasi;
+          $row[] = $field->name_type;
           $row[] = $field->note;
           $row[] = $field->status;
 
@@ -55,7 +56,7 @@ class Adjustment extends MY_Controller
   { 
     $data['id_dept']  ='MADJ';    
     //$data['category'] = $this->m_produk->get_list_category();
-    //$data['route']    = $this->m_produk->get_list_route();        
+    $data['type']    = $this->m_adjustment->get_list_type_adjustment();        
     $data['warehouse'] = $this->_module->get_list_departement();
     return $this->load->view('warehouse/v_adjustment_add', $data);
   }
@@ -80,11 +81,12 @@ class Adjustment extends MY_Controller
     }else{
       
       //lock table
-      $this->_module->lock_tabel('adjustment WRITE, departemen WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE');
+      $this->_module->lock_tabel('adjustment WRITE, departemen WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, mst_type_adjustment WRITE');
       
       $kode_adjustment    = addslashes($this->input->post('kode_adjustment'));
       $create_date        = $this->input->post('create_date');      
       $lok_adjustment     = addslashes($this->input->post('lokasi_adjustment'));
+      $type_adjustment    = $this->input->post('type_adjustment');
       $lokasi_adjustment  = $this->m_adjustment->get_nama_departemen_by_kode($lok_adjustment)->row_array();
       $kode_lokasi        = addslashes($this->input->post('kode_lokasi'));
       $note               = $this->input->post('note');
@@ -102,6 +104,9 @@ class Adjustment extends MY_Controller
       }else{
         //cek kode adjustment apa sudah ada apa belum
         $cek = $this->m_adjustment->cek_adjustment_by_kode($kode_adjustment)->row_array();
+        // get nama type adjustment
+        $nm = $this->m_adjustment->get_type_adjustment_by_kode($type_adjustment);
+        $nama_type_adjustment = $nm->name_type ?? '';
         if(!empty($cek['kode_adjustment']) AND $status == 'tambah'){
           $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Adjustment Ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
         }else if(!empty($cek['kode_adjustment'])){
@@ -114,10 +119,10 @@ class Adjustment extends MY_Controller
               $callback = array('status' => 'failed','message' => 'Maaf, Data Tidak Bisa Disimpan, Status Adjustment Sudah Batal !', 'icon' =>'fa fa-check', 'type' => 'danger');
           }else{
             //update/edit adjustment
-            $this->m_adjustment->update_adjustment($cek['kode_adjustment'],$note);
+            $this->m_adjustment->update_adjustment($cek['kode_adjustment'],$note,$type_adjustment);
             $kode_adjustment_encr = encrypt_url($cek['kode_adjustment']);
             $jenis_log   = "edit";
-            $note_log    = $cek['kode_adjustment']."|".$note;
+            $note_log    = $cek['kode_adjustment']." | ".$note.' | '.$nama_type_adjustment;
             $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
             
             $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kode_adjustment_encr, 'icon' =>'fa fa-check', 'type' => 'success');
@@ -130,10 +135,11 @@ class Adjustment extends MY_Controller
           $kode_adjustment   = substr("00000" . $kode_adjustment,-4);                  
           $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
 
-          $this->m_adjustment->save_header_adjustment($kode_adjustment,$create_date,$lokasi_adjustment['nama'],$kode_lokasi,$note,$status,$nama_user['nama']);
+
+          $this->m_adjustment->save_header_adjustment($kode_adjustment,$create_date,$lokasi_adjustment['nama'],$kode_lokasi,$note,$status,$nama_user['nama'],$type_adjustment);
           $kode_adjustment_encr = encrypt_url($kode_adjustment);
           $jenis_log   = "create";
-          $note_log    = $kode_adjustment."|".$lokasi_adjustment['nama']."|".$kode_lokasi;
+          $note_log    = $kode_adjustment." | ".$lokasi_adjustment['nama']." | ".$kode_lokasi.' | '.$nama_type_adjustment;
           $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kode_adjustment_encr, 'icon' =>'fa fa-check', 'type' => 'success');
         }
@@ -151,7 +157,8 @@ class Adjustment extends MY_Controller
     if(!isset($id)) show_404();
         $kode_adjustment_decrypt = decrypt_url($id);
         $data['id_dept'] ='MADJ';
-        $data['warehouse'] = $this->_module->get_list_departement();
+        $data['warehouse']  = $this->_module->get_list_departement();
+        $data['type']       = $this->m_adjustment->get_list_type_adjustment();        
         $data['adjustment'] = $this->m_adjustment->get_adjustment_by_code($kode_adjustment_decrypt);
         $data['details'] = $this->m_adjustment->get_adjustment_detail_by_code($kode_adjustment_decrypt);
         if(empty($data["adjustment"])){
@@ -363,7 +370,7 @@ class Adjustment extends MY_Controller
       }else{
 
         // lock table
-        $this->_module->lock_tabel('adjustment WRITE, adjustment_items WRITE, adjustment_items as adji WRITE, mst_produk as mp WRITE');
+        $this->_module->lock_tabel('adjustment WRITE, adjustment_items WRITE, adjustment_items as adji WRITE, mst_produk as mp WRITE, mst_produk WRITE');
         
         if(!empty($row)){//update details
           /*

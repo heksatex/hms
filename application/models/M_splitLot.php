@@ -209,7 +209,7 @@ class M_splitLot extends CI_Model
 
 	public function simpan_adjustment_batch($sql)
     {
-        return $this->db->query("INSERT INTO adjustment (kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status,nama_user) values $sql ");
+        return $this->db->query("INSERT INTO adjustment (kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status,nama_user, id_type_adjustment) values $sql ");
     }
 
     public function simpan_adjustment_items_batch($sql)

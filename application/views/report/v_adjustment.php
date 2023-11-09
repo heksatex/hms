@@ -85,9 +85,18 @@
                   <div class="col-md-12">
                     <div class="col-md-2"><label>Departemen</label></div>
                     <div class="col-md-4">
-                        <select type="text" class="form-control input-sm" name="departemen" id="departemen" required=""  >
+                        <select type="text" class="form-control input-sm" name="departemen" id="departemen" required="" style="width:100% !important" >
                         </select>
                       </div>                                    
+                      <div class="col-md-1"></div>
+                      <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                          <label style="cursor:pointer;">
+                            <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                             Advanced 
+                          </label>
+                        </div>
+                      </div>
                   </div>
                 </div>
                
@@ -98,11 +107,81 @@
                 <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
               </div>
 
+              <br>
+              <div class="col-md-12">
+                    <div class="panel panel-default" style="margin-bottom: 0px;">
+                      <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                        <div class="panel-body" style="padding: 5px">
+                          <div class="form-group col-md-12" style="margin-bottom:0px">
+                            <div class="col-md-4" >
+                              <div class="form-group">
+                                <div class="col-md-5">
+                                  <label>Kode Adjustment </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control input-sm" name="kode_adjustment" id="kode_adjustment" >
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="col-md-5">
+                                  <label>Lot </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control input-sm" name="lot" id="lot" >
+                                </div>
+                              </div> 
+                              <div class="form-group">
+                                <div class="col-md-5">
+                                  <label>Nama Produk </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk">
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="form-group">
+                                <div class="col-md-5">
+                                  <label>Type Adjustment </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <select type="text" class="form-control input-sm" name="type_adjustment" id="type_adjustment"  style="width:100% !important"> 
+                                    <option value="">-- Pilih Type --</option>
+                                    <?php 
+                                      foreach ($type as $val) {
+                                          echo "<option value='".$val->id."'>".$val->name_type."</option>";
+                                      }
+                                    ?>
+                                    </select>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="col-md-5">
+                                  <label>User</label>
+                                </div>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control input-sm" name="user" id="user" >
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="col-md-5">
+                                  <label>Notes </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control input-sm" name="notes" id="notes" >
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+              </div>
             </form>
-
             <!-- table ADJ IN  -->
             <div class="box-body">
-              <div class="col-sm-12 table-responsive">
                 <div class="form-group">
                     <div class="col-md-2">
                           <label>Adjustment IN</label>
@@ -116,6 +195,7 @@
                               <tr>
                                 <th  class="style no"  >No. </th>
                                 <th  class='style bb ws' style="min-width: 80px">Kode Adjustment</th>
+                                <th  class='style bb ws' style="min-width: 100px">Type Adjustment</th>
                                 <th  class='style bb ws' style="min-width: 80px">Tanggal</th>
                                 <th  class='style bb ws' style="min-width: 150px">Nama Produk</th>
                                 <th  class='style bb ws' style="min-width: 80px">Lot</th>
@@ -133,7 +213,7 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td colspan="15" >Tidak ada Data</td>
+                                <td colspan="16" >Tidak ada Data</td>
                               </tr>
                             </tbody>
                         </table>
@@ -142,13 +222,10 @@
                         </div>
                   </div>
                 </div>
-
-              </div>
             </div>
 
              <!-- table ADJ OUT  -->
              <div class="box-body">
-              <div class="col-sm-12 table-responsive">
                 <div class="form-group">
                     <div class="col-md-2">
                           <label>Adjustment OUT</label>
@@ -162,6 +239,7 @@
                               <tr>
                                 <th  class="style bb ws no"  >No. </th>
                                 <th  class='style bb ws' style="min-width: 80px">Kode Adjustment</th>
+                                <th  class='style bb ws' style="min-width: 100px">Type Adjustment</th>
                                 <th  class='style bb ws' style="min-width: 80px">Tanggal</th>
                                 <th  class='style bb ws' style="min-width: 150px">Nama Produk</th>
                                 <th  class='style bb ws' style="min-width: 80px">Lot</th>
@@ -179,7 +257,7 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td colspan="15" >Tidak ada Data</td>
+                                <td colspan="16" >Tidak ada Data</td>
                               </tr>
                             </tbody>
                         </table>
@@ -188,11 +266,7 @@
                         </div>
                   </div>
                 </div>
-
               </div>
-            </div>
-
-
         </div>
         <!-- /.box-body -->
       </div>
@@ -207,6 +281,17 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
+
+  //* Show collapse advanced search
+  $('#advancedSearch').on('shown.bs.collapse', function () {
+      $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+  });
+
+  //* Hide collapse advanced search
+  $('#advancedSearch').on('hidden.bs.collapse', function () {
+    $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+  });
+
 
   // array tmp
   var tmp_filter = [];
@@ -264,6 +349,12 @@
       tgldari   = $('#tgldari').val();
       tglsampai = $('#tglsampai').val();
       id_dept   = $('#departemen').val();
+      kode_adjustment   = $('#kode_adjustment').val();
+      lot       = $('#lot').val();
+      nama_produk   = $('#nama_produk').val();
+      type_adjustment   = $('#type_adjustment').val();
+      user      = $('#user').val();
+      notes     = $('#notes').val();
 
       if(tgldari == '' || tglsampai == ''){
         alert_modal_warning('Periode Tanggal Harus diisi !');
@@ -282,13 +373,13 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/adjustment/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, load:'header'},
+                data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, load:'header', kode_adjustment:kode_adjustment, lot:lot, nama_produk:nama_produk, type_adjustment:type_adjustment, user:user, notes:notes},
                 success: function(data){
                   $("#total_lot").html(data.total_lot_adj_in);;
                   $("#total_lot2").html(data.total_lot_adj_out);;
                   
                   // push data filter ke array tmp_filter
-                  tmp_filter.push({'id_dept' : id_dept, 'tgldari' : tgldari, 'tglsampai' : tglsampai});
+                  tmp_filter.push({'id_dept' : id_dept, 'tgldari' : tgldari, 'tglsampai' : tglsampai, 'kode_adjustment':kode_adjustment, 'lot':lot, 'nama_produk':nama_produk, 'type_adjustment':type_adjustment, 'user':user, 'notes':notes});
                   //alert('check arr '+JSON.stringify(tmp_filter));
 
                   body_grouping("example1",data.record)// ADJ IN
@@ -301,6 +392,8 @@
                 },error : function(jqXHR, textStatus, errorThrown){
                   alert(jqXHR.responseText);
                   //alert('error data');
+                  $("#example1_processing").css('display','none'); // hidden loading
+                  $("#example2_processing").css('display','none'); // hidden loading
                   $('#btn-generate').button('reset');
                 }
           });
@@ -314,6 +407,12 @@
     tgldari   = $('#tgldari').val();
     tglsampai = $('#tglsampai').val();
     id_dept   = $('#departemen').val();
+    kode_adjustment   = $('#kode_adjustment').val();
+    lot       = $('#lot').val();
+    nama_produk   = $('#nama_produk').val();
+    type_adjustment   = $('#type_adjustment').val();
+    user      = $('#user').val();
+    notes     = $('#notes').val();
 
     if(tgldari == '' || tglsampai == ''){
         alert_modal_warning('Periode Tanggal Harus diisi !');
@@ -323,7 +422,7 @@
         $.ajax({
           "type":'POST',
           "url" : "<?php echo site_url('report/adjustment/export_excel')?>",
-          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept}, 
+          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, kode_adjustment:kode_adjustment, lot:lot, nama_produk:nama_produk, type_adjustment:type_adjustment, user:user, notes:notes}, 
           "dataType":'json',
           beforeSend: function() {
             $('#btn-excel').button('loading');
@@ -357,11 +456,22 @@
     var id_dept = '';
     var tgldari = '';
     var tglsampai = '';
+    var kode_adjustment = '';
+    var lot = '';
+    var nama_produk = '';
+    var type_adjustment = '';
+    var user = '';
+    var notes = '';
     for(i = 0; i < tmp_filter.length; i++){
       id_dept   = tmp_filter[i].id_dept;
       tgldari   = tmp_filter[i].tgldari;
       tglsampai = tmp_filter[i].tglsampai;
-            
+      kode_adjustment = tmp_filter[i].kode_adjustment;
+      lot       = tmp_filter[i].lot;
+      nama_produk = tmp_filter[i].nama_produk;
+      type_adjustment = tmp_filter[i].type_adjustment;
+      user      = tmp_filter[i].user;
+      notes     = tmp_filter[i].notes;
     }
 
     // ambil data berdasarkan data-content='edit'
@@ -390,7 +500,7 @@
             type : 'POST',
             dataType: 'json',
             url : "<?php echo site_url('report/adjustment/loadData')?>",
-            data : {id_dept:id_dept, tgldari:tgldari, tglsampai:tglsampai, data_isi:data_isi, load:'item', view:'in'},
+            data : {id_dept:id_dept, tgldari:tgldari, tglsampai:tglsampai, data_isi:data_isi, load:'item', view:'in',  kode_adjustment:kode_adjustment, lot:lot, nama_produk:nama_produk, type_adjustment:type_adjustment, user:user, notes:notes},
             success:function(data){
                 
                 body_items('example1',data.item,tbody_id);
@@ -425,10 +535,22 @@
     var id_dept = '';
     var tgldari = '';
     var tglsampai = '';
+    var kode_adjustment = '';
+    var lot = '';
+    var nama_produk = '';
+    var type_adjustment = '';
+    var user = '';
+    var notes = '';
     for(i = 0; i < tmp_filter.length; i++){
       id_dept   = tmp_filter[i].id_dept;
       tgldari   = tmp_filter[i].tgldari;
       tglsampai = tmp_filter[i].tglsampai;
+      kode_adjustment = tmp_filter[i].kode_adjustment;
+      lot       = tmp_filter[i].lot;
+      nama_produk = tmp_filter[i].nama_produk;
+      type_adjustment = tmp_filter[i].type_adjustment;
+      user      = tmp_filter[i].user;
+      notes     = tmp_filter[i].notes;
             
     }
 
@@ -458,7 +580,7 @@
             type : 'POST',
             dataType: 'json',
             url : "<?php echo site_url('report/adjustment/loadData')?>",
-            data : {id_dept:id_dept, tgldari:tgldari, tglsampai:tglsampai, data_isi:data_isi, load:'item', view:'out'},
+            data : {id_dept:id_dept, tgldari:tgldari, tglsampai:tglsampai, data_isi:data_isi, load:'item', view:'out', kode_adjustment:kode_adjustment, lot:lot, nama_produk:nama_produk, type_adjustment:type_adjustment, user:user, notes:notes},
             success:function(data){
                 
                 body_items('example2',data.item,tbody_id);
@@ -507,6 +629,7 @@
                               $("<td class='show collapsed "+$group_num+"' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.kode_produk+"' data-tbody='"+group+"'>").html("<i class='glyphicon glyphicon-plus' ></i>"),
                                $("<td>").text(''),
                                $("<td>").text(''),
+                               $("<td>").text(''),
                                $("<td>").text(value.nama_produk),
                                $("<td>").text(value.tot_lot),
                                $("<td align='right'>").text(value.qty_stock),
@@ -540,6 +663,7 @@
                           row +=  "<tr  style='background-color: #f2f2f2;' >";
                           row += "<td>"+no++ +"</td>";
                           row += "<td>"+value.kode_adjustment+"</td>";
+                          row += "<td>"+value.type_adjustment+"</td>";
                           row += "<td>"+value.tanggal+"</td>";
                           row += "<td></td>";
                           row += "<td>"+value.lot+"</td>";
