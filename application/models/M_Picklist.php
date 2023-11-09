@@ -13,6 +13,7 @@ class M_Picklist extends CI_Model {
     var $column_search = array('jenis_jual', 'bulk_nama', 'sales_nama');
     protected $table = "picklist";
     protected $level_sales_group;
+    protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
 
     public function __construct() {
         parent::__construct();
@@ -20,7 +21,7 @@ class M_Picklist extends CI_Model {
     }
 
     protected function getDataQuery() {
-        $this->db->select('picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user');
+        $this->db->select($this->select);
         $this->db->from($this->table);
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
@@ -47,9 +48,11 @@ class M_Picklist extends CI_Model {
         return $query->num_rows();
     }
 
-    public function getData() {
+    public function getData(bool $realiasi = false) {
         try {
             $this->getDataQuery();
+            if($realiasi)
+                $this->joinDetail();
             if ($_POST['length'] != -1)
                 $this->db->limit($_POST['length'], $_POST['start']);
             $query = $this->db->get();
@@ -119,5 +122,12 @@ class M_Picklist extends CI_Model {
         $this->db->set($data);
         $this->db->where($condition);
         $this->db->update($this->table);
+    }
+
+    protected function joinDetail() {
+        $this->db->select($this->select . ",GROUP_CONCAT(CONCAT(f.valid, ',', f.cnt) SEPARATOR '|' ) as st,total_item");
+        $this->db->join('(select no_pl,valid,count(id) as cnt from picklist_detail GROUP BY no_pl,valid ) f', 'f.no_pl = picklist.no');
+        $this->db->join('(select no_pl,count(id) as total_item from picklist_detail GROUP BY no_pl ) e', 'e.no_pl = picklist.no','left');
+        $this->db->group_by('picklist.id');
     }
 }

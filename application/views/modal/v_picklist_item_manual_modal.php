@@ -7,14 +7,32 @@
     <div class="col-md-6">
         <div class="row">
             <div class="col-md-12 col-xs-12">
+                <div class="col-xs-4">Marketing</div>
+                <div class="col-xs-8">
+                    <select class="form-control input-sm" id="marketing" name="marketing[]" multiple>
+                        <option value="">Marketing</option>
+                        <?php
+                        foreach ($sales as $key => $value) {
+                            echo '<option value="' . $value->kode . '">' . $value->nama . '</option>';
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-12 col-xs-12">
+
                 <div class="col-xs-4">Filter</div>
                 <div class="col-xs-8">
                     <select class="form-control input-sm" id="filter">
                         <option value="">Filter</option>
                         <option value="kode_produk">Kode Produk</option>
+                        <option value="nama_produk">Nama Produk</option>
+                        <option value="corak_remark">Corak Warna</option>
+                        <option value="warna_remark">Warna</option>
                     </select>
                 </div>
             </div>
+
             <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4">Search</div>
                 <div class="col-xs-8">
@@ -31,8 +49,8 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12">
-        <table id="picklist-item" class="table table-striped">
+    <div class="col-md-12 table-responsive over">
+        <table id="picklist-item" class="table table-condesed table-hover rlstable  over" width="100%">
             <thead>
                 <tr>
                     <th class="no"></th>
@@ -55,6 +73,10 @@
             allowClear: true,
             placeholder: 'Filter'
         });
+        $("#marketing").select2({
+            allowClear: true,
+            placeholder: 'Marketing'
+        });
         const dTable = $('#picklist-item').DataTable({
             "iDisplayLength": 50,
             "processing": true,
@@ -72,6 +94,7 @@
                 "type": "POST",
                 "data": function (d) {
                     d.filter = $("#filter").find(":selected").val();
+                    d.marketing = $("#marketing").val();
                 }
             },
             "columnDefs": [
@@ -86,7 +109,9 @@
                 'style': 'multi'
             }
         });
-
+        $("#marketing").on('change', function () {
+            dTable.search($("#search").val()).draw();
+        });
         $("#filter").on('change', function () {
             dTable.search($("#search").val()).draw();
         });
@@ -101,7 +126,7 @@
                 $.each(rows_selected, function (index, rowId) {
                     var datas = dTable.rows([rowId - 1]).data();
                     $.each(datas, function (idx, val) {
-                        dt.push(val[10]);
+                        dt.push(val[9]);
                     });
                 });
                 resolve(dt);

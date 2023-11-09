@@ -16,6 +16,8 @@
 <script type="text/javascript" src="<?php echo base_url('plugins/DataTables-1.10.18/js/dataTables.bootstrap4.min.js') ?>"></script>
 <!-- DaTables Checkbox -->
 <script type="text/javascript" src="<?php echo base_url('plugins/datatables/checkbox/js/dataTables.checkboxes.min.js') ?>"></script>
+<!-- DaTables Button -->
+<script type="text/javascript" src="<?php echo base_url('plugins/datatables/button/button.dataTables.min.js') ?>"></script>
 <!-- Data table row group -->
 <!--script type="text/javascript" src="<?php echo base_url('plugins/DataTables-1.10.18/js/dataTables.rowGroup.min.js') ?>"></script-->
 <!-- Date Time Picker Javascript -->
@@ -32,6 +34,9 @@
 <script src="<?php echo base_url('dist/notify/bootstrap-notify.min.js') ?>"></script>
 <!-- Tags Input -->
 <script src="<?php echo base_url('dist/tags-input/bootstrap-tagsinput.js') ?>"></script>
+<!--charJS-->
+<script type="text/javascript" src="<?php echo site_url('dist/apexchart/js/apex.js') ?>"></script>
+
 <script type="module" src="<?php echo site_url('dist/js/main_module.js') ?>"></script>
 
 <script>

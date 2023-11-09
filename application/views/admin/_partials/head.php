@@ -17,6 +17,8 @@
 <link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/datatables/dataTables.bootstrap.css') ?>">
 <!-- DaTables checkbox -->
 <link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/datatables/checkbox/css/dataTables.checkboxes.css') ?>">
+<!-- DaTables button -->
+<link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/datatables/button/button.dataTables.min.css') ?>">
 <!-- Data Tabel 1.10.18 -->
 <!--link rel="stylesheet" type="text/css" href="<?php echo base_url('plugins/DataTables-1.10.18/css/dataTables.bootstrap.css') ?>"-->
 <!-- Data table row group -->
