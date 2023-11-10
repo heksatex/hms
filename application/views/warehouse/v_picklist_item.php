@@ -98,14 +98,20 @@
                             pl: $(this).attr("data-pl")
                         },
                         "success": function (data) {
-                            location.reload();
+//                            location.reload();
+                            table.search("").draw();
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify(data.icon, data.message, data.type, function () {});
+                                }, 500);
+                            });
                         },
                         "error": function (xhr, ajaxOptions, thrownError) {
                             let data = JSON.parse(xhr.responseText);
                             unblockUI(function () {
                                 setTimeout(function () {
                                     alert_notify(data.icon, data.message, data.type, function () {});
-                                }, 1000);
+                                }, 500);
                             });
                         }
                     });

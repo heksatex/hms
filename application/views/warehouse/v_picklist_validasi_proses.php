@@ -79,6 +79,7 @@
                                                     <input type='text' name="search" id="search" class="form-control input-sm scan-text"/>
                                                     <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan Barcode</label>
                                                     <input type='hidden' name="pl"  value="<?= $picklist->no ?>"/>
+                                                    <input type="hidden" name="valid_date" value="<?= date('Y-m-d H:i:S') ?>">
                                                     <input type="hidden" name="on_menu" id="on_menu" value='validasi'>
                                                 </div>
                                             </div>
@@ -208,10 +209,14 @@
                 const options = {
                     series: [],
                     labels: ['Draft', 'Realisasi', 'Validasi'],
-                    colors: ['#FFFF00', '#0000FF', '#00CC00'],
+                    colors: ['#fcca03', '#0000FF', '#00CC00'],
+                    tooltip: {
+                        enabled: true,
+                        theme: 'light'
+                    },
                     chart: {
                         height: 300,
-                        type: "donut",
+                        type: "donut"
                     },
                     noData: {
                         text: 'Loading...'
@@ -220,14 +225,14 @@
                         enabled: false
                     },
                     fill: {
-                        colors: ['#FFFF00', '#0000FF', '#00CC00']
+                        colors: ['#fcca03', '#0000FF', '#00CC00']
                     }
                 };
-
+                
                 var chart = new ApexCharts(document.querySelector("#itemChart"), options);
-
+                
                 chart.render();
-
+                
                 const setDataChart = function () {
                     $.ajax({
                         "url": "<?= base_url('warehouse/picklistrealisasi/persentase') ?>",
@@ -246,13 +251,13 @@
                     });
                 };
                 setDataChart();
-
-
+                
+                
                 $("#search").keypress(function (e) {
                     if (e.which === 13) {
                         $("#btn_form_realisasi").trigger("click");
                     }
-
+                    
                 });
                 const formrealisasi = document.forms.namedItem("form-realisasi");
                 formrealisasi.addEventListener(
@@ -271,29 +276,29 @@
                                                 table.search($('#search').val()).draw();
                                                 setDataChart();
                                                 return;
-
+                                                
                                             }
                                             audio.play();
-
+                                            
                                         }
-
+                                
                                 ).catch(e => {
-
+                                    
                                 });
-
+                                
                             } catch (e) {
                                 unblockUI(function () {});
                                 alert_modal_warning("Hubungi Dept IT");
                             } finally {
                                 $("#search").val("");
                                 $("#search").focus();
-
+                                
                             }
                             event.preventDefault();
                         },
                         false
                         );
-
+                
                 $("#btn-cancel").on('click', function (e) {
                     e.preventDefault();
                     $("#tambah_data").modal({
@@ -303,7 +308,7 @@
                     $('.modal-title').text('Cancel Item');
                     $(".tambah_data").html(`<?= $view_cancel ?>`);
                     $("#btn-tambah").hide();
-
+                    
                     $("#search_item_cancel").keypress(function (e) {
                         if (e.keyCode === 13) {
                             please_wait(function () {});
@@ -337,7 +342,7 @@
                                     });
                                 }
                             });
-
+                            
                         }
                     });
                     $(document).keydown(function (e) {
@@ -345,14 +350,14 @@
                             $("#search_item_cancel").focus();
                         }
                     });
-
-
+                    
+                    
                 });
-
-
+                
+                
             });
-
-
+            
+            
         </script>
     </body>
 </html>

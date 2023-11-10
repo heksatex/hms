@@ -14,8 +14,8 @@ class Picklistvalidasi extends MY_Controller {
         $this->load->model("m_Picklist");
         $this->load->model("m_PicklistDetail");
         $this->load->model("m_accessmenu");
-        $this->load->library('prints');
-        $this->load->library('barcode');
+//        $this->load->library('prints');
+//        $this->load->library('barcode');
     }
 
     public function index() {
@@ -43,22 +43,6 @@ class Picklistvalidasi extends MY_Controller {
 
 //    public function check() {
 //
-////        $code = new Code\Code128();
-////        $code->setData("12312312");
-////        $code->setDimensions(250, 100);
-////        $code->setQuality(100);
-////        $code->draw();
-////        $gen_code = $code->base64();
-////        $data['image'] = ['airtex' => ['title' => 'LOGO', 'path' => base_url('dist/img/static/airteks.jpg')], 'barcode' => ['title' => 'LOGO', 'path' => base_url('dist/img/static/url_brcd.jpg')]];
-//////        $data['data']=['pattern'=>['value'=>'isi patern'],'isi_color'=>['value'=>'waran waeawen aa n awe ae nw']];
-////        $data['data'] = ['pattern' => 'Ini Pattern', 'isi_color' => 'warna kuning saidi', 'isi_satuan_lebar' => 'WIDTH (cm)', 'isi_lebar' => '250x128',
-////            'isi_satuan_qty1' => 'QTY Pnl', 'isi_qty1' => 16, 'isi_satuan_qty2' => 'QTY kg', 'isi_qty2' => 85, 'barcode' => $gen_code, 'barcode_id' => 12312312, 'tanggal_buat' => date('y m d'), 'no_pack_brc' => 12312312];
-////        $path = base_url('dist/img/static/barcode_except_a.png');
-////        $type = pathinfo($path, PATHINFO_EXTENSION);
-////        $data = file_get_contents($path);
-////        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-////        log_message('error', $base64);
-////        barcode_except_a
 //        return $this->load->view('print/a1');
 //    }
 //
@@ -79,6 +63,7 @@ class Picklistvalidasi extends MY_Controller {
 //            $this->prints->addData('tanggal_buat', date('y-m-d'));
 //            $this->prints->addData('no_pack_brc', 12312312);
 //            $this->prints->addData('barcode', $gen_code);
+//            $this->prints->addData('k3l', date('Y-m-d'));
 //            $this->output->set_status_header(200)
 //                    ->set_content_type('application/json', 'utf-8')
 //                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $this->prints->generate())));

@@ -191,7 +191,7 @@ class Picklist extends MY_Controller {
                 $data[] = $row;
             }
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_Pickliststockquant->count_all(),
+                "recordsTotal" => $this->m_Pickliststockquant->count_all($condition),
                 "recordsFiltered" => $this->m_Pickliststockquant->count_filteredItemPicklist($condition),
                 "data" => $data,
             ));
@@ -235,7 +235,7 @@ class Picklist extends MY_Controller {
             $data = array();
             
             foreach ($list as $field) {
-                $status = ($field->valid === 'draft') ? "<button class='btn btn-danger status_item' data-id='" . $field->barcode_id . "' data-pl='" . $field->no_pl . "'><fa class='fa fa-trash'></fa></button>" : '';
+                $status = (strcasecmp($field->valid, 'draft') == 0) ? "<button class='btn btn-danger status_item' data-id='" . $field->barcode_id . "' data-pl='" . $field->no_pl . "'><fa class='fa fa-trash'></fa></button>" : '';
                 $no++;
                 $row = array(
                     $no,
