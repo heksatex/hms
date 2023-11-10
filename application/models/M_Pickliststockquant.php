@@ -55,8 +55,13 @@ class m_Pickliststockquant extends CI_Model {
         return $query->num_rows();
     }
 
-    public function count_all() {
+    public function count_all($condition = []) {
         $this->db->from($this->table);
+        $this->db->where_not_in('lokasi_fisik', ['PORT', 'XPD']);
+        $this->db->where('lokasi', 'GJD/STOCK');
+        if(count($condition) > 0) {
+            $this->db->where($condition);
+        }
         return $this->db->count_all_results();
     }
 
