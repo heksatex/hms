@@ -85,7 +85,7 @@ class Picklistrealisasi extends MY_Controller {
 
     public function data_detail() {
         try {
-            $pl = decrypt_url($this->input->post('filter'));
+            $pl = $this->input->post('filter');
 
             $condition = ['no_pl' => $pl];
             $list = $this->m_PicklistDetail->getData($condition);
@@ -127,6 +127,7 @@ class Picklistrealisasi extends MY_Controller {
             $pl = $this->input->post('pl');
             $barcode = $this->input->post('search');
             $menu = $this->input->post('on_menu');
+            $valid_date = $this->input->post('valid_date');
             $statusWhere = ['no_pl' => $pl, 'barcode_id' => $barcode];
 
             $this->_module->startTransaction();
@@ -138,14 +139,15 @@ class Picklistrealisasi extends MY_Controller {
             if ($item->valid !== $this->valid[$menu]['before']) {
                 throw new Exception('Data Barcode ' . $barcode . ' pada PL ' . $pl . ' tidak dalam status ' . $this->valid[$menu]['before'], 500);
             }
-            $result = $this->m_PicklistDetail->updateStatus($statusWhere, ['valid' => $menu]);
+            $update = ['valid' => $menu, 'valid_date' => $valid_date];
+            $result = $this->m_PicklistDetail->updateStatus($statusWhere, $update);
             if (!empty($result)) {
                 throw new \Exception($result, 500);
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $pl, 'create', logArrayToString('=', array_merge($statusWhere, ['to' => $menu])), $username);
+            $this->_module->gen_history($sub_menu, $pl, 'create', logArrayToString('=', array_merge($statusWhere, $update)), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => [])));

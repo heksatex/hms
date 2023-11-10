@@ -98,16 +98,16 @@
             }
             #i3a7r{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 transform:rotateZ(270deg);
                 display:inline-block;
-                right:7%;
-                top:14%;
+                right:6.3%;
+                top:15%;
                 position:absolute;
             }
             #i6wsc{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 transform:rotateZ(270deg);
                 display:inline-block;
                 right:8%;
@@ -116,7 +116,7 @@
             }
             #igvhs{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 transform:rotateZ(270deg);
                 display:inline-block;
                 right:8%;
@@ -125,12 +125,12 @@
             }
             #iop3i{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 text-align:center;
             }
             #idybl{
                 padding:4px 0px 0px 0px;
-                font-size:30%;
+                font-size:50%;
                 text-align:center;
             }
             hr{

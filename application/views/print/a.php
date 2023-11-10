@@ -98,39 +98,39 @@
             }
             #i3a7r{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 transform:rotateZ(270deg);
-                display:inline-block;
-                right:7%;
-                top:14%;
-                position:absolute;
+                display:inline;
+                right:6.3%;
+                top:15%;
+                position:fixed;
             }
             #i6wsc{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 transform:rotateZ(270deg);
-                display:inline-block;
+                display:inline;
                 right:8%;
                 top:43%;
-                position:absolute;
+                position:fixed;
             }
             #igvhs{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 transform:rotateZ(270deg);
-                display:inline-block;
+                display:inline;
                 right:8%;
                 top:78%;
-                position:absolute;
+                position:fixed;
             }
             #iop3i{
                 padding:0px 0px 0px 0px;
-                font-size:30%;
+                font-size:45%;
                 text-align:center;
             }
             #idybl{
                 padding:4px 0px 0px 0px;
-                font-size:30%;
+                font-size:50%;
                 text-align:center;
             }
             hr{

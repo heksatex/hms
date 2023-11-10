@@ -185,10 +185,14 @@
                 const options = {
                     series: [],
                     labels: ['Draft', 'Realisasi', 'Validasi'],
-                    colors: ['#FFFF00', '#0000FF', '#00CC00'],
+                    colors: ['#fcca03', '#0000FF', '#00CC00'],
+                    tooltip: {
+                        enabled: true,
+                        theme: 'light'
+                    },
                     chart: {
                         height: 300,
-                        type: "donut",
+                        type: "donut"
                     },
                     noData: {
                         text: 'Loading...'
@@ -197,7 +201,7 @@
                         enabled: false
                     },
                     fill: {
-                        colors: ['#FFFF00', '#0000FF', '#00CC00']
+                        colors: ['#fcca03', '#0000FF', '#00CC00']
                     }
                 };
 
