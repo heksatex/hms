@@ -59,16 +59,31 @@ class _module extends CI_Model {
         $tgl = date('y-m-d H:i:s');
         $nama_user = $this->_module->get_nama_user($username)->row_array();
         $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
-        $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user) 
-								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]')");
+        $ip         = addslashes($this->input->ip_address());
+        $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user,ip_address) 
+								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]','$ip')");
     }
 
     public function gen_history_deptid($sub_menu, $kode_co, $jenis_log, $note_log, $username, $deptid) {
         $tgl = date('y-m-d H:i:s');
         $nama_user = $this->_module->get_nama_user($username)->row_array();
         $kode = $this->_module->get_kode_sub_menu_deptid($sub_menu, $deptid)->row_array();
-        $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user) 
-								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]')");
+        $ip         = addslashes($this->input->ip_address());
+        $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user,ip_address) 
+								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]','$ip')");
+    }
+
+    public function gen_history_ip_deptid($sub_menu, $username, $data_history, $deptid){
+
+        $nama_user = $this->_module->get_nama_user($username)->row_array();
+        $kode       = $this->_module->get_kode_sub_menu_deptid($sub_menu, $deptid)->row_array();
+        $ip         = $this->input->ip_address();
+
+        $add_data_history = array('nama_user'=> $nama_user['nama'],'main_menu_sub_kode' => $kode['kode'], 'ip_address'=> $ip);
+        $data_history_all = array_merge($data_history,$add_data_history);
+
+        $this->db->insert('log_history',$data_history_all);
+        return is_array($this->db->error());
     }
 
     public function gen_history_ip($sub_menu, $username, $data_history){
