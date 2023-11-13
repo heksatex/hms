@@ -626,9 +626,9 @@
 
           },error: function (xhr, ajaxOptions, thrownError) {
             //alert(xhr.responseText);
+            $('#btn-simpan').button('reset');
             alert('Error Simpan Data');
             unblockUI( function(){});
-            $('#btn-simpan').button('reset');
 
           }
       });

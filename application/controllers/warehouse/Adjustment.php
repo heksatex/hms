@@ -92,9 +92,12 @@ class Adjustment extends MY_Controller
       $note               = $this->input->post('note');
       $status             = addslashes($this->input->post('status'));
       
-      if(empty($lokasi_adjustment['nama'])){
+      if(empty($type_adjustment)){
+        $callback = array('status' => 'failed', 'field' => 'type_adjustment', 'message' => 'Type Adjustement Harus Diisi !', 'icon' =>'fa fa-warning', 
+            'type' => 'danger'  );                    
+      }else if(empty($lokasi_adjustment['nama'])){
         $callback = array('status' => 'failed', 'field' => 'lokasi_adjustment', 'message' => 'Lokasi Adjustment Harus Diisi !', 'icon' =>'fa fa-warning', 
-              'type' => 'danger'  );                   
+              'type' => 'danger'  );  
       }else if(empty($kode_lokasi)){
         $callback = array('status' => 'failed', 'field' => 'kode_lokasi', 'message' => 'Kode Lokasi Harus Diisi !', 'icon' =>'fa fa-warning', 
         'type' => 'danger'  );         
@@ -538,6 +541,7 @@ class Adjustment extends MY_Controller
       //cek status adjustment = cancel
       $cek2  = $this->m_adjustment->cek_status_adjustment($kode_adjustment,'cancel')->row_array();
 
+      $cek_head = $this->m_adjustment->get_adjustment_by_code($kode_adjustment);
 
       if(!empty($cek1['status'])){
         $callback = array('status' => 'failed', 'message'=>'Maaf, Tidak Bisa Generate, Status Adjustment Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
@@ -545,6 +549,8 @@ class Adjustment extends MY_Controller
         $callback = array('status' => 'failed', 'message'=>'Maaf, Tidak Bisa Generate, Status Adjustment Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
       }else if(empty($lokasi_adj)){
         $callback = array('status' => 'failed', 'message'=>'Maaf, Lokasi Adjustment Tidak Boleh Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+      }else if(empty($cek_head->id_type_adjustment)){
+          $callback = array('status' => 'failed', 'message'=>'Maaf, Type Adjustment Tidak Boleh Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
       }else{
 
         // lock table

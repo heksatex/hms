@@ -206,10 +206,9 @@
           $('#btn-simpan').button('reset');
 
         },error: function (xhr, ajaxOptions, thrownError) {
+          $('#btn-simpan').button('reset');
           alert(xhr.responseText);
           unblockUI( function(){});
-          $('#btn-simpan').button('reset');
-
         }
     });
       window.setTimeout(function() {
