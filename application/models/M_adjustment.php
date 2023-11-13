@@ -5,8 +5,8 @@
  */
 class M_adjustment extends CI_Model
 {
-	var $column_order = array(null, 'kode_adjustment', 'create_date', 'lokasi_adjustment', 'kode_lokasi', 'note', 'status');
-	var $column_search= array('kode_adjustment', 'create_date', 'lokasi_adjustment', 'kode_lokasi', 'note', 'status');
+	var $column_order = array(null, 'kode_adjustment', 'create_date', 'lokasi_adjustment', 'kode_lokasi','name_type', 'note', 'status');
+	var $column_search= array('kode_adjustment', 'create_date', 'lokasi_adjustment', 'kode_lokasi', 'name_type', 'note', 'status');
 	var $order  	  = array('create_date' => 'desc');
 
 	var $table2  	    = 'stock_quant';
@@ -16,8 +16,9 @@ class M_adjustment extends CI_Model
 
 	private function _get_datatables_query()
 	{
-		$this->db->select("kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status");
-		$this->db->from("adjustment");
+		$this->db->select("adj.kode_adjustment,adj.create_date,adj.lokasi_adjustment,adj.kode_lokasi,adj.note,adj.status, mta.id, mta.name_type");
+		$this->db->from("adjustment adj");
+		$this->db->join("mst_type_adjustment mta", "adj.id_type_adjustment = mta.id","left");
 
 		$i = 0;
 	
@@ -71,8 +72,9 @@ class M_adjustment extends CI_Model
 
 	public function count_all()
 	{
-		$this->db->select("kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status");
-		$this->db->from("adjustment");
+		$this->db->select("adj.kode_adjustment,adj.create_date,adj.lokasi_adjustment,adj.kode_lokasi,adj.note,adj.status, mta.id, mta.name_type");
+		$this->db->from("adjustment adj");
+		$this->db->join("mst_type_adjustment mta", "adj.id_type_adjustment = mta.id","left");
 		return $this->db->count_all_results();
 	}
 
@@ -160,9 +162,9 @@ class M_adjustment extends CI_Model
 		return $this->db->query("SELECT kode_adjustment FROM adjustment where kode_adjustment = '$kode_adjustment'");
 	}
 
-	public function save_header_adjustment($kode_adjustment, $create_date, $lokasi_adjustment, $kode_lokasi, $note, $status, $nama_user)
+	public function save_header_adjustment($kode_adjustment, $create_date, $lokasi_adjustment, $kode_lokasi, $note, $status, $nama_user, $type_adjustment)
 	{
-		return $this->db->query("INSERT INTO adjustment (kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status,nama_user) values ('$kode_adjustment','$create_date','$lokasi_adjustment','$kode_lokasi','$note','$status','$nama_user')");
+		return $this->db->query("INSERT INTO adjustment (kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status,nama_user,id_type_adjustment) values ('$kode_adjustment','$create_date','$lokasi_adjustment','$kode_lokasi','$note','$status','$nama_user','$type_adjustment')");
 	}
 
 	public function get_adjustment_by_code($kode)
@@ -264,9 +266,9 @@ class M_adjustment extends CI_Model
 								WHERE short LIKE '%$name%' ORDER BY id   ")->result_array();
 	}
 
-	public function update_adjustment($kode_adjustment,$note)
+	public function update_adjustment($kode_adjustment,$note,$type_adjustment)
 	{
-		return $this->db->query("UPDATE adjustment set note = '$note' WHERE kode_adjustment = '$kode_adjustment'");
+		return $this->db->query("UPDATE adjustment set note = '$note', id_type_adjustment = '$type_adjustment' WHERE kode_adjustment = '$kode_adjustment'");
 	}
 
 
@@ -324,6 +326,24 @@ class M_adjustment extends CI_Model
 								FROM adjustment_items  as adji
 								INNER JOIN mst_produk as mp ON mp.kode_produk = adji.kode_produk
 								WHERE adji.kode_adjustment = '$kode_adjustment' AND adji.row_order = '$row_order' ");
+	}
+
+	public function get_list_type_adjustment($view = null)
+	{
+		if(isset($view)){
+			$this->db->where('view',$view);
+		}
+		$this->db->order_by("id","asc");
+		$result = $this->db->get('mst_type_adjustment');
+		return $result->result();
+		
+	}
+
+	public function get_type_adjustment_by_kode($id)
+	{
+		$this->db->where('id',$id);
+		$result = $this->db->get('mst_type_adjustment');
+		return $result->row();
 	}
 
 }

@@ -247,7 +247,8 @@ class Splitlot extends MY_Controller
                         $note_adj_in  = 'ADJ | Dibuat dari Fitur Split. No.'.$kode_split;
 
                         // insert into adj 
-                        $sql_adjustment .= "('".$kode_adjustment."', '".$tgl."','".$nama_departemen."','".$lokasi_stock."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."'), ";
+                        $type_adjustment = 6; // 6 = split
+                        $sql_adjustment .= "('".$kode_adjustment."', '".$tgl."','".$nama_departemen."','".$lokasi_stock."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."', '".$type_adjustment."'), ";
 
                         $method         = $departemen.'|ADJ';
                         $lokasi_dari    = $lokasi_stock;

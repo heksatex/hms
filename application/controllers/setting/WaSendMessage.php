@@ -36,11 +36,11 @@ class WaSendMessage extends MY_Controller {
         $this->load->model("m_WaGroup");
         $this->load->model("m_WaTemplate");
         $this->load->model("_module");
+        $this->load->library('barcode');
     }
 
     public function index() {
         $data['id_dept'] = 'MWSM';
-//        $this->wa_message->sendMessageToGroupByDepth('saidi', ['{saidi}' => 'Satu'], ['ACC','BOM'])->setFooter('footer_default')->send();
         return $this->load->view('setting/v_wa_send_message', $data);
     }
 

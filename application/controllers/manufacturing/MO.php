@@ -2051,7 +2051,7 @@ class MO extends MY_Controller
                                         $case   .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";
                                         $where  .= "'".$row['quant_id']."',";
 
-                                        $qty2_new = ($row['qty2']/$row['qty_smi'])*$row['qty_konsum'];
+                                        $qty2_new = round(($row['qty2']/$row['qty_smi'])*$row['qty_konsum'],2);
                                         $qty2_update = $row['qty2'] - $qty2_new;
                                         $case_qty2 .= "when quant_id = '".$row['quant_id']."' then '".$qty2_update."'";
                                         $where_move_items .= "'".$row['move_id']."',";
@@ -2723,7 +2723,7 @@ class MO extends MY_Controller
                                         $case   .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";
                                         $where  .= "'".$row['quant_id']."',";
 
-                                        $qty2_new    = ($row['qty2']/$row['qty_smi'])*$row['qty_konsum'];
+                                        $qty2_new    = round(($row['qty2']/$row['qty_smi'])*$row['qty_konsum'],2);
                                         $qty2_update = $row['qty2'] - $qty2_new;
                                         $case_qty2  .= "when quant_id = '".$row['quant_id']."' then '".$qty2_update."'";
                                         $where_move_items .= "'".$row['move_id']."',";

@@ -359,7 +359,7 @@ class M_produk extends CI_Model
 
 	public function get_mst_jenis_kain_by_id($id)
 	{
-		return $this->db->query("SELECT nama_jenis_kain FROM mst_jenis_kain WHERE id = '$id'");
+		return $this->db->query("SELECT nama_jenis_kain, ket FROM mst_jenis_kain WHERE id = '$id'");
 	}
 
 	public function get_list_product_sub_parent($nama)

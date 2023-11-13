@@ -284,8 +284,8 @@
 		var sisa_target = qty_sisa - tot_qty;// sisa target setelah ada inputan
 		var uom_target  = "<?php echo $uom_qty_sisa; ?>";
 
-		document.getElementById('sisa_target').value = sisa_target+" "+uom_target;
-		document.getElementById('txtQty_sisa').value = sisa_target+" "+uom_target;
+		document.getElementById('sisa_target').value = sisa_target.toFixed(2)+" "+uom_target;
+		document.getElementById('txtQty_sisa').value = sisa_target.toFixed(2)+" "+uom_target;
 		if(sisa_target < 0){
 			$('#sisa_target').addClass('error_target');
 			$('#txtQty_sisa').addClass('error_target');
