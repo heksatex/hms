@@ -18,6 +18,26 @@
                 width: calc(100% - 2rem);
                 margin-right: 0.5rem;
             }
+            #itemText{
+                visibility: hidden;
+                clear: both;
+            }
+            @media screen and (max-width:650px) {
+                #itemChart {
+                    visibility: hidden;
+                    clear: both;
+                    float: left;
+                    margin: 10px auto 5px 20px;
+                    width: 28%;
+                    display: none
+                }
+                #itemText{
+                    visibility: visible;
+                    font-weight: 800;
+                    padding: 2px;
+                    float: right;
+                }
+            }
         </style>
     </head>
 
@@ -110,6 +130,11 @@
                             </div>
                             <div class="col-md-6 col-xs-12">
                                 <div id="itemChart"></div>
+                                <div id="itemText">
+                                    <span>Draft ( <span id="draftText"></span> ) </span>
+                                    <span>Realisasi ( <span id="realisasiText"></span> ) </span>
+                                    <span>Validasi ( <span id="validasiText"></span> ) </span>
+                                </div>
                             </div>
                         </div>
                         <?php $this->load->view("admin/_partials/js.php") ?>
@@ -210,6 +235,7 @@
                 chart.render();
 
                 const setDataChart = function () {
+                    let textGraph = ["draftText", "realisasiText", "validasiText"]
                     $.ajax({
                         "url": "<?= base_url('warehouse/picklistrealisasi/persentase') ?>",
                         "type": "POST",
@@ -222,7 +248,15 @@
                             "pl": "<?= $picklist->no ?? '' ?>"
                         },
                         "success": function (resp) {
+                            resp.forEach((elm, index) => {
+                                $("#" + textGraph[index]).html(elm);
+                            }
+                            );
                             chart.updateSeries(resp);
+//                            resp.forEach(elm, index) => {
+//                                console.log(`a[${index}] = ${elm}`);
+//                            }
+                            ;
                         }
                     });
                 };
@@ -243,7 +277,7 @@
                             try {
                                 request("form-realisasi").then(
                                         response => {
-                                            table.search($('#search').val()).draw();
+                                            table.search($('#search').val()).draw(false);
                                             setDataChart();
                                             unblockUI(function () {
                                                 setTimeout(function () {
@@ -268,6 +302,7 @@
                         );
 
                 $("#btn-cancel").on('click', function (e) {
+                    return;
                     e.preventDefault();
                     $("#tambah_data").modal({
                         show: true,

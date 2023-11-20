@@ -68,7 +68,7 @@
                         <div class="box-body">
                             <?php if (isset($access->status) && $access->status) { ?>
                                 <div class="col-md-6 col-xs-12">
-                                    <form class="form-horizontal" method="POST" name="form-realisasi" id="form-realisasi" action="<?= base_url('warehouse/picklistrealisasi/update') ?>">
+                                    <form class="form-horizontal" method="POST" name="form-realisasi" id="form-realisasi" action="<?= base_url('warehouse/picklistvalidasi/update') ?>">
                                         <button type="submit" id="btn_form_realisasi" style="display: none"></button>
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">

@@ -10,7 +10,7 @@
                 <div class="col-md-12 col-xs-12">
                     <div class="col-xs-4">Scan</div>
                     <div class="col-xs-8">
-                        <input class="form-control input-sm" placeholder="Scan" name="search" id="search" required>
+                        <input class="form-control input-sm" placeholder="Scan" name="search" id="searchdata" required>
                         <button type="submit" id="form_submit" style="display: none;"></button>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
 </div>
 <div class="row">
     <div class="col-md-12 table-responsive over">
-        <table id="picklist-item" class="table table-condesed table-hover rlstable  over" width="100%">
+        <table id="picklist-item-scan" class="table table-condesed table-hover rlstable  over" width="100%">
             <thead>
                 <tr>
                     <th class="no"></th>
@@ -47,12 +47,12 @@
 </div>
 <script>
     $(function () {
-        $("#search").focus();
+        $("#searchdata").focus();
         $("#filter").select2({
             allowClear: true,
             placeholder: 'Filter'
         });
-        const dTable = $('#picklist-item').DataTable({
+        const dTable = $('#picklist-item-scan').DataTable({
             "lengthChange": false,
             columnDefs: [
                 {
@@ -67,7 +67,7 @@
             dTable.row(row).remove().draw();
 
         });
-        $("#search").keypress(function (e) {
+        $("#searchdata").keypress(function (e) {
             if (e.which === 13) {
                 $("#form_submit").trigger("click");
 //                dTable.search($(this).val()).draw();
@@ -143,8 +143,8 @@
             } catch (e) {
 
             } finally {
-                $("#search").val("");
-                $("#search").focus();
+                $("#searchdata").val("");
+                $("#searchdata").focus();
             }
             event.preventDefault();
         },
@@ -161,7 +161,7 @@
             });
 
             data.then(rsp => {
-                addItem(JSON.stringify(rsp));
+                addItem(JSON.stringify(rsp), "", dTable);
             });
 
         });

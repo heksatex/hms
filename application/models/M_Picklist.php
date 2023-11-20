@@ -8,7 +8,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_Picklist extends CI_Model {
 
-    var $column_order = array(null, 'no', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
+    var $column_order = array(null, 'no', 'p.nama','tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
     var $order = ['tanggal_input' => 'desc'];
     var $column_search = array('jenis_jual', 'bulk_nama', 'sales_nama');
     protected $table = "picklist";
@@ -21,7 +21,7 @@ class M_Picklist extends CI_Model {
     }
 
     protected function getDataQuery() {
-        $this->db->select($this->select);
+        $this->db->select($this->select . ', p.nama');
         $this->db->from($this->table);
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
@@ -51,7 +51,7 @@ class M_Picklist extends CI_Model {
     public function getData(bool $realiasi = false) {
         try {
             $this->getDataQuery();
-            if($realiasi)
+            if ($realiasi)
                 $this->joinDetail();
             if ($_POST['length'] != -1)
                 $this->db->limit($_POST['length'], $_POST['start']);
@@ -82,9 +82,10 @@ class M_Picklist extends CI_Model {
         return $sales_group["nama_sales_group"] ?? "";
     }
 
-    public function getDataByID($id) {
+    public function getDataByID($condition = []) {
         $this->db->from($this->table);
-        $this->db->where($this->table . '.id', $id);
+//        $this->db->where($this->table . '.id', $id);
+        $this->db->where($condition);
         $this->filteredSales();
         $this->db->join('partner', 'partner.id = customer_id', 'left');
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
@@ -127,7 +128,12 @@ class M_Picklist extends CI_Model {
     protected function joinDetail() {
         $this->db->select($this->select . ",GROUP_CONCAT(CONCAT(f.valid, ',', f.cnt) SEPARATOR '|' ) as st,total_item");
         $this->db->join('(select no_pl,valid,count(id) as cnt from picklist_detail GROUP BY no_pl,valid ) f', 'f.no_pl = picklist.no');
-        $this->db->join('(select no_pl,count(id) as total_item from picklist_detail GROUP BY no_pl ) e', 'e.no_pl = picklist.no','left');
+        $this->db->join('(select no_pl,count(id) as total_item from picklist_detail GROUP BY no_pl ) e', 'e.no_pl = picklist.no', 'left');
         $this->db->group_by('picklist.id');
+    }
+
+    protected function withCountDetail() {
+        $this->db->select($this->select . ", count(detail.id) as total_item");
+        $this->db->join('picklist_detail detail', 'picklist.no = detail.no_pl', 'left');
     }
 }

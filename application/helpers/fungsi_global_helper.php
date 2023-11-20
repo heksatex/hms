@@ -98,7 +98,7 @@ function bln_indo($tanggal) {
 function logArrayToString(string $seperator, array $data) {
     return implode($seperator, array_map(
                     function ($v, $k) {
-                        return sprintf("%s=%s ", $k, $v);
+                        return sprintf("%s=%s", $k, $v);
                     },
                     $data,
                     array_keys($data)

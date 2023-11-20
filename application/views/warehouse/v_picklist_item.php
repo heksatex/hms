@@ -99,7 +99,7 @@
                         },
                         "success": function (data) {
 //                            location.reload();
-                            table.search("").draw();
+                            table.search("").draw(false);
                             unblockUI(function () {
                                 setTimeout(function () {
                                     alert_notify(data.icon, data.message, data.type, function () {});
@@ -154,7 +154,7 @@
         });
     });
 
-    const addItem = function (data) {
+    const addItem = function (data, error = "", tbl = null) {
         $.ajax({
             "type": "POST",
             "url": "<?= base_url('warehouse/picklist/add_item') ?>",
@@ -168,7 +168,14 @@
                 "ids": "<?= encrypt_url($picklist->id) ?>",
                 "item": data
             }, "success": function (data) {
-                location.reload();
+                unblockUI(function () {
+                    setTimeout(function () {
+                        alert_notify(data.icon, data.message, data.type, function () {});
+                    }, 500);
+                });
+                if (tbl !== null) {
+                    tbl.columns().checkboxes.deselect(true);
+                }
             },
             "error": function (xhr, ajaxOptions, thrownError) {
                 let data = JSON.parse(xhr.responseText);

@@ -165,6 +165,7 @@
 
 
             $("#btn-simpan").on('click', function () {
+                $(this).off('click');
                 $("#btn_form_simpan").trigger("click");
             });
             const formpicklist = document.forms.namedItem("form-picklist");
@@ -177,8 +178,8 @@
                         response => {
                             if (response.status === 200)
                                 window.location.replace('<?php echo base_url('warehouse/picklist/edit/') ?>' + response.data.data);
-                            
-                            
+
+
                         }).catch(err => {
                     unblockUI(function () {});
                     alert_modal_warning("Hubungi Dept IT");
