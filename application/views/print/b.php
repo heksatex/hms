@@ -1,6 +1,6 @@
 <html>
 
-    <style>
+   <style>
         * {
             box-sizing: border-box;
         }
@@ -12,13 +12,14 @@
             justify-content:flex-start;
             align-items:stretch;
             flex-wrap:nowrap;
-            padding:10px;
+            padding:2px;
         }
         .gjs-cell{
             min-height:75px;
             flex-grow:1;
             flex-basis:100%;
             padding:0.5px;
+            /*border: 1px solid;*/
         }
         #idah{
             color:black;
@@ -56,22 +57,23 @@
                 height:226.56px;
             }
             #igct{
-                text-align:left;
+                text-align:center;
                 flex-basis:34%;
                 /*margin-right: 1%;*/
             }
             #idah{
                 display:block;
                 width:100%;
-                margin:5% 0px 0% 5%;
+                margin:10% 0px 0% 0%;
             }
             #iex1{
                 width:88%;
-                margin:0px 0px 5% 10%;
+                margin:-10% 0px 5% 0%;
             }
             #i2uo{
                 flex-basis:65%;
-                margin-right: 1%;
+                margin-right: 0.5%;
+                padding-top: 5%;
             }
             #isef{
                 text-align:right;
@@ -84,9 +86,9 @@
                 flex-basis:30%;
             }
             #ieh54{
-                width:50%;
+                width:70%;
                 text-align:left;
-                margin:1% 0px 0px 0px;
+                margin:1% 0px 0px 1%;
                 height:93%;
             }
             #i75tl{
@@ -99,32 +101,29 @@
                 border-width: thin;
             }
             #i3a7r{
-                padding:0px 0px 0px 0px;
                 margin: 7% 0% 0% 0%;
                 font-size:60%;
                 transform:rotateZ(270deg);
                 display:inline;
-                right:4.5%;
+                right:-4.5%;
                 /*top:15%;*/
                 position:fixed;
             }
             #i6wsc{
-                padding:0px 0px 0px 0px;
                 margin: 25% 0% 0% 0%;
                 font-size:60%;
                 transform:rotateZ(270deg);
                 display:inline;
-                right:7.5%;
+                right:-1.7%;
                 /*top:43%;*/
                 position:fixed;
             }
             #igvhs{
-                padding:0px 0px 0px 0px;
-                margin: 45% 0% 0% 0%;
+                margin: 47% 0% 0% 0%;
                 font-size:60%;
                 transform:rotateZ(270deg);
                 display:inline;
-                right:5%;
+                right:-4%;
                 /*top:78%;*/
                 position:fixed;
             }

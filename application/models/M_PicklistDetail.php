@@ -96,7 +96,7 @@ class M_PicklistDetail extends CI_Model {
     public function detailReport($condition,array $group = ['corak_remark','warna_remark']) {
         $this->db->from($this->table);
         $this->db->where($condition);
-        $this->db->select('no_pl,kode_produk,nama_produk,warna_remark,corak_remark,sales_order, count(qty) as jml_qty, sum(qty) as total_qty');
+        $this->db->select('no_pl,kode_produk,nama_produk,warna_remark,corak_remark,sales_order,uom,lebar_jadi, count(qty) as jml_qty, sum(qty) as total_qty');
         $this->db->order_by('corak_remark', 'asc');
         $this->db->group_by($group);
         return $this->db->get()->result();

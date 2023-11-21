@@ -55,6 +55,7 @@ class Picklistvalidasi extends MY_Controller {
         $errorCode = 0;
         try {
             $username = $this->session->userdata('username');
+            $nama = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
             $pl = "";
             $picklist = null;
@@ -102,7 +103,8 @@ class Picklistvalidasi extends MY_Controller {
                     throw new Exception($sts, 500);
                 }
                 $this->m_Picklist->update(['status' => 'validasi'], ['no' => $pl]);
-                $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($condition, $update)), $username);
+//                $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($condition, $update)), $username);
+                $this->_module->gen_history($sub_menu, $pl, 'edit', $nama . ' Melakukan validasi barcode ' . $barcode, $username);
             }
 
             $this->output->set_status_header(200)
@@ -124,6 +126,7 @@ class Picklistvalidasi extends MY_Controller {
 //        return $this->load->view('print/a1');
 //    }
 //
+////
 //    public function test() {
 //        try {
 //            $code = new Code\Code128New();

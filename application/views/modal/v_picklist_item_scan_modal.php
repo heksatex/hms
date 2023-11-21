@@ -1,5 +1,5 @@
 <style>
-    .dataTables_filter {
+    #picklist-item-scan_filter {
         display: none;
     }
 </style>
@@ -11,6 +11,7 @@
                     <div class="col-xs-4">Scan</div>
                     <div class="col-xs-8">
                         <input class="form-control input-sm" placeholder="Scan" name="search" id="searchdata" required>
+                        <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan Barcode</label>
                         <button type="submit" id="form_submit" style="display: none;"></button>
                     </div>
                 </div>
@@ -46,6 +47,11 @@
     </div>
 </div>
 <script>
+    $(document).keydown(function (e) {
+        if (e.which === 113) {
+            $("#searchdata").focus();
+        }
+    });
     $(function () {
         $("#searchdata").focus();
         $("#filter").select2({
@@ -99,7 +105,7 @@
         async function checkTable(event) {
             let data = false;
             event.preventDefault();
-            await searchArray(dTable.rows().data(), 1, $("#search").val()).then(
+            await searchArray(dTable.rows().data(), 1, $("#searchdata").val()).then(
                     resp => {
                         if (resp.length > 0) {
                             data = true;

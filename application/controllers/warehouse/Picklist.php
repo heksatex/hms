@@ -218,26 +218,47 @@ class Picklist extends MY_Controller {
             $barcode = $this->input->post('search');
             $condition = ["lot" => $barcode];
             $list = $this->m_Pickliststockquant->getDataItemPicklistScan($condition, true);
-            switch (true) {
-
-                case is_null($list):
-                    throw new \Exception('Jumlah atau Barcode Tidak ditemukan', 500);
-                case $list->no_pl !== null:
+            if (!is_null($list)) {
+                if (strlen($list->no_pl) > 4) {
                     throw new \Exception('Barcode ' . $list->barcode . ' sudah ada pada ' . $list->no_pl, 500);
-                case (int) $list->id_category !== 21:
-                    throw new \Exception("Kategori Produk Tidak Valid (" . $list->nama_category . ")", 500);
-                case $list->reserve_move !== "":
-                    throw new \Exception("Barcode " . $barcode . " reserve move " . $list->reserve_move, 500);
+                }
+            } else {
+                $list = $this->m_Pickliststockquant->getDataItemPicklistScanDetail($condition, true);
+                switch (true) {
 
-                case in_array(strtoupper($list->lokasi_fisik), ["PORT", "XPD"]) :
-                    throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi_fisik . ")", 500);
+                    case (int) $list->id_category !== 21:
+                        throw new \Exception("Kategori Produk Tidak Valid (" . $list->nama_category . ")", 500);
+                    case $list->reserve_move !== "":
+                        throw new \Exception("Barcode " . $barcode . " reserve move " . $list->reserve_move, 500);
 
-                case strtoupper($list->lokasi) !== 'GJD/STOCK':
-                    throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi . ")", 500);
+                    case in_array(strtoupper($list->lokasi_fisik), ["PORT", "XPD"]) :
+                        throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi_fisik . ")", 500);
 
-                case $list->qty_jual === "0.00":
-                    throw new \Exception("Barcode " . $barcode . " QTY Jual 0.00", 500);
+                    case strtoupper($list->lokasi) !== 'GJD/STOCK':
+                        throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi . ")", 500);
+                    default :
+                        throw new \Exception('Barcode Tidak ditemukan', 500);
+                }
             }
+//            switch (true) {
+//                
+//                case is_null($list):
+//                    throw new \Exception('Jumlah atau Barcode Tidak ditemukan', 500);
+//                case strlen($list->no_pl) > 4:
+//                    throw new \Exception('Barcode ' . $list->barcode . ' sudah ada pada ' . $list->no_pl, 500);
+//                case (int) $list->id_category !== 21:
+//                    throw new \Exception("Kategori Produk Tidak Valid (" . $list->nama_category . ")", 500);
+//                case $list->reserve_move !== "":
+//                    throw new \Exception("Barcode " . $barcode . " reserve move " . $list->reserve_move, 500);
+//
+//                case in_array(strtoupper($list->lokasi_fisik), ["PORT", "XPD"]) :
+//                    throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi_fisik . ")", 500);
+//
+//                case strtoupper($list->lokasi) !== 'GJD/STOCK':
+//                    throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi . ")", 500);
+//                case $list->qty_jual === "0.00":
+//                    throw new \Exception("Barcode " . $barcode . " QTY Jual 0.00", 500);
+//            }
 //            if (count($list) !== 1) {
 //                throw new \Exception('Jumlah atau Barcode Tidak ditemukan', 500)
 //            }
@@ -246,7 +267,7 @@ class Picklist extends MY_Controller {
 //            }
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => [$list])));
+                    ->set_output(json_encode(array('message' => 'Barcode ditemukan', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => [$list])));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
@@ -303,6 +324,9 @@ class Picklist extends MY_Controller {
             $username = $this->session->userdata('username');
             $pl = $this->input->post('pl');
             $datas = $this->input->post('item');
+            if (count($datas) < 1) {
+                
+            }
 //            $ids = $this->input->post("ids");
             $data = json_decode($datas);
             $this->_module->startTransaction();
@@ -483,7 +507,7 @@ class Picklist extends MY_Controller {
             $this->_module->gen_history($sub_menu, $input["no"], 'create', logArrayToString('; ', $input), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => encrypt_url($id))));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => encrypt_url($nopl))));
         } catch (Exception $ex) {
             $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
@@ -567,8 +591,8 @@ class Picklist extends MY_Controller {
         $logo_path = file_get_contents(FCPATH . 'dist/img/static/heksatex_c.jpg');
         $logo_type = pathinfo(FCPATH . 'dist/img/static/heksatex_c.jpg', PATHINFO_EXTENSION);
         $logo = base64_encode($logo_path);
-        $data['picklist'] = $this->m_Picklist->getDataReportPL(['no' => $pl,],['warna_remark','corak_remark']);
-        $data['picklist_detail'] = $this->m_PicklistDetail->detailReport(['no_pl' => $pl]);
+        $data['picklist'] = $this->m_Picklist->getDataReportPL(['no' => $pl]);
+        $data['picklist_detail'] = $this->m_PicklistDetail->detailReport(['no_pl' => $pl], ['warna_remark', 'corak_remark', 'uom']);
         $data['nopl'] = $pl;
         $data['logo'] = 'data:image/' . $logo_type . ';base64,' . $logo;
         $data['barcode'] = 'data:image/' . $logo_type . ';base64,' . $gen_code;

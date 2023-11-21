@@ -111,7 +111,7 @@
                     </td>
                     <td style="width: 50%; overflow: auto;"> 
                         <p><strong>Catatan</strong></p>
-                       <?= nl2br($picklist->keterangan); ?>
+                        <?= nl2br($picklist->keterangan); ?>
                     </td>
                 </tr>
             </table>
@@ -153,37 +153,38 @@
                         $no++;
                         $jml_qty += $value->jml_qty;
                         $total_qty += $value->total_qty;
-                        $detailQty = $this->m_PicklistDetail->detailReportQty(['corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'no_pl' => $value->no_pl]);
+                        $detailQty = $this->m_PicklistDetail->detailReportQty(['corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
                         $perpage = 10;
                         $totalData = count($detailQty);
                         $totalPage = ceil($totalData / $perpage);
                         for ($nn = 0; $nn < $totalPage; $nn++) {
                             $page = $nn * $perpage;
                             $satuan = $detailQty[0]->uom;
+                            $tempID = $value->warna_remark . $value->corak_remark . $value->uom;
                             ?>
                             <tr>
 
-                                <td><?= ($id === $value->warna_remark . $value->corak_remark) ? '' : $no ?></td>
-                                <td style="text-align: left;"><?= ($id === $value->warna_remark . $value->corak_remark) ? '' : str_replace('|', ' ', $value->corak_remark) ?></td>
-                                <td style="text-align: left;"><?= ($id === $value->warna_remark . $value->corak_remark) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
+                                <td><?= ($id === $tempID) ? '' : $no ?></td>
+                                <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark.' '.$value->lebar_jadi.'"') ?></td>
+                                <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
 
-                                <td><?= isset($detailQty[$page + 0]) ? (int) $detailQty[$page + 0]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 1]) ? (int) $detailQty[$page + 1]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 2]) ? (int) $detailQty[$page + 2]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 3]) ? (int) $detailQty[$page + 3]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 4]) ? (int) $detailQty[$page + 4]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 5]) ? (int) $detailQty[$page + 5]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 6]) ? (int) $detailQty[$page + 6]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 7]) ? (int) $detailQty[$page + 7]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 8]) ? (int) $detailQty[$page + 8]->qty : "" ?></td>
-                                <td><?= isset($detailQty[$page + 9]) ? (int) $detailQty[$page + 9]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "" ?></td>
+                                <td><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
 
 
-                                <td><?= ($id === $value->warna_remark . $value->corak_remark) ? '' : $value->jml_qty ?></td>
-                                <td style="text-align: right;"><?= ($id === $value->warna_remark . $value->corak_remark) ? '' : $value->total_qty . ' ' . $satuan ?></td>
+                                <td><?= ($id === $tempID) ? '' : $value->jml_qty ?></td>
+                                <td style="text-align: right;"><?= ($id === $tempID) ? '' : $value->total_qty . ' ' . $satuan ?></td>
                             </tr>
                             <?php
-                            $id = $value->warna_remark . $value->corak_remark;
+                            $id = $tempID;
                         }
                     }
                     ?>

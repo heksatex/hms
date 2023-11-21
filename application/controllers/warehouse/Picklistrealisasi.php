@@ -127,6 +127,7 @@ class Picklistrealisasi extends MY_Controller {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
+            $nama = $this->session->userdata('nama');
             $pl = $this->input->post('pl');
             $barcode = $this->input->post('search');
             $menu = $this->input->post('on_menu');
@@ -151,7 +152,7 @@ class Picklistrealisasi extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->m_Picklist->update(['status' => $menu], ['no' => $pl]);
-            $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($statusWhere, $update)), $username);
+            $this->_module->gen_history($sub_menu, $pl, 'edit', $nama . ' Melakukan validasi barcode ' . $barcode, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => [])));
@@ -171,7 +172,10 @@ class Picklistrealisasi extends MY_Controller {
             }
             $data['id_dept'] = 'PLR';
             $data["ids"] = $id;
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt]);
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt, 'status !=' => 'cancel']);
+            if (is_null($data["picklist"])) {
+                throw new Exception();
+            }
             $data['view_cancel'] = $this->load->view('modal/v_picklist_item_cancel', [], true);
             $this->load->view('warehouse/v_picklist_realisasi_proses', $data);
         } catch (Exception $ex) {

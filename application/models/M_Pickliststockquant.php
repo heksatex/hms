@@ -103,18 +103,35 @@ class m_Pickliststockquant extends CI_Model {
         return $this->db->select($select)->get()->result();
     }
 
-    public function getDataItemPicklistScan($condition, $joinItemPicklist = false) {
+    public function getDataItemPicklistScan(array $condition,$joinItemPicklist = false) {
+        $select = "";
+        $select .= $this->table . '.lot as barcode,' . $this->table . '.kode_produk,' . $this->table . '.nama_produk,' . $this->table . '.corak_remark,' . $this->table . '.lebar_jadi,'
+                . $this->table . '.uom_lebar_jadi,' . $this->table . '.warna_remark,' . $this->table . '.quant_id,qty_jual,uom_jual,qty2_jual,uom2_jual,' . $this->table . '.lokasi_fisik,lokasi,reserve_origin,reserve_move';
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        if ($joinItemPicklist) {
+            $this->db->join("picklist_detail pd", "pd.barcode_id = " . $this->table . ".lot", 'left');
+            $select .= ",pd.no_pl";
+        }
+        $this->db->where_not_in($this->table . '.lokasi_fisik', ['PORT', 'XPD']);
+        $this->db->where($this->table . '.lokasi', 'GJD/STOCK');
+        return $this->db->select($select)->get()->row();
+    }
+    
+    
+
+    public function getDataItemPicklistScanDetail($condition, $joinItemPicklist = false) {
         $select = "id_category,nama_category,";
         $select .= $this->table . '.lot as barcode,' . $this->table . '.kode_produk,' . $this->table . '.nama_produk,' . $this->table . '.corak_remark,' . $this->table . '.lebar_jadi,'
                 . $this->table . '.uom_lebar_jadi,' . $this->table . '.warna_remark,' . $this->table . '.quant_id,qty_jual,uom_jual,qty2_jual,uom2_jual,' . $this->table . '.lokasi_fisik,lokasi,reserve_origin,reserve_move';
         $this->db->from($this->table);
+        $this->db->where($condition);
         if ($joinItemPicklist) {
             $this->db->join("picklist_detail pd", "pd.barcode_id = " . $this->table . ".lot", 'left');
             $select .= ",pd.no_pl";
         }
 //        $this->db->join('mrp_satuan as ms', 'ms.quant_id = ' . $this->table . '.quant_id', 'left');
 //        $this->db->where("not exists ( select null from picklist_detail d where d.barcode_id = " . $this->table . ".lot )", "", false);
-        $this->db->where($condition);
         $this->db->join('mst_produk as mp', 'mp.kode_produk = ' . $this->table . '.kode_produk');
         $this->db->join('mst_category as mc', 'mc.id = mp.id_category', 'left');
 //        $this->db->where_not_in($this->table . '.lokasi_fisik', ['PORT', 'XPD']);

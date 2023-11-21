@@ -104,6 +104,7 @@
                                             </div>
                                             <input type="hidden" value="<?= $ids ?>" name="ids">
                                             <input type="hidden" value="<?= $picklist->no ?>" name="no_pl">
+                                            <input type="hidden" value="<?= json_encode($picklist)?>">
                                         </div>
                                     </div>
                                 </div>
@@ -198,27 +199,7 @@
             },
                     false
                     );
-            $("#btn-confirm").on('click', function () {
-                please_wait(function () {});
-                $.ajax({
-                    url: "<?= base_url('warehouse/picklist/update_status') ?>",
-                    type: "post",
-                    data: {
-                        pl: "<?= $picklist->no ?>",
-                        status: $(this).attr("data-value")
-                    },
-                    success: function (data) {
-                        location.reload();
-                    },
-                    error: function (req, error) {
-                        unblockUI(function () {
-                            setTimeout(function () {
-                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                            }, 1000);
-                        });
-                    }
-                });
-            });
+            
             $("#btn-cancel").on('click', function () {
                 confirmRequest("Batal Picklist", "Batalkan No Picklist <?= $picklist->no ?>", function () {
                     please_wait(function () {});

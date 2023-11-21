@@ -1,5 +1,5 @@
 <style>
-    .dataTables_filter {
+    #picklist-item-manual_filter {
         display: none;
     }
 </style>
@@ -143,21 +143,22 @@
                     $.each(datas, function (idx, val) {
                         if (val[10] !== null) {
                             pl = val[10];
+                            bcd = val[1];
                             return false;
                         }
 
-                        bcd = val[1];
+
                         dt.push(val[9]);
                     });
                     if (pl !== null)
-                        throw new Error("Barcode " + bcd + " duplicate");
+                        throw new Error("Barcode " + bcd + " duplicate pada PickList " + pl);
                 });
                 resolve(dt);
             });
             data.then((rsp) => {
                 addItem(JSON.stringify(rsp), "", dTable);
             }).catch(e => {
-                addItem(JSON.stringify([]), e);
+                addItem(JSON.stringify([]), e.message);
             });
 //            $('#tambah_data').modal('hide');
         });
@@ -174,7 +175,7 @@
 
             var row = $(this).closest('tr');
             var data = dTable.row(row).data();
-            addItem((JSON.stringify([data[9]])));
+            addItem((JSON.stringify([data[9]])), "", dTable);
         });
     });
 </script>
