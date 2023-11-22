@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
+
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -30,7 +31,7 @@
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Form Edit <strong> <?= $picklist->no ?> </strong></h3>
-                            
+
                         </div>
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-picklist" id="form-picklist" action="<?= base_url('warehouse/picklist/update') ?>">
@@ -92,7 +93,7 @@
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label class="form-label required">Customer</label></div>
                                             <div class="col-xs-8 col-md-8">
-                                                <select class="form-control input-sm" name="customer" id="customer" required>
+                                                <select class="form-control input-sm select2" name="customer" id="customer" required>
                                                     <option value="<?= $picklist->customer_id ?>" selected><?= $picklist->nama ?></option>
                                                 </select>
                                             </div>
@@ -104,7 +105,7 @@
                                             </div>
                                             <input type="hidden" value="<?= $ids ?>" name="ids">
                                             <input type="hidden" value="<?= $picklist->no ?>" name="no_pl">
-                                            <input type="hidden" value="<?= json_encode($picklist)?>">
+                                            <input type="hidden" value="<?= json_encode($picklist) ?>" name="existsing">
                                         </div>
                                     </div>
                                 </div>
@@ -130,15 +131,22 @@
         </div>
 
         <script>
+            $('.select2').select2({
+                allowClear: true,
+                placeholder: 'Pilih'
+            });
+            $("#btn-simpan").attr("disabled", true);
+            $('.select2').on('change', function () {
+                $("#btn-simpan").removeAttr("disabled");
+            });
+            $('.input-sm').on('change', function () {
+                $("#btn-simpan").removeAttr("disabled");
+            });
             const checkStatus = function () {
                 if ("<?= $picklist->status ?>" === 'cancel') {
                     $("#btnShow").hide();
                 }
             };
-            $('.select2').select2({
-                allowClear: true,
-                placeholder: 'Pilih'
-            });
             $("#customer").select2({
                 allowClear: true,
                 placeholder: 'Pilih',
@@ -172,7 +180,6 @@
             $("#customer").on('select2:unselect', function (e) {
                 $("#alamat").val("");
             });
-
             $("#btn-simpan").on('click', function () {
                 $("#btn_form_edit").trigger("click");
             });
@@ -199,7 +206,7 @@
             },
                     false
                     );
-            
+
             $("#btn-cancel").on('click', function () {
                 confirmRequest("Batal Picklist", "Batalkan No Picklist <?= $picklist->no ?>", function () {
                     please_wait(function () {});

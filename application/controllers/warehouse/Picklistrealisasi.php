@@ -60,6 +60,7 @@ class Picklistrealisasi extends MY_Controller {
 
                 $kode_encrypt = encrypt_url($field->id);
                 $no++;
+                $total_lot = $this->_persentase($field->total_item ?? 0, $field->st, 'realisasi');
                 $row = array(
                     $no,
                     '<a href="' . base_url('warehouse/' . $submenu . '/edit/' . $kode_encrypt) . '">' . $field->no . '</a>',
@@ -69,7 +70,7 @@ class Picklistrealisasi extends MY_Controller {
                     $field->keterangan,
                     $field->sales_nama,
                     $field->total_item,
-                    $this->_persentase($field->total_item ?? 0, $field->st, 'realisasi') . ' %'
+                    $total_lot[0] . ' (' . $total_lot[1] . '%)'
 //                    '<div class="miniBar">' . $this->_persentase($field->total_item ?? 0, $field->st) . '</div>'
 //                    $this->m_PicklistDetail->getCountDataFiltered(['no_pl'=>$field->no])
                 );
@@ -136,7 +137,7 @@ class Picklistrealisasi extends MY_Controller {
 
             $this->_module->startTransaction();
 
-            $item = $this->m_PicklistDetail->detailData($statusWhere);
+            $item = $this->m_PicklistDetail->detailData($statusWhere, true);
             if (empty($item)) {
                 throw new Exception('Data Barcode Tidak Ditemukan', 500);
             }
@@ -152,7 +153,7 @@ class Picklistrealisasi extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
             $this->m_Picklist->update(['status' => $menu], ['no' => $pl]);
-            $this->_module->gen_history($sub_menu, $pl, 'edit', $nama . ' Melakukan validasi barcode ' . $barcode, $username);
+            $this->_module->gen_history($sub_menu, $pl, 'edit', ($nama["nama"] ?? "") . ' Melakukan Realisasi barcode ' . $barcode, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => [])));
@@ -240,9 +241,9 @@ class Picklistrealisasi extends MY_Controller {
         return 0;
     }
 
-    protected function _persentase($total_item, $value, $onlyStatus = null): string {
+    protected function _persentase($total_item, $value, $onlyStatus = null): array {
         $data = explode("|", $value);
-        $result = 0;
+        $result = [0, 0];
         $persentase = 0.0;
         if ($data < 1) {
 //            return '<div class="miniBarProgress" style="left: 0; width: 0%; background-color: red;"><span class="tooltiptext">0</span></div>';
@@ -253,7 +254,7 @@ class Picklistrealisasi extends MY_Controller {
 //            $_persen = $persentase;
 //            $persentase += ((trim($list[1]) / $total_item) * 100);
             if ($onlyStatus === $list[0]) {
-                return (string) number_format((trim($list[1]) / $total_item) * 100, 1);
+                return [trim($list[1]), number_format((trim($list[1]) / $total_item) * 100, 1)];
             }
 //            $result .= '<div class="miniBarProgress" style="left: ' . $_persen . '%; width: ' . ($persentase - $_persen) . '%; background-color: ' . $this->statusColor($list[0]) . ';"><span class="tooltiptext">' . $list[0] . ' ' . $list[1] . '</span></div>';
         }

@@ -2,6 +2,22 @@
 <html>
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
+        <style>
+            .divs {
+                position: fixed;
+                left: 40px;
+               
+                width: 20%;
+                background-color: lightgray;
+                display: flex;
+                justify-content: space-between;
+
+            }
+            .translate-rotate {
+                background-color: gold;
+                transform: translateX(180px) rotate(90deg);
+            }
+        </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -44,8 +60,15 @@
                                                     <div class="col-xs-8">
                                                         <button type="submit" id="print" class="btn btn-success" >print</button>
                                                     </div>
+                                                    <div class="divs translate-rotate">
+                                                            <div>asdasd</div>
+                                                            <div>asdasd</div>
+                                                            <div>asdasd</div>
+                                                    </div>
 
                                                 </div>
+
+
                                             </div>
                                         </div>
                                     </div>
@@ -54,7 +77,7 @@
                     </div>
                 </section>
             </div>
-                     <?php $this->load->view("admin/_partials/js.php") ?>
+            <?php $this->load->view("admin/_partials/js.php") ?>
         </div>
         <script>
 

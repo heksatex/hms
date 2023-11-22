@@ -74,10 +74,10 @@
 
         });
         $("#searchdata").keypress(function (e) {
-            if (e.which === 13) {
-                $("#form_submit").trigger("click");
-//                dTable.search($(this).val()).draw();
-            }
+//            if (e.which === 13) {
+//                $("#form_submit").trigger("click");
+////                dTable.search($(this).val()).draw();
+//            }
 
         });
         var no = 1;
@@ -118,7 +118,7 @@
         formpicklistscan.addEventListener(
                 "submit",
                 async (event) => {
-            please_wait(function () {});
+//            please_wait(function () {});
 
             try {
                 let status = await checkTable(event);
@@ -129,22 +129,24 @@
                                     var data = response.data.data[0];
                                     addRow(data);
                                 }
-                                unblockUI(function () {
-                                    setTimeout(function () {
-                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                    }, 1000);
-                                });
+//                                unblockUI(function () {
+//                                    setTimeout(function () {
+//                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+//                                    }, 1000);
+//                                });
+                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                             }
                     ).catch(err => {
                         unblockUI(function () {});
                         alert_modal_warning("Hubungi Dept IT");
                     });
                 } else {
-                    unblockUI(function () {
-                        setTimeout(function () {
-                            alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
-                        }, 1000);
-                    });
+                    alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
+//                    unblockUI(function () {
+//                        setTimeout(function () {
+//                            alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
+//                        }, 1000);
+//                    });
                 }
             } catch (e) {
 

@@ -217,118 +217,118 @@
                     ]
                 });
 
-                $("#search").keypress(function (e) {
-                    if (e.which === 13) {
-                        $("#btn_form_validasi").trigger("click");
-                    }
-
-                });
-                async function checkTable(event) {
-                    let data = false;
-                    event.preventDefault();
-                    await searchArray(table.rows().data(), 1, $("#search").val()).then(
-                            resp => {
-                                if (resp.length > 0) {
-                                    data = true;
-                                }
+////                $("#search").keypress(function (e) {
+//                if (e.which === 13) {
+//                    $("#btn_form_validasi").trigger("click");
+//                }
+//
+//            });
+            async function checkTable(event) {
+                let data = false;
+                event.preventDefault();
+                await searchArray(table.rows().data(), 1, $("#search").val()).then(
+                        resp => {
+                            if (resp.length > 0) {
+                                data = true;
                             }
-                    );
-                    return data;
-                }
-                var dataPicklist = null;
-                var dataValid = 0;
-                var dataInvalid = 0;
-                var urutTable = 0;
-                const formvalidasi = document.forms.namedItem("form-validasi");
-                const addDataTable = function (data) {
-                    urutTable++;
-                    table.row.add([
-                        urutTable,
-                        data.barcode_id,
-                        data.corak_remark,
-                        data.warna_remark,
-                        data.corak_remark,
-                        data.qty + " " + data.uom,
-                        data.lokasi_fisik,
-                        "Validasi"
-                    ]).draw(false);
-                };
-                formvalidasi.addEventListener(
-                        "submit",
-                        async(event) => {
-                    please_wait(function () {});
-                    try {
-                        let status = await checkTable(event);
-                        if (!status) {
+                        }
+                );
+                return data;
+            }
+            var dataPicklist = null;
+            var dataValid = 0;
+            var dataInvalid = 0;
+            var urutTable = 0;
+            const formvalidasi = document.forms.namedItem("form-validasi");
+            const addDataTable = function (data) {
+                urutTable++;
+                table.row.add([
+                    urutTable,
+                    data.barcode_id,
+                    data.corak_remark,
+                    data.warna_remark,
+                    data.corak_remark,
+                    data.qty + " " + data.uom,
+                    data.lokasi_fisik,
+                    "Validasi"
+                ]).draw(false);
+            };
+            formvalidasi.addEventListener(
+                    "submit",
+                    async(event) => {
+//                    please_wait(function () {});
+            try {
+            let status = await checkTable(event);
+                    if (!status) {
 
-                            request("form-validasi").then(
-                                    response => {
-                                        unblockUI(function () {
-                                            setTimeout(function () {
-                                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                            }, 250);
-                                        });
-                                        if (response.status === 200) {
+            request("form-validasi").then(
+                    response => {
+                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+//                                        unblockUI(function () {
+//                                            setTimeout(function () {
+//                                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+//                                            }, 250);
+//                                        });
+                            if (response.status === 200) {
 //                                                table.search($('#search').val()).draw();
 //                                                setDataChart();
-                                            if (response?.data?.picklist !== null) {
-                                                dataPicklist = response.data.picklist;
-                                                $("#pl").val(dataPicklist.no);
-                                                dataValid = 0;
-                                                dataInvalid = 0;
-                                                table.clear().draw();
-                                                $("#no_pl").html(dataPicklist.no);
-                                                $("#sales").html(dataPicklist.sales_kode);
-                                                $("#cust").html(dataPicklist.nama);
-                                                $("#jj").html(dataPicklist.jenis_jual);
-                                                $("#tgl_picklist").html(dataPicklist.tanggal_input);
-                                                $("#totalLot").html(dataPicklist.total_lot);
-                                                $("#scanValid").html(dataValid);
-                                                $("#scanInvalid").html(dataInvalid);
-
-                                                return;
-                                            }
-                                            if (typeof response?.data?.item === "object") {
-                                                dataValid++;
-                                                var item = response?.data?.item;
-                                                addDataTable(item);
-                                                $("#scanValid").html(dataValid);
-                                            }
-                                            return;
-                                        }
-                                        if (response.status === 500) {
-                                            if (response?.data?.error_code >= 0) {
-                                                dataInvalid++;
-                                                $("#scanInvalid").html(dataInvalid);
-                                            }
-                                        }
-                                        audio.play();
-
-                                    }
-
-                            ).catch(e => {
-                                console.log(e);
-                            });
-                        } else {
-                            unblockUI(function () {
-                                setTimeout(function () {
-                                    alert_notify('fa fa-check', 'Item double scan', 'warning', function () {});
-                                }, 1000);
-                            });
-                        }
-                    } catch (e) {
-                        unblockUI(function () {});
-                        alert_modal_warning("Hubungi Dept IT");
-                    } finally {
-                        $("#search").val("");
-                        $("#search").focus();
-
+                    if (response?.data?.picklist !== null) {
+                    dataPicklist = response.data.picklist;
+                            $("#pl").val(dataPicklist.no);
+                            dataValid = 0;
+                            dataInvalid = 0;
+                            table.clear().draw();
+                            $("#no_pl").html(dataPicklist.no);
+                            $("#sales").html(dataPicklist.sales_kode);
+                            $("#cust").html(dataPicklist.nama);
+                            $("#jj").html(dataPicklist.jenis_jual);
+                            $("#tgl_picklist").html(dataPicklist.tanggal_input);
+                            $("#totalLot").html(dataPicklist.total_lot);
+                            $("#scanValid").html(dataPicklist.total_realisasi);
+                            $("#scanInvalid").html(dataInvalid);
+                            return;
                     }
-                    event.preventDefault();
-                },
-                        false
-                        );
+                    if (typeof response?.data?.item === "object") {
+                    dataValid++;
+                            var item = response?.data?.item;
+                            addDataTable(item);
+                            $("#scanValid").html(dataValid);
+                    }
+                    return;
+                    }
+                    if (response.status === 500) {
+                    if (response?.data?.error_code >= 0) {
+                    dataInvalid++;
+                            $("#scanInvalid").html(dataInvalid);
+                    }
+                    }
+                    audio.play();
+                    }
+
+            ).catch(e => {
+            console.log(e);
             });
+            } else {
+            alert_notify('fa fa-check', 'Item double scan', 'warning', function () {});
+//                            unblockUI(function () {
+//                                setTimeout(function () {
+//                                    alert_notify('fa fa-check', 'Item double scan', 'warning', function () {});
+//                                }, 1000);
+//                            });
+            }
+            } catch (e) {
+//                        unblockUI(function () {});
+            alert_modal_warning("Hubungi Dept IT");
+            } finally {
+            $("#search").val("");
+                    $("#search").focus();
+            }
+            event.preventDefault();
+            },
+                    false
+                    );
+            }
+            );
 
         </script>
     </body>
