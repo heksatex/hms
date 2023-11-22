@@ -36,7 +36,7 @@
                                             <th>Keterangan</th>
                                             <th>Sales</th>
                                             <th>Total Lot</th>
-                                            <th>Realisai Lot %</th>
+                                            <th>Realisai Lot ( % )</th>
                                         </tr>
                                     </thead>
                                 </table>

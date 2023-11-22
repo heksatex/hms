@@ -446,6 +446,17 @@ class Picklist extends MY_Controller {
             if ($this->form_validation->run() == FALSE) {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
+//            $check = 0;
+//            $existing = json_decode($this->input->post('existsing'));
+//            switch (true) {
+//            case $this->input->post('bulk'):
+//
+//
+//            break;
+//
+//            default:
+//            break;
+//            }
             $this->_module->startTransaction();
             $input = array(
                 'type_bulk_id' => $this->input->post('bulk'),

@@ -113,8 +113,10 @@ class m_Pickliststockquant extends CI_Model {
             $this->db->join("picklist_detail pd", "pd.barcode_id = " . $this->table . ".lot", 'left');
             $select .= ",pd.no_pl";
         }
+        $this->db->join('mst_produk as mp', 'mp.kode_produk = ' . $this->table . '.kode_produk');
         $this->db->where_not_in($this->table . '.lokasi_fisik', ['PORT', 'XPD']);
         $this->db->where($this->table . '.lokasi', 'GJD/STOCK');
+        $this->db->where('id_category', 21);
         return $this->db->select($select)->get()->row();
     }
     

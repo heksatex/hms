@@ -87,9 +87,10 @@ class M_Picklist extends CI_Model {
 //        $this->db->where($this->table . '.id', $id);
         $this->db->where($condition);
         $this->filteredSales();
+        $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
         $this->db->join('partner', 'partner.id = customer_id', 'left');
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
-        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk')->get()->row();
+        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk, msg.nama_sales_group as sales')->get()->row();
     }
 
     public function getDataReportPL($condition) {

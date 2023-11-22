@@ -165,7 +165,7 @@
                             <tr>
 
                                 <td><?= ($id === $tempID) ? '' : $no ?></td>
-                                <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark.' '.$value->lebar_jadi.'"') ?></td>
+                                <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark.' '.$value->lebar_jadi.' '.$value->uom_lebar_jadi) ?></td>
                                 <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
 
                                 <td><?= isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "" ?></td>

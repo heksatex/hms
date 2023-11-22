@@ -137,6 +137,21 @@
                 font-size:65%;
                 text-align:center;
             }
+
+            .divs {
+                position: fixed;
+                font-size:60%;
+                background-color: lightgray;
+                display: flex;
+                right:32%;
+                top: 45%;
+                width: 53%;
+                justify-content: space-between;
+
+            }
+            .translate-rotate {
+                transform: translateX(180px) rotate(90deg);
+            }
         }
         @media (max-width: 768px){
             .gjs-row{
@@ -172,21 +187,26 @@
                 </div>
                 <div id="isef"><?= $data["isi_satuan_qty1"] ?? "" ?>
                 </div>
-                <div id="i75tl"><?= $data["isi_qty1"] ?>
+                <div id="<?= $data["isi_qty1"] ? "i75tl" : "" ?>"><?= $data["isi_qty1"] ?? "" ?>
                 </div>
-                <div id="isef"><?= $data["isi_satuan_qty2"] ?? "" ?>
+                <div id="<?= $data["isi_satuan_qty2"] ? "isef" : "" ?>"><?= $data["isi_satuan_qty2"] ?? "" ?>
                 </div>
-                <div id="i75tl"><?= $data["isi_qty2"] ?? "" ?>
+                <div id="<?= $data["isi_qty2"] ? "i75tl" : "" ?>"><?= $data["isi_qty2"] ?? "" ?>
                 </div>
             </div>
             <div class="gjs-cell" id="iuua">
                 <img id="ieh54" src="data:image/png;base64,<?= $data["barcode"] ?? "" ?>">
-                <div id="i3a7r"><?= $data["barcode_id"] ?? "" ?>
+                <div class="divs translate-rotate">
+                    <div><?= $data["barcode_id"] ?? "" ?></div>
+                    <div><?= $data["tanggal_buat"] ?? "" ?></div>
+                    <div><?= $data["no_pack_brc"] ?? "" ?></div>
                 </div>
-                <div id="i6wsc"><?= $data["tanggal_buat"] ?? "" ?>
-                </div>
-                <div id="igvhs"><?= $data["no_pack_brc"] ?? "" ?>
-                </div>
+                <!--                <div id="i3a7r"><?= $data["barcode_id"] ?? "" ?>
+                                </div>
+                                <div id="i6wsc"><?= $data["tanggal_buat"] ?? "" ?>
+                                </div>
+                                <div id="igvhs"><?= $data["no_pack_brc"] ?? "" ?>
+                                </div>-->
             </div>
         </div>
     </body>

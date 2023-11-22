@@ -22,7 +22,7 @@ class M_PicklistDetail extends CI_Model {
 
     //put your code here
     protected $table = "picklist_detail";
-    var $column_order = array(null, 'barcode_id', 'quant_id', 'barcode_id', 'kode_produk', 'nama_produk', 'lokasi_fisik', 'a.valid');
+    var $column_order = array(null, 'barcode_id', 'quant_id', 'barcode_id', 'kode_produk', 'nama_produk', 'sq.lokasi_fisik', 'a.valid');
     var $order = ['tanggal_masuk' => 'desc'];
     var $column_search = array('barcode_id', 'quant_id', 'kode_produk', 'nama_produk');
 
@@ -40,9 +40,11 @@ class M_PicklistDetail extends CI_Model {
     }
 
     protected function _getDataItem() {
-        $this->db->select("a.*,ms.nama_status as valid");
+        $this->db->select("a.*,ms.nama_status as valid,sq.lokasi_fisik as lokasi_fisik");
         $this->db->join('mst_status as ms', 'ms.kode = a.valid', 'left');
         $this->db->from($this->table . ' a');
+
+        $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id', 'left');
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
@@ -93,10 +95,10 @@ class M_PicklistDetail extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function detailReport($condition,array $group = ['corak_remark','warna_remark']) {
+    public function detailReport($condition, array $group = ['corak_remark', 'warna_remark']) {
         $this->db->from($this->table);
         $this->db->where($condition);
-        $this->db->select('no_pl,kode_produk,nama_produk,warna_remark,corak_remark,sales_order,uom,lebar_jadi, count(qty) as jml_qty, sum(qty) as total_qty');
+        $this->db->select('no_pl,kode_produk,nama_produk,warna_remark,corak_remark,sales_order,uom,lebar_jadi,uom_lebar_jadi, count(qty) as jml_qty, sum(qty) as total_qty');
         $this->db->order_by('corak_remark', 'asc');
         $this->db->group_by($group);
         return $this->db->get()->result();
@@ -116,10 +118,13 @@ class M_PicklistDetail extends CI_Model {
         $this->db->delete($this->table, $condition);
     }
 
-    public function detailData(array $condition, string $column_order = 'tanggal_masuk', string $orderby = 'DESC') {
+    public function detailData(array $condition, $deepCheck = false, string $column_order = 'tanggal_masuk', string $orderby = 'DESC') {
         $this->db->from($this->table);
         $this->db->order_by($column_order, $orderby);
         $this->db->where($condition);
+        if ($deepCheck) {
+            $this->db->join('stock_quant sq', 'sq.quant_id = ' . $this->table . '.quant_id');
+        }
         return $this->db->select('*')->get()->row();
     }
 

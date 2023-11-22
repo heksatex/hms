@@ -22,6 +22,9 @@
                 visibility: hidden;
                 clear: both;
             }
+            #btn-cancel{
+                visibility: hidden;
+            }
             @media screen and (max-width:650px) {
                 #itemChart {
                     visibility: hidden;
@@ -38,6 +41,7 @@
                     float: right;
                 }
             }
+
         </style>
     </head>
 
@@ -93,17 +97,7 @@
                                             <label class="form-label">Sales</label>
                                         </div>
                                         <div class="col-xs-8 col-md-8">
-                                            <span><?= $picklist->sales_kode ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4">
-                                            <label class="form-label">Customer</label>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <span><?= $picklist->nama ?></span>
+                                            <span><?= $picklist->sales ?? $picklist->sales_kode ?></span>
                                         </div>
                                     </div>
                                 </div>
@@ -114,16 +108,6 @@
                                         </div>
                                         <div class="col-xs-8 col-md-8">
                                             <span><?= strtoupper($picklist->jenis_jual) ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4">
-                                            <label class="form-label">Note</label>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <span><?= $picklist->keterangan ?></span>
                                         </div>
                                     </div>
                                 </div>
@@ -185,7 +169,7 @@
                     "iDisplayLength": 10,
                     "processing": true,
                     "serverSide": true,
-                    "order": [],
+                    "order": [[6, "desc"], [2, "desc"]],
                     "paging": true,
                     "lengthChange": false,
                     "searching": true,
@@ -210,7 +194,7 @@
                 const options = {
                     series: [],
                     labels: ['Draft', 'Realisasi', 'Validasi'],
-                    colors: ['#fcca03', '#0000FF', '#00CC00'],
+                    colors: ['#fcca03', '#0096FF', '#00CC00'],
                     tooltip: {
                         enabled: true,
                         theme: 'light'
@@ -263,33 +247,34 @@
                 setDataChart();
 
 
-                $("#search").keypress(function (e) {
-                    if (e.which === 13) {
-                        $("#btn_form_realisasi").trigger("click");
-                    }
-
-                });
+//                $("#search").keypress(function (e) {
+//                    if (e.which === 13) {
+//                        $("#btn_form_realisasi").trigger("click");
+//                    }
+//
+//                });
                 const formrealisasi = document.forms.namedItem("form-realisasi");
                 formrealisasi.addEventListener(
                         "submit",
                         event => {
-                            please_wait(function () {});
+//                            please_wait(function () {});
                             try {
                                 request("form-realisasi").then(
                                         response => {
+                                            alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                                             table.search($('#search').val()).draw(false);
                                             setDataChart();
-                                            unblockUI(function () {
-                                                setTimeout(function () {
-                                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                                }, 1000);
-                                            });
+//                                            unblockUI(function () {
+//                                                setTimeout(function () {
+//                                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+//                                                }, 1000);
+//                                            });
                                         }
 
                                 );
 
                             } catch (e) {
-                                unblockUI(function () {});
+//                                unblockUI(function () {});
                                 alert_modal_warning("Hubungi Dept IT");
                             } finally {
                                 $("#search").val("");
@@ -312,47 +297,49 @@
                     $(".tambah_data").html(`<?= $view_cancel ?>`);
                     $("#btn-tambah").hide();
 
-                    $("#search_item_cancel").keypress(function (e) {
-                        if (e.keyCode === 13) {
-                            please_wait(function () {});
-                            $.ajax({
-                                "url": "<?= base_url('warehouse/picklistrealisasi/update_status') ?>",
-                                "type": "POST",
-                                beforeSend: function (e) {
-                                    if (e && e.overrideMimeType) {
-                                        e.overrideMimeType("application/json;charset=UTF-8");
-                                    }
-                                },
-                                data: {
-                                    "pl": "<?= $picklist->no ?? '' ?>",
-                                    'barcode': $("#search_item_cancel").val(),
-                                    'on_menu': $("#on_menu").val()
-                                },
-                                success: function (response) {
-                                    unblockUI(function () {
-                                        setTimeout(function () {
-                                            alert_notify(response.icon, response.message, response.type, function () {});
-                                        }, 500);
-                                    });
-                                    table.search("").draw();
-                                    setDataChart();
-                                },
-                                error: function (response) {
-                                    unblockUI(function () {
-                                        setTimeout(function () {
-                                            alert_notify(response?.responseJSON?.icon, response?.responseJSON?.message, response?.responseJSON?.type, function () {});
-                                        }, 1000);
-                                    });
-                                }
-                            });
-
-                        }
-                    });
-                    $(document).keydown(function (e) {
-                        if (e.which === 113) {
-                            $("#search_item_cancel").focus();
-                        }
-                    });
+//                    $("#search_item_cancel").keypress(function (e) {
+//                        if (e.keyCode === 13) {
+////                            please_wait(function () {});
+//                            $.ajax({
+//                                "url": "<?= base_url('warehouse/picklistrealisasi/update_status') ?>",
+//                                "type": "POST",
+//                                beforeSend: function (e) {
+//                                    if (e && e.overrideMimeType) {
+//                                        e.overrideMimeType("application/json;charset=UTF-8");
+//                                    }
+//                                },
+//                                data: {
+//                                    "pl": "<?= $picklist->no ?? '' ?>",
+//                                    'barcode': $("#search_item_cancel").val(),
+//                                    'on_menu': $("#on_menu").val()
+//                                },
+//                                success: function (response) {
+//                                    alert_notify(response.icon, response.message, response.type, function () {});
+////                                    unblockUI(function () {
+////                                        setTimeout(function () {
+////                                            alert_notify(response.icon, response.message, response.type, function () {});
+////                                        }, 500);
+////                                    });
+//                                    table.search("").draw();
+//                                    setDataChart();
+//                                },
+//                                error: function (response) {
+//                                    alert_notify(response?.responseJSON?.icon, response?.responseJSON?.message, response?.responseJSON?.type, function () {});
+////                                    unblockUI(function () {
+////                                        setTimeout(function () {
+////                                            alert_notify(response?.responseJSON?.icon, response?.responseJSON?.message, response?.responseJSON?.type, function () {});
+////                                        }, 1000);
+////                                    });
+//                                }
+//                            });
+//
+//                        }
+//                    });
+//                    $(document).keydown(function (e) {
+//                        if (e.which === 113) {
+//                            $("#search_item_cancel").focus();
+//                        }
+//                    });
 
 
                 });
