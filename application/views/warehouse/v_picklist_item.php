@@ -39,87 +39,92 @@
     </div>
 </div>
 <script>
-    $(function () {
-        const table = $("#item_picklist").DataTable({
-            "iDisplayLength": 25,
-            "processing": true,
-            "serverSide": true,
-            "order": [],
-            "paging": true,
-            "lengthChange": false,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
-            "ajax": {
-                "url": "<?= base_url('warehouse/picklist/list_item') ?>",
-                "type": "POST",
-                "data": function (d) {
-                    d.filter = "<?= $pl ?>";
-                },
-                "dataSrc": function (data) {
-                    if (data.data.length < 1) {
-                        $(".header-status").hide();
-                    }
-                    return data.data;
+    const table = $("#item_picklist").DataTable({
+        "iDisplayLength": 25,
+        "processing": true,
+        "serverSide": true,
+        "order": [],
+        "paging": true,
+        "lengthChange": false,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "ajax": {
+            "url": "<?= base_url('warehouse/picklist/list_item') ?>",
+            "type": "POST",
+            "data": function (d) {
+                d.filter = "<?= $pl ?>";
+            },
+            "dataSrc": function (data) {
+                if (data.data.length < 1) {
+                    $(".header-status").hide();
+                }
+                return data.data;
+            }
+        },
+        "columnDefs": [
+            {
+                "targets": [0, 7, 8, 9],
+                "orderable": false
+            }
+        ],
+        "dom": 'Bfrtip',
+        "buttons": [
+            {
+                "text": '<i class="fa fa-plus"> <span>Tambah Data Scan</span>',
+                "className": "btn btn-default",
+                "action": function (e, dt, node, config) {
+                    $(".add-new-scan").trigger("click");
                 }
             },
-            "columnDefs": [
-                {
-                    "targets": [0, 7, 8, 9],
-                    "orderable": false
+            {
+                "text": '<i class="fa fa-plus"> <span>Tambah Data Manual</span>',
+                "className": "btn btn-default",
+                "action": function (e, dt, node, config) {
+                    $(".add-new-manual").trigger("click");
                 }
-            ],
-            "dom": 'Bfrtip',
-            "buttons": [
-                {
-                    "text": '<i class="fa fa-plus"> <span>Tambah Data Scan</span>',
-                    "className": "btn btn-default",
-                    "action": function (e, dt, node, config) {
-                        $(".add-new-scan").trigger("click");
-                    }
-                },
-                {
-                    "text": '<i class="fa fa-plus"> <span>Tambah Data Manual</span>',
-                    "className": "btn btn-default",
-                    "action": function (e, dt, node, config) {
-                        $(".add-new-manual").trigger("click");
-                    }
-                }
-            ],
-            "fnDrawCallback": function () {
-                $(".status_item").on('click', function () {
-                    please_wait(function () {});
-                    $.ajax({
-                        "url": "<?= base_url('warehouse/picklist/delete_item') ?>",
-                        "type": "POST",
-                        "data": {
-                            id: $(this).attr("data-id"),
-                            pl: $(this).attr("data-pl")
-                        },
-                        "success": function (data) {
+            }
+        ],
+        "fnDrawCallback": function () {
+            $(".status_item").on('click', function () {
+                const e = this;
+                confirmRequest("Hapus Item", "Hapus Barcode ? ", () => {
+                    delete_item(e, table);
+                });
+            });
+        }
+    });
+
+
+    const delete_item = function (e, tbl = null) {
+        please_wait(function () {});
+        $.ajax({
+            "url": "<?= base_url('warehouse/picklist/delete_item') ?>",
+            "type": "POST",
+            "data": {
+                id: $(e).attr("data-id"),
+                pl: $(e).attr("data-pl")
+            },
+            "success": function (data) {
 //                            location.reload();
-                            table.search("").draw();
-                            unblockUI(function () {
-                                setTimeout(function () {
-                                    alert_notify(data.icon, data.message, data.type, function () {});
-                                }, 500);
-                            });
-                        },
-                        "error": function (xhr, ajaxOptions, thrownError) {
-                            let data = JSON.parse(xhr.responseText);
-                            unblockUI(function () {
-                                setTimeout(function () {
-                                    alert_notify(data.icon, data.message, data.type, function () {});
-                                }, 500);
-                            });
-                        }
-                    });
+                tbl.search("").draw(false);
+                unblockUI(function () {
+                    setTimeout(function () {
+                        alert_notify(data.icon, data.message, data.type, function () {});
+                    }, 500);
+                });
+            },
+            "error": function (xhr, ajaxOptions, thrownError) {
+                let data = JSON.parse(xhr.responseText);
+                unblockUI(function () {
+                    setTimeout(function () {
+                        alert_notify(data.icon, data.message, data.type, function () {});
+                    }, 500);
                 });
             }
         });
-    });
-
+    };
 
     $(".add-new-manual").on('click', function (e) {
         e.preventDefault();
@@ -135,7 +140,12 @@
                 $("#btn-tambah").html("Tambahkan");
             }, 1000);
         });
+        $('#tambah_data').on('hidden.bs.modal', function () {
+            table.search("").draw(false);
+        });
     });
+
+
 
     $(".add-new-scan").on('click', function (e) {
         e.preventDefault();
@@ -152,9 +162,20 @@
                 $("#btn-tambah").html("Tambahkan");
             }, 1000);
         });
+        $('#tambah_data').on('hidden.bs.modal', function () {
+            table.search("").draw(false);
+        });
     });
 
-    const addItem = function (data) {
+    const addItem = function (data, error = "", tbl = null) {
+        if (error !== "") {
+            unblockUI(function () {
+                setTimeout(function () {
+                    alert_notify("fa fa-danger", error, "danger", function () {});
+                }, 500);
+            });
+            return;
+        }
         $.ajax({
             "type": "POST",
             "url": "<?= base_url('warehouse/picklist/add_item') ?>",
@@ -168,14 +189,22 @@
                 "ids": "<?= encrypt_url($picklist->id) ?>",
                 "item": data
             }, "success": function (data) {
-                location.reload();
+                unblockUI(function () {
+                    setTimeout(function () {
+                        alert_notify(data.icon, data.message, data.type, function () {});
+                    }, 500);
+                });
+                if (tbl !== null) {
+                    tbl.columns().checkboxes.deselect(true);
+                    tbl.search("").draw(false);
+                }
             },
             "error": function (xhr, ajaxOptions, thrownError) {
                 let data = JSON.parse(xhr.responseText);
                 unblockUI(function () {
                     setTimeout(function () {
                         alert_notify(data.icon, data.message, data.type, function () {});
-                    }, 1000);
+                    }, 500);
                 });
             }
         });

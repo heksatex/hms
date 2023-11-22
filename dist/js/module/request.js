@@ -41,12 +41,12 @@ const requestDelete = function (uri, objectData = {}) {
                     data: objectData,
                     success: function (data) {
                         dialog.modal('hide');
-                        unblockUI(function (){})
+                        unblockUI(function () {})
                         resolve(data)
                     },
                     error: function (error) {
                         dialog.modal('hide');
-                        unblockUI(function (){})
+                        unblockUI(function () {})
                         reject(error)
                     }
                 });
@@ -57,6 +57,26 @@ const requestDelete = function (uri, objectData = {}) {
     });
 
 
-}
+};
 
-export {requests, requestDelete}
+const ConfirmRequest = function (title, message, cb) {
+    bootbox.confirm({
+        title: title,
+        message: message,
+        buttons: {
+            cancel: {
+                label: '<i class="fa fa-times"></i> Tidak'
+            },
+            confirm: {
+                label: '<i class="fa fa-check"></i> YA'
+            }
+        },
+        callback: function (result) {
+            if (result) {
+                cb();
+            }
+        }
+    });
+};
+
+export {requests, requestDelete, ConfirmRequest}

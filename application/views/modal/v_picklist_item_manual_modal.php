@@ -1,5 +1,5 @@
 <style>
-    .dataTables_filter {
+    #picklist-item-manual_filter {
         display: none;
     }
 </style>
@@ -36,7 +36,7 @@
             <div class="col-md-12 col-xs-12">
                 <div class="col-xs-4">Search</div>
                 <div class="col-xs-8">
-                    <input class="form-control input-sm" placeholder="Search" id="search">
+                    <input class="form-control input-sm" placeholder="Search" id="searchdata">
                 </div>
             </div>
         </div>
@@ -50,10 +50,10 @@
 </div>
 <div class="row">
     <div class="col-md-12 table-responsive over">
-        <table id="picklist-item" class="table table-condesed table-hover rlstable  over" width="100%">
+        <table id="picklist-item-manual" class="table table-condesed table-hover rlstable over" width="100%">
             <thead>
                 <tr>
-                    <th class="no"></th>
+                    <th></th>
                     <th>Barcode</th>
                     <th>Kode Produk</th>
                     <th>Nama Produk</th>
@@ -62,6 +62,9 @@
                     <th>Qty Jual</th>
                     <th>Qty Jual 2</th>
                     <th>Lokasi Fisik</th>
+                    <th></th>
+                    <th></th>
+                    <th>#</th>
                 </tr>
             </thead>
         </table>
@@ -77,12 +80,12 @@
             allowClear: true,
             placeholder: 'Marketing'
         });
-        const dTable = $('#picklist-item').DataTable({
+        const dTable = $('#picklist-item-manual').DataTable({
             "iDisplayLength": 50,
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
             "processing": true,
             "serverSide": true,
-            "order": [],
-
+            "order": [[8, 'desc']],
             "paging": true,
             "lengthChange": true,
             "searching": true,
@@ -103,6 +106,16 @@
                     'checkboxes': {
                         'selectRow': true
                     }
+                },
+                {
+                    "targets": 9,
+                    "visible": false,
+                    "searchable": false
+                },
+                {
+                    'targets': 10,
+                    "visible": false,
+                    "searchable": false
                 }
             ],
             'select': {
@@ -110,12 +123,12 @@
             }
         });
         $("#marketing").on('change', function () {
-            dTable.search($("#search").val()).draw();
+            dTable.search($("#searchdata").val()).draw();
         });
         $("#filter").on('change', function () {
-            dTable.search($("#search").val()).draw();
+            dTable.search($("#searchdata").val()).draw();
         });
-        $("#search").keyup(function () {
+        $("#searchdata").keyup(function () {
             dTable.search($(this).val()).draw();
         });
         $('input', dTable.cells().nodes()).prop('checked', false);
@@ -123,19 +136,46 @@
             var rows_selected = dTable.column(0).checkboxes.selected();
             const data = new Promise((resolve, reject) => {
                 let dt = [];
+                let pl = null;
+                let bcd = "";
                 $.each(rows_selected, function (index, rowId) {
                     var datas = dTable.rows([rowId - 1]).data();
                     $.each(datas, function (idx, val) {
+                        if (val[10] !== null) {
+                            pl = val[10];
+                            bcd = val[1];
+                            return false;
+                        }
+
+
                         dt.push(val[9]);
                     });
+                    if (pl !== null)
+                        throw new Error("Barcode " + bcd + " duplicate pada PickList " + pl);
                 });
                 resolve(dt);
             });
-            data.then(rsp => {
-                addItem(JSON.stringify(rsp));
+            data.then((rsp) => {
+                addItem(JSON.stringify(rsp), "", dTable);
+            }).catch(e => {
+                addItem(JSON.stringify([]), e.message);
             });
-
 //            $('#tambah_data').modal('hide');
+        });
+//        $("#picklist-item").on('change', 'input[type="checkbox"]', function () {
+//            var row = $(this).closest('tr');
+//            var data = dTable.row(row).data();
+//        });
+//
+//        $('input[type="checkbox"]').on('change', function () {
+//            console.log("masuk");
+//        });
+
+        $("#picklist-item-manual").on('click', 'button', function () {
+
+            var row = $(this).closest('tr');
+            var data = dTable.row(row).data();
+            addItem((JSON.stringify([data[9]])), "", dTable);
         });
     });
 </script>

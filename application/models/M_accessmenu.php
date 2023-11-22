@@ -8,7 +8,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_accessmenu extends CI_Model {
 
-    protected $table = 'z_access_menu';
+    protected $table = 'mst_access_menu';
 
     public function __construct() {
         parent::__construct();
