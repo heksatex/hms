@@ -22,9 +22,9 @@ class M_PicklistDetail extends CI_Model {
 
     //put your code here
     protected $table = "picklist_detail";
-    var $column_order = array(null, 'barcode_id', 'quant_id', 'barcode_id', 'kode_produk', 'nama_produk', 'sq.lokasi_fisik', 'a.valid');
+    var $column_order = array(null, 'barcode_id', 'a.quant_id', 'barcode_id', 'a.kode_produk', 'a.nama_produk', 'sq.lokasi_fisik', 'a.valid');
     var $order = ['tanggal_masuk' => 'desc'];
-    var $column_search = array('barcode_id', 'quant_id', 'kode_produk', 'nama_produk');
+    var $column_search = array('barcode_id', 'a.quant_id', 'a.kode_produk', 'a.nama_produk');
 
     public function insertItem(array $data) {
         try {

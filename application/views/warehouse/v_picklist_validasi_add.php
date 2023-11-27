@@ -14,9 +14,13 @@
                 text-align: center;
                 width: 100%;
             }
+            .notify{
+                font-weight: 400;
+                font-size: 200%;
+            }
         </style>
     </head>
-    <body class="hold-transition skin-black fixed sidebar-mini">
+    <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
         <div class="wrapper">
             <header class="main-header">
                 <?php
@@ -45,22 +49,32 @@
                         </div>
                         <div class="box-body">
                             <?php if (isset($access->status) && $access->status) { ?>
-                                <div class="col-md-6 col-xs-12">
-                                    <form class="form-horizontal" method="POST" name="form-validasi" id="form-validasi" action="<?= base_url('warehouse/picklistvalidasi/update') ?>">
-                                        <button type="submit" id="btn_form_validasi" style="display: none"></button>
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label required">Scan Barcode / No PL</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type='text' name="search" id="search" class="form-control input-sm scan-text" required/>
-                                                    <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
-                                                    <input type='hidden' name="pl" id="pl" value=""/>
+                                <div class="row">
+                                    <div class="col-md-6 col-xs-12">
+                                        <form class="form-horizontal" method="POST" name="form-validasi" id="form-validasi" action="<?= base_url('warehouse/picklistvalidasi/update') ?>">
+                                            <button type="submit" id="btn_form_validasi" style="display: none"></button>
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label required">Scan Barcode / No PL</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input type='text' name="search" id="search" class="form-control input-lg scan-text" required/>
+                                                        <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
+                                                        <input type='hidden' name="pl" id="pl" value=""/>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </form>
+                                        </form>
+
+                                    </div>
+                                    <div class="col-md-6 col-xs-12" id="checkFocus">
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-xs-12">
+
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
@@ -190,12 +204,25 @@
             <?php $this->load->view("admin/_partials/js.php") ?>
         </div>
         <script>
+
             $(document).keydown(function (e) {
                 if (e.which === 113) {
                     $("#search").focus();
                 }
+
             });
+            const getSearch = document.getElementById("search");
+            getSearch.addEventListener("focus", (event) => {
+                $("#checkFocus").css({"background-color": "green", 'font-weight': "400", "font-size": "150%", "text-align": "center", "color": "white"});
+                $("#checkFocus").html("Scan Barcode Sudah Siap");
+            });
+            getSearch.addEventListener("blur", (event) => {
+                $("#checkFocus").css({"background-color": "red", 'font-weight': "400", "font-size": "150%", "text-align": "center", "color": "white"});
+                $("#checkFocus").html("Scan Barcode Tidak Siap");
+            }
+            );
             $(function () {
+
                 $("#search").focus();
                 $("#btn-validasi").hide();
                 var nopl = "";
@@ -223,112 +250,113 @@
 //                }
 //
 //            });
-            async function checkTable(event) {
-                let data = false;
-                event.preventDefault();
-                await searchArray(table.rows().data(), 1, $("#search").val()).then(
-                        resp => {
-                            if (resp.length > 0) {
-                                data = true;
+                async function checkTable(event) {
+                    let data = false;
+                    event.preventDefault();
+                    await searchArray(table.rows().data(), 1, $("#search").val()).then(
+                            resp => {
+                                if (resp.length > 0) {
+                                    data = true;
+                                }
                             }
-                        }
-                );
-                return data;
-            }
-            var dataPicklist = null;
-            var dataValid = 0;
-            var dataInvalid = 0;
-            var urutTable = 0;
-            const formvalidasi = document.forms.namedItem("form-validasi");
-            const addDataTable = function (data) {
-                urutTable++;
-                table.row.add([
-                    urutTable,
-                    data.barcode_id,
-                    data.corak_remark,
-                    data.warna_remark,
-                    data.corak_remark,
-                    data.qty + " " + data.uom,
-                    data.lokasi_fisik,
-                    "Validasi"
-                ]).draw(false);
-            };
-            formvalidasi.addEventListener(
-                    "submit",
-                    async(event) => {
-//                    please_wait(function () {});
-            try {
-            let status = await checkTable(event);
-                    if (!status) {
+                    );
+                    return data;
+                }
+                var dataPicklist = null;
+                var dataValid = 0;
+                var dataInvalid = 0;
+                var urutTable = 0;
+                const formvalidasi = document.forms.namedItem("form-validasi");
+                const addDataTable = function (data) {
+                    urutTable++;
+                    table.row.add([
+                        urutTable,
+                        data.barcode_id,
+                        data.corak_remark,
+                        data.warna_remark,
+                        data.corak_remark,
+                        data.qty + " " + data.uom,
+                        data.lokasi_fisik,
+                        "Validasi"
+                    ]).draw(false);
+                };
+                formvalidasi.addEventListener(
+                        "submit",
+                        async(event) => {
+                    please_wait(function () {});
+                    try {
+                        let status = await checkTable(event);
+                        if (!status) {
 
-            request("form-validasi").then(
-                    response => {
-                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-//                                        unblockUI(function () {
+                            request("form-validasi").then(
+                                    response => {
+                                        alert_notify(response.data.icon, '<span class="notify">' + response.data.message + '<strong>', response.data.type, function () {});
+                                        unblockUI(function () {
 //                                            setTimeout(function () {
 //                                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
 //                                            }, 250);
-//                                        });
-                            if (response.status === 200) {
+                                        }, 50);
+                                        if (response.status === 200) {
 //                                                table.search($('#search').val()).draw();
 //                                                setDataChart();
-                    if (response?.data?.picklist !== null) {
-                    dataPicklist = response.data.picklist;
-                            $("#pl").val(dataPicklist.no);
-                            dataValid = 0;
-                            dataInvalid = 0;
-                            table.clear().draw();
-                            $("#no_pl").html(dataPicklist.no);
-                            $("#sales").html(dataPicklist.sales_kode);
-                            $("#cust").html(dataPicklist.nama);
-                            $("#jj").html(dataPicklist.jenis_jual);
-                            $("#tgl_picklist").html(dataPicklist.tanggal_input);
-                            $("#totalLot").html(dataPicklist.total_lot);
-                            $("#scanValid").html(dataPicklist.total_realisasi);
-                            $("#scanInvalid").html(dataInvalid);
-                            return;
-                    }
-                    if (typeof response?.data?.item === "object") {
-                    dataValid++;
-                            var item = response?.data?.item;
-                            addDataTable(item);
-                            $("#scanValid").html(dataValid);
-                    }
-                    return;
-                    }
-                    if (response.status === 500) {
-                    if (response?.data?.error_code >= 0) {
-                    dataInvalid++;
-                            $("#scanInvalid").html(dataInvalid);
-                    }
-                    }
-                    audio.play();
-                    }
+                                            if (response?.data?.picklist !== null) {
+                                                dataPicklist = response.data.picklist;
+                                                $("#pl").val(dataPicklist.no);
+                                                dataValid = 0;
+                                                dataInvalid = 0;
+                                                table.clear().draw();
+                                                $("#no_pl").html(dataPicklist.no);
+                                                $("#sales").html(dataPicklist.sales_kode);
+                                                $("#cust").html(dataPicklist.nama);
+                                                $("#jj").html(dataPicklist.jenis_jual);
+                                                $("#tgl_picklist").html(dataPicklist.tanggal_input);
+                                                $("#totalLot").html(dataPicklist.total_lot);
+                                                $("#scanValid").html(dataPicklist.total_realisasi);
+                                                $("#scanInvalid").html(dataInvalid);
+                                                return;
+                                            }
+                                            if (typeof response?.data?.item === "object") {
+                                                dataValid++;
+                                                var item = response?.data?.item;
+                                                addDataTable(item);
+                                                $("#scanValid").html(dataValid);
+                                            }
+                                            return;
+                                        }
+                                        if (response.status === 500) {
+                                            if (response?.data?.error_code >= 0) {
+                                                dataInvalid++;
+                                                $("#scanInvalid").html(dataInvalid);
+                                            }
+                                        }
+                                        audio.play();
+                                    }
 
-            ).catch(e => {
-            console.log(e);
-            });
-            } else {
-            alert_notify('fa fa-check', 'Item double scan', 'warning', function () {});
-//                            unblockUI(function () {
+                            ).catch(e => {
+                                console.log(e);
+                            });
+                        } else {
+                            alert_notify('fa fa-check', 'Item double scan', 'warning', function () {});
+                            unblockUI(function () {
 //                                setTimeout(function () {
 //                                    alert_notify('fa fa-check', 'Item double scan', 'warning', function () {});
 //                                }, 1000);
-//                            });
-            }
-            } catch (e) {
-//                        unblockUI(function () {});
-            alert_modal_warning("Hubungi Dept IT");
-            } finally {
-            $("#search").val("");
-                    $("#search").focus();
-            }
-            event.preventDefault();
-            },
-                    false
-                    );
-            }
-            );
+                            }, 50);
+                        }
+                    } catch (e) {
+                        unblockUI(function () {}, 50);
+                        alert_modal_warning("Hubungi Dept IT");
+                    } finally {
+                        $("#search").val("");
+                        $("#search").focus();
+                    }
+                    event.preventDefault();
+                },
+                        false
+                        );
+
+
+            });
 
         </script>
     </body>

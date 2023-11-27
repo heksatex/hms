@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
- 
+
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -10,7 +10,7 @@
                 <?php $this->load->view("admin/_partials/main-menu.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
-                $this->load->view("admin/_partials/topbar.php", $data)
+                $this->load->view("admin/_partials/topbar.php", $data);
                 ?>
             </header>
             <aside class="main-sidebar">
@@ -29,15 +29,12 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>No Picklist</th>                  
+                                            <th>No Picklist</th>
+                                            <th>Customer</th>
                                             <th>Tanggal Dibuat</th>
                                             <th>Jenis</th>
-                                            <th>Type Bulk</th>
                                             <th>Keterangan</th>
                                             <th>Sales</th>
-                                            <th>Total Lot</th>
-                                            <th>Realisasi Lot ( % )</th>
-                                            <th>Validasi Lot ( % )</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -65,15 +62,12 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('warehouse/picklistrealisasi/data') ?>",
-                        "type": "POST",
-                        "data": function (d) {
-                            d.submenu = "<?= $submenu ?>";
-                        }
+                        "url": "<?php echo site_url('warehouse/bulk/data') ?>",
+                        "type": "POST"
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 5,7,8],
+                            "targets": [0, 5],
                             "orderable": false
                         }
                     ]

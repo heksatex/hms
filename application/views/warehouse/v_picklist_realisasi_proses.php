@@ -257,24 +257,24 @@
                 formrealisasi.addEventListener(
                         "submit",
                         event => {
-//                            please_wait(function () {});
+                            please_wait(function () {});
                             try {
                                 request("form-realisasi").then(
                                         response => {
                                             alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                                             table.search($('#search').val()).draw(false);
                                             setDataChart();
-//                                            unblockUI(function () {
+                                            unblockUI(function () {
 //                                                setTimeout(function () {
 //                                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
 //                                                }, 1000);
-//                                            });
+                                            },50);
                                         }
 
                                 );
 
                             } catch (e) {
-//                                unblockUI(function () {});
+                                unblockUI(function () {},50);
                                 alert_modal_warning("Hubungi Dept IT");
                             } finally {
                                 $("#search").val("");

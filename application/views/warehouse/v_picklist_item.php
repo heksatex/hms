@@ -110,18 +110,20 @@
 //                            location.reload();
                 tbl.search("").draw(false);
                 unblockUI(function () {
-                    setTimeout(function () {
-                        alert_notify(data.icon, data.message, data.type, function () {});
-                    }, 500);
-                });
+                    alert_notify(data.icon, data.message, data.type, function () {});
+//                    setTimeout(function () {
+//                        alert_notify(data.icon, data.message, data.type, function () {});
+//                    }, 500);
+                },50);
             },
             "error": function (xhr, ajaxOptions, thrownError) {
                 let data = JSON.parse(xhr.responseText);
                 unblockUI(function () {
-                    setTimeout(function () {
-                        alert_notify(data.icon, data.message, data.type, function () {});
-                    }, 500);
-                });
+                     alert_notify(data.icon, data.message, data.type, function () {});
+//                    setTimeout(function () {
+//                        alert_notify(data.icon, data.message, data.type, function () {});
+//                    }, 500);
+                },50);
             }
         });
     };
@@ -170,10 +172,11 @@
     const addItem = function (data, error = "", tbl = null) {
         if (error !== "") {
             unblockUI(function () {
-                setTimeout(function () {
-                    alert_notify("fa fa-danger", error, "danger", function () {});
-                }, 500);
-            });
+                alert_notify("fa fa-danger", error, "danger", function () {});
+//                setTimeout(function () {
+//                    alert_notify("fa fa-danger", error, "danger", function () {});
+//                }, 500);
+            }, 50);
             return;
         }
         $.ajax({
@@ -190,10 +193,10 @@
                 "item": data
             }, "success": function (data) {
                 unblockUI(function () {
-                    setTimeout(function () {
-                        alert_notify(data.icon, data.message, data.type, function () {});
-                    }, 500);
-                });
+//                    setTimeout(function () {
+                    alert_notify(data.icon, data.message, data.type, function () {});
+//                    }, 500);
+                }, 50);
                 if (tbl !== null) {
                     tbl.columns().checkboxes.deselect(true);
                     tbl.search("").draw(false);
@@ -202,10 +205,10 @@
             "error": function (xhr, ajaxOptions, thrownError) {
                 let data = JSON.parse(xhr.responseText);
                 unblockUI(function () {
-                    setTimeout(function () {
-                        alert_notify(data.icon, data.message, data.type, function () {});
-                    }, 500);
-                });
+//                    setTimeout(function () {
+                    alert_notify(data.icon, data.message, data.type, function () {});
+//                    }, 500);
+                }, 50);
             }
         });
     }
