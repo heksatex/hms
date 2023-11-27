@@ -207,7 +207,7 @@
 
             <div>
                 <span><strong>Mengetahui,</strong></span>
-                <span style="margin-top: 50px; display: block; font-weight: bold;">[<?= $picklist->sales_kode ?>]</span>
+                <span style="margin-top: 50px; display: block; font-weight: bold;">[<?= $picklist->sales ?>]</span>
             </div>
         </div>
 

@@ -109,8 +109,8 @@
     }
 
     //unblock UI 
-    function unblockUI(callback) {
-        setTimeout($.unblockUI, 1000);
+    function unblockUI(callback,timeout = 1000) {
+        setTimeout($.unblockUI, timeout);
         callback();
     }
 

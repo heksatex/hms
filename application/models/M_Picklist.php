@@ -8,7 +8,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_Picklist extends CI_Model {
 
-    var $column_order = array(null, 'no', 'p.nama','tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
+    var $column_order = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
     var $order = ['tanggal_input' => 'desc'];
     var $column_search = array('jenis_jual', 'bulk_nama', 'sales_nama');
     protected $table = "picklist";
@@ -42,15 +42,19 @@ class M_Picklist extends CI_Model {
         }
     }
 
-    public function getCountDataFiltered() {
+    public function getCountDataFiltered(array $condition = []) {
         $this->getDataQuery();
+        if (count($condition) > 0)
+                $this->db->where($condition);
         $query = $this->db->get();
         return $query->num_rows();
     }
 
-    public function getData(bool $realiasi = false) {
+    public function getData(bool $realiasi = false, array $condition = []) {
         try {
             $this->getDataQuery();
+            if (count($condition) > 0)
+                $this->db->where($condition);
             if ($realiasi)
                 $this->joinDetail();
             if ($_POST['length'] != -1)
@@ -62,8 +66,10 @@ class M_Picklist extends CI_Model {
         }
     }
 
-    public function getCountAllData() {
+    public function getCountAllData(array $condition = []) {
         $this->db->from($this->table);
+        if (count($condition) > 0)
+                $this->db->where($condition);
         $this->filteredSales();
         return $this->db->count_all_results();
     }
@@ -97,9 +103,10 @@ class M_Picklist extends CI_Model {
         $this->db->from($this->table);
         $this->db->where($condition);
         $this->filteredSales();
+        $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
         $this->db->join('partner', 'partner.id = customer_id', 'left');
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
-        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk')->get()->row();
+        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk,msg.nama_sales_group as sales')->get()->row();
     }
 
     public function getTypeBulk() {

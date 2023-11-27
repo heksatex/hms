@@ -118,7 +118,7 @@
         formpicklistscan.addEventListener(
                 "submit",
                 async (event) => {
-//            please_wait(function () {});
+            please_wait(function () {});
 
             try {
                 let status = await checkTable(event);
@@ -129,11 +129,11 @@
                                     var data = response.data.data[0];
                                     addRow(data);
                                 }
-//                                unblockUI(function () {
+                                unblockUI(function () {
 //                                    setTimeout(function () {
 //                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
 //                                    }, 1000);
-//                                });
+                                }, 50);
                                 alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                             }
                     ).catch(err => {
@@ -142,11 +142,11 @@
                     });
                 } else {
                     alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
-//                    unblockUI(function () {
+                    unblockUI(function () {
 //                        setTimeout(function () {
 //                            alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
 //                        }, 1000);
-//                    });
+                    },50);
                 }
             } catch (e) {
 

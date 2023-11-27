@@ -60,7 +60,8 @@ class Picklistrealisasi extends MY_Controller {
 
                 $kode_encrypt = encrypt_url($field->id);
                 $no++;
-                $total_lot = $this->_persentase($field->total_item ?? 0, $field->st, 'realisasi');
+                $realisasi = $this->_persentase($field->total_item ?? 0, $field->st, ['realisasi', 'validasi']);
+                $validasi = $this->_persentase($field->total_item ?? 0, $field->st, 'validasi');
                 $row = array(
                     $no,
                     '<a href="' . base_url('warehouse/' . $submenu . '/edit/' . $kode_encrypt) . '">' . $field->no . '</a>',
@@ -70,7 +71,8 @@ class Picklistrealisasi extends MY_Controller {
                     $field->keterangan,
                     $field->sales_nama,
                     $field->total_item,
-                    $total_lot[0] . ' (' . $total_lot[1] . '%)'
+                    $realisasi[0] . ' (' . number_format($realisasi[1], 1) . '%)',
+                    $validasi[0] . ' (' . number_format($validasi[1], 1) . '%)',
 //                    '<div class="miniBar">' . $this->_persentase($field->total_item ?? 0, $field->st) . '</div>'
 //                    $this->m_PicklistDetail->getCountDataFiltered(['no_pl'=>$field->no])
                 );
@@ -244,20 +246,46 @@ class Picklistrealisasi extends MY_Controller {
     protected function _persentase($total_item, $value, $onlyStatus = null): array {
         $data = explode("|", $value);
         $result = [0, 0];
-        $persentase = 0.0;
         if ($data < 1) {
-//            return '<div class="miniBarProgress" style="left: 0; width: 0%; background-color: red;"><span class="tooltiptext">0</span></div>';
-            return 0;
+            return $result;
         }
         foreach ($data as $key => $values) {
             $list = explode(',', trim($values));
-//            $_persen = $persentase;
-//            $persentase += ((trim($list[1]) / $total_item) * 100);
-            if ($onlyStatus === $list[0]) {
-                return [trim($list[1]), number_format((trim($list[1]) / $total_item) * 100, 1)];
+            if (is_string($onlyStatus)) {
+                if ($onlyStatus === $list[0]) {
+                    return [trim($list[1]), number_format((trim($list[1]) / $total_item) * 100, 1)];
+                }
+            } else if (is_array($onlyStatus)) {
+                foreach ($onlyStatus as $value) {
+                    if ($value === $list[0]) {
+                        $result[0] += (int) trim($list[1]);
+                        $result[1] += (trim($list[1]) / $total_item) * 100;
+                    }
+                }
             }
-//            $result .= '<div class="miniBarProgress" style="left: ' . $_persen . '%; width: ' . ($persentase - $_persen) . '%; background-color: ' . $this->statusColor($list[0]) . ';"><span class="tooltiptext">' . $list[0] . ' ' . $list[1] . '</span></div>';
         }
         return $result;
     }
+
+//    protected function _persentase($total_item, $value, $onlyStatus = null): array {
+//        
+//        
+//        $data = explode("|", $value);
+//        $result = [0, 0];
+//        $persentase = 0.0;
+//        if ($data < 1) {
+////            return '<div class="miniBarProgress" style="left: 0; width: 0%; background-color: red;"><span class="tooltiptext">0</span></div>';
+//            return $result;
+//        }
+//        foreach ($data as $key => $values) {
+//            $list = explode(',', trim($values));
+////            $_persen = $persentase;
+////            $persentase += ((trim($list[1]) / $total_item) * 100);
+//            if ($onlyStatus === $list[0]) {
+//                return [trim($list[1]), number_format((trim($list[1]) / $total_item) * 100, 1)];
+//            }
+////            $result .= '<div class="miniBarProgress" style="left: ' . $_persen . '%; width: ' . ($persentase - $_persen) . '%; background-color: ' . $this->statusColor($list[0]) . ';"><span class="tooltiptext">' . $list[0] . ' ' . $list[1] . '</span></div>';
+//        }
+//        return $result;
+//    }
 }

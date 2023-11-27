@@ -131,8 +131,9 @@ class Picklistvalidasi extends MY_Controller {
     public function test() {
         try {
             $code = new Code\Code128New();
-            $gen_code = $code->generate("1234567890", "", 65, "vertical");
-            $this->prints->setView('print/e');
+            $text  = "123456789012";
+            $gen_code = $code->generate($text, "", 65, "vertical");
+            $this->prints->setView('print/d');
             $this->prints->addData('pattern', 'Test Printed');
             $this->prints->addData('isi_color', 'warna kuning matahari warna kuning matahari');
             $this->prints->addData('isi_satuan_lebar', 'WIDTH (cm)');
@@ -141,7 +142,7 @@ class Picklistvalidasi extends MY_Controller {
             $this->prints->addData('isi_qty1', 16);
             $this->prints->addData('isi_satuan_qty2', 'QTY [kg]');
             $this->prints->addData('isi_qty2', 85);
-            $this->prints->addData('barcode_id', '1234567890');
+            $this->prints->addData('barcode_id', $text);
             $this->prints->addData('tanggal_buat', date('ymd'));
             $this->prints->addData('no_pack_brc', "MG312312");
             $this->prints->addData('barcode', $gen_code);

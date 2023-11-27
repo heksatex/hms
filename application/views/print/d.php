@@ -11,7 +11,7 @@
             justify-content:flex-start;
             align-items:stretch;
             flex-wrap:nowrap;
-            padding:2px;
+            padding:0px 5px 0px 5px;
         }
         .gjs-cell{
             min-height:75px;
@@ -133,7 +133,7 @@
             }
             #idybl{
                 padding:4px 0px 0px 0px;
-                font-size:65%;
+                font-size:70%;
                 text-align:center;
             }
             .divs {
@@ -149,6 +149,21 @@
             }
             .translate-rotate {
                 transform: translateX(180px) rotate(90deg);
+            }
+            .text-rotate {
+                -webkit-transform: rotate(90deg);
+                -moz-transform: rotate(90deg);
+                -ms-transform: rotate(90deg);
+                -o-transform: rotate(90deg);
+                transform: rotate(180deg);
+            }
+            #isef_p{
+                text-align:right;
+                font-size:67%;
+                padding:2px 10px 2px 10px;
+                font-family:Arial, Helvetica, sans-serif;
+                font-weight:600;
+                text-transform: uppercase;
             }
         }
         @media (max-width: 768px){
@@ -178,11 +193,11 @@
                 </div>
             </div>
             <div class="gjs-cell" id="i2uo">
-                <div id="isef">Pattern
+                <div id="isef_p">Pattern
                 </div>
                 <div id="i75tl"><?= $data["pattern"] ?? "" ?>
                 </div>
-                <div id="isef">Color
+                <div id="isef_p">Color
                 </div>
                 <div id="i75tl"><?= $data["isi_color"] ?? "" ?>
                 </div>
@@ -192,19 +207,19 @@
                 </div>
                 <div id="isef"><?= $data["isi_satuan_qty1"] ?? "" ?>
                 </div>
-                <div id="i75tl"><?= $data["isi_qty1"] ?>
+                <div id="<?= isset($data["isi_qty1"]) ? "i75tl" : "" ?>"><?= $data["isi_qty1"] ?? "" ?>
                 </div>
-                <div id="isef"><?= $data["isi_satuan_qty2"] ?? "" ?>
+                <div id="<?= isset($data["isi_satuan_qty2"]) ? "isef" : "" ?>"><?= $data["isi_satuan_qty2"] ?? "" ?>
                 </div>
-                <div id="i75tl"><?= $data["isi_qty2"] ?? "" ?>
+                <div id="<?= isset($data["isi_qty2"]) ? "i75tl" : "" ?>"><?= $data["isi_qty2"] ?? "" ?>
                 </div>
             </div>
             <div class="gjs-cell" id="iuua">
                 <img id="ieh54" src="data:image/png;base64,<?= $data["barcode"] ?? "" ?>">
                 <div class="divs translate-rotate">
-                    <div><?= $data["barcode_id"] ?? "" ?></div>
-                    <div><?= $data["tanggal_buat"] ?? "" ?></div>
-                    <div><?= $data["no_pack_brc"] ?? "" ?></div>
+                    <div class="text-rotate"><?= $data["barcode_id"] ?? "" ?></div>
+                    <div class="text-rotate"><?= $data["tanggal_buat"] ?? "" ?></div>
+                    <div class="text-rotate"><?= $data["no_pack_brc"] ?? "" ?></div>
                 </div>
             </div>
         </div>
