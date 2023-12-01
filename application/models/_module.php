@@ -694,7 +694,10 @@ class _module extends CI_Model {
         return $result->result();
     }
 
-    public function get_list_sales_group_by_view() {
+    public function get_list_sales_group_by_view($view = null) {
+        if(isset($view)){
+            $this->db->where('view',$view);
+        }
         $result = $this->db->get('mst_sales_group');
         return $result->result();
     }
@@ -815,7 +818,10 @@ class _module extends CI_Model {
         return $result->result();
     }
     
-    public function get_list_quality(){
+    public function get_list_quality($nama=null){
+        if($nama){
+            $this->db->like('nama', $nama);
+        }
         $this->db->order_by('nama','asc');
         $result = $this->db->get('mst_quality');
         return $result->result();
