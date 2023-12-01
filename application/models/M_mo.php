@@ -1284,5 +1284,13 @@ class M_mo extends CI_Model
 
 	}
 
+	public function cek_mrp_inlet_by_quant_id($quant_id,$status)
+	{
+		$this->db->where_not_in('status',$status);
+		$this->db->where('quant_id',$quant_id);
+		$result = $this->db->get('mrp_inlet');
+		return $result->num_rows();
+	}
+
 
 }

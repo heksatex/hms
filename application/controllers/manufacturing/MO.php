@@ -5512,7 +5512,7 @@ class MO extends MY_Controller
             $status_brg     = 'draft';
             
             //lock tabel
-            $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, mrp_production WRITE, stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE, mrp_production_fg_hasil WRITE' );
+            $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, mrp_production_rm_target WRITE,  mrp_production_rm_target rm WRITE, mrp_production WRITE, stock_move_items as smi WRITE, mst_produk as mp WRITE, mst_category as mc WRITE, mrp_production_fg_hasil WRITE, mrp_inlet WRITE' );
 
 
             //cek status mrp_production = done
@@ -5539,10 +5539,23 @@ class MO extends MY_Controller
                 $where2          = '';
                 $note_log_produk = '';
                 $no              = 1;
+                $inlet           = false;
+                $lot_inlet       = '';
                 foreach($items_arr as $item){
+
                     $quant_id   = $item['quant_id'];
                     $row_order  = $item['row_order'];
                     $lot        = $item['lot'];
+                    if($deptid == 'GJD'){
+                        // cek quant_id di table mrp_inlet
+                        $status = array('status' => 'cancel'); // status not i
+                        $cek_inlet = $this->m_mo->cek_mrp_inlet_by_quant_id($quant_id,$status);
+
+                        if($cek_inlet > 0){
+                            $inlet = true;
+                            $lot_inlet .= $lot.'<br> ';
+                        }
+                    }
 
                     // cek item row
                     $get_smi = $this->_module->get_stock_move_items_by_kode($move_id,$quant_id,$kode_produk,$row_order)->row_array();
@@ -5562,7 +5575,7 @@ class MO extends MY_Controller
                 }
 
 
-                if($delete_lot == true){
+                if($delete_lot == true AND $inlet == false){
                     
                     //delete stock move item dan update reserve move jadi kosong
                     if(!empty($where) AND !empty($where2)){
@@ -5622,9 +5635,14 @@ class MO extends MY_Controller
                     }
                     
                 }else{
+
+                    if($inlet){
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, Product/Lot tidak bisa dihapus karena sudah INLET ! <br> '.$lot_inlet, 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    }else{
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, Product/Lot Tidak ditemukan ! <br> '.$list_lot_failed, 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    }
                     //unlock table
                     $this->_module->unlock_tabel();
-                    $callback = array('status' => 'failed', 'message'=>'Maaf, Product/Lot Tidak ditemukan ! <br> '.$list_lot_failed, 'icon' => 'fa fa-warning', 'type'=>'danger');
                     
 
                 }
