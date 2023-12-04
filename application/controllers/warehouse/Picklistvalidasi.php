@@ -75,7 +75,7 @@ class Picklistvalidasi extends MY_Controller {
 //                }
                 $picklist = $dataPl;
                 $picklist->total_lot = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no]);
-                $picklist->total_realisasi = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no,'valid'=>'realisasi']);
+                $picklist->total_realisasi = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no, 'valid' => 'realisasi']);
                 if ($picklist->total_lot < 1) {
                     throw new Exception("Tidak ada barcode pada Picklist " . $dataPl->no, 500);
                 }
@@ -105,7 +105,7 @@ class Picklistvalidasi extends MY_Controller {
                 }
                 $this->m_Picklist->update(['status' => 'validasi'], ['no' => $pl]);
 //                $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($condition, $update)), $username);
-                $this->_module->gen_history($sub_menu, $pl, 'edit',  ($nama["nama"] ?? "") . ' Melakukan validasi barcode ' . $barcode, $username);
+                $this->_module->gen_history($sub_menu, $pl, 'edit', ($nama["nama"] ?? "") . ' Melakukan validasi barcode ' . $barcode, $username);
             }
 
             $this->output->set_status_header(200)
@@ -131,22 +131,38 @@ class Picklistvalidasi extends MY_Controller {
     public function test() {
         try {
             $code = new Code\Code128New();
-            $text  = "123456789012";
-            $gen_code = $code->generate($text, "", 65, "vertical");
-            $this->prints->setView('print/d');
-            $this->prints->addData('pattern', 'Test Printed');
-            $this->prints->addData('isi_color', 'warna kuning matahari warna kuning matahari');
-            $this->prints->addData('isi_satuan_lebar', 'WIDTH (cm)');
-            $this->prints->addData('isi_lebar', '250x128');
-            $this->prints->addData('isi_satuan_qty1', 'QTY [Pnl]');
-            $this->prints->addData('isi_qty1', 16);
-            $this->prints->addData('isi_satuan_qty2', 'QTY [kg]');
-            $this->prints->addData('isi_qty2', 85);
-            $this->prints->addData('barcode_id', $text);
-            $this->prints->addData('tanggal_buat', date('ymd'));
-            $this->prints->addData('no_pack_brc', "MG312312");
-            $this->prints->addData('barcode', $gen_code);
-            $this->prints->addData('k3l', date('Ymd'));
+            $text = "123456789012";
+            $gen_code = $code->generate($text, "", 50, "vertical");
+            $this->prints->setView('print/a');
+            $this->prints->addDatas([
+                'pattern' => 'Test Printed',
+                'isi_color' => 'warna kuning matahari warna kuning matahari',
+                'isi_satuan_lebar' => 'WIDTH (cm)',
+                'isi_lebar' => '250x128',
+                'isi_satuan_qty1' => 'QTY [Pnl]',
+                'isi_qty1' => 16,
+                'isi_satuan_qty2' => 'QTY [kg]',
+                'isi_qty2' => 85,
+                'barcode_id' => $text,
+                'tanggal_buat' => date('ymd'),
+                'no_pack_brc' => "MG312312",
+                'barcode' => $gen_code,
+                'k3l' => date('Ymd')
+            ]);
+            
+//            $this->prints->addData('pattern', 'Test Printed');
+//            $this->prints->addData('isi_color', 'warna kuning matahari warna kuning matahari');
+//            $this->prints->addData('isi_satuan_lebar', 'WIDTH (cm)');
+//            $this->prints->addData('isi_lebar', '250x128');
+//            $this->prints->addData('isi_satuan_qty1', 'QTY [Pnl]');
+//            $this->prints->addData('isi_qty1', 16);
+//            $this->prints->addData('isi_satuan_qty2', 'QTY [kg]');
+//            $this->prints->addData('isi_qty2', 85);
+//            $this->prints->addData('barcode_id', $text);
+//            $this->prints->addData('tanggal_buat', date('ymd'));
+//            $this->prints->addData('no_pack_brc', "MG312312");
+//            $this->prints->addData('barcode', $gen_code);
+//            $this->prints->addData('k3l', date('Ymd'));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $this->prints->generate())));
