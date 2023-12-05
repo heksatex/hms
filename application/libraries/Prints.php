@@ -18,6 +18,7 @@ class Prints {
     protected $image = array();
     protected $data = array();
     protected $ci = null;
+    protected $isMultiplePage = false;
 
     public function __construct(string $view = null) {
 
@@ -48,11 +49,21 @@ class Prints {
      * @param string $title
      */
     public function addData(string $key, $data) {
+        $this->isMultiplePage = false;
         $this->data = array_merge($this->data, [$key => $data]);
         return $this;
     }
 
+    public function addDatas(array $data) {
+        $this->isMultiplePage = true;
+        $this->data[] = $data;
+        return $this;
+    }
+
     public function generate() {
+        if (!$this->isMultiplePage) {
+            $this->data = array($this->data);
+        }
         $data = $this->ci->view($this->view, ['image' => $this->image, 'data' => $this->data], true);
         return $data;
     }
