@@ -18,6 +18,9 @@
                 font-size: 100%;
                 letter-spacing: 3px;
             }
+            #btn-simpan{
+                display: none;
+            }
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
@@ -25,7 +28,7 @@
             <header class="main-header">
                 <?php
                 $data['deptid'] = $id_dept;
-                $this->load->view("admin/_partials/topbar.php", $data)
+                $this->load->view("admin/_partials/topbar.php", $data);
                 ?>
             </header>
             <aside class="main-sidebar">
@@ -35,74 +38,48 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">bulk</strong></h3>
+                            <h3 class="box-title">BULK</strong></h3>
                             <div class="pull-right text-right" id="btn-header">
                                 <button class="btn btn-primary btn-sm" id="btn-add-bulk" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Tambah Bulk / BAL</button>
                             </div>
                         </div>
                         <div class="box-body">
+
                             <div class="row">
                                 <div class="col-md-6 col-xs-12">
-                                    <div class="form-group">
-                                        <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
-                                                <label class="form-label">No Picklist</label>
-                                            </div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <span id="no_pl"><?= $picklist->no ?></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
-                                                <label class="form-label">Buyer</label>
-                                            </div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <span id="no_pl"><?= $picklist->nama ?></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--                            <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <div class="col-md-12" id="statusbulk">
-                                                                        BAL Not Exist
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>-->
-                            <div class="row">
-                                <div class="col-md-6 col-xs-12">
-                                    <form class="form-horizontal" method="POST" name="form-validasi" id="form-validasi" action="<?= base_url('warehouse/bulk/update') ?>">
-                                        <button type="submit" id="btn_form_validasi" style="display: none"></button>
+                                    <form class="form-horizontal" method="POST" name="form-bulk-edit" id="form-bulk-edit" action="<?= base_url('warehouse/bulk/update') ?>">
+                                        <button type="submit" id="btn_form_bulk_edit" style="display: none"></button>
                                         <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label required">Scan Barcode / BULK ID</label>
+                                            <div class="col-md-8 col-xs-12">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">No Picklist</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input type='text' class="form-control input-sm" readonly value="<?= $picklist->no ?>"  />
+                                                    </div>
                                                 </div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type='text' name="search" id="search" class="form-control input-lg scan-text" required/>
-                                                    <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
-                                                    <input type='hidden' name="pl" id="pl" value=""/>
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">Buyer</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input type='text' class="form-control input-sm" readonly value="<?= $picklist->nama ?>"  />
+                                                    </div>
                                                 </div>
+
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">Sales</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8">
+                                                        <input type='text' class="form-control input-sm" readonly value="<?= $picklist->sales ?>"  />
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </form>
-                                </div>
-                                <div class="col-md-6 col-xs-12">
-                                    <div class="form-group">
-                                        <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
-                                                <label class="form-label">BULK</label>
-                                            </div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <h2 id="posisi_bulk">-</h2>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -113,11 +90,9 @@
                                                 <tr>
                                                     <th class="style" width="10px">No</th>
                                                     <th class="style"width="20px">BAL ID</th>
-                                                    <th class="style" width="20px">Description</th>
                                                     <th class="style" width="10px">PCS</th>
                                                     <th class="style" width="10px">QTY</th>
-                                                    <th class="style" width="10px">UOM</th>
-
+                                                    <th class="style" width="10px">#</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -137,40 +112,115 @@
                 ?>
             </footer>
         </div>
+        <div style="display: none;" id="pilihan-print">
+            <div class="row">
+                <div class="col-md-3 col-xs-6">
+                    <button class="btn btn-default btn-sm print-bulk" data-print="S"><i class="fa fa-print"></i> S</button>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <button class="btn btn-default btn-sm print-bulk" data-print="T"><i class="fa fa-print"></i> T</button>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <button class="btn btn-default btn-sm print-bulk" data-print="U"><i class="fa fa-print"></i> U</button>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <button class="btn btn-default btn-sm print-bulk" data-print="V"><i class="fa fa-print"></i> V</button>
+                </div>
+            </div>
+        </div>
         <script>
-            $(document).keydown(function (e) {
-                if (e.which === 113) {
-                    $("#search").focus();
-                }
-                checkInput(e, "*", {"*scan*": function () {
-                        $("#search").focus();
-                    }});
-
-            });
             $(function () {
-                $("#search").focus();
 
                 const sumTable = $("#summary_bulk").DataTable({
-                    "searching": false,
-                    "paging": false
+                    "iDisplayLength": 25,
+                    "processing": true,
+                    "serverSide": true,
+                    "order": [],
+                    "paging": true,
+                    "lengthChange": false,
+                    "searching": true,
+                    "ordering": false,
+                    "info": true,
+                    "autoWidth": true,
+                    "ajax": {
+                        "url": "<?= base_url('warehouse/bulk/data_bulking') ?>",
+                        "type": "POST",
+                        "data": function (d) {
+                            d.no_pl = "<?= $picklist->no ?>";
+                        },
+                        "dataSrc": function (data) {
+                            if (data.data.length < 1) {
+                                $(".header-status").hide();
+                            }
+                            return data.data;
+                        }
+                    },
+                    "columnDefs": [
+                        {
+                            "orderable": false
+                        }
+                    ],
+                    "fnDrawCallback": function () {
+                        $(".print-ballid").on("click", function (e) {
+                            e.preventDefault();
+                            $("#print_data").modal({
+                                show: true,
+                                backdrop: 'static'
+                            });
+                            $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                            $('.modal-title').text('Pilihan Mode Print ' + $(this).attr("data-id"));
+                            $(".print_data").html($("#pilihan-print").html());
+                        });
+                    }
                 });
                 $(sumTable.column(1).nodes()).addClass('bolded');
 
+                const formsearch = document.forms.namedItem("form-bulk-edit");
+                formsearch.addEventListener(
+                        "submit",
+                        async(event) => {
+                    please_wait(function () {});
+                    try {
+
+                    } catch (e) {
+
+                    } finally {
+                        unblockUI(function () {});
+                    }
+                    event.preventDefault();
+                },
+                        false
+                        );
+
                 $("#btn-add-bulk").on('click', function (e) {
                     e.preventDefault();
-                    $("#tambah_data").modal({
-                        show: true,
-                        backdrop: 'static'
-                    });
-                    $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-                    $('.modal-title').text('Tambah Data BAL');
-                    $.post("<?= base_url('warehouse/bulk/add_bulk/') ?>", {pl: "<?= $picklist->no ?>"}, function (data) {
-                        setTimeout(function () {
-                            $(".tambah_data").html(data.data);
-                            $("#btn-tambah").html("Tambahkan");
-                        }, 1000);
+                    confirmRequest("Tambah Data", "Tambah Data Bulk / BAL ", () => {
+                        addBulk();
                     });
                 });
+
+                const addBulk = function () {
+                    please_wait(function () {});
+                    $.ajax({
+                        "url": "<?= base_url('warehouse/bulk/save_add_bulk') ?>",
+                        "type": "POST",
+                        "data": {
+                            pl: "<?= $picklist->no ?>"
+                        },
+                        "success": function (data) {
+                            sumTable.search("").draw(false);
+                            unblockUI(function () {
+                                alert_notify(data.icon, data.message, data.type, function () {});
+                            }, 100);
+                        },
+                        "error": function (xhr, ajaxOptions, thrownError) {
+                            let data = JSON.parse(xhr.responseText);
+                            unblockUI(function () {
+                                alert_notify(data.icon, data.message, data.type, function () {});
+                            }, 100);
+                        }
+                    });
+                };
             });
         </script>
     </body>
