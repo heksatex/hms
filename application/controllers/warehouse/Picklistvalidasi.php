@@ -134,7 +134,7 @@ class Picklistvalidasi extends MY_Controller {
             $text = "123456789012";
             $gen_code = $code->generate($text, "", 50, "vertical");
 //            $gen_code = $code->generate($text, "", 50);
-            $this->prints->setView('print/j');
+            $this->prints->setView('print/x2');
 //            $this->prints->addDatas([
 //                'barcode_id' => $text,
 //                'barcode' => $gen_code,
@@ -161,7 +161,7 @@ class Picklistvalidasi extends MY_Controller {
                     'tanggal_buat' => date('ymd'),
                     'no_pack_brc' => "MG312312" . $index,
                     'barcode' => $gen_code,
-                    'k3l' => date('Ymd')
+                    'k3l' => "20-".date('Ymd')
                 ]);
             }
 
