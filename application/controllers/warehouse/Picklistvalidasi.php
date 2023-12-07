@@ -133,23 +133,39 @@ class Picklistvalidasi extends MY_Controller {
             $code = new Code\Code128New();
             $text = "123456789012";
             $gen_code = $code->generate($text, "", 50, "vertical");
-            $this->prints->setView('print/a');
-            $this->prints->addDatas([
-                'pattern' => 'Test Printed',
-                'isi_color' => 'warna kuning matahari warna kuning matahari',
-                'isi_satuan_lebar' => 'WIDTH (cm)',
-                'isi_lebar' => '250x128',
-                'isi_satuan_qty1' => 'QTY [Pnl]',
-                'isi_qty1' => 16,
-                'isi_satuan_qty2' => 'QTY [kg]',
-                'isi_qty2' => 85,
-                'barcode_id' => $text,
-                'tanggal_buat' => date('ymd'),
-                'no_pack_brc' => "MG312312",
-                'barcode' => $gen_code,
-                'k3l' => date('Ymd')
-            ]);
-            
+//            $gen_code = $code->generate($text, "", 50);
+            $this->prints->setView('print/j');
+//            $this->prints->addDatas([
+//                'barcode_id' => $text,
+//                'barcode' => $gen_code,
+//                'pl' => "PL200312323"
+//            ]);
+//            $this->prints->addDatas([
+//                'barcode_id' => $text,
+//                'barcode' => $gen_code,
+//                'pl' => "PL200312323"
+//            ]);
+            for ($index = 0; $index < 6; $index++) {
+                $text = "1234567890-" . $index;
+                $gen_code = $code->generate($text, "", 50, "vertical");
+                $this->prints->addDatas([
+                    'pattern' => 'Test Printed ' . $index,
+                    'isi_color' => 'warna kuning matahari warna kuning matahari',
+                    'isi_satuan_lebar' => 'WIDTH (cm)',
+                    'isi_lebar' => '250x128',
+                    'isi_satuan_qty1' => 'QTY [Pnl]',
+                    'isi_qty1' => 16,
+                    'isi_satuan_qty2' => 'QTY [kg]',
+                    'isi_qty2' => 85,
+                    'barcode_id' => $text,
+                    'tanggal_buat' => date('ymd'),
+                    'no_pack_brc' => "MG312312" . $index,
+                    'barcode' => $gen_code,
+                    'k3l' => date('Ymd')
+                ]);
+            }
+
+//            
 //            $this->prints->addData('pattern', 'Test Printed');
 //            $this->prints->addData('isi_color', 'warna kuning matahari warna kuning matahari');
 //            $this->prints->addData('isi_satuan_lebar', 'WIDTH (cm)');

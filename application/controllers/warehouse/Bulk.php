@@ -105,6 +105,7 @@ class Bulk extends MY_Controller {
                     $field->jenis_jual,
                     $field->keterangan,
                     $field->sales_nama,
+                    "<button type='button' class='btn btn-default btn-sm print-ballid' data-id='" . $field->no . "'><i class='fa fa-print'></i><span class='tooltiptext'>Cetak Barcode Bulk</span></button>"
                 );
                 $data[] = $row;
             }
@@ -132,6 +133,46 @@ class Bulk extends MY_Controller {
             foreach ($list as $field) {
                 $no++;
             }
+        } catch (Exception $ex) {
+            
+        }
+    }
+
+    public function print_bulk() {
+        try {
+            $pl = $this->input->post("pl");
+            $mode = $this->input->post("print_mode");
+            $condition = ['no_pl' => $pl];
+            if (!is_null($this->input->post("type"))) {
+                $condition = ['no_bulk' => $pl];
+            }
+            $list = $this->m_bulk->getDatas($condition);
+            $code = new Code\Code128New();
+            $this->prints->setView('print/bulk/' . $mode);
+            $gen_code = [];
+            $codes = [];
+            foreach ($list as $key => $value) {
+                $codes[$key] = $value->no_bulk;
+                $gen_code[$key] = $code->generate($value->no_bulk, "", 50, ($mode === "v" ? "horizontal" : "vertical"));
+                $data = [
+                    'barcode_id' => $codes[$key],
+                    'barcode' => $gen_code[$key],
+                    'pl' => $pl
+                ];
+                $this->prints->addDatas($data);
+                log_message('error', json_encode($data));
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $this->prints->generate())));
+        } catch (Exception $ex) {
+            
+        }
+    }
+
+    public function print_bulk_satuan() {
+        try {
+            
         } catch (Exception $ex) {
             
         }
