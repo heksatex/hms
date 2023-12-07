@@ -6,9 +6,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            /*margin-top: -10px;*/
         }
         #noregk3l #iop3i{
-             margin-top: auto;
+            margin-top: auto;
+            line-height: 0.5;
         }
     </style>
     <body>
@@ -23,7 +25,7 @@
                                 <div id="noregk3l">
                                     <div id="iop3i">
                                         <div>
-                                            No Registrasi K3L <span style="font-size: 150%;"><?= $data["k3l"] ?? "" ?></span>
+                                            <p>No Registrasi K3L</p> <span style="font-size: 150%;"><?= $data["k3l"] ?? "" ?></span>
                                         </div>
                                     </div>
                                 </div>
