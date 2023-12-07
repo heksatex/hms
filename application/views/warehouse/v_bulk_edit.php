@@ -115,16 +115,16 @@
         <div style="display: none;" id="pilihan-print">
             <div class="row">
                 <div class="col-md-3 col-xs-6">
-                    <button class="btn btn-default btn-sm print-bulk" data-print="S"><i class="fa fa-print"></i> S</button>
+                    <button class="btn btn-default btn-sm print-bulk" type="button" data-print="s"><i class="fa fa-print"></i> S</button>
                 </div>
                 <div class="col-md-3 col-xs-6">
-                    <button class="btn btn-default btn-sm print-bulk" data-print="T"><i class="fa fa-print"></i> T</button>
+                    <button class="btn btn-default btn-sm print-bulk" type="button" data-print="t"><i class="fa fa-print"></i> T</button>
                 </div>
                 <div class="col-md-3 col-xs-6">
-                    <button class="btn btn-default btn-sm print-bulk" data-print="U"><i class="fa fa-print"></i> U</button>
+                    <button class="btn btn-default btn-sm print-bulk" type="button" data-print="u"><i class="fa fa-print"></i> U</button>
                 </div>
                 <div class="col-md-3 col-xs-6">
-                    <button class="btn btn-default btn-sm print-bulk" data-print="V"><i class="fa fa-print"></i> V</button>
+                    <button class="btn btn-default btn-sm print-bulk" type="button" data-print="v"><i class="fa fa-print"></i> V</button>
                 </div>
             </div>
         </div>
@@ -170,6 +170,20 @@
                             $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                             $('.modal-title').text('Pilihan Mode Print ' + $(this).attr("data-id"));
                             $(".print_data").html($("#pilihan-print").html());
+                            let pl = $(this).attr("data-id");
+                            $(".print-bulk").on('click', function () {
+                                $.post("<?= base_url('warehouse/bulk/print_bulk/') ?>",
+                                        {
+                                            "pl": pl,
+                                            "print_mode": $(this).attr("data-print"),
+                                            "type":"bulk"
+                                        }
+                                , function (response) {
+                                    var divp = document.getElementById('printed');
+                                    divp.innerHTML = response.data;
+                                    print_voucher();
+                                });
+                            });
                         });
                     }
                 });
@@ -222,6 +236,16 @@
                     });
                 };
             });
+
+            const print_voucher = function () {
+
+                var win = window.open();
+                win.document.write($("#printed").html());
+                win.document.close();
+                win.print();
+                win.close();
+
+            };
         </script>
     </body>
 </html>
