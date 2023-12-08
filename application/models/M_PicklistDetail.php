@@ -40,11 +40,12 @@ class M_PicklistDetail extends CI_Model {
     }
 
     protected function _getDataItem() {
-        $this->db->select("a.*,ms.nama_status as valid,sq.lokasi_fisik as lokasi_fisik");
+        $this->db->select("a.*,ms.nama_status as valid,sq.lokasi_fisik as lokasi_fisik, dt.bulk_no_bulk as bulk");
         $this->db->join('mst_status as ms', 'ms.kode = a.valid', 'left');
         $this->db->from($this->table . ' a');
 
         $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id', 'left');
+        $this->db->join("bulk_detail dt","dt.barcode = a.barcode_id","left");
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
