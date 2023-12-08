@@ -1050,22 +1050,28 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty2])+" "+value[in_qty2_uom]+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_opname])+" "+value[in_opname_uom]+"</td>";
                               no_in++;
-                              // info total++ in
-                              in_total_lot         = in_total_lot+parseInt(value[in_lot]);
-                              in_total_qty1        = in_total_qty1+parseFloat(value[in_qty1]);
-                              in_total_qty2        = in_total_qty2+parseFloat(value[in_qty2]);
-                              in_total_qty_opname  = in_total_qty_opname+parseFloat(value[in_opname]);
 
-                              arr_in.push({in_lot:value[in_lot], in_qty1:value[in_qty1],  in_qty1_uom:value[in_qty1_uom],  in_qty2:value[in_qty2], in_qty2_uom:value[in_qty2_uom], in_opname:value[in_opname], in_opname_uom:value[in_opname_uom]});
+                              // info total++ in
+                              value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              value_in_qty1 = value[in_qty1] !== null ? parseFloat(value[in_qty1])  : 0;
+                              value_in_qty2 = value[in_qty2] !== null ? parseFloat(value[in_qty2])  : 0 ;
+                              value_in_opname = value[in_opname] !== null ? parseFloat(value[in_opname])  : 0 ;
+
+                              in_total_lot         = in_total_lot+ value_in_lot;
+                              in_total_qty1        = in_total_qty1+value_in_qty1
+                              in_total_qty2        = in_total_qty2+value_in_qty2
+                              in_total_qty_opname  = in_total_qty_opname+value_in_opname;
+
+                              arr_in.push({in_lot:value_in_lot, in_qty1:value_in_qty1,  in_qty1_uom:value[in_qty1_uom],  in_qty2:value_in_qty2, in_qty2_uom:value[in_qty2_uom], in_opname:value_in_opname, in_opname_uom:value[in_opname_uom]});
 
                               //info uom
-                              if(value[in_qty1_uom] != ''){
+                              if(value[in_qty1_uom] != '' && value[in_qty1_uom] !== null){
                                 qty1_uom  = value[in_qty1_uom];
                               }
-                              if(value[in_qty2_uom] != ''){
+                              if(value[in_qty2_uom] != ''&& value[in_qty2_uom] !== null){
                                 qty2_uom  = value[in_qty2_uom];
                               }
-                              if(value[in_opname_uom] != ''){
+                              if(value[in_opname_uom] != ''&& value[in_opname_uom] !== null){
                                 qty_opname_uom = value[in_opname_uom];
                               }
                             
@@ -1179,22 +1185,27 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
                               no_out++;
 
-                              // info total++ out
-                              out_total_lot       = out_total_lot+parseInt(value[out_lot]);
-                              out_total_qty1      = out_total_qty1+parseFloat(value[out_qty1]);
-                              out_total_qty2      = out_total_qty2+parseFloat(value[out_qty2]);
-                              out_total_qty_opname = out_total_qty_opname+parseFloat(value[out_opname]);
+                              value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              value_out_qty1 = value[out_qty1] !== null ? parseFloat(value[out_qty1])  : 0;
+                              value_out_qty2 = value[out_qty2] !== null ? parseFloat(value[out_qty2])  : 0 ;
+                              value_out_opname = value[out_opname] !== null ? parseFloat(value[out_opname])  : 0 ;
 
-                              arr_out.push({out_lot:value[out_lot], out_qty1:value[out_qty1], out_qty1_uom:value[out_qty1_uom], out_qty2:value[out_qty2], out_qty2_uom:value[out_qty2_uom], out_opname:value[out_opname], out_opname_uom:value[out_opname_uom]});
+                              // info total++ out
+                              out_total_lot       = out_total_lot + value_out_lot;
+                              out_total_qty1      = out_total_qty1+ value_out_qty1;
+                              out_total_qty2      = out_total_qty2+ value_out_qty2;
+                              out_total_qty_opname = out_total_qty_opname+ value_out_opname;
+
+                              arr_out.push({out_lot:value[out_lot], out_qty1:value_out_qty1, out_qty1_uom:value[out_qty1_uom], out_qty2:value_out_qty2, out_qty2_uom:value[out_qty2_uom], out_opname:value_out_opname, out_opname_uom:value[out_opname_uom]});
 
                               // info uom 
-                              if(value[out_qty1_uom] != ''){
+                              if(value[out_qty1_uom] != '' && value[out_qty1_uom] !== null){
                                 qty1_uom  = value[out_qty1_uom];
                               }
-                              if(value[out_qty2_uom] != ''){
+                              if(value[out_qty2_uom] != '' && value[out_qty2_uom] !== null){
                                 qty2_uom  = value[out_qty2_uom];
                               }
-                              if(value[out_opname_uom] != ''){
+                              if(value[out_opname_uom] != '' && value[out_opname_uom] !== null){
                                 qty_opname_uom = value[out_opname_uom];
                               }
                             
@@ -1563,7 +1574,7 @@
                                 if(view == "Global" || view == "DetailProduk"){
                                   colspan = 'colspan = "5" ';
                                 }else{
-                                  colspan = 'colspan = "4" ';
+                                  colspan = 'colspan = "5" ';
                                 }
                                 row2 += "<th class='style no text-center white-space-nowrap'  "+colspan+" >";
                                 row2 += h;
@@ -1621,9 +1632,9 @@
             
             // saldo awal
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty1)+" "+value.s_awal_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty2)+" "+value.s_awal_qty2_uom+" </td>";
@@ -1643,10 +1654,10 @@
                         in_qty_op      = "in_"+d+"_qty_opname";
                         in_qty_op_uom  = "in_"+d+"_qty_opname_uom";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_proses])+"</td>";
-                        if(view == "Global" || view == 'DetailProduk'){
-                          lot = "in_"+d+"_lot";
-                          row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
-                        }
+                        lot = "in_"+d+"_lot";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
+                        // if(view == "Global" || view == 'DetailProduk'){
+                        // }
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty1])+" "+value[in_qty1_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty2])+" "+value[in_qty2_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty_op])+" "+value[in_qty_op_uom]+"</td>";
@@ -1656,27 +1667,27 @@
 
             // consume
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty1)+" "+value.con_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty2)+" "+value.con_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
 
             // ADJ IN 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty1)+" "+value.adj_in_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty2)+" "+value.adj_in_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+" </td>";
 
             // produce
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty1)+" "+value.prod_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty2)+" "+value.prod_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
@@ -1694,7 +1705,9 @@
                         hph_qty2_uom  = "hph_"+d+"_qty2_uom";
                         hph_qty_op      = "hph_"+d+"_qty_opname";
                         hph_qty_op_uom  = "hph_"+d+"_qty_opname_uom";
+                        hph_lot         = "hph_"+d+"_lot";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_proses])+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_lot])+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty1])+" "+value[hph_qty1_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty2])+" "+value[hph_qty2_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty_op])+" "+value[hph_qty_op_uom]+"</td>";
@@ -1716,10 +1729,10 @@
                         out_qty_op      = "out_"+d+"_qty_opname";
                         out_qty_op_uom  = "out_"+d+"_qty_opname_uom";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_proses])+"</td>";
-                        if(view == "Global" || view == 'DetailProduk'){
+                        // if(view == "Global" || view == 'DetailProduk'){
                           lot = "out_"+d+"_lot";
                           row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
-                        }
+                        // }
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty1])+" "+value[out_qty1_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty2])+" "+value[out_qty2_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty_op])+" "+value[out_qty_op_uom]+"</td>";
@@ -1729,18 +1742,18 @@
 
             // ADJ OUT
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
+            // if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_lot)+"</td>";
-            }
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty1)+" "+value.adj_out_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty2)+" "+value.adj_out_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+" </td>";
 
             // saldo akhir
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
+            // if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_lot)+"</td>";
-            }
+            // }
 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty1)+" "+value.s_akhir_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty2)+" "+value.s_akhir_qty2_uom+" </td>";
