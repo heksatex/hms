@@ -300,7 +300,7 @@ class Picklist extends MY_Controller {
                     $field->lokasi_fisik,
                     $field->valid,
                     $field->valid_date,
-                    $status
+                    (!is_null($field->bulk) ? "" : $status)
                 );
                 $data[] = $row;
             }
