@@ -160,19 +160,10 @@ class Bulk extends MY_Controller {
                     'pl' => $pl
                 ];
                 $this->prints->addDatas($data);
-                log_message('error', json_encode($data));
             }
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $this->prints->generate())));
-        } catch (Exception $ex) {
-            
-        }
-    }
-
-    public function print_bulk_satuan() {
-        try {
-            
         } catch (Exception $ex) {
             
         }
@@ -384,15 +375,6 @@ class Bulk extends MY_Controller {
             $data['data'] = $this->m_bulkdetail->getDataListBulk(['b.no_pl' => $pl]);
             $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
             echo json_encode($pers);
-        } catch (Exception $ex) {
-            
-        }
-    }
-
-    protected function getNoPl($nopl) {
-        try {
-            $data = $this->m_Picklist->getDataByID(['picklist.no' => $nopl, 'status' => 'validasi', 'type_bulk_id' => 1]);
-            return $data;
         } catch (Exception $ex) {
             
         }

@@ -2,32 +2,31 @@
     <?php $this->load->view("print/header.php") ?>
     <style>
         #noregk3l{
-            height: 30vh;
+            height: 20vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-right: -10px;
-            margin-top: -10px;
         }
         #noregk3l #iop3i{
             margin-top: auto;
             line-height: 0.5;
         }
         #idah{
-            width:100%;
-            margin-top: 25%;
+            width:80%;
+            height: 38%;
+            margin-top: 10%;
         }
         #iex1{
-            width:80%;
+            width:60%;
             margin-top: 0px;
-            margin-left: 20%;
+            margin-left: 22%
         }
     </style>
     <body>
         <?php foreach ($data as $key => $data) { ?>
             <div class="container-fluid" id="#is1i">
                 <div class="row">
-                    <div class="col-xs-3">
+                    <div class="col-xs-4">
                         <div class="row">
                             <div class="data-center">
                                 <img id="idah" src="data:image/jpg;base64,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">
@@ -44,7 +43,7 @@
                         </div>
 
                     </div>
-                    <div class="col-xs-3">
+                    <div class="col-xs-3" style="margin-left: -10px;">
                         <div class="row">
                             <ul class="flex-container row">
                                 <li class="flex-item" style="width: 15px;">
@@ -72,9 +71,9 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-xs-6">
+                    <div class="col-xs-5">
                         <div class="row">
-                            <div class="data-center" style="padding-top: 10%;">
+                            <div class="data-center data-text">
                                 <div id="isef_p">Pattern
                                 </div>
                                 <div id="i75tl"><?= $data["pattern"] ?? "" ?>

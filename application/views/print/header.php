@@ -17,11 +17,11 @@
         }
 
         body {
-            margin-left: 10px;
+            margin-left: 20px;
         }
         #idah{
             width:100%;
-            margin-top: 15%;
+            margin-top: 10%;
             margin-left: 12%;
             /*border: 1px solid;*/
         }
@@ -123,6 +123,10 @@
             -webkit-flex-direction: column;
             flex-direction: column;
             float: left;
+        }
+        .data-text {
+            padding-top: 10%;
+            line-height: 1.3;
         }
         @media print {
             #is1i {

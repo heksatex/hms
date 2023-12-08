@@ -2,7 +2,7 @@
     <?php $this->load->view("print/header.php") ?>
     <style>
         #noregk3l{
-            height: 50vh;
+            height: 35vh;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -16,7 +16,7 @@
         <?php foreach ($data as $key => $data) { ?>
             <div class="container-fluid" id="#is1i">
                 <div class="row">
-                    <div class="col-xs-3">
+                    <div class="col-xs-4">
                         <div class="row">
                             <div class="data-center">
                                 <img id="idah" style="width:85%; margin-top: 25%;"
@@ -32,9 +32,9 @@
                         </div>
 
                     </div>
-                    <div class="col-xs-6">
+                    <div class="col-xs-5">
                         <div class="row">
-                            <div class="data-center" style="padding-top: 10%;">
+                            <div class="data-center data-text" style="padding-top: 10%;">
                                 <div id="isef_p">Pattern
                                 </div>
                                 <div id="i75tl"><?= $data["pattern"] ?? "" ?>
