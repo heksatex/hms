@@ -1811,9 +1811,14 @@
 							$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('waste_produksi'); 
 							
 				        },error: function (jqXHR, textStatus, errorThrown){
-						  alert_bootbox('error Simpan Waste');
-				          $('#btn-produksi-waste').button('reset');
-						  unblockUI( function(){});
+						    unblockUI( function(){});
+  				            $('#btn-produksi-waste').button('reset');
+							if(jqXHR.status == 401){
+								var err = JSON.parse(jqXHR.responseText);
+								alert(err.message);
+							}else{
+								alert("Error Simpan Waste !");
+							}   
 				        }
 				    });
 				}

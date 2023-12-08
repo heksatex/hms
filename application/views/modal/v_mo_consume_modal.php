@@ -832,9 +832,14 @@
                             $("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('consume'); 
                             
                         },error: function (jqXHR, textStatus, errorThrown){
-                            alert(jqXHR.responseTex+' error');
-                            $('#btn-produksi-consume').button('reset');
                             unblockUI( function(){});
+                            $('#btn-produksi-consume').button('reset');
+							if(jqXHR.status == 401){
+								var err = JSON.parse(jqXHR.responseText);
+								alert(err.message);
+							}else{
+								alert("Error Simpan Consume !");
+							}   
                         }
                     });
                 }

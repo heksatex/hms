@@ -456,8 +456,14 @@ class _module extends CI_Model {
         return $this->db->query("UPDATE stock_move_produk SET status = '$status' WHERE move_id = '$move_id'");
     }
 
-    public function get_stock_move_items_by_move_id($move_id) {
-        return $this->db->query("SELECT * FROM stock_move_items WHERE move_id = '$move_id' order by row_order ")->result();
+    public function get_stock_move_items_by_move_id($move_id, $status = null) {
+        if($status){
+            $this->db->where('status',$status);
+        }
+        $this->db->where('move_id',$move_id);
+        $result = $this->db->get('stock_move_items');
+        return $result->result();
+        // return $this->db->query("SELECT * FROM stock_move_items WHERE move_id = '$move_id' order by row_order ")->result();
     }
 
     public function get_stock_move_tujuan($move_id, $origin, $status1, $status2) {
