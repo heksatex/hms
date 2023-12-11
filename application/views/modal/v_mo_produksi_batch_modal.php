@@ -1158,9 +1158,14 @@
 						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch'); 
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
-			          alert("Error Simpan Produksi Batch");
-			          $('#btn-tambah-produksi-batch').button('reset');
-					  unblockUI( function(){});
+						unblockUI(function() {});
+	  		            $('#btn-tambah-produksi-batch').button('reset');
+						if(jqXHR.status == 401){
+							var err = JSON.parse(jqXHR.responseText);
+							alert(err.message);
+						}else{
+							alert("Error Simpan Produksi Batch !");
+						}    
 			        }
 			    });
 			}

@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
+
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -30,23 +31,7 @@
                     <div class="box">
                         <div class="box-header with-border">
                             <h3 class="box-title">Form Edit <strong> <?= $picklist->no ?> </strong></h3>
-                            <div class="pull-right text-right header-status" id="btn-header">
-                                <?php
-                                switch ($picklist->status) {
-                                    case "draft":
-                                        echo '<button class="btn btn-primary btn-sm" id="btn-confirm" data-value="draft" data-loading-text="<i class=`fa fa-spinner fa-spin `></i> processing...">Confirm</button>';
-                                        break;
-                                    case "realisasi":
-                                        echo '<button class="btn btn-primary btn-sm" id="btn-confirm" data-value="realisasi" data-loading-text="<i class=`fa fa-spinner fa-spin `></i> processing...">Confirm Realisasi</button>';
-                                        break;
-                                    case "validasi":
-//                                        echo '<button class="btn btn-primary btn-sm" id="btn-confirm" data-value="validasi" data-loading-text="<i class=`fa fa-spinner fa-spin `></i> processing...">Confirm Validasi</button>';
-                                        break;
-                                    default:
-                                }
-                                ?>
 
-                            </div>
                         </div>
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-picklist" id="form-picklist" action="<?= base_url('warehouse/picklist/update') ?>">
@@ -108,7 +93,7 @@
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label class="form-label required">Customer</label></div>
                                             <div class="col-xs-8 col-md-8">
-                                                <select class="form-control input-sm" name="customer" id="customer" required>
+                                                <select class="form-control input-sm select2" name="customer" id="customer" required>
                                                     <option value="<?= $picklist->customer_id ?>" selected><?= $picklist->nama ?></option>
                                                 </select>
                                             </div>
@@ -120,13 +105,17 @@
                                             </div>
                                             <input type="hidden" value="<?= $ids ?>" name="ids">
                                             <input type="hidden" value="<?= $picklist->no ?>" name="no_pl">
+                                            <input type="hidden" value="<?= json_encode($picklist) ?>" name="existsing">
                                         </div>
                                     </div>
                                 </div>
                             </form>
                             <?php $this->load->view("admin/_partials/js.php") ?>
                             <div class="row">
-                                <?php $this->load->view('warehouse/v_picklist_item', ["pl" => $picklist->no]) ?>
+                                <?php
+                                if ($picklist->status !== "cancel")
+                                    $this->load->view('warehouse/v_picklist_item', ["pl" => $picklist->no]);
+                                ?>
                             </div>
                         </div>
                     </div>
@@ -134,7 +123,10 @@
             </div>
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
-                <?php $this->load->view("admin/_partials/footer.php") ?>
+
+                <?php
+                $this->load->view("admin/_partials/footer.php");
+                ?>
             </footer>
         </div>
 
@@ -143,6 +135,18 @@
                 allowClear: true,
                 placeholder: 'Pilih'
             });
+            $("#btn-simpan").attr("disabled", true);
+            $('.select2').on('change', function () {
+                $("#btn-simpan").removeAttr("disabled");
+            });
+            $('.input-sm').on('change', function () {
+                $("#btn-simpan").removeAttr("disabled");
+            });
+            const checkStatus = function () {
+                if ("<?= $picklist->status ?>" === 'cancel') {
+                    $("#btnShow").hide();
+                }
+            };
             $("#customer").select2({
                 allowClear: true,
                 placeholder: 'Pilih',
@@ -176,7 +180,6 @@
             $("#customer").on('select2:unselect', function (e) {
                 $("#alamat").val("");
             });
-
             $("#btn-simpan").on('click', function () {
                 $("#btn_form_edit").trigger("click");
             });
@@ -203,27 +206,30 @@
             },
                     false
                     );
-            $("#btn-confirm").on('click', function () {
-                please_wait(function () {});
-                $.ajax({
-                    url: "<?= base_url('warehouse/picklist/update_status') ?>",
-                    type: "post",
-                    data: {
-                        pl: "<?= $picklist->no ?>",
-                        status: $(this).attr("data-value")
-                    },
-                    success: function (data) {
-                        location.reload();
-                    },
-                    error: function (req, error) {
-                        unblockUI(function () {
-                            setTimeout(function () {
-                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
-                            }, 1000);
-                        });
-                    }
+
+            $("#btn-cancel").on('click', function () {
+                confirmRequest("Batal Picklist", "Batalkan No Picklist <?= $picklist->no ?>", function () {
+                    please_wait(function () {});
+                    $.ajax({
+                        url: "<?= base_url('warehouse/picklist/batal_picklist') ?>",
+                        type: "post",
+                        data: {
+                            pl: "<?= $picklist->no ?>"
+                        },
+                        success: function (data) {
+                            location.reload();
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
                 });
             });
+            checkStatus();
         </script>
     </body>
 </html>

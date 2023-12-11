@@ -328,10 +328,10 @@ class M_adjustment extends CI_Model
 								WHERE adji.kode_adjustment = '$kode_adjustment' AND adji.row_order = '$row_order' ");
 	}
 
-	public function get_list_type_adjustment($view = null)
+	public function get_list_type_adjustment($where_field = null,$view = null)
 	{
-		if(isset($view)){
-			$this->db->where('view',$view);
+		if(isset($view) AND isset($where_field)){
+			$this->db->where($where_field,$view);
 		}
 		$this->db->order_by("id","asc");
 		$result = $this->db->get('mst_type_adjustment');

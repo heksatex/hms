@@ -1,5 +1,5 @@
 <style>
-    .dataTables_filter {
+    #picklist-item-scan_filter {
         display: none;
     }
 </style>
@@ -10,7 +10,8 @@
                 <div class="col-md-12 col-xs-12">
                     <div class="col-xs-4">Scan</div>
                     <div class="col-xs-8">
-                        <input class="form-control input-sm" placeholder="Scan" name="search" id="search" required>
+                        <input class="form-control input-sm" placeholder="Scan" name="search" id="searchdata" required>
+                        <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan Barcode</label>
                         <button type="submit" id="form_submit" style="display: none;"></button>
                     </div>
                 </div>
@@ -27,7 +28,7 @@
 </div>
 <div class="row">
     <div class="col-md-12 table-responsive over">
-        <table id="picklist-item" class="table table-condesed table-hover rlstable  over" width="100%">
+        <table id="picklist-item-scan" class="table table-condesed table-hover rlstable  over" width="100%">
             <thead>
                 <tr>
                     <th class="no"></th>
@@ -46,13 +47,18 @@
     </div>
 </div>
 <script>
+    $(document).keydown(function (e) {
+        if (e.which === 113) {
+            $("#searchdata").focus();
+        }
+    });
     $(function () {
-        $("#search").focus();
+        $("#searchdata").focus();
         $("#filter").select2({
             allowClear: true,
             placeholder: 'Filter'
         });
-        const dTable = $('#picklist-item').DataTable({
+        const dTable = $('#picklist-item-scan').DataTable({
             "lengthChange": false,
             columnDefs: [
                 {
@@ -67,11 +73,11 @@
             dTable.row(row).remove().draw();
 
         });
-        $("#search").keypress(function (e) {
-            if (e.which === 13) {
-                $("#form_submit").trigger("click");
-//                dTable.search($(this).val()).draw();
-            }
+        $("#searchdata").keypress(function (e) {
+//            if (e.which === 13) {
+//                $("#form_submit").trigger("click");
+////                dTable.search($(this).val()).draw();
+//            }
 
         });
         var no = 1;
@@ -99,7 +105,7 @@
         async function checkTable(event) {
             let data = false;
             event.preventDefault();
-            await searchArray(dTable.rows().data(), 1, $("#search").val()).then(
+            await searchArray(dTable.rows().data(), 1, $("#searchdata").val()).then(
                     resp => {
                         if (resp.length > 0) {
                             data = true;
@@ -124,27 +130,29 @@
                                     addRow(data);
                                 }
                                 unblockUI(function () {
-                                    setTimeout(function () {
-                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                    }, 1000);
-                                });
+//                                    setTimeout(function () {
+//                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+//                                    }, 1000);
+                                }, 50);
+                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                             }
                     ).catch(err => {
                         unblockUI(function () {});
                         alert_modal_warning("Hubungi Dept IT");
                     });
                 } else {
+                    alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
                     unblockUI(function () {
-                        setTimeout(function () {
-                            alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
-                        }, 1000);
-                    });
+//                        setTimeout(function () {
+//                            alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
+//                        }, 1000);
+                    },50);
                 }
             } catch (e) {
 
             } finally {
-                $("#search").val("");
-                $("#search").focus();
+                $("#searchdata").val("");
+                $("#searchdata").focus();
             }
             event.preventDefault();
         },
@@ -161,7 +169,7 @@
             });
 
             data.then(rsp => {
-                addItem(JSON.stringify(rsp));
+                addItem(JSON.stringify(rsp), "", dTable);
             });
 
         });

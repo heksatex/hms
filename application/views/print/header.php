@@ -1,145 +1,137 @@
-<html>
-    <link rel="stylesheet" href="<?php echo base_url("bootstrap/css/bootstrap.min.css") ?>">
-    <link rel="stylesheet" href="<?php echo base_url("dist/fa/css/font-awesome.min.css") ?>">
-    <link href="https://fonts.cdnfonts.com/css/code-128" rel="stylesheet">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="shortcut icon"  href="<?php echo base_url('dist/img/favicon_heksa.ico') ?>">
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="<?php echo base_url('bootstrap/css/bootstrap.min.css') ?>">
+    <link rel="stylesheet" href="<?php echo base_url('dist/fa/css/font-awesome.min.css') ?>">
     <style>
-        .text-rotate {
-            transform-origin: 0 0;
-            transform: rotate(90deg);
+        * {
+            box-sizing: border-box;
         }
-        .text-barcode {
-            font-family: "Code 128", sans-serif;
-            font-size: 22px;
-        }
-        .list-data{
-            text-align: right;
-        }
-        s
-        .list-data-item {
-            display: inline;
-        }
-        .info-barcode {
-            padding: 2px;
-        }
-        p{
+        body {
             margin: 0;
-        }
-        @media print
-        {
-            /*            @page{
-                            size: 2.36in 3in;
-            
-                        }*/
-            body {
-                font-size: 8pt;
-                margin-top: 5px;
-                margin-left: 5%;
-            }
-            .wrp {
-                word-wrap: break-word;
-                text-align: right;
-                margin-top: 10%;
-            }
-            .text-rotate {
-                transform-origin: 0 0;
-                transform: rotate(90deg);
-            }
-            .text-rotate-e {
-                font-size: 7px;
-                position: fixed;
-                top: 50%;
-                font-weight: bold;
-                transform-origin: 0 0;
-                transform: rotate(90deg);
-            }
+            font-family:Arial, Helvetica, sans-serif;
 
-            .img-responsive{
-                padding-bottom: 1px;
-            }
-            .img-barcode{
-                width: 100%;
-                margin-top: 50%;
-            }
-            hr {
-                margin: 0;
-                height:2px;
-                text-align:left;
-                margin-left:0
-            }
-            .text-barcode {
-                font-family: "Code 128", sans-serif;
-                font-size: 20px;
-                line-height: 1px;
-                letter-spacing: 2px;
-            }
-            .barcode-align {
-                text-align: center;
-            }
-            .list-data-item {
-                float: right;
-                font-size: 7pt;
-            }
-            .list-data{
-                text-align: right;
-                font-size: 10px;
-            }
-            .list-data hr {
-                border-style: inset;
-                border-width: 1px;
-            }
-            p{
-                margin: 0;
-            }
-            .info-barcode {
-                padding: 2px;
-            }
-            .image-rotasi {
-                position: fixed;
-                top: 37%;
-                left: 55%;
-                width: 35%;
-                -webkit-transform: rotate(90deg);
-                -moz-transform: rotate(90deg);
-                -ms-transform: rotate(90deg);
-                -o-transform: rotate(90deg);
-                transform: rotate(90deg);
-            }
-            .image-rotasi-e {
-                position: fixed;
-                top: 37%;
-                left: 25%;
-                width: 35%;
-                -webkit-transform: rotate(90deg);
-                -moz-transform: rotate(90deg);
-                -ms-transform: rotate(90deg);
-                -o-transform: rotate(90deg);
-                transform: rotate(90deg);
-            }
-            .container1 {
-                display: flex;
-                justify-content: space-evenly;
-                margin-left: 10px;
-                width: 100vh;
-            }
-
-            .container1::before, .container1::after {
-                width: 30px;
-                height: 30px;
-            }
-            .child{
-                font-size: 6px;
-                padding: 4px;
-                margin-top:13%;
-            }
         }
 
-        .container1 {
+        body {
+            margin-left: 20px;
+        }
+        #idah{
+            width:100%;
+            margin-top: 10%;
+            margin-left: 12%;
+            /*border: 1px solid;*/
+        }
+        #iex1{
+            display:block;
+            width:70%;
+            margin: -13px 0px 0% 25%;
+        }
+        #iop3i{
+            padding:10px 0px 0px 0px;
+            font-size:45%;
+            text-align:center;
+        }
+        #isef_p{
+            text-align:right;
+            font-size:67%;
+            padding:2px 10px 2px 10px;
+            font-family:Arial, Helvetica, sans-serif;
+            font-weight:600;
+            text-transform: uppercase;
+        }
+        #i75tl{
+            text-align:right;
+            font-size:64%;
+            padding:2px 10px 2px 10px;
+            font-family:Arial, Helvetica, sans-serif;
+            font-weight:400;
+            border-bottom: solid;
+            border-width: thin;
+        }
+        #isef{
+            text-align:right;
+            font-size:67%;
+            padding:2px 10px 2px 10px;
+            /*font-family:Arial, Helvetica, sans-serif;*/
+            font-weight:600;
+        }
+        .data-center{
+            height: 100vh;
+            margin: 0 auto;
+        }
+        .text-rotate {
+            -webkit-transform: rotate(90deg);
+            -moz-transform: rotate(90deg);
+            -ms-transform: rotate(90deg);
+            -o-transform: rotate(90deg);
+            transform: rotate(180deg);
+
+        }
+        .translate-rotate {
+            transform: translateX(0px) rotate(90deg);
+
+        }
+        .divss {
+            display: block;
+        }
+        .data-center-rotate {
+            width: 100vh;
             display: flex;
-            justify-content: space-between;
-            width: 200px;
+            justify-content: space-evenly;
+            font-size: 10px;
+            font-weight: 200;
+        }
+        #ieh54{
+
+            width:50%;
+            height:100%;
+            /*margin-right: -30%;*/
+        }
+        .flex-container {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+
+            -ms-box-orient: horizontal;
+            display: -webkit-box;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: -moz-flex;
+            display: -webkit-flex;
+            display: flex;
         }
 
-        .container1::before, .container1::after {
-            width: 100%;
+        .rows            {
+            -webkit-flex-direction: row;
+            flex-direction: row;
+        }
+        .flex-item {
+            background: tomato;
+
+            height: 92vh;
+            color: white;
+            font-weight: bold;
+            font-size: 2em;
+            text-align: center;
+            /*border: 1px solid;*/
+        }
+        .column {
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            float: left;
+        }
+        .data-text {
+            padding-top: 10%;
+            line-height: 1.3;
+        }
+        @media print {
+            #is1i {
+                page-break-after: always;
+            }
         }
     </style>
+</head>

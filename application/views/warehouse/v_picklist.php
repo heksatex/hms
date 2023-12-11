@@ -29,7 +29,8 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>No Picklist</th>                  
+                                            <th>No Picklist</th>
+                                            <th>Customer</th>
                                             <th>Tanggal Dibuat</th>
                                             <th>Jenis</th>
                                             <th>Type Bulk</th>

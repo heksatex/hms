@@ -2,46 +2,7 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
-        <style>
-            .miniBarProgress {
-                height: 100%;
-                position: absolute;
-                top: 0rem;
-                left: 0rem;
-            }
-            .miniBar {
-                height: 0.5rem;
-                border: 1px solid #8a898a;
-                position: relative;
-                width: -webkit-calc(100% - 2rem);
-                width: -moz-calc(100% - 2rem);
-                width: calc(100% - 2rem);
-                margin-right: 0.5rem;
-            }
-
-            /* Tooltip text */
-            .miniBarProgress .tooltiptext {
-                visibility: hidden;
-                width: 120px;
-                bottom: 100%;
-                left: 50%;
-                margin-left: -60px;
-                background-color: black;
-                color: #fff;
-                text-align: center;
-                padding: 5px 0;
-                border-radius: 6px;
-
-                /* Position the tooltip text - see examples below! */
-                position: absolute;
-                z-index: 1;
-            }
-
-            /* Show the tooltip text when you mouse over the tooltip container */
-            .miniBarProgress:hover .tooltiptext {
-                visibility: visible;
-            }
-        </style>
+ 
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -74,7 +35,9 @@
                                             <th>Type Bulk</th>
                                             <th>Keterangan</th>
                                             <th>Sales</th>
-                                            <th>Status Item %</th>
+                                            <th>Total Lot</th>
+                                            <th>Realisasi Lot ( % )</th>
+                                            <th>Validasi Lot ( % )</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -110,7 +73,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 5],
+                            "targets": [0, 5,7,8],
                             "orderable": false
                         }
                     ]

@@ -25,63 +25,75 @@ class ListOW extends MY_Controller
 
     public function get_data()
 	{
-
-        $list = $this->m_listOW->get_datatables();
-        $data = array();
-        $no = $_POST['start'];
-        foreach ($list as $field) {
-        	$kode_co_encrypt = encrypt_url($field->kode_co);
-            if($field->status_scl == 't'){
-                $status_scl = 'Aktif';
-            }else if($field->status_scl == 'ng'){
-                $status_scl = 'Not Good';
-            }else if($field->status_scl == 'r'){
-                $status_scl = 'Reproses';
-            }else{
-                $status_scl = 'Tidak Aktif';
-            }
-
-            $no++;
-            $row = array();
-            $row[] = $no;
-            $row[] = $field->sales_order;
-            $row[] = $field->nama_sales_group;
-            $row[] = $field->ow;
-            $row[] = $field->tanggal_ow;
-            $row[] = $status_scl;
-            $row[] = $field->nama_produk;
-            $row[] = $field->nama_warna;
-            $row[] = number_format($field->qty,2).' '.$field->uom;
-            $row[] = number_format($field->tot_qty1,2);
-            $row[] = $field->gramasi;
-            $row[] = $field->nama_handling;
-            $row[] = $field->nama_route;
-            $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
-            $row[] = $field->nama_status;
-            $row[] = $field->piece_info;
-            $row[] = $field->reff_notes;
-            $row[] = $field->delivery_date;
-            //$row[] = $field->kode_co;
-            $row[] = '<a href="'.base_url('ppic/colororder/edit/'.$kode_co_encrypt).'" target="_blank" data-togle="tooltip" title="Lihat Color Order">'.$field->kode_co.'</a>';
-            if(!empty($field->kode_co)){
-                $row[] = '<a href="javascript:void(0)" data-toggle="tooltip" title="Tracking OW" onclick=view_detail("'.$field->kode_co.'","'.$field->sales_order.'","'.$field->ow.'","'.$field->id_warna.'")> <span class="glyphicon  glyphicon-share"></span></a>';
-            }else{
-                $row[] = '';
-            }
-            $row[] = $field->status_scl;
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $check_stock_grg = $this->input->post('check_stock');
             
-            $data[] = $row;
-            
+
+            $list = $this->m_listOW->get_datatables();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $kode_co_encrypt = encrypt_url($field->kode_co);
+                if($field->status_scl == 't'){
+                    $status_scl = 'Aktif';
+                }else if($field->status_scl == 'ng'){
+                    $status_scl = 'Not Good';
+                }else if($field->status_scl == 'r'){
+                    $status_scl = 'Reproses';
+                }else{
+                    $status_scl = 'Tidak Aktif';
+                }
+
+                if($check_stock_grg){
+                    $stock_grg =  number_format($field->tot_qty1,2);
+                }else{
+                    $stock_grg = 0;
+                }
+
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->sales_order;
+                $row[] = $field->nama_sales_group;
+                $row[] = $field->ow;
+                $row[] = $field->tanggal_ow;
+                $row[] = $status_scl;
+                $row[] = $field->nama_produk;
+                $row[] = $field->nama_warna;
+                $row[] = number_format($field->qty,2).' '.$field->uom;
+                $row[] = $stock_grg;
+                $row[] = $field->gramasi;
+                $row[] = $field->nama_handling;
+                $row[] = $field->nama_route;
+                $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
+                $row[] = $field->nama_status;
+                $row[] = $field->piece_info;
+                $row[] = $field->reff_notes;
+                $row[] = $field->delivery_date;
+                //$row[] = $field->kode_co;
+                $row[] = '<a href="'.base_url('ppic/colororder/edit/'.$kode_co_encrypt).'" target="_blank" data-togle="tooltip" title="Lihat Color Order">'.$field->kode_co.'</a>';
+                if(!empty($field->kode_co)){
+                    $row[] = '<a href="javascript:void(0)" data-toggle="tooltip" title="Tracking OW" onclick=view_detail("'.$field->kode_co.'","'.$field->sales_order.'","'.$field->ow.'","'.$field->id_warna.'")> <span class="glyphicon  glyphicon-share"></span></a>';
+                }else{
+                    $row[] = '';
+                }
+                $row[] = $field->status_scl;
+                
+                $data[] = $row;
+                
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_listOW->count_all(),
+                "recordsFiltered" => $this->m_listOW->count_filtered(),
+                "data" => $data,
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+        }else{
+            die();
         }
- 
-        $output = array(
-            "draw" => $_POST['draw'],
-            "recordsTotal" => $this->m_listOW->count_all(),
-            "recordsFiltered" => $this->m_listOW->count_filtered(),
-            "data" => $data,
-        );
-        //output dalam format JSON
-        echo json_encode($output);
 	}
 
     public function view_detail_items()// view detail item modal
@@ -138,6 +150,7 @@ class ListOW extends MY_Controller
 		$warna          = $this->input->post('warna');
 		$status_ow      = $this->input->post('status_ow');
 		$no_ow          = $this->input->post('no_ow');
+		$check_stock    = $this->input->post('stock_grg');
 
         $this->load->library('excel');
         $object = new PHPExcel();
@@ -179,7 +192,7 @@ class ListOW extends MY_Controller
 
         $num   = 1;
         $rowCount = 6;
-        $list = $this->m_listOW->get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow);
+        $list = $this->m_listOW->get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow,$check_stock);
         foreach($list as $val){
 
             if($val->status_scl == 't'){
@@ -192,6 +205,12 @@ class ListOW extends MY_Controller
                 $status_scl = 'Tidak Aktif';
             }
 
+            if($check_stock){
+                $stock_grg = $val->tot_qty1;
+            }else{
+                $stock_grg = 0;
+            }
+
             $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
 			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->sales_order);
 			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->nama_sales_group);
@@ -202,7 +221,7 @@ class ListOW extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->nama_warna);
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
 			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
-			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->tot_qty1);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $stock_grg);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->gramasi);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_handling);
 			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->nama_route);
