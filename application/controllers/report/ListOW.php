@@ -44,10 +44,10 @@ class ListOW extends MY_Controller
                     $status_scl = 'Tidak Aktif';
                 }
 
-                if($check_stock_grg){
+                if($check_stock_grg == 'true'){
                     $stock_grg =  number_format($field->tot_qty1,2);
                 }else{
-                    $stock_grg = 0;
+                    $stock_grg = 'NA';
                 }
 
                 $no++;
@@ -205,10 +205,10 @@ class ListOW extends MY_Controller
                 $status_scl = 'Tidak Aktif';
             }
 
-            if($check_stock){
+            if($check_stock == 'show'){
                 $stock_grg = $val->tot_qty1;
             }else{
-                $stock_grg = 0;
+                $stock_grg = 'NA';
             }
 
             $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
