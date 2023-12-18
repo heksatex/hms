@@ -1712,7 +1712,7 @@ class MO extends MY_Controller
                 $consume    = "yes";              
 
                 // start transaction
-                $this->_module->startTransaction();
+                // $this->_module->startTransaction();
 
                 //lock table
                 $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
@@ -2490,7 +2490,7 @@ class MO extends MY_Controller
                 $consume    = "yes";
 
                 // start transaction
-                $this->_module->startTransaction();
+                // $this->_module->startTransaction();
 
                 //lock table
                 $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
@@ -3009,7 +3009,7 @@ class MO extends MY_Controller
             // unlock table
             $this->_module->unlock_tabel();
             // finish transaction
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             // echo json_encode($callback);
 
         }catch(Exception $ex){
