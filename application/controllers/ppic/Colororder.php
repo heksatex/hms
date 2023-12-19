@@ -641,7 +641,11 @@ class Colororder extends MY_Controller
                         if($method_action == 'CON'){
                           $origin_prod = $kode_prod_rm.'_1';
                           $source_move_PROD = FALSE;
-                          $source_move      = '';
+                          if($method_dept== "GJD"){
+                            $source_move      = $source_move;
+                          }else{
+                            $source_move      = '';
+                          }
                         }else{
                           $origin_prod = '';
                         }
