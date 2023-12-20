@@ -2,15 +2,34 @@
 <html>
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
-      @media (min-width: 300px) {
+    @media (min-width: 300px) {
         .btn-style-proc {
          padding-left: 30px !important;
         }
-      }
-        .select2-container--focus{
+    }
+    .select2-container--focus{
 		    border:  1px solid #66afe9;
         }
+        .select2-container--focus{
+	    border:  1px solid #66afe9;
+    }
+
+    .select2-container--default .select2-selection--single{
+        height : 30px;
+        font-size : 12px;
+        padding: 5px 12px;
+    }
+    .nowrap{
+        white-space: nowrap;
+    }
+    /* .divListviewHead table  {
+        display: block;
+        min-height: calc( 100vh - 680px);
+        max-height: calc( 100vh - 600px );
+        overflow-x: auto;
+    } */
   </style>
 </head>
 
@@ -134,7 +153,7 @@
                         <div class="col-md-12 col-xs-12">
                             <div class="col-xs-4"><label>Uom Lebar Jadi</label></div>
                             <div class="col-xs-8 col-md-8">
-                                <select class="form-control input-sm select2" name="uom_lebar_jadi" id="uom_lebar_jadi" disabled >
+                                <select class="form-control input-sm select2" name="uom_lebar_jadi" id="uom_lebar_jadi"  >
                                     <option value="">-- Pilih Satuan Lebar Jadi --</option>
                                     <?php 
                                         $selected = "";
@@ -254,10 +273,97 @@
                         </div>
                      
                     </div>
-                   
+
+                    <div class="col-md-6">
+                        <div class="col-xs-12 table-responsive example1 divListviewHead">
+                            <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                                <table id="table_hasil_hph" class="table table-condesed table-hover" border="0" style="margin-bottom:0px;">
+                                    <thead>
+                                        <th class="bb no">No.</th>
+                                        <th class="bb" width="200px">Keterangan</th>
+                                        <th class="bb" >HPH Mtr</th>
+                                        <th class="bb" >HPH Kg</th>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="4">Tidak Ada Data</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div id="example1_processing" class="example1_processing table_processing" style="display: none; z-index:5;">
+                                    Processing...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xs-12 table-responsive example1 divListviewHead" style="margin-top:10px">
+                            <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
+                                <table id="table_hasil_hph_grade" class="table table-condesed table-hover" border="0" style="margin-bottom:0px;">
+                                    <thead>
+                                        <th class="bb no">No.</th>
+                                        <th class="bb nowrap" width="100px">Grade</th>
+                                        <th class="bb nowrap" width="100px">Total Qty[Mtr]</th>
+                                        <th class="bb nowrap" width="100px">Total Qty2[Kg]</th>
+                                        <th class="bb nowrap" width="100px">Total Pcs</th>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5">Tidak Ada Data</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div id="example1_processing" class="example1_processing table_processing" style="display: none; z-index:5;">
+                                    Processing...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             
             </form>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- Custom Tabs -->
+                    <div class="">
+                        <ul class="nav nav-tabs " >
+                            <li class="active"><a href="#tab_1" data-toggle="tab">Details HPH</a></li>
+                        </ul>
+                        <div class="tab-content over"><br>
+                            <div class="tab-pane active" id="tab_1">
+                                 <!-- Tabel  -->
+                                <div class="col-md-12 table-responsive over">
+                                    <table class="table table-condesed table-hover rlstable over" width="100%" id="table_hph" >
+                                        <thead>                          
+                                            <tr>
+                                                <th class="style no">No.</th>
+                                                <th class="style nowrap">Tgl.Buat</th>                            
+                                                <th class="style nowrap">Corak Remark</th>
+                                                <th class="style nowrap">Warna Remark</th>
+                                                <th class="style nowrap">Lot</th>
+                                                <th class="style nowrap">Qty</th>
+                                                <th class="style nowrap">Qty2</th>
+                                                <th class="style nowrap">Qty Jual</th>
+                                                <th class="style nowrap">Qty2 Jual</th>
+                                                <th class="style nowrap">Lbr.Jadi</th>
+                                                <th class="style nowrap">Grade</th>
+                                                <th class="style ">Lokasi Sekarang</th>
+                                                <th class="style nowrap">User HPH</th>
+                                                <th class="style" style="min-width:10px;">#</th>        
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <!-- /Tabel  -->
+                            </div>
+                            <!-- /.tab-pane -->
+                        </div>
+                        <!-- /.tab-content -->
+                    </div>
+                    <!-- nav-tabs-custom -->
+                </div>
+                <!-- /.col -->
+            </div>
 
 
         </div>
@@ -282,10 +388,26 @@
 
 </div>
 
+<div id="load_modal">
+    <!-- Load Partial Modal -->
+   <?php $this->load->view("admin/_partials/modal.php") ?>
+</div>
+
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 
 <script type="text/javascript">
+
+    $(".modal").on('hidden.bs.modal', function(){
+        refresh();
+        get_hasil_hph();
+    });
+
+    function refresh(){
+        table.ajax.reload( function(){});
+        $("#foot").load(location.href + " #foot");
+        $("#status_bar").load(location.href + " #status_bar>*");
+    }
 
     $('.select2').select2({
         allowClear: true,
@@ -304,7 +426,7 @@
 
     var jenis_kain  = "<?php echo $inlet->id_jenis_kain?>";
     if(jenis_kain == 7 || jenis_kain == 8 || jenis_kain == 6 || jenis_kain == 5 || jenis_kain == 10){
-        $('#uom_lebar_jadi').attr( "disabled", true ).attr('name', 'uom_lebar_jadi');
+        // $('#uom_lebar_jadi').attr( "disabled", true ).attr('name', 'uom_lebar_jadi');
         $('#tampil_gramasi').show();
         $('#tampil_berat').hide();
     }else{
@@ -409,6 +531,170 @@
     }
 
 
+    var table;
+    $(document).ready(function() {
+        //datatables
+        table = $('#table_hph').DataTable({ 
+            "processing": true, 
+            "serverSide": true, 
+            "order": [], 
+
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+             
+            "ajax": {
+                "url": "<?php echo site_url('manufacturing/inlet/get_data_hph_inlet')?>",
+                "type": "POST",
+                "data": {"kode": "<?php echo $inlet->id;?>"}
+            },
+           
+            "columnDefs": [
+              { 
+                "targets": [0,13], 
+                "orderable": false, 
+              },
+              { 
+                "targets": [5,6,7,8], 
+                "className":"text-right nowrap",
+              },
+            ],
+        });
+ 
+    });
+
+    $(document).on("click", ".edit_lot", function(e) {
+        let quant_id = $(this).attr('data-quant');
+        edit_lot(quant_id);
+    });
+
+    function edit_lot(quant_id){
+        let id   =  "<?php echo $inlet->id; ?>";
+        $('#btn-tambah').button('reset');
+        $("#tambah_data").modal({
+                show: true,
+                backdrop: 'static'
+        })
+        $("#tambah_data").removeClass('modal fade lebar').addClass('modal fade lebar_mode');
+        $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('lot_hph');
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-print").remove();
+
+        $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Edit Data HPH Lot');
+        $.post('<?php echo site_url()?>manufacturing/inlet/edit_lot_modal',
+            {id:id,quant_id:quant_id},
+        ).done(function(html){
+            setTimeout(function() {
+                $(".lot_hph").html(html)  
+            },1000);
+            $("#tambah_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print" name="btn-print" >Print</button>');
+            $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+        }).fail(function(response) {
+            var err = JSON.parse(response.responseText);
+            if(response.status == 401){
+                alert(err.message);
+            }else{
+                alert(err.message)
+                $(".lot_hph").html(err.message);
+            }   
+        });
+    }
+
+    get_hasil_hph();
+
+    function get_hasil_hph(){
+
+        let id   =  "<?php echo $inlet->id; ?>";
+        $.ajax({
+            type     : "POST",
+            dataType : "json",
+            url :'<?php echo base_url('manufacturing/inlet/get_data_total_hasil_hph')?>',
+            beforeSend: function(e) {
+                if(e && e.overrideMimeType) {
+                    e.overrideMimeType("application/json;charset=UTF-8");
+                }                               
+                $("#table_hasil_hph tbody").remove();
+                // $("#table_hasil_hph_grade tbody").remove();
+                $(".example1_processing").css('display','');// show loading processing in table
+            },
+            data: {id:id},
+            success: function(data){
+                    var tbody = $("<tbody />");
+                    var no    = 1;
+                    var qty_target = 0;
+                    var qty2_target = 0;
+                    var color = '';
+                    var color2 = '';
+                    $.each(data.hasil_hph, function(key, value) {
+
+                        if(value.ket == 'Qty Target'){
+                            qty_target = value.qty;
+                            qty2_target = value.qty2;
+                        }
+                        if(value.ket == 'Sudah diproses'){
+                            if(value.qty > qty_target){
+                                color = "text-red";
+                            }
+                            if(value.qty2 > qty2_target){
+                                color2 = "text-red";
+                            }
+                        }
+                            
+                        var tr  = "<tr>"
+                                + "<td class='cursor-pointer'>"+no++ +".</td>"
+                                + "<td class='cursor-pointer'>"+value.ket+"</td>"
+                                + "<td class='cursor-pointer text-right "+color+" '>"+value.qty+"</td>"
+                                + "<td class='cursor-pointer text-right "+color2+" '>"+value.qty2+"</td>"
+                                + "</tr>";
+                                tbody.append(tr);
+                    });
+
+                    if(data.hasil_hph == 0){
+                        tr = "<tr><td colspan='4'>Tidak Ada Data</td></tr>"
+                        tbody.append(tr);
+                    }
+                    $("#table_hasil_hph tbody").empty();
+                    // $("#table_hasil_hph_grade tbody").empty();
+                    $("#table_hasil_hph").append(tbody);
+
+                    var tbody = $("<tbody />");
+                    var no    = 1;
+                    $.each(data.hasil_hph_grade, function(key, value) {
+                        var tr  = "<tr>"
+                                + "<td class='cursor-pointer'>"+no++ +".</td>"
+                                + "<td class='cursor-pointer'>"+value.nama_grade+"</td>"
+                                + "<td class='cursor-pointer text-right'>"+value.total_qty+"</td>"
+                                + "<td class='cursor-pointer text-right'>"+value.total_qty2+"</td>"
+                                + "<td class='cursor-pointer text-right'>"+value.total_pcs+"</td>"
+                                + "</tr>";
+                                tbody.append(tr);
+                    });
+
+                    if(data.hasil_hph_grade == 0){
+                        tr = "<tr><td colspan='5'>Tidak Ada Data</td></tr>"
+                        tbody.append(tr);
+                    }
+                    $("#table_hasil_hph_grade tbody").empty();
+                    $("#table_hasil_hph_grade").append(tbody);
+
+                    $(".example1_processing").css('display','none');// hidden loading processing in table
+            },error: function (xhr, ajaxOptions, thrownError) {
+                $(".example1_processing").css('display','none');// hidden loading processing in table
+                if(xhr.status == 401){
+                    var err = JSON.parse(xhr.responseText);
+                    alert(err.message);
+                }else{
+                    alert("Error Load Data!")
+                }  
+            }
+        });
+
+    }
    
 </script>
 

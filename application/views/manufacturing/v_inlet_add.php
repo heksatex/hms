@@ -427,7 +427,7 @@
         // Tricot,Spandex.Tulle,Vitrage,Double Needle
         if(jenis_kain == 7 || jenis_kain == 8 || jenis_kain == 6 || jenis_kain == 5 || jenis_kain == 10){
             $('#uom_lebar_jadi').val('Inch');
-            $('#uom_lebar_jadi').attr( "readonly", true ).attr('name', 'uom_lebar_jadi');
+            // $('#uom_lebar_jadi').attr( "readonly", true ).attr('name', 'uom_lebar_jadi');
             $('#tampil_gramasi').show();
             $('#berat').val('');
             $('#tampil_berat').hide();
