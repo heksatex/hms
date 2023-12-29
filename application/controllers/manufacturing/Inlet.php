@@ -544,22 +544,24 @@ class Inlet extends MY_Controller
                 $row = array();
                 $row[] = $no;
                 $row[] = $field->create_date;
+                $row[] = $field->kode_produk;
+                if($field->nama_grade == 'F'){
+                    $row[] = $field->nama_produk;
+                }else{
+                    $row[] = ' <a href="javascript:void(0)" class="edit_lot" title="Edit" data-toggle="tooltip" data-quant="'.$field->quant_id.'">'.$field->nama_produk.'</a>';
+                }
+                
                 $row[] = $field->corak_remark;
                 $row[] = $field->warna_remark;
                 $row[] = $field->lot;
+                $row[] = $field->nama_grade;
                 $row[] = $field->qty.' '.$field->uom;
                 $row[] = $field->qty2.' '.$field->uom2;
                 $row[] = $field->qty_jual.' '.$field->uom_jual;
                 $row[] = $field->qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
-                $row[] = $field->nama_grade;
                 $row[] = $field->lokasi;
                 $row[] = $field->nama_user;
-                if($field->nama_grade == 'F'){
-                    $row[] = '';
-                }else {
-                    $row[] = ' <a href="javascript:void(0)" class="edit_lot" title="Edit" data-toggle="tooltip" style="color: #FFC107" data-quant="'.$field->quant_id.'"><i class="fa fa-edit"></i></a>';
-                }
                 $data[] = $row;
             }
     

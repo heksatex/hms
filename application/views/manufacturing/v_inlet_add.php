@@ -8,23 +8,20 @@
             padding-left: 30px !important;
             }
         }
-        .select2-container--focus{
-		    border:  1px solid #66afe9;
-        }
 
         select[readonly].select2-hidden-accessible + .select2-container {
-        pointer-events: none;
-        touch-action: none;
+            pointer-events: none;
+            touch-action: none;
         }
 
         select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
-        background: #eee;
-        box-shadow: none;
+            background: #eee;
+            box-shadow: none;
         }
 
         select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow,
         select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
-        display: none;
+            display: none;
         }
   </style>
 </head>

@@ -238,7 +238,7 @@ class M_inlet extends CI_Model
 
 
 	// var $table        = 'mrp_inlet';
-    var $column_order2 = array(null,  'fg.create_date',  'sq.corak_remark', 'sq.warna_remark', 'fg.lot', 'fg.qty', 'fg.qty2','sq.qty_jual', 'sq.qty2_jual', 'sq.lebar_jadi',  'sq.nama_grade', 'sq.lokasi', 'fg.nama_user',null);
+    var $column_order2 = array(null,  'fg.create_date', 'fg.kode_produk', 'fg.nama_produk','sq.corak_remark', 'sq.warna_remark', 'fg.lot','sq.nama_grade', 'fg.qty', 'fg.qty2','sq.qty_jual', 'sq.qty2_jual', 'sq.lebar_jadi',   'sq.lokasi', 'fg.nama_user');
 	var $column_search2= array('fg.lot', 'fg.create_date', 'sq.corak_remark', 'sq.warna_remark', 'fg.qty', 'fg.qty2','sq.qty_jual', 'sq.qty2_jual', 'sq.lebar_jadi',  'sq.nama_grade', 'fg.nama_user','sq.lokasi');
 	var $order2  	  = array('sq.create_date' => 'desc');
 	

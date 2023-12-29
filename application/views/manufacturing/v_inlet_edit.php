@@ -9,20 +9,11 @@
          padding-left: 30px !important;
         }
     }
-    .select2-container--focus{
-		    border:  1px solid #66afe9;
-        }
-        .select2-container--focus{
-	    border:  1px solid #66afe9;
-    }
-
-    .select2-container--default .select2-selection--single{
-        height : 30px;
-        font-size : 12px;
-        padding: 5px 12px;
-    }
     .nowrap{
         white-space: nowrap;
+    }
+    .max-width-5{
+        max-width:5px
     }
     /* .divListviewHead table  {
         display: block;
@@ -338,18 +329,19 @@
                                             <tr>
                                                 <th class="style no">No.</th>
                                                 <th class="style nowrap">Tgl.Buat</th>                            
+                                                <th class="style nowrap">Kode Produk</th>
+                                                <th class="style nowrap">Nama Produk</th>
                                                 <th class="style nowrap">Corak Remark</th>
                                                 <th class="style nowrap">Warna Remark</th>
                                                 <th class="style nowrap">Lot</th>
+                                                <th class="style nowrap">Grade</th>
                                                 <th class="style nowrap">Qty</th>
                                                 <th class="style nowrap">Qty2</th>
                                                 <th class="style nowrap">Qty Jual</th>
                                                 <th class="style nowrap">Qty2 Jual</th>
                                                 <th class="style nowrap">Lbr.Jadi</th>
-                                                <th class="style nowrap">Grade</th>
                                                 <th class="style ">Lokasi Sekarang</th>
                                                 <th class="style nowrap">User HPH</th>
-                                                <th class="style" style="min-width:10px;">#</th>        
                                             </tr>
                                         </thead>
                                     </table>
@@ -553,12 +545,16 @@
             },
            
             "columnDefs": [
+              {
+                "targets":[0],
+                "className":"max-width-5"
+              },
               { 
-                "targets": [0,13], 
+                "targets": [0], 
                 "orderable": false, 
               },
               { 
-                "targets": [5,6,7,8], 
+                "targets": [8,9,10,11], 
                 "className":"text-right nowrap",
               },
             ],
