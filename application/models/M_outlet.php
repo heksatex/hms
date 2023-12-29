@@ -127,8 +127,8 @@ class M_outlet extends CI_Model
     }
 
     
-    var $column_order2 = array(null, 'fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
-	var $column_search2= array('fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
+    var $column_order2 = array(null, 'fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lebar_jadi','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
+	var $column_search2= array('fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lebar_jadi','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
 	var $order2  	  = array('fg.create_date' => 'asc');
 
     private function get_list_hph()

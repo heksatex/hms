@@ -256,6 +256,7 @@ class Outlet extends MY_Controller
                 $row[] = $field->qty2.' '.$field->uom2;
                 $row[] = $field->qty_jual.' '.$field->uom_jual;
                 $row[] = $field->qty2_jual.' '.$field->uom2_jual;
+                $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->lokasi;
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->nama_user;
@@ -378,6 +379,16 @@ class Outlet extends MY_Controller
                         // if($cek_reserve_move > 0 ){
                         // }
                         $cek_smi_rm = $this->m_outlet->cek_stock_move_items_by_kode($kode_mg,$quant_id_inlet,$lot_inlet)->row();
+                        $cek_smi_rm_qty = $cek_smi_rm->qty ?? 0 ;
+                        $cek_smi_rm_qty2 = $cek_smi_rm->qty2 ?? 0 ;
+                        // cek lokasi quant id apakah waste 
+                        $sq     = $this->_module->get_stock_quant_by_id($quant_id_inlet)->row();
+                        $sq_ex  = explode("/", $sq->lokasi);
+                        $waste_lokasi = $sq_ex[1] ?? '';
+                        $is_waste_lokasi = false;
+                        if($waste_lokasi == "Waste"){
+                            $is_waste_lokasi = true;
+                        }
 
                         if(empty($data_mrp)){
                             $callback = array('status' => 'failed', 'message'=> 'Data KP/Lot Inlet tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
@@ -389,11 +400,11 @@ class Outlet extends MY_Controller
                             $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                         }else if($data_mrp->status == 'hold'){
                             $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                        }else if(empty($cek_smi_rm)){
+                        }else if(empty($cek_smi_rm) AND $is_waste_lokasi == false){
                             $callback = array('status' => 'failed', 'message'=>'Maaf, Stock Move Bahan Baku tidak ditemukan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                        }else if(round($cek_smi_rm->qty,2) != round($sisa_hph_mtr,2) AND $sisa_hph_mtr > 0){
+                        }else if(round($cek_smi_rm_qty,2) != round($sisa_hph_mtr,2) AND $sisa_hph_mtr > 0 AND $is_waste_lokasi == false){
                             $callback = array('status' => 'failed', 'message'=>'Maaf, <b>Sisa Qty Mtr</b> dan <b>Stock Qty Mtr</b> tidak sama, Harap Pilih kp/lot kembali !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                        }else if(round($cek_smi_rm->qty2,2) != round($sisa_hph_kg,2) AND $sisa_hph_kg > 0){
+                        }else if(round($cek_smi_rm_qty2,2) != round($sisa_hph_kg,2) AND $sisa_hph_kg > 0 AND $is_waste_lokasi == false){
                             $callback = array('status' => 'failed', 'message'=>'Maaf, <b>Sisa Qty Kg</b> dan <b>Stock Qty Kg</b> tidak sama, Harap Pilih kp/lot kembali !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                         }else{
 
@@ -469,8 +480,9 @@ class Outlet extends MY_Controller
                             $data_array_stock_move_items = array();
                             $data_array_stock_quant  = array();
                             // $data_array_stock_quant_tmp  = array();
-                            $warna_remark_fix = '';  
+                            $warna_remark_fix   = '';  
                             $corak_remark_fix   = '';
+                            $qty_not_same       = false;
 
                             // fg hasil
                             if($grade == 'A' or $grade == 'B' OR $grade == 'C'){
@@ -580,6 +592,7 @@ class Outlet extends MY_Controller
                                 foreach($arr_uom_jual as $uj){
                                     $data_satuan_jual[] = array(  
                                                         'kode'              => $kode_mg,
+                                                        'tanggal'           => $tgl,
                                                         'quant_id'          => $start,
                                                         'kode_produk'       => $kode_produk_fg,
                                                         'nama_produk'       => $nama_produk_fg,
@@ -590,18 +603,18 @@ class Outlet extends MY_Controller
                                     );
                                     $row_order_satuan++;
 
-                                    if($uj['uom_jual'] == 'Mtr'){
-                                        if($uj['value_uom_jual'] != $hph_mtr){
-                                            $qty_not_same = true;
-                                            $uom_not_same .= "Mtr, ";
-                                        }
-                                    }
-                                    if($uj['uom_jual'] == 'Kg'){
-                                        if($uj['value_uom_jual'] != $hph_kg){
-                                            $qty_not_same = true;
-                                            $uom_not_same .= "Kg, ";
-                                        }
-                                    }
+                                    // if($uj['uom_jual'] == 'Mtr'){
+                                    //     if($uj['value_uom_jual'] != $hph_mtr){
+                                    //         $qty_not_same = true;
+                                    //         $uom_not_same .= "Mtr, ";
+                                    //     }
+                                    // }
+                                    // if($uj['uom_jual'] == 'Kg'){
+                                    //     if($uj['value_uom_jual'] != $hph_kg){
+                                    //         $qty_not_same = true;
+                                    //         $uom_not_same .= "Kg, ";
+                                    //     }
+                                    // }
 
                                     if(!empty($uom_label_barcode)){
                                         if($uom_label_barcode == $uj['uom_jual']){
@@ -672,10 +685,10 @@ class Outlet extends MY_Controller
                                             }else{ // hph_kg >= qty_2_rm
 
                                                 $qty1_update = (double)$qty_1_rm - (double)round($hph_mtr,2);// update ke quant bahan baku yg ready
-                                                if($hph_kg = $qty_2_rm){
-                                                    $qty2_update = $qty_2_rm;
-                                                }else{
+                                                if($hph_kg == $qty_2_rm){
                                                     $qty2_update = 0;
+                                                }else{
+                                                    $qty2_update = $qty_2_rm;
                                                 }
 
                                             }
@@ -789,9 +802,9 @@ class Outlet extends MY_Controller
                                             if($hph_kg < $qty_2_rm){
 
                                                 if($hph_mtr == $qty_1_rm){
-                                                    $qty1_update = $qty_1_rm; // qty = qty_1_rm
-                                                }else{ // hph_mtr > $qty_1_rm
                                                     $qty1_update = 0;
+                                                }else{ // hph_mtr > $qty_1_rm
+                                                    $qty1_update = $qty_1_rm; // qty = qty_1_rm
                                                 }
                                                 
                                                 $qty2_update = (double)$qty_2_rm - (double)round($hph_kg,2);
@@ -936,6 +949,13 @@ class Outlet extends MY_Controller
 
                                     }else if($grade == 'F'){
 
+                                        if($hph_mtr < 0){
+                                            $hph_mtr = 0.00;
+                                        }
+                                        if($hph_kg < 0){
+                                            $hph_kg = 0.00;
+                                        }
+
                                         if($qty_1_rm == $hph_mtr AND $qty_2_rm == $hph_kg){
 
                                             if(!empty($dept['waste_location'])){
@@ -948,7 +968,7 @@ class Outlet extends MY_Controller
                                                                     'status'      => $status_done,
                                                                     'move_id'     => $move_id_fg,
                                                                     'lot'         => $lot_waste_rm,
-                                                                    'tanggal'     => $tgl
+                                                                    'tanggal_transaksi'     => $tgl
                                                 );
                                                 $update_rm_smi_where = array(
                                                                     'quant_id' => $quant_id_inlet,
@@ -964,7 +984,8 @@ class Outlet extends MY_Controller
                                                                     'reserve_move'  => $move_id_fg,
                                                                     'lokasi'        => $waste_location,
                                                                     'lot'           => $lot_waste_rm,
-                                                                    'lokasi_fisik'  => ''
+                                                                    'lokasi_fisik'  => '',
+                                                                    'nama_grade'    => 'F'
 
                                                 );
                                                 array_push($data_update_rm_sq,$update_rm_sq);
@@ -1264,6 +1285,17 @@ class Outlet extends MY_Controller
                     $quant_id_inlet     = $inlet->quant_id;
 
                     $cek_smi_rm = $this->m_outlet->cek_stock_move_items_by_kode($kode_mg,$quant_id_inlet,$lot_inlet)->row();
+                    $cek_smi_rm_status = $cek_smi_rm->status ?? '';
+                    // cek lokasi quant id apakah waste 
+                    $sq     = $this->_module->get_stock_quant_by_id($quant_id_inlet)->row();
+                    $sq_ex  = explode("/", $sq->lokasi);
+                    $waste_lokasi = $sq_ex[1] ?? '';
+                    $is_waste_lokasi = false;
+                    if($waste_lokasi == "Waste"){
+                        $is_waste_lokasi = true;
+                    }
+
+                    $total_hph = $this->m_inlet->get_total_hph_by_lot($id_inlet);
 
                     if(empty($data_mrp)){
                         $callback = array('status' => 'failed', 'message'=> 'Data KP/Lot Inlet tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
@@ -1275,13 +1307,13 @@ class Outlet extends MY_Controller
                         $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else if($data_mrp->status == 'hold'){
                         $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                    }else if(empty($cek_smi_rm)){
-                        $callback = array('status' => 'failed', 'message'=>'Maaf, Stock Move Bahan Baku tidak ditemukan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                    }else if(($cek_smi_rm->status == 'ready')){
+                    }else if(empty($cek_smi_rm) AND $is_waste_lokasi == false){
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, Stock Move Bahan Baku tidak ditemukan !'.$waste_lokasi, 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    }else if(($cek_smi_rm_status == 'ready' OR $total_hph->qty > $total_hph->hasil_qty or $total_hph->qty2 > $total_hph->hasil_qty2) AND $is_waste_lokasi == false ){
                         $callback = array('status' => 'failed', 'message'=>'Maaf, Target Bahan Baku <b>'.$lot_inlet.'</b> belum habis!', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                    }else if(($cek_smi_rm->status == 'draft')){
+                    }else if(($cek_smi_rm_status == 'draft') AND $is_waste_lokasi == false){
                         $callback = array('status' => 'failed', 'message'=>'Maaf, Bahan Baku <b>'.$lot_inlet.'</b> belum ready!', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                    }else if(($cek_smi_rm->status == 'cancel')){
+                    }else if(($cek_smi_rm_status == 'cancel') AND $is_waste_lokasi == false){
                         $callback = array('status' => 'failed', 'message'=>'Maaf, Bahan Baku <b>'.$lot_inlet.'</b> di cancel!', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else{
 
@@ -1302,6 +1334,11 @@ class Outlet extends MY_Controller
                             
                             $this->_module->gen_history_ip_deptid('mO',$username,$data_history,'GJD');
 
+                            $data_history = array(
+                                            'datelog'   => date("Y-m-d H:i:s"),
+                                            'kode'      => $id_inlet,
+                                            'jenis_log' => $jenis_log,
+                                            'note'      => $note_log  );
                             $this->_module->gen_history_ip('inlet',$username,$data_history);
 
                             
@@ -1344,15 +1381,15 @@ class Outlet extends MY_Controller
         $gen_code = $code->generate($lot, "", 60, "vertical");
         $this->prints->setView('print/'.$desain_barcode);
         $this->prints->addData('pattern', $corak);
-        $this->prints->addData('isi_color', $warna);
+        $this->prints->addData('isi_color', !empty($warna)? $warna : '&nbsp');
         $this->prints->addData('isi_satuan_lebar', 'WIDTH ['.$uom_lebar.']');
-        $this->prints->addData('isi_lebar', $lebar);
+        $this->prints->addData('isi_lebar', !empty($lebar)? $lebar : '&nbsp');
         $this->prints->addData('isi_satuan_qty1', 'QTY ['.$uom_jual.']');
-        $this->prints->addData('isi_qty1', $qty_jual);
-        // if(!empty($qty2_jual)){
-            $this->prints->addData('isi_satuan_qty2', 'QTY ['.$uom2_jual.']');
-            $this->prints->addData('isi_qty2', $qty2_jual);
-        // }
+        $this->prints->addData('isi_qty1', round($qty_jual,2));
+        if(!empty($qty2_jual)){
+            $this->prints->addData('isi_satuan_qty2', 'QTY2 ['.$uom2_jual.']');
+            $this->prints->addData('isi_qty2', round($qty2_jual,2));
+        }
         $this->prints->addData('barcode_id', $lot);
         $this->prints->addData('tanggal_buat', $tanggal);
         $this->prints->addData('no_pack_brc', $kode_mg);

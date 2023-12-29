@@ -16,6 +16,7 @@
               <th>Qty2</th>
               <th>Qty Jual</th>
               <th>Qty2 Jual</th>
+              <th>Lbr.Jadi</th>
               <th>Lokasi</th>
               <th>Lokasi Fisik</th>
               <th>Nama User</th>
@@ -28,7 +29,11 @@
     </div>
   </div>
 </form>
-
+<style>
+  .max-width-5{
+    max-width:5px
+  }
+</style>
 <script type="text/javascript">
     var table;
     $(document).ready(function() {
@@ -55,6 +60,7 @@
               { 
                 "targets": [0], 
                 "orderable": false, 
+                "className": "max-width-5"
               },
             ],
         });

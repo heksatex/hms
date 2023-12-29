@@ -86,29 +86,28 @@
         font-weight: bold;
     }
 
-    @media screen and (min-width:768px) {
+    @media screen and (min-width:1366px) and (min-height:768px) {
         .divListviewHead table  {
             display: block;
             /* height: calc( 100vh - 0vh ); */
             /* max-height: calc( 100vh - 600px );
             min-height: calc( 100vh - 750px ); */
-            min-height: calc( 50vh - 600px );
+            min-height: calc( 100vh - 700px );
             max-height: calc( 100vh - 600px );
             /* height: 5%;  */
             overflow-x: auto;
         }
     }
 
-    @media screen and (max-width:768px)) {
+    @media screen and (max-width:1366px) AND (max-height:768px) {
         .divListviewHead table  {
             display: block;
-            /* height: calc( 100vh - 80vh ); */
-            /* max-height: calc( 100vh - 400px ); */
-            max-height: calc( 100vh - 600px );;
-            /* max-height: calc( 100vh - 250px ); */
+            min-height: calc( 100vh - 500px );;
+            max-height: calc( 100vh - 450px );;
             overflow-x: auto;
         }
     }
+
     .loading_content_inlet{
         z-index: 50;
         background: rgba(255,255,255,0.7);
@@ -611,7 +610,7 @@
 
         // body onload
         get_list_lot_hph();
-        get_count_inlet();
+        // get_count_inlet();
 
         // $("#qty_yrd_potong").click(function () {
         //     $("html, body").animate({ scrollTop: $(".box .box-danger").offset().top }, 300);
@@ -753,30 +752,30 @@
         }
 
         // get count inlet
-        function get_count_inlet(){
+        // function get_count_inlet(){
 
-            $.ajax({
-                type     : "POST",
-                dataType : "json",
-                url :'<?php echo base_url('manufacturing/outlet/get_count_lot_inlet')?>',
-                beforeSend: function(e) {
-                    if(e && e.overrideMimeType) {
-                        e.overrideMimeType("application/json;charset=UTF-8");
-                    }                               
-                    $('.load_inlet').append('<div class="loading_content_inlet"><i class="fa fa-refresh fa-spin"></i></div>');
-                },
-                success: function(data){
+        //     $.ajax({
+        //         type     : "POST",
+        //         dataType : "json",
+        //         url :'<?php echo base_url('manufacturing/outlet/get_count_lot_inlet')?>',
+        //         beforeSend: function(e) {
+        //             if(e && e.overrideMimeType) {
+        //                 e.overrideMimeType("application/json;charset=UTF-8");
+        //             }                               
+        //             $('.load_inlet').append('<div class="loading_content_inlet"><i class="fa fa-refresh fa-spin"></i></div>');
+        //         },
+        //         success: function(data){
 
-                    $("#jml_lot_blm_inlet").html(data.jml_lot_blm_inlet);
-                    $("#jml_lot_inlet").html(data.jml_lot_inlet);
-                    $('.load_inlet .loading_content_inlet').remove('');
+        //             $("#jml_lot_blm_inlet").html(data.jml_lot_blm_inlet);
+        //             $("#jml_lot_inlet").html(data.jml_lot_inlet);
+        //             $('.load_inlet .loading_content_inlet').remove('');
                   
-                },error: function (xhr, ajaxOptions, thrownError) {
-                    alert(xhr.responseText)
-                }
-            });
+        //         },error: function (xhr, ajaxOptions, thrownError) {
+        //             alert(xhr.responseText)
+        //         }
+        //     });
 
-        }
+        // }
 
         
         $(document).on("keyup", "#txt_search_lot", function(){
@@ -808,7 +807,9 @@
 
                         var tbody = $("<tbody />");
                         var no    = 1;
+                        loop      = 3;
                         $.each(data.record, function(key, value) {
+                            // for(a=1; a<loop; a++){
                             lot_encr = htmlentities_script(value.lot);
                             var tr  = "<tr class='num' ondblclick='myFunction(this)' data-id="+value.id+" data-lot="+value.lot+">"
                                     + "<td class='cursor-pointer'>"+no++ +".</td>"
@@ -817,6 +818,7 @@
                                     + "<td class='cursor-pointer'><button type='button' id='btn-search-inlet' class='btn btn-xs btn-primary search-inlet' onclick='myFunction(this)'data-id='"+value.id+"' data-lot='"+value.lot+"'><i class='fa fa-check'></i>  Pilih </td>"
                                     + "</tr>";
                                     tbody.append(tr);
+                            // }
                         });
 
                         if(data.record == 0){
@@ -867,8 +869,7 @@
             var win = window.open();
             win.document.write($("#printed").html());
             win.document.close();
-            win.print();
-            win.close();
+            setTimeout(function(){ win.print(); win.close();}, 200);
             $('#qty_yrd_potong').focus();
         }
 
@@ -954,7 +955,7 @@
                             divp.innerHTML = data.data_print;
                             unblockUI( function() {
                                 setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){ 
-                                        if(print){
+                                        if(print && grade_radio != 'F'){
                                             print_voucher();
                                         }
                                         $('#btn-simpan').button('reset');
@@ -966,7 +967,7 @@
                             $('.info_status').addClass(data.tipe_alert);
 
                             get_list_lot_hph();
-                            get_count_inlet();
+                            // get_count_inlet();
 
                             // clear_value
                             $("input[type=text].input_list").val('');
@@ -974,7 +975,7 @@
                             $("#uom_label_barcode").val('');
                             $("#qty2_label").val('');
                             $("#uom2_label_barcode").val('');
-                            // $("#lebar_jadi_label").val('');
+                            $("#lebar_jadi_label").val(lebar_jadi_label);
                             // $("#uom_lebar_jadi_label_barcode").val('');
                             $("#remark_by_grade").prop('selectedIndex', 0);
                             if(data.sisa_target != ''){
@@ -1360,7 +1361,7 @@
                                     $('.info_status').addClass(data.tipe_alert);
 
                                     get_list_lot_hph();
-                                    get_count_inlet();
+                                    // get_count_inlet();
                                             
                                 }
                         
