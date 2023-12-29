@@ -399,12 +399,8 @@
               window.location.replace('index.php');
               $('#btn-scan').button('reset');
           }else if(data.status == 'failed'){
-              if(data.alert == 'modal'){
-                alert_modal_warning(data.message);
-              }else{
-                alert(data.message);
-                document.getElementById(data.field).focus();             
-              }
+              alert_notify(data.icon,data.message,data.type,function(){});
+              document.getElementById(data.field).focus();             
               refresh_transferLokasi();
           }else{
               //jika success 
@@ -419,7 +415,6 @@
         },error: function (jqXHR, textStatus, errorThrown){
           alert(jqXHR.responseText);
           $('#btn-scan').button('reset');
-          
         }
     });
     
