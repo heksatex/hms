@@ -113,6 +113,10 @@ class Splitlot extends MY_Controller
                 $row[] = $field->lot;
                 $row[] = number_format($field->qty,2)." ".$field->uom;
                 $row[] = number_format($field->qty2,2)." ".$field->uom2;
+                if($departemen == 'GJD'){
+                    $row[] = number_format($field->qty_jual,2)." ".$field->uom_jual;
+                    $row[] = number_format($field->qty2_jual,2)." ".$field->uom2_jual;
+                }
                 $row[] = $field->nama_grade;
                 $row[] = $field->reff_note;
                 $row[] = $field->reserve_move;

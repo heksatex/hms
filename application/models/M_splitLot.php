@@ -10,11 +10,6 @@ class M_splitLot extends CI_Model
 	var $column_search= array('a.kode_split','a.tanggal','d.nama', 'a.kode_produk', 'a.nama_produk', 'a.lot', 'a.qty', 'a.qty2', 'a.note' );
 	var $order  	  = array('a.tanggal' => 'desc');
 
-    var $table2  	    = 'stock_quant';
-	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
-	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
-	var $order2  	    = array('move_date' => 'desc');
-
 	private function _get_datatables_query()
 	{	
 
@@ -116,7 +111,11 @@ class M_splitLot extends CI_Model
         return $kode_split;
 	}
 
-
+	var $table2  	    = 'stock_quant';
+	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
+	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
+	var $order2  	    = array('move_date' => 'desc');
+	
 
     private function _get_datatables2_query()
 	{
