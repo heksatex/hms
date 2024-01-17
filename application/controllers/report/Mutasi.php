@@ -967,7 +967,7 @@ class Mutasi extends MY_Controller
                     $count_child_head1  = 6;
                     $count_child_head2  = 9;
                 }else{
-                    $count_child_head1  = 10; // jml kolom penerimaan
+                    $count_child_head1  = 5; // jml kolom penerimaan
                     $count_child_head2  = 10; // jml kolom pengiriman
                 }
 
@@ -988,7 +988,7 @@ class Mutasi extends MY_Controller
                 if($excel == true){
                     $count_childx = 30;
                 }else{
-                    $count_childx = 25;
+                    $count_childx = 30;
                 }
                 $head_process[]        = array('nama' => 'Detail Process', 'child' => $head_process_dept, 'count_child'=>$count_childx,'row'=>3);
 
