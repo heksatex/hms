@@ -7,7 +7,7 @@
             <tr>
               <th class="no">No</th>
               <th>Kode Produk</th>
-              <th>Product</th>
+              <th>Nama Produk</th>
               <th>Lot</th>
               <th>Qty</th>
               <th>Qty2</th>

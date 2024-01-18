@@ -2,6 +2,11 @@
 <html>
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <style>
+        .min_width_100{
+            min-width:100%
+        }
+  </style>
 </head>
 
 <body class="hold-transition skin-black fixed sidebar-mini" onload="get_default()"> 
@@ -78,7 +83,7 @@
 
                     <div class="col-md-6" >
 
-                        <span id="show_scan" style="display: ;">
+                       
                         
                             <div class="col-md-12 col-xs-12 " style="padding-bottom:10px;">
                                 <div class="col-xs-12 col-md-4 col-sm-4 " style>
@@ -129,7 +134,27 @@
                                 </div>                                    
                             </div>
 
-                        </span>
+                            <span id="show_qty_jual" style="display: none;">
+                                <div class="col-md-12 col-xs-12">
+                                    <div class="col-xs-4"><label>Qty1 Jual  </label></div>
+                                    <div class="col-xs-5">
+                                        <input type="text" class="form-control input-sm" name="qty_jual" id="qty_jual" readonly>                    
+                                    </div> 
+                                    <div class="col-xs-3">
+                                        <input type="text" class="form-control input-sm" name="uom_qty_jual" id="uom_qty_jual"readonly >                    
+                                    </div>                                    
+                                </div>
+
+                                <div class="col-md-12 col-xs-12">
+                                    <div class="col-xs-4"><label>Qty2 Jual </label></div>
+                                    <div class="col-xs-5">
+                                        <input type="text" class="form-control input-sm" name="qty2_jual" id="qty2_jual" readonly>                    
+                                    </div> 
+                                    <div class="col-xs-3">
+                                        <input type="text" class="form-control input-sm" name="uom_qty2_jual" id="uom_qty2_jual" readonly>                    
+                                    </div>                                    
+                                </div>
+                            </span>
 
                     </div>
 
@@ -152,7 +177,7 @@
                         <table class="table table-condesed table-hover rlstable  over" width="100%" id="table_items" >
                           <thead>                          
                             <tr>
-                              <th class="style no">No.</th>
+                              <th class="style" width="50px">No.</th>
                               <th class="style" style="width:100px;" >Qty1</th>
                               <th class="style" width="80px">Uom</th>
                               <th class="style" style="width:100px;" >Qty2</th>
@@ -215,12 +240,31 @@
         $("#departemen").prop('selectedIndex',0)
     }
     
-    function validAngka(a){   
-        if(!/^[0-9.]+$/.test(a.value)){
-          //a.value = a.value.substring(0,a.value.length-1);
-          a.value = a.value.replace(/[^0-9.]/, '')
-          return true;
-        }
+    // validasi decimal/ onlynumber
+	function enforceNumberValidation(ele) {
+            if ($(ele).data('decimal') != null) {
+                // found valid rule for decimal
+                var decimal = parseInt($(ele).data('decimal')) || 0;
+                var val = $(ele).val();
+                if (decimal > 0) {
+					var value   = ele.value;
+					var numbers = value.replace(/[^0-9.-]/g, '');
+                    var splitVal = numbers.split('.');
+                    if (splitVal.length == 2 && splitVal[1].length > decimal) {
+                        // user entered invalid input
+						splitVal0  = splitVal[0].replace(/[^0-9.-]/g, '');
+						splitVal1  = splitVal[1].substr(0, decimal).replace(/[^0-9]/g, "");
+                        $(ele).val(splitVal0 + '.' + splitVal1);
+                    }else{
+						$(ele).val(numbers)
+					}
+                } else if (decimal == 0) {
+
+					var value = ele.value;
+					var numbers = value.replace(/[^0-9]/g, "");
+					ele.value = numbers;
+                }
+            }
     }
 
 
@@ -229,8 +273,41 @@
     });
 
     function checkTampil(){
+        var dept = $('#departemen').val();
         if($('#departemen').val() != ''){
-            $("#show_scan").show();
+            if(dept == 'GJD'){
+                $("#show_qty_jual").show();
+
+                $('#table_items thead tr').remove();
+                var row = '<tr><th class="style" width="50px">No.</th>'
+                        +'<th class="style" style="width:100px;" >Qty1</th>'
+                        +'<th class="style" width="80px">Uom</th>'
+                        +'<th class="style" style="width:100px;" >Qty2</th>'
+                        +'<th class="style" width="80px">Uom2</th>'
+                        +'<th class="style" style="width:100px;" >Qty1 Jual</th>'
+                        +'<th class="style" width="80px">Uom Jual</th>'
+                        +'<th class="style" style="width:100px;" >Qty2 Jual</th>'
+                        +'<th class="style" width="80px">Uom2 Jual</th>'
+                        +'<th class="style" width="100px">Lot Baru</th>'
+                        +'<th class="style" width="50px"></th><tr>';
+                $('#table_items thead').append(row);
+            }else{
+                $("#show_qty_jual").hide();
+                $('#table_items thead tr').remove();
+                var row = '<tr><th class="style" width="50px">No.</th>'
+                        +'<th class="style" style="width:100px;" >Qty1</th>'
+                        +'<th class="style" width="80px">Uom</th>'
+                        +'<th class="style" style="width:100px;" >Qty2</th>'
+                        +'<th class="style" width="80px">Uom2</th>'
+                        +'<th class="style" width="100px">Lot Baru</th>'
+                        +'<th class="style" width="50px"></th><tr>';
+                $('#table_items thead').append(row);
+            }
+
+            $('#qty_jual').val('');
+            $('#uom_qty_jual').val('');
+            $('#qty2_jual').val('');
+            $('#uom_qty2_jual').val('');
 
             $('#txtlot').val('');
             $('#quant_id').val('');
@@ -242,8 +319,9 @@
             $('#qty2').val('');
             $('#uom_qty2').val('');            
             $("#table_items tbody tr").remove();
+
         }else{
-            $("#show_scan").hide();
+            $("#show_qty_jual").hide();
         }
     }
 
@@ -303,6 +381,10 @@
       document.getElementById("uom_qty").value = $(this).attr('uom');
       document.getElementById("qty2").value = $(this).attr('qty2');
       document.getElementById("uom_qty2").value = $(this).attr('uom2');
+      document.getElementById("qty_jual").value = $(this).attr('qty_jual');
+      document.getElementById("uom_qty_jual").value = $(this).attr('uom_jual');
+      document.getElementById("qty2_jual").value = $(this).attr('qty2_jual');
+      document.getElementById("uom_qty2_jual").value = $(this).attr('uom2_jual');
       $('#view_data').modal('hide');
       $("#table_items tbody tr").remove();
     });
@@ -317,6 +399,7 @@
 
     function tambah_baris(){
         var tambah = true;
+        var dept   = $("#departemen").val();
 
         tbl_uom_value = $('#uom_qty').val();
         tbl_uom2_value = $('#uom_qty2').val();
@@ -343,20 +426,48 @@
 			}
 		});	
 
+        if(dept == 'GJD'){
+            $('.tbl_qty_jual').each(function(index,value){
+                if($(value).val() === "" ){
+                    alert_notify('fa fa-warning','Qty Jual tidak boleh kosong !','danger',function(){});
+                    $(value).addClass('error'); 
+                    tambah = false;
+                }else{
+                    $(value).removeClass('error'); 
+                }
+            });	
+
+            $('.tbl_uom_jual').each(function(index,value){
+                if($(value).val() === "" ){
+                    alert_notify('fa fa-warning','Uom Qty Jual tidak boleh kosong !','danger',function(){});
+                    $(value).addClass('error'); 
+                    tambah = false;
+                }else{
+                    $(value).removeClass('error'); 
+                }
+            });	
+        }
+
         if(tambah){
             var tbl_qty = document.getElementsByClassName('tbl_qty');
 		    var inx_tbl_qty = tbl_qty.length-1;
-
             var index = $("#table_items tbody tr:last-child").index();
             var row   ='<tr class="num">'
-                    + '<td></td>'
-                    + '<td class="width-200"><input type="text" class="form-control input-sm tbl_qty text-right" name="Qty1" id="tbl_qty1"  onkeyup="validAngka(this)" onkeypress="enter(event);" ></td>'
-                    + '<td class="width-200"><input type="text" class="form-control input-sm tbl_uom" name="Uom" id="tbl_uom" value="'+tbl_uom_value+'" readonly></td>'     
-                    + '<td class="width-200"><input type="text" class="form-control input-sm tbl_qty2 text-right" name="Qty2" id="tbl_qty2"  onkeyup="validAngka(this)" onkeypress="enter(event);"></td>'
-                    + '<td class="width-200"><input type="text" class="form-control input-sm tbl_uom2" name="Uom2" id="tbl_uom2" value="'+tbl_uom2_value+'" readonly></td>'          
-                    + '<td></td>'
-                    + '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
-                    + '</tr>';
+                row  +='<td></td>';
+                row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_qty text-right" name="Qty1" id="tbl_qty1"  onkeypress="enter(event);" data-decimal="2" oninput="enforceNumberValidation(this)"></td>';
+                row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_uom" name="Uom" id="tbl_uom" value="'+tbl_uom_value+'" readonly></td>';
+                row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_qty2 text-right" name="Qty2" id="tbl_qty2"  onkeypress="enter(event);" data-decimal="2" oninput="enforceNumberValidation(this)"></td>';
+                row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_uom2" name="Uom2" id="tbl_uom2" value="'+tbl_uom2_value+'" readonly></td>';
+                    if(dept == 'GJD'){
+                        row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_qty_jual text-right" name="Qty1 Jual" id="tbl_qty1_jual"  onkeypress="enter(event);" data-decimal="2" oninput="enforceNumberValidation(this)" ></td>';
+                        row  += '<td class="width-200"><select type="text" class="form-control input-sm min_width_100 tbl_uom_jual" name="Uom Jual" id="tbl_uom_jual"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>';
+                        row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_qty2_jual text-right" name="Qty2 Jual" id="tbl_qty2_jual"  onkeypress="enter(event);" data-decimal="2" oninput="enforceNumberValidation(this)" ></td>';
+                        row  += '<td class="width-200"><select type="text" class="form-control input-sm min_width_100 tbl_uom2_jual" name="Uom2 Jual" id="tbl_uom2_jual"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>';
+                    }
+
+                row  += '<td></td>';
+                row  += '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>';
+                row  += '</tr>';
 
             $('#table_items tbody').append(row);
             // $("#table_items tbody tr").eq(index + 1).find(".add, .edit").toggle();
@@ -386,6 +497,10 @@
         let uom_qty     = $('#uom_qty').val();
         let qty2        = $('#qty2').val();
         let uom_qty2    = $('#uom_qty2').val();    
+        let qty_jual    = $('#qty_jual').val();
+        let uom_qty_jual= $('#uom_qty_jual').val();
+        let qty2_jual   = $('#qty2_jual').val();
+        let uom_qty2_jual= $('#uom_qty2_jual').val();    
         let departemen  = $('#departemen').val();
         let note        = $('#note').val();
         let arr         = new Array();
@@ -412,6 +527,10 @@
                         uom_qty1    : $(value).parents("tr").find("#tbl_uom").val(),
                         qty2        : $(value).parents("tr").find("#tbl_qty2").val(),
                         uom_qty2    : $(value).parents("tr").find("#tbl_uom2").val(),
+                        qty1_jual   : $(value).parents("tr").find("#tbl_qty1_jual").val(),
+                        uom_qty1_jual : $(value).parents("tr").find("#tbl_uom_jual").val(),
+                        qty2_jual   : $(value).parents("tr").find("#tbl_qty2_jual").val(),
+                        uom_qty2_jual : $(value).parents("tr").find("#tbl_uom2_jual").val(),
                     });
                     items_split = true;
                 }
@@ -441,6 +560,28 @@
                 }
             });	
 
+            if(dept == 'GJD'){
+                $('.tbl_qty_jual').each(function(index,value){
+                    if($(value).val() === "" ){
+                        alert_notify('fa fa-warning','Qty Jual tidak boleh kosong !','danger',function(){});
+                        $(value).addClass('error'); 
+                        tambah = false;
+                    }else{
+                        $(value).removeClass('error'); 
+                    }
+                });	
+
+                $('.tbl_uom_jual').each(function(index,value){
+                    if($(value).val() === "" ){
+                        alert_notify('fa fa-warning','Uom Qty Jual tidak boleh kosong !','danger',function(){});
+                        $(value).addClass('error'); 
+                        tambah = false;
+                    }else{
+                        $(value).removeClass('error'); 
+                    }
+                });	
+            }
+
             if(tambah){
         
                 if(items_split == false ){
@@ -467,19 +608,16 @@
                                             e.overrideMimeType("application/json;charset=UTF-8");
                                         }
                                     },
-                                    data: {lot:lot, quant_id:quant_id, kode_produk:kode_produk, nama_produk:nama_produk, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, departemen:departemen, note:note, data_split: JSON.stringify(arr),
+                                    data: {lot:lot, quant_id:quant_id, kode_produk:kode_produk, nama_produk:nama_produk, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, qty_jual:qty_jual, uom_qty_jual:uom_qty_jual, uom_qty2_jual:uom_qty2_jual,  departemen:departemen, note:note, data_split:JSON.stringify(arr),
                                     },success: function(data){
-                                        if(data.sesi == "habis"){
-                                            //alert jika session habis
-                                            alert_modal_warning(data.message);
-                                            window.location.replace('index');
-                                        }else if(data.status == "failed"){
+                                        if(data.status == "failed"){
                                             //jika ada form belum keiisi
                                             unblockUI( function() {
                                                 setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                                             });
-                                            document.getElementById(data.field).focus();
-                                            
+                                            if(data.field!= ''){
+                                                document.getElementById(data.field).focus();
+                                            }
                                         }else{
                                         //jika berhasil disimpan
                                             unblockUI( function() {
@@ -491,9 +629,14 @@
                                         $('#btn-generate').button('reset');
 
                                     },error: function (xhr, ajaxOptions, thrownError) {
-                                        alert(xhr.responseText);
-                                        unblockUI( function(){});
+                                        unblockUI(function() {});
                                         $('#btn-generate').button('reset');
+                                        if(xhr.status == 401){
+                                            var err = JSON.parse(xhr.responseText);
+                                            alert(err.message);
+                                        }else{
+                                            alert("Error Generate Data !");
+                                        }  
 
                                     }
                                 });

@@ -6,6 +6,11 @@
     button[id="btn-generate"]{/*untuk hidden button generate*/
         display: none;
     }
+    <?php if($split->dept_id != 'GJD'){ ?>
+              button[id="btn-print"]{/*untuk hidden button generate*/
+                display: none;
+              }
+    <?php } ?>
   </style>
 </head>
 
@@ -40,7 +45,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title">Form Split Lot </h3>
+          <h3 class="box-title">Form Split Lot : <b><?php echo $split->kode_split;?></b> </h3>
         </div>
 
         <div class="box-body">
@@ -77,7 +82,6 @@
                     </div>
 
                     <div class="col-md-6" >
-
                         <div class="col-md-12 col-xs-12">
                             <div class="col-xs-4"><label>Kode Produk  </label></div>
                                 <div class="col-xs-8">
@@ -89,7 +93,7 @@
                             <div class="col-md-12 col-xs-12">
                                 <div class="col-xs-4"><label>Nama Produk  </label></div>
                                 <div class="col-xs-8">
-                                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk"   value="<?php echo $split->nama_produk; ?>" readonly>                    
+                                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk"   value="<?php echo htmlentities($split->nama_produk); ?>" readonly>                    
                                 </div>                                    
                             </div>
 
@@ -119,6 +123,27 @@
                                     <input type="text" class="form-control input-sm" name="uom_qty2" id="uom_qty2"  value="<?php echo $split->uom2; ?>" readonly>                    
                                 </div>                                    
                             </div>
+                            <?php if($split->dept_id == 'GJD'){?>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Qty1 Jual  </label></div>
+                                <div class="col-xs-5">
+                                    <input type="text" class="form-control input-sm" name="qty_jual" id="qty_jual"  value="<?php echo $split->qty_jual; ?>"  readonly>                    
+                                </div> 
+                                <div class="col-xs-3">
+                                    <input type="text" class="form-control input-sm" name="uom_qty_jual" id="uom_qty_jual"  value="<?php echo $split->uom_jual; ?>" readonly >                    
+                                </div>                                    
+                            </div>
+
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Qty2 Jual  </label></div>
+                                <div class="col-xs-5">
+                                    <input type="text" class="form-control input-sm" name="qty2_jual" id="qty2_jual"  value="<?php echo $split->qty2_jual; ?>" readonly>                    
+                                </div> 
+                                <div class="col-xs-3">
+                                    <input type="text" class="form-control input-sm" name="uom_qty2_jual" id="uom_qty2_jual"  value="<?php echo $split->uom2_jual; ?>" readonly>                    
+                                </div>                                    
+                            </div>
+                            <?php } ?>
                         </div>
 
                     </div>
@@ -147,8 +172,17 @@
                               <th class="style" width="80px">Uom</th>
                               <th class="style" style="width:100px;" >Qty2</th>
                               <th class="style" width="80px">Uom2</th>
+                              <?php if($split->dept_id == 'GJD'){?>
+                              <th class="style" style="width:100px;" >Qty1 Jual</th>
+                              <th class="style" width="80px">Uom Jual</th>
+                              <th class="style" style="width:100px;" >Qty2 Jual</th>
+                              <th class="style" width="80px">Uom2 Jual</th>
+                              <?php }?>
                               <th class="style" width="100px">Lot New</th>
-                              <th class="style" width="50px"></th>
+                              <th class="style" width="50px">
+                                <?php if(($split->dept_id) == 'GJD'){?>
+                                    All <input type="checkbox" name="checkQAll" id="checkQAll"></th>
+                                <?php }?>
                             </tr>
                           </thead>
                           <tbody>
@@ -161,7 +195,18 @@
                                       <td><?php echo $row->uom?></td>
                                       <td align="right"><?php echo number_format($row->qty2,2)?></td>
                                       <td><?php echo $row->uom2?></td>
+                                      <?php if($split->dept_id == 'GJD'){?>
+                                      <td align="right"><?php echo number_format($row->qty_jual,2)?></td>
+                                      <td><?php echo $row->uom_jual?></td>
+                                      <td align="right"><?php echo number_format($row->qty2_jual,2)?></td>
+                                      <td><?php echo $row->uom2_jual?></td>
+                                      <?php }?>
                                       <td class="text-wrap width-200"><?php echo $row->lot_baru?></td>
+                                      <td>
+                                        <?php if(($split->dept_id) == 'GJD'){?>
+                      										<input type="checkbox" class="checkItem" value="<?php echo $row->quant_id_baru?>" data-toggle="tooltip" title="Pilih Lot">
+                                        <?php }?>
+                                      </td>
                                     </tr>
                                   <?php 
                                 }
@@ -205,7 +250,82 @@
 </div>
 
 <?php $this->load->view("admin/_partials/js.php") ?>
+<?php $this->load->view("admin/_partials/modal.php") ?>
 
+<script>
+
+      //checked All
+    $('#checkQAll').on("change", function(){
+          $('.checkItem').prop("checked", $(this).prop("checked"));
+      });
+
+    $(".checkItem").on("change", function(){
+      var checked = $(this).is(':checked');
+          if(checked == false){
+              $('#checkQAll').prop("checked", false);
+          }
+      checkAllSQ();
+    });	
+
+    function checkAllSQ(){
+
+      var lengthClass = $(".checkItem").length;
+      var loop        = 0;
+      $('.checkItem').each(function(index,item){		
+        var checked = $(this).is(':checked');
+
+        if(checked == true){
+          // alert(loop);
+          loop++;
+        }
+
+        if(lengthClass == loop){
+          $('#checkQAll').prop("checked", true);
+        }
+      });
+    }
+
+ 
+    $(document).on("click", "#btn-print", function(e) {
+
+        var myCheckboxes_arr = new Array();
+
+        $(".checkItem:checked").each(function() {
+            myCheckboxes_arr.push($(this).val());
+        });
+     
+        let kode_split      = "<?php echo $split->kode_split; ?>";
+        if (myCheckboxes_arr.length === 0) {
+            alert_notify('fa fa-warning', 'Pilih LOT terlebih dahulu yang akan di print !', 'danger', function() {});
+        }else{
+            $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+            $("#print_data").modal({
+                show: true,
+                backdrop: 'static'
+            });
+            $("#print_data .modal-dialog .modal-content .modal-footer #btn-print-barcode").remove();
+            $('.modal-title').text('Pilih Desain Barcode dan K3L ');
+
+            $.post('<?php echo site_url()?>warehouse/splitlot/print_modal',
+            { kode_split:kode_split, data_arr:myCheckboxes_arr},
+                function(html){
+                    setTimeout(function() {$(".print_data").html(html);  },1000);
+                    $("#print_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print-barcode" name="btn-print" >Print</button>');
+
+                }   
+            );
+        }
+    });
+
+    // load new page print
+    function print_voucher() {
+        var win = window.open();
+        win.document.write($("#printed").html());
+        win.document.close();
+        setTimeout(function(){ win.print(); win.close();}, 200);
+    }
+  
+</script>
 
 
 </body>
