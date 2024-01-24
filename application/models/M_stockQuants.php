@@ -120,5 +120,14 @@ class M_stockQuants extends CI_Model {
 
         $this->db->query("UPDATE stock_move_items SET lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'  WHERE quant_id = '$quant_id' ");
     }
+
+    public function get_kategori_produk_by_produk($kode_produk){
+        $this->db->where('mp.kode_produk',$kode_produk);
+        $this->db->SELECT("mp.id_category, cat.nama_category");
+        $this->db->FROM("mst_produk mp");
+        $this->db->JOIN("mst_category cat","mp.id_category = cat.id");
+        $result = $this->db->get();
+        return $result->row();
+    }
     
 }
