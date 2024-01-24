@@ -79,7 +79,7 @@ class Inlet extends MY_Controller
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->desain_barcode;
                 $row[] = $field->nama_status;
-                $row[] = '<button type="button" class="btn btn-danger btn-sm btn-delete-inlet" data-id="' . $kode_encrypt . '" data-lot ="'.$field->lot.'" data-title="Batal Inlet"><i class="fa fa-trash"></></button>';
+                $row[] = '<button type="button" class="btn btn-danger btn-sm btn-delete-inlet" data-id="' . $kode_encrypt . '" data-lot ="'.$field->lot.'"  title="Batal Inlet" data-toggle="tooltip"><i class="fa fa-trash"></></button>';
     
                 $data[] = $row;
             }
@@ -113,7 +113,7 @@ class Inlet extends MY_Controller
                 $table_total = array();
                 $table_target = array('ket'=>'Qty Target','qty'=>$total_hph->qty,'qty2'=>$total_hph->qty2);
                 array_push($table_total,$table_target);
-                $table_ready  = array('ket'=>'Belum diProses','qty'=>isset($total_hph->qty_ready)? $total_hph->qty_ready : 0,'qty2'=>isset($total_hph->qty2_ready)? $total_hph->qty2_ready : 0);
+                $table_ready  = array('ket'=>'Belum diproses','qty'=>isset($total_hph->qty_ready)? $total_hph->qty_ready : 0,'qty2'=>isset($total_hph->qty2_ready)? $total_hph->qty2_ready : 0);
                 array_push($table_total,$table_ready);
                 $table_hasil  = array('ket'=>'Sudah diproses','qty'=>isset($total_hph->hasil_qty)? $total_hph->hasil_qty : 0,'qty2'=>isset($total_hph->hasil_qty2)? $total_hph->hasil_qty2:0);
                 array_push($table_total,$table_hasil);
@@ -482,18 +482,18 @@ class Inlet extends MY_Controller
             if(empty($cek_status)){
                 $callback = array('status' => 'failed', 'message' => 'Data Inlet KP / Lot <b>'.$lot.' tidak ditemukan!', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else if($cek_status->status == 'done'){
-                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sudah Done !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sudah Done !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else if($cek_status->status == 'process'){
-                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sedang di Process !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sedang di Process !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else if($cek_status->status == 'cancel'){
-                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sudah Cancel / dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sudah Cancel / dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else{
 
                 // cek hasil hph by lot
                 $cek_hasil = $this->m_inlet->cek_mrp_rm_hasil_by_lot($cek_status->kode_mrp,$cek_status->lot)->num_rows();
 
                 if($cek_hasil > 0 ){
-                    $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sudah terdapat HPH !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                    $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sudah terdapat HPH !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else{
 
                     $update_status = array('status'=>'cancel');

@@ -438,12 +438,12 @@ class M_inlet extends CI_Model
 				(SELECT sum(fg.qty2) as total_qty2 FROM mrp_production_fg_hasil fg WHERE inm.kode_mrp =  fg.kode AND inm.id = fg.id_inlet) as hasil_qty2,
 				(SELECT sum(smi.qty) as total_qty FROM mrp_production_rm_target rm 
 					INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id AND smi.status = 'ready'
-					WHERE smi.quant_id = inm.quant_id AND inm.kode_mrp = rm.kode ) as qty_ready,
+					WHERE smi.quant_id = inm.quant_id AND inm.kode_mrp = rm.kode AND inm.status != 'cancel') as qty_ready,
 				(SELECT sum(smi.qty2) as total_qty FROM mrp_production_rm_target rm 
 					INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id AND smi.status = 'ready'
-					WHERE smi.quant_id = inm.quant_id AND inm.kode_mrp = rm.kode ) as qty2_ready
+					WHERE smi.quant_id = inm.quant_id AND inm.kode_mrp = rm.kode AND inm.status != 'cancel' ) as qty2_ready
 				FROM mrp_inlet inm
-				WHERE id = '$id'");
+				WHERE inm.id = '$id'");
 		return $query->row();
 	}
 

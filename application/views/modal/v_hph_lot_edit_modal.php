@@ -375,7 +375,7 @@
                         unblockUI(function() {});
                         btn_load.button('reset');
                         if(xhr.status == 401){
-                            // var err = JSON.parse(xhr.responseText);
+                            var err = JSON.parse(xhr.responseText);
                             alert(err.message);
                         }else{
                             alert("Error print Data!")

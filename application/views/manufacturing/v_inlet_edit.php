@@ -628,9 +628,9 @@
                     var color2 = '';
                     $.each(data.hasil_hph, function(key, value) {
 
-                        if(value.ket == 'Qty Target'){
-                            qty_target = value.qty;
-                            qty2_target = value.qty2;
+                        if(value.ket == 'Qty Target' || value.ket == 'Belum diproses'){
+                            qty_target = qty_target + parseFloat(value.qty);
+                            qty2_target = qty2_target + parseFloat(value.qty2);
                         }
                         if(value.ket == 'Sudah diproses'){
                             if(value.qty > qty_target){
