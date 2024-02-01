@@ -343,7 +343,7 @@ class Outlet extends MY_Controller
                     $inlet     = $this->m_inlet->get_data_inlet_by_id($id_inlet);
 
                     // lock table
-                    $this->_module->lock_tabel("stock_quant WRITE, mrp_production WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, mrp_production_rm_target WRITE, mrp_production_rm_hasil WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_move WRITE, mrp_satuan WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, mrp_inlet  WRITE, stock_move_items as smi WRITE, stock_quant as sq WRITE, mst_produk WRITE, token_increment WRITE,departemen as d WRITE, mrp_production_rm_target as rmt WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE,mrp_production_fg_hasil  as fg WRITE, mrp_production as mrp write");
+                    $this->_module->lock_tabel("stock_quant WRITE, mrp_production WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, mrp_production_rm_target WRITE, mrp_production_rm_hasil WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_move WRITE, mrp_satuan WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, mrp_inlet  WRITE, stock_move_items as smi WRITE, stock_quant as sq WRITE, mst_produk WRITE, token_increment WRITE,departemen as d WRITE, mrp_production_rm_target as rmt WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE,mrp_production_fg_hasil  as fg WRITE, mrp_production as mrp write, mrp_production_fg_target as tfg WRITE");
 
 
                     // get data inlet
@@ -388,19 +388,22 @@ class Outlet extends MY_Controller
                         $is_waste_lokasi = false;
                         if($waste_lokasi == "Waste"){
                             $is_waste_lokasi = true;
+                            $cek_smi_rm = $this->m_outlet->cek_stock_move_items_by_kode_2($kode_mg)->row();// fg jika quant inlet habis buat waste limit 1
                         }
 
                         if(empty($data_mrp)){
                             $callback = array('status' => 'failed', 'message'=> 'Data KP/Lot Inlet tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                         }else if($data_mrp->status == 'done'){
-                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                         }else if($data_mrp->status == 'draft'){
-                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Masih Draft !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG Masih Draft !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                         }else if($data_mrp->status == 'cancel'){
-                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                         }else if($data_mrp->status == 'hold'){
-                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                            $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                         }else if(empty($cek_smi_rm) AND $is_waste_lokasi == false){
+                            $callback = array('status' => 'failed', 'message'=>'Maaf, Stock Move Bahan Baku tidak ditemukan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                        }else if(empty($cek_smi_rm) AND $is_waste_lokasi == true){
                             $callback = array('status' => 'failed', 'message'=>'Maaf, Stock Move Bahan Baku tidak ditemukan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                         }else if(round($cek_smi_rm_qty,2) != round($sisa_hph_mtr,2) AND $sisa_hph_mtr > 0 AND $is_waste_lokasi == false){
                             $callback = array('status' => 'failed', 'message'=>'Maaf, <b>Sisa Qty Mtr</b> dan <b>Stock Qty Mtr</b> tidak sama, Harap Pilih kp/lot kembali !', 'icon' => 'fa fa-warning', 'type'=>'danger');
@@ -668,7 +671,7 @@ class Outlet extends MY_Controller
                                 if($get_sq['qty'] == $qty_1_rm AND $get_sq['qty2'] == $qty_2_rm){ // cek qty di stock quant dan di smi
                                     
                                     if($grade == 'A' or $grade == 'B' or $grade == 'C'){
-                                        if($hph_mtr < $qty_1_rm){
+                                        if((double)$hph_mtr < (double)$qty_1_rm){
 
                                             if($get_sq['qty_opname'] > 0 AND $qty_1_rm > 0){
                                                 $qty_op_new = ($get_sq['qty_opname'] / $qty_1_rm) * $hph_mtr;
@@ -676,22 +679,21 @@ class Outlet extends MY_Controller
                                                 $uom_opname_rm = $get_sq['qty_opname'];
                                             }
 
-                                            if($hph_kg < $qty_2_rm){
-
+                                            if((double)$hph_kg < (double)$qty_2_rm){
                                                 $qty1_update = (double)$qty_1_rm - (double)round($hph_mtr,2);// update ke quant bahan baku yg ready
                                                 $qty2_update =  (double)$qty_2_rm - (double)round($hph_kg,2);
-
                                                
                                             }else{ // hph_kg >= qty_2_rm
 
                                                 $qty1_update = (double)$qty_1_rm - (double)round($hph_mtr,2);// update ke quant bahan baku yg ready
-                                                if($hph_kg == $qty_2_rm){
-                                                    $qty2_update = 0;
-                                                }else{
-                                                    $qty2_update = $qty_2_rm;
-                                                }
-
+                                                $qty2_update = 0;
+                                                // if($hph_kg >= $qty_2_rm){
+                                                // }else{
+                                                //     $qty2_update = $qty_2_rm;
+                                                // }
+                                                $hph_kg = $qty_2_rm;
                                             }
+
                                                                                     
                                             // update stock_move_items
                                             $update_rm_smi  = array(
@@ -801,13 +803,14 @@ class Outlet extends MY_Controller
                                          
                                             if($hph_kg < $qty_2_rm){
 
-                                                if($hph_mtr == $qty_1_rm){
-                                                    $qty1_update = 0;
-                                                }else{ // hph_mtr > $qty_1_rm
-                                                    $qty1_update = $qty_1_rm; // qty = qty_1_rm
-                                                }
+                                                // if($hph_mtr == $qty_1_rm){
+                                                // }else{ // hph_mtr > $qty_1_rm
+                                                //     $qty1_update = $qty_1_rm; // qty = qty_1_rm
+                                                // }
                                                 
+                                                $qty1_update = 0;
                                                 $qty2_update = (double)$qty_2_rm - (double)round($hph_kg,2);
+                                                $hph_mtr     = $qty_1_rm;
 
                                                 // update stock_quant
                                                 $update_rm_sq = array(
@@ -949,14 +952,14 @@ class Outlet extends MY_Controller
 
                                     }else if($grade == 'F'){
 
-                                        if($hph_mtr < 0){
+                                        if((double)$hph_mtr < 0){
                                             $hph_mtr = 0.00;
                                         }
-                                        if($hph_kg < 0){
+                                        if((double)$hph_kg < 0){
                                             $hph_kg = 0.00;
                                         }
 
-                                        if($qty_1_rm == $hph_mtr AND $qty_2_rm == $hph_kg){
+                                        if((double)$qty_1_rm ==(double)$hph_mtr AND (double)$qty_2_rm == (double)$hph_kg){
 
                                             if(!empty($dept['waste_location'])){
                                                 $waste_location = $dept['waste_location'];
@@ -1300,13 +1303,13 @@ class Outlet extends MY_Controller
                     if(empty($data_mrp)){
                         $callback = array('status' => 'failed', 'message'=> 'Data KP/Lot Inlet tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                     }else if($data_mrp->status == 'done'){
-                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else if($data_mrp->status == 'draft'){
-                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Masih Draft !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG Masih Draft !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else if($data_mrp->status == 'cancel'){
-                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else if($data_mrp->status == 'hold'){
-                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MG di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else if(empty($cek_smi_rm) AND $is_waste_lokasi == false){
                         $callback = array('status' => 'failed', 'message'=>'Maaf, Stock Move Bahan Baku tidak ditemukan !'.$waste_lokasi, 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else if(($cek_smi_rm_status == 'ready' OR $total_hph->qty > $total_hph->hasil_qty or $total_hph->qty2 > $total_hph->hasil_qty2) AND $is_waste_lokasi == false ){

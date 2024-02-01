@@ -1147,13 +1147,13 @@
                 $('.tampil_label_barcode').hide();
                 $("#tampil_table_list_uom_jual").hide();
                 if($('#sisa_hph_mtr').val() < 0){
-                    $('#qty_mtr_hph').val('');
+                    $('#qty_mtr_hph').val(0);
                 }else{
                     $('#qty_mtr_hph').val($('#sisa_hph_mtr').val());
                 }
 
                 if($('#sisa_hph_kg').val() < 0){
-                    $('#qty_kg_hph').val('');
+                    $('#qty_kg_hph').val(0);
                 }else{
                     $('#qty_kg_hph').val($('#sisa_hph_kg').val());
                 }
