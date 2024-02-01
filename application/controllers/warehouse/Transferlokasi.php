@@ -134,6 +134,8 @@ class Transferlokasi extends MY_Controller
 
 	      		if(!$validLokasiTujuan){
 	      			$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+				}else if($dept_id = "GJD" AND $lokasi_tujuan == "XPD"){
+					$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan di Departemen Gudang Jadi tidak boleh XPD !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      		}else{
 					if(empty($kode_tl)){// create transfer lokasi
 						
@@ -253,10 +255,22 @@ class Transferlokasi extends MY_Controller
 	      		}else if(!$validLokasiTujuan){
 	      			$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      		}else if(!$validBarcode){
-	      			$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Barcode tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
-
+					$cek_lot = $this->m_transferLokasi->cek_stock_qunt_by_barcode($barcode_id);
+					if(!empty($cek_lot)){
+						$lokasi_ril = $cek_lot->lokasi;
+						$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Lokasi Barcode sekarang berada di <b>'.$lokasi_ril.'</b> !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+					}else{
+						$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Barcode tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+					}
+				}else if($validBarcode->lokasi_fisik == 'XPD' AND $lokasi_stock == 'GJD/Stock'){
+					$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Lokasi asal Barcode tidak boleh XPD !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      		}else if($validBarcodeDepartement['lokasi'] != $lokasi_stock){
-	      			$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Lokasi Barcode tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+					$lokasi_ril =$validBarcodeDepartement['lokasi'];
+	      			$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Lokasi Barcode tidak Valid, Lokasi Barcode sekarang ada di '.$lokasi_ril.' !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+
+				}else if($lokasi_stock == 'GJD/Stock' AND $lokasi_tujuan == 'XPD'){
+					$lokasi_ril =$validBarcodeDepartement['lokasi'];
+	      			$callback = array('status' => 'failed', 'field' => 'barcode_id', 'message' => 'Lokasi Tujuan di Gudang Jadi tidak boleh XPD  !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      		}else if($validBarcodeInput > 0){
 
 					// get list kode Tl 
