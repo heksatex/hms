@@ -301,4 +301,13 @@ class M_joinLot extends CI_Model
         $this->db->update_batch("stock_quant",$data_update_stock,'quant_id');
         return $this->db->affected_rows();
     }
+
+	public function cek_picklist_by_lot($lot)
+	{
+		$this->db->where('barcode_id',$lot);
+		$this->db->where('valid != "cancel" ');
+		$result = $this->db->get("picklist_detail");
+		return $result->num_rows();
+		
+	}
 }

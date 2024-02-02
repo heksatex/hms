@@ -64,7 +64,6 @@ class Joinlot extends MY_Controller
     public function add()
 	{ 
 	    $data['id_dept']       = 'JLOT';
-        // $data['kode_split']    = $this->m_splitLot->get_kode_split();
         $data['warehouse']     = $this->_module->get_list_departement();
 	    return $this->load->view('warehouse/v_join_lot_add', $data);
 	}
@@ -265,6 +264,9 @@ class Joinlot extends MY_Controller
                     $lokasi_stock = $get['stock_location'] ?? '';
                     $get_sq = $this->m_joinLot->get_stock_quant_by_lot($lot,$lokasi_stock);
                     
+                    // cek barcode di picklist 
+                    $cek_pl = $this->m_joinLot->cek_picklist_by_lot($lot);
+                     
                     //cek lot by kodejoin
                     $cek_lot = $this->m_joinLot->cek_lot_join_by_kode($kode_join,$lot)->num_rows();
                     $lot_tmp = "";
@@ -279,8 +281,10 @@ class Joinlot extends MY_Controller
                         }
                     }else if($cek_lot > 0){
                         throw new \Exception('Barcode / Lot sudah diinput !', 200);
-                    }else if($get_sq->lokasi_fisik == "XPD"){
+                    }else if($get_sq->lokasi_fisik == "XPD" AND $dept == 'GJD'){
                         throw new \Exception('Lokasi Barcode / Lot sudah XPD !',200);
+                    }else if(!empty($cek_pl) AND $dept == 'GJD'){
+                        throw new \Exception('Data Barcode / Lot '.$lot.' sudah masuk PL !',200);
                     }else{
 
                         $items_join = $this->m_joinLot->get_data_join_lot_items_by_kode($kode_join);
@@ -431,7 +435,7 @@ class Joinlot extends MY_Controller
                     $lot_tmp    = "";
                     foreach($arr_data as $row){
 
-                        $get_sq = $this->m_joinLot->get_stock_quant_by_id($row,$lokasi_stock);// GJD
+                        $get_sq = $this->m_joinLot->get_stock_quant_by_id($row,$lokasi_stock);// GJD                     
                         
                         if(empty($get_sq)){
                             $get_sq2 = $this->_module->get_stock_quant_by_id($row)->row();
@@ -448,99 +452,106 @@ class Joinlot extends MY_Controller
                                 throw new \Exception('Barcode / Lot tidak valid !', 200);
                             }
                             break;
-                        }else if($get_sq->lokasi_fisik == 'XPD'){
+                        }else if($get_sq->lokasi_fisik == 'XPD' AND $dept == 'GJD'){
                             $lot        = $get_sq->lot;
                             throw new \Exception('Lokasi Barcode / Lot '.$lot.' sudah XPD !', 200);
                         }else{
 
+                            // cek barcode di picklist 
                             $lot     = $get_sq->lot;
-                            $cek_lot = $this->m_joinLot->cek_lot_join_by_kode($kode_join,$lot)->num_rows();
-    
-                            if(!empty($tmp_items)){
-                                foreach($tmp_items as $cki){
-
-                                    if($cki['grade'] != $get_sq->nama_grade){
-                                        $grade_note_same = true;
-                                        $lot_tmp .= $get_sq->lot;
-                                        // break;
-                                        throw new \Exception('Grade Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                    }
-
-                                    if($cki['corak_remark'] != $get_sq->corak_remark){
-                                        $corak_remark_note_same = true;
-                                        $lot_tmp .= $get_sq->lot;
-                                        throw new \Exception('Corak Remark Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                    }
-                                }
-                                $tmp_items = "";
-                            }
-
-                            if($cek_lot > 0){
-                                // $lot_input .= $lot.' <br> ';
-                                throw new \Exception('Barcode / Lot '.$lot.' sudah diinput !', 200);
+                            $cek_pl = $this->m_joinLot->cek_picklist_by_lot($lot);
+                            if(!empty($cek_pl)){
+                                throw new \Exception('Data Barcode / Lot '.$lot.' sudah masuk PL !',200);
                             }else{
-
-                                $items_join = $this->m_joinLot->get_data_join_lot_items_by_kode($kode_join);
-                                if(!empty($items_join)){
-                                    foreach($items_join as $ij){
-                                        if(($ij->kode_produk != $get_sq->kode_produk) or ($ij->nama_produk != $get_sq->nama_produk)){//produk
+                                $cek_lot = $this->m_joinLot->cek_lot_join_by_kode($kode_join,$lot)->num_rows();
+        
+                                if(!empty($tmp_items)){
+                                    foreach($tmp_items as $cki){
+    
+                                        if($cki['grade'] != $get_sq->nama_grade){
+                                            $grade_note_same = true;
                                             $lot_tmp .= $get_sq->lot;
-                                            throw new \Exception('Produk Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                        }else if($ij->corak_remark != $get_sq->corak_remark){// cek corak remark
+                                            // break;
+                                            throw new \Exception('Grade Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                        }
+    
+                                        if($cki['corak_remark'] != $get_sq->corak_remark){
+                                            $corak_remark_note_same = true;
                                             $lot_tmp .= $get_sq->lot;
                                             throw new \Exception('Corak Remark Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                        }else if($ij->warna_remark != $get_sq->warna_remark){
-                                            $lot_tmp .= $get_sq->lot;
-                                            throw new \Exception('Warna Remark Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                        }else if($ij->uom_jual != $get_sq->uom_jual){
-                                            $lot_tmp .= $get_sq->lot;
-                                            throw new \Exception('Uom Jual Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                        }else if($ij->uom2_jual != $get_sq->uom2_jual){
-                                            $lot_tmp .= $get_sq->lot;
-                                            throw new \Exception('Uom2 Jual Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                        }else if($ij->grade != $get_sq->nama_grade){
-                                            $lot_tmp .= $get_sq->lot;
-                                            throw new \Exception('Grade Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                        }else if(($ij->lebar_jadi != $get_sq->lebar_jadi) or ($ij->uom_lebar_jadi != $get_sq->uom_lebar_jadi)){
-                                            $lot_tmp .= $get_sq->lot;
-                                            throw new \Exception('Lebar Jadi Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
-                                        }else if($ij->sales_group != $get_sq->sales_group){
-                                            $lot_tmp .= $get_sq->lot;
-                                            throw new \Exception('Marketing Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
                                         }
                                     }
+                                    $tmp_items = "";
                                 }
-                                
-                                // insert into join_lot_items
-                                $data_items[] = array('kode_join'       => $kode_join,
-                                                'quant_id'      => $get_sq->quant_id,
-                                                'kode_produk'   => $get_sq->kode_produk,
-                                                'nama_produk'   => $get_sq->nama_produk,
-                                                'corak_remark'  => $get_sq->corak_remark,
-                                                'warna_remark'  => $get_sq->warna_remark,
-                                                'lot'           => $get_sq->lot,
-                                                'qty'           => $get_sq->qty,
-                                                'uom'           => $get_sq->uom,
-                                                'qty2'          => $get_sq->qty2,
-                                                'uom2'          => $get_sq->uom2,
-                                                'qty_jual'      => $get_sq->qty_jual,
-                                                'uom_jual'      => $get_sq->uom_jual,
-                                                'qty2_jual'     => $get_sq->qty2_jual,
-                                                'uom2_jual'     => $get_sq->uom2_jual,
-                                                'grade'         => $get_sq->nama_grade,
-                                                'lebar_jadi'    => $get_sq->lebar_jadi,
-                                                'uom_lebar_jadi'=> $get_sq->uom_lebar_jadi,
-                                                'sales_group'   => $get_sq->sales_group,
-                                                'row_order'     => $row_order,
-                                );
-
-                                $tmp_items = $data_items;
-                                // var_dump($tmp_items);
-                                $row_order++;
-
-                                $log_add_items .= "(".$count.") ".$get_sq->kode_produk." ".$get_sq->nama_produk." ".$get_sq->lot." ".$get_sq->qty." ".$get_sq->uom." ".$get_sq->qty2." ".$get_sq->uom2." <br>";
-                                $count++;
+    
+                                if($cek_lot > 0){
+                                    // $lot_input .= $lot.' <br> ';
+                                    throw new \Exception('Barcode / Lot '.$lot.' sudah diinput !', 200);
+                                }else{
+    
+                                    $items_join = $this->m_joinLot->get_data_join_lot_items_by_kode($kode_join);
+                                    if(!empty($items_join)){
+                                        foreach($items_join as $ij){
+                                            if(($ij->kode_produk != $get_sq->kode_produk) or ($ij->nama_produk != $get_sq->nama_produk)){//produk
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Produk Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }else if($ij->corak_remark != $get_sq->corak_remark){// cek corak remark
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Corak Remark Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }else if($ij->warna_remark != $get_sq->warna_remark){
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Warna Remark Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }else if($ij->uom_jual != $get_sq->uom_jual){
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Uom Jual Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }else if($ij->uom2_jual != $get_sq->uom2_jual){
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Uom2 Jual Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }else if($ij->grade != $get_sq->nama_grade){
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Grade Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }else if(($ij->lebar_jadi != $get_sq->lebar_jadi) or ($ij->uom_lebar_jadi != $get_sq->uom_lebar_jadi)){
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Lebar Jadi Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }else if($ij->sales_group != $get_sq->sales_group){
+                                                $lot_tmp .= $get_sq->lot;
+                                                throw new \Exception('Marketing Barcode / Lot '.$lot_tmp.' tidak sama  !', 200);
+                                            }
+                                        }
+                                    }
+                                    
+                                    // insert into join_lot_items
+                                    $data_items[] = array('kode_join'       => $kode_join,
+                                                    'quant_id'      => $get_sq->quant_id,
+                                                    'kode_produk'   => $get_sq->kode_produk,
+                                                    'nama_produk'   => $get_sq->nama_produk,
+                                                    'corak_remark'  => $get_sq->corak_remark,
+                                                    'warna_remark'  => $get_sq->warna_remark,
+                                                    'lot'           => $get_sq->lot,
+                                                    'qty'           => $get_sq->qty,
+                                                    'uom'           => $get_sq->uom,
+                                                    'qty2'          => $get_sq->qty2,
+                                                    'uom2'          => $get_sq->uom2,
+                                                    'qty_jual'      => $get_sq->qty_jual,
+                                                    'uom_jual'      => $get_sq->uom_jual,
+                                                    'qty2_jual'     => $get_sq->qty2_jual,
+                                                    'uom2_jual'     => $get_sq->uom2_jual,
+                                                    'grade'         => $get_sq->nama_grade,
+                                                    'lebar_jadi'    => $get_sq->lebar_jadi,
+                                                    'uom_lebar_jadi'=> $get_sq->uom_lebar_jadi,
+                                                    'sales_group'   => $get_sq->sales_group,
+                                                    'row_order'     => $row_order,
+                                    );
+    
+                                    $tmp_items = $data_items;
+                                    // var_dump($tmp_items);
+                                    $row_order++;
+    
+                                    $log_add_items .= "(".$count.") ".$get_sq->kode_produk." ".$get_sq->nama_produk." ".$get_sq->lot." ".$get_sq->qty." ".$get_sq->uom." ".$get_sq->qty2." ".$get_sq->uom2." <br>";
+                                    $count++;
+                                }
                             }
+
                         }
                     }
 
@@ -739,15 +750,15 @@ class Joinlot extends MY_Controller
                 //start transaction
                 $this->_module->startTransaction();
 
-                $cek_status  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
+                $cek  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
                 
-                if($cek_status->status == 'done'){
+                if($cek->status == 'done'){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status Join Lot Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
-                }else if($cek_status->status == 'cancel'){
+                }else if($cek->status == 'cancel'){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status Join Lot Cancel !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else{
 
-                    $get          = $this->_module->get_nama_dept_by_kode('GJD')->row_array();// get lokasi stock
+                    $get          = $this->_module->get_nama_dept_by_kode($cek->dept_id)->row_array();// get lokasi stock
                     $lokasi_stock = $get['stock_location'] ?? '';
                     $lokasi_adj   = $get['adjustment_location'] ?? '';
                     $nama_departemen   = $get['nama'] ?? '';
@@ -780,14 +791,19 @@ class Joinlot extends MY_Controller
                         foreach($items_join as $ij){
 
                             $get_sq = $this->_module->get_stock_quant_by_id($ij->quant_id)->row_array();
+                            // cek barcode di picklist 
+                            $cek_pl = $this->m_joinLot->cek_picklist_by_lot($ij->lot);
+
                             if(empty($get_sq)){
                                 throw new \Exception('Data Barcode / Lot '.$ij->lot.' tidak ditemukan !',200);
                             }else if($get_sq['lokasi'] != $lokasi_stock ){
                                 throw new \Exception('Lokasi Barcode / Lot '.$ij->lot.' bukan di '.$lokasi_stock.' , Lokasi Sekarang di <b>'.$get_sq['lokasi'].'</b> !', 200);
-                            }else if($get_sq['lokasi_fisik'] == 'XPD'){
+                            }else if($get_sq['lokasi_fisik'] == 'XPD' AND $cek->dept_id == 'GJD'){
                                 throw new \Exception('Lokasi Barcode / Lot '.$ij->lot.' sudah XPD !',200);
                             }else if(!empty($get_sq['reserve_move'])){
                                 throw new \Exception('Data Barcode / Lot '.$ij->lot.' sudah terpesan oleh dokumen lain !',200);
+                            }else if(!empty($cek_pl)){
+                                throw new \Exception('Data Barcode / Lot '.$ij->lot.' sudah masuk PL !',200);
                             }
                             $tmp_quant_id = $ij->quant_id;
                             $lot_tmp   = $ij->lot;

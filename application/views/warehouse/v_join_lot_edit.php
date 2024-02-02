@@ -213,7 +213,7 @@
                                                 <td><?php echo $join->nama_sales_group; ?></td>
                                                 <td class="width-50 " align="center" >  
                                                     <?php if($join->status == 'done'){?>
-                                                        <a href="javascript:void(0)" class="print_barcode" title="Print Barcode" data-toggle="tooltip" ><i class="fa fa-print" style="color: blue"></i></a>
+                                                        <a href="javascript:void(0)" class="print_barcode" title="Print Barcode" data-toggle="tooltip" data-status="<?php echo $join->status?>"><i class="fa fa-print" style="color: blue"></i></a>
                                                     <?php }?>
                                                 </td>
                                             </tr>
@@ -227,7 +227,6 @@
 
                     </div>
                     <!-- /.tab-pane -->
-              
                   </div>
                   <!-- /.tab-content -->
                 </div>
@@ -624,7 +623,7 @@
     //modal mode print
     $(document).on('click','.print_barcode',function(e){
         e.preventDefault();
-        let status_head = "<?php echo $join->status; ?>";
+        let status_head = $(this).attr('data-status');
         if(status_head == 'cancel'){
             alert_modal_warning('Maaf, Data Tidak Bisa di Print, Status Join Lot Sudah Batal !');
         }else if(status_head == 'draft'){
