@@ -404,6 +404,9 @@
         tbl_uom_value = $('#uom_qty').val();
         tbl_uom2_value = $('#uom_qty2').val();
 
+        tbl_uom_jual_value = "";
+        tbl_uom2_jual_value = "";
+
         //cek lot apa ada yg kosong
 		$('.tbl_qty').each(function(index,value){
 			if($(value).val()==''){
@@ -446,6 +449,8 @@
                     $(value).removeClass('error'); 
                 }
             });	
+            tbl_uom_jual_value = $("#uom_jual").val();
+            tbl_uom2_jual_value = $("#uom_jual").val();
         }
 
         if(tambah){
@@ -460,9 +465,9 @@
                 row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_uom2" name="Uom2" id="tbl_uom2" value="'+tbl_uom2_value+'" readonly></td>';
                     if(dept == 'GJD'){
                         row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_qty_jual text-right" name="Qty1 Jual" id="tbl_qty1_jual"  onkeypress="enter(event);" data-decimal="2" oninput="enforceNumberValidation(this)" ></td>';
-                        row  += '<td class="width-200"><select type="text" class="form-control input-sm min_width_100 tbl_uom_jual" name="Uom Jual" id="tbl_uom_jual"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>';
+                        row  += '<td class="width-200"><select type="text" class="form-control input-sm min_width_100 tbl_uom_jual" name="Uom Jual" id="tbl_uom_jual" onkeypress="enter(event);"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>';
                         row  += '<td class="width-200"><input type="text" class="form-control input-sm min_width_100 tbl_qty2_jual text-right" name="Qty2 Jual" id="tbl_qty2_jual"  onkeypress="enter(event);" data-decimal="2" oninput="enforceNumberValidation(this)" ></td>';
-                        row  += '<td class="width-200"><select type="text" class="form-control input-sm min_width_100 tbl_uom2_jual" name="Uom2 Jual" id="tbl_uom2_jual"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>';
+                        row  += '<td class="width-200"><select type="text" class="form-control input-sm min_width_100 tbl_uom2_jual" name="Uom2 Jual" id="tbl_uom2_jual" onkeypress="enter(event);"><option value=""></option><?php foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>';
                     }
 
                 row  += '<td></td>';
@@ -608,7 +613,7 @@
                                             e.overrideMimeType("application/json;charset=UTF-8");
                                         }
                                     },
-                                    data: {lot:lot, quant_id:quant_id, kode_produk:kode_produk, nama_produk:nama_produk, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, qty_jual:qty_jual, uom_qty_jual:uom_qty_jual, uom_qty2_jual:uom_qty2_jual,  departemen:departemen, note:note, data_split:JSON.stringify(arr),
+                                    data: {lot:lot, quant_id:quant_id, kode_produk:kode_produk, nama_produk:nama_produk, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, qty_jual:qty_jual, uom_qty_jual:uom_qty_jual, qty2_jual:qty2_jual, uom_qty2_jual:uom_qty2_jual,  departemen:departemen, note:note, data_split:JSON.stringify(arr),
                                     },success: function(data){
                                         if(data.status == "failed"){
                                             //jika ada form belum keiisi

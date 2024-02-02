@@ -192,6 +192,8 @@ class Splitlot extends MY_Controller
                     $callback = array('status' => 'failed', 'field' => 'uom_qty', 'message' => 'Uom Qty1 tidak boleh kosong !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                 }else if(empty($array_split)){
                     $callback = array('status' => 'failed', 'field' => 'kode_produk', 'message' => 'Split Items masih Kosong !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
+                }else if(count($array_split) == 1){
+                    $callback = array('status' => 'failed', 'field' => 'kode_produk', 'message' => 'Barcode / Lot yang akan di Split harus lebih dari 1 items !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                 }else{
 
                     // cek stock quant
@@ -213,6 +215,8 @@ class Splitlot extends MY_Controller
                         $callback = array('status' => 'failed',  'field' => 'qty', 'message' => 'Qty Produk tidak sama dengan Stock yang sekarang !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                     }else if($sq['qty2'] != 0 AND $sq['qty2'] != $qty2){// cek qty2 yg di post dan yg ter baru
                         $callback = array('status' => 'failed', 'field' => 'qty2',  'message' => 'Qty2 Produk tidak sama Stock yang sekarang !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
+                    }else if($sq['lokasi_fisik'] == "XPD" AND $departemen == "GJD"){
+                        $callback = array('status' => 'failed', 'field' =>'',  'message' => 'Lokasi Barcode/Lot Sudah XPD !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                     }else if(!empty($cek_pl)){
                         $callback = array('status' => 'failed', 'field' =>'',  'message' => 'Barcode/Lot Sudah Masuk PL !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
                     }else{

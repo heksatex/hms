@@ -254,9 +254,11 @@ class M_splitLot extends CI_Model
         return is_array($this->db->error());
 	}
 
-	public function cek_picklist_by_lot($quant_id,$lot)
+	public function cek_picklist_by_lot($quant_id = null,$lot)
 	{
-		$this->db->where('quant_id',$quant_id);
+		if(!empty($quant_id)){
+			$this->db->where('quant_id',$quant_id);
+		}
 		$this->db->where('barcode_id',$lot);
 		$this->db->where('valid != "cancel" ');
 		$result = $this->db->get("picklist_detail");
