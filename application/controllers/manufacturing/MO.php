@@ -1371,7 +1371,12 @@ class MO extends MY_Controller
         $data['lbr_produk'] = $this->m_mo->get_lebar_produk_by_kode($kode);
         $data['uom']        = $this->_module->get_list_uom();
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
-
+        
+        $username = $this->session->userdata('username');
+        $cek_dept = $this->_module->cek_departemen_by_user($username)->row_array();
+        $data['cek_dept']    = $cek_dept['dept'];
+        $level_akses         = $this->_module->get_level_akses_by_user($username)->row_array();
+        $data['level']       = $level_akses['level'];
         if(!empty($lot_prefix)){
             $count              = $this->m_mo->get_counter_by_lot_prefix(addslashes($lot_prefix),$deptid);
             //$data['row_lot']  = $count['jml_lot'] + 1;
@@ -1464,6 +1469,7 @@ class MO extends MY_Controller
         $data['lbr_produk'] = $this->m_mo->get_lebar_produk_by_kode($kode);
         $data['uom']        = $this->_module->get_list_uom();
         $data['show_lebar'] = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
+
 
         if($deptid == 'TRI' OR $deptid == 'JAC'){
             //cek MC by dept_id

@@ -808,6 +808,15 @@
 					
 					row = "grg"+row_order_rm;
 					row2 = "gjd"+row_order_rm;
+
+					var level 			= '<?php echo $level; ?>';
+					var cek_dept 		= '<?php echo $cek_dept; ?>';
+					var copy_bahan_baku =  '<?php echo $copy_bahan_baku; ?>';
+					if((cek_dept.includes("PPIC") !== false || level !== 'Entry Data') && (copy_bahan_baku == 'true')){
+						del_row_show = '<a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a>';
+					}else{
+						del_row_show = '';
+					}
 				
 					html='<tr class="num">'
 						+ '<td></td>'
@@ -827,7 +836,7 @@
 						+ '<td><select type="text" name="txtuom_lebar_jadi"  id="txtuom_lebar_jadi" class="form-control input-sm width-80 '+row2+'" ><option value=""></option><?php foreach($uom as $row){ echo  "<option value=".$row->short.">".$row->short."</option>"; }?></select></td>'
 						<?php }?>
 						+ '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm width-150" onkeypress="enter(event);"/></td>'
-						+ '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
+						+ '<td>'+del_row_show+'</td>'
 						+ '</tr>';
 						$('#tabel_produksi tbody').append(html);			
 						
