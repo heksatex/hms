@@ -12,7 +12,7 @@ class M_outlet extends CI_Model
         $this->db->WHERE_IN('mrpin.status',$status);
         // $this->db->WHERE("sq.lokasi","GJD/Stock");
         // $this->db->WHERE("sq.lokasi_fisik","INLET");
-        $this->db->SELECT('mrpin.id, mrpin.quant_id, mrpin.lot, mrpin.id, ms.nama_mesin, ms.mc_id');
+        $this->db->SELECT('mrpin.id, mrpin.quant_id, mrpin.lot, mrpin.id, IFNULL(ms.nama_mesin,"") as nama_mesin,IFNULL(ms.mc_id,"") as mc_id');
         $this->db->FROM('mrp_inlet mrpin');
         // $this->db->JOIN('stock_quant sq ','mrpin.quant_id = sq.quant_id', 'INNER');
         $this->db->JOIN("mesin ms ", 'mrpin.mc_id = ms.mc_id', "left");             
@@ -127,8 +127,8 @@ class M_outlet extends CI_Model
     }
 
     
-    var $column_order2 = array(null, 'fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
-	var $column_search2= array('fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
+    var $column_order2 = array(null, 'fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lebar_jadi','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
+	var $column_search2= array('fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lebar_jadi','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
 	var $order2  	  = array('fg.create_date' => 'asc');
 
     private function get_list_hph()
@@ -327,6 +327,18 @@ class M_outlet extends CI_Model
         $this->db->join("stock_move_items smi","rm.move_id = smi.move_id", "INNER");
         $this->db->join("stock_quant sq ", "smi.quant_id = sq.quant_id","INNER");
         $this->db->order_by("smi.row_order","asc");
+        return $this->db->get();
+    }
+
+    function cek_stock_move_items_by_kode_2($kode)
+    {
+        $this->db->where("tfg.kode",$kode);
+        $this->db->select("smi.move_id, smi.quant_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.`status`, smi.origin_prod, smi.row_order, sq.reff_note, smi.origin_prod, sq.nama_grade, smi.lokasi_fisik, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, tfg.qty as qty_rm_target");
+        $this->db->FROM("mrp_production_fg_target tfg");
+        $this->db->join("stock_move_items smi","tfg.move_id = smi.move_id", "INNER");
+        $this->db->join("stock_quant sq ", "smi.quant_id = sq.quant_id","INNER");
+        $this->db->order_by("smi.row_order","desc");
+        $this->db->limit('1');
         return $this->db->get();
     }
 

@@ -8,23 +8,20 @@
             padding-left: 30px !important;
             }
         }
-        .select2-container--focus{
-		    border:  1px solid #66afe9;
-        }
 
         select[readonly].select2-hidden-accessible + .select2-container {
-        pointer-events: none;
-        touch-action: none;
+            pointer-events: none;
+            touch-action: none;
         }
 
         select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
-        background: #eee;
-        box-shadow: none;
+            background: #eee;
+            box-shadow: none;
         }
 
         select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow,
         select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
-        display: none;
+            display: none;
         }
   </style>
 </head>
@@ -427,7 +424,7 @@
         // Tricot,Spandex.Tulle,Vitrage,Double Needle
         if(jenis_kain == 7 || jenis_kain == 8 || jenis_kain == 6 || jenis_kain == 5 || jenis_kain == 10){
             $('#uom_lebar_jadi').val('Inch');
-            $('#uom_lebar_jadi').attr( "readonly", true ).attr('name', 'uom_lebar_jadi');
+            // $('#uom_lebar_jadi').attr( "readonly", true ).attr('name', 'uom_lebar_jadi');
             $('#tampil_gramasi').show();
             $('#berat').val('');
             $('#tampil_berat').hide();

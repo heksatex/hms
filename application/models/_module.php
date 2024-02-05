@@ -197,9 +197,29 @@ class _module extends CI_Model {
         return $this->db->query("INSERT INTO stock_move (move_id,create_date,origin,method,lokasi_dari,lokasi_tujuan,status,row_order,source_move) values $sql ");
     }
 
+    public function create_stock_move_batch_2($data_sm) {
+        $this->db->insert_batch('stock_move', $data_sm);
+        return is_array($this->db->error());
+    }
+
     public function create_stock_move_produk_batch($sql) {
         return $this->db->query("INSERT INTO stock_move_produk (move_id,kode_produk,nama_produk,qty,uom,status,row_order,origin_prod) 
 								values $sql ");
+    }
+
+    public function create_stock_move_produk_batch_2($data_smp) {
+        $this->db->insert_batch('stock_move_produk', $data_smp);
+        return is_array($this->db->error());
+        // try {
+        //     $this->db->insert_batch('stock_move_produk', $data_smp);
+        //     $db_error = $this->db->error();
+        //     if ($db_error['code'] > 0) {
+        //         throw new Exception($db_error['message']);
+        //     }
+        //     return "";
+        // }catch (Exception $ex) {
+        //     return $ex->getMessage();
+        // }
     }
 
     public function simpan_penerimaan_batch($sql) {
@@ -386,8 +406,18 @@ class _module extends CI_Model {
         return $this->db->query("INSERT INTO stock_quant (quant_id,create_date,kode_produk,nama_produk,lot,nama_grade,qty,uom,qty2,uom2,lokasi,reff_note,reserve_move,reserve_origin,move_date,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi,sales_order,sales_group) VALUES $sql ");
     }
 
+    public function simpan_stock_quant_batch_2($data_stockquant) {
+        $this->db->insert_batch('stock_quant', $data_stockquant);
+        return is_array($this->db->error());
+    }
+
     public function simpan_stock_move_items_batch($sql) {
         return $this->db->query("INSERT INTO stock_move_items (move_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,status,row_order,origin_prod,tanggal_transaksi,lokasi_fisik,lebar_greige,uom_lebar_greige,lebar_jadi,uom_lebar_jadi) values $sql ");
+    }
+
+    public function simpan_stock_move_items_batch_2($data_smi) {
+        $this->db->insert_batch('stock_move_items', $data_smi);
+        return is_array($this->db->error());
     }
 
     public function update_status_stock_move_items($move_id, $kode_produk, $status) {
@@ -432,6 +462,11 @@ class _module extends CI_Model {
         return $this->db->query("INSERT INTO log_history (datelog,main_menu_sub_kode,kode,jenis_log,note,nama_user) values $sql ");
     }
 
+    public function simpan_log_history_batch_2($sql) {
+        $this->db->insert_batch('log_history', $sql);
+        return is_array($this->db->error());
+    }
+    
     public function get_location_by_move_id($move_id) {
         return $this->db->query("SELECT lokasi_dari, lokasi_tujuan From stock_move where move_id = '$move_id'");
     }
@@ -802,6 +837,16 @@ class _module extends CI_Model {
             $this->db->trans_commit();
             return true;
         }
+    }
+
+    public function finishRollBack(){
+        $this->db->trans_rollback();
+        return false;
+    }
+
+    public function finishCommit(){
+        $this->db->trans_commit();
+        return true;
     }
 
     public function get_list_number_user_by_dept($dept){

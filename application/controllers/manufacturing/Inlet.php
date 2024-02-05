@@ -14,6 +14,8 @@ class Inlet extends MY_Controller
         $this->load->model("m_outlet");
         $this->load->model("m_produk");
         $this->load->model("m_mo");
+        $this->load->library('barcode');
+        $this->load->library('prints');
 	}
 
     public function index()
@@ -77,7 +79,7 @@ class Inlet extends MY_Controller
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->desain_barcode;
                 $row[] = $field->nama_status;
-                $row[] = '<button type="button" class="btn btn-danger btn-sm btn-delete-inlet" data-id="' . $kode_encrypt . '" data-lot ="'.$field->lot.'" data-title="Batal Inlet"><i class="fa fa-trash"></></button>';
+                $row[] = '<button type="button" class="btn btn-danger btn-sm btn-delete-inlet" data-id="' . $kode_encrypt . '" data-lot ="'.$field->lot.'"  title="Batal Inlet" data-toggle="tooltip"><i class="fa fa-trash"></></button>';
     
                 $data[] = $row;
             }
@@ -94,6 +96,48 @@ class Inlet extends MY_Controller
         }else{
             die();
         }
+    }
+
+    function get_data_total_hasil_hph()
+    {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                // $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{  
+
+                $id_inlet = $this->input->post('id');
+                $total_hph = $this->m_inlet->get_total_hph_by_lot($id_inlet);
+
+                $table_total = array();
+                $table_target = array('ket'=>'Qty Target','qty'=>$total_hph->qty,'qty2'=>$total_hph->qty2);
+                array_push($table_total,$table_target);
+                $table_ready  = array('ket'=>'Belum diproses','qty'=>isset($total_hph->qty_ready)? $total_hph->qty_ready : 0,'qty2'=>isset($total_hph->qty2_ready)? $total_hph->qty2_ready : 0);
+                array_push($table_total,$table_ready);
+                $table_hasil  = array('ket'=>'Sudah diproses','qty'=>isset($total_hph->hasil_qty)? $total_hph->hasil_qty : 0,'qty2'=>isset($total_hph->hasil_qty2)? $total_hph->hasil_qty2:0);
+                array_push($table_total,$table_hasil);
+
+                $hasil_grade         = $this->m_inlet->get_total_hph_by_grade($id_inlet);
+                $callback     = array("hasil_hph" => $table_total, 'hasil_hph_grade'=>$hasil_grade);
+                $this->output->set_status_header(200)
+                        ->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+        
+        } catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+
+
+    }
+
+    public function get_uom_select2()
+    {
+	    $prod = addslashes($this->input->post('prod'));
+   		$callback = $this->m_inlet->get_list_uom_select2_by_prod($prod);
+        echo json_encode($callback);
     }
 
     function search_lot()
@@ -369,7 +413,6 @@ class Inlet extends MY_Controller
                                             'uom2'          => $sq->uom2,
                                             'qty_opname'    => $sq->uom,
                                             'uom_opname'    => $sq->uom_opname,                                                                                     
-                                            'origin_prod'   => $data->origin_prod
                             );
 
                             
@@ -430,7 +473,6 @@ class Inlet extends MY_Controller
             // start transaction
             $this->_module->startTransaction();
 
-
             //lock table 
             $this->_module->lock_tabel('mrp_inlet WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, mrp_production_rm_hasil WRITE,stock_quant WRITE, stock_quant as sq WRITE, mrp_production_rm_target as rm WRITE, stock_move_items as smi WRITE, stock_move_items WRITE');
 
@@ -440,18 +482,18 @@ class Inlet extends MY_Controller
             if(empty($cek_status)){
                 $callback = array('status' => 'failed', 'message' => 'Data Inlet KP / Lot <b>'.$lot.' tidak ditemukan!', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else if($cek_status->status == 'done'){
-                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sudah Done !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sudah Done !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else if($cek_status->status == 'process'){
-                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sedang di Process !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sedang di Process !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else if($cek_status->status == 'cancel'){
-                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sudah Cancel / dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sudah Cancel / dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else{
 
                 // cek hasil hph by lot
                 $cek_hasil = $this->m_inlet->cek_mrp_rm_hasil_by_lot($cek_status->kode_mrp,$cek_status->lot)->num_rows();
 
                 if($cek_hasil > 0 ){
-                    $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa dihapus, Data Inlet sudah terdapat HPH !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                    $callback = array('status' => 'failed', 'message' => 'Data Inlet tidak bisa di batalkan, Data Inlet sudah terdapat HPH !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else{
 
                     $update_status = array('status'=>'cancel');
@@ -488,6 +530,402 @@ class Inlet extends MY_Controller
         }
 
         echo json_encode($callback);
-
     }
+
+    function get_data_hph_inlet()
+    {
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $kode = $this->input->post('kode');// id inlet
+            $list = $this->m_inlet->get_datatables2($kode);
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->create_date;
+                $row[] = $field->kode_produk;
+                if($field->nama_grade == 'F'){
+                    $row[] = $field->nama_produk;
+                }else{
+                    $row[] = ' <a href="javascript:void(0)" class="edit_lot" title="Edit" data-toggle="tooltip" data-quant="'.$field->quant_id.'">'.$field->nama_produk.'</a>';
+                }
+                
+                $row[] = $field->corak_remark;
+                $row[] = $field->warna_remark;
+                $row[] = $field->lot;
+                $row[] = $field->nama_grade;
+                $row[] = $field->qty.' '.$field->uom;
+                $row[] = $field->qty2.' '.$field->uom2;
+                $row[] = $field->qty_jual.' '.$field->uom_jual;
+                $row[] = $field->qty2_jual.' '.$field->uom2_jual;
+                $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
+                $row[] = $field->lokasi;
+                $row[] = $field->nama_user;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_inlet->count_all2($kode),
+                "recordsFiltered" => $this->m_inlet->count_filtered2($kode),
+                "data" => $data,
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+    }
+
+    function edit_lot_modal()
+    {
+        try{
+            $kode               = $this->input->post('id');// id_inlet
+            $quant_id           = $this->input->post('quant_id');
+            $data['kode']       = $kode;
+            $data['quant_id']   = $quant_id;
+            if(empty($kode) or empty($quant_id)){
+                throw new \Exception('Data Lot Kosong !', 500);
+            }
+            $data_hph_lot       = $this->m_inlet->get_data_lot_hph_by_kode($kode,$quant_id);
+            $kode_mg            = $data_hph_lot->kode_mrp ?? '';
+            // cek list satuan
+            $list_uom_lot       = $this->m_inlet->get_list_uom_by_lot($kode_mg,$quant_id);
+            $data['list_uom_ready'] = ($list_uom_lot);
+            $data['list_uom_lot']   = json_encode($list_uom_lot);
+            if(empty($data_hph_lot)){
+                throw new \Exception('Data tidak Ditemukan !', 500);
+            }
+            $data['data_hph_lot']   = $data_hph_lot;
+            $data['desain_barcode']   = $this->_module->get_list_desain_barcode_by_type('LBK');     
+            // $data['kode_k3l']   = $this->_module->get_list_kode_k3l();        
+            return $this->load->view('modal/v_hph_lot_edit_modal',$data);
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    function save_edit_hph_lot()
+    {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+
+                $id_inlet   = $this->input->post('kode');
+                $quant_id   = $this->input->post('quant_id');
+                $lot        = $this->input->post('lot');
+                $corak_remark = $this->input->post('corak_remark');
+                $warna_remark = $this->input->post('warna_remark');
+                $qty_jual     = (double)$this->input->post('qty_jual');
+                $uom_qty_jual = $this->input->post('uom_qty_jual');
+                $qty2_jual    = (double)$this->input->post('qty2_jual');
+                $uom_qty2_jual= $this->input->post('uom_qty2_jual');
+                $lebar_jadi = $this->input->post('lebar_jadi');
+                $uom_lebar_jadi = $this->input->post('uom_lebar_jadi');
+
+                $sub_menu           = $this->uri->segment(2);
+                $username  = addslashes($this->session->userdata('username'));
+
+                // start transaction
+                $this->_module->startTransaction();
+
+                $tgl            = date('Y-m-d H:i:s');
+                $inlet = $this->m_inlet->get_data_inlet_by_id($id_inlet);
+
+                if(empty($inlet)){
+                    throw new \Exception('Data Inlet tidak ditemukan !', 200);
+                }
+
+                //lock table 
+                $this->_module->lock_tabel('log_history WRITE, user WRITE, main_menu_sub WRITE, mrp_satuan WRITE,stock_quant WRITE, picklist_detail WRITE, mrp_inlet WRITE, mrp_production_fg_hasil WRITE, stock_move_items WRITE');
+
+                //get data stock by kode
+                $get = $this->_module->get_stock_quant_by_id($quant_id)->row();
+                if(empty($get) or empty($quant_id)){
+                    throw new \Exception('Data Lot'.$lot.' tidak ditemukan di Stock !', 200);
+                }else if($get->lokasi != 'GJD/Stock'){
+                    throw new \Exception('Lokasi tidak valid, Data Lot'.$lot.' berada dilokasi '.$get->lokasi ?? '' .' !', 200);
+                }else{
+                    if($get->nama_grade == 'F'){
+                        $callback = array('status' => 'failed', 'message' => 'Grade F tidak bisa Edit HPH !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($corak_remark)){
+                        $callback = array('status' => 'failed', 'message' => 'Corak Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($warna_remark) AND $get->nama_grade != 'C'){
+                        $callback = array('status' => 'failed', 'message' => 'Warna Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');                    
+                    }else if(empty($qty_jual)){
+                        $callback = array('status' => 'failed', 'message' => 'Qty Jual Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($uom_qty_jual)){
+                        $callback = array('status' => 'failed', 'message' => 'Uom Jual Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(!empty($qty2_jual) AND empty($uom_qty2_jual)){
+                        $callback = array('status' => 'failed', 'message' => 'Uom2 Jual Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($lebar_jadi) AND $get->nama_grade != 'C'){
+                        $callback = array('status' => 'failed', 'message' => 'Lebar Jadi Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($uom_lebar_jadi) AND $get->nama_grade != 'C'){
+                        $callback = array('status' => 'failed', 'message' => 'Uom Lebar Jadi Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else{
+
+                        // cek apakah barcode masuk PL
+                        $cek_pl = $this->m_inlet->cek_barcode_in_picklist($quant_id,$lot)->row();
+                        if(!empty($cek_pl)){
+                            throw new \Exception('Tidak Bisi disimpan, Data Lot '.$lot.' Sudah Masuk PL !', 200);
+                        }
+                        $kode_mrp           = $inlet->kode_mrp;
+                        $kode_produk_fg     = $get->kode_produk;
+                        $nama_produk_fg     = $get->nama_produk;
+                        $data_qty_update    = array(array('qty'=>$qty_jual,'uom'=>$uom_qty_jual),array('qty'=>$qty2_jual,'uom'=>$uom_qty2_jual));
+                        $row_satuan         = $this->m_inlet->get_row_order_mrp_satuan_by_kode($kode_mrp,$quant_id);
+                        $rows               = $row_satuan;
+                        $data_insert_uom    = array();
+                        $data_update_uom    = array();
+                        $same               = false;
+                        $note_log_uom_qty   = "";
+                        $note_log_uom_qty2   = "";
+                        $note_log_uom_qty2   = "";
+                        $note_log_update_uom_jual   = "";
+
+                        $list_uom_ready =  $this->m_inlet->get_list_uom_by_lot($kode_mrp,$quant_id);
+
+                        // cek uom jual ada di table?                        
+                        $ids = array_column($list_uom_ready, 'uom', 'uom');
+                        isset($ids[$uom_qty_jual])? $qty_jual_ready = true: $qty_jual_ready = false;
+
+                        if($get->qty_jual != $qty_jual || $get->uom_jual != $uom_qty_jual){
+                            if($qty_jual_ready == false AND $qty_jual > 0){
+                                // insert mrp satuan baru   
+                                $data_insert_uom[] = array('kode'         => $kode_mrp,
+                                                'tanggal'           => $tgl,
+                                                'quant_id'          => $quant_id,
+                                                'kode_produk'       => $kode_produk_fg,
+                                                'nama_produk'       => $nama_produk_fg,
+                                                'lot'               => trim($lot),
+                                                'qty'               => $qty_jual,
+                                                'uom'               => $uom_qty_jual,
+                                                'row_order'         => $row_satuan,
+                            );
+                            $row_satuan++;
+                            $note_log_uom_qty = "<br> ".$qty_jual." ".$uom_qty_jual;
+                            }else{ // update qty
+                                if($qty2_jual > 0){
+                                    $data_update_uom[] = array('qty'=> $qty_jual, 'uom' => $uom_qty_jual);
+                                    $note_log_update_uom_jual = $qty_jual." ".$uom_qty_jual;
+                                }
+                            }
+                        }
+
+
+                        $ids = array_column($list_uom_ready, 'uom', 'uom');
+                        isset($ids[$uom_qty2_jual])? $qty2_jual_ready = true: $qty2_jual_ready = false;
+
+                        if($get->qty2_jual != $qty2_jual || $get->uom2_jual != $uom_qty2_jual){
+                            if($qty2_jual_ready == false AND $uom_qty_jual != $uom_qty2_jual AND $qty2_jual > 0){
+                                $data_insert_uom[] = array('kode'         => $kode_mrp,
+                                                        'tanggal'           => $tgl,
+                                                        'quant_id'          => $quant_id,
+                                                        'kode_produk'       => $kode_produk_fg,
+                                                        'nama_produk'       => $nama_produk_fg,
+                                                        'lot'               => trim($lot),
+                                                        'qty'               => $qty2_jual,
+                                                        'uom'               => $uom_qty2_jual,
+                                                        'row_order'         => $row_satuan,
+                                );
+                                $row_satuan++;
+                                $note_log_uom_qty2 = "<br> ".$qty2_jual." ".$uom_qty2_jual;
+                            }else{ // update qty
+                                if($qty2_jual > 0){
+                                    $data_update_uom[] = array('qty'=> $qty2_jual, 'uom' => $uom_qty2_jual);
+                                    $note_log_update_uom_jual = $qty2_jual." ".$uom_qty2_jual;
+                                }
+
+                            }
+                        }
+
+
+                        $note_log_before = $get->corak_remark." ".$get->warna_remark." ".$get->qty_jual." ".$get->uom_jual." ".$get->qty2_jual." ".$get->uom2_jual." ".$get->lebar_jadi." ".$get->uom_lebar_jadi." <b>-></b>";
+
+                        // update stock_quant
+                        $data_update = array(
+                                        'corak_remark' => $corak_remark,
+                                        'warna_remark' => $warna_remark,
+                                        'qty_jual'     => $qty_jual,
+                                        'uom_jual'     => $uom_qty_jual,
+                                        'qty2_jual'    => $qty2_jual,
+                                        'uom2_jual'    => $uom_qty2_jual,
+                                        'lebar_jadi'   => $lebar_jadi,
+                                        'uom_lebar_jadi'=> $uom_lebar_jadi
+                        );
+
+                        $update = $this->m_inlet->update_date_stock_quant($data_update,$quant_id);
+                        if(!empty($update)){
+                            throw new \Exception('Gagal Simpan Data Lot !', 200);
+                        }
+
+                        if($get->lebar_jadi != $lebar_jadi or $get->uom_lebar_jadi != $uom_lebar_jadi){
+                            $data_update_lebar = array('lebar_jadi'=> $lebar_jadi,'uom_lebar_jadi'=> $uom_lebar_jadi);
+                            $update_fg_hasil = $this->m_inlet->update_data_mrp_fg_hasil($data_update_lebar,$kode_mrp,$quant_id);
+                            if(!empty($update_fg_hasil)){
+                                throw new \Exception('Gagal Simpan Data Lot !', 200);
+                            }
+
+                            $update_smi = $this->m_inlet->update_data_stock_move_items($data_update_lebar,$quant_id);
+                            if(!empty($update_smi)){
+                                throw new \Exception('Gagal Simpan Data Lot !', 200);
+                            }
+                        }
+
+
+                        // update data uom
+                        $data_where_update = array('quant_id'=>$quant_id, 'kode'=>$kode_mrp);
+                        if(!empty($data_update_uom)){
+                            $update_uom = $this->m_inlet->update_data_mrp_satuan_batch($data_update_uom,$data_where_update);
+                        }
+
+                        //insert data uom
+                        if(!empty($data_insert_uom)){
+                            $insert_uom = $this->m_inlet->save_mrp_satuan_batch($data_insert_uom);
+                            if(!empty($insert_uom)){
+                                throw new \Exception('Gagal Simpan Uom baru !'.$insert_uom, 500);
+                            }
+                        }
+
+                        if(!empty($note_log_uom_qty2) || !empty($note_log_uom_qty)){
+                            $note_log_insert_uom = "<br> Tambah List Uom Jual ".$note_log_uom_qty." ".$note_log_uom_qty2;
+                        }else{
+                            $note_log_insert_uom = "";
+                        }
+
+                        if(!empty($note_log_update_uom_jual)){
+                            $note_log_update_uom = "<br> Update List Uom Jual <br>".$note_log_update_uom_jual;
+                        }else{
+                            $note_log_update_uom = "";
+                        }
+
+                        $jenis_log = "edit";
+                        $note_log  = "Edit Lot ".$lot." <br> ".$note_log_before." ".$corak_remark." ".$warna_remark." ".$qty_jual." ".$uom_qty_jual." ".$qty2_jual." ".$uom_qty2_jual." ".$lebar_jadi." ".$uom_lebar_jadi." ".$note_log_insert_uom." ".$note_log_update_uom;
+                        $data_history = array(
+                                        'datelog'   => date("Y-m-d H:i:s"),
+                                        'kode'      => $id_inlet,
+                                        'jenis_log' => $jenis_log,
+                                        'note'      => $note_log );
+
+                        $this->_module->gen_history_ip($sub_menu,$username,$data_history);
+
+                        $callback = array('status' => 'success', 'message' => 'Data Berhasil disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+                    }
+                    
+                    // unlock table
+                    $this->_module->unlock_tabel();
+                    $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+
+                    if (!$this->_module->finishTransaction()) {
+                        throw new \Exception('Gagal Simpan data ', 500);
+                    }
+                }
+
+                // finish transaction
+                $this->_module->finishTransaction();
+
+            }
+        
+        }catch(Exception $ex){
+            // unlock table
+            $this->_module->unlock_tabel();
+            // finish transaction
+            $this->_module->finishTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    function reprint_barcode_hph()
+    {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+
+                $id_inlet   = $this->input->post('kode');
+                $quant_id   = $this->input->post('quant_id');
+                $lot        = $this->input->post('lot');
+                $desain_barcode  = $this->input->post('desain_barcode');
+
+                if(empty($id_inlet) AND empty($quant_id) AND empty($lot)){
+                    throw new \Exception('Data Print Lot Kosong !', 200);
+                }else if(empty($desain_barcode)){
+                    throw new \Exception('Data Print Lot Kosong !', 200);
+                }else{
+
+                    $inlet = $this->m_inlet->get_data_inlet_by_id($id_inlet);
+                    if(empty($inlet)){
+                        throw new \Exception('Data Inlet tidak ditemukan !', 200);
+                    }
+
+                    //get data stock by kode
+                    $get = $this->_module->get_stock_quant_by_id($quant_id)->result();
+                    if(empty($get)){
+                        throw new \Exception('Data '.$lot.' tidak ditemukan !', 200);
+                    }
+                    
+                    $data_print = $this->print_barcode($desain_barcode,$get,$inlet);
+                    if(empty($data_print)){
+                        throw new \Exception('Data Print tidak ditemukan !', 500);
+                    }
+                    $callback = array('status' => 'success', 'message' => 'Print Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success', 'data_print' =>$data_print);
+                }
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+
+    function print_barcode($desain_barcode,$data_stock,$inlet)
+    {
+        $kode_mrp = $inlet->kode_mrp; 
+        $kode_k3l = $inlet->kode_k3l;
+        $desain_barcode = strtolower($desain_barcode);
+        $code = new Code\Code128New();
+        $this->prints->setView('print/'.$desain_barcode);
+        $data_print_array = array();
+        $data_qty2_jual = array();
+        foreach($data_stock as $row){
+            $gen_code = $code->generate($row->lot, "", 60, "vertical");
+            $tanggal = date('Ymd', strtotime($row->create_date));
+            $data_print_array = array(
+                        'pattern' => $row->corak_remark,
+                        'isi_color' => !empty($row->warna_remark)? $row->warna_remark : '&nbsp' ,
+                        'isi_satuan_lebar' => 'WIDTH ('.$row->uom_lebar_jadi.')',
+                        'isi_lebar' => !empty($row->lebar_jadi)? $row->lebar_jadi : '&nbsp',
+                        'isi_satuan_qty1' => 'QTY ['.$row->uom_jual.']',
+                        'isi_qty1' => round($row->qty_jual,2),
+                        'barcode_id' => $row->lot,
+                        'tanggal_buat' => $tanggal,
+                        'no_pack_brc' => $kode_mrp,
+                        'barcode' => $gen_code,
+                        'k3l' => $kode_k3l
+            );
+            if(!empty((double)$row->qty2_jual)){
+                $data_qty2_jual = array('isi_satuan_qty2' => 'QTY2 ['.$row->uom2_jual.']', 'isi_qty2' => round($row->qty2_jual,2));
+                $data_print_array = array_merge($data_print_array,$data_qty2_jual);
+            }
+            // break;
+            $this->prints->addDatas($data_print_array);
+        }
+     
+        return $this->prints->generate();
+    }
+
 }

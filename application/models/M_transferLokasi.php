@@ -317,5 +317,12 @@ class M_transferLokasi extends CI_Model
 		return $result->result();;
 	}
 
+	public function cek_stock_qunt_by_barcode($lot)
+	{
+		$this->db->where('lot', $lot);
+		$result = $this->db->get('stock_quant');
+		return $result->row();
+	}
+
 
 }

@@ -10,11 +10,6 @@ class M_splitLot extends CI_Model
 	var $column_search= array('a.kode_split','a.tanggal','d.nama', 'a.kode_produk', 'a.nama_produk', 'a.lot', 'a.qty', 'a.qty2', 'a.note' );
 	var $order  	  = array('a.tanggal' => 'desc');
 
-    var $table2  	    = 'stock_quant';
-	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
-	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
-	var $order2  	    = array('move_date' => 'desc');
-
 	private function _get_datatables_query()
 	{	
 
@@ -116,15 +111,34 @@ class M_splitLot extends CI_Model
         return $kode_split;
 	}
 
-
+	var $table2  	    = 'stock_quant';
+	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
+	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
+	var $order2  	    = array('move_date' => 'desc');
+	
 
     private function _get_datatables2_query()
 	{
-		$this->db->from($this->table2);
+		$departemen  = addslashes($this->input->post('departemen'));
+
+		if($departemen == 'GJD'){
+			$column_order2    = array(null, 'sq.kode_produk', 'sq.nama_produk', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual','sq.nama_grade', 'sq.reff_note', 'sq.reserve_move');
+			$column_search2   = array('sq.kode_produk','sq.nama_produk', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual', 'sq.nama_grade', 'sq.reff_note', 'sq.reserve_move');
+
+			$this->db->SELECT("sq.quant_id, sq.kode_produk, sq.nama_produk, sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.reff_note, sq.reserve_move, mp.id_jenis_kain, mjk.nama_jenis_kain,mp.lebar_jadi, mp.uom_lebar_jadi, mp.id_category, sq.lokasi_fisik, sq.nama_grade");
+			$this->db->FROM("stock_quant sq");
+			$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk", "INNER");
+			$this->db->JOIN("mst_jenis_kain mjk","mp.id_jenis_kain = mjk.id", "LEFT");
+		}else{
+			$column_order2   = $this->column_order2;
+			$column_search2   = $this->column_search2;
+			$this->db->from($this->table2);
+		}
+
 
 		$i = 0;
 	
-		foreach ($this->column_search2 as $item) // loop column 
+		foreach ($column_search2 as $item) // loop column 
 		{
 			if($_POST['search']['value']) // if datatable send POST for search
 			{
@@ -139,7 +153,7 @@ class M_splitLot extends CI_Model
 					$this->db->or_like($item, $_POST['search']['value']);
 				}
 
-				if(count($this->column_search2) - 1 == $i) //last loop
+				if(count($column_search2) - 1 == $i) //last loop
 					$this->db->group_end(); //close bracket
 			}
 			$i++;
@@ -147,7 +161,7 @@ class M_splitLot extends CI_Model
 		
 		if(isset($_POST['order'])) // here order processing
 		{
-			$this->db->order_by($this->column_order2[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+			$this->db->order_by($column_order2[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
 		} 
 		else if(isset($this->order2))
 		{
@@ -156,44 +170,60 @@ class M_splitLot extends CI_Model
 		}
 	}
 
-	function get_datatables2($kode_lokasi)
+	function get_datatables2($kode_lokasi,$dept)
 	{
 		$this->_get_datatables2_query();		
 		$this->db->where('lokasi', $kode_lokasi);
+		if($dept == 'GJD'){
+			$this->db->WHERE('mp.id_category',21);
+		}
 		if(isset($_POST["length"]) && $_POST["length"] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
 		return $query->result();
 	}
 
-	function count_filtered2($kode_lokasi)
+	function count_filtered2($kode_lokasi,$dept)
 	{
 		$this->db->where('lokasi', $kode_lokasi);
+		if($dept == 'GJD'){
+			$this->db->WHERE('mp.id_category',21);
+		}
 		$this->_get_datatables2_query();
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all2($kode_lokasi)
+	public function count_all2($kode_lokasi,$dept)
 	{
+		
+		if($dept=="GJD"){
+			$this->db->SELECT("sq.quant_id, sq.kode_produk, sq.nama_produk, sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.reff_note, sq.reserve_move, mp.id_jenis_kain, mp.lebar_jadi, mp.uom_lebar_jadi, mp.id_category, sq.lokasi_fisik");
+			$this->db->FROM("stock_quant sq");
+			$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk", "INNER");
+			$this->db->WHERE('mp.id_category',21);
+		}else {
+			$this->db->from($this->table2);
+		}
 		$this->db->where('lokasi', $kode_lokasi);
-		$this->db->from($this->table2);
 		return $this->db->count_all_results();
 	}
 
-    public function save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,$nama_produk,$lot,$qty,$uom_qty,$qty2,$uom_qty2,$note,$nama_user)
+    public function save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,$nama_produk,$lot,$qty,$uom_qty,$qty2,$uom_qty2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$note,$nama_user)
     {
-        $this->db->query("INSERT INTO split (kode_split,tanggal,dept_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,note,nama_user) values ('$kode_split','$tgl','$departemen','$quant_id','$kode_produk','$nama_produk','$lot','$qty','$uom_qty','$qty2','$uom_qty2','$note','$nama_user')") ;
+        $this->db->query("INSERT INTO split (kode_split,tanggal,dept_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,qty_jual,uom_jual,qty2_jual,uom2_jual,note,nama_user) values ('$kode_split','$tgl','$departemen','$quant_id','$kode_produk','$nama_produk','$lot','$qty','$uom_qty','$qty2','$uom_qty2','$qty_jual','$uom_jual','$qty2_jual','$uom2_jual','$note','$nama_user')") ;
+		return is_array($this->db->error());
     }
 
-    public function save_split_items_batch($sql)
+    public function save_split_items_batch($data_item)
     {
-        $this->db->query("INSERT INTO split_items (kode_split, quant_id_baru, qty, uom, qty2, uom2, lot_baru, row_order) values $sql ");
+		$this->db->insert_batch('split_items', $data_item);
+        return is_array($this->db->error());
     }
 
     public function get_data_split_by_kode($kode)
     {
-        return $this->db->query("SELECT s.kode_split,s.tanggal,s.dept_id,s.quant_id,s.kode_produk,s.nama_produk,s.lot,s.qty,s.uom,s.qty2,s.uom2,s.note,s.nama_user, d.nama as nama_departemen
+        return $this->db->query("SELECT s.kode_split,s.tanggal,s.dept_id,s.quant_id,s.kode_produk,s.nama_produk,s.lot,s.qty,s.uom,s.qty2,s.uom2,s.note,s.nama_user, d.nama as nama_departemen, s.qty_jual, s.uom_jual, s.qty2_jual, s.uom2_jual
                         FROM split s
                         LEFT JOIN departemen d ON s.dept_id = d.kode
                         WHERE s.kode_split = '$kode' ")->row(); 
@@ -201,20 +231,39 @@ class M_splitLot extends CI_Model
 
     public function get_data_split_items_by_kode($kode)
     {
-        return $this->db->query("SELECT kode_split, qty, uom, qty2, uom2, lot_baru, row_order
-                        FROM split_items 
-                        WHERE kode_split = '$kode' ")->result(); 
+        // return $this->db->query("SELECT kode_split, qty, uom, qty2, uom2, lot_baru, row_order
+        //                 FROM split_items 
+        //                 WHERE kode_split = '$kode' ")->result(); 
+		$this->db->where('kode_split',$kode);
+		$result = $this->db->get('split_items');
+		return $result->result();
     }
 
 
-	public function simpan_adjustment_batch($sql)
+	public function simpan_adjustment_batch($data_adj)
     {
-        return $this->db->query("INSERT INTO adjustment (kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status,nama_user, id_type_adjustment) values $sql ");
+        // return $this->db->query("INSERT INTO adjustment (kode_adjustment,create_date,lokasi_adjustment,kode_lokasi,note,status,nama_user, id_type_adjustment) values $sql ");
+		$this->db->insert_batch('adjustment', $data_adj);
+        return is_array($this->db->error());
     }
 
-    public function simpan_adjustment_items_batch($sql)
+    public function simpan_adjustment_items_batch($data_adj_items)
 	{
-		return $this->db->query("INSERT INTO adjustment_items (kode_adjustment, quant_id, kode_produk, lot, uom, qty_data, qty_adjustment, uom2, qty_data2, qty_adjustment2, move_id, qty_move, qty2_move, row_order) values $sql ");
+		// return $this->db->query("INSERT INTO adjustment_items (kode_adjustment, quant_id, kode_produk, lot, uom, qty_data, qty_adjustment, uom2, qty_data2, qty_adjustment2, move_id, qty_move, qty2_move, row_order) values $sql ");
+		$this->db->insert_batch('adjustment_items', $data_adj_items);
+        return is_array($this->db->error());
+	}
+
+	public function cek_picklist_by_lot($quant_id = null,$lot)
+	{
+		if(!empty($quant_id)){
+			$this->db->where('quant_id',$quant_id);
+		}
+		$this->db->where('barcode_id',$lot);
+		$this->db->where('valid != "cancel" ');
+		$result = $this->db->get("picklist_detail");
+		return $result->num_rows();
+		
 	}
 
 
