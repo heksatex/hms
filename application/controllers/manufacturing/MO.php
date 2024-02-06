@@ -1377,6 +1377,7 @@ class MO extends MY_Controller
         $data['cek_dept']    = $cek_dept['dept'];
         $level_akses         = $this->_module->get_level_akses_by_user($username)->row_array();
         $data['level']       = $level_akses['level'];
+        $data['type_mo']  = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
         if(!empty($lot_prefix)){
             $count              = $this->m_mo->get_counter_by_lot_prefix(addslashes($lot_prefix),$deptid);
             //$data['row_lot']  = $count['jml_lot'] + 1;

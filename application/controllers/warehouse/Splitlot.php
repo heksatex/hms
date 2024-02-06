@@ -298,9 +298,9 @@ class Splitlot extends MY_Controller
 
                             $sum_tbl_qty1 = $sum_tbl_qty1 + $row['qty1'];
                             $sum_tbl_qty2 = $sum_tbl_qty2 + $row['qty2'];
-
-                            $sum_tbl_qty1_jual = $sum_tbl_qty1_jual + $row['qty1_jual'];
-                            $sum_tbl_qty2_jual = $sum_tbl_qty2_jual + $row['qty2_jual'];
+                            
+                            // $sum_tbl_qty1_jual = $sum_tbl_qty1_jual + $row['qty1_jual'];
+                            // $sum_tbl_qty2_jual = $sum_tbl_qty2_jual + $row['qty2_jual'];
                             
                         }
                         
@@ -402,7 +402,7 @@ class Splitlot extends MY_Controller
                             $lokasi_tujuan  = $lokasi_stock;
 
                             $lokasi_fisik      = '';
-                            if($dept_id = 'GJD'){
+                            if($dept_id == 'GJD'){
                                 $lokasi_fisik = "PORT";
                             }
                             
@@ -475,10 +475,10 @@ class Splitlot extends MY_Controller
                                                         'uom'           => $row['uom_qty1'],
                                                         'qty2'          => $row['qty2'],
                                                         'uom2'          => $row['uom_qty2'],
-                                                        'qty_jual'      => $row['qty1_jual'],
-                                                        'uom_jual'      => $row['uom_qty1_jual'],
-                                                        'qty2_jual'     => $row['qty2_jual'],
-                                                        'uom2_jual'     => $row['uom_qty2_jual'],
+                                                        'qty_jual'      => $row['qty1_jual'] ?? 0,
+                                                        'uom_jual'      => $row['uom_qty1_jual'] ?? '',
+                                                        'qty2_jual'     => $row['qty2_jual'] ?? 0,
+                                                        'uom2_jual'     => $row['uom_qty2_jual'] ?? '',
                                                         'lokasi'        => $lokasi_stock,
                                                         'lokasi_fisik'  => $lokasi_fisik,
                                                         'lebar_greige'  => ($sq['lebar_greige']),

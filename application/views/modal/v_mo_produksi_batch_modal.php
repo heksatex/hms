@@ -811,8 +811,9 @@
 
 					var level 			= '<?php echo $level; ?>';
 					var cek_dept 		= '<?php echo $cek_dept; ?>';
-					var copy_bahan_baku =  '<?php echo $copy_bahan_baku; ?>';
-					if((cek_dept.includes("PPIC") !== false || level !== 'Entry Data') && (copy_bahan_baku == 'true')){
+					var copy_bahan_baku = '<?php echo $copy_bahan_baku; ?>';
+					var type_mo			= '<?php echo $type_mo['type_mo']; ?>';
+					if((cek_dept.includes("PPIC") !== false || level !== 'Entry Data' || type_mo == 'knitting') && (copy_bahan_baku == 'true') ){
 						del_row_show = '<a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a>';
 					}else{
 						del_row_show = '';
