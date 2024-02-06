@@ -134,7 +134,7 @@ class Transferlokasi extends MY_Controller
 
 	      		if(!$validLokasiTujuan){
 	      			$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
-				}else if($dept_id = "GJD" AND $lokasi_tujuan == "XPD"){
+				}else if($dept_id == "GJD" AND $lokasi_tujuan == "XPD"){
 					$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan di Departemen Gudang Jadi tidak boleh XPD !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      		}else{
 					if(empty($kode_tl)){// create transfer lokasi
