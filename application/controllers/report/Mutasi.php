@@ -3257,7 +3257,7 @@ class Mutasi extends MY_Controller
                     $in_opname      = $row['in'.$no_in.'_qty_opname'];
                     $in_opname_uom  = $row['in'.$no_in.'_qty_opname_uom'];
                     $column_excel  = $this->cek_column_excel($column);
-                    $sheet->SetCellValue($column_excel.''.$rowCount, $tm['count_in']);
+                    $sheet->SetCellValue($column_excel.''.$rowCount, $in_lot);
                     $column_excel1  = $this->cek_column_excel($column+1);
                     $sheet->SetCellValue($column_excel1.''.$rowCount, $in_qty1);
                     $column_excel2  = $this->cek_column_excel($column+2);
