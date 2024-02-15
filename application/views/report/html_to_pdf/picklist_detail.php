@@ -82,11 +82,11 @@
             </div>
             <div style="float: right; width: 25%">
                 <img style="width: 100%;height: 35%" src="<?= $barcode ?>" ><br>
-                <div style="float: left; font-size: 10px">
+                <div style="float: left; font-size: 12px">
                     <span><?= $picklist->bulk ?></span><br>
                     <span><?= $picklist->jenis_jual ?></span>
                 </div>
-                <div style="float: right; font-size: 10px">
+                <div style="float: right; font-size: 12px">
                     <span><?= $nopl ?? "" ?></span><br>
                     <span>SC</span>
                 </div>
@@ -153,7 +153,7 @@
                         $no++;
                         $jml_qty += $value->jml_qty;
                         $total_qty += $value->total_qty;
-                        $detailQty = $this->m_PicklistDetail->detailReportQty(['corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
+                        $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !='=>'cancel','corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
                         $perpage = 10;
                         $totalData = count($detailQty);
                         $totalPage = ceil($totalData / $perpage);

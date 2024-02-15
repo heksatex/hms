@@ -22,9 +22,9 @@ class M_PicklistDetail extends CI_Model {
 
     //put your code here
     protected $table = "picklist_detail";
-    var $column_order = array(null, 'barcode_id', 'a.quant_id', 'barcode_id', 'a.kode_produk', 'a.nama_produk', 'sq.lokasi_fisik', 'a.valid');
+    var $column_order = array(null, 'a.barcode_id', 'a.quant_id', 'barcode_id', 'a.kode_produk', 'a.nama_produk', 'sq.lokasi_fisik', 'a.valid');
     var $order = ['tanggal_masuk' => 'desc'];
-    var $column_search = array('barcode_id', 'a.quant_id', 'a.kode_produk', 'a.nama_produk');
+    var $column_search = array('a.barcode_id', 'a.quant_id', 'a.kode_produk', 'a.nama_produk');
 
     public function insertItem(array $data) {
         try {
@@ -39,13 +39,18 @@ class M_PicklistDetail extends CI_Model {
         }
     }
 
+    public function insertBatch(array $data) {
+        $this->db->insert_batch($this->table, $data);
+    }
+
     protected function _getDataItem() {
-        $this->db->select("a.*,ms.nama_status as valid,sq.lokasi_fisik as lokasi_fisik, dt.bulk_no_bulk as bulk");
+        $this->db->select("a.*,ms.nama_status as valid,sq.lokasi_fisik as lokasi_fisik, dt.bulk_no_bulk as bulk,dod.do_id as dod,dod.status as dodstatus");
         $this->db->join('mst_status as ms', 'ms.kode = a.valid', 'left');
         $this->db->from($this->table . ' a');
 
-        $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id', 'left');
-        $this->db->join("bulk_detail dt","dt.barcode = a.barcode_id","left");
+        $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id');
+        $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id", "left");
+        $this->db->join("delivery_order_detail dod", "(dod.barcode_id = a.barcode_id and dod.status = 'done')", "left");
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
@@ -68,8 +73,13 @@ class M_PicklistDetail extends CI_Model {
         }
     }
 
-    public function getData(array $condition = []) {
+    public function getData(array $condition = [], $join = [], $notin = []) {
         $this->_getDataItem();
+
+        foreach ($notin as $key => $value) {
+            $this->db->where_not_in($key, $value);
+        }
+
         if (count($condition) > 0) {
             $this->db->where($condition);
         }
@@ -79,8 +89,11 @@ class M_PicklistDetail extends CI_Model {
         return $query->result();
     }
 
-    public function getCountDataFiltered(array $condition = []) {
+    public function getCountDataFiltered(array $condition = [], $join = [], $notin = []) {
         $this->_getDataItem();
+        foreach ($notin as $key => $value) {
+            $this->db->where_not_in($key, $value);
+        }
         if (count($condition) > 0) {
             $this->db->where($condition);
         }
@@ -88,7 +101,7 @@ class M_PicklistDetail extends CI_Model {
         return $query->num_rows();
     }
 
-    public function getCountAllData(array $condition = []) {
+    public function getCountAllData(array $condition = [], $join = [], $notin = []) {
         $this->db->from($this->table);
         if (count($condition) > 0) {
             $this->db->where($condition);
@@ -103,15 +116,36 @@ class M_PicklistDetail extends CI_Model {
         $this->db->order_by('corak_remark', 'asc');
         $this->db->group_by($group);
         return $this->db->get()->result();
-//        $this->db->join('(select no_pl,kode_produk,nama_produk,warna_remark,'
-//                . 'corak_remark,sales_order, count(qty) as jml_qty, sum(qty) as total_qty) as b',
-//                'b.no_pl=' . $this->table . '.no_pl', 'left');
     }
 
-    public function detailReportQty($condition) {
+    public function detailDraftReport($condition, $nopl, array $group = ['corak_remark', 'warna_remark'], array $join = []) {
         $this->db->from($this->table);
         $this->db->where($condition);
-        $this->db->select('qty,uom');
+        $this->db->select('picklist_detail.no_pl,kode_produk,nama_produk,warna_remark,corak_remark,sales_order,uom,lebar_jadi,uom_lebar_jadi, count(qty) as jml_qty, sum(qty) as total_qty');
+        foreach ($join as $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->select("bbd.no_bulk,bbd.gross_weight,bbd.net_weight");
+                    $this->db->join("("
+                            . "select b.no_pl,b.net_weight,b.gross_weight,bd.picklist_detail_id,b.no_bulk from bulk b
+                                join bulk_detail bd on bd.bulk_no_bulk = b.no_bulk where b.no_pl = '" . $nopl . "'"
+                            . ") as bbd ", "bbd.picklist_detail_id = picklist_detail.id", "left");
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        $this->db->order_by('no_bulk', 'asc');
+        $this->db->group_by($group);
+        return $this->db->get()->result();
+    }
+
+    public function detailReportQty($condition, $select = 'qty,uom') {
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        $this->db->select($select);
         return $this->db->get()->result();
     }
 
@@ -149,6 +183,237 @@ class M_PicklistDetail extends CI_Model {
         } catch (Exception $ex) {
             return $ex->getMessage();
         }
+    }
+
+    public function updateStatusWin(array $condition, array $data, array $arrayCondition = [], $in = true) {
+        try {
+            $this->db->set($data);
+            $this->db->where($condition);
+            if ($in) {
+                foreach ($arrayCondition as $key => $value) {
+                    $this->db->where_in($key, $value);
+                }
+            } else {
+                foreach ($arrayCondition as $key => $value) {
+                    $this->db->where_not_in($key, $value);
+                }
+            }
+            $this->db->update($this->table);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
+
+    public function getBarcodeID($condition = [], $whereNotIn = []) {
+        $this->db->from($this->table . ' a');
+        $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id');
+        $this->db->where($condition);
+        foreach ($whereNotIn as $key => $value) {
+            $this->db->where_not_in($key, $value);
+        }
+        $result = $this->db->select('a.barcode_id,sq.*');
+        return $result->get()->result();
+    }
+
+    public function contoh($limit, $size) {
+        $this->db->from($this->table);
+        $this->db->join('stock_quant sq', 'sq.lot = picklist_detail.barcode_id');
+        $this->db->limit($limit, $size);
+        $rest = $this->db->select("barcode_id,sq.nama_produk,picklist_detail.corak_remark,sq.warna_remark,picklist_detail.lebar_jadi,picklist_detail.uom_lebar_jadi,picklist_detail.qty,picklist_detail.uom")->get();
+        return $rest->result();
+    }
+
+    protected function doDataList_() {
+        $this->db->from($this->table . ' pd');
+        $columnSearch = ["barcode_id", "corak_remark", "warna_remark"];
+        $columnOrder = ["corak_remark", "warna_remark"];
+        foreach ($columnSearch as $key => $value) {
+            if ($_POST['search']['value']) {
+                if ($key === 0) {
+                    $this->db->group_start();
+                    $this->db->like($value, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($value, $_POST['search']['value']);
+                }
+
+                if (count($columnSearch) === ($key + 1)) {
+                    $this->db->group_end();
+                }
+            }
+        }
+
+        if (isset($_POST['order'])) {
+            $this->db->order_by($columnOrder[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else {
+            $this->db->order_by('tanggal_masuk', 'ASC');
+        }
+        $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom');
+        $this->db->select('pd.corak_remark,pd.warna_remark,sum(qty) as total_qty,count(qty) as jumlah_qty,uom');
+    }
+
+    public function getdoDataList(array $condition = [], $joinBulk = [], $notIn = []) {
+        $this->doDataList_();
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        if (count($joinBulk) > 0) {
+            $this->db->join("bulk_detail bd", "pd.barcode_id = bd.barcode");
+//            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
+            $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
+            $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
+            $this->db->select('pd.corak_remark,pd.warna_remark,sum(qty) as total_qty,count(qty) as jumlah_qty,uom,bd.bulk_no_bulk');
+        }
+        if (count($notIn) > 0) {
+            foreach ($notIn as $key => $value) {
+                $this->db->where_not_in($key, $value);
+            }
+        }
+        if ($_POST['length'] != -1)
+            $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCountdoDataListFiltered(array $condition = [], $joinBulk = [], $notIn = []) {
+        $this->doDataList_();
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        if (count($joinBulk) > 0) {
+            $this->db->join("bulk_detail bd", "pd.barcode_id = bd.barcode");
+            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
+            $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
+        }
+        if (count($notIn) > 0) {
+            foreach ($notIn as $key => $value) {
+                $this->db->where_not_in($key, $value);
+            }
+        }
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function getCountAlldoDataList(array $condition = [], $joinBulk = [], $notIn = []) {
+        $this->db->from($this->table . ' pd');
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        if (count($joinBulk) > 0) {
+            $this->db->join("bulk_detail bd", "pd.barcode_id = bd.barcode");
+            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
+            $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
+        }
+        if (count($notIn) > 0) {
+            foreach ($notIn as $key => $value) {
+                $this->db->where_not_in($key, $value);
+            }
+        }
+        return $this->db->count_all_results();
+    }
+
+    protected function _getDataItemViewDodd() {
+        $this->db->select("a.*");
+        $this->db->from($this->table . ' a');
+        foreach ($this->column_search as $key => $value) {
+            if ($_POST['search']['value']) {
+                if ($key === 0) {
+                    $this->db->group_start();
+                    $this->db->like($value, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($value, $_POST['search']['value']);
+                }
+
+                if (count($this->column_search) === ($key + 1)) {
+                    $this->db->group_end();
+                }
+            }
+        }
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order = $this->order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+    }
+
+    public function getDataViewDodd(array $condition = [], $join = [], $notin = [], $in = []) {
+        $this->_getDataItemViewDodd();
+        foreach ($join as $key => $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
+                    foreach ($in as $key => $value) {
+                        $this->db->where_in($key, $value);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        foreach ($notin as $key => $value) {
+            $this->db->where_not_in($key, $value);
+        }
+
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        if ($_POST['length'] != -1)
+            $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCountDataFilteredViewDodd(array $condition = [], $join = [], $notin = [], $in = []) {
+        $this->_getDataItemViewDodd();
+        foreach ($join as $key => $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
+                    foreach ($in as $key => $value) {
+                        $this->db->where_in($key, $value);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        foreach ($notin as $key => $value) {
+            $this->db->where_not_in($key, $value);
+        }
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function getCountAllDataViewDodd(array $condition = [], $join = [], $notin = [], $in = []) {
+        $this->db->from($this->table . ' a');
+        foreach ($join as $key => $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
+                    foreach ($in as $key => $value) {
+                        $this->db->where_in($key, $value);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        return $this->db->count_all_results();
     }
 
     public function __destruct() {

@@ -53,7 +53,7 @@ class Picklistrealisasi extends MY_Controller {
     public function data() {
         try {
             $data = array();
-            $list = $this->m_Picklist->getData(true);
+            $list = $this->m_Picklist->getData(true, ['valid !=' => 'cancel']);
             $no = $_POST['start'];
             $submenu = $_POST['submenu'];
             foreach ($list as $field) {
@@ -93,7 +93,7 @@ class Picklistrealisasi extends MY_Controller {
         try {
             $pl = $this->input->post('filter');
 
-            $condition = ['no_pl' => $pl];
+            $condition = ['no_pl' => $pl, 'valid !=' => 'cancel'];
             $list = $this->m_PicklistDetail->getData($condition);
             $no = $_POST['start'];
             $data = [];
@@ -135,7 +135,7 @@ class Picklistrealisasi extends MY_Controller {
             $barcode = $this->input->post('search');
             $menu = $this->input->post('on_menu');
             $valid_date = $this->input->post('valid_date');
-            $statusWhere = ['no_pl' => $pl, 'barcode_id' => $barcode];
+            $statusWhere = ['no_pl' => $pl, 'barcode_id' => $barcode, 'valid !=' => 'cancel'];
 
             $this->_module->startTransaction();
 
@@ -194,7 +194,7 @@ class Picklistrealisasi extends MY_Controller {
             $barcode = $this->input->post('barcode');
             $menu = $this->input->post('on_menu');
 
-            $condition = ['no_pl' => $pl, 'barcode_id' => $barcode];
+            $condition = ['no_pl' => $pl, 'barcode_id' => $barcode, 'valid !=' => 'cancel'];
             $item = $this->m_PicklistDetail->detailData($condition);
             if (empty($item)) {
                 throw new Exception('Data Barcode Tidak Ditemukan', 500);

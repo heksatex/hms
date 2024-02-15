@@ -18,6 +18,7 @@ class Picklistvalidasi extends MY_Controller {
         $this->load->model("m_accessmenu");
         $this->load->library('prints');
         $this->load->library('barcode');
+        $this->load->model('m_Pickliststockquant');
     }
 
     public function add() {
@@ -61,6 +62,7 @@ class Picklistvalidasi extends MY_Controller {
             $picklist = null;
             $barcode = $this->input->post('search');
             $item = null;
+            $access = $this->input->post("access");
             if (preg_match("/PL/i", $barcode)) {
                 $pl = $barcode;
                 $dataPl = $this->m_Picklist->getDataByID(['picklist.no' => $pl]);
@@ -70,42 +72,84 @@ class Picklistvalidasi extends MY_Controller {
                 if ($dataPl->status === "cancel") {
                     throw new Exception("No Picklist dibatalkan", 500);
                 }
+                if (empty($access)) {
+                    throw new Exception("Invalid tipe picklist", 500);
+                }
+                if (($dataPl->type_bulk_id === "1") && ($access === "LOOSE_PACKING")) {
+                    throw new Exception("Invalid tipe picklist", 500);
+                }
+                if (($dataPl->type_bulk_id === "2") && ($access === "BAL")) {
+                    throw new Exception("Invalid tipe picklist", 500);
+                }
 //                if ($dataPl->status !== 'validasi') {
 //                    throw new Exception("No Picklist belum dalam status Validasi", 500);
 //                }
                 $picklist = $dataPl;
                 $picklist->total_lot = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no]);
-                $picklist->total_realisasi = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no, 'valid' => 'realisasi']);
+                $picklist->total_validasi = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no, 'valid' => 'validasi']) ?? 0;
                 if ($picklist->total_lot < 1) {
                     throw new Exception("Tidak ada barcode pada Picklist " . $dataPl->no, 500);
                 }
             } else {
+
                 $pl = $this->input->post('pl');
                 if (empty($pl)) {
                     throw new Exception("Tentukan dulu no picklist", 500);
                 }
+                $this->_module->startTransaction();
                 $item = $this->m_PicklistDetail->detailData(['no_pl' => $pl, "barcode_id" => $barcode]);
+
                 if (is_null($item)) {
                     $errorCode = 11;
                     throw new Exception("Barcode " . $barcode . " Tidak Ada Dalam No PL " . $pl, 500);
                 }
+                $cond = ['lot' => $barcode];
+
+                $check = $this->m_Pickliststockquant->getDataItemPicklistScan(array_merge($cond, ['stock_quant.lokasi' => 'GJD/Stock', 'id_category' => 21]));
+
+                if (is_null($check)) {
+                    $list = $this->m_Pickliststockquant->getDataItemPicklistScanDetail($cond, true);
+                    if (empty($list)) {
+                        throw new \Exception('Barcode Tidak ditemukan', 500);
+                    }
+                    switch (true) {
+
+                        case (int) $list->id_category !== 21:
+                            throw new \Exception("Kategori Produk Tidak Valid (" . $list->nama_category . ")", 500);
+                        case $list->reserve_move !== "":
+                            throw new \Exception("Barcode " . $barcode . " reserve move " . $list->reserve_move, 500);
+
+                        case in_array(strtoupper($list->lokasi_fisik), ["PORT", "XPD"]) :
+                            throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi_fisik . ")", 500);
+
+                        case strtoupper($list->lokasi) !== 'GJD/STOCK':
+                            throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi . ")", 500);
+                        default :
+                            throw new \Exception('Barcode Tidak ditemukan', 500);
+                    }
+                }
                 if ($item->valid === 'validasi') {
                     $errorCode = 12;
-                    throw new Exception("Barcode " . $barcode . " Duplikat scan", 500);
+                    throw new Exception("Barcode " . $barcode . " sudah valid", 500);
                 }
 //                if ($item->valid !== 'realisasi') {
 //                    $errorCode = 12;
 //                    throw new Exception("Barcode " . $barcode . " Dalam Status " . $item->valid, 500);
 //                }
+
                 $update = ['valid' => 'validasi', 'valid_date' => date('Y-m-d H:i:s')];
-                $condition = ['no_pl' => $pl, 'barcode_id' => $item->barcode_id];
+                $condition = ['no_pl' => $pl, 'barcode_id' => $item->barcode_id, 'valid !=' => 'cancel'];
                 $sts = $this->m_PicklistDetail->updateStatus($condition, $update);
                 if (!empty($sts)) {
                     throw new Exception($sts, 500);
                 }
+                $this->m_Pickliststockquant->update(["move_date" => date('Y-m-d H:i:s'), "lokasi_fisik" => "XPD"], ["lot" => $barcode, 'quant_id' => $item->quant_id]);
                 $this->m_Picklist->update(['status' => 'validasi'], ['no' => $pl]);
 //                $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($condition, $update)), $username);
                 $this->_module->gen_history($sub_menu, $pl, 'edit', ($nama["nama"] ?? "") . ' Melakukan validasi barcode ' . $barcode, $username);
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal validasi data', 500);
+                }
             }
 
             $this->output->set_status_header(200)
@@ -118,12 +162,44 @@ class Picklistvalidasi extends MY_Controller {
         }
     }
 
+    public function data_detail() {
+        try {
+            $pl = $this->input->post('filter');
+
+            $condition = ['no_pl' => $pl, 'valid' => 'validasi'];
+            $list = $this->m_PicklistDetail->getData($condition);
+            $no = $_POST['start'];
+            $data = [];
+            foreach ($list as $field) {
+                $no++;
+                $row = array(
+                    $no,
+                    $field->barcode_id,
+                    $field->corak_remark,
+                    $field->warna_remark,
+                    $field->qty . " " . $field->uom,
+                    $field->qty2 . " " . $field->uom2,
+                    $field->lokasi_fisik,
+                    $field->valid,
+                );
+                $data[] = $row;
+            }
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_PicklistDetail->getCountAllData($condition),
+                "recordsFiltered" => $this->m_PicklistDetail->getCountDataFiltered($condition),
+                "data" => $data,
+            ));
+            exit();
+        } catch (Exception $ex) {
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => [],
+            ));
+        }
+    }
+
     public function check() {
-//        $path = "dist/img/static/Logo AX Hitam.png";
-//        $info = pathinfo($path, PATHINFO_EXTENSION);
-//        $datas = file_get_contents($path);
-//        $base64 = 'data:image/' . $info . ';base64,' . base64_encode($datas);
-//        log_message('error', $base64);
         return $this->load->view('print/a1');
     }
 
@@ -131,40 +207,55 @@ class Picklistvalidasi extends MY_Controller {
     public function test() {
         try {
             $code = new Code\Code128New();
-            $text = "123456789012";
-            $gen_code = $code->generate($text, "", 50, "vertical");
-//            $gen_code = $code->generate($text, "", 50);
-            $this->prints->setView('print/j');
-//            $this->prints->addDatas([
-//                'barcode_id' => $text,
-//                'barcode' => $gen_code,
-//                'pl' => "PL200312323"
-//            ]);
-//            $this->prints->addDatas([
-//                'barcode_id' => $text,
-//                'barcode' => $gen_code,
-//                'pl' => "PL200312323"
-//            ]);
-            for ($index = 0; $index < 6; $index++) {
-                $text = "1234567890-" . $index;
-                $gen_code = $code->generate($text, "", 50, "vertical");
+            $datsa = $this->m_PicklistDetail->contoh(60, 40);
+            $this->prints->setView('print/a');
+            foreach ($datsa as $key => $value) {
+                $gen_code = $code->generate($value->barcode_id, "", 50, "vertical");
                 $this->prints->addDatas([
-                    'pattern' => 'Test Printed ' . $index,
-                    'isi_color' => 'warna kuning matahari warna kuning matahari',
-                    'isi_satuan_lebar' => 'WIDTH (cm)',
-                    'isi_lebar' => '250x128',
-                    'isi_satuan_qty1' => 'QTY [Pnl]',
-                    'isi_qty1' => 16,
-                    'isi_satuan_qty2' => 'QTY [kg]',
-                    'isi_qty2' => 85,
-                    'barcode_id' => $text,
+                    'pattern' => $value->nama_produk,
+                    'isi_color' => $value->corak_remark,
+                    'isi_satuan_lebar' => 'WIDTH [' . $value->uom_lebar_jadi . ']',
+                    'isi_lebar' => $value->lebar_jadi,
+                    'isi_satuan_qty1' => 'QTY [' . $value->uom . ']',
+                    'isi_qty1' => $value->qty,
+                    'barcode_id' => $value->barcode_id,
                     'tanggal_buat' => date('ymd'),
-                    'no_pack_brc' => "MG312312" . $index,
+                    'no_pack_brc' => "MG" . ($key + 1),
                     'barcode' => $gen_code,
                     'k3l' => "20-D-001737"
                 ]);
             }
 
+//            $gen_code = $code->generate($text, "", 50);
+//            $this->prints->addDatas([
+//                'barcode_id' => $text,
+//                'barcode' => $gen_code,
+//                'pl' => "PL200312323"
+//            ]);
+//            $this->prints->addDatas([
+//                'barcode_id' => $text,
+//                'barcode' => $gen_code,
+//                'pl' => "PL200312323"
+//            ]);
+//            for ($index = 0; $index < 6; $index++) {
+//                $text = "1234567890-" . $index;
+//                $gen_code = $code->generate($text, "", 50, "vertical");
+//                $this->prints->addDatas([
+//                    'pattern' => 'Test Printed ' . $index,
+//                    'isi_color' => 'warna kuning matahari warna kuning matahari',
+//                    'isi_satuan_lebar' => 'WIDTH (cm)',
+//                    'isi_lebar' => '250x128',
+//                    'isi_satuan_qty1' => 'QTY [Pnl]',
+//                    'isi_qty1' => 16,
+//                    'isi_satuan_qty2' => 'QTY [kg]',
+//                    'isi_qty2' => 85,
+//                    'barcode_id' => $text,
+//                    'tanggal_buat' => date('ymd'),
+//                    'no_pack_brc' => "MG312312" . $index,
+//                    'barcode' => $gen_code,
+//                    'k3l' => "20-D-001737"
+//                ]);
+//            }
 //            
 //            $this->prints->addData('pattern', 'Test Printed');
 //            $this->prints->addData('isi_color', 'warna kuning matahari warna kuning matahari');

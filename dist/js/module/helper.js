@@ -30,11 +30,19 @@ const changeCondition = function (value, check, changed, addTrimVal = false) {
     return value;
 };
 
+const checkIsFuncExist = function (func) {
+    if (typeof func === "function") {
+        return true;
+    }
+    return false;
+};
+
 var statusInput = 0;
 var input = "";
 const checkScannerInput = function (e, tanda = "*", listVal = {}) {
     if (e.key === tanda)
         statusInput++;
+
 
     switch (statusInput) {
         case 1:
@@ -42,7 +50,13 @@ const checkScannerInput = function (e, tanda = "*", listVal = {}) {
             break;
         case 2:
             input += e.key;
-            listVal[input]();
+            if (checkIsFuncExist(listVal[input])) {
+                listVal[input]();
+            } else {
+                statusInput = 0;
+                input = "";
+            }
+
 //            searchArray(listVal, null, input).then(dt => {
 //                if (dt.length > 0) {
 //                    callback();

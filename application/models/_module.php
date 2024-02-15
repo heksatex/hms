@@ -1,3 +1,4 @@
+
 <?php
 
 defined('BASEPATH') or exit('No Direct Script Acces Allowed');
@@ -827,6 +828,11 @@ class _module extends CI_Model {
     public function startTransaction() {
         $this->db->trans_start();
     }
+  
+    public function rollbackTransaction() {
+        $this->db->trans_complete();
+        $this->db->trans_rollback();
+    }
 
     public function finishTransaction() {
         $this->db->trans_complete();
@@ -896,7 +902,6 @@ class _module extends CI_Model {
         $this->db->where("id",$id);
         return $this->db->get('mst_quality');
     }
-
 
 }
 

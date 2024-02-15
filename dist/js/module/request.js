@@ -46,8 +46,8 @@ const requestDelete = function (uri, objectData = {}) {
                     },
                     error: function (error) {
                         dialog.modal('hide');
-                        unblockUI(function () {})
-                        reject(error)
+                        unblockUI(function () {});
+                        reject(error);
                     }
                 });
 

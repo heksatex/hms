@@ -184,6 +184,7 @@
                     unblockUI(function () {});
                     alert_modal_warning("Hubungi Dept IT");
                 });
+                event.preventDefault();
             },
                     false
                     );

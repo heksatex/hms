@@ -10,7 +10,7 @@ class M_Picklist extends CI_Model {
 
     var $column_order = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
     var $order = ['tanggal_input' => 'desc'];
-    var $column_search = array('jenis_jual', 'bulk_nama', 'sales_nama');
+    var $column_search = array('no', 'jenis_jual', 'msg.nama_sales_group');
     protected $table = "picklist";
     protected $level_sales_group;
     protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
@@ -29,8 +29,16 @@ class M_Picklist extends CI_Model {
         $this->db->join('mst_status as ms', 'ms.kode = status', 'left');
         $this->filteredSales();
         foreach ($this->column_search as $key => $value) {
-            if ($_POST["search"]["value"]) {
-                $this->db->or_like($value, $_POST["search"]["value"]);
+            if ($_POST['search']['value']) {
+                if ($key === 0) {
+                    $this->db->group_start();
+                    $this->db->like($value, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($value, $_POST['search']['value']);
+                }
+
+                if (count($this->column_search) - 1 === $key)
+                    $this->db->group_end();
             }
         }
 
@@ -42,19 +50,29 @@ class M_Picklist extends CI_Model {
         }
     }
 
-    public function getCountDataFiltered(array $condition = []) {
-        $this->getDataQuery();
+    public function getCountDataFiltered(array $condition = [], $menu = "") {
+
         if (count($condition) > 0)
-                $this->db->where($condition);
+            $this->db->where($condition);
+
+        $this->getDataQuery();
+        if ('do' === strtolower($menu)) {
+            $this->notInDO();
+        }
         $query = $this->db->get();
         return $query->num_rows();
     }
 
-    public function getData(bool $realiasi = false, array $condition = []) {
+    public function getData(bool $realiasi = false, array $condition = [], $menu = "") {
         try {
-            $this->getDataQuery();
             if (count($condition) > 0)
                 $this->db->where($condition);
+
+            $this->getDataQuery();
+
+            if ('do' === strtolower($menu)) {
+                $this->notInDO();
+            }
             if ($realiasi)
                 $this->joinDetail();
             if ($_POST['length'] != -1)
@@ -66,10 +84,15 @@ class M_Picklist extends CI_Model {
         }
     }
 
-    public function getCountAllData(array $condition = []) {
+    public function getCountAllData(array $condition = [], $menu = "") {
         $this->db->from($this->table);
         if (count($condition) > 0)
-                $this->db->where($condition);
+            $this->db->where($condition);
+
+        if ('do' === strtolower($menu)) {
+            $this->notInDO();
+        }
+
         $this->filteredSales();
         return $this->db->count_all_results();
     }
@@ -88,15 +111,25 @@ class M_Picklist extends CI_Model {
         return $sales_group["nama_sales_group"] ?? "";
     }
 
-    public function getDataByID($condition = []) {
+    public function getDataByID($condition = [], $join = "") {
         $this->db->from($this->table);
+        $select = $this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk, msg.nama_sales_group as sales';
 //        $this->db->where($this->table . '.id', $id);
+        switch ($join) {
+            case "DO":
+                $this->db->join('delivery_order do', 'do.no_picklist = ' . $this->table . '.no', 'left');
+                $select .= ",do.no_sj";
+                break;
+
+            default:
+                break;
+        }
         $this->db->where($condition);
         $this->filteredSales();
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
         $this->db->join('partner', 'partner.id = customer_id', 'left');
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
-        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk, msg.nama_sales_group as sales')->get()->row();
+        return $this->db->select($select)->get()->row();
     }
 
     public function getDataReportPL($condition) {
@@ -122,6 +155,26 @@ class M_Picklist extends CI_Model {
                         . "nama LIKE '%" . $param . "%' or delivery_street LIKE '%" . $param . "%' group by id order by nama asc limit 10")->result();
     }
 
+    public function checkExists(array $condition, array $join = []) {
+        $this->db->from($this->table . ' a');
+        $this->db->where($condition);
+        $this->db->select("a.*");
+        foreach ($join as $key => $value) {
+            switch ($value) {
+                case "DO":
+                    $this->db->join("delivery_order do", "(do.no_picklist = a.no and do.status ='done' )", 'left');
+                    $this->db->select(",do.no as doid");
+                    break;
+                case "BULK":
+                    $this->db->join("bulk b", "b.no_pl = a.no", 'left');
+                    $this->db->select(", no_bulk");
+                    break;
+            }
+        }
+
+        return $this->db->get()->row();
+    }
+
     public function save(array $data) {
         $this->db->insert($this->table, $data);
         return $this->db->insert_id() ?? null;
@@ -131,6 +184,14 @@ class M_Picklist extends CI_Model {
         $this->db->set($data);
         $this->db->where($condition);
         $this->db->update($this->table);
+    }
+
+    public function draftSuratJalan(array $condition) {
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        $this->db->join('partner', 'partner.id = customer_id', 'left');
+        $this->db->join('delivery_order do', '(do.no_picklist = picklist.no and do.status = "done")', 'left');
+        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,do.no_sj')->get()->row();
     }
 
     protected function joinDetail() {
@@ -143,5 +204,9 @@ class M_Picklist extends CI_Model {
     protected function withCountDetail() {
         $this->db->select($this->select . ", count(detail.id) as total_item");
         $this->db->join('picklist_detail detail', 'picklist.no = detail.no_pl', 'left');
+    }
+
+    protected function notInDO() {
+        $this->db->where("no NOT IN (select no_picklist from delivery_order where status != 'cancel')", null, false);
     }
 }

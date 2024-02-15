@@ -2,7 +2,7 @@
     <div class="col-md-8 col-xs-12">
         <div class="table-responsive over">
             <form class="form-horizontal" method="POST" name="form-net-gross" id="form-net-gross" action="<?= base_url('warehouse/bulk/net_gross') ?>">
-
+                <input type="hidden" name="pl" value="<?= $pl ?>">
                 <table class="table table-condesed table-hover rlstable  over" width="100%">
                     <thead>
                     <th>Bal ID</th>

@@ -89,27 +89,40 @@ class M_bulk extends CI_Model {
     }
 
     protected function _listBulkDetail(array $condition) {
+        $subquery = $this->_listBulkDetailSub($condition);
         $this->_getDataQuery();
-        $this->db->join('bulk_detail bd', $this->table . '.no_bulk = bd.bulk_no_bulk', 'left');
+        $this->db->join("($subquery) pl", " bulk.no_bulk = pl.bulk_no_bulk", "left");
         $this->db->select($this->table . '.*');
         $this->db->where($condition);
         $this->db->group_by('no_bulk');
     }
 
+    protected function _listBulkDetailSub($condition): string {
+        $this->db->from("bulk_detail cbd");
+        $this->db->select("cbd.bulk_no_bulk,cbd.barcode,cbd.tanggal_input,sum(pl.qty) as total_qty,count(pl.qty) as jumlah_qty,valid");
+        $this->db->join("picklist_detail pl", "(pl.barcode_id = cbd.barcode and valid != 'cancel')", "left");
+        $this->db->where($condition);
+        $this->db->group_by('bulk_no_bulk');
+        $subquery = $this->db->get_compiled_select();
+        return $subquery;
+    }
+
     public function listBulkDetail(array $condition) {
         $this->_listBulkDetail($condition);
-        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
-        $q = $this->db->select('bulk.no_bulk,bulk.tanggal_input, sum(qty) as total_qty,count(qty) as jumlah_qty')->get();
+//        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
+        $q = $this->db->select('bulk.no_bulk,bulk.tanggal_input,total_qty,jumlah_qty')->get();
         return $q->result();
     }
 
     public function getCountAllDataBulk($condition) {
         $this->_listBulkDetail($condition);
+//        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
         return $this->db->count_all_results();
     }
 
     public function getCountDataFilteredBulk(array $condition = []) {
         $this->_listBulkDetail($condition);
+//        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
         $query = $this->db->get();
         return $query->num_rows();
     }

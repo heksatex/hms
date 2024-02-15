@@ -139,24 +139,29 @@
                 let pl = null;
                 let bcd = "";
                 $.each(rows_selected, function (index, rowId) {
-                    var datas = dTable.rows([rowId - 1]).data();
-                    $.each(datas, function (idx, val) {
-                        if (val[10] !== null) {
-                            pl = val[10];
-                            bcd = val[1];
-                            return false;
-                        }
+//                    var datas = dTable.rows([rowId - 1]).data();
+//                    $.each(datas, function (idx, val) {
+//                        if (val[10] !== null) {
+//                            pl = val[10];
+//                            bcd = val[1];
+//                            return false;
+//                        }
+//                        dt.push(val[9]);
+//                    });
+//                    if (pl !== null)
+//                        throw new Error("Barcode " + bcd + " duplicate pada PickList " + pl);
+                    let text = rowId.split("-");
+                    if (text.length > 0) {
+                        if (text[2] !== '')
+                            throw new Error("Barcode " + text[1] + " duplicate pada PickList " + text[2]);
 
-
-                        dt.push(val[9]);
-                    });
-                    if (pl !== null)
-                        throw new Error("Barcode " + bcd + " duplicate pada PickList " + pl);
+                        dt.push(text[0]);
+                    }
                 });
                 resolve(dt);
             });
             data.then((rsp) => {
-                addItem(JSON.stringify(rsp), "", dTable);
+                addItem(JSON.stringify(rsp), "", dTable, 'draft');
             }).catch(e => {
                 addItem(JSON.stringify([]), e.message);
             });
@@ -175,7 +180,8 @@
 
             var row = $(this).closest('tr');
             var data = dTable.row(row).data();
-            addItem((JSON.stringify([data[9]])), "", dTable);
+            let text = data[0].split("-");
+            addItem((JSON.stringify([text[0]])), "", dTable,"draft");
         });
     });
 </script>

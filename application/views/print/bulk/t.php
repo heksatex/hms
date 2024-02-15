@@ -25,7 +25,7 @@
             }
             #noregk3l{
                 display: flex;
-                height: 15vh;
+                height: 13vh;
                 align-items: center;
                 justify-content: center;
             }
