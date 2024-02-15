@@ -270,6 +270,14 @@ class Joinlot extends MY_Controller
                     //cek lot by kodejoin
                     $cek_lot = $this->m_joinLot->cek_lot_join_by_kode($kode_join,$lot)->num_rows();
                     $lot_tmp = "";
+
+                    // cek_lot hph
+                    $cek_lot_hph = $this->m_joinLot->cek_lot_hph($lot);
+                    $inlet       = '';
+                    if(!empty($cek_lot_hph)){
+                        $id_inlet = $cek_lot_hph->id_inlet ?? ''; 
+                        $inlet = $this->m_joinLot->cek_status_inlet_by_id($id_inlet);
+                    }
                     if(empty($get_sq)){
                         $get_sq2 = $this->m_joinLot->get_stock_quant_by_lot($lot);
                         if(empty($get_sq2)){
@@ -281,10 +289,14 @@ class Joinlot extends MY_Controller
                         }
                     }else if($cek_lot > 0){
                         throw new \Exception('Barcode / Lot sudah diinput !', 200);
+                    }else if(empty($cek_lot_hph)){
+                        throw new \Exception('Barcode / Lot sudah bukan dari HPH !', 200);
                     }else if($get_sq->lokasi_fisik == "XPD" AND $dept == 'GJD'){
                         throw new \Exception('Lokasi Barcode / Lot sudah XPD !',200);
                     }else if(!empty($cek_pl) AND $dept == 'GJD'){
                         throw new \Exception('Data Barcode / Lot '.$lot.' sudah masuk PL !',200);
+                    }else if(!empty($cek_lot_hph) AND $inlet->status != 'done'){
+                        throw new \Exception('Status HPH / INLET Barcode / Lot '.$lot.' masih <b>'.$inlet->status.'<b> !',200);
                     }else{
 
                         $items_join = $this->m_joinLot->get_data_join_lot_items_by_kode($kode_join);
@@ -435,7 +447,9 @@ class Joinlot extends MY_Controller
                     $lot_tmp    = "";
                     foreach($arr_data as $row){
 
-                        $get_sq = $this->m_joinLot->get_stock_quant_by_id($row,$lokasi_stock);// GJD                     
+                        $get_sq = $this->m_joinLot->get_stock_quant_by_id($row,$lokasi_stock);// GJD    
+                        
+                        
                         
                         if(empty($get_sq)){
                             $get_sq2 = $this->_module->get_stock_quant_by_id($row)->row();
@@ -457,10 +471,20 @@ class Joinlot extends MY_Controller
                             throw new \Exception('Lokasi Barcode / Lot '.$lot.' sudah XPD !', 200);
                         }else{
 
+                            // cek_lot hph
+                            $lot         = $get_sq->lot;
+                            $cek_lot_hph = $this->m_joinLot->cek_lot_hph($lot);
+                            $inlet       = '';
+                            if(!empty($cek_lot_hph)){
+                                $id_inlet = $cek_lot_hph->id_inlet ?? ''; 
+                                $inlet = $this->m_joinLot->cek_status_inlet_by_id($id_inlet);
+                            }
                             // cek barcode di picklist 
-                            $lot     = $get_sq->lot;
                             $cek_pl = $this->m_joinLot->cek_picklist_by_lot($lot);
-                            if(!empty($cek_pl)){
+
+                            if(!empty($cek_lot_hph) AND $inlet->status != 'done'){
+                                throw new \Exception('Status HPH / INLET Barcode / Lot '.$lot.' masih <b>'.$inlet->status.'<b> !',200);
+                            }else if(!empty($cek_pl)){
                                 throw new \Exception('Data Barcode / Lot '.$lot.' sudah masuk PL !',200);
                             }else{
                                 $cek_lot = $this->m_joinLot->cek_lot_join_by_kode($kode_join,$lot)->num_rows();
@@ -794,6 +818,14 @@ class Joinlot extends MY_Controller
                             // cek barcode di picklist 
                             $cek_pl = $this->m_joinLot->cek_picklist_by_lot($ij->lot);
 
+                            // cek_lot hph
+                            $cek_lot_hph = $this->m_joinLot->cek_lot_hph($ij->lot);
+                            $inlet       = '';
+                            if(!empty($cek_lot_hph)){
+                                $id_inlet = $cek_lot_hph->id_inlet ?? ''; 
+                                $inlet = $this->m_joinLot->cek_status_inlet_by_id($id_inlet);
+                            }
+
                             if(empty($get_sq)){
                                 throw new \Exception('Data Barcode / Lot '.$ij->lot.' tidak ditemukan !',200);
                             }else if($get_sq['lokasi'] != $lokasi_stock ){
@@ -804,7 +836,10 @@ class Joinlot extends MY_Controller
                                 throw new \Exception('Data Barcode / Lot '.$ij->lot.' sudah terpesan oleh dokumen lain !',200);
                             }else if(!empty($cek_pl)){
                                 throw new \Exception('Data Barcode / Lot '.$ij->lot.' sudah masuk PL !',200);
+                            }else if(!empty($cek_lot_hph) AND $inlet->status != 'done'){
+                                throw new \Exception('Status HPH / INLET Barcode / Lot '.$ij->lot.' masih <b>'.$inlet->status.'<b> !',200);
                             }
+
                             $tmp_quant_id = $ij->quant_id;
                             $lot_tmp   = $ij->lot;
                             $tmp_kode_produk = $ij->kode_produk;
