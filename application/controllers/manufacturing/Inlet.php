@@ -287,10 +287,10 @@ class Inlet extends MY_Controller
                     $callback = array('status' => 'failed', 'field' => 'warna_remark', 'message' => 'Warna Remark tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if(empty($jenis_kain)){
                     $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-                }else if(empty($gramasi) AND $ket_kain == 'Non Multibar'){
-                    $callback = array('status' => 'failed', 'field' => 'gramasi', 'message' => 'Gramasi tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-                }else if(empty($berat) AND $ket_kain == 'Multibar'){
-                    $callback = array('status' => 'failed', 'field' => 'berat', 'message' => 'Berat tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                // }else if(empty($gramasi) AND $ket_kain == 'Non Multibar'){
+                //     $callback = array('status' => 'failed', 'field' => 'gramasi', 'message' => 'Gramasi tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                // }else if(empty($berat) AND $ket_kain == 'Multibar'){
+                //     $callback = array('status' => 'failed', 'field' => 'berat', 'message' => 'Berat tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if(empty($lebar_jadi)){
                     $callback = array('status' => 'failed', 'field' => 'lebar_jadi', 'message' => 'Lebar Jadi tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if(empty($uom_lebar_jadi)){
@@ -562,6 +562,7 @@ class Inlet extends MY_Controller
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->lokasi;
                 $row[] = $field->nama_user;
+                $row[] = $field->kode_split ?? '';
                 $data[] = $row;
             }
     

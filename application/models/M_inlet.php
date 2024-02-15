@@ -238,17 +238,38 @@ class M_inlet extends CI_Model
 
 
 	// var $table        = 'mrp_inlet';
-    var $column_order2 = array(null,  'fg.create_date', 'fg.kode_produk', 'fg.nama_produk','sq.corak_remark', 'sq.warna_remark', 'fg.lot','sq.nama_grade', 'fg.qty', 'fg.qty2','sq.qty_jual', 'sq.qty2_jual', 'sq.lebar_jadi',   'sq.lokasi', 'fg.nama_user');
-	var $column_search2= array('fg.lot', 'fg.create_date', 'sq.corak_remark', 'sq.warna_remark', 'fg.qty', 'fg.qty2','sq.qty_jual', 'sq.qty2_jual', 'sq.lebar_jadi',  'sq.nama_grade', 'fg.nama_user','sq.lokasi');
-	var $order2  	  = array('sq.create_date' => 'desc');
-	
-	private function _get_datatables_query2()
+    var $column_order2 = array(null,  'create_date', 'kode_produk', 'nama_produk','corak_remark', 'warna_remark', 'lot','nama_grade', 'qty', 'qty2','qty_jual', 'qty2_jual', 'lebar_jadi',   'lokasi', 'nama_user');
+	var $column_search2= array('lot', 'create_date', 'corak_remark', 'warna_remark', 'qty', 'qty2','qty_jual', 'qty2_jual', 'lebar_jadi',  'nama_grade', 'nama_user','lokasi');
+	var $order2  	  = array('create_date' => 'asc');
+
+	private function _get_datatables_query22()
 	{
-	
-		$this->db->SELECT("in.id, sq.quant_id, fg.create_date, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.nama_user,sq.qty_jual,sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark ");
+		// $id = $this->input->post('kode');;
+		$this->db->SELECT("spl.kode_split,in.id, sq.quant_id, fg.create_date, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.nama_user,sq.qty_jual,sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark ");
 		$this->db->FROM("mrp_inlet in");
 		$this->db->JOIN("mrp_production_fg_hasil fg","fg.kode = in.kode_mrp AND in.id = fg.id_inlet" , "INNER");
 		$this->db->JOIN("stock_quant sq","sq.quant_id = fg.quant_id", "INNER");
+		$this->db->JOIN("split spl","spl.quant_id = fg.quant_id", "LEFT");
+		$query1 = $this->db->get_compiled_select();
+
+		$this->db->SELECT("'' as kode_split, fg.id_inlet, sq.quant_id, spl.tanggal, sq.kode_produk,sq.nama_produk, sq.lot,sq.nama_grade, sq.qty,sq.uom,sq.qty2,sq.uom2,spl.nama_user,sq.qty_jual,sq.uom_jual,sq.qty2_jual,sq.uom2_jual,sq.lokasi,sq.lebar_jadi,sq.uom_lebar_jadi,sq.corak_remark,sq.warna_remark"); 
+		$this->db->FROM("mrp_production_fg_hasil fg");
+		$this->db->JOIN("split spl","fg.quant_id = spl.quant_id","INNER");
+		$this->db->JOIN("split_items spli","spl.kode_split = spli.kode_split","INNER");
+		$this->db->JOIN("stock_quant sq ","sq.quant_id = spli.quant_id_baru","INNER");
+		$query2 = $this->db->get_compiled_select();
+
+		if($this->input->post('kode')){
+			$this->db->where('id',$this->input->post('kode'));
+		}
+		$this->db->SELECT('*');
+		$this->db->FROM('('.$query1 . ' UNION ' . $query2 .' ) as unionTable');
+	}
+
+	
+	private function _get_datatables_query2()
+	{
+		$this->_get_datatables_query22();
 
         $i = 0;
 		foreach ($this->column_search2 as $item) // loop column 
@@ -285,7 +306,8 @@ class M_inlet extends CI_Model
 
 	function get_datatables2($id)
 	{
-		$this->db->where('in.id',$id);
+		
+		$this->db->where('id_inlet',$id);
 		$this->_get_datatables_query2();
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
@@ -295,32 +317,49 @@ class M_inlet extends CI_Model
 
 	function count_filtered2($id)
 	{
-		$this->db->where('in.id',$id);
+		$this->db->where('id',$id);
 		$this->_get_datatables_query2();
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all2($id)
+	
+	function count_all2($id)
 	{
-		// $this->db->from($this->table);
-		$this->db->where('in.id',$id);
-		$this->db->SELECT("in.id, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.nama_user, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark ");
-		$this->db->FROM("mrp_inlet in");
-		$this->db->JOIN("mrp_production_fg_hasil fg","fg.kode = in.kode_mrp AND in.id = fg.id_inlet" , "INNER");
-		$this->db->JOIN("stock_quant sq","sq.quant_id = fg.quant_id", "INNER");
-		return $this->db->count_all_results();
-	} 
-
+		$this->db->where('id',$id);
+		$this->_get_datatables_query22();
+		$query = $this->db->count_all_results();
+		return $query;
+	}
 
 	function get_data_lot_hph_by_kode($id_inlet,$quant_id)
 	{
-		$this->db->where('in.id',$id_inlet);
-		$this->db->where('sq.quant_id',$quant_id);
-		$this->db->SELECT("in.id, in.kode_mrp, fg.quant_id, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.nama_user, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark, sq.qty_jual,sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi");
+		
+
+		// $this->db->SELECT("in.id, in.kode_mrp, fg.quant_id, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.nama_user, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark, sq.qty_jual,sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi");
+		// $this->db->FROM("mrp_inlet in");
+		// $this->db->JOIN("mrp_production_fg_hasil fg","fg.kode = in.kode_mrp AND in.id = fg.id_inlet" , "INNER");
+		// $this->db->JOIN("stock_quant sq","sq.quant_id = fg.quant_id", "INNER");
+		$this->db->SELECT("spl.kode_split,in.id, in.kode_mrp, sq.quant_id, fg.create_date, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.nama_user,sq.qty_jual,sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark ");
 		$this->db->FROM("mrp_inlet in");
 		$this->db->JOIN("mrp_production_fg_hasil fg","fg.kode = in.kode_mrp AND in.id = fg.id_inlet" , "INNER");
 		$this->db->JOIN("stock_quant sq","sq.quant_id = fg.quant_id", "INNER");
+		$this->db->JOIN("split spl","spl.quant_id = fg.quant_id", "LEFT");
+		$query1 = $this->db->get_compiled_select();
+
+		$this->db->SELECT("'' as kode_split, fg.id_inlet, fg.kode, sq.quant_id, spl.tanggal, sq.kode_produk,sq.nama_produk, sq.lot,sq.nama_grade, sq.qty,sq.uom,sq.qty2,sq.uom2,spl.nama_user,sq.qty_jual,sq.uom_jual,sq.qty2_jual,sq.uom2_jual,sq.lokasi,sq.lebar_jadi,sq.uom_lebar_jadi,sq.corak_remark,sq.warna_remark"); 
+		$this->db->FROM("mrp_production_fg_hasil fg");
+		$this->db->JOIN("split spl","fg.quant_id = spl.quant_id","INNER");
+		$this->db->JOIN("split_items spli","spl.kode_split = spli.kode_split","INNER");
+		$this->db->JOIN("stock_quant sq ","sq.quant_id = spli.quant_id_baru","INNER");
+		$query2 = $this->db->get_compiled_select();
+
+		$this->db->where('id',$id_inlet);
+		$this->db->where('quant_id',$quant_id);
+
+		$this->db->SELECT('*');
+		$this->db->FROM('('.$query1 . ' UNION ' . $query2 .' ) as unionTable');
+
 		$result = $this->db->get();
 		return $result->row();
 	}
