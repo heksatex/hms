@@ -113,8 +113,7 @@
                             <?php $this->load->view("admin/_partials/js.php") ?>
                             <div class="row">
                                 <?php
-                                if ($picklist->status !== "cancel")
-                                    $this->load->view('warehouse/v_picklist_item', ["pl" => $picklist->no]);
+                                    $this->load->view('warehouse/v_picklist_item', ["pl" => $picklist->no, 'no_sj' => $picklist->no_sj]);
                                 ?>
                             </div>
                         </div>

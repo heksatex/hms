@@ -11,7 +11,7 @@
             
             #noregk3l{
                 display: flex;
-                height: 100vh;
+                height: 100%;
                 align-items: center;
                 justify-content: center;
             }

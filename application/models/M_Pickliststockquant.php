@@ -93,8 +93,9 @@ class m_Pickliststockquant extends CI_Model {
                 . $this->table . '.uom_lebar_jadi,' . $this->table . '.warna_remark,' . $this->table . '.quant_id,qty_jual,uom_jual,qty2_jual,uom2_jual,' . $this->table . '.lokasi_fisik,lokasi,reserve_origin,reserve_move';
 //                . ' ms.qty,ms.uom';
         if ($joinItemPicklist) {
-            $this->db->join("picklist_detail pd", "pd.barcode_id = " . $this->table . ".lot", 'left');
+            $this->db->join("picklist_detail pd", "(pd.quant_id = " . $this->table . ".quant_id) and (pd.valid != 'cancel')", 'left');
             $select .= ",pd.no_pl";
+//            $this->db->where('pd.valid ', "cancel"); //tambahan
         }
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
@@ -103,39 +104,42 @@ class m_Pickliststockquant extends CI_Model {
         return $this->db->select($select)->get()->result();
     }
 
-    public function getDataItemPicklistScan(array $condition,$joinItemPicklist = false) {
+    public function getDataItemPicklistScan(array $condition, $joinItemPicklist = false, array $notin = ['stock_quant.lokasi_fisik' => ['PORT', 'XPD']]) {
         $select = "";
         $select .= $this->table . '.lot as barcode,' . $this->table . '.kode_produk,' . $this->table . '.nama_produk,' . $this->table . '.corak_remark,' . $this->table . '.lebar_jadi,'
                 . $this->table . '.uom_lebar_jadi,' . $this->table . '.warna_remark,' . $this->table . '.quant_id,qty_jual,uom_jual,qty2_jual,uom2_jual,' . $this->table . '.lokasi_fisik,lokasi,reserve_origin,reserve_move';
         $this->db->from($this->table);
         $this->db->where($condition);
         if ($joinItemPicklist) {
-            $this->db->join("picklist_detail pd", "pd.barcode_id = " . $this->table . ".lot", 'left');
+            $this->db->join("picklist_detail pd", "(pd.quant_id = " . $this->table . ".quant_id) and (pd.valid != 'cancel')", 'left');
             $select .= ",pd.no_pl";
+//            $this->db->where_not_in('pd.valid', ["cancel"]); //tamb ahan
         }
         $this->db->join('mst_produk as mp', 'mp.kode_produk = ' . $this->table . '.kode_produk');
-        $this->db->where_not_in($this->table . '.lokasi_fisik', ['PORT', 'XPD']);
-        $this->db->where($this->table . '.lokasi', 'GJD/STOCK');
-        $this->db->where('id_category', 21);
+//        $this->db->where_not_in($this->table . '.lokasi_fisik', ['PORT', 'XPD']);
+        foreach ($notin as $key => $value) {
+            $this->db->where_not_in($key, $value);
+        }
+//        $this->db->where($this->table . '.lokasi', 'GJD/Stock');
+//        $this->db->where('id_category', 21);
         return $this->db->select($select)->get()->row();
     }
-    
-    
 
     public function getDataItemPicklistScanDetail($condition, $joinItemPicklist = false) {
         $select = "id_category,nama_category,";
         $select .= $this->table . '.lot as barcode,' . $this->table . '.kode_produk,' . $this->table . '.nama_produk,' . $this->table . '.corak_remark,' . $this->table . '.lebar_jadi,'
                 . $this->table . '.uom_lebar_jadi,' . $this->table . '.warna_remark,' . $this->table . '.quant_id,qty_jual,uom_jual,qty2_jual,uom2_jual,' . $this->table . '.lokasi_fisik,lokasi,reserve_origin,reserve_move';
         $this->db->from($this->table);
-        $this->db->where($condition);
         if ($joinItemPicklist) {
-            $this->db->join("picklist_detail pd", "pd.barcode_id = " . $this->table . ".lot", 'left');
+            $this->db->join("picklist_detail pd", "(pd.quant_id = " . $this->table . ".quant_id) and (pd.valid != 'cancel')", 'left');
             $select .= ",pd.no_pl";
+//            $this->db->where_not_in('pd.valid', ["cancel"]); //tamb ahan
         }
 //        $this->db->join('mrp_satuan as ms', 'ms.quant_id = ' . $this->table . '.quant_id', 'left');
 //        $this->db->where("not exists ( select null from picklist_detail d where d.barcode_id = " . $this->table . ".lot )", "", false);
         $this->db->join('mst_produk as mp', 'mp.kode_produk = ' . $this->table . '.kode_produk');
         $this->db->join('mst_category as mc', 'mc.id = mp.id_category', 'left');
+        $this->db->where($condition);
 //        $this->db->where_not_in($this->table . '.lokasi_fisik', ['PORT', 'XPD']);
 //        $this->db->where($this->table . '.lokasi', 'GJD/STOCK');
 //        $this->db->where('id_category', 21);
@@ -149,12 +153,45 @@ class m_Pickliststockquant extends CI_Model {
     }
 
     public function checkItemAvailable(array $condition) {
-        $this->db->select('*');
+        $this->db->select('stock_quant.*,pd.valid');
         $this->db->from($this->table);
+        $this->db->join('picklist_detail pd', '(pd.quant_id = stock_quant.quant_id) and (pd.valid != "cancel")', 'left');
         $this->db->where($condition);
         $this->db->where_not_in($this->table . '.lokasi_fisik', ['PORT', 'XPD']);
         $this->db->where($this->table . '.lokasi', 'GJD/STOCK');
         $query = $this->db->get();
         return $query->row();
     }
+
+    public function update(array $data, array $condition) {
+        $this->db->set($data);
+        $this->db->where($condition);
+        $this->db->update($this->table);
+    }
+
+    public function updateBatch(array $data, string $where) {
+        $this->db->update_batch($this->table, $data, $where);
+    }
+
+    public function updateWin(array $data, array $condition, array $conditionIn = [], $in = true) {
+        $this->db->set($data);
+        if ($in) {
+            foreach ($conditionIn as $key => $value) {
+                $this->db->where_in($key, $value);
+            }
+        } else {
+            foreach ($conditionIn as $key => $value) {
+                $this->db->where_not_in($key, $value);
+            }
+        }
+        $this->db->where($condition);
+        $this->db->update($this->table);
+    }
+
+//    public function updatePicklist(array $data, array $condition) {
+//        $this->db->set($data);
+//        $this->db->where($condition);
+////        $this->db->
+//        $this->db->update($this->table);
+//    }
 }

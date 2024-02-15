@@ -45,7 +45,7 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Form Validasi Picklist</strong></h3>
+                            <h3 class="box-title">Form Validasi Picklist <strong><?= str_replace("_", " ", $access->permission) ?></strong></h3>
                         </div>
                         <div class="box-body">
                             <?php if (isset($access->status) && $access->status) { ?>
@@ -62,6 +62,7 @@
                                                         <input type='text' name="search" id="search" class="form-control input-lg scan-text" required/>
                                                         <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
                                                         <input type='hidden' name="pl" id="pl" value=""/>
+                                                        <input type="hidden" name="access" value="<?= $access->permission ?>">
                                                     </div>
                                                 </div>
                                             </div>
@@ -225,17 +226,25 @@
 
                 $("#search").focus();
                 $("#btn-validasi").hide();
-                var nopl = "";
                 var audio = new Audio("<?= base_url('dist/error.wav') ?>");
                 audio.volume = 1.0;
                 const table = $("#item_realisai").DataTable({
                     "iDisplayLength": 10,
+                    "processing": true,
+                    "serverSide": true,
                     "order": [],
                     "paging": true,
                     "lengthChange": false,
                     "searching": true,
                     "ordering": true,
                     "info": true,
+                    "ajax": {
+                        "url": "<?= base_url('warehouse/picklistvalidasi/data_detail') ?>",
+                        "type": "POST",
+                        "data": function (d) {
+                            d.filter = $("#pl").val();
+                        }
+                    },
                     "columnDefs": [
                         {
                             "targets": [0],
@@ -302,7 +311,7 @@
                                             if (response?.data?.picklist !== null) {
                                                 dataPicklist = response.data.picklist;
                                                 $("#pl").val(dataPicklist.no);
-                                                dataValid = 0;
+                                                dataValid = dataPicklist.total_validasi;
                                                 dataInvalid = 0;
                                                 table.clear().draw();
                                                 $("#no_pl").html(dataPicklist.no);
@@ -311,8 +320,9 @@
                                                 $("#jj").html(dataPicklist.jenis_jual);
                                                 $("#tgl_picklist").html(dataPicklist.tanggal_input);
                                                 $("#totalLot").html(dataPicklist.total_lot);
-                                                $("#scanValid").html(dataPicklist.total_realisasi);
+                                                $("#scanValid").html(dataPicklist.total_validasi);
                                                 $("#scanInvalid").html(dataInvalid);
+                                                table.search("").draw(false);
                                                 return;
                                             }
                                             if (typeof response?.data?.item === "object") {

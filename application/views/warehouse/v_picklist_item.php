@@ -1,6 +1,27 @@
+<style>
+<?php if (!empty($no_sj)) { ?>
+        .add{
+            visibility: hidden;
+        }
+
+    <?php
+}
+if ($picklist->status === 'cancel') {
+    ?>
+        .add{
+            visibility: hidden;
+        }
+        .status_item{
+            visibility: hidden;
+        }
+    <?php
+}
+?>
+</style>
 <div class="col-md-12">
     <ul class="nav nav-tabs " >
         <li class="active"><a href="#tab_1" data-toggle="tab">Picklist Item</a></li>
+        <li><a href="#tab_2" data-toggle="tab">Delivery Order</a></li>
     </ul>
     <div class="tab-content over"><br>
         <div class="tab-pane active" id="tab_1">
@@ -31,9 +52,68 @@
                             </td>
                         </tr>
                         </tr>
-                        </tr>
                     </tfoot>
                 </table>
+            </div>
+        </div>
+        <div class="tab-pane" id="tab_2">
+            <div class="row">
+                <div class="col-md-6 col-xs-12">
+                    <div class="form-group">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-4">
+                                <label class="form-label required">No Delivery Order</label>
+                            </div>
+                            <div class="col-xs-8 col-md-8">
+                                <strong><?= $do->no ?? "" ?></strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-4">
+                                <label class="form-label required">No Surat Jalan</label>
+                            </div>
+                            <div class="col-xs-8 col-md-8">
+                                <strong><?= $do->no_sj ?? "" ?></strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-4">
+                                <label class="form-label required">Status Delivery Order</label>
+                            </div>
+                            <div class="col-xs-8 col-md-8 text-uppercase">
+                                <strong><?= $do->status ?? "" ?></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xs-12">
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4">
+                                    <label class="form-label required">Tanggal dibuat</label>
+                                </div>
+                                <div class="col-xs-8 col-md-8">
+                                    <strong><?= isset($do->tanggal_buat) ? date("l, d m Y H:i:s", strtotime($do->tanggal_buat)) : "" ?></strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4">
+                                    <label class="form-label required">Tanggal Dokumen</label>
+                                </div>
+                                <div class="col-xs-8 col-md-8">
+                                    <strong><?= isset($do->tanggal_dokumen) ? date("l, d m Y H:i:s", strtotime($do->tanggal_dokumen)) : "" ?></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
             </div>
         </div>
     </div>
@@ -55,6 +135,7 @@
             "type": "POST",
             "data": function (d) {
                 d.filter = "<?= $pl ?>";
+                d.no_sj = "<?= $no_sj ?>";
             },
             "dataSrc": function (data) {
                 if (data.data.length < 1) {
@@ -73,14 +154,14 @@
         "buttons": [
             {
                 "text": '<i class="fa fa-plus"> <span>Tambah Data Scan</span>',
-                "className": "btn btn-default",
+                "className": "btn btn-default add",
                 "action": function (e, dt, node, config) {
                     $(".add-new-scan").trigger("click");
                 }
             },
             {
                 "text": '<i class="fa fa-plus"> <span>Tambah Data Manual</span>',
-                "className": "btn btn-default",
+                "className": "btn btn-default add",
                 "action": function (e, dt, node, config) {
                     $(".add-new-manual").trigger("click");
                 }
@@ -104,26 +185,20 @@
             "type": "POST",
             "data": {
                 id: $(e).attr("data-id"),
-                pl: $(e).attr("data-pl")
+                pl: $(e).attr("data-pl"),
+                status: $(e).attr("data-status")
             },
             "success": function (data) {
-//                            location.reload();
                 tbl.search("").draw(false);
                 unblockUI(function () {
                     alert_notify(data.icon, data.message, data.type, function () {});
-//                    setTimeout(function () {
-//                        alert_notify(data.icon, data.message, data.type, function () {});
-//                    }, 500);
-                },50);
+                }, 50);
             },
             "error": function (xhr, ajaxOptions, thrownError) {
                 let data = JSON.parse(xhr.responseText);
                 unblockUI(function () {
-                     alert_notify(data.icon, data.message, data.type, function () {});
-//                    setTimeout(function () {
-//                        alert_notify(data.icon, data.message, data.type, function () {});
-//                    }, 500);
-                },50);
+                    alert_notify(data.icon, data.message, data.type, function () {});
+                }, 50);
             }
         });
     };
@@ -137,7 +212,7 @@
         $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
         $('.modal-title').text('Add Item Manual');
         $.post("<?= base_url('warehouse/picklist/item_manual/') ?>", {pl: "<?= $picklist->no ?>", ids: "<?= encrypt_url($picklist->id) ?>"}, function (data) {
-            setTimeout(function () {
+            setTimeout(function () { 
                 $(".tambah_data").html(data.data);
                 $("#btn-tambah").html("Tambahkan");
             }, 1000);
@@ -169,13 +244,10 @@
         });
     });
 
-    const addItem = function (data, error = "", tbl = null) {
+    const addItem = function (data, error = "", tbl = null, status = "") {
         if (error !== "") {
             unblockUI(function () {
                 alert_notify("fa fa-danger", error, "danger", function () {});
-//                setTimeout(function () {
-//                    alert_notify("fa fa-danger", error, "danger", function () {});
-//                }, 500);
             }, 50);
             return;
         }
@@ -190,12 +262,11 @@
             "data": {
                 "pl": "<?= $picklist->no ?? '' ?>",
                 "ids": "<?= encrypt_url($picklist->id) ?>",
-                "item": data
+                "item": data,
+                "status": status
             }, "success": function (data) {
                 unblockUI(function () {
-//                    setTimeout(function () {
                     alert_notify(data.icon, data.message, data.type, function () {});
-//                    }, 500);
                 }, 50);
                 if (tbl !== null) {
                     tbl.columns().checkboxes.deselect(true);
@@ -205,13 +276,12 @@
             "error": function (xhr, ajaxOptions, thrownError) {
                 let data = JSON.parse(xhr.responseText);
                 unblockUI(function () {
-//                    setTimeout(function () {
                     alert_notify(data.icon, data.message, data.type, function () {});
-//                    }, 500);
+
                 }, 50);
             }
         });
-    }
+    };
 
 
 </script>

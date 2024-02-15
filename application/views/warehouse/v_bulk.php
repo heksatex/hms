@@ -132,8 +132,8 @@
                                         }
                                 , function (response) {
                                     var divp = document.getElementById('printed');
-                                        divp.innerHTML = response.data;
-                                        print_voucher();
+                                    divp.innerHTML = response.data;
+                                    print_voucher();
                                 });
                             });
 
@@ -145,9 +145,12 @@
 
                 var win = window.open();
                 win.document.write($("#printed").html());
-                win.document.close();
-                win.print();
-                win.close();
+                setTimeout(function () {
+                    win.document.close();
+                    win.print();
+                    win.close();
+                }, 500);
+
 
             };
         </script>

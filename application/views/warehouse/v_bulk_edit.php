@@ -176,7 +176,7 @@
                                         {
                                             "pl": pl,
                                             "print_mode": $(this).attr("data-print"),
-                                            "type":"bulk"
+                                            "type": "bulk"
                                         }
                                 , function (response) {
                                     var divp = document.getElementById('printed');
@@ -208,18 +208,38 @@
 
                 $("#btn-add-bulk").on('click', function (e) {
                     e.preventDefault();
-                    confirmRequest("Tambah Data", "Tambah Data Bulk / BAL ", () => {
-                        addBulk();
+                    bootbox.prompt({
+                        title: "Tambah Bulk",
+                        message: "Total BAL yang Akan dibuat?",
+                        inputType: 'number',
+                        buttons: {
+                            cancel: {
+                                label: '<i class="fa fa-times"></i> Tidak'
+                            },
+                            confirm: {
+                                label: '<i class="fa fa-check"></i> YA'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result > 0) {
+                                addBulk(result);
+                            }
+
+                        }
                     });
+//                    confirmRequest("Tambah Data", "Tambah Data Bulk / BAL ", () => {
+//                        addBulk();
+//                    });
                 });
 
-                const addBulk = function () {
+                const addBulk = function (totals) {
                     please_wait(function () {});
                     $.ajax({
                         "url": "<?= base_url('warehouse/bulk/save_add_bulk') ?>",
                         "type": "POST",
                         "data": {
-                            pl: "<?= $picklist->no ?>"
+                            pl: "<?= $picklist->no ?>",
+                            total: totals
                         },
                         "success": function (data) {
                             sumTable.search("").draw(false);
@@ -241,9 +261,11 @@
 
                 var win = window.open();
                 win.document.write($("#printed").html());
-                win.document.close();
-                win.print();
-                win.close();
+                setTimeout(function () {
+                    win.document.close();
+                    win.print();
+                    win.close();
+                }, 200);
 
             };
         </script>
