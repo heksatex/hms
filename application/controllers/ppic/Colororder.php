@@ -365,6 +365,10 @@ class Colororder extends MY_Controller
                     $nama_sub_parent_produk_same  = "";
                     $jenis_kain_same              = TRUE;
                     $nama_jenis_kain_not_same     = "";
+                    $satuan_produk_new_empty      = FALSE;
+                    $satuan_produk_empty          = FALSE;
+                    $nama_satuan_produk_empty     = "";
+                    $satuan_produk_new_empty_departemen = "";
 
                     foreach ($cod as $val) {
 
@@ -478,9 +482,12 @@ class Colororder extends MY_Controller
                         $method_action = trim($mthd[1]);
 
                         $nama_dept        = $this->m_colorOrder->get_nama_dept_by_kode($method_dept)->row_array();
-                        $product_dept     = $nama_dept['nama'];
-                        $product_fullname = $product_warna." (".$product_dept.")";
-
+                        if($method_dept == 'GJD'){
+                          $product_fullname = $product_warna;
+                        }else{
+                          $product_dept     = $nama_dept['nama'];
+                          $product_fullname = $product_warna." (".$product_dept.")";
+                        }
                 
                         if ($method_action == 'PROD'){
                           $cek_prod2 = $this->m_colorOrder->cek_nama_product(addslashes($product_fullname))->row_array();
@@ -496,6 +503,12 @@ class Colororder extends MY_Controller
                             // cek satuan by departement
                             $uom           = $nama_dept['uom_1'];
                             $uom_2         = $nama_dept['uom_2'];
+
+                            if(empty($uom) or empty($uom_2)){
+                              $satuan_produk_new_empty  = TRUE;
+                              $satuan_produk_new_empty_departemen .= '<br>'.$method_dept.', ';
+                            }
+
                             $status_produk = 't';
                             
                             $last_number = $last_number + 1;
@@ -516,6 +529,11 @@ class Colororder extends MY_Controller
                             $kode_prod = $cek_prod2['kode_produk'];
                             $uom       = $cek_prod2['uom'];
                             $uom_2     = $cek_prod2['uom_2'];
+
+                            if(empty($uom) or empty($uom_2)){
+                              $satuan_produk_empty  = TRUE;
+                              $nama_satuan_produk_empty    .= '<br>'.$product_fullname.", ";
+                            }
 
                             // cek status produk route color order
                             $stat_produk = $this->_module->get_status_aktif_by_produk(addslashes($kode_prod))->row_array();// status produk aktif/tidak
@@ -623,7 +641,11 @@ class Colororder extends MY_Controller
                         if($method_action == 'CON'){
                           $origin_prod = $kode_prod_rm.'_1';
                           $source_move_PROD = FALSE;
-                          $source_move      = '';
+                          if($method_dept== "GJD"){
+                            $source_move      = $source_move;
+                          }else{
+                            $source_move      = '';
+                          }
                         }else{
                           $origin_prod = '';
                         }
@@ -765,7 +787,7 @@ class Colororder extends MY_Controller
 
                     } //end foreach color order details / COD
                     
-                    if($id_parent_empty == FALSE AND $id_sub_parent_empty == FALSE AND $id_jenis_kain_empty == FALSE AND $produk_aktif == TRUE AND $jenis_kain_same == TRUE AND $parent_produk_same == TRUE AND $parent_produk_same == TRUE){
+                    if($id_parent_empty == FALSE AND $id_sub_parent_empty == FALSE AND $id_jenis_kain_empty == FALSE AND $produk_aktif == TRUE AND $jenis_kain_same == TRUE AND $parent_produk_same == TRUE AND $parent_produk_same == TRUE AND $satuan_produk_new_empty == FALSE AND $satuan_produk_empty == FALSE){
 
                       if(!empty($sql_insert_batch)){
                         $sql_insert_batch = rtrim($sql_insert_batch, ', ');
@@ -912,6 +934,13 @@ class Colororder extends MY_Controller
                       }else if( $jenis_kain_same == FALSE){
                         $nama_jenis_kain_not_same = rtrim($nama_jenis_kain_not_same,', ');
                         $callback = array('status' => 'failed','message' => 'Maaf, Jenis Kain Tidak Sama ! <b>'.$nama_jenis_kain_not_same.'</b> </br>  Harap samakan terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
+                      }else if( $satuan_produk_new_empty == TRUE){
+                        $satuan_produk_new_empty_departemen = rtrim($satuan_produk_new_empty_departemen,', ');
+                        $callback = array('status' => 'failed','message' => 'Maaf, Master Uom atau Uom 2 di departemen tersebut Kosong ! <b>'.$satuan_produk_new_empty_departemen.'</b> </br>  Harap isi terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
+                      }else if( $satuan_produk_empty == TRUE){
+                        $nama_satuan_produk_empty = rtrim($nama_satuan_produk_empty,', ');
+                        $callback = array('status' => 'failed','message' => 'Maaf, Uom atau Uom2 kosong ! <b>'.$nama_satuan_produk_empty.'</b> </br>  Harap isi terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
                         
                       }else{
                         $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-check', 'type' => 'danger');

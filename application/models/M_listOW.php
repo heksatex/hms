@@ -64,10 +64,15 @@ class M_listOW extends CI_Model
             $tgl_sampai  = date('Y-m-d 23:59:59',strtotime($this->input->post('tgl_sampai')));
             $this->db->where('scl.tanggal_ow <=', $tgl_sampai);
         }
+        if($this->input->post('check_stock') == 'true'){
+            $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
+            (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date ");
+        }else{
+            $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status, scl.status as status_scl,
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date ");
+        }
 
-        $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
-        (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-        co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date ");
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");
@@ -131,7 +136,6 @@ class M_listOW extends CI_Model
 	public function count_all()
 	{	
 		$this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
-        (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1,
         co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route");
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
@@ -293,7 +297,7 @@ class M_listOW extends CI_Model
                                 where fg.kode = '$kode'")->result();
     }
 
-    public function get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow)
+    public function get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow,$check_stock)
     {
 
         
@@ -349,9 +353,15 @@ class M_listOW extends CI_Model
             }
         }
 
-        $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
-        (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-        co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date");
+        if($check_stock == 'show'){
+            $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
+            (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date");
+        }else{
+            $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status, scl.status as status_scl,
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date");
+        }
+    
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
         $this->db->join("mst_sales_group msg", "sc.sales_group = msg.kode_sales_group", "inner");

@@ -284,8 +284,8 @@
 		var sisa_target = qty_sisa - tot_qty;// sisa target setelah ada inputan
 		var uom_target  = "<?php echo $uom_qty_sisa; ?>";
 
-		document.getElementById('sisa_target').value = sisa_target+" "+uom_target;
-		document.getElementById('txtQty_sisa').value = sisa_target+" "+uom_target;
+		document.getElementById('sisa_target').value = sisa_target.toFixed(2)+" "+uom_target;
+		document.getElementById('txtQty_sisa').value = sisa_target.toFixed(2)+" "+uom_target;
 		if(sisa_target < 0){
 			$('#sisa_target').addClass('error_target');
 			$('#txtQty_sisa').addClass('error_target');
@@ -808,6 +808,16 @@
 					
 					row = "grg"+row_order_rm;
 					row2 = "gjd"+row_order_rm;
+
+					var level 			= '<?php echo $level; ?>';
+					var cek_dept 		= '<?php echo $cek_dept; ?>';
+					var copy_bahan_baku = '<?php echo $copy_bahan_baku; ?>';
+					var type_mo			= '<?php echo $type_mo['type_mo']; ?>';
+					if((cek_dept.includes("PPIC") !== false || level !== 'Entry Data' || type_mo == 'knitting') && (copy_bahan_baku == 'true') ){
+						del_row_show = '<a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a>';
+					}else{
+						del_row_show = '';
+					}
 				
 					html='<tr class="num">'
 						+ '<td></td>'
@@ -827,7 +837,7 @@
 						+ '<td><select type="text" name="txtuom_lebar_jadi"  id="txtuom_lebar_jadi" class="form-control input-sm width-80 '+row2+'" ><option value=""></option><?php foreach($uom as $row){ echo  "<option value=".$row->short.">".$row->short."</option>"; }?></select></td>'
 						<?php }?>
 						+ '<td><input type="text" name="reff_note" id="reff_note" class="form-control input-sm width-150" onkeypress="enter(event);"/></td>'
-						+ '<td><a onclick="delRow(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
+						+ '<td>'+del_row_show+'</td>'
 						+ '</tr>';
 						$('#tabel_produksi tbody').append(html);			
 						
@@ -1158,9 +1168,14 @@
 						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm_batch'); 
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
-			          alert("Error Simpan Produksi Batch");
-			          $('#btn-tambah-produksi-batch').button('reset');
-					  unblockUI( function(){});
+						unblockUI(function() {});
+	  		            $('#btn-tambah-produksi-batch').button('reset');
+						if(jqXHR.status == 401){
+							var err = JSON.parse(jqXHR.responseText);
+							alert(err.message);
+						}else{
+							alert("Error Simpan Produksi Batch !");
+						}    
 			        }
 			    });
 			}

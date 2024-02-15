@@ -88,7 +88,7 @@ class M_stockMoves extends CI_Model {
 									(SELECT kode FROM pengiriman_barang WHERE move_id = sm.move_id), 
 									(SELECT kode FROM penerimaan_barang WHERE move_id = sm.move_id),
 									(SELECT DISTINCT kode FROM mrp_production_rm_target WHERE move_id = sm.move_id),
-									(SELECT DISTINCT kode FROM mrp_production_fg_target WHERE move_id = sm.move_id)
+									(SELECT DISTINCT kode FROM mrp_production_fg_target WHERE move_id = sm.move_id),
 									) as 'picking',smp.kode_produk, smp.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status
 								FROM stock_move AS sm
 								INNER JOIN stock_move_produk smp ON sm.move_id = smp.move_id
@@ -109,7 +109,9 @@ class M_stockMoves extends CI_Model {
 									UNION SELECT kode, move_id FROM penerimaan_barang
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_rm_target
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_fg_target
-									UNION SELECT kode_adjustment, move_id FROM adjustment_items ) picking ON picking.move_id = sm.move_id
+									UNION SELECT kode_adjustment, move_id FROM adjustment_items
+									UNION SELECT no_do, move_id FROM deliveryorder_stock_move
+									 ) picking ON picking.move_id = sm.move_id
 								LEFT JOIN stock_quant sq ON smi.quant_id = sq.quant_id								
 								$where
 								ORDER BY sm.create_date desc");
@@ -128,7 +130,8 @@ class M_stockMoves extends CI_Model {
 									UNION SELECT kode, move_id FROM penerimaan_barang
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_rm_target
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_fg_target
-									UNION SELECT kode_adjustment, move_id FROM adjustment_items) picking ON picking.move_id = sm.move_id
+									UNION SELECT kode_adjustment, move_id FROM adjustment_items
+									UNION SELECT no_do, move_id FROM deliveryorder_stock_move) picking ON picking.move_id = sm.move_id
 								LEFT JOIN stock_quant sq ON smi.quant_id = sq.quant_id
 								$where
 								$kolom_order $order
@@ -148,7 +151,8 @@ class M_stockMoves extends CI_Model {
 									UNION SELECT kode, move_id FROM penerimaan_barang
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_rm_target
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_fg_target
-									UNION SELECT kode_adjustment, move_id FROM adjustment_items) picking ON picking.move_id = sm.move_id
+									UNION SELECT kode_adjustment, move_id FROM adjustment_items
+									UNION SELECT no_do, move_id FROM deliveryorder_stock_move) picking ON picking.move_id = sm.move_id
 								LEFT JOIN stock_quant sq ON smi.quant_id = sq.quant_id
 								$where $kolom_order $order ");
 
@@ -166,7 +170,9 @@ class M_stockMoves extends CI_Model {
 									UNION SELECT kode, move_id FROM penerimaan_barang
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_rm_target
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_fg_target
-									UNION SELECT kode_adjustment, move_id FROM adjustment_items) picking ON picking.move_id = sm.move_id
+									UNION SELECT kode_adjustment, move_id FROM adjustment_items
+									UNION SELECT no_do, move_id FROM deliveryorder_stock_move
+									UNION SELECT no_do, move_id FROM deliveryorder_stock_move) picking ON picking.move_id = sm.move_id
 								LEFT JOIN stock_quant sq ON smi.quant_id = sq.quant_id
 								$where ");
 
@@ -185,7 +191,8 @@ class M_stockMoves extends CI_Model {
 									UNION SELECT kode, move_id FROM penerimaan_barang
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_rm_target
 									UNION SELECT DISTINCT kode, move_id FROM mrp_production_fg_target
-									UNION SELECT kode_adjustment, move_id FROM adjustment_items) picking ON picking.move_id = sm.move_id
+									UNION SELECT kode_adjustment, move_id FROM adjustment_items
+									UNION SELECT no_do, move_id FROM deliveryorder_stock_move) picking ON picking.move_id = sm.move_id
 								LEFT JOIN stock_quant sq ON smi.quant_id = sq.quant_id
 								$where
 								Group by $groupBy

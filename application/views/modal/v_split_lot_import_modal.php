@@ -7,10 +7,14 @@
             <tr>
               <th class="no">No</th>
               <th>Kode Produk</th>
-              <th>Product</th>
+              <th>Nama Produk</th>
               <th>Lot</th>
               <th>Qty</th>
               <th>Qty2</th>
+              <?php if($departemen == 'GJD'){?>
+                <th>Qty Jual</th>
+                <th>Qty2 Jual</th>
+                <?php } ?>
               <th>Grade</th>
               <th>Reff Notes</th>
               <th>Reserve Move</th>
@@ -26,6 +30,9 @@
 </form>
   
 <script type="text/javascript">
+  
+  var dept = "<?php echo $departemen;?>";
+  var kolom = (dept=='GJD')? 11 : 9;
   $(document).ready( function () {
         var  table = $('#example2').DataTable({ 
             "processing": true, 
@@ -42,11 +49,11 @@
             "ajax": {
                 "url": "<?php echo site_url('warehouse/splitlot/list_import_produk')?>",
                 "type": "POST",
-                "data":{"departemen" : "<?php echo $departemen;?>"}
+                "data":{"departemen" : dept}
             },
             "columnDefs": [
               {
-                "targets" : 9,
+                "targets" : kolom,
                 "orderable": false, 
                 "createdCell": function (td, cellData, rowData, row, col) {
                    var rowId = rowData[8];

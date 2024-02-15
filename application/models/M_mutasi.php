@@ -26,6 +26,25 @@ class M_mutasi extends CI_Model
                                 ORDER BY mut.id_category, mut.nama_produk");
     }
 
+    public function acc_mutasi_by_kode_datar($table, $field,$tahun, $bulan,$where)
+    {
+        return $this->db->query("SELECT $field
+                                FROM $table mut
+                                INNER JOIN mst_category cat ON mut.id_category = cat.id
+                                WHERE mut.periode_th = '$tahun'  AND mut.periode_bln = '$bulan' $where
+                                ORDER BY mut.lot asc");
+    }
+
+    public function acc_mutasi_by_kode_datar_limit($table, $field,$tahun, $bulan,$where,$record,$recordPerPage)
+    {
+        return $this->db->query("SELECT $field
+                                FROM $table mut
+                                INNER JOIN mst_category cat ON mut.id_category = cat.id
+                                WHERE mut.periode_th = '$tahun'  AND mut.periode_bln = '$bulan' $where
+                                ORDER BY mut.lot asc
+                                LIMIT $record, $recordPerPage");
+    }
+
     public function acc_mutasi_by_kode($table,$tahun, $bulan, $field,$where)
     {
         return $this->db->query("SELECT $field
@@ -99,5 +118,10 @@ class M_mutasi extends CI_Model
 	{
 		return $this->db->query("SELECT kode, nama FROM route_co ORDER BY kode ")->result();
 	}
+
+    public function get_list_type_adjustment()
+    {
+		return $this->db->query("SELECT * FROM mst_type_adjustment ORDER BY id asc ")->result();
+    }
 
 }

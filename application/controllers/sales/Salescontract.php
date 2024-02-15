@@ -1037,7 +1037,7 @@ class Salescontract extends MY_Controller
     {
         $list = array(
             array('kode' => 't', 'nama'=>'Aktif'),
-            array('kode' => 'f', 'nama'=>'Tidak Aktif '),
+            array('kode' => 'f', 'nama'=>'Tidak Aktif'),
             array('kode' => 'ng', 'nama'=>'Not Good'),
             array('kode' => 'r', 'nama'=>'Reproses'),
         );

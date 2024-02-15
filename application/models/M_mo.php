@@ -271,10 +271,12 @@ class M_mo extends CI_Model
 
 	public function get_list_barang_jadi_hasil($kode,$lokasi_waste)
 	{
+		// tipe adjustment
+		// 1=Koreksi MO, 2=Koreksi Salah INput User
 		return $this->db->query("SELECT fg.kode, fg.move_id, fg.quant_id, fg.kode_produk, fg.kode_produk, fg.nama_produk, 
 										fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.row_order, sq.reff_note, fg.qty2, fg.uom2, fg.lebar_greige, fg.uom_lebar_greige, fg.lebar_jadi, fg.uom_lebar_jadi,(SELECT lot FROM adjustment_items adji 
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
-									where adj.status = 'done' AND adji.quant_id = fg.quant_id limit 1 ) as lot_adj
+									where adj.status = 'done' AND adji.quant_id = fg.quant_id AND adj.id_type_adjustment IN ('1','2') limit 1 ) as lot_adj
 								FROM mrp_production_fg_hasil fg 
 								INNER JOIN stock_quant sq ON fg.quant_id =  sq.quant_id
 								WHERE fg.kode = '".$kode."' AND fg.lokasi NOT IN ('".$lokasi_waste."') ORDER BY fg.row_order")->result();
@@ -1168,6 +1170,8 @@ class M_mo extends CI_Model
 
 	public function get_sum_qty_fg_adj($kode)
 	{
+		// tipe adjustment
+		// 1=Koreksi MO, 2=Koreksi Salah INput User
 		return $this->db->query("SELECT sum(mtr) as mtr, sum(kg) as kg
 							from (
 							SELECT smi.kode_produk, smi.nama_produk, 
@@ -1179,7 +1183,7 @@ class M_mo extends CI_Model
 							INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
 							INNER JOIN stock_move_items smi ON adji.quant_id = smi.quant_id AND adji.move_id = smi.move_id
 							INNER JOIN mst_produk mp ON smi.kode_produk = mp.kode_produk
-							WHERE fg.kode ='$kode' AND smi.status = 'done'  AND fg.lokasi LIKE '%stock%' AND adj.status = 'done'
+							WHERE fg.kode ='$kode' AND smi.status = 'done'  AND fg.lokasi LIKE '%stock%' AND adj.status = 'done' AND adj.id_type_adjustment IN ('1','2')
 							GROUP BY smi.kode_produk
 							) as gp");
 	}
@@ -1278,6 +1282,14 @@ class M_mo extends CI_Model
 		return $this->db->query("INSERT INTO mrp_production_done (kode,tanggal,dept_id,con_mtr,con_kg,prod_mtr,prod_kg, waste_mtr,waste_kg,adj_mtr,adj_kg,status) 
 								values ('$kode','$tgl','$deptid','$rm_done_mtr','$rm_done_kg','$fg_prod_mtr','$fg_prod_kg','$fg_waste_mtr','$fg_waste_kg','$fg_adj_mtr','$fg_adj_kg','$status') ");
 
+	}
+
+	public function cek_mrp_inlet_by_quant_id($quant_id,$status)
+	{
+		$this->db->where_not_in('status',$status);
+		$this->db->where('quant_id',$quant_id);
+		$result = $this->db->get('mrp_inlet');
+		return $result->num_rows();
 	}
 
 

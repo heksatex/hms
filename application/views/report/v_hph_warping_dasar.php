@@ -450,7 +450,7 @@
                         tbody.append(tr);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='12' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='12'>").text('Tidak ada Data'));
                       tbody.append(tr);
                     }
                     $("#example1").append(tbody);
@@ -463,6 +463,7 @@
                   alert(jqXHR.responseText);
                   //alert('error data');
                   $('#btn-generate').button('reset');
+                  $("#example1_processing").css('display','none'); // hidden loading
                 }
           });
       }

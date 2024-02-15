@@ -19,4 +19,10 @@ class M_accessmenu extends CI_Model {
         $this->db->where($condition);
         return $this->db->select('*')->get()->row();
     }
+
+    public function getDetailByMenu(array $condition) {
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        return $this->db->select('*')->get()->row();
+    }
 }
