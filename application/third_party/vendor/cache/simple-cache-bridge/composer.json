@@ -1,0 +1,49 @@
+{
+    "name": "cache/simple-cache-bridge",
+    "type": "library",
+    "description": "A PSR-6 bridge to PSR-16. This will make any PSR-6 cache compatible with SimpleCache.",
+    "keywords": [
+        "cache",
+        "psr-6",
+        "psr-16",
+        "bridge"
+    ],
+    "homepage": "http://www.php-cache.com/en/latest/",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Magnus Nordlander",
+            "email": "magnus@fervo.se",
+            "homepage": "https://github.com/magnusnordlander"
+        }
+    ],
+    "require": {
+        "php": "^5.6 || ^7.0 || ^8.0",
+        "psr/cache": "^1.0",
+        "psr/simple-cache": "^1.0"
+    },
+    "provide": {
+        "psr/simple-cache-implementation": "^1.0"
+    },
+    "require-dev": {
+        "cache/integration-tests": "^0.16",
+        "mockery/mockery": "^1.0",
+        "phpunit/phpunit": "^5.7.21",
+        "symfony/cache": "^3.2"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.1-dev"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Cache\\Bridge\\SimpleCache\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

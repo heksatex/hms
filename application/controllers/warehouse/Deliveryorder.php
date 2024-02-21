@@ -371,6 +371,11 @@ class Deliveryorder extends MY_Controller {
             $users = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
 
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
+            }
+
             $pl = $this->input->post("pl");
             $nodo = $this->input->post("nodo");
             $this->_module->startTransaction();
@@ -767,6 +772,11 @@ class Deliveryorder extends MY_Controller {
             $username = $this->session->userdata('username');
             $users = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
+
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
+            }
 
             $dataItem = json_decode($this->input->post("data"));
             $do = $this->input->post("do");

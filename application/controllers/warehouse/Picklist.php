@@ -407,6 +407,13 @@ class Picklist extends MY_Controller {
             }
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
+            
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
+            }
+            
+            
             $id = $this->input->post('id');
             $pl = $this->input->post('pl');
             $status = $this->input->post('status');
@@ -513,7 +520,6 @@ class Picklist extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-
             $this->_module->gen_history($sub_menu, $input["no"], 'create', logArrayToString('; ', $input), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -532,6 +538,11 @@ class Picklist extends MY_Controller {
             $username = $this->session->userdata('username');
             if (empty($this->session->userdata('status'))) {
                 throw new \Exception('Waktu Anda Telah Habis', 410);
+            }
+            
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
             }
 
             $pl = $this->input->post('pl');
@@ -653,5 +664,22 @@ class Picklist extends MY_Controller {
         $cnt = $this->load->view('report/html_to_pdf/picklist_detail', $data, true);
 //        $this->load->view('report/html_to_pdf/picklist_detail', $data);
         $this->dompdflib->generate($cnt);
+    }
+
+    public function broadcast() {
+        try {
+            $pl = $this->input->post("pl");
+
+            $this->m_Picklist->update([
+                "notifikasi" => 1,
+                    ], ['no' => $pl]);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
     }
 }

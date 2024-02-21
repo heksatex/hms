@@ -146,4 +146,70 @@ class M_bulk extends CI_Model {
             return $ex->getMessage();
         }
     }
+
+    protected $selectPicklist = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
+    protected $column_orderPicklist = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
+    protected $orderPicklist = ['tanggal_input' => 'desc'];
+    protected $column_searchPicklist = array('no', 'jenis_jual', 'msg.nama_sales_group');
+
+    protected function _bulkPicklist() {
+        $this->db->select($this->selectPicklist . ', p.nama');
+        $this->db->from('picklist');
+        $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
+        $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
+        $this->db->join('partner as p', 'p.id = customer_id', 'left');
+        $this->db->join('mst_status as ms', 'ms.kode = status', 'left');
+        foreach ($this->column_searchPicklist as $key => $value) {
+            if ($_POST['search']['value']) {
+                if ($key === 0) {
+                    $this->db->group_start();
+                    $this->db->like($value, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($value, $_POST['search']['value']);
+                }
+
+                if (count($this->column_searchPicklist) - 1 === $key)
+                    $this->db->group_end();
+            }
+        }
+
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_orderPicklist[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->orderPicklist)) {
+            $order = $this->orderPicklist;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+    }
+
+    public function getCountDataFilteredPicklist(array $condition = []) {
+
+        if (count($condition) > 0)
+            $this->db->where($condition);
+
+        $this->_bulkPicklist();
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function getDataPicklist(array $condition = []) {
+        try {
+            if (count($condition) > 0)
+                $this->db->where($condition);
+
+            $this->_bulkPicklist();
+            if ($_POST['length'] != -1)
+                $this->db->limit($_POST['length'], $_POST['start']);
+            $query = $this->db->get();
+            return $query->result();
+        } catch (Exception $ex) {
+            throw $ex;
+        }
+    }
+
+    public function getCountAllDataPicklist(array $condition = []) {
+        $this->db->from('picklist');
+        if (count($condition) > 0)
+            $this->db->where($condition);
+        return $this->db->count_all_results();
+    }
 }

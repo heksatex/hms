@@ -93,7 +93,7 @@ class Bulk extends MY_Controller {
         try {
             $data = array();
             $condition = ['type_bulk_id' => 1, 'status !=' => 'cancel'];
-            $list = $this->m_Picklist->getData(false, $condition);
+            $list = $this->m_bulk->getDataPicklist($condition);
             $no = $_POST['start'];
             foreach ($list as $field) {
                 $kode_encrypt = encrypt_url($field->no);
@@ -111,8 +111,8 @@ class Bulk extends MY_Controller {
                 $data[] = $row;
             }
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_Picklist->getCountAllData($condition),
-                "recordsFiltered" => $this->m_Picklist->getCountDataFiltered($condition),
+                "recordsTotal" => $this->m_bulk->getCountAllDataPicklist($condition),
+                "recordsFiltered" => $this->m_bulk->getCountDataFilteredPicklist($condition),
                 "data" => $data,
             ));
             exit();

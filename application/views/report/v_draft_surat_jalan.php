@@ -181,11 +181,35 @@
                         false
                         );
                 $("#export_excel").on("click", function () {
-                    $("#draftsuratjalan").table2excel({
-                        name: $("#pack").html(),
-                        filename: "draft_surat_jalan_pl_" + $("#pack").html(),
-                        fileext: ".xlsx"
+                    please_wait(function () {});
+                    $.ajax({
+                        url: "<?= base_url('report/draftsuratjalan/export') ?>",
+                        type: "POST",
+                        data: {
+                            no_pl: $("#pack").html()
+                        },
+                        success: function (data) {
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            alert_notify(jqXHR.responseJSON.icon, jqXHR.responseJSON.message, jqXHR.responseJSON.type, function () {});
+//                            alert(jqXHR);
+                        },
+                        complete: function (dt) {
+
+                            unblockUI(function () {}, 100);
+                        }
                     });
+//                    $("#draftsuratjalan").table2excel({
+//                        name: $("#pack").html(),
+//                        filename: "draft_surat_jalan_pl_" + $("#pack").html(),
+//                        fileext: ".xlsx"
+//                    });
                 });
             });
         </script>
