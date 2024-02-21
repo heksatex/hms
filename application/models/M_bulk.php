@@ -212,4 +212,24 @@ class M_bulk extends CI_Model {
             $this->db->where($condition);
         return $this->db->count_all_results();
     }
+    
+    public function getDataByIDPicklist($condition = [], $join = "") {
+        $this->db->from('picklist');
+        $select = 'picklist.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk, msg.nama_sales_group as sales';
+//        $this->db->where($this->table . '.id', $id);
+        switch ($join) {
+            case "DO":
+                $this->db->join('delivery_order do', 'do.no_picklist = ' . $this->table . '.no', 'left');
+                $select .= ",do.no_sj";
+                break;
+
+            default:
+                break;
+        }
+        $this->db->where($condition);
+        $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
+        $this->db->join('partner', 'partner.id = customer_id', 'left');
+        $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
+        return $this->db->select($select)->get()->row();
+    }
 }

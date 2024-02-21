@@ -47,7 +47,7 @@ class Bulk extends MY_Controller {
             }
             $data['id_dept'] = 'BULK';
             $data["ids"] = $id;
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt, 'status !=' => 'cancel', 'type_bulk_id' => 1]);
+            $data['picklist'] = $this->m_bulk->getDataByIDPicklist(['picklist.no' => $kode_decrypt, 'status !=' => 'cancel', 'type_bulk_id' => 1]);
 
             $this->load->view('warehouse/v_bulk_edit', $data);
         } catch (Exception $ex) {
