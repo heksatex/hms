@@ -44,7 +44,7 @@ class Picklistvalidasi extends MY_Controller {
             $data['id_dept'] = 'PLV';
             $data['access'] = $this->m_accessmenu->getDetail(['access_only' => getClientIP(), 'menu' => $this->uri->segment(2)]);
             $data["ids"] = $id;
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt]);
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt],'','delivery');
             $data['view_cancel'] = $this->load->view('modal/v_picklist_item_cancel', [], true);
             $this->load->view('warehouse/v_picklist_validasi_proses', $data);
         } catch (Exception $ex) {
@@ -65,7 +65,7 @@ class Picklistvalidasi extends MY_Controller {
             $access = $this->input->post("access");
             if (preg_match("/PL/i", $barcode)) {
                 $pl = $barcode;
-                $dataPl = $this->m_Picklist->getDataByID(['picklist.no' => $pl]);
+                $dataPl = $this->m_Picklist->getDataByID(['picklist.no' => $pl], '', 'validasi');
                 if (is_null($dataPl)) {
                     throw new Exception("No Picklist Tidak ditemukan", 500);
                 }

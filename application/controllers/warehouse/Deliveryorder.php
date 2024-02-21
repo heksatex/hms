@@ -55,7 +55,7 @@ class Deliveryorder extends MY_Controller {
             $data['id_dept'] = 'DO';
             $data["section"] = "ADD";
             $data["user"] = $this->m_user->get_user_by_username($this->session->userdata('username'));
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt, 'status' => 'validasi']);
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt, 'status' => 'validasi'],'','delivery');
             if (is_null($data["picklist"])) {
                 throw new Exception();
             }
@@ -79,7 +79,7 @@ class Deliveryorder extends MY_Controller {
             if (is_null($data["do"])) {
                 throw new Exception();
             }
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist]);
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist],'','delivery');
             $this->load->view('warehouse/v_do_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -620,7 +620,7 @@ class Deliveryorder extends MY_Controller {
         try {
             $data = array();
             $condition = ['picklist.status' => 'validasi'];
-            $list = $this->m_Picklist->getData(false, $condition, "DO");
+            $list = $this->m_Picklist->getData(false, $condition, ["DO", "delivery"]);
             $no = $_POST['start'];
             foreach ($list as $field) {
                 $kode_encrypt = encrypt_url($field->no);
@@ -635,8 +635,8 @@ class Deliveryorder extends MY_Controller {
                 $data[] = $row;
             }
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_Picklist->getCountAllData($condition, "DO"),
-                "recordsFiltered" => $this->m_Picklist->getCountDataFiltered($condition, "DO"),
+                "recordsTotal" => $this->m_Picklist->getCountAllData($condition, ["DO", 'delivery']),
+                "recordsFiltered" => $this->m_Picklist->getCountDataFiltered($condition, ["DO", 'delivery']),
                 "data" => $data,
             ));
             exit();
@@ -695,7 +695,7 @@ class Deliveryorder extends MY_Controller {
 
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_deliveryorderdetail->getDataCountAll(["valid" => "validasi"]),
+                "recordsTotal" => $this->m_deliveryorderdetail->getDataCountAll($condition),
                 "recordsFiltered" => $this->m_deliveryorderdetail->getDataCountFiltered($condition, ["BULK"]),
                 "data" => $data,
             ));

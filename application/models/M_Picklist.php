@@ -14,6 +14,7 @@ class M_Picklist extends CI_Model {
     protected $table = "picklist";
     protected $level_sales_group;
     protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
+    protected $_menu = "";
 
     public function __construct() {
         parent::__construct();
@@ -50,29 +51,63 @@ class M_Picklist extends CI_Model {
         }
     }
 
-    public function getCountDataFiltered(array $condition = [], $menu = "") {
+    public function getCountDataFiltered(array $condition = [], array $menu = []) {
 
         if (count($condition) > 0)
             $this->db->where($condition);
 
-        $this->getDataQuery();
-        if ('do' === strtolower($menu)) {
-            $this->notInDO();
+
+        foreach ($menu as $value) {
+
+            switch (strtolower($value)) {
+                case 'do':
+                    $this->notInDO();
+                    break;
+                case "realisasi":
+                    $this->_menu = "realisasi";
+                    break;
+                case "validasi":
+                    $this->_menu = "validasi";
+                    break;
+                case "delivery":
+                    $this->_menu = "delivery";
+                    break;
+                default:
+                    break;
+            }
         }
+
+        $this->getDataQuery();
         $query = $this->db->get();
         return $query->num_rows();
     }
 
-    public function getData(bool $realiasi = false, array $condition = [], $menu = "") {
+    public function getData(bool $realiasi = false, array $condition = [], array $menu = []) {
         try {
             if (count($condition) > 0)
                 $this->db->where($condition);
 
-            $this->getDataQuery();
+            foreach ($menu as $value) {
 
-            if ('do' === strtolower($menu)) {
-                $this->notInDO();
+                switch (strtolower($value)) {
+                    case 'do':
+                        $this->notInDO();
+                        break;
+                    case "realisasi":
+                        $this->_menu = "realisasi";
+                        break;
+                    case "validasi":
+                        $this->_menu = "validasi";
+                        break;
+                    case "delivery":
+                        $this->_menu = "delivery";
+                        break;
+                    default:
+                        break;
+                }
             }
+
+            $this->getDataQuery();
             if ($realiasi)
                 $this->joinDetail();
             if ($_POST['length'] != -1)
@@ -84,13 +119,29 @@ class M_Picklist extends CI_Model {
         }
     }
 
-    public function getCountAllData(array $condition = [], $menu = "") {
+    public function getCountAllData(array $condition = [], array $menu = []) {
         $this->db->from($this->table);
         if (count($condition) > 0)
             $this->db->where($condition);
 
-        if ('do' === strtolower($menu)) {
-            $this->notInDO();
+        foreach ($menu as $value) {
+
+            switch (strtolower($value)) {
+                case 'do':
+                    $this->notInDO();
+                    break;
+                case "realisasi":
+                    $this->_menu = "realisasi";
+                    break;
+                case "validasi":
+                    $this->_menu = "validasi";
+                    break;
+                case "delivery":
+                    $this->_menu = "delivery";
+                    break;
+                default:
+                    break;
+            }
         }
 
         $this->filteredSales();
@@ -99,7 +150,8 @@ class M_Picklist extends CI_Model {
 
     protected function filteredSales() {
         if ($this->level_sales_group !== 'Administrator') {
-            $this->db->where('sales_kode', $this->session->userdata('nama')['sales_group']);
+            if (!in_array($this->_menu, ['realisasi', 'validasi', 'delivery']))
+                $this->db->where('sales_kode', $this->session->userdata('nama')['sales_group']);
         }
     }
 
@@ -111,7 +163,7 @@ class M_Picklist extends CI_Model {
         return $sales_group["nama_sales_group"] ?? "";
     }
 
-    public function getDataByID($condition = [], $join = "") {
+    public function getDataByID($condition = [], $join = "", $menu = "") {
         $this->db->from($this->table);
         $select = $this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk, msg.nama_sales_group as sales';
 //        $this->db->where($this->table . '.id', $id);
@@ -125,7 +177,10 @@ class M_Picklist extends CI_Model {
                 break;
         }
         $this->db->where($condition);
-        $this->filteredSales();
+        if (!in_array($menu, ['realisasi', 'validasi', 'delivery'])) {
+
+            $this->filteredSales();
+        }
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = sales_kode', 'left');
         $this->db->join('partner', 'partner.id = customer_id', 'left');
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');

@@ -91,7 +91,7 @@
                                                 <label class="form-label">Sales</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
-                                                <span><?= $picklist->sales_kode ?></span>
+                                                <span><?= $picklist->sales ?></span>
                                             </div>
                                         </div>
                                     </div>

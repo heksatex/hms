@@ -53,7 +53,7 @@ class Picklistrealisasi extends MY_Controller {
     public function data() {
         try {
             $data = array();
-            $list = $this->m_Picklist->getData(true, ['valid !=' => 'cancel']);
+            $list = $this->m_Picklist->getData(true, ['valid !=' => 'cancel'],["realisasi"]);
             $no = $_POST['start'];
             $submenu = $_POST['submenu'];
             foreach ($list as $field) {
@@ -175,7 +175,7 @@ class Picklistrealisasi extends MY_Controller {
             }
             $data['id_dept'] = 'PLR';
             $data["ids"] = $id;
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt, 'status !=' => 'cancel']);
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt, 'status !=' => 'cancel'],"",'realisasi');
             if (is_null($data["picklist"])) {
                 throw new Exception();
             }
