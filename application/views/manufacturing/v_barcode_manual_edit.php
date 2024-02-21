@@ -430,7 +430,7 @@
     function tambah_batch(){
         var status = 'draft';
         var kode   = "<?php echo $mrpm->kode; ?>";
-        let acces = "<?php echo $access->status; ?>";
+        let acces = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -479,7 +479,7 @@
         let type        = $('#type').val();
         let notes       = $('#notes').val();
         let status      = "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
        
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -558,7 +558,7 @@
 
         var kode        = "<?php echo $mrpm->kode; ?>";
         var row         = row;
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -630,7 +630,7 @@
     function edit_batch(row){
         var kode     =  "<?php echo $mrpm->kode; ?>";
         var status   =  "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -666,7 +666,7 @@
 
         let kode        = $('#kode').val();
         let status      = "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -736,7 +736,7 @@
 
         let kode        = "<?php echo $mrpm->kode; ?>";
         let status      = "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
