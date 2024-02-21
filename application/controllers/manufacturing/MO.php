@@ -200,6 +200,7 @@ class MO extends MY_Controller
                 $row[] = $no;
                 $row[] = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
                 $row[] = $field->tanggal;
+                $row[] = $field->origin;
                 $row[] = $field->nama_produk;
                 $row[] = $field->qty;
                 $row[] = $field->uom;
