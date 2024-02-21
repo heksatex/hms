@@ -38,73 +38,97 @@
         <div class="box-body">
             
             <form name="input" class="form-horizontal" role="form" method="POST">
-            <div class="col-md-6">
-              <div class="form-group"> 
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Departemen</label></div>
-                   <div class="col-xs-8 col-md-8 ">
-                    <select class="form-control input-sm" name="departemen" id="departemen" >
-                    <option value="">All</option>
-                      <?php foreach ($warehouse as $row) {?>
-                         <option value='<?php echo $row->kode; ?>'><?php echo $row->nama;?></option>
-                      <?php  }?>
-                    </select>                 
-                  </div>                                  
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Nama Produk</label></div>
-                   <div class="col-xs-8">
-                      <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" />
-                    </div>                                    
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
               <div class="form-group">
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Lot </label></div>
-                   <div class="col-xs-8">
-                      <input type="text" class="form-control input-sm" name="lot" id="lot" />
-                    </div>                                    
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Note</label></div>
-                   <div class="col-xs-8">
-                      <input type="text" class="form-control input-sm" name="note" id="note"  />
-                    </div>                                    
+                    <div class="col-md-12">
+                        <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                            <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                                <label style="cursor:pointer;">
+                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                                Advanced  Search
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+              </div>
+              <div class="col-md-12">
+                <div class="panel panel-default" style="margin-bottom: 0px;">
+                  <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                    <div class="panel-body" style="padding: 5px">
+                      <div class="form-group col-md-12" style="margin-bottom:0px">
+                        <div class="col-md-6">
+                          <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4"><label>Departemen</label></div>
+                              <div class="col-xs-8 col-md-8 ">
+                                <select class="form-control input-sm" name="departemen" id="departemen" >
+                                <option value="">All</option>
+                                  <?php foreach ($warehouse as $row) {?>
+                                    <option value='<?php echo $row->kode; ?>'><?php echo $row->nama;?></option>
+                                  <?php  }?>
+                                </select>                 
+                              </div>                                  
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4"><label>Nama Produk</label></div>
+                              <div class="col-xs-8">
+                                  <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" />
+                                </div>                                    
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4"><label>Lot </label></div>
+                              <div class="col-xs-8">
+                                  <input type="text" class="form-control input-sm" name="lot" id="lot" />
+                                </div>                                    
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4"><label>Note</label></div>
+                              <div class="col-xs-8">
+                                  <input type="text" class="form-control input-sm" name="note" id="note"  />
+                                </div>                                    
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4"><label></label></div>
+                              <div class="col-xs-8">
+                                  <button type="button" id="btn-filter" name="submit" class="btn btn-primary btn-sm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Proses</button>
+                                </div>                                    
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label></label></div>
-                   <div class="col-xs-8">
-                      <button type="button" id="btn-filter" name="submit" class="btn btn-primary btn-sm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Proses</button>
-                    </div>                                    
-                </div>
-              </div>
-            </div>
+           
             </form>
-          <div class="col-xs-12 table-responsive">
-            <table id="example1" class="table table-striped">
-              <thead>
-                <tr>
-                  <th class='no'>No</th>
-                  <th>Kode</th>
-                  <th>Tanggal dibuat</th>
-                  <th>Departemen</th>
-                  <th>Kode produk</th>
-                  <th>Nama produk</th>
-                  <th>Lot</th>
-                  <th>Qty</th>
-                  <th>Qty2</th>
-                  <th>Jml Split</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
+
+            <div class="col-xs-12 table-responsive">
+              <table id="example1" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th class='no'>No</th>
+                    <th>Kode</th>
+                    <th>Tanggal dibuat</th>
+                    <th>Departemen</th>
+                    <th>Kode produk</th>
+                    <th>Nama produk</th>
+                    <th>Lot</th>
+                    <th>Qty</th>
+                    <th>Qty2</th>
+                    <th>Jml Split</th>
+                    <th>Note</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
         </div>
         <!-- /.box-body -->
       </div>
@@ -121,6 +145,17 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
+
+    //* Show collapse advanced search
+    $('#advancedSearch').on('shown.bs.collapse', function () {
+       $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+    });
+
+    //* Hide collapse advanced search
+    $('#advancedSearch').on('hidden.bs.collapse', function () {
+       $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+    });
+    
     var table;
     $(document).ready(function() {
  

@@ -198,8 +198,16 @@
                                 </select>
                             </div>
                           </div>
+                          <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Tampil Stock Greige </label>
+                              </div>
+                              <div class="col-md-7">
+                                  <input type="checkbox" name="stock_grg" value="show" >
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -315,7 +323,7 @@
     });
     
  
-    function fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow){
+    function fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock){
         //datatables
         $('#example1').DataTable({ 
             "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
@@ -347,6 +355,7 @@
                     data.sales_group  = sales_group;
                     data.no_ow  = no_ow;
                     data.status_ow  = status_ow;
+                    data.check_stock  = check_stock;
                 },beforeSend: function () {
                   //please_wait(function(){});
                 }, complete: function () {
@@ -361,6 +370,10 @@
                 },
                 { 
                   "targets": [19], 
+                  "orderable": false, 
+                },
+                { 
+                  "targets": [9], 
                   "orderable": false, 
                 },
                 { 
@@ -398,7 +411,8 @@
     $('#btn-filter').click(function(){ //button filter event click
         $('#btn-filter').button('loading');
         $('#example1').DataTable().destroy();
-        
+
+        var check_stock = $("input[name=stock_grg]").is(':checked');
         var tgl_dari    = $('#tgldari').val();
         var tgl_sampai  = $('#tglsampai').val();
         var sc          = $('#sc').val();
@@ -412,7 +426,7 @@
         if(tgl_dari == '' || tgl_sampai == ''){
           alert_modal_warning('Periode Tanggal Harus diisi !');
         }else{
-          fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow);
+          fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock);
         }
           //table.ajax.reload( function(){
         $('#btn-filter').button('reset');

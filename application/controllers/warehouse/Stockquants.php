@@ -43,41 +43,80 @@ class Stockquants extends MY_Controller
 
     public function simpan()
     {
-        if(empty($this->session->userdata('status'))){//cek apa session masih ada ?
-            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
-        }else{
 
-            $username    = addslashes($this->session->userdata('username'));
-            $sub_menu    = $this->uri->segment(2);
-            $quant_id    = $this->input->post('quant_id');
-            $nama_produk = addslashes($this->input->post('nama_produk'));
-            $lot         = addslashes($this->input->post('lot'));
-            $qty2        = $this->input->post('qty2');
-            $uom2        = $this->input->post('uom2');
-            $nama_grade  = $this->input->post('nama_grade');
-            $reff_note   = addslashes($this->input->post('reff_note'));
-            $lebar_greige       = addslashes($this->input->post('lebar_greige'));
-            $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
-            $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
-            $uom_lebar_jadi     = addslashes($this->input->post('uom_lebar_jadi'));
-            $lokasi     = addslashes($this->input->post('lokasi'));
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
 
-            // get data stock_quant by quant_id sebelumnya
-            $sq   = $this->m_stockQuants->get_stock_quant_by_kode($quant_id);
+                // start transaction
+                $this->_module->startTransaction();
 
-            $note_before = $sq->quant_id.' '.$sq->kode_produk.' '.$sq->nama_produk.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty.' '.$sq->uom.' '.$sq->qty2.' '.$sq->uom2.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
+                $username    = addslashes($this->session->userdata('username'));
+                $sub_menu    = $this->uri->segment(2);
+                $quant_id    = $this->input->post('quant_id');
+                $nama_produk = addslashes($this->input->post('nama_produk'));
+                $lot         = addslashes($this->input->post('lot'));
+                $qty2        = $this->input->post('qty2');
+                $uom2        = $this->input->post('uom2');
+                $nama_grade  = $this->input->post('nama_grade');
+                $reff_note   = addslashes($this->input->post('reff_note'));
+                $lebar_greige       = addslashes($this->input->post('lebar_greige'));
+                $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
+                $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
+                $uom_lebar_jadi     = addslashes($this->input->post('uom_lebar_jadi'));
+                $lokasi     = addslashes($this->input->post('lokasi'));
 
-            $this->m_stockQuants->update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
+                if(empty($quant_id)){
+                    throw new \Exception("Data Kosong !", 200);
+                }else{
 
-            $jenis_log   = "edit";        
-            $note_log    = $note_before.' <b> -> </b>'. $quant_id.' '.$nama_produk.'  '.$lot.'  '.$nama_grade.' '.$qty2.' '.$uom2.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
-            $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
+                    // get data stock_quant by quant_id sebelumnya
+                    $sq   = $this->m_stockQuants->get_stock_quant_by_kode($quant_id);
 
-            $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
-
+                    if(empty($sq)){
+                        throw new \Exception("Data Produk tidak ditemukan !", 200);
+                    }else{
+                        // cek category produk
+                        $cek_cat = $this->m_stockQuants->get_kategori_produk_by_produk($sq->kode_produk);
+                        if((int) $cek_cat->id_category == 21){// kain hasil gudang jadi
+                            if($sq->nama_grade != $nama_grade){
+                                throw new \Exception(" Nama Grade tidak Boleh dirubah !", 200);
+                            }else if($sq->lebar_greige != $lebar_greige){
+                                throw new \Exception(" Lebar Greige tidak Boleh dirubah !", 200);
+                            }else if($sq->uom_lebar_greige != $uom_lebar_greige){
+                                throw new \Exception(" Uom Lebar Greige tidak Boleh dirubah !", 200);
+                            }else if($sq->lebar_jadi != $lebar_jadi){
+                                throw new \Exception(" Lebar Jadi tidak Boleh dirubah !", 200);
+                            }else if($sq->uom_lebar_jadi != $uom_lebar_jadi){
+                                throw new \Exception(" Uom Lebar Jadi tidak Boleh dirubah !", 200);
+                            }
+                        }
+                        $note_before = $sq->kode_produk.' '.$sq->nama_produk.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty.' '.$sq->uom.' '.$sq->qty2.' '.$sq->uom2.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
+        
+                        $this->m_stockQuants->update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
+        
+                        $jenis_log   = "edit";        
+                        $note_log    = $note_before.' <b> -> </b>'. $sq->kode_produk.' '.$nama_produk.'  '.$lot.'  '.$nama_grade.' '.$qty2.' '.$uom2.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
+                        $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
+        
+                        $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+                    }
+    
+                }
+                // finish transaction
+                $this->_module->finishTransaction();
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+        
+        }catch(Exception $ex){
+            // finish transaction
+            $this->_module->finishTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
-
-        echo json_encode($callback);
     }
 
 

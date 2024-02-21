@@ -44,3 +44,17 @@ div.table_processing {
 
 /* << custom table */
   
+
+/* >> SELECT CUSTOM */
+
+.select2-container--focus{
+    border:  1px solid #66afe9;
+}
+
+.select2-container--default .select2-selection--single{
+    height : 30px;
+    font-size : 12px;
+    padding: 5px 12px;
+}
+
+/* << SELECT CUSTOM */

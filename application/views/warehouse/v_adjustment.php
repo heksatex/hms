@@ -42,6 +42,7 @@
                   <th>Tanggal Dibuat</th>
                   <th>Lokasi Adjustment</th>
                   <th>Kode Lokasi</th>
+                  <th>Type Adjustment</th>
                   <th>Note</th>
                   <th>Status</th>
                 </tr>

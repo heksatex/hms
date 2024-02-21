@@ -127,7 +127,7 @@
                     <div class="col-xs-12 col-sm-12 col-md-2">
                         <label>View </label>
                     </div>
-                    <div class="col-xs-6 col-sm-3 col-md-3">
+                    <div class="col-xs-6 col-sm-2 col-md-2">
                       <input type="radio" id="view" name="view[]" value="Global" checked="checked">
                       <label for="global">Global</label>
                     </div>
@@ -136,6 +136,10 @@
                       <label for="detail">Detail Produk</label>
                     </div>
                     <div class="col-xs-6 col-sm-3 col-md-3">
+                      <input type="radio" id="view" name="view[]" value="DetailLotDatar">
+                      <label for="detail">Detail Datar</label>
+                    </div>
+                    <div class="col-xs-6 col-sm-3 col-md-2">
                       <input type="radio" id="view" name="view[]" value="DetailLot">
                       <label for="detail">Detail Lot</label>
                     </div>
@@ -427,6 +431,7 @@
   $('#departemen').select2({
       allowClear: true,
       placeholder: "Select Departemen",
+      width:'100%',
       ajax: {
         dataType: 'JSON',
         type: "POST",
@@ -618,7 +623,7 @@
                 },
                 success: function(data){
 
-                  if(data.view == 'Global' || data.view == "DetailProduk"){
+                  if(data.view == 'Global' || data.view == "DetailProduk" || data.view == "DetailLotDatar"){
                     $('#pagination').html('');
                     $('#pagination2').html('');
                   }
@@ -646,8 +651,10 @@
                     if(data.format == '1'){
                       $.each(data.result, function(key, value){ 
                         if(value.table_1 == "Yes"){
-                          if(data.view == "Global" || data.view == "DetailProduk"){
+                          if(data.view == "Global" || data.view == "DetailProduk" ){
                             create_table('example1',data.view, value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                          }else if(data.view == "DetailLotDatar"){
+                            create_table_detail_datar('example1',data.view, value.head_table1,value.head_table2,value.record,value.count_in,value.count_out, value.count_type_in, value.count_type_out);
                           }else{
                             create_table_detail('example1', value.head_table,value.record);
                           }
@@ -766,10 +773,11 @@
 
   }
 
-  function create_table(tableId,view,head_table1,head_table2,body,count_in,count_out){
+  function create_table_detail_datar(tableId,view,head_table1,head_table2,body,count_in,count_out,count_type_in,count_type_out){
                     let thead = $("<thead />");
                     let row   = '';
                     let row2  = '';
+                    let row22 = '';
                     let arr_in  = [];
                     let arr_in2 = [];
                     let arr_out  = [];
@@ -780,28 +788,54 @@
                     $.each(head_table1, function(key, value){ // loop
                         $.each(value, function(a, b){
                             if(a == 'info'){
+                                if(view == 'DetailLotDatar'){
+                                  rowspan = "rowspan = '3' ";
+                                }else{
+                                  rowspan = "rowspan = '2' ";
+                                }
                                 for ( var i = 0, l = b.length; i < l; i++ ) {
                                     $.each(b[i], function(c, d){
-                                        row += "<th class='style no bb white-space-nowrap'  rowspan='2'>";
+                                        row += "<th class='style no bb white-space-nowrap'  "+rowspan+" >";
                                         row += d;
                                         row += "</th>";
                                     });
                                 }
-                            }else if(a == 'awal' || a == 'akhir' || a == 'in' || a== 'out' || a == 'adj_in' || a == 'adj_out' || a == 'count_in' || a == 'count_out'){
-                                if(view == "DetailProduk"){
-                                  colspan = "colspan='4'";
+                            }else if(a == 'awal' || a == 'akhir' || a == 'in' || a== 'out' || a == 'adj_in' || a == 'adj_out' || a == 'count_in' || a == 'count_out' ){
+                                if(view == "DetailProduk" || view == "DetailLotDatar"){
+                                  colspan = "colspan='4'";                             
+                                  if(view == "DetailLotDatar"){
+                                    rowspan = "rowspan ='2' ";
+                                  }else{
+                                    rowspan = "";
+                                  }
                                 }else{
                                   colspan = "colspan='3'";
+                                  rowspan = "";
                                 }
                                 for ( var i = 0, l = b.length; i < l; i++ ) {
                                     $.each(b[i], function(c, d){
-                                        row += "<th class='style no text-center white-space-nowrap' "+colspan+" >";
+                                        row += "<th class='style no text-center white-space-nowrap' "+colspan+" "+rowspan+" >";
                                         row += d;
                                         row += "</th>";
                                     });
                                    
                                 }
+                            }else if(a == 'type_adj_in' || a == 'type_adj_out' ){
+                              if(view == "DetailLotDatar"){
+                                if(a.length > 0 ){
+                                  $.each(b,function(e,f){                  
+                                    row += "<th class='style no text-center white-space-nowrap'  colspan='"+f.count_child+"'  >";
+                                    row += f.nama;
+                                    row += "</th>";
+                                      
+                                  });
+                                }
+                              }
+
                             }
+                            // if(a == 'count_in'){
+                            //   return false;
+                            // }
 
                         });
                     });
@@ -809,18 +843,439 @@
                     thead.append(tr)
                     $.each(head_table2, function(key, value){ //loop head table
                         $.each(value, function(a, b){ // loop jenis awal, in, out, adj, akhir
-                                for ( var i = 0, l = b.length; i < l; i++ ) {
-                                    $.each(b[i], function(c, d){
-                                        row2 += "<th class='style bb white-space-nowrap'>";
-                                        row2 += d;
+                            if(a == 'type_adj_in' || a == 'type_adj_out' ){
+                              $.each(b,function(e,f){
+                               
+                                for (var i = 0, l = f.child.length; i<l; i++){
+                                    $.each(f.child[i], function(g,h){
+                                      if(Array.isArray(h)){
+                                        // alert(h)
+                                          $.each(h, function(x,y){
+                                            // alert(y);
+                                            row22 += "<th class='style  bb white-space-nowrap'  >";
+                                            row22 += y;
+                                            row22 += "</th>"; 
+                                          });
+                                      }else{
+                                        colspan = "colspan='4'";
+                                        row2 += "<th class='style text-center bb white-space-nowrap'  "+colspan+">";
+                                        row2 += h;
                                         row2 += "</th>";
+                                      }
                                     });
                                 }
+                              });
+                            }else{
+
+                                for ( var i = 0, l = b.length; i < l; i++ ) {
+                                    $.each(b[i], function(c, d){
+                                        row22 += "<th class='style bb white-space-nowrap'>";
+                                        row22 += d;
+                                        row22 += "</th>";
+                                    });
+                                }
+                            }
+                            // if(a == 'count_in'){
+                            //   return false;
+                            // }
+                        });
+                    });
+                    if(row2.length > 0){
+                      tr2  = $("<tr>").append(row2);
+                      thead.append(tr2)
+                    }
+                    tr22  = $("<tr>").append(row22);
+                    thead.append(tr22);
+                    $('#'+tableId).append(thead);
+
+                    let tbody = $("<tbody />");
+                    let row3  = '';
+                    let no    = 1;
+
+                    $.each(body, function(key, value){ // loop body
+
+                          // in 
+                          let d = 0;
+                          let no_in = 1;
+                          let in_total_lot         = 0
+                          let in_total_qty1        = 0;
+                          let in_total_qty2        = 0;
+                          let in_total_qty_opname  = 0;
+
+                          let in_total_mtr         = 0;
+                          let in_total_kg          = 0;
+
+                          let qty1_uom             = '';
+                          let qty2_uom             = '';
+                          let qty_opname_uom       = '';
+                          let in_empty             = true;
+
+                          let x = 0;
+                          let no_out= 1;
+                          let out_empty    = true;
+                          let out_total_lot   = 0
+                          let out_total_qty1        = 0;
+                          let out_total_qty2        = 0;
+                          let out_total_qty_opname  = 0;
+
+                          let out_total_mtr         = 0;
+                          let out_total_kg          = 0;
+
+                          row3 += "<tr>";
+                          row3 += "<td >"+ (no++) +"</td>";
+                          if(  view =="DetailLotDatar"){
+                            row3 += "<td class='white-space-nowrap'>"+value.nama_category+"</td>";
+                            row3 += "<td class='white-space-nowrap'>"+value.kode_produk+"</td>";
+                            row3 += "<td class='white-space-normal' >"+value.nama_produk+"</td>";
+                            row3 += "<td class='white-space-nowrap' >"+value.product_parent+"</td>";
+                            if(view == "DetailLotDatar"){
+                              row3 += "<td class='white-space-normal' >"+value.lot+"</td>";
+                              row3 += "<td class='white-space-nowrap' >"+value.nama_jenis_kain+"</td>";
+                            }
+                            // saldo awal
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty1)+" "+value.s_awal_qty1_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty2)+" "+value.s_awal_qty2_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty_opname)+" "+value.s_awal_qty_opname_uom+"</td>";
+                          }
+
+                          if(  view =="DetailLotDatar"){
+                            for (  n = count_in; d < n; d++ ) {
+                              in_lot         = 'in'+no_in+'_lot';
+                              in_qty1        = 'in'+no_in+'_qty1';
+                              in_qty1_uom    = 'in'+no_in+'_qty1_uom';
+                              in_qty2        = 'in'+no_in+'_qty2';
+                              in_qty2_uom    = 'in'+no_in+'_qty2_uom';
+                              in_opname      = 'in'+no_in+'_qty_opname';
+                              in_opname_uom  = 'in'+no_in+'_qty_opname_uom';
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_lot])+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty1])+" "+value[in_qty1_uom]+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty2])+" "+value[in_qty2_uom]+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_opname])+" "+value[in_opname_uom]+"</td>";
+                              no_in++;
+
+                              // info total++ in
+                              value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              value_in_qty1 = value[in_qty1] !== null ? parseFloat(value[in_qty1])  : 0;
+                              value_in_qty2 = value[in_qty2] !== null ? parseFloat(value[in_qty2])  : 0 ;
+                              value_in_opname = value[in_opname] !== null ? parseFloat(value[in_opname])  : 0 ;
+
+                              in_total_lot         = in_total_lot+ value_in_lot;
+                              in_total_qty1        = in_total_qty1+value_in_qty1
+                              in_total_qty2        = in_total_qty2+value_in_qty2
+                              in_total_qty_opname  = in_total_qty_opname+value_in_opname;
+
+                              arr_in.push({in_lot:value_in_lot, in_qty1:value_in_qty1,  in_qty1_uom:value[in_qty1_uom],  in_qty2:value_in_qty2, in_qty2_uom:value[in_qty2_uom], in_opname:value_in_opname, in_opname_uom:value[in_opname_uom]});
+
+                              //info uom
+                              if(value[in_qty1_uom] != '' && value[in_qty1_uom] !== null){
+                                qty1_uom  = value[in_qty1_uom];
+                              }
+                              if(value[in_qty2_uom] != ''&& value[in_qty2_uom] !== null){
+                                qty2_uom  = value[in_qty2_uom];
+                              }
+                              if(value[in_opname_uom] != ''&& value[in_opname_uom] !== null){
+                                qty_opname_uom = value[in_opname_uom];
+                              }
+                            
+                              in_empty        = true;
+                            }
+                          }
+
+
+                          if(  view =="DetailLotDatar"){
+                            // adj in
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty1)+" "+value.adj_in_qty1_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty2)+" "+value.adj_in_qty2_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+"</td>";
+
+                            in_total_lot         = in_total_lot+parseInt(value.adj_in_lot);
+                            in_total_qty1        = in_total_qty1+parseFloat(value.adj_in_qty1);
+                            in_total_qty2        = in_total_qty2+parseFloat(value.adj_in_qty2);
+                            in_total_qty_opname  = in_total_qty_opname+parseFloat(value.adj_in_qty_opname);
+
+                            // info uom
+                            if(value.adj_in_qty1_uom != ''){
+                              qty1_uom  = value.adj_in_qty1_uom;
+                              $cat_qty1_uom_adj_in   = value.adj_in_qty1_uom;
+                            }
+                            if(value.adj_in_qty2_uom != ''){
+                              qty2_uom  = value.adj_in_qty2_uom;
+                              $cat_qty2_uom_adj_in   = value.adj_in_qty2_uom;
+                            }
+                            if(value.adj_in_qty_opname_uom != ''){
+                              qty_opname_uom  = value.adj_in_qty_opname_uom;
+                              $cat_opname_uom_adj_in   = value.adj_in_qty_opname_uom;
+                            }
+
+                            if(view =="DetailLotDatar"){
+                              // type ADJ IN 
+                              let cti = 1;
+                              for ( n = count_type_in; cti <= n; cti++ ) {
+                                    type_in_lot         = cti+'_in_lot';
+                                    type_in_qty1        = cti+'_in_qty1';
+                                    type_in_qty1_uom    = cti+'_in_qty1_uom';
+                                    type_in_qty2        = cti+'_in_qty2';
+                                    type_in_qty2_uom    = cti+'_in_qty2_uom';
+                                    type_in_opname      = cti+'_in_qty_opname';
+                                    type_in_opname_uom  = cti+'_in_qty_opname_uom';
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_in_lot])+"</td>";
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_in_qty1])+" "+value[type_in_qty1_uom]+"</td>";
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_in_qty2])+" "+value[type_in_qty2_uom]+"</td>";
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_in_opname])+" "+value[type_in_opname_uom]+"</td>";
+                              }
+                            }
+
+                            // total in 
+                            // if(in_empty == true){
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_lot)+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_qty1)+" "+qty1_uom+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_qty2)+" "+qty2_uom+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_qty_opname)+" "+qty_opname_uom+"</td>";
+                            // }
+
+                            arr_tot_in.push({tot_lot:in_total_lot, tot_qty1:in_total_qty1, qty1_uom:qty1_uom, tot_qty2:in_total_qty2, qty2_uom:qty2_uom, tot_qty_opname:in_total_qty_opname, qty_opname_uom:qty_opname_uom});
+                          }
+
+
+                          if(  view =="DetailLotDatar"){
+                            for (  s = count_out; x < s; x++ ) {
+                              out_lot         = 'out'+no_out+'_lot';
+                              out_qty1        = 'out'+no_out+'_qty1';
+                              out_qty1_uom    = 'out'+no_out+'_qty1_uom';
+                              out_qty2        = 'out'+no_out+'_qty2';
+                              out_qty2_uom    = 'out'+no_out+'_qty2_uom';
+                              out_opname      = 'out'+no_out+'_qty_opname';
+                              out_opname_uom  = 'out'+no_out+'_qty_opname_uom';
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_lot])+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty1])+" "+value[out_qty1_uom]+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty2])+" "+value[out_qty2_uom]+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
+                              no_out++;
+
+                              value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              value_out_qty1 = value[out_qty1] !== null ? parseFloat(value[out_qty1])  : 0;
+                              value_out_qty2 = value[out_qty2] !== null ? parseFloat(value[out_qty2])  : 0 ;
+                              value_out_opname = value[out_opname] !== null ? parseFloat(value[out_opname])  : 0 ;
+
+                              // info total++ out
+                              out_total_lot       = out_total_lot + value_out_lot;
+                              out_total_qty1      = out_total_qty1+ value_out_qty1;
+                              out_total_qty2      = out_total_qty2+ value_out_qty2;
+                              out_total_qty_opname = out_total_qty_opname+ value_out_opname;
+
+                              arr_out.push({out_lot:value[out_lot], out_qty1:value_out_qty1, out_qty1_uom:value[out_qty1_uom], out_qty2:value_out_qty2, out_qty2_uom:value[out_qty2_uom], out_opname:value_out_opname, out_opname_uom:value[out_opname_uom]});
+
+                              // info uom 
+                              if(value[out_qty1_uom] != '' && value[out_qty1_uom] !== null){
+                                qty1_uom  = value[out_qty1_uom];
+                              }
+                              if(value[out_qty2_uom] != '' && value[out_qty2_uom] !== null){
+                                qty2_uom  = value[out_qty2_uom];
+                              }
+                              if(value[out_opname_uom] != '' && value[out_opname_uom] !== null){
+                                qty_opname_uom = value[out_opname_uom];
+                              }
+                            
+                              out_empty        = true;
+                            }
+                          }
+
+                          if(  view =="DetailLotDatar"){
+
+                            // adj out
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_lot)+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty1)+" "+value.adj_out_qty1_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty2)+" "+value.adj_out_qty2_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+"</td>";
+
+                            out_total_lot         = out_total_lot+parseInt(value.adj_out_lot);
+                            out_total_qty1        = out_total_qty1+parseFloat(value.adj_out_qty1);
+                            out_total_qty2        = out_total_qty2+parseFloat(value.adj_out_qty2);
+                            out_total_qty_opname  = out_total_qty_opname+parseFloat(value.adj_out_qty_opname);
+
+                            // info uom
+                            if(value.adj_out_qty1_uom != ''){
+                              qty1_uom  = value.adj_out_qty1_uom;
+                              $cat_qty1_uom_adj_out   = value.adj_out_qty1_uom;
+                            }
+                            if(value.adj_out_qty2_uom != ''){
+                              qty2_uom  = value.adj_out_qty2_uom;
+                              $cat_qty2_uom_adj_out   = value.adj_out_qty2_uom;
+                            }
+                            if(value.adj_out_qty_opname_uom != ''){
+                              qty_opname_uom  = value.adj_out_qty_opname_uom;
+                              $cat_opname_uom_adj_out   = value.adj_out_qty_opname_uom;
+                            }
+
+                            if(view =="DetailLotDatar"){
+                              // type ADJ OUT
+                              let cto = 1;
+                              for ( n = count_type_out; cto <= n; cto++ ) {
+                                    type_out_lot         = cto+'_out_lot';
+                                    type_out_qty1        = cto+'_out_qty1';
+                                    type_out_qty1_uom    = cto+'_out_qty1_uom';
+                                    type_out_qty2        = cto+'_out_qty2';
+                                    type_out_qty2_uom    = cto+'_out_qty2_uom';
+                                    type_out_opname      = cto+'_out_qty_opname';
+                                    type_out_opname_uom  = cto+'_out_qty_opname_uom';
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_out_lot])+"</td>";
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_out_qty1])+" "+value[type_out_qty1_uom]+"</td>";
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_out_qty2])+" "+value[type_out_qty2_uom]+"</td>";
+                                    row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[type_out_opname])+" "+value[type_out_opname_uom]+"</td>";
+                              }
+                            }
+
+                            // total out
+                            // if(out_empty == true){
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_lot)+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_qty1)+" "+qty1_uom+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_qty2)+" "+qty2_uom+"</td>";
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_qty_opname)+" "+qty_opname_uom+"</td>";
+                            // }
+
+                            arr_tot_out.push({tot_lot:out_total_lot, tot_qty1:out_total_qty1, qty1_uom:qty1_uom, tot_qty2:out_total_qty2, qty2_uom:qty2_uom,tot_qty_opname:out_total_qty_opname, qty_opname_uom:qty_opname_uom,});
+
+                            // saldo Akhir
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_lot)+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty1)+" "+value.s_akhir_qty1_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty2)+" "+value.s_akhir_qty2_uom+"</td>";
+                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty_opname)+" "+value.s_akhir_qty_opname_uom+"</td>";
+
+                            if(value.s_akhir_qty1_uom != ''){
+                              $cat_qty1_uom_s_akhir   = value.s_akhir_qty1_uom;
+                            }
+                            if(value.s_akhir_qty1_uom != ''){
+                              $cat_qty2_uom_s_akhir   = value.s_akhir_qty2_uom;
+                            }
+                            if(value.s_akhir_qty_opname_uom != ''){
+                              $cat_opname_uom_s_akhir   = value.s_akhir_qty_opname_uom;
+                            }
+                          }
+
+
+                    });
+
+                    tbody.append(row3);
+                    $('#'+tableId).append(tbody);
+
+                    return;
+  }
+
+  function create_table(tableId,view,head_table1,head_table2,body,count_in,count_out){
+                    let thead = $("<thead />");
+                    let row   = '';
+                    let row2  = '';
+                    let row22 = '';
+                    let arr_in  = [];
+                    let arr_in2 = [];
+                    let arr_out  = [];
+                    let arr_out2 = [];
+                    let arr_tot_in = [];
+                    let arr_tot_out = [];
+                    
+                    $.each(head_table1, function(key, value){ // loop
+                        $.each(value, function(a, b){
+                            if(a == 'info'){
+                                if(view == 'DetailLotDatar'){
+                                  rowspan = "rowspan = '3' ";
+                                }else{
+                                  rowspan = "rowspan = '2' ";
+                                }
+                                for ( var i = 0, l = b.length; i < l; i++ ) {
+                                    $.each(b[i], function(c, d){
+                                        row += "<th class='style no bb white-space-nowrap'  "+rowspan+" >";
+                                        row += d;
+                                        row += "</th>";
+                                    });
+                                }
+                            }else if(a == 'awal' || a == 'akhir' || a == 'in' || a== 'out' || a == 'adj_in' || a == 'adj_out' || a == 'count_in' || a == 'count_out' ){
+                                if(view == "DetailProduk" || view == "DetailLotDatar"){
+                                  colspan = "colspan='4'";                             
+                                  if(view == "DetailLotDatar"){
+                                    rowspan = "rowspan ='2' ";
+                                  }else{
+                                    rowspan = "";
+                                  }
+                                }else{
+                                  colspan = "colspan='3'";
+                                  rowspan = "";
+                                }
+                                for ( var i = 0, l = b.length; i < l; i++ ) {
+                                    $.each(b[i], function(c, d){
+                                        row += "<th class='style no text-center white-space-nowrap' "+colspan+" "+rowspan+" >";
+                                        row += d;
+                                        row += "</th>";
+                                    });
+                                   
+                                }
+                            }else if(a == 'type_adj_in' || a == 'type_adj_out' ){
+                              if(view == "DetailLotDatar"){
+                                if(a.length > 0 ){
+                                  $.each(b,function(e,f){                  
+                                    row += "<th class='style no text-center white-space-nowrap'  colspan='"+f.count_child+"'  >";
+                                    row += f.nama;
+                                    row += "</th>";
+                                      
+                                  });
+                                }
+                              }
+
+                            }
+                            // if(a == 'count_in'){
+                            //   return false;
+                            // }
 
                         });
                     });
-                    tr2  = $("<tr>").append(row2);
-                    thead.append(tr2)
+                    tr = $("<tr>").append(row);
+                    thead.append(tr)
+                    $.each(head_table2, function(key, value){ //loop head table
+                        $.each(value, function(a, b){ // loop jenis awal, in, out, adj, akhir
+                            if(a == 'type_adj_in' || a == 'type_adj_out' ){
+                              $.each(b,function(e,f){
+                               
+                                for (var i = 0, l = f.child.length; i<l; i++){
+                                    $.each(f.child[i], function(g,h){
+                                      if(Array.isArray(h)){
+                                        // alert(h)
+                                          $.each(h, function(x,y){
+                                            // alert(y);
+                                            row22 += "<th class='style bb white-space-nowrap'  >";
+                                            row22 += y;
+                                            row22 += "</th>"; 
+                                          });
+                                      }else{
+                                        colspan = "colspan='4'";
+                                        row2 += "<th class='style bb white-space-nowrap'  "+colspan+">";
+                                        row2 += h;
+                                        row2 += "</th>";
+                                      }
+                                    });
+                                }
+                              });
+                            }else{
+
+                                for ( var i = 0, l = b.length; i < l; i++ ) {
+                                    $.each(b[i], function(c, d){
+                                        row22 += "<th class='style bb white-space-nowrap'>";
+                                        row22 += d;
+                                        row22 += "</th>";
+                                    });
+                                }
+                            }
+                            // if(a == 'count_in'){
+                            //   return false;
+                            // }
+                        });
+                    });
+                    if(row2.length > 0){
+                      tr2  = $("<tr>").append(row2);
+                      thead.append(tr2)
+                    }
+                    tr22  = $("<tr>").append(row22);
+                    thead.append(tr22);
                     $('#'+tableId).append(thead);
 
                     let tbody = $("<tbody />");
@@ -907,7 +1362,7 @@
                           let out_total_mtr         = 0;
                           let out_total_kg          = 0;
 
-                          if(value.id_category != $id_category && $id_category != '' && view == "DetailProduk"){ 
+                          if(value.id_category != $id_category && $id_category != '' && (view == "DetailProduk" || view == "DetailLotDatar")){ 
 
                             $result = create_total_in_body($nama_category,$cat_total_lot_s_awal,$cat_total_qty_s_awal,$cat_total_qty2_s_awal,$cat_total_qty_opname_s_awal,$cat_qty1_uom_s_awal,$cat_qty2_uom_s_awal,$cat_opname_uom_s_awal,count_in,$cat_total_lot_adj_in,$cat_total_qty_adj_in,$cat_total_qty2_adj_in,$cat_total_qty_opname_adj_in,$cat_qty1_uom_adj_in,$cat_qty2_uom_adj_in,$cat_opname_uom_adj_in,$cat_total_lot_in,$cat_total_qty_in,$cat_total_qty2_in,$cat_total_qty_opname_in,arr_in2,count_out,arr_tot_in,$cat_total_lot_adj_out,$cat_total_qty_adj_out,$cat_total_qty2_adj_out,$cat_total_qty_opname_adj_out,$cat_qty1_uom_adj_out,$cat_qty2_uom_adj_out,$cat_opname_uom_adj_out,$cat_total_lot_out,$cat_total_qty_out,$cat_total_qty2_out,$cat_total_qty_opname_out,$cat_total_lot_s_akhir,$cat_total_qty_s_akhir,$cat_total_qty2_s_akhir,$cat_total_qty_opname_s_akhir,arr_out2,arr_tot_out,$cat_qty1_uom_s_akhir,$cat_qty2_uom_s_akhir,$cat_opname_uom_s_akhir);
 
@@ -997,11 +1452,15 @@
 
                           row3 += "<tr>";
                           row3 += "<td >"+ (no++) +"</td>";
-                          if( view == "DetailProduk" ){
+                          if( view == "DetailProduk" || view =="DetailLotDatar"){
                             row3 += "<td class='white-space-nowrap'>"+value.nama_category+"</td>";
                             row3 += "<td class='white-space-nowrap'>"+value.kode_produk+"</td>";
                             row3 += "<td class='white-space-normal' >"+value.nama_produk+"</td>";
                             row3 += "<td class='white-space-nowrap' >"+value.product_parent+"</td>";
+                            if(view == "DetailLotDatar"){
+                              row3 += "<td class='white-space-normal' >"+value.lot+"</td>";
+                              row3 += "<td class='white-space-nowrap' >"+value.nama_jenis_kain+"</td>";
+                            }
                             // saldo awal
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty1)+" "+value.s_awal_qty1_uom+"</td>";
@@ -1050,22 +1509,28 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty2])+" "+value[in_qty2_uom]+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_opname])+" "+value[in_opname_uom]+"</td>";
                               no_in++;
-                              // info total++ in
-                              in_total_lot         = in_total_lot+parseInt(value[in_lot]);
-                              in_total_qty1        = in_total_qty1+parseFloat(value[in_qty1]);
-                              in_total_qty2        = in_total_qty2+parseFloat(value[in_qty2]);
-                              in_total_qty_opname  = in_total_qty_opname+parseFloat(value[in_opname]);
 
-                              arr_in.push({in_lot:value[in_lot], in_qty1:value[in_qty1],  in_qty1_uom:value[in_qty1_uom],  in_qty2:value[in_qty2], in_qty2_uom:value[in_qty2_uom], in_opname:value[in_opname], in_opname_uom:value[in_opname_uom]});
+                              // info total++ in
+                              value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              value_in_qty1 = value[in_qty1] !== null ? parseFloat(value[in_qty1])  : 0;
+                              value_in_qty2 = value[in_qty2] !== null ? parseFloat(value[in_qty2])  : 0 ;
+                              value_in_opname = value[in_opname] !== null ? parseFloat(value[in_opname])  : 0 ;
+
+                              in_total_lot         = in_total_lot+ value_in_lot;
+                              in_total_qty1        = in_total_qty1+value_in_qty1
+                              in_total_qty2        = in_total_qty2+value_in_qty2
+                              in_total_qty_opname  = in_total_qty_opname+value_in_opname;
+
+                              arr_in.push({in_lot:value_in_lot, in_qty1:value_in_qty1,  in_qty1_uom:value[in_qty1_uom],  in_qty2:value_in_qty2, in_qty2_uom:value[in_qty2_uom], in_opname:value_in_opname, in_opname_uom:value[in_opname_uom]});
 
                               //info uom
-                              if(value[in_qty1_uom] != ''){
+                              if(value[in_qty1_uom] != '' && value[in_qty1_uom] !== null){
                                 qty1_uom  = value[in_qty1_uom];
                               }
-                              if(value[in_qty2_uom] != ''){
+                              if(value[in_qty2_uom] != ''&& value[in_qty2_uom] !== null){
                                 qty2_uom  = value[in_qty2_uom];
                               }
-                              if(value[in_opname_uom] != ''){
+                              if(value[in_opname_uom] != ''&& value[in_opname_uom] !== null){
                                 qty_opname_uom = value[in_opname_uom];
                               }
                             
@@ -1179,22 +1644,27 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
                               no_out++;
 
-                              // info total++ out
-                              out_total_lot       = out_total_lot+parseInt(value[out_lot]);
-                              out_total_qty1      = out_total_qty1+parseFloat(value[out_qty1]);
-                              out_total_qty2      = out_total_qty2+parseFloat(value[out_qty2]);
-                              out_total_qty_opname = out_total_qty_opname+parseFloat(value[out_opname]);
+                              value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              value_out_qty1 = value[out_qty1] !== null ? parseFloat(value[out_qty1])  : 0;
+                              value_out_qty2 = value[out_qty2] !== null ? parseFloat(value[out_qty2])  : 0 ;
+                              value_out_opname = value[out_opname] !== null ? parseFloat(value[out_opname])  : 0 ;
 
-                              arr_out.push({out_lot:value[out_lot], out_qty1:value[out_qty1], out_qty1_uom:value[out_qty1_uom], out_qty2:value[out_qty2], out_qty2_uom:value[out_qty2_uom], out_opname:value[out_opname], out_opname_uom:value[out_opname_uom]});
+                              // info total++ out
+                              out_total_lot       = out_total_lot + value_out_lot;
+                              out_total_qty1      = out_total_qty1+ value_out_qty1;
+                              out_total_qty2      = out_total_qty2+ value_out_qty2;
+                              out_total_qty_opname = out_total_qty_opname+ value_out_opname;
+
+                              arr_out.push({out_lot:value[out_lot], out_qty1:value_out_qty1, out_qty1_uom:value[out_qty1_uom], out_qty2:value_out_qty2, out_qty2_uom:value[out_qty2_uom], out_opname:value_out_opname, out_opname_uom:value[out_opname_uom]});
 
                               // info uom 
-                              if(value[out_qty1_uom] != ''){
+                              if(value[out_qty1_uom] != '' && value[out_qty1_uom] !== null){
                                 qty1_uom  = value[out_qty1_uom];
                               }
-                              if(value[out_qty2_uom] != ''){
+                              if(value[out_qty2_uom] != '' && value[out_qty2_uom] !== null){
                                 qty2_uom  = value[out_qty2_uom];
                               }
-                              if(value[out_opname_uom] != ''){
+                              if(value[out_opname_uom] != '' && value[out_opname_uom] !== null){
                                 qty_opname_uom = value[out_opname_uom];
                               }
                             
@@ -1563,7 +2033,7 @@
                                 if(view == "Global" || view == "DetailProduk"){
                                   colspan = 'colspan = "5" ';
                                 }else{
-                                  colspan = 'colspan = "4" ';
+                                  colspan = 'colspan = "5" ';
                                 }
                                 row2 += "<th class='style no text-center white-space-nowrap'  "+colspan+" >";
                                 row2 += h;
@@ -1621,9 +2091,9 @@
             
             // saldo awal
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty1)+" "+value.s_awal_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty2)+" "+value.s_awal_qty2_uom+" </td>";
@@ -1643,10 +2113,10 @@
                         in_qty_op      = "in_"+d+"_qty_opname";
                         in_qty_op_uom  = "in_"+d+"_qty_opname_uom";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_proses])+"</td>";
-                        if(view == "Global" || view == 'DetailProduk'){
-                          lot = "in_"+d+"_lot";
-                          row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
-                        }
+                        lot = "in_"+d+"_lot";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
+                        // if(view == "Global" || view == 'DetailProduk'){
+                        // }
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty1])+" "+value[in_qty1_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty2])+" "+value[in_qty2_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty_op])+" "+value[in_qty_op_uom]+"</td>";
@@ -1656,27 +2126,27 @@
 
             // consume
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty1)+" "+value.con_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty2)+" "+value.con_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
 
             // ADJ IN 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty1)+" "+value.adj_in_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty2)+" "+value.adj_in_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+" </td>";
 
             // produce
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
-              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
-            }
+            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
+            // if(view == "Global" || view == "DetailProduk" ){
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty1)+" "+value.prod_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty2)+" "+value.prod_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
@@ -1694,7 +2164,9 @@
                         hph_qty2_uom  = "hph_"+d+"_qty2_uom";
                         hph_qty_op      = "hph_"+d+"_qty_opname";
                         hph_qty_op_uom  = "hph_"+d+"_qty_opname_uom";
+                        hph_lot         = "hph_"+d+"_lot";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_proses])+"</td>";
+                        row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_lot])+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty1])+" "+value[hph_qty1_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty2])+" "+value[hph_qty2_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[hph_qty_op])+" "+value[hph_qty_op_uom]+"</td>";
@@ -1716,10 +2188,10 @@
                         out_qty_op      = "out_"+d+"_qty_opname";
                         out_qty_op_uom  = "out_"+d+"_qty_opname_uom";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_proses])+"</td>";
-                        if(view == "Global" || view == 'DetailProduk'){
+                        // if(view == "Global" || view == 'DetailProduk'){
                           lot = "out_"+d+"_lot";
                           row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[lot])+"</td>";
-                        }
+                        // }
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty1])+" "+value[out_qty1_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty2])+" "+value[out_qty2_uom]+"</td>";
                         row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty_op])+" "+value[out_qty_op_uom]+"</td>";
@@ -1729,18 +2201,18 @@
 
             // ADJ OUT
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
+            // if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_lot)+"</td>";
-            }
+            // }
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty1)+" "+value.adj_out_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty2)+" "+value.adj_out_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+" </td>";
 
             // saldo akhir
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_proses)+"</td>";
-            if(view == "Global" || view == "DetailProduk" ){
+            // if(view == "Global" || view == "DetailProduk" ){
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_lot)+"</td>";
-            }
+            // }
 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty1)+" "+value.s_akhir_qty1_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty2)+" "+value.s_akhir_qty2_uom+" </td>";

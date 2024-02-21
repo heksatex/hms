@@ -1126,7 +1126,7 @@
           + '<td></td>'
           + '<td><select type="text" class="form-control input-sm width-80 status_ow" name="Status OW" id="status_ow"><?php 
           foreach($list_status_ow as $owr){?><option value="<?php echo $owr['kode']; ?>"><?php echo $owr['nama'];?></option>"<?php }?></select></td>'
-          + '<td></td>'
+          // + '<td></td>'
           + '<td><button type="button" class="btn btn-primary btn-xs add-color-lines width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit-color-lines" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal-color-lines width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'
           + '</tr>';
 
@@ -1291,7 +1291,7 @@
       //validasi tidak boleh kosong hanya select product saja
       select.each(function(){
         
-        if(!$(this).val() && $(this).attr('name')=='Product' ){
+        if(!$(this).val() && $(this).attr('name')=='Product'){
           alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty2 = true;
         }
@@ -1327,6 +1327,10 @@
           alert_notify('fa fa-warning',$(this).attr('name')+ ' Harus Diisi !','danger',function(){});
           empty = true;
           //break;
+        }
+        if($(this).val() == 0  & $(this).attr('name') == 'Qty'){
+          alert_notify('fa fa-warning',$(this).attr('name')+ ' tidak boleh 0 !','danger',function(){});
+          empty = true;
         }
       });
 
@@ -1509,10 +1513,10 @@
             row_order = $(this).attr('data-isi');
 
           }else if($(this).attr('data-id')=='qty' || $(this).attr('data-id')=='gramasi'){
-            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)"> ');
+            $(this).html('<input type="text"  class="form-control width-100 input-sm" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)"> ');
           
           }else if($(this).attr('data-id')=='lebar_jadi'){
-            $(this).html('<input type="text"  class="form-control width-100" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" > ');
+            $(this).html('<input type="text"  class="form-control width-100 input-sm" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" > ');
           
           }else if($(this).attr('data-id') == 'color'){
 
@@ -1658,7 +1662,9 @@
         $(this).parents("tr").find(".add-color-lines, .edit-color-lines").toggle();
         $(this).parents("tr").find(".cancel-color-lines, .delete-color-lines").toggle();
         $(this).parents("tr").find(".ow-color-lines").toggle();
+        $(this).parents("tr").find(".status_scl").hide();
         $(".add-new-color-lines").hide();
+
       }else{
          alert_modal_warning('Maaf, Data tidak bisa diubah !')
       }

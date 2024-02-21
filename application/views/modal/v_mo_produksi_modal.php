@@ -468,9 +468,14 @@
 						$("#tambah_data .modal-dialog .modal-content .modal-body").removeClass('produksi_rm');
 			            
 			        },error: function (jqXHR, textStatus, errorThrown){
-			          alert("Error Simpan Produksi");
-			          $('#btn-tambah-produksi').button('reset');
-					  unblockUI( function(){});
+						unblockUI( function(){});
+		  	            $('#btn-tambah-produksi').button('reset');
+						if(jqXHR.status == 401){
+							var err = JSON.parse(jqXHR.responseText);
+							alert(err.message);
+						}else{
+							alert("Error Simpan Produksi !");
+						}    
 			        }
 			    });
 			    
