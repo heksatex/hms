@@ -34,6 +34,11 @@ class M_inlet extends CI_Model
     		$this->db->where('in.status',$this->input->post('status'));
         }
 
+		if($this->input->post('lot_gjd')){
+    		$this->db->like('fg.lot',$this->input->post('lot_gjd'));
+			$this->db->JOIN("mrp_production_fg_hasil fg","fg.id_inlet = in.id", "LEFT");
+        }
+
 		// $this->db->from($this->table);
 		$this->db->SELECT("in.id, in.lot, in.tanggal, in.kode_mrp, in.sales_group, in.nama_produk, in.corak_remark, in.warna_remark, in.lebar_jadi,in.uom_lebar_jadi, in.desain_barcode, ms.nama_status, msg.nama_sales_group, in.status");
 		$this->db->FROM("mrp_inlet in");
