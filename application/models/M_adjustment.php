@@ -154,7 +154,7 @@ class M_adjustment extends CI_Model
 
 	public function get_nama_departemen_by_kode($kode)
 	{
-		return $this->db->query("SELECT nama FROM departemen WHERE kode = '$kode'");
+		return $this->db->query("SELECT nama, stock_location FROM departemen WHERE kode = '$kode'");
 	}
 
 	public function cek_adjustment_by_kode($kode_adjustment)

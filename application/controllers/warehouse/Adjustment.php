@@ -104,6 +104,8 @@ class Adjustment extends MY_Controller
       }else if(empty($note)){
         $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Notes Harus Diisi / Alasan membuat Adjustment !', 'icon' =>'fa fa-warning', 
         'type' => 'danger'  );         
+      }else if($lokasi_adjustment['stock_location'] != $kode_lokasi){
+        $callback = array('status' => 'failed', 'field' => 'lokasi_adjustment', 'message' => 'Kode Lokasi Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );
       }else{
         //cek kode adjustment apa sudah ada apa belum
         $cek = $this->m_adjustment->cek_adjustment_by_kode($kode_adjustment)->row_array();
@@ -543,6 +545,9 @@ class Adjustment extends MY_Controller
 
       $cek_head = $this->m_adjustment->get_adjustment_by_code($kode_adjustment);
 
+      // cek lokasivalid      
+      $lokasi_adjustment  = $this->m_adjustment->get_nama_departemen_by_kode($lokasi_adj)->row_array();
+
       if(!empty($cek1['status'])){
         $callback = array('status' => 'failed', 'message'=>'Maaf, Tidak Bisa Generate, Status Adjustment Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
       }else if(!empty($cek2['status'])){
@@ -551,6 +556,8 @@ class Adjustment extends MY_Controller
         $callback = array('status' => 'failed', 'message'=>'Maaf, Lokasi Adjustment Tidak Boleh Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
       }else if(empty($cek_head->id_type_adjustment)){
           $callback = array('status' => 'failed', 'message'=>'Maaf, Type Adjustment Tidak Boleh Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+      }else if($lokasi_adjustment['stock_location'] != $kode_lokasi){
+          $callback = array('status' => 'failed', 'field' => 'lokasi_adjustment', 'message' => 'Kode Lokasi Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );
       }else{
 
         // lock table
@@ -998,6 +1005,8 @@ class Adjustment extends MY_Controller
             $callback = array('status' => 'failed','message' => 'Produk atau Lot terdapat <b>Reserve Move / Terpesan</b> oleh dokumen lain !!<br> '.$list_produk2, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if($quant == false){
             $callback = array('status' => 'failed','message' => 'Produk atau Lot di <b>Stock tidak ditemukan / sudah di hapus </b> !!<br> '.$list_quant, 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if(empty($item)){
+            $callback = array('status' => 'failed','message' => 'Produk atau Lot yang akan di Adjustment masih  Kosong !!<br> '.$list_quant, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
             $callback = array('status' => 'failed','message' => 'Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }
