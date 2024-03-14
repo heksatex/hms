@@ -129,7 +129,7 @@ class Mutasi extends MY_Controller
             if($view == "DetailLotDatar" AND $result_2 == false){
                 $get_dept  = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
                 $callback = array('status'=>'failed', 'view' => $view, 'message'=> "Departemen ".$get_dept['nama']." belum terdapat Laporan Mutasi dengan View Detail Datar", 'result'=>$table_mutasi);
-            }else if($departemen == 'DYE2'or $departemen == 'FIN' OR $departemen == 'DF'){
+            }else if($departemen == 'DYE2'or $departemen == 'FIN' OR $departemen == 'DF' OR $departemen == "INS2"){
                 
                 if($view == "Global"){ 
                     $result_where = $this->create_where2($parent,'','','','','',$jenis_kain);
@@ -384,7 +384,7 @@ class Mutasi extends MY_Controller
 
     function cek_dept_mutasi($dept)
     {
-        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB','DYE2','FIN','DF');
+        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB','DYE2','FIN','DF','INS2');
         $dept_status      = false;
         foreach($list_dept_mutasi as $list){
             if($list == $dept){
@@ -437,6 +437,7 @@ class Mutasi extends MY_Controller
             array('kode' => 'DYE2','nama'=>'Dyeing 2'),
             array('kode' => 'FIN', 'nama'=>'Finishing'),
             array('kode' => 'DF',  'nama'=>'Dyeing Finishing'),
+            array('kode' => 'INS2',  'nama'=>'Inspecting 2',),
         );
 
 
@@ -1124,7 +1125,7 @@ class Mutasi extends MY_Controller
             $field_dept_out[] = array('ins2','grg','dye');
             $field_dept_process[] = array('set','fin','brs','fbr','pad');
         
-        }else{// DF
+        }else if($departemen == 'DF'){// DF
 
             if($view == 'Global' || $view == 'DetailProduk'){
                 if($excel == true){
@@ -1190,6 +1191,59 @@ class Mutasi extends MY_Controller
             $field_dept_process[] = array('dye','set','fin','brs','fbr','pad');
             
 
+        }else{// INS2
+
+            if($view == 'Global' || $view == 'DetailProduk'){
+                if($excel == true){
+                    $count_child_head1  = $count_child*5; // jml kolom penerimaan
+                    $count_child_head2  = $count_child*1; // jml kolom pengiriman
+                }else{
+                    $count_child_head1  = $count_child*5; // jml kolom penerimaan
+                    $count_child_head2  = $count_child*1; // jml kolom pengiriman
+                }
+            }else{
+              
+                if($excel == true){
+                    $count_child_head1  = $count_child*5; // jml kolom penerimaan
+                    $count_child_head2  = $count_child*1; // jml kolom pengiriman
+                }else{
+                    $count_child_head1  = $count_child*5; // jml kolom penerimaan
+                    $count_child_head2  = $count_child*1;// jml kolom pengiriman
+                }
+             
+            }
+
+            // penerimaan
+            $head_in_dept[]   = array('nama'=> 'GRG','child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'SET','child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'PAD','child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'FIN','child' => $child, );
+            $head_in_dept[]   = array('nama'=> 'FBR','child' => $child, );
+            $head_in[]        = array('nama' => 'IN (Penerimaan dari) ','child'=> $head_in_dept, 'count_child'=>$count_child_head1,'row'=>3);
+
+    
+            // pengiriman
+            $head_out_dept[]   = array('nama'=> 'GJD','child' => $child, );
+            // $head_out_dept[]   = array('nama'=> 'GRG','child' => $child, );
+            $head_out[]        = array('nama' => 'OUT (Pengiriman Ke)', 'child' => $head_out_dept, 'count_child'=>$count_child_head2,'row'=>3);
+
+            $field .= 'in_grg_lot,in_set_lot,in_pad_lot,in_fin_lot,in_fbr_lot,';
+            $field .= 'out_gjd_lot,';
+
+            $field .= 'in_grg_proses, in_grg_qty1,in_grg_qty1_uom,in_grg_qty2,in_grg_qty2_uom,in_grg_qty_opname,in_grg_qty_opname_uom,';
+            $field .= 'in_set_proses, in_set_qty1,in_set_qty1_uom,in_set_qty2,in_set_qty2_uom,in_set_qty_opname,in_set_qty_opname_uom,';
+            $field .= 'in_pad_proses, in_pad_qty1,in_pad_qty1_uom,in_pad_qty2,in_pad_qty2_uom,in_pad_qty_opname,in_pad_qty_opname_uom,';
+            $field .= 'in_fbr_proses, in_fbr_qty1,in_fbr_qty1_uom,in_fbr_qty2,in_fbr_qty2_uom,in_fbr_qty_opname,in_fbr_qty_opname_uom,';
+            $field .= 'in_fin_proses, in_fin_qty1,in_fin_qty1_uom,in_fin_qty2,in_fin_qty2_uom,in_fin_qty_opname,in_fin_qty_opname_uom,';
+
+            $field .= 'out_gjd_proses, out_gjd_qty1,out_gjd_qty1_uom,out_gjd_qty2,out_gjd_qty2_uom,out_gjd_qty_opname,out_gjd_qty_opname_uom';
+            // $field .= 'out_grg_proses, out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
+
+            $mutasi_dept = 'acc_mutasi_ins2_1_';
+
+            // untuk looping view
+            $field_dept_in[]  = array('grg','set','pad','fin','fbr');
+            $field_dept_out[] = array('gjd');
         }
 
         $head_table[] = array( 'info'    => $head_utama,
@@ -1315,7 +1369,7 @@ class Mutasi extends MY_Controller
 
         }else{
 
-            if($departemen == 'DYE2'or $departemen == 'FIN' OR $departemen == 'DF'){
+            if($departemen == 'DYE2'or $departemen == 'FIN' OR $departemen == 'DF' || $departemen == 'INS2'){
                 $this->export_excel_mutasi_format2($view,$tanggal,$departemen,$parent,$nama_produk,$warna,$lot,$no_go,$route,$jenis_kain);
             }else{
 
@@ -1345,6 +1399,8 @@ class Mutasi extends MY_Controller
                 $dept = "Dyeing (2) ";
             }else if($departemen == "DF"){
                 $dept = "Dyeing Finishing";
+            }else if($departemen == "INS2"){
+                $dept = "Inspecting 2";
             }else{
                 $dept = "Finishing";
             }
