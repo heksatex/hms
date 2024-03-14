@@ -109,17 +109,41 @@ class M_deliveryorderdetail extends CI_Model {
         }
     }
 
-    public function getDataDetail(array $condition) {
+    public function getDataDetail(array $condition, array $join = []) {
         $this->_getDataDetail();
         $this->db->where($condition);
+        foreach ($join as $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->join('bulk_detail bd', 'pd.id = bd.picklist_detail_id', 'left');
+                    $this->db->select("bd.bulk_no_bulk");
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
         return $query->result();
     }
 
-    public function getDataDetailCountFiltered($condition = []) {
+    public function getDataDetailCountFiltered($condition = [], array $join = []) {
         $this->_getDataDetail();
+        foreach ($join as $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->join('bulk_detail bd', 'pd.id = bd.picklist_detail_id', 'left');
+                    $this->db->select("bd.bulk_no_bulk");
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
         $this->db->where($condition);
         $query = $this->db->get();
         return $query->num_rows();
@@ -155,11 +179,9 @@ class M_deliveryorderdetail extends CI_Model {
         return $query->num_rows();
     }
 
-    public function getDataCountAll(array $condition = []) {
-        $this->db->from($this->table . ' a');
-        $this->db->join("delivery_order do", 'do.id = a.do_id');
-        $this->db->join("picklist_detail pd", "pd.barcode_id = a.barcode_id");
-        $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom');
+    public function getDataCountAll(array $condition = [], $join = []) {
+        $this->join = $join;
+        $this->_getData();
         $this->db->select("a.id");
         if (count($condition) > 0)
             $this->db->where($condition);
@@ -173,7 +195,7 @@ class M_deliveryorderdetail extends CI_Model {
         $this->db->join('delivery_order do', 'do.id = dod.do_id');
         $this->db->where($condition);
         if ($type_bulk === 1) {
-            $group .= ",bd.bulk_no_bulk";
+//            $group .= ",bd.bulk_no_bulk";
             $select .= ",bd.bulk_no_bulk";
             $this->db->join("bulk_detail bd", "bd.barcode = dod.barcode_id");
             $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode");
@@ -272,5 +294,15 @@ class M_deliveryorderdetail extends CI_Model {
             $this->db->where_in($key, $value);
         }
         return $this->db->count_all_results();
+    }
+    
+    public function countDetail(array $condition) {
+        $this->db->from($this->table . ' dod');
+        $this->db->join("delivery_order do","do.id = dod.do_id");
+        $this->db->join('picklist_detail pd','(pd.barcode_id = dod.barcode_id and pd.valid != "cancel")');
+        $this->db->where($condition);
+//        $this->db->group_by("pd.barcode_id");
+        $query = $this->db->select('count(pd.barcode_id) as total_item, sum(pd.qty) as total_qty, count(pd.qty) as jumlah_qty')->get();
+        return $query->row();
     }
 }

@@ -1,5 +1,5 @@
 <style>
-<?php if (!empty($no_sj)) { ?>
+<?php if ($sj_status === 'done') { ?>
         .add{
             visibility: hidden;
         }
@@ -154,14 +154,14 @@ if ($picklist->status === 'cancel') {
         "buttons": [
             {
                 "text": '<i class="fa fa-plus"> <span>Tambah Data Scan</span>',
-                "className": "btn btn-default add",
+                "className": "btn btn-default add btn-data-table",
                 "action": function (e, dt, node, config) {
                     $(".add-new-scan").trigger("click");
                 }
             },
             {
                 "text": '<i class="fa fa-plus"> <span>Tambah Data Manual</span>',
-                "className": "btn btn-default add",
+                "className": "btn btn-default add btn-data-table",
                 "action": function (e, dt, node, config) {
                     $(".add-new-manual").trigger("click");
                 }
@@ -212,7 +212,7 @@ if ($picklist->status === 'cancel') {
         $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
         $('.modal-title').text('Add Item Manual');
         $.post("<?= base_url('warehouse/picklist/item_manual/') ?>", {pl: "<?= $picklist->no ?>", ids: "<?= encrypt_url($picklist->id) ?>"}, function (data) {
-            setTimeout(function () { 
+            setTimeout(function () {
                 $(".tambah_data").html(data.data);
                 $("#btn-tambah").html("Tambahkan");
             }, 1000);

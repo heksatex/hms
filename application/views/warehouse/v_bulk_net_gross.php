@@ -10,6 +10,7 @@
                     <th>Total QTY</th>
                     <th>Net Weight</th>
                     <th>Gross Weight</th>
+                    <th><input type="checkbox" class="rumus"> Terapkan Rumus</th>
                     </thead>
                     <tbody>
                     <button type="submit" id="btn_form_net_gross" style="display: none"></button>
@@ -19,8 +20,9 @@
                             <td><?= $value->no_bulk ?></td>
                             <td><?= $value->jumlah_qty ?></td>
                             <td><?= $value->total_qty ?></td>
-                            <td> <input type='text' name="net[<?= $value->no_bulk ?>][]" class="form-control input-sm" value="<?= $value->net_weight ?>"/></td>
-                            <td> <input type='text' name="gross[<?= $value->no_bulk ?>][]" class="form-control input-sm" value="<?= $value->gross_weight ?>"/></td>
+                            <td> <input type='text' oninput="isNumb(event,this)" name="net[<?= $value->no_bulk ?>][]" data-id="<?= $value->no_bulk ?>" class="form-control input-sm nw net-<?= $value->no_bulk ?>" value="<?= $value->net_weight ?>"/></td>
+                            <td> <input type='text' oninput="isNumb(event,this)" name="gross[<?= $value->no_bulk ?>][]" data-id="<?= $value->no_bulk ?>" class="form-control input-sm gw weight" value="<?= $value->gross_weight ?>"/></td>
+                            <!--<td><input type="checkbox" class="crumus-<?= $value->no_bulk ?>" data-id="<?= $value->no_bulk ?>" > </td>-->
                         </tr>
 
                     <?php } ?>
@@ -32,6 +34,31 @@
 </div>
 <script>
     $(function () {
+        $(".rumus").on("change", function () {
+            var rumus = $(this);
+            let bulk = rumus.attr("data-id");
+            let checked = rumus.prop('checked');
+            if (checked) {
+                $(".nw").prop('readonly', true);
+                return;
+            }
+            $(".nw").prop('readonly', false);
+        });
+
+
+        $(".weight").on("input", function () {
+            let bulk = $(this).attr("data-id");
+            let checked = $(".rumus").prop('checked');
+            if (checked) {
+                let gw = $(this).val();
+                let net = parseFloat(gw) - 4;
+                if (isNaN(net) || net < 0) {
+                    $(".net-" + bulk).val(0);
+                    return;
+                }
+                $(".net-" + bulk).val(net.toFixed(2));
+            }
+        });
         const formnetgross = document.forms.namedItem("form-net-gross");
         formnetgross.addEventListener(
                 "submit",
@@ -56,7 +83,8 @@
         },
                 false
                 );
-    });
+    })
+            ;
 
 
 </script>

@@ -1,4 +1,4 @@
-!<!doctype html>
+<!doctype html>
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
@@ -29,28 +29,28 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-dsj" id="form-dsj" action="<?= base_url('report/draftsuratjalan/checking') ?>">
                                 <div class="col-md-4 col-xs-12">
-                                    <div class="row">
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label required">No Picklist</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_pl" id="no_pl" class="form-control" required>
-                                                    <label class="text-sm text-info">Tekan F2 Untuk Kembali Cari Picklist</label>
-                                                </div>
-                                            </div>
 
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">No. SJ</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <span id="nosj"></span>
-                                                </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label required">No Picklist</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <input type="text" name="no_pl" id="no_pl" class="form-control" required>
+                                                <label class="text-sm text-info">Tekan F2 Untuk Kembali Cari Picklist</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label">No. SJ</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <span id="nosj"></span>
                                             </div>
                                         </div>
                                     </div>
+
                                 </div>
                                 <div class="col-md-4 col-xs-12">
                                     <div class="form-group">
@@ -181,11 +181,35 @@
                         false
                         );
                 $("#export_excel").on("click", function () {
-                    $("#draftsuratjalan").table2excel({
-                        name: $("#pack").html(),
-                        filename: "draft_surat_jalan_pl_" + $("#pack").html(),
-                        fileext: ".xlsx"
+                    please_wait(function () {});
+                    $.ajax({
+                        url: "<?= base_url('report/draftsuratjalan/export') ?>",
+                        type: "POST",
+                        data: {
+                            no_pl: $("#pack").html()
+                        },
+                        success: function (data) {
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            alert_notify(jqXHR.responseJSON.icon, jqXHR.responseJSON.message, jqXHR.responseJSON.type, function () {});
+//                            alert(jqXHR);
+                        },
+                        complete: function (dt) {
+
+                            unblockUI(function () {}, 100);
+                        }
                     });
+//                    $("#draftsuratjalan").table2excel({
+//                        name: $("#pack").html(),
+//                        filename: "draft_surat_jalan_pl_" + $("#pack").html(),
+//                        fileext: ".xlsx"
+//                    });
                 });
             });
         </script>

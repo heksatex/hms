@@ -47,7 +47,7 @@ class Bulk extends MY_Controller {
             }
             $data['id_dept'] = 'BULK';
             $data["ids"] = $id;
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt, 'status !=' => 'cancel', 'type_bulk_id' => 1]);
+            $data['picklist'] = $this->m_bulk->getDataByIDPicklist(['picklist.no' => $kode_decrypt, 'status !=' => 'cancel', 'type_bulk_id' => 1]);
 
             $this->load->view('warehouse/v_bulk_edit', $data);
         } catch (Exception $ex) {
@@ -93,7 +93,7 @@ class Bulk extends MY_Controller {
         try {
             $data = array();
             $condition = ['type_bulk_id' => 1, 'status !=' => 'cancel'];
-            $list = $this->m_Picklist->getData(false, $condition);
+            $list = $this->m_bulk->getDataPicklist($condition);
             $no = $_POST['start'];
             foreach ($list as $field) {
                 $kode_encrypt = encrypt_url($field->no);
@@ -111,8 +111,8 @@ class Bulk extends MY_Controller {
                 $data[] = $row;
             }
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_Picklist->getCountAllData($condition),
-                "recordsFiltered" => $this->m_Picklist->getCountDataFiltered($condition),
+                "recordsTotal" => $this->m_bulk->getCountAllDataPicklist($condition),
+                "recordsFiltered" => $this->m_bulk->getCountDataFilteredPicklist($condition),
                 "data" => $data,
             ));
             exit();
@@ -250,7 +250,7 @@ class Bulk extends MY_Controller {
                         throw new Exception("Tentukan Dulu No Picklist" . $nopl, 500);
                     }
                     if (!empty($do)) {
-                        throw new Exception("No " . $nopl . ' Sudah Masuk Delivery Order', 500);
+//                        throw new Exception("No " . $nopl . ' Sudah Masuk Delivery Order', 500);
                     }
                     $data = $this->m_bulk->getDataDetail(['no_pl' => $nopl, 'no_bulk' => $value]);
                     if (empty($data) || is_null($data)) {
@@ -283,7 +283,7 @@ class Bulk extends MY_Controller {
                     $checkExist = $this->m_bulkdetail->getDataDetail(['barcode' => $value]);
                     if ($checkExist) {
                         if ($checkExist->bulk_no_bulk === $bulk) {
-                            throw new Exception("Barcode " . $value . " Duplikat", 500);
+                            throw new Exception("Barcode " . $value . " Duplikat", 505);
                         }
                         $insrt = $this->m_bulkdetail->updateBulkDetail(['barcode' => $value], ['bulk_no_bulk' => $bulk]);
                         $message = "Berhasil Pindah Item Pada BAL / Bulk";
@@ -296,7 +296,7 @@ class Bulk extends MY_Controller {
                         if (strpos($insrt, 'Duplicate') !== false) {
                             $insrt = "Barcode " . $value . " duplikat.";
                         }
-                        throw new \Exception($insrt, 500);
+                        throw new \Exception($insrt, 505);
                     }
                     $this->_module->gen_history($sub_menu, $bulk, 'edit', 'Menambahkan Barcode ' . $value, $users["nama"] ?? "");
                     break;
@@ -328,9 +328,19 @@ class Bulk extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $message, 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data, 'status' => $status)));
         } catch (Exception $ex) {
-            $this->output->set_status_header($ex->getCode() ?? 500)
+            $error_type = "danger";
+            switch ($ex->getCode()) {
+                case 505:
+                    $error_type = 'warning';
+
+                    break;
+
+                default:
+                    break;
+            }
+            $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => $error_type)));
         }
     }
 
@@ -362,7 +372,7 @@ class Bulk extends MY_Controller {
             $pl = $this->input->post("pl");
             $dataPl = $this->m_deliveryorder->getDataDetail(['a.no_picklist' => $pl]);
             if (!empty($dataPl)) {
-                throw new Exception("No " . $pl . ' Sudah Masuk Delivery Order', 500);
+//                throw new Exception("No " . $pl . ' Sudah Masuk Delivery Order', 500);
             }
             foreach ($net as $key => $value) {
                 foreach ($value as $keys => $values) {
@@ -397,11 +407,20 @@ class Bulk extends MY_Controller {
             $pl = $this->input->post('pl');
             $bulk = $this->input->post('bulk');
             $condition = ['b.no_pl' => $pl];
-            $data['data'] = $this->m_bulkdetail->getDataListBulk($condition);
-
-            $data["total_item"] = $this->m_bulkdetail->getTotalItem($condition);
+            $data["totalan"] = $this->m_bulkdetail->getTotalItemBulk($condition);
+            log_message('error', json_encode($data["totalan"]));
+//            $data["total_item"] = $this->m_bulkdetail->getTotalItem($condition);
+            $data["total_item_bulk"] = $this->m_bulkdetail->getTotalItem(array_merge($condition, ['no_bulk' => $bulk]));
             $data["bulk"] = $bulk;
-            $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
+            $pers = [];
+            if (empty($bulk) || is_null($bulk)) {
+                $data['data'] = $this->m_bulkdetail->getDataListBulk($condition);
+                $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
+            } else {
+                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['no_bulk' => $bulk]));
+                $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
+            }
+
             echo json_encode($pers);
         } catch (Exception $ex) {
             

@@ -34,6 +34,10 @@
                         ?>
                         <div class="row">
                             <div class="col-md-12 table-responsive over">
+                                <?php if ((int) $picklist->type_bulk_id === 2) { ?>
+                                                <label>Total Item / Barcode : <span><?= $total_detail ?? 0 ?></span></label>
+                                            <?php } ?>
+                                
                                 <table class="table table-condesed table-hover rlstable  over" width="100%" id="delivery-item" >
                                     <thead>                          
                                         <tr>

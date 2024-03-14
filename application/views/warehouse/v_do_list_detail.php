@@ -3,6 +3,9 @@
         <thead>
             <tr>
                 <th class="style" width="10px">No</th>
+                <?php if ((int) $type === 1) { ?>
+                    <th class="style">BAL ID</th>
+                <?php } ?>
                 <th class="style">Barcode</th>
                 <th class="style">Produk</th>
                 <th class="style">Corak Remark</th>

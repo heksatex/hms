@@ -27,6 +27,7 @@ class Deliveryorder extends MY_Controller {
         $this->load->model("m_user");
         $this->load->model("m_Pickliststockquant");
         $this->load->library("token");
+        $this->load->library("wa_message");
     }
 
     public function index() {
@@ -54,12 +55,14 @@ class Deliveryorder extends MY_Controller {
             }
             $data['id_dept'] = 'DO';
             $data["section"] = "ADD";
-            $data["user"] = $this->m_user->get_user_by_username($this->session->userdata('username'));
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt, 'status' => 'validasi']);
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt, 'status' => 'validasi'], '', 'delivery');
             if (is_null($data["picklist"])) {
                 throw new Exception();
             }
-            $this->load->view('warehouse/v_do_base', $data);
+            $data["user"] = $this->m_user->get_user_by_username($this->session->userdata('username'));
+
+//            $data['total_detail'] = $recordsTotal ?? 0;
+            $this->load->view('warehouse/v_do_add', $data);
         } catch (Exception $ex) {
             show_404();
         }
@@ -73,13 +76,25 @@ class Deliveryorder extends MY_Controller {
             }
             $data['id_dept'] = 'DO';
             $data["id"] = $no;
-            $data["section"] = "EDIT";
+//            $data["section"] = "EDIT";
             $data["user"] = $this->m_user->get_user_by_username($this->session->userdata('username'));
             $data["do"] = $this->m_deliveryorder->getDataDetail(['a.no' => $kode_decrypt]);
             if (is_null($data["do"])) {
                 throw new Exception();
             }
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist]);
+            if ($data["do"]->status === 'draft') {
+                $recordsTotal = $this->m_PicklistDetail->getCountDetail(['no_pl' => $data["do"]->no_picklist, 'valid !=' => 'cancel']);
+            } else {
+//                $recordsTotal = $this->m_deliveryorderdetail->countData(
+//                        [
+//                            'dod.do_id' => $data["do"]->id
+//                        ]
+//                );
+                $recordsTotal = $this->m_deliveryorderdetail->countDetail(['dod.do_id' => $data["do"]->id]);
+            }
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist], '', 'delivery');
+
+            $data['total_detail'] = $recordsTotal;
             $this->load->view('warehouse/v_do_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -91,6 +106,7 @@ class Deliveryorder extends MY_Controller {
             $data ["id"] = $this->input->post("id");
             $data ["pl"] = $this->input->post("pl");
             $data["doid"] = $this->input->post("doid");
+            $data["type"] = $this->input->post("type");
             $data ["form"] = "edit";
             $datas = $this->load->view("warehouse/v_do_list_detail", $data, true);
             $this->output->set_status_header(200)
@@ -133,9 +149,41 @@ class Deliveryorder extends MY_Controller {
             $list = array();
             $no = $_POST['start'];
             if ($form === 'edit') {
-                $list = $this->m_deliveryorderdetail->getDataDetail($condition);
-                $recordsTotal = $this->m_deliveryorderdetail->getDataDetailCountAll($condition);
+                $join = [];
+                if ($type === "1") {
+                    $join = ["BULK"];
+                }
+                $list = $this->m_deliveryorderdetail->getDataDetail($condition, $join);
+                $recordsTotal = $this->m_deliveryorderdetail->getDataDetailCountAll($condition, $join);
                 $recordsFiltered = $this->m_deliveryorderdetail->getDataDetailCountFiltered($condition);
+                if ($type === "1") {
+                    foreach ($list as $field) {
+                        $no++;
+                        $row = [
+                            $no,
+                            $field->bulk_no_bulk,
+                            $field->barcode_id,
+                            $field->nama_produk,
+                            $field->corak_remark,
+                            $field->warna_remark,
+                            $field->qty . ' ' . $field->uom
+                        ];
+                        $data[] = $row;
+                    }
+                } else {
+                    foreach ($list as $field) {
+                        $no++;
+                        $row = [
+                            $no,
+                            $field->barcode_id,
+                            $field->nama_produk,
+                            $field->corak_remark,
+                            $field->warna_remark,
+                            $field->qty . ' ' . $field->uom
+                        ];
+                        $data[] = $row;
+                    }
+                }
             } else {
                 $whereNotIn = [];
                 $whereIn = [];
@@ -144,31 +192,48 @@ class Deliveryorder extends MY_Controller {
                     $whereNotIn = ['a.barcode_id' => $notin];
                 }
                 $condition = ['a.no_pl' => $pl, 'a.valid ' => 'validasi'];
-                if ($type === "1" && empty($bulk)) {
+
+                if ($type === "1" && count(json_decode($bulk)) === 0) {
                     throw new Exception("");
                 }
-                if (!empty($bulk)) {
+                if (count(json_decode($bulk)) > 0) {
                     $join[] = "BULK";
                     $whereIn = ['dt.bulk_no_bulk' => json_decode($bulk)];
                 }
                 $list = $this->m_PicklistDetail->getDataViewDodd($condition, $join, $whereNotIn, $whereIn);
                 $recordsFiltered = $this->m_PicklistDetail->getCountDataFilteredViewDodd($condition, $join, $whereNotIn, $whereIn);
                 $recordsTotal = $this->m_PicklistDetail->getCountAllDataViewDodd($condition, $join, $whereNotIn, $whereIn);
+                if ($type === "1") {
+                    foreach ($list as $field) {
+                        $no++;
+                        $row = [
+                            $no,
+                            $field->bulk_no_bulk ?? "",
+                            $field->barcode_id,
+                            $field->nama_produk,
+                            $field->corak_remark,
+                            $field->warna_remark,
+                            $field->qty . ' ' . $field->uom
+                        ];
+                        $data[] = $row;
+                    }
+                } else {
+                    foreach ($list as $field) {
+                        $no++;
+                        $row = [
+                            $no,
+                            $field->barcode_id,
+                            $field->nama_produk,
+                            $field->corak_remark,
+                            $field->warna_remark,
+                            $field->qty . ' ' . $field->uom
+                        ];
+                        $data[] = $row;
+                    }
+                }
             }
 
-            foreach ($list as $field) {
-                $no++;
-//                $button = is_null($field->nodo) ? "<button class='btn btn-danger btn-sm status_item' data-id='" . $field->barcode_id . "' data-pl='" . $pl . "'><fa class='fa fa-trash'></fa></button>" : $kode_decrypt;
-                $row = [
-                    $no,
-                    $field->barcode_id,
-                    $field->nama_produk,
-                    $field->corak_remark,
-                    $field->warna_remark,
-                    $field->qty . ' ' . $field->uom
-                ];
-                $data[] = $row;
-            }
+
             echo json_encode(array("draw" => $_POST['draw'],
                 "recordsTotal" => $recordsTotal,
                 "recordsFiltered" => $recordsFiltered,
@@ -184,7 +249,7 @@ class Deliveryorder extends MY_Controller {
         }
     }
 
-    public function update_note() {
+    public function update() {
         try {
             $username = $this->session->userdata('username');
             $users = $this->session->userdata('nama');
@@ -249,15 +314,15 @@ class Deliveryorder extends MY_Controller {
             $tipe_no_sj = $this->input->post("no_sj_jenis");
             $nosj = "";
             $nodo = "";
-            $tipeBulk = (int) $this->input->post("tipe");
             $tanggal_dokumen = $this->input->post("tanggal_dokumen");
             $time_dokumen = strtotime($tanggal_dokumen);
             $pl = $this->input->post("pl");
             $this->_module->startTransaction();
+            $now = date("Y-m-d H:i:s");
             if (!$nodo = $this->token->noUrut('deliveryorder', date('ym'), true)->generate('DO', '%04d')->get()) {
                 throw new \Exception("No Delivery Order tidak terbuat", 500);
             }
-            $nosjs = $this->m_deliveryorder->checkNoSJ(['no_sj LIKE' => $tipe_no_sj . '/' . date('y', $time_dokumen) . '/' . getRomawi(date('m', $time_dokumen)) . '%']);
+            $nosjs = $this->m_deliveryorder->checkNoSJ(['no_sj LIKE' => $tipe_no_sj . '/' . date('y', $time_dokumen) . '/' . getRomawi(date('m', $time_dokumen)) . '/%']);
             if (!is_null($nosjs)) {
                 $nosj = $nosjs->no_sj;
                 $this->m_deliveryorder->deleteNoSJ(['no_sj' => $nosj]);
@@ -266,45 +331,83 @@ class Deliveryorder extends MY_Controller {
                     throw new \Exception("No SJ tidak terbuat", 500);
                 }
             }
+            $tgl_dok = date("Y-m-d H:i:s", $time_dokumen);
+            $diff = date_diff(date_create($now), date_create($tgl_dok));
+            $interval = (int) $diff->format("%a");
             $data = [
                 'no' => $nodo,
                 'no_sj' => $nosj,
-                'tanggal_dokumen' => date("Y-m-d H:i:s", $time_dokumen),
-                'tanggal_buat' => date("Y-m-d H:i:s"),
+                'tanggal_dokumen' => $interval ? $tgl_dok : $now,
+                'tanggal_buat' => $now,
                 'note' => $this->input->post("ket"),
-                'status' => 'done',
+                'status' => 'draft',
                 'no_picklist' => $pl,
                 'rev' => $this->input->post("rev"),
-                'tipe_no_sj' => $tipe_no_sj
+                'tipe_no_sj' => $tipe_no_sj,
+                'notifikasi' => 0,
+                'user' => $users["nama"] ?? $username
             ];
             $idd = $this->m_deliveryorder->insert($data);
             if (is_null($idd)) {
                 throw new Exception("Gagal Membuat Surat Jalan ", 500);
             }
+            $kode_decrypt = encrypt_url($nodo);
+            $this->_module->gen_history($sub_menu, $data['no'], 'create', ($users["nama"] ?? $username) . ' Menambahkan Dokumen DO - ' . $data["no"], $username);
+
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Menyimpan Data', 500);
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Surat Jalan berhasil dibuat', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $kode_decrypt)));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function add_item() {
+        try {
+            $username = $this->session->userdata('username');
+            $users = $this->session->userdata('nama');
+            $sub_menu = $this->uri->segment(2);
+
+            $nodo = $this->input->post("nodo");
+            $type_bulk = $this->input->post("type_bulk");
+            $bulks = $this->input->post("bulks");
+
+            $data_do = $this->m_deliveryorder->getDataDetail(['no' => $nodo, 'status' => 'draft']);
+            if (empty($data_do)) {
+                throw new \Exception('Data DO harus dalam status draft', 500);
+            }
+            if ($data_do->faktur === "1") {
+                throw new \Exception('Data DO Sudah masuk Faktur', 500);
+            }
+
             $nosm = "SM" . $this->_module->get_kode_stock_move();
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|OUT','GJD/Stock','CST/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
-            $condition = ["no_pl" => $pl, "valid" => "validasi"];
+            $condition = ["no_pl" => $data_do->no_picklist, "valid" => "validasi"];
             $whereNotIn = [];
             $wherein = [];
-            $notin = json_decode($this->input->post('remove_item'));
-
+            $notin = json_decode("[]");
             if (count($notin) > 0) {
                 $whereNotIn = ['barcode_id' => $notin];
             }
-
-            if ($tipeBulk === 1) {
-                $bulkList = json_decode($this->input->post("bal"));
+            if ($type_bulk === "1") {
+                $bulkList = json_decode($bulks);
                 if (is_null($bulkList) || count($bulkList) < 1) {
                     throw new Exception("Silahkan scan item terlebih dahulu", 500);
                 }
-                $condition = ["a.no_pl" => $pl];
+                $condition = ["a.no_pl" => $data_do->no_picklist];
                 $wherein = $bulkList;
                 if (count($notin) > 0) {
                     $whereNotIn = ['bd.bulk_no_bulk' => $notin];
                 }
             }
-            $item = $this->getItemBarcode($condition, (int) $tipeBulk, $wherein, $whereNotIn);
+            $item = $this->getItemBarcode($condition, (int) $type_bulk, $wherein, $whereNotIn);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
             $listBarcode = [];
 
@@ -313,12 +416,13 @@ class Deliveryorder extends MY_Controller {
             $insertStokMvItem = [];
             $insertStokMvProd = [];
             $updateStokQuant = [];
+
             foreach ($item as $key => $value) {
                 $check = $this->checkLokasi(['stock_quant.quant_id' => $value->quant_id]);
                 if (!empty($check)) {
                     throw new \Exception($check, 500);
                 }
-                $insertDetail[] = ['do_id' => $idd, 'barcode_id' => $value->barcode_id, 'status' => 'done'];
+                $insertDetail[] = ['do_id' => $data_do->id, 'barcode_id' => $value->barcode_id, 'status' => 'done'];
                 $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','" . $value->lebar_greige . "','" . $value->uom_lebar_greige . "','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
@@ -340,23 +444,23 @@ class Deliveryorder extends MY_Controller {
             foreach ($smproduk as $key => $value) {
                 $insertStokMvProd[] = "('" . $nosm . "','" . $key . "','" . $value['nama'] . "','" . $value['qty'] . "','" . $value['uom'] . "','done','" . $value['order'] . "','')";
             }
-            //tambahan
+
+            $this->m_deliveryorder->update(['status' => 'done'], ['id' => $data_do->id]);
+            $this->_module->gen_history($sub_menu, $data_do->no, 'edit', ($users["nama"] ?? $username) . ' Merubah status DO - ' . $data_do->no . ' Menjadi TERKIRIM', $username);
             $this->m_deliveryorderdetail->insertBatch($insertDetail);
             $this->_module->simpan_stock_move_items_batch(implode(",", $insertStokMvItem));
             $this->_module->create_stock_move_produk_batch(implode(",", $insertStokMvProd));
             $this->m_Pickliststockquant->updateBatch($updateStokQuant, 'quant_id');
-            $this->m_Picklist->update(['status' => 'done'], ["no" => $pl, 'status' => 'validasi']);
-            $this->m_PicklistDetail->updateStatusWin(['no_pl' => $pl, 'valid' => 'validasi'], ['valid' => 'done'], ['barcode_id' => $listBarcode], true);
+            $this->m_Picklist->update(['status' => 'done'], ["no" => $data_do->no_picklist, 'status' => 'validasi']);
+            $this->m_PicklistDetail->updateStatusWin(['no_pl' => $data_do->no_picklist, 'valid' => 'validasi'], ['valid' => 'done'], ['barcode_id' => $listBarcode], true);
             $this->m_deliveryorder->insertDoMove(['move_id' => $nosm, 'no_do' => $nodo]);
-            //end tambahan
-            $this->_module->gen_history($sub_menu, $data['no'], 'create', ($users["nama"] ?? $username) . ' Menambahkan Dokumen DO - ' . $data["no"], $username);
+
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-            $kode_decrypt = encrypt_url($nodo);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Surat Jalan berhasil dibuat', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $kode_decrypt)));
+                    ->set_output(json_encode(array('message' => 'Surat Jalan berhasil dibuat', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
@@ -371,6 +475,11 @@ class Deliveryorder extends MY_Controller {
             $users = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
 
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
+            }
+
             $pl = $this->input->post("pl");
             $nodo = $this->input->post("nodo");
             $this->_module->startTransaction();
@@ -378,8 +487,11 @@ class Deliveryorder extends MY_Controller {
             if (empty($data)) {
                 throw new \Exception('Data Tidak ditemukan', 500);
             }
+            if ($data->faktur === "1") {
+                throw new \Exception('Data DO sudah masuk Faktur', 500);
+            }
             $nosm = "SM" . $this->_module->get_kode_stock_move();
-            $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','CST|OUT','CST/Stock','GJD/Stock','done','1','')";
+            $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
             $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $data->id, 'a.status' => 'done'], ['PD', 'SQ']);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
@@ -493,7 +605,7 @@ class Deliveryorder extends MY_Controller {
                 throw new \Exception();
             }
             $condition = ["do.no" => $kode_decrypt];
-            $base = $this->m_deliveryorder->getDataDetail(["a.no" => $kode_decrypt], true, "a.*,concat(pn.delivery_street,' ',pn.delivery_city,' ',pn.delivery_state) as alamat,p.type_bulk_id");
+            $base = $this->m_deliveryorder->getDataDetail(["a.no" => $kode_decrypt], true, "a.*,concat(pn.delivery_street,' ',pn.delivery_city,' ',pn.delivery_state) as alamat, pn.nama,p.type_bulk_id");
             $data["base"] = $base;
             if ($jenis === "sje") {
                 $data["count_bulk"] = $this->m_deliveryorderdetail->getCountBulk($condition);
@@ -516,6 +628,27 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'BAL berhasil ditambahkan', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function get_total_item() {
+        try {
+            $picklist = $this->input->post("pl");
+            $bal = $this->input->post("bal");
+            $bulk = json_decode($bal);
+
+            if (count($bulk) > 0) {
+                $data = $this->m_bulkdetail->getTotalItemBulk(['pl.no_pl' => $picklist], ["b.no_bulk" => $bulk]);
+            } else {
+                $data = $this->m_bulkdetail->getTotalItemBulk(['pl.no_pl' => $picklist]);
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'BAL berhasil ditambahkan', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data)));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
@@ -546,8 +679,8 @@ class Deliveryorder extends MY_Controller {
                         $field->corak_remark,
                         '-',
                         $field->warna_remark,
-                        $field->total_qty,
                         $field->jumlah_qty,
+                        $field->total_qty,
                         $field->uom,
                         ""
                     );
@@ -561,7 +694,7 @@ class Deliveryorder extends MY_Controller {
                 if (count($notin) > 0) {
                     $whereNotIn = ['bd.bulk_no_bulk' => $notin];
                 }
-                if (is_null($bulk)) {
+                if (empty($bulk)) {
                     $bulk = [];
                     throw new Exception();
                 }
@@ -576,8 +709,8 @@ class Deliveryorder extends MY_Controller {
                         $field->corak_remark,
                         '-',
                         $field->warna_remark,
-                        $field->total_qty,
                         $field->jumlah_qty,
+                        $field->total_qty,
                         $field->uom,
                         ""
                     );
@@ -615,7 +748,7 @@ class Deliveryorder extends MY_Controller {
         try {
             $data = array();
             $condition = ['picklist.status' => 'validasi'];
-            $list = $this->m_Picklist->getData(false, $condition, "DO");
+            $list = $this->m_Picklist->getData(false, $condition, ["DO", "delivery"]);
             $no = $_POST['start'];
             foreach ($list as $field) {
                 $kode_encrypt = encrypt_url($field->no);
@@ -630,8 +763,8 @@ class Deliveryorder extends MY_Controller {
                 $data[] = $row;
             }
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_Picklist->getCountAllData($condition, "DO"),
-                "recordsFiltered" => $this->m_Picklist->getCountDataFiltered($condition, "DO"),
+                "recordsTotal" => $this->m_Picklist->getCountAllData($condition, ["DO", 'delivery']),
+                "recordsFiltered" => $this->m_Picklist->getCountDataFiltered($condition, ["DO", 'delivery']),
                 "data" => $data,
             ));
             exit();
@@ -666,8 +799,8 @@ class Deliveryorder extends MY_Controller {
                         $field->bulk_no_bulk,
                         $field->corak_remark,
                         $field->warna_remark,
-                        $field->total_qty,
                         $field->jumlah_qty,
+                        $field->total_qty,
                         $field->uom,
                     );
                     $data[] = $row;
@@ -680,8 +813,8 @@ class Deliveryorder extends MY_Controller {
                         $no,
                         $field->corak_remark,
                         $field->warna_remark,
-                        $field->total_qty,
                         $field->jumlah_qty,
+                        $field->total_qty,
                         $field->uom,
                     );
                     $data[] = $row;
@@ -690,7 +823,7 @@ class Deliveryorder extends MY_Controller {
 
 
             echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_deliveryorderdetail->getDataCountAll(["valid" => "validasi"]),
+                "recordsTotal" => $this->m_deliveryorderdetail->getDataCountAll($condition, ["BULK"]),
                 "recordsFiltered" => $this->m_deliveryorderdetail->getDataCountFiltered($condition, ["BULK"]),
                 "data" => $data,
             ));
@@ -768,6 +901,11 @@ class Deliveryorder extends MY_Controller {
             $users = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
 
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
+            }
+
             $dataItem = json_decode($this->input->post("data"));
             $do = $this->input->post("do");
             $doid = $this->input->post("doid");
@@ -786,7 +924,7 @@ class Deliveryorder extends MY_Controller {
                 throw new Exception("Silahkan scan kembali data, ada data berubah pada database " . $countData . ' - ' . count($dataItem), 500);
             }
             $nosm = "SM" . $this->_module->get_kode_stock_move();
-            $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $do . "|1','CST|OUT','CST/Stock','GJD/Stock','done','1','')";
+            $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $do . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
 
             $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'done'], ['PD', 'SQ'], ['a.barcode_id' => $barcode]);
@@ -889,6 +1027,35 @@ class Deliveryorder extends MY_Controller {
         $this->output->set_status_header(200)
                 ->set_content_type('application/json', 'utf-8')
                 ->set_output(json_encode(['data' => $datas]));
+    }
+
+    public function broadcast() {
+        try {
+            $do = $this->input->post("do");
+            $data = $this->m_deliveryorder->getDataDetail(['a.no' => $do], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales");
+            $dataPesan = [
+                "{no_sj}" => $data->no_sj,
+                "{customer}" => $data->nama,
+                "{tgl_time_dokumen}" => $data->tanggal_dokumen,
+                "{no_pl}" => $data->no_picklist,
+                "{no_do}" => $data->no,
+                "{sales}" => $data->sales,
+                "{jenis_jual}" => $data->jenis_jual,
+                "{bulk}" => ($data->type_bulk_id === "1") ? "BAL" : "LOOSE PACKING"
+            ];
+
+            $this->m_deliveryorder->update(['notifikasi' => 1], ['no' => $do]);
+
+            $this->wa_message->sendMessageToGroup('new_do', $dataPesan, ['WAREHOUSE 24JAM'])->setFooter('footer_hms')->send();
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
     }
 
     protected function checkLokasi(array $condition, array $addCondition = ['stock_quant.lokasi_fisik' => 'XPD', 'stock_quant.lokasi' => 'GJD/Stock', 'id_category' => 21]) {

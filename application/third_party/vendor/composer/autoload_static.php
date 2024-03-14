@@ -71,6 +71,8 @@ class ComposerStaticInitd667858ccb36e1221a91b9a5ab83aef1
         'P' => 
         array (
             'Psr\\SimpleCache\\' => 16,
+            'Psr\\Log\\' => 8,
+            'Psr\\Cache\\' => 10,
             'PhpOffice\\PhpSpreadsheet\\' => 25,
         ),
         'M' => 
@@ -80,6 +82,10 @@ class ComposerStaticInitd667858ccb36e1221a91b9a5ab83aef1
         'C' => 
         array (
             'Complex\\' => 8,
+            'Cache\\TagInterop\\' => 17,
+            'Cache\\Bridge\\SimpleCache\\' => 25,
+            'Cache\\Adapter\\Common\\' => 21,
+            'Cache\\Adapter\\Apcu\\' => 19,
         ),
     );
 
@@ -87,6 +93,14 @@ class ComposerStaticInitd667858ccb36e1221a91b9a5ab83aef1
         'Psr\\SimpleCache\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
+        'Psr\\Cache\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/cache/src',
         ),
         'PhpOffice\\PhpSpreadsheet\\' => 
         array (
@@ -99,6 +113,22 @@ class ComposerStaticInitd667858ccb36e1221a91b9a5ab83aef1
         'Complex\\' => 
         array (
             0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
+        ),
+        'Cache\\TagInterop\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cache/tag-interop',
+        ),
+        'Cache\\Bridge\\SimpleCache\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cache/simple-cache-bridge',
+        ),
+        'Cache\\Adapter\\Common\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cache/adapter-common',
+        ),
+        'Cache\\Adapter\\Apcu\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cache/apcu-adapter',
         ),
     );
 

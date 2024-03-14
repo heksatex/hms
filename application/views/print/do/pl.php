@@ -16,46 +16,44 @@
                 <div class="col-xs-4">
                     <img style="width: 30%" src="<?= base_url('dist/img/static/heksatex_c.jpg') ?>" >
                     <strong><span style="margin: auto;
-                                  font-size: 12px;">PT HEKSATEX INDAH</span></strong>
+                                  font-size: 14px;">PT HEKSATEX INDAH</span></strong>
                 </div>
-                <div class="col-xs-3">
-                    <div class="title" style="text-align: end;">
+                <div class="col-xs-4">
+                    <div class="title" style="text-align: center">
                         <span>
                             packing list (pl)
                         </span>
                     </div>
 
                 </div>
-                <div class="col-xs-5 item-right" style="margin-top: 10px;">
-                    <div class="row">
-                        <div class="form-group">
-                            <div class="col-xs-12">
+                <div class="col-xs-4 item-right" style="margin-top: 10px;" >
+
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <div class="row">
                                 <div class="col-xs-2">
-                                    <label class="form-label">No.</label>
+                                    <label class="form-label">No</label>
                                 </div>
-                                <div class="col-xs-2">
-                                    <label class="form-label">:</label>
+                                <div class="col-xs-10">
+                                    <label class="form-label nosjprint" style="font-weight: 500;">: <?= $base->no_sj ?></label>
                                 </div>
-                                <div class="col-xs-6">
-                                    <label class="form-label nosjprint"><?= $base->no_sj ?></label>
-                                </div>
+
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="col-xs-12">
-                                <div class="col-xs-2">
-                                    <label class="form-label">Tanggal</label>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        <label class="form-label">Tanggal</label>
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <label class="form-label" style="font-size: 15px; font-weight: 500;">: <?= date("d-M-Y") ?></label>
+                                    </div>
                                 </div>
-                                <div class="col-xs-2">
-                                    <label class="form-label">:</label>
-                                </div>
-                                <div class="col-xs-6">
-                                    <label class="form-label" style="font-size: 15px;"><?= date("d-M-Y") ?></label>
-                                </div>
+
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             <div class="row">
@@ -63,8 +61,15 @@
                     <thead>
                         <tr>
                             <td rowspan="2" class="row-1" style="font-size: 15px;
-                                width: 10%">Kepada Alamat</td>
-                            <td rowspan="2" style="width: 45%"><?= $base->alamat ?></td>
+                                width: 10%">
+                                <p>Kepada</p>
+                                <p>Alamat</p>
+
+                            </td>
+                            <td rowspan="2" style="width: 45%">
+                                <p><?= $base->nama ?></p>
+                                <p><?= $base->alamat ?></p>
+                            </td>
                             <td style="font-weight: 600;
                                 font-size: 13px;
                                 width: 45%">Catatan</td>
@@ -117,17 +122,48 @@
                             $id = null;
                             $satuan = '';
                             $bulk = null;
+                            $sub_jml_qty = 0;
+                            $sub_total_qty = 0;
                             foreach ($data as $key => $value) {
                                 $no++;
                                 $jml_qty += $value->jumlah_qty;
                                 $total_qty += $value->total_qty;
+//                                log_message('error', $value->jumlah_qty . " - " . $sub_jml_qty);
                                 $detailQty = $this->m_deliveryorderdetail->detailReportQty([
                                     'bulk_no_bulk' => $value->bulk_no_bulk, 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $base->no_picklist
                                         ], true);
                                 $perpage = 10;
                                 $totalData = count($detailQty);
                                 $totalPage = ceil($totalData / $perpage);
+                                if (!is_null($bulk)) {
+                                    if ($bulk !== $value->bulk_no_bulk) {
+                                        ?>
+                                        <tr style="text-align: center;">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td><?= $sub_jml_qty ?? 0 ?></td>
+                                            <td><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
+                                        </tr>
+                                        <?php
+                                        $sub_total_qty = 0;
+                                        $sub_jml_qty = 0;
+                                    }
+                                }
 
+                                $sub_jml_qty += $value->jumlah_qty;
+                                $sub_total_qty += $value->total_qty;
                                 for ($nn = 0; $nn < $totalPage; $nn++) {
                                     $page = $nn * $perpage;
                                     $satuan = $detailQty[0]->uom;
@@ -138,8 +174,8 @@
 
                                         <td><?= ($bulk === $tempBulk) ? '' : $no ?></td>
                                         <td><?= ($bulk === $tempBulk) ? '' : $value->bulk_no_bulk ?></td>
-                                        <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi) ?></td>
-                                        <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
+                                        <td style="text-align: left;"><?= str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi) ?></td>
+                                        <td style="text-align: left;"><?= str_replace('|', ' ', $value->warna_remark) ?></td>
 
                                         <td><?= isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "" ?></td>
                                         <td><?= isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "" ?></td>
@@ -153,8 +189,8 @@
                                         <td><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
 
 
-                                        <td style=" text-align: center;"><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
-                                        <td style="text-align: right;"><?= ($id === $tempID) ? '' : $value->total_qty . ' ' . $satuan ?></td>
+                                        <td style=" text-align: center;"><?= $value->jumlah_qty ?></td>
+                                        <td style="text-align: right;"><?= $value->total_qty . ' ' . $satuan ?></td>
                                     </tr>
                                     <?php
                                     $id = $tempID;
@@ -162,6 +198,24 @@
                                 }
                             }
                             ?>
+                            <tr style="text-align: center;">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><?= $sub_jml_qty ?? 0 ?></td>
+                                <td><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
+                            </tr>
                         </tbody>
                         <?php
                     } else {
@@ -217,8 +271,8 @@
                     <?php } ?>
                 </table>
                 <div class="col-xs-4">
-                    <p style="font-weight: 600;">Sub - Total GL/PCS : <?= $jml_qty ?> </p>
-                    <p style="font-weight: 600;">Sub - Total Qty : <?= $total_qty ?> </p>
+                    <p><strong>Sub - Total GL/PCS :</strong> <?= $jml_qty ?> </p>
+                    <p><strong>Sub - Total Qty :</strong> <?= $total_qty ?> </p>
                 </div>
             </div>
             <div class="row">

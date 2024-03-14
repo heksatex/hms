@@ -315,7 +315,7 @@
                                                 dataInvalid = 0;
                                                 table.clear().draw();
                                                 $("#no_pl").html(dataPicklist.no);
-                                                $("#sales").html(dataPicklist.sales_kode);
+                                                $("#sales").html(dataPicklist.sales);
                                                 $("#cust").html(dataPicklist.nama);
                                                 $("#jj").html(dataPicklist.jenis_jual);
                                                 $("#tgl_picklist").html(dataPicklist.tanggal_input);

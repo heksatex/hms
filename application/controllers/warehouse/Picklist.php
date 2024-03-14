@@ -19,6 +19,8 @@ class Picklist extends MY_Controller {
         $this->load->library("token");
         $this->load->model("m_Pickliststockquant");
         $this->load->library('prints');
+        $this->load->library("wa_message");
+        $this->load->model("m_user");
     }
 
     protected $val_form = array(
@@ -170,6 +172,8 @@ class Picklist extends MY_Controller {
             $condition = [];
             $in = [];
             $marketing = $this->input->post('marketing');
+            $form = $this->input->post("form") ?? "";
+            log_message('error', json_encode($form));
             if ($this->input->post('filter') !== "" && $_POST["search"]["value"] !== "") {
                 $condition = array_merge($condition, ['stock_quant.' . $this->input->post('filter') . " LIKE" => '%' . $_POST["search"]["value"] . '%']);
             }
@@ -177,6 +181,35 @@ class Picklist extends MY_Controller {
                 if (trim($marketing[0]) !== "")
                     $in = array_merge($in, ['`stock_quant`.`sales_group`' => $marketing]);
             }
+            $keyFilter = "";
+            $valSearch = "";
+            if (!is_string($form)) {
+                foreach ($form as $values) {
+                    if (!is_array($values)) {
+                        continue;
+                    }
+                    foreach ($values as $value) {
+                        if (is_array($value)) {
+                            foreach ($values as $key => $filter) {
+                                if (key($filter) === "filter") {
+                                    $keyFilter = "stock_quant." . $filter[key($filter)] . ' LIKE';
+                                } else if (key($filter) === "search") {
+                                    $valSearch = "%" . $filter[key($filter)] . '%';
+                                } else if (key($filter) === "remove") {
+                                    $keyFilter = "";
+                                    $valSearch = "";
+                                }
+                            }
+                            if ($keyFilter !== "" && $valSearch !== "") {
+                                $condition = array_merge($condition, [$keyFilter => $valSearch]);
+                                $keyFilter = "";
+                                $valSearch = "";
+                            }
+                        }
+                    }
+                }
+            }
+//            log_message('error', json_encode($condition));
             $list = $this->m_Pickliststockquant->getDataItemPicklist($condition, $in, true);
             $no = $_POST['start'];
             foreach ($list as $field) {
@@ -296,11 +329,13 @@ class Picklist extends MY_Controller {
                 );
                 $data[] = $row;
             }
-            echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_PicklistDetail->getCountAllData($condition),
-                "recordsFiltered" => $this->m_PicklistDetail->getCountDataFiltered($condition),
-                "data" => $data,
-            ));
+            echo json_encode(
+                    array("draw" => $_POST['draw'],
+                        "recordsTotal" => $this->m_PicklistDetail->getCountAllData($condition),
+                        "recordsFiltered" => $this->m_PicklistDetail->getCountDataFiltered($condition),
+                        "data" => $data,
+                    )
+            );
             exit();
         } catch (Exception $exc) {
             
@@ -314,6 +349,7 @@ class Picklist extends MY_Controller {
             }
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
+            $nama = $this->session->userdata('nama');
             $pl = $this->input->post('pl');
             $datas = $this->input->post('item');
             if (count($datas) < 1) {
@@ -389,6 +425,10 @@ class Picklist extends MY_Controller {
                 }
             }
             $this->_module->gen_history($sub_menu, $pl, 'edit', 'Menambahkan Barcode ' . implode(',', $barcodeInput), $username);
+            if ($this->input->post('status') === "realisasi") {
+                $this->_module->gen_history($sub_menu, $pl, 'edit', ($nama["nama"] ?? "") . ' Melakukan Realisasi barcode ' . implode(',', $barcodeInput), $username);
+            }
+
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Barcode berhasil ditambahkan', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -407,6 +447,11 @@ class Picklist extends MY_Controller {
             }
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
+
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
+            }
             $id = $this->input->post('id');
             $pl = $this->input->post('pl');
             $status = $this->input->post('status');
@@ -513,7 +558,6 @@ class Picklist extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-
             $this->_module->gen_history($sub_menu, $input["no"], 'create', logArrayToString('; ', $input), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -532,6 +576,11 @@ class Picklist extends MY_Controller {
             $username = $this->session->userdata('username');
             if (empty($this->session->userdata('status'))) {
                 throw new \Exception('Waktu Anda Telah Habis', 410);
+            }
+
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                throw new \Exception('Akses tidak diijinkan', 500);
             }
 
             $pl = $this->input->post('pl');
@@ -653,5 +702,65 @@ class Picklist extends MY_Controller {
         $cnt = $this->load->view('report/html_to_pdf/picklist_detail', $data, true);
 //        $this->load->view('report/html_to_pdf/picklist_detail', $data);
         $this->dompdflib->generate($cnt);
+    }
+
+    public function broadcast() {
+        try {
+            $pl = $this->input->post("pl");
+            $data = $this->m_Picklist->getDataByID(['picklist.no' => $pl]);
+
+            $dataPesan = [
+                "{no_pl}" => $pl,
+                "{customer}" => $data->nama,
+                "{marketing}" => $data->sales,
+                "{jenis_jual}" => $data->jenis_jual,
+                "{bulking}" => ($data->type_bulk_id === "1") ? "BAL" : "LOOSE PACKING"
+            ];
+            $this->m_Picklist->update([
+                "notifikasi" => 1,
+                    ], ['no' => $pl]);
+
+            $this->wa_message->sendMessageToGroup('new_picklist', $dataPesan, ['WAREHOUSE 24JAM'])->setFooter('footer_hms')->send();
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function lokasi_fisik() {
+        try {
+            $no = $this->input->get('no');
+            $data = $this->m_PicklistDetail->reportLokasiFisikRak(['no_pl' => $no, 'valid !=' => 'cancel']);
+            if (empty($data)) {
+                throw new Exception("", 500);
+            }
+            $tempLokasi = [];
+            $lisdata = [];
+            foreach ($data as $value) {
+                $tempLokasi[] = $value->lokasi_fisik;
+            }
+            $datas = $this->m_PicklistDetail->reportLokasiFisik(['no_pl' => $no, 'valid !=' => 'cancel'], ['lokasi_fisik' => $tempLokasi]);
+            if (empty($datas)) {
+                throw new Exception("", 500);
+            }
+            $totalItem = 0;
+            foreach ($datas as $key => $value) {
+                $totalItem++;
+                if (isset($lisdata[$value->lokasi_fisik])) {
+                    $lisdata[$value->lokasi_fisik][] = $value;
+                } else {
+                    $lisdata[$value->lokasi_fisik] = [];
+                    $lisdata[$value->lokasi_fisik][] = $value;
+                }
+            }
+            $this->load->view('print/picklist/printpl', ['pl' => $no, 'data' => $lisdata, 'total' => $totalItem]);
+        } catch (Exception $ex) {
+            
+        }
     }
 }

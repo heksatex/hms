@@ -13,6 +13,8 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Settings;
+use Cache\Adapter\Apcu\ApcuCachePool;
+use Cache\Bridge\SimpleCache\SimpleCacheBridge;
 
 class Draftsuratjalan extends MY_Controller {
 
@@ -29,58 +31,158 @@ class Draftsuratjalan extends MY_Controller {
         $this->load->view('report/v_draft_surat_jalan', $data);
     }
 
-    public function test() {
+    public function export() {
+        try {
 
-        $style = [
-            'font' => [
-                'bold' => true
-            ]
-        ];
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'No SJ');
-        $sheet->setCellValue('B1', 'MAKLOON/HI/24/II/0001');
-        $sheet->setCellValue('C1', 'Customer    ');
-        $sheet->setCellValue('D1', 'KORIN JUNG WOO (MAKLOON)');
+            $style = [
+                'font' => [
+                    'bold' => true
+                ]
+            ];
 
-        $sheet->setCellValue('A2', "Pack");
-        $sheet->setCellValue('B2', "PL24020002");
-        $sheet->setCellValue('C2', "Alamat");
-        $sheet->setCellValue('D2', "Jl. Raya Bandung Garut Km 25 Kebon Suuk KP. 02/09");
+            $nopl = $this->input->post("no_pl");
+            $pkl = $this->m_Picklist->draftSuratJalan(['picklist.no' => $nopl]);
+            if (empty($pkl)) {
+                throw new Exception("No Picklist Tidak ditemukan", 500);
+            }
+            if (!in_array($pkl->status, ['done', 'validasi'])) {
+                throw new Exception("No Picklist Dalam Status " . $pkl->status, 500);
+            }
 
-        $sheet->setCellValue('A3', "Tanggal");
-        $sheet->setCellValue('B3', "2/13/2024 8:54");
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A1', 'No SJ');
+            $sheet->setCellValue('B1', $pkl->no_sj ?? "");
+            $sheet->setCellValue('C1', 'Customer    ');
+            $sheet->setCellValue('D1', $pkl->nama ?? "");
 
-        $sheet->setCellValue('A5', 'No Urut');
-        $sheet->setCellValue('B5', 'CTH No');
-        $sheet->setCellValue('C5', 'Design No.');
-        $sheet->setCellValue('D5', 'Color');
-        $sheet->setCellValue('E5', 'F1');
-        $sheet->setCellValue('F5', 'F2');
-        $sheet->setCellValue('G5', 'F3');
-        $sheet->setCellValue('H5', 'F4');
-        $sheet->setCellValue('I5', 'F5');
-        $sheet->setCellValue('J5', 'F6');
-        $sheet->setCellValue('K5', 'F7');
-        $sheet->setCellValue('L5', 'F8');
-        $sheet->setCellValue('M5', 'F9');
-        $sheet->setCellValue('N5', 'F10');
+            $sheet->setCellValue('A2', "Pack");
+            $sheet->setCellValue('B2', $pkl->no ?? "");
+            $sheet->setCellValue('C2', "Alamat");
+            $sheet->setCellValue('D2', $pkl->alamat ?? "");
 
-        $spreadsheet->getActiveSheet()->getStyle("B1")->applyFromArray($style);
-        $spreadsheet->getActiveSheet()->getStyle("B2")->applyFromArray($style);
-        $spreadsheet->getActiveSheet()->getStyle("B3")->applyFromArray($style);
-        
-        $spreadsheet->getActiveSheet()->getStyle("D1")->applyFromArray($style);
-        $spreadsheet->getActiveSheet()->getStyle("D2")->applyFromArray($style);
-        $writer = new Xlsx($spreadsheet);
-        $filename = 'excel-report';
+            $sheet->setCellValue('A3', "Tanggal");
+            $sheet->setCellValue('B3', $pkl->tanggal_input ?? "");
 
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
-        header('Cache-Control: max-age=0');
+            $sheet->setCellValue('A5', 'No Urut');
+            $sheet->setCellValue('B5', 'CTH No');
+            $sheet->setCellValue('C5', 'Design No.');
+            $sheet->setCellValue('D5', 'Color');
+            $sheet->setCellValue('E5', 'F1');
+            $sheet->setCellValue('F5', 'F2');
+            $sheet->setCellValue('G5', 'F3');
+            $sheet->setCellValue('H5', 'F4');
+            $sheet->setCellValue('I5', 'F5');
+            $sheet->setCellValue('J5', 'F6');
+            $sheet->setCellValue('K5', 'F7');
+            $sheet->setCellValue('L5', 'F8');
+            $sheet->setCellValue('M5', 'F9');
+            $sheet->setCellValue('N5', 'F10');
+            $sheet->setCellValue('O5', 'Total PCS');
+            $sheet->setCellValue('P5', 'Total Qty');
+            $sheet->setCellValue('Q5', 'UOM');
+            $sheet->setCellValue('R5', 'N.W[KGS]');
+            $sheet->setCellValue('S5', 'G.W[KGS]');
 
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->save('php://output');
+            $no = 0;
+            $jml_qty = 0;
+            $total_qty = 0;
+            $id = null;
+            $satuan = '';
+            $nourut = 0;
+            $total_net = 0;
+            $total_groos = 0;
+            $tempBulk = null;
+
+            $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
+                    ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                    $nopl, ['warna_remark', 'corak_remark', 'uom'], ["BULK"]
+            );
+            foreach ($picklist_detail as $key => $value) {
+                $no++;
+                $jml_qty += $value->jml_qty;
+                $total_qty += $value->total_qty;
+                $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
+                $perpage = 10;
+                $totalData = count($detailQty);
+                $totalPage = ceil($totalData / $perpage);
+                $rowStartData = 5;
+                for ($nn = 0; $nn < $totalPage; $nn++) {
+                    $rowStartData += $no;
+                    $page = $nn * $perpage;
+                    $satuan = $detailQty[0]->uom;
+                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom;
+                    $showNoUrut = "";
+                    $showNet = "";
+                    $showGross = "";
+                    if ($tempBulk !== $value->no_bulk) {
+                        $nourut++;
+                        $total_net += $value->net_weight;
+                        $total_groos += $value->gross_weight;
+
+                        $showGross = $value->gross_weight;
+                        $showNet = $value->net_weight;
+                        $showNoUrut = $nourut;
+                    }
+
+                    $sheet->setCellValue("A" . $rowStartData, ($pkl->type_bulk_id === "1") ? $showNoUrut : $no);
+                    $sheet->setCellValue('B' . $rowStartData, ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk);
+                    $sheet->setCellValue("C" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
+                    $sheet->setCellValue("D" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark));
+                    $sheet->setCellValue("E" . $rowStartData, isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "");
+                    $sheet->setCellValue("F" . $rowStartData, isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "");
+                    $sheet->setCellValue("G" . $rowStartData, isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "");
+                    $sheet->setCellValue("H" . $rowStartData, isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "");
+                    $sheet->setCellValue("I" . $rowStartData, isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "");
+                    $sheet->setCellValue("J" . $rowStartData, isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "");
+                    $sheet->setCellValue("K" . $rowStartData, isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "");
+                    $sheet->setCellValue("L" . $rowStartData, isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "");
+                    $sheet->setCellValue("M" . $rowStartData, isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "");
+                    $sheet->setCellValue("N" . $rowStartData, isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "");
+
+                    $sheet->setCellValue('O' . $rowStartData, ($id === $tempID) ? '' : $value->jml_qty);
+                    $sheet->setCellValue('P' . $rowStartData, ($id === $tempID) ? '' : $value->total_qty);
+                    $sheet->setCellValue('Q' . $rowStartData, ($id === $tempID) ? '' : $satuan);
+                    $sheet->setCellValue('R' . $rowStartData, $showNet);
+                    $sheet->setCellValue('S' . $rowStartData, $showGross);
+
+                    $id = $tempID;
+                    $tempBulk = $value->no_bulk;
+                }
+            }
+
+            $sheet->setCellValue("C" . ($rowStartData + 2), "TOTAL : " . $nourut . " CARTONS");
+            $sheet->setCellValue('O' . ($rowStartData + 2), $jml_qty);
+            $sheet->setCellValue('P' . ($rowStartData + 2), $total_qty);
+            $sheet->setCellValue('R' . ($rowStartData + 2), $total_net);
+            $sheet->setCellValue('S' . ($rowStartData + 2), $total_groos);
+
+            $spreadsheet->getActiveSheet()->getStyle("B1")->applyFromArray($style);
+            $spreadsheet->getActiveSheet()->getStyle("B2")->applyFromArray($style);
+            $spreadsheet->getActiveSheet()->getStyle("B3")->applyFromArray($style);
+
+            $spreadsheet->getActiveSheet()->getStyle("D1")->applyFromArray($style);
+            $spreadsheet->getActiveSheet()->getStyle("D2")->applyFromArray($style);
+            $writer = new Xlsx($spreadsheet);
+            $filename = 'darat_surat_jalan_' . $nopl;
+
+//        header('Content-Type: application/vnd.ms-excel');
+//        header('Content-Disposition: attachment;filename="' . $filename . '.xlsx"');
+//        header('Cache-Control: max-age=0');
+
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . 'dist/storages/report/suratjalan/' . $filename . '.xlsx');
+
+//        $writer->save('php://output');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url('dist/storages/report/suratjalan/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
     }
 
     public function checking() {
@@ -108,6 +210,16 @@ class Draftsuratjalan extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
+    }
+
+    public function testMemory() {
+        try {
+            $tanggal = "";
+            $tahun = date('Y', strtotime($tanggal));
+            $bulan = date('n', strtotime($tanggal));
+        } catch (Exception $ex) {
+            
         }
     }
 }

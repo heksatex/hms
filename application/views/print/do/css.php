@@ -15,6 +15,8 @@
         font-weight: 800;
         border-bottom: solid;
         border-width: thin;
+        font-size: 16px;
+        text-decoration: underline;
     }
     .nosjprint{
         font-size: 14px;
@@ -71,9 +73,6 @@
             display: flex;
             /*height:3vh;*/
             align-items: end;
-        }
-        .total_pcs{
-            width: 80%
         }
         .footer .divs{
             height: 10vh;
