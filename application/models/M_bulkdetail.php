@@ -40,7 +40,7 @@ class M_bulkdetail extends CI_Model {
 
     public function getTotalItem($condition = []) {
         $this->db->from($this->table);
-        $this->db->join('bulk b','b.no_bulk = bulk_no_bulk');
+        $this->db->join('bulk b', 'b.no_bulk = bulk_no_bulk');
         if (count($condition) > 0) {
             $this->db->where($condition);
         }
@@ -83,5 +83,17 @@ class M_bulkdetail extends CI_Model {
         }
         $query = $this->db->select('b.no_bulk,barcode as barcode_id,sq.*')->get();
         return $query->result();
+    }
+
+    public function getTotalItemBulk(array $condition, $in = []) {
+        $this->db->from($this->table . ' bd');
+        $this->db->where($condition);
+        foreach ($in as $key => $value) {
+            $this->db->where_in($key, $value);
+        }
+        $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk', 'right');
+        $this->db->join('picklist_detail pl', '(pl.barcode_id = bd.barcode and pl.valid != "cancel")');
+        $query = $this->db->select('count(DISTINCT(b.no_bulk)) as total_bulk, sum(qty) as total_qty, count(qty) as jumlah_qty')->get();
+        return $query->row();
     }
 }

@@ -100,6 +100,7 @@ class M_deliveryorder extends CI_Model {
         if ($join) {
             $this->db->join("picklist p", "p.no = a.no_picklist");
             $this->db->join('partner as pn', 'pn.id = p.customer_id', 'left');
+            $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = p.sales_kode', 'left');
         }
         $this->db->where($condition);
         $result = $this->db->select($select)->get();
@@ -109,5 +110,64 @@ class M_deliveryorder extends CI_Model {
     public function insertDoMove(array $value) {
         $this->db->insert('deliveryorder_stock_move', $value);
         return $this->db->insert_id() ?? null;
+    }
+
+    protected function _getDataReport() {
+        $this->db->from($this->table . ' ddo');
+        $this->db->join("delivery_order_detail dod", 'dod.do_id = ddo.id');
+        $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
+        $this->db->join("picklist p", 'p.no = ddo.no_picklist');
+        $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
+        $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = p.sales_kode', 'left');
+        $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,"
+                . "corak_remark,warna_remark,uom,COUNT(pd.barcode_id) as total_lot,COUNT(pd.qty) as total_qty,msg.nama_sales_group as marketing,ddo.user,ddo.note");
+    }
+
+    public function getDataReport(array $condition, $order = "", $rekap = "global", $summary = false) {
+        $this->_getDataReport();
+        if ($rekap === 'global') {
+            $this->db->group_by("ddo.no");
+        } else {
+            $this->db->group_by("pd.corak_remark,pd.warna_remark,pd.uom");
+        }
+        if (count($condition) > 0)
+            $this->db->where($condition);
+
+        if (!empty($order))
+            $this->db->order_by($order);
+
+        if (isset($_POST['length'])) {
+            if ($_POST['length'] != -1)
+                $this->db->limit($_POST['length'], $_POST['start']);
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getDataReportTotal(array $condition, $order = "", $rekap = "global", $summary = false) {
+        $this->_getDataReport();
+        if ($rekap === 'global') {
+            $this->db->group_by("ddo.no");
+        } else {
+            $this->db->group_by("pd.corak_remark,pd.warna_remark,pd.uom");
+        }
+        if (count($condition) > 0)
+            $this->db->where($condition);
+
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function getDataReportTotalAll(array $condition, $order = "", $rekap = "global", $summary = false) {
+        $this->_getDataReport();
+        if ($rekap === 'global') {
+            $this->db->group_by("ddo.no");
+        } else {
+            $this->db->group_by("pd.corak_remark,pd.warna_remark,pd.uom");
+        }
+        if (count($condition) > 0)
+            $this->db->where($condition);
+
+        return $this->db->count_all_results();
     }
 }

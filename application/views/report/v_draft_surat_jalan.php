@@ -1,4 +1,4 @@
-!<!doctype html>
+<!doctype html>
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
@@ -29,28 +29,28 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-dsj" id="form-dsj" action="<?= base_url('report/draftsuratjalan/checking') ?>">
                                 <div class="col-md-4 col-xs-12">
-                                    <div class="row">
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label required">No Picklist</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="text" name="no_pl" id="no_pl" class="form-control" required>
-                                                    <label class="text-sm text-info">Tekan F2 Untuk Kembali Cari Picklist</label>
-                                                </div>
-                                            </div>
 
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">No. SJ</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <span id="nosj"></span>
-                                                </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label required">No Picklist</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <input type="text" name="no_pl" id="no_pl" class="form-control" required>
+                                                <label class="text-sm text-info">Tekan F2 Untuk Kembali Cari Picklist</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label">No. SJ</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <span id="nosj"></span>
                                             </div>
                                         </div>
                                     </div>
+
                                 </div>
                                 <div class="col-md-4 col-xs-12">
                                     <div class="form-group">

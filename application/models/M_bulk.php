@@ -108,9 +108,11 @@ class M_bulk extends CI_Model {
     }
 
     public function listBulkDetail(array $condition) {
+        $this->order = ['bulk.no_bulk' => 'asc'];
         $this->_listBulkDetail($condition);
 //        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
         $q = $this->db->select('bulk.no_bulk,bulk.tanggal_input,total_qty,jumlah_qty')->get();
+
         return $q->result();
     }
 
@@ -212,7 +214,7 @@ class M_bulk extends CI_Model {
             $this->db->where($condition);
         return $this->db->count_all_results();
     }
-    
+
     public function getDataByIDPicklist($condition = [], $join = "") {
         $this->db->from('picklist');
         $select = 'picklist.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk, msg.nama_sales_group as sales';

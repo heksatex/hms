@@ -23,7 +23,7 @@
             }
         </style>
     </head>
-    <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
+    <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
                 <?php

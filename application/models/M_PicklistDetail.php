@@ -347,6 +347,7 @@ class M_PicklistDetail extends CI_Model {
             switch ($value) {
                 case "BULK":
                     $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
+                    $this->db->select(",dt.bulk_no_bulk");
                     foreach ($in as $key => $value) {
                         $this->db->where_in($key, $value);
                     }
@@ -414,6 +415,35 @@ class M_PicklistDetail extends CI_Model {
             $this->db->where($condition);
         }
         return $this->db->count_all_results();
+    }
+
+    public function reportLokasiFisikRak(array $condition) {
+        $this->db->select("lokasi_fisik");
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        $this->db->group_by('lokasi_fisik');
+        $this->db->order_by("lokasi_fisik", "asc");
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function reportLokasiFisik(array $condition, array $in = []) {
+        $this->db->from($this->table);
+        $this->db->select("lokasi_fisik,barcode_id,corak_remark,warna_remark,qty");
+        $this->db->where($condition);
+        foreach ($in as $key => $value) {
+            $this->db->where_in($key, $value);
+        }
+        $this->db->order_by("lokasi_fisik", "asc");
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCountDetail(array $condition) {
+        $this->db->from($this->table . " pd");
+        $this->db->where($condition);
+        $query = $this->db->select('count(pd.barcode_id) as total_item, sum(pd.qty) as total_qty, count(pd.qty) as jumlah_qty')->get();
+        return $query->row();
     }
 
     public function __destruct() {

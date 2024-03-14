@@ -155,7 +155,7 @@ class M_Picklist extends CI_Model {
         }
     }
 
-    protected function getLevelSales(): string {
+    public function getLevelSales(): string {
         $sales_group = $this->db->query('select nama_sales_group from mst_sales_group '
                         . 'join user on user.sales_group = mst_sales_group.kode_sales_group '
                         . 'where user.username = "' . $this->session->userdata('username') . '"')
@@ -169,8 +169,8 @@ class M_Picklist extends CI_Model {
 //        $this->db->where($this->table . '.id', $id);
         switch ($join) {
             case "DO":
-                $this->db->join('delivery_order do', 'do.no_picklist = ' . $this->table . '.no', 'left');
-                $select .= ",do.no_sj";
+                $this->db->join('delivery_order do', '(do.no_picklist = ' . $this->table . '.no and do.status = "done")', 'left');
+                $select .= ",do.no_sj,do.status as sj_status";
                 break;
 
             default:

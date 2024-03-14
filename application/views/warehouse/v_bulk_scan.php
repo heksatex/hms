@@ -23,8 +23,11 @@
             }
             .bolded {
                 font-weight:bold;
-                font-size: 150%;
+                /*font-size: 100%;*/
                 letter-spacing: 2px;
+            }
+            .list{
+                font-size: 150%;
             }
 
             .count {
@@ -36,7 +39,7 @@
                 font-weight:bold;
                 font-size: 200%;
                 letter-spacing: 2px;
-                float: right;
+                /*float: right;*/
                 text-align: end;
             }
 
@@ -57,7 +60,7 @@
             }
             .notify{
                 font-weight: 400;
-                font-size: 150%;
+                font-size: 200%;
             }
         </style>
     </head>
@@ -346,6 +349,7 @@
                                         statusScan = "Silahkan Scan Barcode Item";
                                         $("#search").blur();
                                         $("#search").focus();
+                                        await loadSummary($("#pl").val(), data.no_bulk);
                                         break;
                                     case "cancel":
                                         await loadSummary($("#pl").val());
@@ -368,6 +372,21 @@
                         false
                         );
             });
+            const isNumb = (event, element) => {
+                event.target.setCustomValidity('');
+                const patt = /^\d+\.{0,1}\d{0,2}$/;
+                let value = event.target.value;
+                if (!patt.test(value)) {
+                    event.target.reportValidity();
+                    element.setAttribute("maxlength", value.length);
+                } else
+                {
+                    element.removeAttribute("maxlength")
+                }
+                if (value.length === 0) {
+                    element.removeAttribute("maxlength");
+                }
+            }
         </script>
     </body>
 </html>

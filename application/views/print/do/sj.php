@@ -16,55 +16,60 @@
                 <div class="col-xs-4">
                     <img style="width: 30%" src="<?= base_url('dist/img/static/heksatex_c.jpg') ?>" >
                     <strong><span style="margin: auto;
-                                  font-size: 12px;">PT HEKSATEX INDAH</span></strong>
+                                  font-size: 14px;">PT HEKSATEX INDAH</span></strong>
                 </div>
-                <div class="col-xs-3">
-                    <div class="title" style="text-align: end;">
+                <div class="col-xs-4">
+                    <div class="title" style="text-align: center;">
                         <span>
                             surat jalan
                         </span>
                     </div>
 
                 </div>
-                <div class="col-xs-5 item-right" style="margin-top: 10px;">
-                    <div class="row">
-                        <div class="form-group">
-                            <div class="col-xs-12">
-                                <div class="col-xs-2">
-                                    <label class="form-label">No.</label>
-                                </div>
-                                <div class="col-xs-2">
-                                    <label class="form-label">:</label>
-                                </div>
-                                <div class="col-xs-6">
-                                    <label class="form-label nosjprint"><?= $base->no_sj ?></label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-xs-12">
-                                <div class="col-xs-2">
-                                    <label class="form-label">Tanggal</label>
-                                </div>
-                                <div class="col-xs-2">
-                                    <label class="form-label">:</label>
-                                </div>
-                                <div class="col-xs-6">
-                                    <label class="form-label" style="font-size: 15px;"><?= date("d-M-Y") ?></label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-xs-4 item-right" style="margin-top: 10px;" >
+                        
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <div class="row">
+                                        <div class="col-xs-2">
+                                            <label class="form-label">No</label>
+                                        </div>
+                                        <div class="col-xs-10">
+                                            <label class="form-label nosjprint" style="font-weight: 500;">: <?= $base->no_sj ?></label>
+                                        </div>
 
-                </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12">
+                                        <div class="row">
+                                            <div class="col-xs-4">
+                                                <label class="form-label">Tanggal</label>
+                                            </div>
+                                            <div class="col-xs-8">
+                                                <label class="form-label" style="font-size: 15px; font-weight: 500;">: <?= date("d-M-Y") ?></label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
             </div>
             <div class="row">
                 <table class="table table-bordered header-table" style="width:100%">
                     <thead>
                         <tr>
                             <td rowspan="2" class="row-1" style="font-size: 15px;
-                                width: 10%">Kepada Alamat</td>
-                            <td rowspan="2" style="width: 45%"><?= $base->alamat ?></td>
+                                width: 10%">
+                                <p>Kepada</p>
+                                <p>Alamat</p>
+
+                            </td>
+                            <td rowspan="2" style="width: 45%">
+                                <p><?= $base->nama ?></p>
+                                <p><?= $base->alamat ?></p>
+                            </td>
                             <td style="font-weight: 600;
                                 font-size: 13px;
                                 width: 45%">Catatan</td>
@@ -116,16 +121,14 @@
                                         <hr>
                                         <span><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
                                     </td>
-                                    <td style="text-align: right;
-                                        font-weight: 600;">
+                                    <td style="text-align: right;font-weight: 600">
                                         <div class="deskripsi" style="justify-content: end;">
                                             <?= $value->jumlah_qty ?>
                                         </div>
                                         <hr>
                                         <span style="text-align: right"><?= $value->jumlah_qty ?></span>
                                     </td>
-                                    <td style="text-align: right;
-                                        font-weight: 600;">
+                                    <td style="text-align: right;">
                                         <div class="deskripsi" style="justify-content: end;">
                                             <?= $value->total_qty . " " . $value->uom ?>
                                         </div>
@@ -156,8 +159,7 @@
                                             <?= $value->jumlah_qty ?>
                                         </div>
                                     </td>
-                                    <td style="text-align: right;
-                                        font-weight: 600;">
+                                    <td style="text-align: right;;">
                                         <div class="deskripsi" style="justify-content: end;">
                                             <?= $value->total_qty . " " . $value->uom ?>
                                         </div>
@@ -167,26 +169,25 @@
                             <?php } ?>
                         </tbody>
                     <?php } ?>
-                </table>
-                <table class="table" style="width:100%;
-                       margin-top: -30px;
-                       border: none !important ">
-                    <tr>
-                        <td class="total_pcs">
+                        <tr>
+                            <td colspan="2"></td>
+                            <td class="total_total">
                             <div class="deskripsi" style="justify-content: end;
                                  font-weight: 600;">
                                  <?= $total_pcs ?>
                             </div>
+
                         </td>
-                        <td class="total_total">
+                             <td class="total_total">
                             <div class="deskripsi" style="justify-content: end;
                                  font-weight: 600;">
                                  <?= $total_jumlah ?>
                             </div>
 
                         </td>
-                    </tr>
+                        </tr>
                 </table>
+                
             </div>
             <div class="row">
                 <div class="footer">
@@ -200,7 +201,7 @@
                              font-size: 10px;
                              text-align: center;">
                             <p>Pengaduan-pengaduan / Claim melebihi</p>
-                            <p>7(tujuh) hari dan tanggal pengiriman barang</p>
+                            <p>7(tujuh) hari dari tanggal pengiriman barang</p>
                             <p>tersebut diatas TIDAK diterima</p>
                         </div>
                     </div>

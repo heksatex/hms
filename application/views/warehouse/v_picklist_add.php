@@ -62,7 +62,11 @@
                                                     <option></option>
                                                     <?php
                                                     foreach ($sales as $key => $value) {
-                                                        echo '<option value="' . $value->kode . '">' . $value->nama . '</option>';
+                                                        if ($this->session->userdata('nama')['sales_group'] === $value->kode) {
+                                                            echo '<option value="' . $value->kode . '" selected>' . $value->nama . '</option>';
+                                                        } else {
+                                                            echo '<option value="' . $value->kode . '">' . $value->nama . '</option>';
+                                                        }
                                                     }
                                                     ?>
                                                 </select>
@@ -76,6 +80,7 @@
                                                     <option></option>
                                                     <option value="export">EXPORT</option>
                                                     <option value="lokal">LOKAL</option>
+                                                    <option value="lain-lain">Lain-Lain</option>
                                                 </select>
                                             </div>                                    
                                         </div>
