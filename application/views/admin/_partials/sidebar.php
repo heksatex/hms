@@ -1,4 +1,22 @@
 
+<style>
+  .slimScrollBar {
+    background-color: white !important;
+    opacity: 1 !important;
+    cursor:pointer;
+    width:5px !important;
+    /* visibility: hidden; */
+  }
+  .sidebar:hover,
+  .sidebar:focus {
+    visibility: visible;
+  }
+
+
+
+  
+</style>
+
 <section class="sidebar">
   <!-- Logo Heksatex -->
   <div class="user-panel">
