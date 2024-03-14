@@ -29,7 +29,7 @@ class M_trackinglot extends CI_Model
                         FROM pengiriman_barang pb
                         INNER JOIN stock_move_items smi ON pb.move_id = smi.move_id
                         INNER JOIN mst_status ms ON smi.status = ms.kode
-                        WHERE smi.lot LIKE '%$lot%' ")->result();
+                        WHERE smi.lot LIKE '$lot%' ")->result();
     }
 
 
@@ -39,7 +39,7 @@ class M_trackinglot extends CI_Model
                         FROM penerimaan_barang pb
                         INNER JOIN stock_move_items smi ON pb.move_id = smi.move_id
                         INNER JOIN mst_status ms ON smi.status = ms.kode
-                        WHERE smi.lot LIKE '%$lot%' ")->result();
+                        WHERE smi.lot LIKE '$lot%' ")->result();
     }
 
     function get_mrp_by_lot($lot){
@@ -47,7 +47,7 @@ class M_trackinglot extends CI_Model
                                 FROM mrp_production_fg_hasil fg
                                 INNER JOIN mrp_production mrp ON fg.kode = mrp.kode
                                 INNER JOIN departemen d ON mrp.dept_id = d.kode
-                                WHERE fg.lot LIKE '%$lot%' ORDER by fg.create_date asc ")->result();
+                                WHERE fg.lot LIKE '$lot%' ORDER by fg.create_date asc ")->result();
     }
 
     function get_mrp_cons_by_lot($lot){
@@ -56,7 +56,7 @@ class M_trackinglot extends CI_Model
                                 INNER JOIN mrp_production mrp ON rm.kode = mrp.kode
                                 INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id AND smi.quant_id = rm.quant_id
                                 INNER JOIN departemen d ON mrp.dept_id = d.kode
-                                WHERE rm.lot LIKE '%$lot%' 
+                                WHERE rm.lot LIKE '$lot%' 
                                 GROUP BY rm.kode, rm.lot
                                 ORDER by smi.tanggal_transaksi desc ")->result();
     }
@@ -68,7 +68,7 @@ class M_trackinglot extends CI_Model
                                 INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id
                                 INNER JOIN departemen d ON mrp.dept_id = d.kode
                                 INNER JOIN mst_status ms ON smi.status = ms.kode
-                                WHERE smi.lot LIKE '%$lot%' AND smi.status NOT IN ('done') 
+                                WHERE smi.lot LIKE '$lot%' AND smi.status NOT IN ('done') 
                                 GROUP BY rm.kode, smi.lot
                                 ORDER by smi.tanggal_transaksi asc
                                 ")->result();
@@ -80,7 +80,7 @@ class M_trackinglot extends CI_Model
                                 INNER JOIN transfer_lokasi_items tli ON tl.kode_tl = tli.kode_tl 
                                 INNER JOIN departemen d ON d.kode = tl.dept_id 
                                 INNER JOIN mst_status ms ON tl.status = ms.kode
-                                WHERE tli.lot LIKE '%$lot%' AND tl.status = 'done'  ")->result();
+                                WHERE tli.lot LIKE '$lot%' AND tl.status = 'done'  ")->result();
     }
 
     function get_adjustment_by_lot($lot){
@@ -90,7 +90,7 @@ class M_trackinglot extends CI_Model
                                 FROM adjustment adj
                                 INNER JOIN adjustment_items adji ON adj.kode_adjustment = adji.kode_adjustment 
                                 INNER JOIN mst_status ms ON adj.status = ms.kode
-                                WHERE adji.lot LIKE '%$lot%' AND adj.status = 'done'  ")->result();
+                                WHERE adji.lot LIKE '$lot%' AND adj.status = 'done'  ")->result();
     }
 
     function get_reproses_by_lot($lot){
@@ -100,7 +100,7 @@ class M_trackinglot extends CI_Model
                                 INNER JOIN reproses_items ri ON r.kode_reproses = ri.kode_reproses
                                 INNER JOIN mst_status ms ON r.status = ms.kode
                                 INNER JOIN reproses_jenis rj ON r.id_jenis = rj.id
-                                WHERE ri.lot LIKE '%$lot%' AND r.status = 'done'  ")->result();
+                                WHERE ri.lot LIKE '$lot%' AND r.status = 'done'  ")->result();
     }
 
 
@@ -109,7 +109,7 @@ class M_trackinglot extends CI_Model
                                 (select count(*) as jml FROM split_items WHERE s.kode_split = kode_split) as total_split, d.nama as nama_departemen
                                 FROM split s
                                 INNER JOIN departemen d ON d.kode = s.dept_id
-                                WHERE s.lot LIKE '%$lot%'   ")->result();
+                                WHERE s.lot LIKE '$lot%'   ")->result();
     }
 
 
@@ -130,6 +130,30 @@ class M_trackinglot extends CI_Model
 		$this->db->order_by('status','desc');
         $query = $this->db->get('tmp_tracking_lot');
 		return $query->result();
+    }
+
+    function get_inlet_by_Lot($lot){
+        return $this->db->query("SELECT mrpin.id, mrpin.lot, mrpin.tanggal, mrpin.nama_user, ms.nama_status
+                                FROM mrp_inlet mrpin
+                                INNER JOIN mst_status ms ON mrpin.status = ms.kode
+                                WHERE mrpin.lot LIKE '$lot%'  ")->result();
+    }
+
+
+    function get_picklist_by_Lot($lot){
+        return $this->db->query("SELECT pl.no_pl, pl.barcode_id, pl.tanggal_masuk, ms.nama_status
+                                FROM picklist_detail pl
+                                INNER JOIN mst_status ms ON pl.valid = ms.kode
+                                WHERE pl.barcode_id LIKE '$lot%'  ")->result();
+    }
+
+
+    function get_delivery_by_Lot($lot){
+        return $this->db->query("SELECT do.no, do.no_sj, do.tanggal_buat, do.user as nama_user, ms.nama_status
+                                FROM delivery_order do
+                                INNER JOIN delivery_order_detail as dod ON do.id = dod.do_id
+                                INNER JOIN mst_status ms ON dod.status = ms.kode
+                                WHERE dod.barcode_id LIKE '$lot%'  ")->result();
     }
 
 

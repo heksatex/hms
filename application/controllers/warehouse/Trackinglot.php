@@ -177,6 +177,45 @@ class Trackinglot extends MY_Controller
                                   );
                 }
 
+                //INLET
+                $inlet = $this->m_trackingLot->get_inlet_by_Lot($txtlot);
+                foreach($inlet as $inlets){
+
+                  $result_record[] = array('tanggal' => $inlets->tanggal, 
+                                    'kode'        => $inlets->lot,
+                                    'link'        => '',
+                                    'keterangan'  => 'KP/Lot ini di INLET',
+                                    'status'      => $inlets->nama_status,
+                                    'user'        => $inlets->nama_user,
+                                  );
+                }
+
+
+                //PICKLIST
+                $picklist = $this->m_trackingLot->get_picklist_by_Lot($txtlot);
+                foreach($picklist as $picklists){
+
+                  $result_record[] = array('tanggal' => $picklists->tanggal_masuk, 
+                                    'kode'        => $picklists->no_pl,
+                                    'link'        => '',
+                                    'keterangan'  => 'Barcode ini Masuk Picklist ',
+                                    'status'      => $picklists->nama_status,
+                                    'user'        => '',
+                                  );
+                }
+
+                // Delivery
+                $delivery = $this->m_trackingLot->get_delivery_by_Lot($txtlot);
+                foreach($delivery as $deliv){
+
+                  $result_record[] = array('tanggal' => $deliv->tanggal_buat, 
+                                    'kode'        => $deliv->no,
+                                    'link'        => '',
+                                    'keterangan'  => 'Delivery Order : '.$deliv->no,
+                                    'status'      => $deliv->nama_status,
+                                    'user'        => $deliv->nama_user,
+                                  );
+                }
 
                 // arsort($result_record);
                 $result_record1  =  $this->urutkan($result_record);
