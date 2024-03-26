@@ -1069,7 +1069,8 @@ class Joinlot extends MY_Controller
                                                     'uom_lebar_jadi'=> $tmp_uom_lebar_jadi,
                                                     'sales_group'   => $tmp_sales_group,
                                                     'grade'         => 'A',
-                                                    'status'        => "done"
+                                                    'status'        => "done",
+                                                    'tanggal_transaksi' => $tgl
                             );
 
                             if (!$this->_module->finishTransaction()) {
