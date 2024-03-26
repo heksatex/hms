@@ -112,6 +112,25 @@ class M_trackinglot extends CI_Model
                                 WHERE s.lot LIKE '$lot%'   ")->result();
     }
 
+    function get_hasil_split_by_lot($lot){
+        return $this->db->query("SELECT s.kode_split, s.tanggal, s.dept_id, s.lot  as lot_asal ,s.nama_user,d.nama as nama_departemen                         
+                                FROM split s
+                                INNER JOIN split_items si ON s.kode_split = si.kode_split
+                                INNER JOIN departemen d ON d.kode = s.dept_id
+                                WHERE si.lot_baru LIKE '$lot%'   ")->result();
+    }
+
+    
+    function get_join_by_lot($lot){
+        return $this->db->query("SELECT j.kode_join, j.tanggal_transaksi, j.dept_id, j.lot, j.nama_user,ms.nama_status, d.nama as nama_departemen,
+                                (SELECT GROUP_CONCAT(lot SEPARATOR ' + ') FROM join_lot_items jli WHERE  jli.kode_join = j.kode_join) as lot_asal
+                                FROM join_lot j
+                                INNER JOIN departemen d ON d.kode = j.dept_id
+                                INNER JOIN mst_status ms ON j.status = ms.kode
+                                WHERE j.lot LIKE '$lot%' 
+                                GROUP BY j.kode_join  ")->result();
+    }
+
 
     public function insert_tmp_tracking_lot_batch($sql)
 	{
@@ -137,6 +156,21 @@ class M_trackinglot extends CI_Model
                                 FROM mrp_inlet mrpin
                                 INNER JOIN mst_status ms ON mrpin.status = ms.kode
                                 WHERE mrpin.lot LIKE '$lot%'  ")->result();
+    }
+
+    function get_hph_inlet_by_lot($lot){
+        return $this->db->query("SELECT fg.kode,fg.lot, fg.create_date, fg.nama_user, fg.id_inlet
+                                FROM mrp_production_fg_hasil fg
+                                INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
+                                WHERE fg.lot LIKE '$lot%' ")->result();
+    }
+
+    function get_barcode_manual_by_lot($lot){
+        return $this->db->query("SELECT mm.kode, mm.tanggal_transaksi,  mm.nama_user, ms.nama_status
+                                FROM mrp_manual mm
+                                INNER JOIN mrp_manual_batch_items mbi ON mm.kode = mbi.kode
+                                INNER JOIN mst_status ms ON mm.status = ms.kode
+                                WHERE mbi.lot LIKE '$lot%' ")->result();
     }
 
 
