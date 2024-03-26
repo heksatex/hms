@@ -203,6 +203,8 @@
                       <option value="umur">Umur</option>
                       <option value="kode_produk">Kode Produk</option>
                       <option value="nama_produk">Nama Produk</option>
+                      <option value="corak_remark">Corak Remark</option>
+                      <option value="warna_remark">Warna Remark</option>
                       <option value="category">Kategori</option>
                       <option value="lot">Lot</option>
                       <option value="nama_grade">Grade</option>
@@ -278,6 +280,8 @@
                                   <li onclick="groupBy('lokasi','Lokasi',2)" class="li-adv" data-index="2">Lokasi</li>
                                   <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',3)" class="li-adv" data-index="3">Lokasi Fisik</li>
                                   <li onclick="groupBy('nama_grade','Grade',4)" class="li-adv" data-index="4">Grade</li>
+                                  <li onclick="groupBy('corak_remark','Corak Remark',5)" class="li-adv" data-index="5">Corak Remark</li>
+                                  <li onclick="groupBy('warna_remark','Warna Remark',6)" class="li-adv" data-index="6">Warna Remark</li>
                                 </div>
                               </div>
                               <div class="form-group" style="margin-bottom: 0px;">
@@ -360,9 +364,13 @@
                               <th  class='style bb min-width-120 nowrap' ><a class="column_sort" id="lokasi_fisik" data-order="desc" href="javascript:void(0)">Lokasi Fisik</a></th>
                               <th  class='style bb min-width-80 nowrap'  ><a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
                               <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
+                              <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="corak_remark" data-order="desc" href="javascript:void(0)">Corak Remark</a></th>
+                              <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="warna_remark" data-order="desc" href="javascript:void(0)">Warna Remark</a></th>
                               <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="category" data-order="desc" href="javascript:void(0)">Kategori</a></th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
+                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty_jual" data-order="desc" href="javascript:void(0)">Qty1 Jual</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty2_jual" data-order="desc" href="javascript:void(0)">Qty2 Jual</a></th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="lebar_greige" data-order="desc" href="javascript:void(0)">Lbr Greige</a></th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)">Lbr Jadi</th>
                               <th  class='style bb min-width-80 nowrap' ><a class="column_sort" id="sales_order" data-order="desc" href="javascript:void(0)">SC</th>
@@ -748,6 +756,10 @@
       field  = 'Status Opname';
     }else if(field == 'category'){
       field  = 'Kategori';
+    }else if(field == 'corak_remark'){
+      field  = 'Corak Remark';
+    }else if(field == 'warna_remark'){
+      field  = 'Warna Remark';
     }
     return field;
   }
@@ -1314,9 +1326,13 @@
                                 $("<td>").text(value.lokasi_fisik),
                                 $("<td>").text(value.kode_produk),
                                 $("<td>").text(value.nama_produk),
+                                $("<td>").text(value.corak_remark),
+                                $("<td>").text(value.warna_remark),
                                 $("<td>").text(value.kategori),
                                 $("<td align='right'>").text(value.qty),
                                 $("<td align='right'>").text(value.qty2),
+                                $("<td align='right'>").text(value.qty_jual),
+                                $("<td align='right'>").text(value.qty2_jual),
                                 $("<td align='right'>").text(value.lebar_greige),
                                 $("<td align='right'>").text(value.lebar_jadi),
                                 $("<td>").text(value.sales_order),
@@ -1471,9 +1487,13 @@
                                     $("<td>").text(value.lokasi_fisik),
                                     $("<td>").text(value.kode_produk),
                                     $("<td>").text(value.nama_produk),
+                                    $("<td>").text(value.corak_remark),
+                                    $("<td>").text(value.warna_remark),
                                     $("<td>").text(value.kategori),
                                     $("<td align='right'>").text(value.qty),
                                     $("<td align='right'>").text(value.qty2),
+                                    $("<td align='right'>").text(value.qty_jual),
+                                    $("<td align='right'>").text(value.qty2_jual),
                                     $("<td align='right'>").text(value.lebar_greige),
                                     $("<td align='right'>").text(value.lebar_jadi),
                                     $("<td>").text(value.sales_order),
@@ -1684,9 +1704,13 @@
                       $("<td>").text(value.lokasi_fisik),
                       $("<td>").text(value.kode_produk),
                       $("<td>").text(value.nama_produk),
+                      $("<td>").text(value.corak_remark),
+                      $("<td>").text(value.warna_remark),
                       $("<td>").text(value.kategori),
                       $("<td align='right'>").text(value.qty),
                       $("<td align='right'>").text(value.qty2),
+                      $("<td align='right'>").text(value.qty_jual),
+                      $("<td align='right'>").text(value.qty2_jual),
                       $("<td align='right'>").text(value.lebar_greige),
                       $("<td align='right'>").text(value.lebar_jadi),
                       $("<td>").text(value.sales_order),
