@@ -228,6 +228,8 @@ class Stock extends MY_Controller
     	    							  'lokasi_fisik'  => $row->lokasi_fisik,
     	    							  'kode_produk' => $row->kode_produk,
     	    							  'nama_produk' => $row->nama_produk,
+    	    							  'corak_remark' => $row->corak_remark,
+    	    							  'warna_remark' => $row->warna_remark,
     	    							  'kategori'    => $row->nama_category,
     	    							  'qty' 		=> $row->qty.' '.$row->uom,
     	    							  'qty2'        => $row->qty2.' '.$row->uom2,
@@ -237,6 +239,8 @@ class Stock extends MY_Controller
     	    							  'sales_group' => $row->nama_sales_group,
                                           'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
     	    							  'umur_produk' => $row->umur,
+                                          'qty_jual'    => $row->qty_jual.' '.$row->uom_jual,
+                                          'qty2_jual'   => $row->qty2_jual.' '.$row->uom2_jual,
     	    							);
     	    	}
 
@@ -367,6 +371,8 @@ class Stock extends MY_Controller
                                       'lokasi_fisik'  => $row->lokasi_fisik,
                                       'kode_produk' => $row->kode_produk,
                                       'nama_produk' => $row->nama_produk,
+                                      'corak_remark' => $row->corak_remark,
+    	    						  'warna_remark' => $row->warna_remark,
    	    							  'kategori'    => $row->nama_category,
                                       'qty' 		=> $row->qty.' '.$row->uom,
     	    						  'qty2'        => $row->qty2.' '.$row->uom2,
@@ -375,7 +381,9 @@ class Stock extends MY_Controller
                                       'sales_order' => $row->sales_order,
                                       'sales_group' => $row->nama_sales_group,
                                       'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
-                                      'umur_produk' => $row->umur
+                                      'umur_produk' => $row->umur,
+                                      'qty_jual'    => $row->qty_jual.' '.$row->uom_jual,
+                                      'qty2_jual'   => $row->qty2_jual.' '.$row->uom2_jual,
                                     );
             }
             $allcount  = $this->m_stock->get_record_stock($where_lokasi,$where_result);
@@ -612,6 +620,7 @@ class Stock extends MY_Controller
 
     	$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
+        ini_set('memory_limit', '4096M');
     	// SET JUDUL
  		$object->getActiveSheet()->SetCellValue('A1', 'Laporan Stock');
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
@@ -631,7 +640,7 @@ class Stock extends MY_Controller
 
 
         // header table
-        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk','Kategori' ,'Qty1','Uom1', 'Qty2','Uom2','Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Corak Remark', 'Warna Remark', 'Kategori' ,'Qty1','Uom1', 'Qty2', 'Uom2', 'Qty1 Jual', 'Uom1 Jual' , 'Qty2 Jual', 'Uom2 Jual', 'Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -641,7 +650,7 @@ class Stock extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y', 'Z', 'AA', 'AB','AC');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -665,20 +674,26 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->lokasi_fisik);
             $object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->kode_produk);
             $object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->nama_produk);
-            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->nama_category);
-            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->qty);
-            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->uom);
-            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->qty2);
-            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->uom2);
-            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_greige);
-            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->uom_lebar_greige);
-            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->uom_lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->sales_order);
-            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->nama_sales_group);
-            $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->qty_opname);
-            $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->uom_opname);
-            $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->umur);
+            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->corak_remark);
+            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->warna_remark);
+            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->nama_category);
+            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->qty);
+            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->uom);
+            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->qty2);
+            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->uom2);
+            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->qty_jual);
+            $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->uom_jual);
+            $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->qty2_jual);
+            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->uom2_jual);
+            $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->lebar_greige);
+            $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->uom_lebar_greige);
+            $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('X'.$rowCount, $val->uom_lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $val->sales_order);
+            $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $val->nama_sales_group);
+            $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $val->qty_opname);
+            $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $val->uom_opname);
+            $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $val->umur);
 
              //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -705,6 +720,12 @@ class Stock extends MY_Controller
 			$object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('V'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('W'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('X'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('Y'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('Z'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('AA'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('AB'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('AC'.$rowCount)->applyFromArray($styleArray);
 
             $rowCount++;
 
