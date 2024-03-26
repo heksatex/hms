@@ -423,8 +423,22 @@
         var no_ow       = $('#no_ow').val();
         var status_ow   = $('#status_ow').val();
 
+        var tgldari_2 = $('#tgldari').data("DateTimePicker").date();
+        var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+
+        var timeDiff = 0;
+        if (tglsampai_2) {
+            timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+        }
+        selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
+
+
         if(tgl_dari == '' || tgl_sampai == ''){
           alert_modal_warning('Periode Tanggal Harus diisi !');
+        }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
+          alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+        }else if(selisih > 30 ){
+          alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
         }else{
           fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock);
         }
