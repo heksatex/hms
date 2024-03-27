@@ -490,7 +490,7 @@
             alert_modal_warning('Periode Tanggal Harus diisi !');
         }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
              alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');            
-        }else if(selisih > 30 ){
+        }else if(selisih > 31 ){
             alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
         }else{  
 

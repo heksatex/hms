@@ -361,7 +361,7 @@
       alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
       // return false;
 
-    }else if(selisih > 30 ){
+    }else if(selisih > 31 ){
       alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 31 hari !')
       // return false;
       
