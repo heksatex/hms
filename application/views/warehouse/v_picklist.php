@@ -35,7 +35,7 @@
                                             <th>Jenis</th>
                                             <th>Type Bulk</th>
                                             <th>Keterangan</th>
-                                            <th>Sales</th>
+                                            <th>Marketing</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>

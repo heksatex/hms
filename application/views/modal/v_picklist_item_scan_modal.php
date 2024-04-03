@@ -10,7 +10,7 @@
                 <div class="col-md-12 col-xs-12">
                     <div class="col-xs-4">Scan</div>
                     <div class="col-xs-8">
-                        <input class="form-control input-sm" placeholder="Scan" name="search" id="searchdata" required>
+                        <input class="form-control input-sm" placeholder="Scan" name="search" id="searchdata" required autocomplete="off">
                         <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan Barcode</label>
                         <button type="submit" id="form_submit" style="display: none;"></button>
                     </div>
@@ -35,7 +35,7 @@
                     <th class="style">Barcode</th>
                     <th class="style">Kode Produk</th>
                     <th class="style">Nama Produk</th>
-                    <th class="style">Corak Warna</th>
+                    <th class="style">Corak Remark</th>
                     <th class="style">Warna Remark</th>
                     <th class="style">Qty Jual</th>
                     <th class="style">Qty 2 Jual</th>
@@ -63,7 +63,7 @@
             columnDefs: [
                 {
                     data: null,
-                    defaultContent: '<button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button>',
+                    defaultContent: '<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>',
                     targets: -1
                 }
             ]
@@ -140,7 +140,7 @@
                 } else {
                     alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
                     unblockUI(function () {
-                    },50);
+                    }, 50);
                 }
             } catch (e) {
 
@@ -163,7 +163,7 @@
             });
 
             data.then(rsp => {
-                addItem(JSON.stringify(rsp), "", dTable,"realisasi");
+                addItem(JSON.stringify(rsp), "", dTable, "realisasi");
             });
 
         });

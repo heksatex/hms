@@ -132,7 +132,7 @@
                                                             <label class="form-label required">Scan Barcode</label>
                                                         </div>
                                                         <div class="col-xs-12 col-md-8">
-                                                            <input type='text' name="search" id="search" class="form-control input-lg scan-text" required/>
+                                                            <input type='text' name="search" id="search" class="form-control input-lg scan-text" required autocomplete="off"/>
                                                             <label class="text-sm text-info"></label>
                                                             <input type='hidden' name="pl" id="pl" value=""/>
                                                             <input type='hidden' name="doid" id="doid" value=""/>

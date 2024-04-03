@@ -87,7 +87,7 @@
                     <th>Barcode</th>
                     <th>Kode Produk</th>
                     <th>Nama Produk</th>
-                    <th>Corak Warna</th>
+                    <th>Corak Remark</th>
                     <th>Warna Remark</th>
                     <th>Qty Jual</th>
                     <th>Qty Jual 2</th>

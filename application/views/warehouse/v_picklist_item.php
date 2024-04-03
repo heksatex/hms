@@ -84,7 +84,7 @@ if ($picklist->status === 'cancel') {
                             <div class="col-xs-4">
                                 <label class="form-label required">Status Delivery Order</label>
                             </div>
-                            <div class="col-xs-8 col-md-8 text-uppercase">
+                            <div class="col-xs-8 col-md-8">
                                 <strong><?= $do->status ?? "" ?></strong>
                             </div>
                         </div>
@@ -170,7 +170,7 @@ if ($picklist->status === 'cancel') {
         "fnDrawCallback": function () {
             $(".status_item").on('click', function () {
                 const e = this;
-                confirmRequest("Hapus Item", "Hapus Barcode ? ", () => {
+                confirmRequest("Hapus Item", "Keluarkan Item dari Picklikst ? ", () => {
                     delete_item(e, table);
                 });
             });

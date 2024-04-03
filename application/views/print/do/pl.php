@@ -97,7 +97,7 @@
                             <th rowspan="2">Warna</th>
                             <th colspan="10">Rincian Qty/Pcs/GL</th>
                             <th rowspan="2" style="width: 20px;">GL/PCS</th>
-                            <th rowspan="2" style="width: 80px;">Total QTY</th>
+                            <th rowspan="2" style="width: 120px;">Total QTY</th>
                         </tr>
                         <tr style="text-align: center;">
                             <td>1</td>
@@ -190,7 +190,7 @@
 
 
                                         <td style=" text-align: center;"><?= $value->jumlah_qty ?></td>
-                                        <td style="text-align: right;"><?= $value->total_qty . ' ' . $satuan ?></td>
+                                        <td style="text-align: center;"><?= $value->total_qty . ' ' . $satuan ?></td>
                                     </tr>
                                     <?php
                                     $id = $tempID;

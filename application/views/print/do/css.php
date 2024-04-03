@@ -74,9 +74,6 @@
             /*height:3vh;*/
             align-items: end;
         }
-        .footer .divs{
-            height: 10vh;
-        }
         p{
             margin: 0;
         }
@@ -129,11 +126,3 @@
         top:180px;
     }
 </style>
-
-<div id="dialogoverlay"></div>
-
-<div id="dialogbox"> 
-    <div id="dialogboxhead"></div>
-    <div id="dialogboxbody"></div>
-    <div id="dialogboxfoot"></div>
-</div>

@@ -26,8 +26,8 @@
             "order": [],
             "paging": true,
             "lengthChange": false,
-            "searching": true,
-            "ordering": true,
+            "searching": false,
+            "ordering": false,
             "info": true,
             "autoWidth": false,
             "ajax": {

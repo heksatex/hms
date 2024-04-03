@@ -43,11 +43,11 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <div class="box-header with-border"  style="background-color: <?= (!$do->notifikasi ) ? "yellow" : "transfarent" ?>;">
+                        <div class="box-header with-border"  style="background-color: <?= (!$do->notifikasi && $do->status !== "cancel" ) ? "yellow" : "transfarent" ?>;">
                             <h3 class="box-title">Form Edit <strong> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
                                 <?php
-                                if (!$do->notifikasi) {
+                                if (!$do->notifikasi && $do->status !== "cancel") {
                                     ?>
                                     <button class="btn btn-success btn-sm" id="send-broadcast" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                         <i class="fa fa-whatsapp">&nbsp; Broadcast DO</i>
@@ -72,7 +72,7 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label">Sales</label>
+                                                <label class="form-label">Marketing</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <span><?= $picklist->sales ?></span>
@@ -197,7 +197,7 @@
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
                                                         <input class="form-control" name="dok_date" value="<?= date("D, d M Y H:i:s", strtotime($do->tanggal_dokumen)) ?>"
-                                                               id="tanggal_dokumen" required <?= (in_array($user->level, ["Entry Data", ""]) ? "readonly" : "") ?> >
+                                                               id="tanggal_dokumen" required <?= (in_array($user->level, ["Entry Data", ""]) ? "readonly" : (($do->status === "draft") ? "" : "readonly")) ?> >
                                                     </div>
                                                 </div>
                                             </div>
@@ -359,9 +359,32 @@
                 var listBulk = [];
                 $(function () {
                     $("#btn-edit").hide();
-                    $("#btn-cancel").hide();
+                    //                    $("#btn-cancel").hide();
                     $("#btn-print").hide();
 
+                    $("#btn-cancel").on("click", function () {
+                        confirmRequest("Delivery", "Batalkan Draft Delivery Order ?", function () {
+                            please_wait(function () {});
+                            $.ajax({
+                                url: "<?= base_url('warehouse/deliveryorder/batal_do_draft') ?>",
+                                type: "post",
+                                data: {
+                                    pl: "<?= $do->no_picklist ?>",
+                                    nodo: "<?= $do->no ?>"
+                                },
+                                success: function (data) {
+                                    location.reload();
+                                },
+                                error: function (req, error) {
+                                    unblockUI(function () {
+                                        setTimeout(function () {
+                                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                        }, 500);
+                                    });
+                                }
+                            });
+                        });
+                    });
                     $("#btn-kirim").on("click", function () {
                         confirmRequest("Delivery", "Kirim delivery order ?", function () {
                             please_wait(function () {});
@@ -387,34 +410,6 @@
 
                         });
                     });
-
-
-
-                    const formedit = document.forms.namedItem("form-do");
-                    formedit.addEventListener(
-                            "submit",
-                            (event) => {
-                        please_wait(function () {});
-                        request("form-do").then(
-                                response => {
-                                    unblockUI(function () {
-                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                    }, 100);
-                                    if (response.status === 200) {
-                                        //                                        location.reload();
-                                    }
-                                }
-                        ).catch(err => {
-                            unblockUI(function () {});
-                            alert_modal_warning("Hubungi Dept IT");
-                        });
-                        event.preventDefault();
-                    },
-                            false
-                            );
-
-
-
                 });
 
                 const table = $("#delivery-item").DataTable({
@@ -575,11 +570,39 @@
                                         setTimeout(function () {
                                             $(".tambah_data").html(data.data);
                                         }, 1000);
+
+                                        $("#btn-tambah").hide();
+
                                     });
                                 }
                             }
                         ]
                     });
+
+
+
+                    const formedit = document.forms.namedItem("form-do");
+                    formedit.addEventListener(
+                            "submit",
+                            (event) => {
+                        please_wait(function () {});
+                        request("form-do").then(
+                                response => {
+                                    unblockUI(function () {
+                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+                                    }, 100);
+                                    if (response.status === 200) {
+                                        location.reload();
+                                    }
+                                }
+                        ).catch(err => {
+                            unblockUI(function () {});
+                            alert_modal_warning("Hubungi Dept IT");
+                        });
+                        event.preventDefault();
+                    },
+                            false
+                            );
 
                     $("#btn-print").on('click', function (e) {
                         e.preventDefault();
@@ -638,7 +661,15 @@
 
                 });
             </script>
-        <?php } ?>
+        <?php } if ($do->status === 'cancel') {
+            ?>
+            <script>
+                $(function () {
+                    $("#btn-simpan").hide();
+                })
+            </script>
+        <?php }
+        ?>
 
         <script>
 

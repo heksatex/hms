@@ -1,6 +1,12 @@
 <html>
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
+        
+        <style>
+            #btn-print{
+                display: none;
+            }
+        </style>
 
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -56,7 +62,7 @@
                                         </div>
 
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4"><label class="form-label required">Sales</label></div>
+                                            <div class="col-xs-4"><label class="form-label required">Marketing</label></div>
                                             <div class="col-xs-8 col-md-8">
                                                 <select class="form-control input-sm select2" name="sales" required>
                                                     <option></option>

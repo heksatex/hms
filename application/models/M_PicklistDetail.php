@@ -267,6 +267,7 @@ class M_PicklistDetail extends CI_Model {
             $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
             $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
             $this->db->select('pd.corak_remark,pd.warna_remark,sum(qty) as total_qty,count(qty) as jumlah_qty,uom,bd.bulk_no_bulk');
+            $this->db->order_by("bulk_no_bulk","ASC");
         }
         if (count($notIn) > 0) {
             foreach ($notIn as $key => $value) {
@@ -348,6 +349,7 @@ class M_PicklistDetail extends CI_Model {
                 case "BULK":
                     $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
                     $this->db->select(",dt.bulk_no_bulk");
+                    $this->db->order_by("bulk_no_bulk","ASC");
                     foreach ($in as $key => $value) {
                         $this->db->where_in($key, $value);
                     }

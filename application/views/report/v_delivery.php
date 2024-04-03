@@ -122,7 +122,6 @@
                                         <table class="table table-condesed table-hover rlstable  over" width="100%" id="delivery_global">
                                             <thead>                          
                                                 <tr>
-
                                                     <th class="style" width="8px">No</th>
                                                     <th class="style">DO</th>
                                                     <th class="style">No SJ</th>
@@ -135,12 +134,12 @@
                                                     <th class="style">Warna</th>
                                                     <th class="style">Qty</th>
                                                     <th class="style">LOT</th>
+                                                    <th class="style">Marketing</th>
                                                 </tr>
                                             </thead>
                                         </table>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -153,7 +152,7 @@
             $(function () {
                 $('input[name="periode"]').daterangepicker({
                     endDate: moment().startOf('day'),
-                    startDate: moment().startOf('day').add(-1, 'month'),
+                    startDate: moment().startOf('day').add(-1, 'week'),
                     locale: {
                         format: 'YYYY-MM-DD'
                     }

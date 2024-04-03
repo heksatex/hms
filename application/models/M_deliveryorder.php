@@ -170,4 +170,13 @@ class M_deliveryorder extends CI_Model {
 
         return $this->db->count_all_results();
     }
+
+    public function userBC(array $condition) {
+        $this->db->select("u.telepon_wa,u.aktif");
+        $this->db->from("user as u");
+        $this->db->where($condition);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 }

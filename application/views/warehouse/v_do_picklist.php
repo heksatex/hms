@@ -8,7 +8,7 @@
                             <th class="style" width="10px">No</th>
                             <th class="style" >Picklist</th>
                             <th class="style" >Jenis</th>
-                            <th class="style" >Sales</th>
+                            <th class="style" >Marketing</th>
                             <th class="style" >Customer</th>
                         </tr>
                     </thead>

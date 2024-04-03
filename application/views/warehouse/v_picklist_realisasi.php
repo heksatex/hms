@@ -34,7 +34,7 @@
                                             <th>Jenis</th>
                                             <th>Type Bulk</th>
                                             <th>Keterangan</th>
-                                            <th>Sales</th>
+                                            <th>Marketing</th>
                                             <th>Total Lot</th>
                                             <th>Realisasi Lot ( % )</th>
                                             <th>Validasi Lot ( % )</th>
