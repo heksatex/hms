@@ -36,7 +36,7 @@
                     <th class="style">Barcode</th>
                     <th class="style">Kode Produk</th>
                     <th class="style">Nama Produk</th>
-                    <th class="style">Corak Warna</th>
+                    <th class="style">Corak Remark</th>
                     <th class="style">Warna Remark</th>
                     <th class="style">Qty Jual</th>
                     <th class="style">Qty 2 Jual</th>

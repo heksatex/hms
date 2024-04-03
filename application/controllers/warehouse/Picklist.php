@@ -89,7 +89,7 @@ class Picklist extends MY_Controller {
             $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt], "DO");
             $data['bulk'] = $this->m_Picklist->getTypeBulk();
             $data['sales'] = $this->m_Picklist->getSales();
-            $data['do'] = $this->m_deliveryorder->getDataDetail(['no_picklist' => $kode_decrypt, 'status' => 'done']);
+            $data['do'] = $this->m_deliveryorder->getDataDetail(['no_picklist' => $kode_decrypt]);
             $this->load->view('warehouse/v_picklist_edit', $data);
         } catch (Exception $ex) {
             show_404();

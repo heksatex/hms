@@ -70,7 +70,7 @@
 
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4">
-                                                        <label class="form-label">Sales</label>
+                                                        <label class="form-label">Marketing</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
                                                         <input type='text' class="form-control input-sm" readonly value="<?= $picklist->sales ?>"  />

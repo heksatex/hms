@@ -39,15 +39,15 @@ class M_deliveryorderdetail extends CI_Model {
         $this->db->from($this->table . ' a');
         $this->db->join("delivery_order do", 'do.id = a.do_id');
         $this->db->join("picklist_detail pd", "pd.barcode_id = a.barcode_id");
-
         foreach ($this->join as $value) {
             switch ($value) {
                 case 'BULK':
-
+                    $this->column_search = array_merge($this->column_search, ["bulk_no_bulk"]);
                     $this->db->select("bulk_no_bulk");
-                    $this->column_order = [null, "bd.bulk_no_bulk", "corak_remark", "warna_remark", "total_qty", "jumlah_qty", "uom"];
+                    $this->column_order = [null, "bulk_no_bulk", "corak_remark", "warna_remark", "total_qty", "jumlah_qty", "uom"];
                     $this->db->join('bulk_detail bd', 'bd.barcode = pd.barcode_id', 'left');
                     $this->db->group_by('bulk_no_bulk');
+//                    $this->db->order_by("bulk_no_bulk");
                     break;
 
                 default:
@@ -73,6 +73,7 @@ class M_deliveryorderdetail extends CI_Model {
         }
         if (isset($_POST['order'])) {
             $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            log_message('error', $this->column_order[$_POST['order']['0']['column']] . ' = ' . $_POST['order']['0']['dir']);
         } else if (isset($this->order)) {
             $order = $this->order;
             $this->db->order_by(key($order), $order[key($order)]);
@@ -117,7 +118,7 @@ class M_deliveryorderdetail extends CI_Model {
                 case "BULK":
                     $this->db->join('bulk_detail bd', 'pd.id = bd.picklist_detail_id', 'left');
                     $this->db->select("bd.bulk_no_bulk");
-
+                    $this->db->order_by("bd.bulk_no_bulk", "ASC");
                     break;
 
                 default:
@@ -188,14 +189,16 @@ class M_deliveryorderdetail extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function getDataWGroup($condition = [], $type_bulk = 1) {
+    public function getDataWGroup($condition = [], $type_bulk = 1, $type = "") {
         $select = "pd.corak_remark,pd.warna_remark,sum(pd.qty) as total_qty,count(pd.qty) as jumlah_qty,pd.uom,pd.lebar_jadi,pd.uom_lebar_jadi";
         $group = "pd.warna_remark, pd.corak_remark,pd.uom";
         $this->db->from($this->table . ' dod');
         $this->db->join('delivery_order do', 'do.id = dod.do_id');
         $this->db->where($condition);
         if ($type_bulk === 1) {
-//            $group .= ",bd.bulk_no_bulk";
+            if ($type !== "sje") {
+                $group .= ",bd.bulk_no_bulk";
+            }
             $select .= ",bd.bulk_no_bulk";
             $this->db->join("bulk_detail bd", "bd.barcode = dod.barcode_id");
             $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode");
@@ -295,11 +298,11 @@ class M_deliveryorderdetail extends CI_Model {
         }
         return $this->db->count_all_results();
     }
-    
+
     public function countDetail(array $condition) {
         $this->db->from($this->table . ' dod');
-        $this->db->join("delivery_order do","do.id = dod.do_id");
-        $this->db->join('picklist_detail pd','(pd.barcode_id = dod.barcode_id and pd.valid != "cancel")');
+        $this->db->join("delivery_order do", "do.id = dod.do_id");
+        $this->db->join('picklist_detail pd', '(pd.barcode_id = dod.barcode_id and pd.valid != "cancel")');
         $this->db->where($condition);
 //        $this->db->group_by("pd.barcode_id");
         $query = $this->db->select('count(pd.barcode_id) as total_item, sum(pd.qty) as total_qty, count(pd.qty) as jumlah_qty')->get();

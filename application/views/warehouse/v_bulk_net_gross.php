@@ -21,7 +21,7 @@
                             <td><?= $value->jumlah_qty ?></td>
                             <td><?= $value->total_qty ?></td>
                             <td> <input type='text' oninput="isNumb(event,this)" name="net[<?= $value->no_bulk ?>][]" data-id="<?= $value->no_bulk ?>" class="form-control input-sm nw net-<?= $value->no_bulk ?>" value="<?= $value->net_weight ?>"/></td>
-                            <td> <input type='text' oninput="isNumb(event,this)" name="gross[<?= $value->no_bulk ?>][]" data-id="<?= $value->no_bulk ?>" class="form-control input-sm gw weight" value="<?= $value->gross_weight ?>"/></td>
+                            <td> <input type='text' oninput="isNumb(event,this)" name="gross[<?= $value->no_bulk ?>][]" data-id="<?= $value->no_bulk ?>" class="form-control input-sm gw weight-<?= $value->no_bulk ?>" value="<?= $value->gross_weight ?>"/></td>
                             <!--<td><input type="checkbox" class="crumus-<?= $value->no_bulk ?>" data-id="<?= $value->no_bulk ?>" > </td>-->
                         </tr>
 
@@ -46,7 +46,7 @@
         });
 
 
-        $(".weight").on("input", function () {
+        $(".gw").on("input", function () {
             let bulk = $(this).attr("data-id");
             let checked = $(".rumus").prop('checked');
             if (checked) {
@@ -57,6 +57,22 @@
                     return;
                 }
                 $(".net-" + bulk).val(net.toFixed(2));
+            }
+        });
+
+        var $inputs = $(".gw");
+        $inputs.keyup(function (event) {
+
+            if (event.key === "Enter") {
+                var index = $inputs.index(this);
+                $inputs.eq(index + 1).focus();
+            }
+            event.preventDefault();
+        });
+
+        $(".gw").on("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
             }
         });
         const formnetgross = document.forms.namedItem("form-net-gross");

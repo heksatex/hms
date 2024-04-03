@@ -10,9 +10,8 @@
         <?php $this->load->view("print/do/css.php") ?>
     </head>
 
-    <body >
+    <body>
         <div class="container">
-            <div class="row">
                 <div class="row">
                     <div class="col-xs-4">
                         <img style="width: 30%" src="<?= base_url('dist/img/static/heksatex_c.jpg') ?>" >
@@ -149,6 +148,5 @@
                         </div>
                     </div>
                 </div>
-            </div>
     </body>
 </html>

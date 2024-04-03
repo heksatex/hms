@@ -408,7 +408,6 @@ class Bulk extends MY_Controller {
             $bulk = $this->input->post('bulk');
             $condition = ['b.no_pl' => $pl];
             $data["totalan"] = $this->m_bulkdetail->getTotalItemBulk($condition);
-            log_message('error', json_encode($data["totalan"]));
 //            $data["total_item"] = $this->m_bulkdetail->getTotalItem($condition);
             $data["total_item_bulk"] = $this->m_bulkdetail->getTotalItem(array_merge($condition, ['no_bulk' => $bulk]));
             $data["bulk"] = $bulk;

@@ -59,7 +59,7 @@
                                                         <label class="form-label required">Scan Barcode / No PL</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
-                                                        <input type='text' name="search" id="search" class="form-control input-lg scan-text" required/>
+                                                        <input type='text' name="search" id="search" class="form-control input-lg scan-text" required autocomplete="off"/>
                                                         <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
                                                         <input type='hidden' name="pl" id="pl" value=""/>
                                                         <input type="hidden" name="access" value="<?= $access->permission ?>">
@@ -99,7 +99,7 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label">Sales</label>
+                                                <label class="form-label">Marketing</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <span id="sales"></span>

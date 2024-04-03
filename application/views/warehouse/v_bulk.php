@@ -58,7 +58,7 @@
                                             <th>Tanggal Dibuat</th>
                                             <th>Jenis</th>
                                             <th>Keterangan</th>
-                                            <th>Sales</th>
+                                            <th>Marketing</th>
                                             <th>#</th>
                                         </tr>
                                     </thead>

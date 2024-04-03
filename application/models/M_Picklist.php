@@ -56,7 +56,6 @@ class M_Picklist extends CI_Model {
         if (count($condition) > 0)
             $this->db->where($condition);
 
-
         foreach ($menu as $value) {
 
             switch (strtolower($value)) {

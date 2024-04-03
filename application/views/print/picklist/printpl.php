@@ -128,5 +128,22 @@
                 <?php } ?>
             </div>
         </div>
+        <div class="row">
+            <div class="col-xs-4">
+
+            </div>
+            <div class="col-xs-4">
+
+            </div>
+            <div class="col-xs-4">
+                <div style="text-align: center;font-weight: 500; margin-top: 40%;">
+                    Yang Memerintahkan
+                </div>
+
+                <div style="text-align: center;font-weight: 400; margin-top: 25%;">
+                    ( <?= $this->session->userdata('nama')["nama"] ?? "" ?> )
+                </div>
+            </div>
+        </div>
     </div>
 </body>

@@ -94,7 +94,7 @@
                             $(".tambah_data").html(data.data);
                             
                         }, 1000);
-                        
+                        $(".modal-footer #btn-tambah").hide();
                     });
                 });
             });

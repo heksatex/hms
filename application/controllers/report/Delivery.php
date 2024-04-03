@@ -82,7 +82,8 @@ class Delivery extends MY_Controller {
                     $value->corak_remark,
                     $value->warna_remark,
                     $value->total_qty . ' ' . $value->uom,
-                    $value->total_lot
+                    $value->total_lot,
+                    $value->marketing,
                 );
                 $data[] = $row;
             }
@@ -131,7 +132,7 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('M1', 'Satuan');
             $sheet->setCellValue('N1', 'User');
             $sheet->setCellValue('O1', 'Catatan');
-            $sheet->setCellValue('p1', 'Marketing');
+            $sheet->setCellValue('P1', 'Marketing');
             $condition = ['ddo.tanggal_dokumen >=' => $period[0], 'ddo.tanggal_dokumen <=' => $period[1], 'ddo.status' => 'done'];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);

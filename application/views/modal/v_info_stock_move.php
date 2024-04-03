@@ -11,7 +11,6 @@
                     <th class="style">Dari Lokasi</th>
                     <th class="style">Tujuan Lokasi</th>
                     <th class="style">Status</th>
-                    <th class="style">MO</th>
                 </tr>
             </thead>
         </table>
@@ -24,7 +23,7 @@
             "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
             "processing": true,
             "serverSide": true,
-            "order": [[8, 'desc']],
+            "order": [[2, 'desc']],
             "paging": true,
             "lengthChange": true,
             "searching": true,
