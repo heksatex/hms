@@ -150,10 +150,20 @@ class M_deliveryorderdetail extends CI_Model {
         return $query->num_rows();
     }
 
-    public function getDataDetailCountAll(array $condition = []) {
+    public function getDataDetailCountAll(array $condition = [], array $join = []) {
         $this->db->from($this->table . ' a');
-        $this->db->join("delivery_order do", 'do.id = a.do_id');
-        $this->db->join("picklist_detail pd", "pd.no_pl = do.no_picklist");
+        $this->db->join("picklist_detail pd", "pd.barcode_id = a.barcode_id");
+        $this->db->group_by("a.barcode_id");
+        foreach ($join as $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->join('bulk_detail bd', 'pd.id = bd.picklist_detail_id', 'left');
+                    break;
+
+                default:
+                    break;
+            }
+        }
         $this->db->select("a.id");
         $this->db->where($condition);
         return $this->db->count_all_results();
