@@ -279,5 +279,13 @@ class M_procurementOrder extends CI_Model
 		return $result->show_sales_order;
 	}
 
+	public function cek_mrp_production_rm_target($kode,$status)
+	{
+		$this->db->where('kode',$kode);
+		$this->db->where('status',$status);
+		$query = $this->db->get('mrp_production_rm_target');
+		return $query;
+		
+	}
 
 }
