@@ -836,4 +836,130 @@ class m_marketing extends CI_Model
 		$this->get_query_items8();
 		return $this->db->count_all_results();
 	} 
+
+
+	public function get_list_mst_sales_group()
+	{
+		$this->db->order_by('kode_sales_group','asc');
+		$this->db->where('view','1');
+		$query = $this->db->get('mst_sales_group');
+		return $query->result();
+	}
+
+	public function get_data_stock_by_mkt($tgldari,$tglsampai,$mkt)
+	{
+		$this->db->order_by('tanggal','asc');
+		$this->db->where("tanggal >= '".$tgldari."'");
+		$this->db->where("tanggal <= '".$tglsampai."'");
+		$this->db->where("mkt",$mkt);
+		$query = $this->db->get('stock_history_gjd');
+		return $query->result();
+	}
+
+
+
+	var $column_order9 = array(null, 'tanggal','hen','mei','ts','vi','al');
+	var $column_search9= array('tanggal','hen','mei','ts','vi','al');
+	var $order9  	  = array('tanggal' => 'asc');
+
+	function get_query_items9()
+	{
+		if($this->input->post('tgldari')){
+			$tgldari = date("Y-m-d H:i:s", strtotime($this->input->post('tgldari')));
+    		$this->db->where('tanggal >= "'.$tgldari.'"');
+        }
+
+        if($this->input->post('tglsampai')){
+			$tglsampai = date("Y-m-d 23:59:59", strtotime($this->input->post('tglsampai')));
+    		$this->db->where('tanggal <= "'.$tglsampai.'"');
+        }
+
+		// $this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik");
+		// $this->db->FROM("stock_quant sq");
+		// $this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        // $this->db->WHERE("sq.lokasi",$this->lokasi);
+		// $this->db->WHERE('mp.id_category',$this->category);
+
+		$this->db->SELECT("tanggal,sum(NMBB) AS hen, 
+               sum(NMBL) AS mei, sum(TMBX) AS ts, 
+               sum(TMBL) AS vi,
+               sum(TMBX+TMBL+NMBL+NMBB) AS al");
+		$this->db->FROM("(SELECT tanggal, 
+                          if(mkt='NMBB', l_stock,0) AS NMBB,
+                          if(mkt='NMBL', l_stock,0) AS NMBL,
+                          if(mkt='TMBX', l_stock,0) AS TMBX,
+                          if(mkt='TMBL', l_stock,0) AS TMBL
+        				from stock_history_gjd) AS inti");
+		$this->db->group_by('tanggal');
+
+		return;
+	}
+
+	private function _get_datatables_query9()
+	{
+		
+		$this->get_query_items9();
+
+        $i = 0;
+		foreach ($this->column_search9 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search9) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order9[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order9))
+		{
+			$order = $this->order9;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables9()
+	{
+		$this->_get_datatables_query9();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered9()
+	{
+		$this->_get_datatables_query9();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all9()
+	{
+		$this->get_query_items9();
+		return $this->db->count_all_results();
+	} 
+
+
+	function query_9_excel()
+	{
+		$this->get_query_items9();
+		$query = $this->db->get();
+		return $query->result();
+	}
 }

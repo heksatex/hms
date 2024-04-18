@@ -99,6 +99,17 @@
 
 <script type="text/javascript">
 
+  $("form").submit(function(){
+    let product = $("#product").val();
+    if(product.length === 0){
+      alert_notify('fa fa-warning','Product / Corak harus diisi !','danger',function(){});
+      $("#product").focus();
+      return false;
+    }else{
+      return true;
+    }
+  });
+
 </script>
 
 </body>

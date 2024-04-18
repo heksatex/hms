@@ -59,6 +59,7 @@
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/stockbylokasi'"><i class='fa fa-map-marker'></i> View Stock By Location (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/gradeexpiredgjd'"><i class='fa fa-file-text-o'></i> Report Grade & Expired (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/listwarnabyproduct'"><i class='fa fa-file-text-o'></i> List Warna by Product (GJD)</button>
+                        <button type='button' class='btn btn-default btn-block' onClick="location.href='<?php echo base_url();?>report/marketing/stockhistorygjd'"><i class='fa fa-file-text-o'></i> Report Stock History (GJD)</button>
                     </div>
 
                 </div>

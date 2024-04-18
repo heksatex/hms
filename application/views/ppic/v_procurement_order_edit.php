@@ -819,7 +819,7 @@
                   error: function (xhr, ajaxOptions, thrownError){
                     alert('Error data');
                     alert(xhr.responseText);
-                    refresh_production();
+                    refresh_procurement();
                     unblockUI( function(){});
                   }
                 });
@@ -830,7 +830,7 @@
                 className: "btn-default  btn-sm",
                 callback : function() {
                   $('.bootbox').modal('hide');
-                  refresh_production();
+                  refresh_procurement();
                 }
           }
         }

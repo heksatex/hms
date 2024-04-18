@@ -470,4 +470,158 @@ class Marketing extends MY_Controller
         
     }
 
+    function stockhistorygjd()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $this->load->view('report/v_marketing_stock_history', $data);
+    }
+
+    function get_data_stock_history()
+    {
+        $tgldari   = date("Y-m-d H:i:s", strtotime($this->input->post('tgl_dari')));
+        $tglsampai = date("Y-m-d 23:59:59", strtotime($this->input->post('tgl_sampai')));
+
+        $get_mkt = $this->m_marketing->get_list_mst_sales_group();
+        $data_stock_history = [];
+        $tmp_tgl = "";
+        foreach($get_mkt as $val){
+
+            $data_stock = $this->m_marketing->get_data_stock_by_mkt($tgldari,$tglsampai,$val->nama_sales_group);
+            $tmp_stock  = "";
+            foreach($data_stock as $st){
+                $tmp_stock .= floatval($st->l_stock).", ";
+                $tmp_tgl   .= date('d F', strtotime($st->tanggal)).", ";
+            }
+            $tmp_stock = rtrim($tmp_stock, ', ');
+            $arr_data  = [];
+            $data_stock_history[] = array(
+                                    "name" => $val->nama_sales_group,
+                                    "data" => ($tmp_stock),
+            );
+            
+        }
+
+        // $tmp_tgl = "";
+        // $tgldari   = date("Y-m-d", strtotime($this->input->post('tgl_dari')));
+        // $tglsampai = date("Y-m-d", strtotime($this->input->post('tgl_sampai')));
+        // while ($tgldari <= $tglsampai) {
+        //     $tmp_tgl .= date('d F', strtotime($tgldari)).", ";
+        //     $tgldari = date('Y-m-d', strtotime('+1 days', strtotime($tgldari)));
+        // }
+        $callback  = array('status'=>'success', 'result'=>$data_stock_history, 'periode'=>$tmp_tgl);
+        echo json_encode($callback);
+
+
+    }
+
+    function get_dataTable_stock_history()
+    {
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables9();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->tanggal;
+                $row[] = number_format($field->hen);
+                $row[] = number_format($field->mei);
+                $row[] = number_format($field->ts);
+                $row[] = number_format($field->vi);
+                $row[] = number_format($field->al);
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all9(),
+                "recordsFiltered" => $this->m_marketing->count_filtered9(),
+                "data" => $data,
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+
+    }
+
+    function export_excel_stock_history()
+    {
+        $this->load->library('excel');
+		ob_start();
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Stock History (GJD)');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        $tgldari = $this->input->post('tgldari');
+        $tglsampai = $this->input->post('tglsampai');
+
+        $tgldari_capt  = $tgldari;
+		$tglsampai_capt = $tglsampai;
+
+        // set periode
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Periode');
+		$object->getActiveSheet()->mergeCells('A3:B3');
+ 		$object->getActiveSheet()->SetCellValue('C3', ': '.tgl_indo(date('d-m-Y',strtotime($tgldari_capt))).' - '.tgl_indo(date('d-m-Y',strtotime($tglsampai_capt)) ));
+		$object->getActiveSheet()->mergeCells('C3:F3');
+
+
+        //bold huruf
+		$object->getActiveSheet()->getStyle("A1:U6")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+        // header table
+    	$table_head_columns  = array('No', 'Tanggal','NMBB', 'NMBL','TMBX','TMBL', 'ALL');
+
+        $column = 0;
+    	foreach ($table_head_columns as $field) {
+	    	$object->getActiveSheet()->setCellValueByColumnAndRow($column, 6, $field);  
+    		$column++;
+    	}
+
+        $items = $this->m_marketing->query_9_excel();
+    	$num   = 1;
+        $rowCount = 7;
+		foreach ($items as $val) {
+            $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->tanggal);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->hen);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->mei);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->ts);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->vi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->al);
+            $rowCount++;
+        }
+
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Stock History GJD.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+    }
+
 }

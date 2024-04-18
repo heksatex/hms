@@ -53,7 +53,7 @@
         </div>
         <div class="box-body ">
        
-            <form name="input"  action="<?= base_url() ?>report/marketing/stockbylokasiitems"  role="form" method="get">
+            <form name="form"  action="<?= base_url() ?>report/marketing/stockbylokasiitems"  role="form" method="get">
                 <div class="col-12 col-sm-12 col-md-6 col-lg-4">
                     <div class="box-body">    
                         <div class="form-group">
@@ -80,6 +80,17 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
+
+  $("form").submit(function(){
+    let lokasi = $("#lokasi").val();
+    if(lokasi.length === 0){
+      alert_notify('fa fa-warning','Lokasi harus diisi !','danger',function(){});
+      $("#lokasi").focus();
+      return false;
+    }else{
+      return true;
+    }
+  });
 
 </script>
 
