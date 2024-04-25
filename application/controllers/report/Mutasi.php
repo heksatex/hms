@@ -163,7 +163,7 @@ class Mutasi extends MY_Controller
 
                 if($view == "Global" or $view == "DetailProduk"){
 
-                    if($type_dept['type_dept'] == 'manufaktur'){
+                    if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
                         if($table_view == 'rm' or $table_view == 'all'){
                         // rm
                         $mutasi_dept_rm = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'rm')->result();
@@ -267,7 +267,7 @@ class Mutasi extends MY_Controller
 
                 }else{ // Detail
 
-                    if($type_dept['type_dept'] == 'manufaktur'){
+                    if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
 
                         if($table_view == 'rm' or $table_view == 'all'){
 
@@ -384,7 +384,7 @@ class Mutasi extends MY_Controller
 
     function cek_dept_mutasi($dept)
     {
-        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB','DYE2','FIN','DF','INS2');
+        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB','DYE2','FIN','DF','INS2','GJD');
         $dept_status      = false;
         foreach($list_dept_mutasi as $list){
             if($list == $dept){
@@ -397,7 +397,7 @@ class Mutasi extends MY_Controller
 
     function cek_dept_mutasi_bap($dept)
     {
-        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB');
+        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB','GJD');
         $dept_status      = false;
         foreach($list_dept_mutasi as $list){
             if($list == $dept){
@@ -438,6 +438,7 @@ class Mutasi extends MY_Controller
             array('kode' => 'FIN', 'nama'=>'Finishing'),
             array('kode' => 'DF',  'nama'=>'Dyeing Finishing'),
             array('kode' => 'INS2',  'nama'=>'Inspecting 2',),
+            array('kode' => 'GJD',  'nama'=>'Gudang Jadi',),
         );
 
 
@@ -1940,7 +1941,7 @@ class Mutasi extends MY_Controller
             
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen);
             $type_dept = $get_dept->row_array();
-            if($type_dept['type_dept'] == 'manufaktur'){
+            if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
 
                 $table          = 'acc_mutasi_'.strtolower($departemen).'_rm_detail';
                 $result         = $this->create_header_detail(true);
@@ -1978,7 +1979,7 @@ class Mutasi extends MY_Controller
             }
             
             // array judul WorkSheet
-            if($type_dept['type_dept'] == 'manufaktur'){// two table
+            if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){// two table
                 $object->createSheet();
                 $sheet1 = $object->setActiveSheetIndex(0);
                 $sheet1->setTitle('Bahan Baku');
@@ -2123,7 +2124,7 @@ class Mutasi extends MY_Controller
             // cek tipe departemen
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen);
             $type_dept = $get_dept->row_array();
-            if($type_dept['type_dept'] == 'manufaktur'){
+            if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
                 // rm
                 $mutasi_dept_rm = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'rm')->result();
                 if($view == "Global"){
@@ -2205,7 +2206,7 @@ class Mutasi extends MY_Controller
             }
 
             // array judul WorkSheet
-            if($type_dept['type_dept'] == 'manufaktur'){// two table
+            if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){// two table
                 $object->createSheet();
                 $sheet1 = $object->setActiveSheetIndex(0);
                 $sheet1->setTitle('Bahan Baku');
@@ -3030,7 +3031,7 @@ class Mutasi extends MY_Controller
             ini_set('memory_limit', '4096M');
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen);
             $type_dept = $get_dept->row_array();
-            if($type_dept['type_dept'] == 'manufaktur'){
+            if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
             }else{
                 $mutasi_dept = $this->m_mutasi->acc_dept_mutasi_by_kode($departemen,'')->result();
                 $table       = 'acc_mutasi_'.strtolower($departemen).'_detail_datar';
@@ -3058,7 +3059,7 @@ class Mutasi extends MY_Controller
             }
 
             // array judul WorkSheet
-            if($type_dept['type_dept'] == 'manufaktur'){// two table
+            if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){// two table
                 $object->createSheet();
                 $sheet1 = $object->setActiveSheetIndex(0);
                 $sheet1->setTitle('Bahan Baku');
@@ -3907,7 +3908,7 @@ class Mutasi extends MY_Controller
         $result = $this->cek_dept_mutasi_bap($departemen);
         if($result == true){
 
-            if($dept['type_dept'] == 'manufaktur'){
+            if($dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
 
                 $table     = 'acc_mutasi_'.strtolower($departemen).'_rm';
                 $table2    = 'acc_mutasi_'.strtolower($departemen).'_fg';
@@ -3950,7 +3951,7 @@ class Mutasi extends MY_Controller
             
             $pdf->SetFont('Arial','B',9,'C');
 
-            if($dept['type_dept'] == 'manufaktur'){
+            if($dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
                 $ket_rm  = "Total Adjustment Bahan Baku" ;
                 $set     = 2;
             }else{
