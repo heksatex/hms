@@ -582,7 +582,7 @@ class HPHgudangjadi extends MY_Controller
 
 
             // header table
-            $table_head_columns  = array('No', 'No.HPH', 'MC GJD', 'Lot(Bahan Baku)' ,'Nama Produk', 'Qty Prod', 'Uom Prod', 'Qty2', 'Uom2 Prod', 'Quality', 'Tanggal.Proses', 'Lot(Barang jadi)', 'Corak Remark', 'Warna Remark', 'Qty1 HPH', 'Uom1 HPH', 'Qty2 HPH', 'Uom2 HPH', 'Grade','L.Jadi','uom L.Jadi','Jenis Kain', 'Gramasi', 'Berat/Mtr/pnl', 'Benang', 'Qty1 Jual', 'Uom1 Jual', 'Qty2 Jual', 'Uom2 Jual','Marketing','SC','CO','Keterangan','Operator','User');
+            $table_head_columns  = array('No', 'No.HPH', 'MC GJD', 'Lot(Bahan Baku)' ,'Nama Produk', 'Qty (Bahan Baku)', 'Uom (Bahan Baku)', 'Qty2 (Bahan Baku)', 'Uom2 (Bahan Baku)', 'Quality', 'Tanggal.Proses', 'Lot(Barang jadi)', 'Corak Remark', 'Warna Remark', 'Qty1 HPH', 'Uom1 HPH', 'Qty2 HPH', 'Uom2 HPH', 'Grade','L.Jadi','uom L.Jadi','Jenis Kain', 'Gramasi', 'Berat/Mtr/pnl', 'Benang', 'Qty1 Jual', 'Uom1 Jual', 'Qty2 Jual', 'Uom2 Jual','Marketing','SC','CO','Keterangan','Operator','User');
             $column = 0;
             foreach ($table_head_columns as $field) {
 

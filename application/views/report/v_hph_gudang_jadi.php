@@ -324,8 +324,8 @@
                               <th  class='style bb ws'>MC GJD</th>
                               <th  class='style bb ws' style="min-width: 150px">Lot(Bahan Baku)</th>
                               <th  class='style bb ws' style="min-width: 200px">Nama Produk</th>
-                              <th  class='style bb ws text-right'>Qty1 Prod</th>
-                              <th  class='style bb ws text-right'>Qty2 Prod</th>
+                              <th  class='style bb ws text-right'>Qty1 (Bahan Baku)</th>
+                              <th  class='style bb ws text-right'>Qty2 (Bahan Baku)</th>
                               <th  class='style bb ws'>Quality</th>
                               <th  class='style bb ws'>Tanggal.Proses </th>
                               <th  class='style bb ws' style="min-width: 150px">Lot(Barang Jadi)</th>
