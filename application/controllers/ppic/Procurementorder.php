@@ -10,7 +10,7 @@ class Procurementorder extends MY_Controller
 		$this->is_loggedin();//cek apakah user sudah login
         $this->load->model('m_procurementOrder');
 		$this->load->model('_module');
-		
+		$this->load->model('m_colorOrder');
 	}
 
 	public function index()
@@ -630,9 +630,15 @@ class Procurementorder extends MY_Controller
     	        	$last_move   = $this->_module->get_kode_stock_move();
     	            $move_id     = "SM".$last_move; //Set kode stock_move
 
-    	            $last_mo     = $this->_module->get_kode_mo();
-    	            $dgt         = substr("00000" . $last_mo,-5);            
-    	            $kode_mo     = "MO".date("y") .  date("m"). $dgt;
+                    if($warehouse == "GJD"){ // berdasarkan dept tujuan
+                        $last_mo     = $this->m_colorOrder->get_kode_mo();
+                        $dgt         = substr("00000" . $last_mo,-5);            
+                        $kode_mo     = "MG".date("y") .  date("m"). $dgt;
+                    }else{
+                        $last_mo     = $this->_module->get_kode_mo();
+                        $dgt         = substr("00000" . $last_mo,-5);            
+                        $kode_mo     = "MO".date("y") .  date("m"). $dgt;
+                    }
 
     	            $route_prod = $this->_module->get_route_product($jen_route['route_produksi']);
 
@@ -1158,8 +1164,13 @@ class Procurementorder extends MY_Controller
 
                                 }
 
-                                $dgt       = substr("00000" . $last_mo,-5);            
-                                $kode_mo   = "MO".date("y") .  date("m"). $dgt;
+                                if($warehouse == "GJD"){ // berdasarkan dept tujuan
+                                    $dgt         = substr("00000" . $last_mo,-5);            
+                                    $kode_mo     = "MG".date("y") .  date("m"). $dgt;
+                                }else{
+                                    $dgt       = substr("00000" . $last_mo,-5);            
+                                    $kode_mo   = "MO".date("y") .  date("m"). $dgt;
+                                }
 
                                 $last_move = $last_move + 1;
                                 $move_id   = "SM".$last_move;
