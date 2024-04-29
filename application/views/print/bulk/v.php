@@ -17,7 +17,7 @@
             }
             #iop3i{
                 padding:0px 0px 0px 0%;
-                font-size:45%;
+                font-size:1.2rem;
                 display: inline-block;
                 align-self: flex-end;
                 padding-bottom: 10px;
@@ -61,7 +61,7 @@
                                             </span>
                                         </div>
                                         Packing List
-                                        <span style="font-size: 130%;"><?= $data["pl"] ?? "" ?>
+                                        <span style="font-weight: 600;"><?= $data["pl"] ?? "" ?>
                                         </span>
                                         <div>
                                             <img id="ieh54" src="data:image/png;base64,<?= $data["barcode"] ?? "" ?>">

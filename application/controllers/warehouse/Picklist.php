@@ -173,7 +173,7 @@ class Picklist extends MY_Controller {
             $in = [];
             $marketing = $this->input->post('marketing');
             $form = $this->input->post("form") ?? "";
-            log_message('error', json_encode($form));
+//            log_message('error', json_encode($form));
             if ($this->input->post('filter') !== "" && $_POST["search"]["value"] !== "") {
                 $condition = array_merge($condition, ['stock_quant.' . $this->input->post('filter') . " LIKE" => '%' . $_POST["search"]["value"] . '%']);
             }
@@ -716,11 +716,20 @@ class Picklist extends MY_Controller {
                 "{jenis_jual}" => $data->jenis_jual,
                 "{bulking}" => ($data->type_bulk_id === "1") ? "BAL" : "LOOSE PACKING"
             ];
+
             $this->m_Picklist->update([
                 "notifikasi" => 1,
                     ], ['no' => $pl]);
+            $mention = [];
+            $getMention = $this->m_Picklist->getUserBC(['nama' => $data->nama_user, 'username' => 'prianto', 'username' => 'fmuharam', 'username' => 'amunandar', 'username' => 'mfachril']);
+            foreach ($getMention as $key => $value) {
+                if (is_null($value->telepon_wa) || empty($value->telepon_wa)) {
+                    continue;
+                }
+                $mention[] = $value;
+            }
 
-            $this->wa_message->sendMessageToGroup('new_picklist', $dataPesan, ['WAREHOUSE 24JAM'])->setFooter('footer_hms')->send();
+            $this->wa_message->sendMessageToGroup('new_picklist', $dataPesan, ['WAREHOUSE 24JAM'])->setMentions($mention)->setFooter('footer_hms')->send();
 
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -732,7 +741,7 @@ class Picklist extends MY_Controller {
         }
     }
 
-    public function lokasi_fisik() {
+    public function lokasi_fisik() {    
         try {
             $no = $this->input->get('no');
             $data = $this->m_PicklistDetail->reportLokasiFisikRak(['no_pl' => $no, 'valid !=' => 'cancel']);

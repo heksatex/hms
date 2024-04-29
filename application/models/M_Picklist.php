@@ -263,4 +263,24 @@ class M_Picklist extends CI_Model {
     protected function notInDO() {
         $this->db->where("no NOT IN (select no_picklist from delivery_order where status != 'cancel')", null, false);
     }
+
+    public function getUserBC(array $condition) {
+        $this->db->from("user");
+        $this->db->select("telepon_wa");
+        if (count($condition) > 0) {
+            $loop = 0;
+            foreach ($condition as $key => $value) {
+                if ($loop === 0) {
+                    $this->db->group_start();
+                    $this->db->where($key, $value);
+                } else {
+                    $this->db->or_where($key, $value);
+                }
+                $loop++;
+            }
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
 }

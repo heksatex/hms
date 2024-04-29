@@ -145,7 +145,8 @@ class Bulk extends MY_Controller {
             $mode = $this->input->post("print_mode");
             $condition = ['no_pl' => $pl];
             if (!is_null($this->input->post("type"))) {
-                $condition = ['no_bulk' => $pl];
+                $bulk = $this->input->post("bulk");
+                $condition = ['no_bulk' => $bulk];
             }
             $list = $this->m_bulk->getDatas($condition);
             $code = new Code\Code128New();
