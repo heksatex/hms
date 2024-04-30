@@ -8,7 +8,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_Picklist extends CI_Model {
 
-    var $column_order = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
+    var $column_order = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', 'sales_nama', null, 'status', 'nama_user');
     var $order = ['tanggal_input' => 'desc'];
     var $column_search = array('no', 'jenis_jual', 'msg.nama_sales_group');
     protected $table = "picklist";

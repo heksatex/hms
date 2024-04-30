@@ -111,8 +111,8 @@ class Picklist extends MY_Controller {
                     $field->tanggal_input,
                     $field->jenis_jual,
                     $field->bulk_nama,
-                    $field->keterangan,
                     $field->sales_nama,
+                    $field->keterangan,
                     $field->status,
                 );
                 $data[] = $row;
