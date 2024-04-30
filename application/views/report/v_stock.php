@@ -376,6 +376,7 @@
                               <th  class='style bb min-width-80 nowrap' ><a class="column_sort" id="sales_order" data-order="desc" href="javascript:void(0)">SC</th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="sales_group" data-order="desc" href="javascript:void(0)">Marketing</th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)">Qty Opname</th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="no_pl" data-order="desc" href="javascript:void(0)">Picklist (PL)</th>
                               <th  class='style bb' >Umur (Hari)</th>
                             </tr>
                           </thead>
@@ -1338,6 +1339,7 @@
                                 $("<td>").text(value.sales_order),
                                 $("<td>").text(value.sales_group),
                                 $("<td>").text(value.qty_opname),
+                                $("<td>").text(value.no_pl),
                                 $("<td>").text(value.umur_produk),
                       );
                       tbody.append(tr);
@@ -1499,6 +1501,7 @@
                                     $("<td>").text(value.sales_order),
                                     $("<td>").text(value.sales_group),
                                     $("<td>").text(value.qty_opname),
+                                    $("<td>").text(value.no_pl),
                                     $("<td>").text(value.umur_produk),
                          );
                         tbody.append(tr);
@@ -1716,6 +1719,7 @@
                       $("<td>").text(value.sales_order),
                       $("<td>").text(value.sales_group),
                       $("<td>").text(value.qty_opname),
+                      $("<td>").text(value.no_pl),
                       $("<td>").text(value.umur_produk),
             );    
             tbody.append(tr);

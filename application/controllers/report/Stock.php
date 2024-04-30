@@ -241,6 +241,7 @@ class Stock extends MY_Controller
     	    							  'umur_produk' => $row->umur,
                                           'qty_jual'    => $row->qty_jual.' '.$row->uom_jual,
                                           'qty2_jual'   => $row->qty2_jual.' '.$row->uom2_jual,
+                                          'no_pl'   => $row->no_pl,
     	    							);
     	    	}
 
@@ -382,6 +383,7 @@ class Stock extends MY_Controller
                                       'sales_group' => $row->nama_sales_group,
                                       'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
                                       'umur_produk' => $row->umur,
+                                      'no_pl'       => $row->no_pl,
                                       'qty_jual'    => $row->qty_jual.' '.$row->uom_jual,
                                       'qty2_jual'   => $row->qty2_jual.' '.$row->uom2_jual,
                                     );
@@ -585,6 +587,8 @@ class Stock extends MY_Controller
     {
         if($nama_field == 'category'){
             $where = 'mp.id_category';
+        }else if($nama_field == 'no_pl'){
+            $where = 'no_pl';
         }else{
             $where = 'sq.'.$nama_field;
         }
@@ -627,7 +631,7 @@ class Stock extends MY_Controller
 		$object->getActiveSheet()->mergeCells('A1:L1');
 
         //bold huruf
-        $object->getActiveSheet()->getStyle("A1:W4")->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle("A1:AD4")->getFont()->setBold(true);
 
         // Border 
 		$styleArray = array(
@@ -640,7 +644,7 @@ class Stock extends MY_Controller
 
 
         // header table
-        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Corak Remark', 'Warna Remark', 'Kategori' ,'Qty1','Uom1', 'Qty2', 'Uom2', 'Qty1 Jual', 'Uom1 Jual' , 'Qty2 Jual', 'Uom2 Jual', 'Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Corak Remark', 'Warna Remark', 'Kategori' ,'Qty1','Uom1', 'Qty2', 'Uom2', 'Qty1 Jual', 'Uom1 Jual' , 'Qty2 Jual', 'Uom2 Jual', 'Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Picklist (PL)', 'Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -650,7 +654,7 @@ class Stock extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y', 'Z', 'AA', 'AB','AC');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y', 'Z', 'AA', 'AB','AC','AD');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -693,7 +697,8 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $val->nama_sales_group);
             $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $val->qty_opname);
             $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $val->uom_opname);
-            $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $val->umur);
+            $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $val->no_pl);
+            $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $val->umur);
 
              //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -726,6 +731,7 @@ class Stock extends MY_Controller
 			$object->getActiveSheet()->getStyle('AA'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('AB'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('AC'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('AD'.$rowCount)->applyFromArray($styleArray);
 
             $rowCount++;
 
