@@ -116,19 +116,23 @@ class M_deliveryorder extends CI_Model {
         $this->db->from($this->table . ' ddo');
         $this->db->join("delivery_order_detail dod", 'dod.do_id = ddo.id');
         $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
+        $this->db->join("stock_quant sq", "sq.quant_id = pd.quant_id", "left");
         $this->db->join("picklist p", 'p.no = ddo.no_picklist');
         $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = p.sales_kode', 'left');
-        $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,"
-                . "corak_remark,warna_remark,uom,COUNT(pd.barcode_id) as total_lot,COUNT(pd.qty) as total_qty,msg.nama_sales_group as marketing,ddo.user,ddo.note");
+        $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,"
+                . "pd.corak_remark,pd.warna_remark,sq.uom,sq.uom2,sq.uom_jual,sq.uom2_jual,COUNT(pd.barcode_id) as total_lot,"
+                . "COUNT(sq.qty) as total_qty,COUNT(sq.qty2) as total_qty2,COUNT(sq.qty_jual) as total_qty_jual,COUNT(sq.qty2_jual) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note");
     }
 
     public function getDataReport(array $condition, $order = "", $rekap = "global", $summary = false) {
         $this->_getDataReport();
         if ($rekap === 'global') {
             $this->db->group_by("ddo.no");
-        } else {
+        } else if ($rekap === 'corak') {
             $this->db->group_by("pd.corak_remark,pd.warna_remark,pd.uom");
+        } else {
+            $this->db->group_by("pd.barcode_id");
         }
         if (count($condition) > 0)
             $this->db->where($condition);
@@ -148,8 +152,10 @@ class M_deliveryorder extends CI_Model {
         $this->_getDataReport();
         if ($rekap === 'global') {
             $this->db->group_by("ddo.no");
-        } else {
+        } else if ($rekap === 'corak') {
             $this->db->group_by("pd.corak_remark,pd.warna_remark,pd.uom");
+        } else {
+            $this->db->group_by("pd.barcode_id");
         }
         if (count($condition) > 0)
             $this->db->where($condition);
@@ -162,8 +168,10 @@ class M_deliveryorder extends CI_Model {
         $this->_getDataReport();
         if ($rekap === 'global') {
             $this->db->group_by("ddo.no");
-        } else {
+        } else if ($rekap === 'corak') {
             $this->db->group_by("pd.corak_remark,pd.warna_remark,pd.uom");
+        } else {
+            $this->db->group_by("pd.barcode_id");
         }
         if (count($condition) > 0)
             $this->db->where($condition);
@@ -172,9 +180,22 @@ class M_deliveryorder extends CI_Model {
     }
 
     public function userBC(array $condition) {
-        $this->db->select("u.telepon_wa,u.aktif");
+        $this->db->select("u.telepon_wa");
         $this->db->from("user as u");
-        $this->db->where($condition);
+        $loop = 0;
+        if (count($condition) > 0) {
+            foreach ($condition as $key => $value) {
+                if ($loop === 0) {
+                    $this->db->group_start();
+                    $this->db->where($key, $value);
+                } else {
+                    $this->db->or_where($key, $value);
+                }
+                $loop++;
+            }
+            $this->db->group_end();
+        }
+
 
         $query = $this->db->get();
         return $query->result();

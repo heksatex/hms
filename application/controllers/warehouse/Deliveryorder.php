@@ -1124,7 +1124,7 @@ class Deliveryorder extends MY_Controller {
     public function broadcast() {
         try {
             $do = $this->input->post("do");
-            $data = $this->m_deliveryorder->getDataDetail(['a.no' => $do], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales");
+            $data = $this->m_deliveryorder->getDataDetail(['a.no' => $do], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales,p.nama_user as user_picklist");
             $dataPesan = [
                 "{no_sj}" => $data->no_sj,
                 "{customer}" => $data->nama,
@@ -1139,9 +1139,13 @@ class Deliveryorder extends MY_Controller {
             $this->m_deliveryorder->update(['notifikasi' => 1], ['no' => $do]);
 
             $mention = [];
-            $user = $this->m_deliveryorder->userBC(['u.aktif' => '1', 'sales_group' => $data->kode_sales, 'telepon_wa !=' => '']);
+            //'sales_group' => $data->kode_sales, 
+            $user = $this->m_deliveryorder->userBC(['nama' => $data->user, 'username' => 'prianto', 'nama' => $data->user_picklist]);
 
             foreach ($user as $key => $value) {
+                if (is_null($value->telepon_wa) || empty($value->telepon_wa)) {
+                    continue;
+                }
                 $mention[] = $value->telepon_wa;
             }
             $this->wa_message->sendMessageToGroup('new_do', $dataPesan, ['WAREHOUSE 24JAM'])->setMentions($mention)->setFooter('footer_hms')->send();
