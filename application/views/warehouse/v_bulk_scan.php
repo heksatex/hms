@@ -23,15 +23,24 @@
             }
             .bolded {
                 font-weight:bold;
-                font-size: 150%;
+                /*font-size: 100%;*/
                 letter-spacing: 2px;
+            }
+            .list{
+                font-size: 150%;
             }
 
             .count {
                 font-weight:bold;
                 font-size: 150%;
                 letter-spacing: 2px;
-                background-color: #01ff70;
+            }
+            .status_bal{
+                font-weight:bold;
+                font-size: 200%;
+                letter-spacing: 2px;
+                /*float: right;*/
+                text-align: end;
             }
 
             #tablesdata_{
@@ -41,10 +50,17 @@
                 font-size: 200%;
                 letter-spacing: 1px;
                 font-weight: 400;
+                background-color: yellow;
+            }
+            #buyer{
+                font-size: 200%;
+                letter-spacing: 1px;
+                font-weight: 400;
+                background-color: yellow;
             }
             .notify{
                 font-weight: 400;
-                font-size: 150%;
+                font-size: 200%;
             }
         </style>
     </head>
@@ -116,9 +132,10 @@
                                                             <label class="form-label required">Scan Barcode</label>
                                                         </div>
                                                         <div class="col-xs-12 col-md-8">
-                                                            <input type='text' name="search" id="search" class="form-control input-lg scan-text" required/>
+                                                            <input type='text' name="search" id="search" class="form-control input-lg scan-text" required autocomplete="off"/>
                                                             <label class="text-sm text-info"></label>
                                                             <input type='hidden' name="pl" id="pl" value=""/>
+                                                            <input type='hidden' name="doid" id="doid" value=""/>
                                                             <input type="hidden" name="status" id="status" value=""/>
                                                             <input type="hidden" name="no_bulk" id="no_bulk" value=""/>
                                                         </div>
@@ -126,19 +143,19 @@
                                                 </div>
                                             </form>
                                         </div>
-                                        <div class="col-md-6 col-xs-12">
-                                            <div class="form-group">
-                                                <div class="col-md-12 col-xs-12">
-                                                    <div style="text-align:center;">
-                                                        <label class="form-label">BULK ID</label>
-                                                        <h2 id="posisi_bulk" style="letter-spacing: 2px; font-weight: 600;">-</h2>
-                                                    </div>
-
-
-
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <!--                                        <div class="col-md-6 col-xs-12">
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-md-12 col-xs-12">
+                                                                                            <div style="text-align:center;">
+                                                                                                <label class="form-label">BULK ID</label>
+                                                                                                <h2 id="posisi_bulk" style="letter-spacing: 2px; font-weight: 600;">-</h2>
+                                                                                            </div>
+                                        
+                                        
+                                        
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>-->
                                     </div>
                                 </div>
                                 <!--                                <div class="col-md-4 col-xs-12"  id="tablesdata">
@@ -159,54 +176,70 @@
         </div>
         <script>
             var statusScan = "-";
+
+            const checkStatusScan = function () {
+                statusScan = "Silahkan Scan Barcode PL";
+                switch (true) {
+                    case ($("#pl").val() !== "" && $("#no_bulk").val() !== "") :
+                        statusScan = "Silahkan Scan Barcode Item";
+                        $("#status").val("item");
+                        break;
+                    case ($("#pl").val() !== "" && $("#no_bulk").val() === "") :
+                        statusScan = "Silahkan Scan Barcode Bulk";
+                        $("#status").val("bulk");
+                        break;
+                    case ($("#pl").val() === "" && $("#no_bulk").val() !== "") :
+                        statusScan = "Silahkan Scan Barcode Picklist";
+                        $("#status").val("pl");
+                        break;
+                }
+                $("#search").blur();
+                $("#search").focus();
+            };
+
+            const checkStatusCancel = function () {
+                $("#status").val("cancel");
+                statusScan = "Silahkan Scan Barcode Untuk dibatalkan";
+                $("#search").blur();
+                $("#search").focus();
+            };
+
+            const checkStatusPL = function () {
+                $("#status").val("pl");
+//                        $("#posisibulk").html("Silahkan Scan Barcode Picklist");
+                statusScan = "Silahkan Scan Barcode Picklist";
+                $("#search").blur();
+                $("#pl").val("");
+                $("#no_pl").html("");
+                $("#buyer").html("");
+                $("#tablesdata").html("");
+                $("#no_bulk").val("");
+                $("#bal_aktif").html("");
+                $("#search").focus();
+            };
+            const checkStatusBulk = function () {
+                statusScan = "Silahkan Scan Barcode Bulk";
+
+                $("#search").blur();
+                $("#status").val("bulk");
+                $("#bal_aktif").html("-");
+                $("#search").focus();
+            };
             $(document).keydown(function (e) {
                 checkInput(e, "=", {
                     "=scan=": function () {
+                        checkStatusScan();
 //                        $("#status").val("scan");
-                        statusScan = "Silahkan Scan Barcode PL";
-                        switch (true) {
-                            case ($("#pl").val() !== "" && $("#no_bulk").val() !== "") :
-                                statusScan = "Silahkan Scan Barcode Item";
-                                $("#status").val("item");
-                                break;
-                            case ($("#pl").val() !== "" && $("#no_bulk").val() === "") :
-                                statusScan = "Silahkan Scan Barcode Bulk";
-                                $("#status").val("bulk");
-                                break;
-                            case ($("#pl").val() === "" && $("#no_bulk").val() !== "") :
-                                statusScan = "Silahkan Scan Barcode Picklist";
-                                $("#status").val("pl");
-                                break;
-                        }
-                        $("#search").blur();
-                        $("#search").focus();
+
                     },
                     "=cancel=": function () {
-                        $("#status").val("cancel");
-                        statusScan = "Silahkan Scan Barcode Untuk dibatalkan";
-                        $("#search").blur();
-                        $("#search").focus();
+                        checkStatusCancel();
                     },
                     "=pl=": function () {
-                        $("#status").val("pl");
-//                        $("#posisibulk").html("Silahkan Scan Barcode Picklist");
-                        statusScan = "Silahkan Scan Barcode Picklist";
-                        $("#search").blur();
-                        $("#pl").val("");
-                        $("#no_pl").html("");
-                        $("#buyer").html("");
-                        $("#tablesdata").html("");
-                        $("#no_bulk").val("");
-                        $("#posisi_bulk").html("");
-                        $("#search").focus();
+                        checkStatusPL();
                     },
                     "=bulk=": function () {
-                        statusScan = "Silahkan Scan Barcode Bulk";
-
-                        $("#search").blur();
-                        $("#status").val("bulk");
-                        $("#posisi_bulk").html("-");
-                        $("#search").focus();
+                        checkStatusBulk();
                     }
                 });
             });
@@ -222,12 +255,13 @@
                 $("#posisibulk").html("Silahkan Scan barcode 'SCAN' ");
             });
 
-            const loadSummary = function (pl) {
+            const loadSummary = async function (pl, bl = "") {
                 $.ajax({
                     url: "<?= base_url('warehouse/bulk/bulking_data') ?>",
                     type: "POST",
                     data: {
-                        pl: pl
+                        pl: pl,
+                        bulk: bl
                     },
                     success: function (response) {
                         $("#tablesdata").html(response);
@@ -273,47 +307,60 @@
                             $("#search").val("");
                             throw new Error("errorMessage");
                         }
+                        let checkFirstString = search.slice(0, 2);
+                        checkFirstString = checkFirstString.toLowerCase();
+                        switch (checkFirstString) {
+                            case "pl":
+                                checkStatusPL();
+                                break;
+                            case "bl":
+                                checkStatusBulk();
+                                break;
+                        }
                         request("form-search").then(
-                                response => {
+                                async (response) => {
 
-                                    unblockUI(function () {
-                                        alert_notify(response.data.icon, '<span class="notify">' + response.data.message + '<strong>', response.data.type, function () {});
-                                    }, 50);
-                                    if (response.status === 200) {
-                                        var data = null;
-                                        switch (response.data.status) {
-                                            case "pl":
-                                                data = response.data?.data;
-                                                $("#pl").val(data.no);
-                                                $("#no_pl").html(data.no);
-                                                $("#buyer").html(data.nama);
-                                                $("#status").val("bulk");
-                                                statusScan = "Silahkan Scan Barcode Bulk";
-                                                $("#btn-simpan").show();
-                                                $("#btn-simpan").html("Gross Weight");
-                                                $("#search").blur();
-                                                $("#search").focus();
-                                                loadSummary(data.no);
-                                                break;
-                                            case "bulk":
-                                                data = response.data?.data;
-                                                $("#no_bulk").val(data.no_bulk);
-                                                $("#status").val("item");
-                                                $("#posisi_bulk").html(data.no_bulk);
-                                                statusScan = "Silahkan Scan Barcode Item";
-                                                $("#search").blur();
-                                                $("#search").focus();
-                                                break;
-                                            case "cancel":
-                                                loadSummary($("#pl").val());
-                                                break;
-                                            case "item":
-                                                loadSummary($("#pl").val());
-                                                break;
-                                        }
-                                    }
+                            unblockUI(function () {
+                                alert_notify(response.data.icon, '<span class="notify">' + response.data.message + '<strong>', response.data.type, function () {});
+                            }, 50);
+                            if (response.status === 200) {
+                                var data = null;
+                                switch (response.data.status) {
+                                    case "pl":
+                                        data = response.data?.data;
+                                        $("#pl").val(data.no);
+                                        $("#no_pl").html(data.no);
+                                        $("#buyer").html(data.nama);
+                                        $("#doid").val(data.no_sj);
+                                        $("#status").val("bulk");
+                                        statusScan = "Silahkan Scan Barcode Bulk";
+                                        $("#btn-simpan").show();
+                                        $("#btn-simpan").html("Gross Weight");
+                                        $("#search").blur();
+                                        $("#search").focus();
+                                        await loadSummary(data.no);
+                                        break;
+                                    case "bulk":
+                                        data = response.data?.data;
+                                        $("#no_bulk").val(data.no_bulk);
+                                        $("#bal_aktif_qty").html(data.total_item);
+                                        $("#status").val("item");
+                                        $("#bal_aktif").html(data.no_bulk);
+                                        statusScan = "Silahkan Scan Barcode Item";
+                                        $("#search").blur();
+                                        $("#search").focus();
+                                        await loadSummary($("#pl").val(), data.no_bulk);
+                                        break;
+                                    case "cancel":
+                                        await loadSummary($("#pl").val());
+                                        break;
+                                    case "item":
+                                        await loadSummary($("#pl").val(), $("#no_bulk").val());
+                                        break;
+                                }
+                            }
 
-                                });
+                        });
                     } catch (e) {
 
                     } finally {
@@ -325,6 +372,21 @@
                         false
                         );
             });
+            const isNumb = (event, element) => {
+                event.target.setCustomValidity('');
+                const patt = /^\d+\.{0,1}\d{0,2}$/;
+                let value = event.target.value;
+                if (!patt.test(value)) {
+                    event.target.reportValidity();
+                    element.setAttribute("maxlength", value.length);
+                } else
+                {
+                    element.removeAttribute("maxlength")
+                }
+                if (value.length === 0) {
+                    element.removeAttribute("maxlength");
+                }
+            }
         </script>
     </body>
 </html>

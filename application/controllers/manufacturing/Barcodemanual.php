@@ -658,7 +658,7 @@ class Barcodemanual extends MY_Controller
                 $nama_user = addslashes($nu['nama']);
 
                 //lock table
-                $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE,  mrp_manual_batch_items WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, stock_move WRITE, departemen as d WRITE, token_increment WRITE, stock_move_produk WRITE, stock_move_items WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, access_menu WRITE ");
+                $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE,  mrp_manual_batch_items WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, stock_move WRITE, departemen as d WRITE, token_increment WRITE, stock_move_produk WRITE, stock_move_items WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, mst_access_menu WRITE ");
  
                 $tgl        = date('Y-m-d H:i:s');
                 $mrpm       = $this->m_barcodemanual->get_data_mrp_manual_by_id($kode);

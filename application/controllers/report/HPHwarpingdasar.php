@@ -47,8 +47,8 @@ class HPHwarpingdasar extends MY_Controller
 		if(strtotime($tglsampai) < strtotime($tgldari) ){
 			$callback = array('status' => 'failed', 'message' => 'Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );  
 
-		}else if(count($shift_arr) > 0 AND $hasil > 30){ // cek maksimal 30 hari  jika shift di ceklis 
-			$callback = array('status' => 'failed', 'message' => 'Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+		}else if($hasil > 31){ // cek maksimal 31 hari 
+			$callback = array('status' => 'failed', 'message' => 'Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 
 		}else{
 

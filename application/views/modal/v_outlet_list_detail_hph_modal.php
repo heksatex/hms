@@ -26,6 +26,9 @@
 
           </tbody>
         </table>
+        <small><b>*Jika terdapat baris yang berwarna <font color="red">MERAH</font> maka Product/Lot tersebut telah di proses SPLIT !!</b></small>
+        <br>
+        &nbsp;
     </div>
   </div>
 </form>
@@ -63,6 +66,11 @@
                 "className": "max-width-5"
               },
             ],
+             "createdRow": function( row, data, dataIndex){
+              if( data[16].includes('SPL') == true ){
+                $(row).addClass('text-red');
+              }
+            }
         });
  
     });

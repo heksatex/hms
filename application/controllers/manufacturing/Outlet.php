@@ -260,6 +260,7 @@ class Outlet extends MY_Controller
                 $row[] = $field->lokasi;
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->nama_user;
+                $row[] = $field->kode_split ?? '';
                 $data[] = $row;
             }
     

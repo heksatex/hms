@@ -45,7 +45,7 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Form Validasi Picklist</strong></h3>
+                            <h3 class="box-title">Form Validasi Picklist <strong><?= str_replace("_", " ", $access->permission ?? "") ?></strong></h3>
                         </div>
                         <div class="box-body">
                             <?php if (isset($access->status) && $access->status) { ?>
@@ -59,9 +59,10 @@
                                                         <label class="form-label required">Scan Barcode / No PL</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
-                                                        <input type='text' name="search" id="search" class="form-control input-lg scan-text" required/>
+                                                        <input type='text' name="search" id="search" class="form-control input-lg scan-text" required autocomplete="off"/>
                                                         <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
                                                         <input type='hidden' name="pl" id="pl" value=""/>
+                                                        <input type="hidden" name="access" value="<?= $access->permission ?>">
                                                     </div>
                                                 </div>
                                             </div>
@@ -98,7 +99,7 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label">Sales</label>
+                                                <label class="form-label">Marketing</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <span id="sales"></span>
@@ -225,17 +226,25 @@
 
                 $("#search").focus();
                 $("#btn-validasi").hide();
-                var nopl = "";
                 var audio = new Audio("<?= base_url('dist/error.wav') ?>");
                 audio.volume = 1.0;
                 const table = $("#item_realisai").DataTable({
                     "iDisplayLength": 10,
+                    "processing": true,
+                    "serverSide": true,
                     "order": [],
                     "paging": true,
                     "lengthChange": false,
                     "searching": true,
                     "ordering": true,
                     "info": true,
+                    "ajax": {
+                        "url": "<?= base_url('warehouse/picklistvalidasi/data_detail') ?>",
+                        "type": "POST",
+                        "data": function (d) {
+                            d.filter = $("#pl").val();
+                        }
+                    },
                     "columnDefs": [
                         {
                             "targets": [0],
@@ -302,17 +311,18 @@
                                             if (response?.data?.picklist !== null) {
                                                 dataPicklist = response.data.picklist;
                                                 $("#pl").val(dataPicklist.no);
-                                                dataValid = 0;
+                                                dataValid = dataPicklist.total_validasi;
                                                 dataInvalid = 0;
                                                 table.clear().draw();
                                                 $("#no_pl").html(dataPicklist.no);
-                                                $("#sales").html(dataPicklist.sales_kode);
+                                                $("#sales").html(dataPicklist.sales);
                                                 $("#cust").html(dataPicklist.nama);
                                                 $("#jj").html(dataPicklist.jenis_jual);
                                                 $("#tgl_picklist").html(dataPicklist.tanggal_input);
                                                 $("#totalLot").html(dataPicklist.total_lot);
-                                                $("#scanValid").html(dataPicklist.total_realisasi);
+                                                $("#scanValid").html(dataPicklist.total_validasi);
                                                 $("#scanInvalid").html(dataInvalid);
+                                                table.search("").draw(false);
                                                 return;
                                             }
                                             if (typeof response?.data?.item === "object") {

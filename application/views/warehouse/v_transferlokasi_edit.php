@@ -118,7 +118,14 @@
                   <div class="col-xs-12 col-md-8 col-sm-8">
                     <button  type="button" class="btn btn-sm btn-primary" name="btn-scan" id="btn-scan" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."><i class="fa fa-barcode"></i> Scan </button>
                   </div>                                    
-                </div>                
+                </div> 
+                <br>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-0 col-md-12 col-sm-12" id="total">
+                    <label for="total" id="total_items"></label>
+                  </div>
+                </br>
+               </div>
               </div>
             </div>           
           </form>
@@ -138,45 +145,16 @@
                         <thead>                          
                           <tr>
                             <th class="style no">No.</th>
-                            <th class="style">Quant Id</th>                            
                             <th class="style">Kode Produk</th>                            
                             <th class="style">Nama Produk</th>
                             <th class="style">Lokasi Asal</th>
                             <th class="style">Lot</th>
-                            <th class="style">Qty</th>
-                            <th class="style">UoM</th>
-                            <th class="style">Qty2</th>
-                            <th class="style">UoM2</th>
-                            <th class="style no"></th>
+                            <th class="style">Qty</th>                          
+                            <th class="style">Qty2</th>                            
+                            <th class="style no" style="min-width:50px;">#</th>
                           </tr>
                         </thead>
                         <tbody>
-                            <?php
-                                $no = 1;
-                                $color = '';
-                                foreach ($tli as $row) {
-                            ?>
-                                <tr>
-                                  <td><?php echo $no++; ?></td>
-                                  <td><?php echo $row->quant_id; ?></td>
-                                  <td><?php echo $row->kode_produk; ?></td>
-                                  <td><?php echo $row->nama_produk; ?></td>
-                                  <td><?php echo $row->lokasi_asal; ?></td>
-                                  <td><?php echo $row->lot; ?></td>
-                                  <td align='right'><?php echo $row->qty; ?></td>
-                                  <td><?php echo $row->uom; ?></td>
-                                  <td align='right'><?php echo $row->qty2; ?></td>
-                                  <td><?php echo $row->uom2; ?></td>
-                                  <td>
-                                    <?php if($tl->status == 'ready' or $tl->status == 'draft'){?>
-                                    <a onclick="hapus_items('<?php  echo $tl->kode_tl ?>','<?php  echo $row->row_order ?>','<?php echo htmlentities($row->nama_produk) ?>','<?php  echo $row->quant_id ?>','<?php  echo htmlentities($row->lot) ?>')"  href="javascript:void(0)" data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a>
-                                    <?php }?>
-
-                                  </td>
-                                </tr>
-                            <?php
-                                }
-                            ?>
                         </tbody>
                       </table>
                     </div>
@@ -221,10 +199,12 @@
 
  //untuk merrefresh 
   function refresh_transferLokasi(){
-      $("#tab_1").load(location.href + " #tab_1>*"); 
+      // $("#tab_1").load(location.href + " #tab_1>*"); 
+      $("#total").load(location.href + " #total");
       $("#foot").load(location.href + " #foot");
       $("#status_bar").load(location.href + " #status_bar>*");
       $("#tgl_gen").load(location.href + " #tgl_gen>*");
+      table.ajax.reload( function(){});
   }
 
   //klik button simpan
@@ -420,39 +400,53 @@
     
   }
 
+  $(document).on("click", ".delete_item_transfer", function(e) {
+        let row_order = $(this).attr('data-row');
+        let quant_id = $(this).attr('data-quant');
+        let kode_tl   =  "<?php echo $tl->kode_tl?>";
+        hapus_items(this,kode_tl,quant_id,row_order)
+  });
 
   // hapus items
-  function hapus_items(kode_tl,row_order,nama_produk,quant_id,lot){
+  function hapus_items(btn,kode_tl,quant_id,row_order){
 
     dept_id   = "<?php echo $tl->dept_id?>";
+    var btn_load    = $(btn);
+    btn_load.button('loading');
     $.ajax({
         dataType: "JSON",
         url     : '<?php echo base_url('warehouse/transferlokasi/hapus_items_barcode')?>',
         type    : "POST",
-        data    : { kode:kode_tl, dept_id:dept_id, quant_id:quant_id, barcode_id:lot, nama_produk:nama_produk, row_order:row_order},
+        data    : { kode:kode_tl, dept_id:dept_id, quant_id:quant_id,row_order:row_order},
         success: function(data){
           if(data.sesi == "habis"){
               //alert jika session habis
               alert('Waktu Anda telah habis ! ');
               window.location.replace('index.php');
               $('#btn-scan').button('reset');
+              btn_load.button('reset');
           }else if(data.status == 'failed'){
               alert(data.message);
               //document.getElementById(data.name).focus();             
               $('#btn-scan').button('reset');
               refresh_transferLokasi();
-
+              btn_load.button('reset');
           }else{
               //jika success 
               refresh_transferLokasi();
               alert_notify(data.icon,data.message,data.type,function(){});
               $('#btn-scan').button('reset');
-
+              btn_load.button('reset');
           }
                   
         },error: function (jqXHR, textStatus, errorThrown){
-          alert(jqXHR.responseText);
-          
+            btn_load.button('reset');
+            if(xhr.status == 401){
+                var err = JSON.parse(xhr.responseText);
+                alert(err.message);
+            }else{
+                alert("Error Simpan Data!")
+            }
         }
     });
 
@@ -528,6 +522,51 @@
     }
   });
 
+
+  var table;
+  $(document).ready(function() {
+        //datatables
+        table = $('#table_detail').DataTable({ 
+            "processing": true, 
+            "serverSide": true, 
+            "order": [], 
+
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+             
+            "ajax": {
+                "url": "<?php echo site_url('warehouse/transferlokasi/get_data_item')?>",
+                "type": "POST",
+                "data": {"kode": "<?php echo $tl->kode_tl;?>"},
+            },
+           
+            "columnDefs": [
+              { 
+                "targets": [0,7], 
+                "orderable": false, 
+              },
+              { 
+                "targets": [5,6], 
+                "className":"text-right nowrap",
+              },
+              { 
+                "targets": [2], 
+                "className":"nowrap",
+              },
+            ],
+            "drawCallback": function( settings, start, end, max, total, pre ) {  
+                console.log(this.fnSettings().json); /* for json response you can use it also*/ 
+                let total_record = this.fnSettings().fnRecordsTotal(); // total number of rows
+                $('#total_items').text( 'Total Lot yang di Transfer Lokasi : ' + total_record + ' Lot' )
+            },
+          
+        });
+
+  });
 
 
    

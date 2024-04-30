@@ -317,10 +317,14 @@
                     var empty = true;
                     $.each(data.record, function(key, value) {
                         empty = false;
+                        link = value.kode;
+                        if(value.link != ''){
+                            link = '<a href="<?=base_url()?>'+value.link+'" target="_blank" data-togle="tooltip" title="Cek Details">'+value.kode+'</a>';
+                        }
                         var tr = $("<tr>").append(
                           $("<td>").text(no++),
                           $("<td>").text(value.tanggal),
-                          $("<td>").html('<a href="<?=base_url()?>'+value.link+'" target="_blank" data-togle="tooltip" title="Cek Details">'+value.kode+'</a>'),
+                          $("<td>").html(link),
                           $("<td>").text(value.keterangan),
                           $("<td>").text(value.status),
                           $("<td>").text(value.user),

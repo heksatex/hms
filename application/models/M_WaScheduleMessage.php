@@ -87,6 +87,12 @@ class M_WaScheduleMessage extends CI_Model {
         ));
         return is_array($this->db->error());
     }
+    
+    public function updates(array $data, array $condition) {
+        $this->db->set($data);
+        $this->db->where($condition);
+        $this->db->update($this->table);
+    }
 
     public function deleteSchedule($id) {
         $this->db->query('delete from wa_schedule_message where id =' . $id);

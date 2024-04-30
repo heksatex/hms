@@ -1,3 +1,4 @@
+
 <?php
 
 defined('BASEPATH') or exit('No Direct Script Acces Allowed');
@@ -673,15 +674,15 @@ class _module extends CI_Model {
     }
 
     public function cek_status_mrp_productin_by_origin($origin, $dept_id, $status) {// production_order, procurement_purchase
-        return $this->db->query("SELECT kode FROM mrp_production WHERE origin = '$origin' AND dept_id = '$dept_id' $status ");
+        return $this->db->query("SELECT kode,status,dept_id FROM mrp_production WHERE origin = '$origin' AND dept_id = '$dept_id' $status ");
     }
 
     public function cek_status_pengiriman_barang_by_move_id($origin, $move_id, $status) {// production_order, procurement_purchase, color order
-        return $this->db->query("SELECT kode FROM pengiriman_barang WHERE  origin = '$origin' AND move_id = '$move_id' $status ");
+        return $this->db->query("SELECT kode,status,dept_id FROM pengiriman_barang WHERE  origin = '$origin' AND move_id = '$move_id' $status ");
     }
 
     public function cek_status_penerimaan_barang_by_move_id($origin, $move_id, $status) {// production_order, procurement_purchase, color order
-        return $this->db->query("SELECT kode FROM penerimaan_barang WHERE  origin = '$origin' AND move_id = '$move_id' $status ");
+        return $this->db->query("SELECT kode,status,dept_id FROM penerimaan_barang WHERE  origin = '$origin' AND move_id = '$move_id' $status ");
     }
 
     public function get_stock_quant_by_id($quant_id) {
@@ -827,6 +828,11 @@ class _module extends CI_Model {
     public function startTransaction() {
         $this->db->trans_start();
     }
+  
+    public function rollbackTransaction() {
+        $this->db->trans_complete();
+        $this->db->trans_rollback();
+    }
 
     public function finishTransaction() {
         $this->db->trans_complete();
@@ -896,7 +902,6 @@ class _module extends CI_Model {
         $this->db->where("id",$id);
         return $this->db->get('mst_quality');
     }
-
 
 }
 

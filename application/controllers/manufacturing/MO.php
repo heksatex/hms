@@ -200,6 +200,7 @@ class MO extends MY_Controller
                 $row[] = $no;
                 $row[] = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'">'.$field->kode.'</a>';
                 $row[] = $field->tanggal;
+                $row[] = $field->origin;
                 $row[] = $field->nama_produk;
                 $row[] = $field->qty;
                 $row[] = $field->uom;
@@ -3291,11 +3292,11 @@ class MO extends MY_Controller
                                                     }
                         
                                                     //update qty stock_quant dan stock move items by quant_id
-                                                    $qty_new = $row['qty_smi'] - $row['qty_konsum'];
+                                                    $qty_new = round($row['qty_smi'],2) - round($row['qty_konsum'],2);
                                                     $case   .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";
                                                     $where  .= "'".$row['quant_id']."',";
                         
-                                                    $qty2_new       = $row['qty2'] - $row['qty2_konsum'];
+                                                    $qty2_new       = round($row['qty2'],2) - round($row['qty2_konsum'],2);
                                                     $case_qty2     .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'";
                                                     $where_move_items .= "'".$row['move_id']."',";
 
@@ -3321,10 +3322,10 @@ class MO extends MY_Controller
 
                                                     if($row['qty2_konsum']<$row['qty2']){
 
-                                                        $qty_new     = $row['qty_smi'] - $row['qty_konsum'];
+                                                        $qty_new     = round($row['qty_smi'],2) - round($row['qty_konsum'],2);
                                                         $case       .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";// update qty1 smi sbelumnya
                                                         
-                                                        $qty2_new    = $row['qty2'] - $row['qty2_konsum'];
+                                                        $qty2_new    = round($row['qty2'],2) - round($row['qty2_konsum'],2);
                                                         $case_qty2  .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'"; // update qty2 smi sblumnya
                                                         
                                                         $where              .= "'".$row['quant_id']."',";
@@ -3383,10 +3384,10 @@ class MO extends MY_Controller
                                                     }
 
                                                     
-                                                    $qty_new     = $row['qty_smi'] - $row['qty_konsum'];
+                                                    $qty_new     = round($row['qty_smi'],2) - round($row['qty_konsum'],2);
                                                     $case       .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";// update qty1 smi sbelumnya
                                                     
-                                                    $qty2_new    = $row['qty2'] - $row['qty2_konsum'];
+                                                    $qty2_new    = round($row['qty2'],2) - round($row['qty2_konsum'],2);
                                                     $case_qty2  .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'"; // update qty2 smi sblumnya
                                                     
                                                     $where              .= "'".$row['quant_id']."',";
@@ -3407,10 +3408,10 @@ class MO extends MY_Controller
                                                     
                                                     if($row['qty_konsum']<$row['qty_smi']){
 
-                                                        $qty_new     = $row['qty_smi'] - $row['qty_konsum'];
+                                                        $qty_new     = round($row['qty_smi'],2) - round($row['qty_konsum'],2);
                                                         $case       .= "when quant_id = '".$row['quant_id']."' then '".$qty_new."'";// update qty1 smi sbelumnya
                                                         
-                                                        $qty2_new    = $row['qty2'] - $row['qty2_konsum'];
+                                                        $qty2_new    = round($row['qty2'],2) - round($row['qty2_konsum'],2);
                                                         $case_qty2  .= "when quant_id = '".$row['quant_id']."' then '".$qty2_new."'"; // update qty2 smi sblumnya
                                                         
                                                         $where              .= "'".$row['quant_id']."',";

@@ -88,10 +88,10 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label">Sales</label>
+                                                <label class="form-label">Marketing</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
-                                                <span><?= $picklist->sales_kode ?></span>
+                                                <span><?= $picklist->sales ?></span>
                                             </div>
                                         </div>
                                     </div>

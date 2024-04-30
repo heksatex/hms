@@ -127,17 +127,40 @@ class M_outlet extends CI_Model
     }
 
     
-    var $column_order2 = array(null, 'fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lebar_jadi','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
-	var $column_search2= array('fg.create_date', 'fg.kode_produk', 'fg.nama_produk', 'sq.corak_remark','sq.warna_remark', 'fg.lot', 'sq.nama_grade', 'fg.qty','fg.qty2','sq.qty_jual','sq.qty2_jual','sq.lebar_jadi','sq.lokasi','sq.lokasi_fisik','fg.nama_user');
-	var $order2  	  = array('fg.create_date' => 'asc');
+    var $column_order2 = array(null, 'create_date', 'kode_produk', 'nama_produk', 'corak_remark','warna_remark', 'lot', 'nama_grade', 'qty','qty2','qty_jual','qty2_jual','lebar_jadi','lokasi','lokasi_fisik','nama_user');
+	var $column_search2= array('create_date', 'kode_produk', 'nama_produk', 'corak_remark','warna_remark', 'lot', 'nama_grade', 'qty','qty2','qty_jual','qty2_jual','lebar_jadi','lokasi','lokasi_fisik','nama_user');
+	var $order2  	  = array('create_date' => 'asc');
+
+    private function _get_datatables_query22()
+	{
+		$this->db->SELECT("spl.kode_split,in.id, sq.quant_id, fg.create_date, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.nama_user,sq.qty_jual,sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi,sq.lokasi_fisik, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark ");
+		$this->db->FROM("mrp_inlet in");
+		$this->db->JOIN("mrp_production_fg_hasil fg","fg.kode = in.kode_mrp AND in.id = fg.id_inlet" , "INNER");
+		$this->db->JOIN("stock_quant sq","sq.quant_id = fg.quant_id", "INNER");
+		$this->db->JOIN("split spl","spl.quant_id = fg.quant_id", "LEFT");
+		$query1 = $this->db->get_compiled_select();
+
+		$this->db->SELECT("'' as kode_split, fg.id_inlet, sq.quant_id, spl.tanggal, sq.kode_produk,sq.nama_produk, sq.lot,sq.nama_grade, sq.qty,sq.uom,sq.qty2,sq.uom2,spl.nama_user,sq.qty_jual,sq.uom_jual,sq.qty2_jual,sq.uom2_jual,sq.lokasi, sq.lokasi_fisik, sq.lebar_jadi,sq.uom_lebar_jadi,sq.corak_remark,sq.warna_remark"); 
+		$this->db->FROM("mrp_production_fg_hasil fg");
+		$this->db->JOIN("split spl","fg.quant_id = spl.quant_id","INNER");
+		$this->db->JOIN("split_items spli","spl.kode_split = spli.kode_split","INNER");
+		$this->db->JOIN("stock_quant sq ","sq.quant_id = spli.quant_id_baru","INNER");
+		$query2 = $this->db->get_compiled_select();
+
+		if($this->input->post('id')){
+			$this->db->where('id',$this->input->post('id'));
+		}
+		$this->db->SELECT('*');
+		$this->db->FROM('('.$query1 . ' UNION ' . $query2 .' ) as unionTable');
+	}
 
     private function get_list_hph()
     {
-
-        $this->db->SELECT("fg.create_date, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.lokasi, fg.lebar_jadi, fg.uom_lebar_jadi,  fg.nama_user, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.corak_remark, sq.warna_remark, sq.lokasi");
-        $this->db->FROM("mrp_inlet inp");
-        $this->db->JOIN("mrp_production_fg_hasil fg", "inp.kode_mrp = fg.kode AND inp.id = fg.id_inlet","INNER");
-        $this->db->JOIN("stock_quant sq", "fg.quant_id = sq.quant_id", "INNER");
+        $this->_get_datatables_query22();
+        // $this->db->SELECT("fg.create_date, fg.kode_produk, fg.nama_produk, fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.qty2, fg.uom2, fg.lokasi, fg.lebar_jadi, fg.uom_lebar_jadi,  fg.nama_user, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.corak_remark, sq.warna_remark, sq.lokasi");
+        // $this->db->FROM("mrp_inlet inp");
+        // $this->db->JOIN("mrp_production_fg_hasil fg", "inp.kode_mrp = fg.kode AND inp.id = fg.id_inlet","INNER");
+        // $this->db->JOIN("stock_quant sq", "fg.quant_id = sq.quant_id", "INNER");
 
         $i = 0;
 	
@@ -177,23 +200,31 @@ class M_outlet extends CI_Model
     function get_list_detail_hph($id)
     {   
         $this->get_list_hph();
-        $this->db->WHERE("inp.id",$id);
+        $this->db->WHERE("id",$id);
         if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
         $query =  $this->db->get();
 		return $query->result();
     }
 
+    // function count_all_hph($id)
+    // {
+    //     $this->db->WHERE("inp.id",$id);
+    //     $this->get_list_hph();
+	// 	return $this->db->count_all_results();
+    // }
+
     function count_all_hph($id)
-    {
-        $this->db->WHERE("inp.id",$id);
-        $this->get_list_hph();
-		return $this->db->count_all_results();
-    }
+	{
+		$this->db->where('id',$id);
+		$this->_get_datatables_query22();
+		$query = $this->db->count_all_results();
+		return $query;
+	}
 
     function count_filtered_hph($id)
     {
-        $this->db->WHERE("inp.id",$id);
+        $this->db->WHERE("id",$id);
         $this->get_list_hph();
         $query = $this->db->get();
 		return $query->num_rows();

@@ -2,7 +2,11 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
-
+        <style>
+            .btn-data-table{
+                font-family: "inherit"
+            }
+        </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -29,9 +33,22 @@
                 </section>
                 <section class="content">
                     <div class="box">
-                        <div class="box-header with-border">
+                        <div class="box-header with-border" style="background-color: <?= $picklist->notifikasi ? "transfarent" : "yellow" ?>;">
                             <h3 class="box-title">Form Edit <strong> <?= $picklist->no ?> </strong></h3>
+                            <div class="pull-right text-right" id="btn-header">
+                                <?php
+                                if (!$picklist->notifikasi) {
+                                    ?>
+                                    <button class="btn btn-success btn-sm btn-data-table" id="send-broadcast" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-whatsapp">&nbsp; Broadcast PL</i>
+                                    </button>
+                                <?php }
+                                ?>
 
+                                <button class="btn btn-default btn-sm btn-data-table" id="cetak-lokasi-item" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                    <i class="fa fa-print">&nbsp; Cetak Lokasi Item</i>
+                                </button>
+                            </div>
                         </div>
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-picklist" id="form-picklist" action="<?= base_url('warehouse/picklist/update') ?>">
@@ -61,7 +78,7 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4"><label class="form-label required">Sales</label></div>
+                                            <div class="col-xs-4"><label class="form-label required">Marketing</label></div>
                                             <div class="col-xs-8 col-md-8">
                                                 <select class="form-control input-sm select2" name="sales" required>
                                                     <option></option>
@@ -81,6 +98,7 @@
                                                     <option></option>
                                                     <option value="export" <?= ($picklist->jenis_jual === "export") ? 'selected' : '' ?>>EXPORT</option>
                                                     <option value="lokal" <?= ($picklist->jenis_jual === "lokal") ? 'selected' : '' ?>>LOKAL</option>
+                                                    <option value="lain-lain" <?= ($picklist->jenis_jual === "lain-lain") ? 'selected' : '' ?>>Lain-Lain</option>
                                                 </select>
                                             </div>                                    
                                         </div>
@@ -113,8 +131,7 @@
                             <?php $this->load->view("admin/_partials/js.php") ?>
                             <div class="row">
                                 <?php
-                                if ($picklist->status !== "cancel")
-                                    $this->load->view('warehouse/v_picklist_item', ["pl" => $picklist->no]);
+                                $this->load->view('warehouse/v_picklist_item', ["pl" => $picklist->no, 'no_sj' => $picklist->no_sj, 'sj_status' => $picklist->sj_status]);
                                 ?>
                             </div>
                         </div>
@@ -131,6 +148,38 @@
         </div>
 
         <script>
+            $(function () {
+                $("#cetak-lokasi-item").on("click", function () {
+                    let url = "<?= base_url("warehouse/picklist/lokasi_fisik?no=$picklist->no") ?>";
+                    var win = window.open(url, "width=1000,height=700");
+                    setTimeout(function () {
+                        win.document.close();
+                        win.print();
+                        win.close();
+                    }, 500);
+                });
+                $("#send-broadcast").on("click", function () {
+                    confirmRequest("Broadcast", "Kirim Data PL ke whatsapp ? ",
+                            function () {
+                                please_wait(function () {});
+                                $.ajax({
+                                    url: "<?= base_url('warehouse/picklist/broadcast') ?>",
+                                    type: "POST",
+                                    data: {
+                                        "pl": "<?= $picklist->no ?>"
+                                    },
+                                    success: function (data) {
+                                        location.reload();
+                                    },
+                                    complete: function (jqXHR, textStatus) {
+                                        unblockUI(function () {}, 100);
+                                    }
+                                });
+
+                            });
+
+                });
+            });
             $('.select2').select2({
                 allowClear: true,
                 placeholder: 'Pilih'

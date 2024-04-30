@@ -339,6 +339,16 @@ class M_productionOrder extends CI_Model
 	}
 
 
+	public function cek_mrp_production_rm_target($kode,$status)
+	{
+		$this->db->where('kode',$kode);
+		$this->db->where('status',$status);
+		$query = $this->db->get('mrp_production_rm_target');
+		return $query;
+		
+	}
+
+
 	
 
 

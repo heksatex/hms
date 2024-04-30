@@ -38,7 +38,8 @@
 					<input type="text" class="form-control input-sm text-right" name="qty" id="qty" data-decimal="2" oninput="enforceNumberValidation(this)"/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<select type="text" class="form-control input-sm select2 uom" name="uom_qty" id="uom_qty"  style="width:100% !important;" ></select>
+					<!-- <select type="text" class="form-control input-sm select2 uom" name="uom_qty" id="uom_qty"  style="width:100% !important;" ></select> -->
+                    <input type="text" class="form-control input-sm" name="uom_qty" id="uom_qty" readonly>
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
@@ -47,7 +48,8 @@
 					<input type="text" class="form-control input-sm text-right" name="qty2" id="qty2" data-decimal="2" oninput="enforceNumberValidation(this)"/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<select type="text" class="form-control input-sm select2 uom" name="uom_qty2" id="uom_qty2" style="width:100% !important;" ></select>
+					<!-- <select type="text" class="form-control input-sm select2 uom" name="uom_qty2" id="uom_qty2" style="width:100% !important;" ></select> -->
+                    <input type="text" class="form-control input-sm" name="uom_qty2" id="uom_qty2" readonly>
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
@@ -169,14 +171,18 @@
 		var uom = $("#kode_produk :selected").data().data.uom;
 		var uom2 = $("#kode_produk :selected").data().data.uom2;
 		var $newOption = $("<option></option>").val(uom).text(uom);
-        $("#uom_qty").empty().append($newOption).trigger('change');
-		var $newOption2 = $("<option></option>").val(uom2).text(uom2);
-        $("#uom_qty2").empty().append($newOption2).trigger('change');
+        // $("#uom_qty").empty().append($newOption).trigger('change');
+		// var $newOption2 = $("<option></option>").val(uom2).text(uom2);
+        // $("#uom_qty2").empty().append($newOption2).trigger('change');
+        $("#uom_qty").val(uom);
+        $("#uom_qty2").val(uom2);
     });
 
     $("#kode_produk").on('select2:unselect', function (e) {
-        $("#uom_qty").empty().append('<option></option>').trigger('change');
-        $("#uom_qty2").empty().append('<option></option>').trigger('change');
+        // $("#uom_qty").empty().append('<option></option>').trigger('change');
+        // $("#uom_qty2").empty().append('<option></option>').trigger('change');
+        $("#uom_qty").val('');
+        $("#uom_qty2").val('');
     });
 
 	//select 2 product

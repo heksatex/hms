@@ -154,7 +154,7 @@ class M_adjustment extends CI_Model
 
 	public function get_nama_departemen_by_kode($kode)
 	{
-		return $this->db->query("SELECT nama FROM departemen WHERE kode = '$kode'");
+		return $this->db->query("SELECT nama, stock_location FROM departemen WHERE kode = '$kode'");
 	}
 
 	public function cek_adjustment_by_kode($kode_adjustment)
@@ -343,6 +343,15 @@ class M_adjustment extends CI_Model
 	{
 		$this->db->where('id',$id);
 		$result = $this->db->get('mst_type_adjustment');
+		return $result->row();
+	}
+
+	public function cek_quant_id_in_picklist_by_kode($quant_id,$lot)
+	{
+		$this->db->where('barcode_id',$lot);
+		$this->db->where('quant_id',$quant_id);
+		$this->db->where_not_in('valid','cancel');
+		$result = $this->db->get('picklist_detail');
 		return $result->row();
 	}
 

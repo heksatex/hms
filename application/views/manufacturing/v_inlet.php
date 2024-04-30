@@ -59,6 +59,10 @@
                                   <div class="col-xs-7">
                                     <input type="text" class="form-control input-sm" name="lot" id="lot" >
                                   </div>  
+                                  <div class="col-xs-5"><label>Barcode GJD</label></div>
+                                  <div class="col-xs-7">
+                                    <input type="text" class="form-control input-sm" name="lot_gjd" id="lot_gjd" >
+                                  </div>  
                                   <div class="col-xs-5"><label>Marketing</label></div>
                                   <div class="col-xs-7">
                                       <select class="form-control input-sm" name="marketing" id="marketing" >
@@ -73,14 +77,14 @@
                                   <div class="col-xs-7">
                                     <input type="text" class="form-control input-sm" name="mg" id="mg" >
                                   </div>                                    
-                                  <div class="col-xs-5"><label>Nama Produk</label></div>
-                                  <div class="col-xs-7">
-                                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk"  >
-                                  </div>                                    
                                 </div>
                               </div>
                               <div class="col-md-6">
-                                <div class="form-group"> 
+                                <div class="form-group">
+                                  <div class="col-xs-5"><label>Nama Produk</label></div>
+                                  <div class="col-xs-7">
+                                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk"  >
+                                  </div> 
                                   <div class="col-xs-5"><label>Corak Remark</label></div>
                                   <div class="col-xs-7">
                                     <input type="text" class="form-control input-sm" name="corak_remark" id="corak_remark"  >
@@ -176,6 +180,7 @@
           "data": function ( data ) {
                     data.sales_group = $('#marketing').val();
                     data.lot         = $('#lot').val();
+                    data.lot_gjd         = $('#lot_gjd').val();
                     data.nama_produk = $('#nama_produk').val();
                     data.mg          = $('#mg').val();
                     data.corak_remark= $('#corak_remark').val();

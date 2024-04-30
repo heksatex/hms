@@ -177,6 +177,96 @@ class Trackinglot extends MY_Controller
                                   );
                 }
 
+                // HASIL SPLIT
+                $hsplit = $this->m_trackingLot->get_hasil_split_by_lot($txtlot);
+                foreach($hsplit as $ssplits){
+                  $kode_encrypt = encrypt_url($ssplits->kode_split);
+                  $result_record[] = array('tanggal' => $ssplits->tanggal, 
+                                    'kode'        => $ssplits->kode_split,
+                                    'link'        => 'warehouse/splitlot/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Lot ini dibuat dari hasil SPLIT di Departemen '.$ssplits->nama_departemen.' dari Lot '.$ssplits->lot_asal,
+                                    'status'      => '-',
+                                    'user'        => $ssplits->nama_user,
+                                  );
+                }
+
+                $join  = $this->m_trackingLot->get_join_by_lot($txtlot);
+                foreach($join as $joins){
+                  $kode_encrypt = encrypt_url($joins->kode_join);
+                  $result_record[] = array('tanggal' => $joins->tanggal_transaksi, 
+                                    'kode'        => $joins->kode_join,
+                                    'link'        => 'warehouse/joinlot/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Lot ini dibuat dari hasil JOIN di Departemen '.$joins->nama_departemen.' dari Lot '.$joins->lot_asal,
+                                    'status'      => '-',
+                                    'user'        => $joins->nama_user,
+                                  );
+                }
+
+                //INLET
+                $inlet = $this->m_trackingLot->get_inlet_by_Lot($txtlot);
+                foreach($inlet as $inlets){
+
+                  $result_record[] = array('tanggal' => $inlets->tanggal, 
+                                    'kode'        => $inlets->lot,
+                                    'link'        => '',
+                                    'keterangan'  => 'KP/Lot ini di INLET',
+                                    'status'      => $inlets->nama_status,
+                                    'user'        => $inlets->nama_user,
+                                  );
+                }
+
+                // HASIL HPH
+                $hph  = $this->m_trackingLot->get_hph_inlet_by_lot($txtlot);
+                foreach($hph as $hphs){
+                  $kode_encrypt = encrypt_url($hphs->id_inlet);
+                  $result_record[] = array('tanggal' => $hphs->create_date, 
+                                    'kode'        => $hphs->kode,
+                                    'link'        => 'manufacturing/inlet/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Lot ini dibuat dari HPH',
+                                    'status'      => '',
+                                    'user'        => $hphs->nama_user,
+                                  );
+                }
+
+                // Barcode Manual
+                $manual  = $this->m_trackingLot->get_barcode_manual_by_lot($txtlot);
+                foreach($manual as $manuals){
+                  $kode_encrypt = encrypt_url($manuals->kode);
+                  $result_record[] = array('tanggal' => $manuals->tanggal_transaksi, 
+                                    'kode'        => $manuals->kode,
+                                    'link'        => 'manufacturing/barcodemanual/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Lot ini dibuat dari Barcode Manual',
+                                    'status'      => '',
+                                    'user'        => $manuals->nama_user,
+                                  );
+                }
+
+
+                //PICKLIST
+                $picklist = $this->m_trackingLot->get_picklist_by_Lot($txtlot);
+                foreach($picklist as $picklists){
+
+                  $result_record[] = array('tanggal' => $picklists->tanggal_masuk, 
+                                    'kode'        => $picklists->no_pl,
+                                    'link'        => '',
+                                    'keterangan'  => 'Barcode ini Masuk Picklist ',
+                                    'status'      => $picklists->nama_status,
+                                    'user'        => '',
+                                  );
+                }
+
+                // Delivery
+                $delivery = $this->m_trackingLot->get_delivery_by_Lot($txtlot);
+                foreach($delivery as $deliv){
+
+                  $result_record[] = array('tanggal' => $deliv->tanggal_buat, 
+                                    'kode'        => $deliv->no,
+                                    'link'        => '',
+                                    'keterangan'  => 'Delivery Order : '.$deliv->no,
+                                    'status'      => $deliv->nama_status,
+                                    'user'        => $deliv->nama_user,
+                                  );
+                }
 
                 // arsort($result_record);
                 $result_record1  =  $this->urutkan($result_record);

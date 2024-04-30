@@ -310,4 +310,18 @@ class M_joinLot extends CI_Model
 		return $result->num_rows();
 		
 	}
+
+	function cek_lot_hph($lot)
+	{
+		$this->db->where('lot',$lot);
+		$query = $this->db->get('mrp_production_fg_hasil');
+		return $query->row();
+	}
+
+	function cek_status_inlet_by_id($id_inlet)
+	{
+		$this->db->where('id',$id_inlet);
+		$query = $this->db->get('mrp_inlet');
+		return $query->row();
+	}
 }

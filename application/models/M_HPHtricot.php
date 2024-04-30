@@ -9,7 +9,8 @@ class M_HPHtricot extends CI_Model
 	{	
 		// tipe adjustment
 		// 1=Koreksi MO, 2=Koreksi Salah INput User
-		return $this->db->query("SELECT mp.kode, mp.origin, mpfg.kode_produk, mpfg.nama_produk, mp.origin,mp.reff_note,
+		$ip         = $this->input->ip_address();
+		return $this->db->query("SELECT '$ip' as ip, mp.kode, mp.origin, mpfg.kode_produk, mpfg.nama_produk, mp.origin,mp.reff_note,
 								 mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.create_date as tgl_hph, mpfg.nama_grade,
 								 ms.nama_mesin, mpfg.nama_user,mpfg.lokasi,sq.reff_note as reff_note_sq, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi, mpfg.sales_group,  mpfg.sales_order, mg.nama_sales_group,adj.lot as lot_adj
 

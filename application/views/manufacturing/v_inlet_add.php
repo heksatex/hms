@@ -383,7 +383,7 @@
 
                             // $('#marketing').val(value.marketing);
                             $('#marketing').val(value.kd_marketing).trigger('change');
-                            $('#marketing').attr( "readonly", true ).attr('name', 'marketing');
+                            // $('#marketing').attr( "readonly", true ).attr('name', 'marketing');
 
                             $('#kode_produk').val(value.kode_produk);
                             $('#nama_produk').val(value.nama_produk);

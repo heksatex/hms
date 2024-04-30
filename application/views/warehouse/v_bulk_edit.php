@@ -23,7 +23,7 @@
             }
         </style>
     </head>
-    <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
+    <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
                 <?php
@@ -70,7 +70,7 @@
 
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4">
-                                                        <label class="form-label">Sales</label>
+                                                        <label class="form-label">Marketing</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
                                                         <input type='text' class="form-control input-sm" readonly value="<?= $picklist->sales ?>"  />
@@ -170,13 +170,15 @@
                             $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                             $('.modal-title').text('Pilihan Mode Print ' + $(this).attr("data-id"));
                             $(".print_data").html($("#pilihan-print").html());
-                            let pl = $(this).attr("data-id");
+                            let bulk = $(this).attr("data-id");
+                            let pl = "<?= $picklist->no ?>";
                             $(".print-bulk").on('click', function () {
                                 $.post("<?= base_url('warehouse/bulk/print_bulk/') ?>",
                                         {
                                             "pl": pl,
+                                            "bulk": bulk,
                                             "print_mode": $(this).attr("data-print"),
-                                            "type":"bulk"
+                                            "type": "bulk"
                                         }
                                 , function (response) {
                                     var divp = document.getElementById('printed');
@@ -208,18 +210,38 @@
 
                 $("#btn-add-bulk").on('click', function (e) {
                     e.preventDefault();
-                    confirmRequest("Tambah Data", "Tambah Data Bulk / BAL ", () => {
-                        addBulk();
+                    bootbox.prompt({
+                        title: "Tambah Bulk",
+                        message: "Total BAL yang Akan dibuat?",
+                        inputType: 'number',
+                        buttons: {
+                            cancel: {
+                                label: '<i class="fa fa-times"></i> Tidak'
+                            },
+                            confirm: {
+                                label: '<i class="fa fa-check"></i> YA'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result > 0) {
+                                addBulk(result);
+                            }
+
+                        }
                     });
+//                    confirmRequest("Tambah Data", "Tambah Data Bulk / BAL ", () => {
+//                        addBulk();
+//                    });
                 });
 
-                const addBulk = function () {
+                const addBulk = function (totals) {
                     please_wait(function () {});
                     $.ajax({
                         "url": "<?= base_url('warehouse/bulk/save_add_bulk') ?>",
                         "type": "POST",
                         "data": {
-                            pl: "<?= $picklist->no ?>"
+                            pl: "<?= $picklist->no ?>",
+                            total: totals
                         },
                         "success": function (data) {
                             sumTable.search("").draw(false);
@@ -241,9 +263,11 @@
 
                 var win = window.open();
                 win.document.write($("#printed").html());
-                win.document.close();
-                win.print();
-                win.close();
+                setTimeout(function () {
+                    win.document.close();
+                    win.print();
+                    win.close();
+                }, 200);
 
             };
         </script>

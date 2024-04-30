@@ -8,8 +8,8 @@ class M_mo extends CI_Model
 	
 	//var $table 		  = 'mrp_production';
 	//var $table2 	  = 'mesin';
-	var $column_order = array(null, 'kode', 'tanggal', 'nama_produk', 'qty', 'uom', 'reff_note', 'responsible','nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'nama_produk', 'qty','uom', 'reff_note', 'responsible', 'nama_status');
+	var $column_order = array(null, 'kode', 'tanggal','origin', 'nama_produk', 'qty', 'uom', 'reff_note', 'responsible','nama_status');
+	var $column_search= array( 'kode', 'tanggal','origin', 'nama_produk', 'qty','uom', 'reff_note', 'responsible', 'nama_status');
 	var $order  	  = array('kode' => 'desc');
 
 	var $table2  	    = 'stock_quant';
@@ -28,7 +28,7 @@ class M_mo extends CI_Model
 		//$this->db->from('mrp_production');
 		//$this->db->JOIN('mrp_production', 'mrp_production.md_id = mesin.mc_id');
 
-		$this->db->select("mp.kode, mp.tanggal, mp.nama_produk, mp.qty, mp.uom, mp.status, mmss.nama_status, mp.reff_note, mp.responsible");
+		$this->db->select("mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.qty, mp.uom, mp.status, mmss.nama_status, mp.reff_note, mp.responsible");
 		$this->db->from("mrp_production mp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mp.status", "inner");
 

@@ -10,7 +10,7 @@
                 <div class="col-md-12 col-xs-12">
                     <div class="col-xs-4">Scan</div>
                     <div class="col-xs-8">
-                        <input class="form-control input-sm" placeholder="Scan" name="search" id="searchdata" required>
+                        <input class="form-control input-sm" placeholder="Scan" name="search" id="searchdata" required autocomplete="off">
                         <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan Barcode</label>
                         <button type="submit" id="form_submit" style="display: none;"></button>
                     </div>
@@ -35,7 +35,7 @@
                     <th class="style">Barcode</th>
                     <th class="style">Kode Produk</th>
                     <th class="style">Nama Produk</th>
-                    <th class="style">Corak Warna</th>
+                    <th class="style">Corak Remark</th>
                     <th class="style">Warna Remark</th>
                     <th class="style">Qty Jual</th>
                     <th class="style">Qty 2 Jual</th>
@@ -63,7 +63,7 @@
             columnDefs: [
                 {
                     data: null,
-                    defaultContent: '<button type="button" class="btn btn-danger"><i class="fa fa-trash"></i></button>',
+                    defaultContent: '<button type="button" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>',
                     targets: -1
                 }
             ]
@@ -73,13 +73,13 @@
             dTable.row(row).remove().draw();
 
         });
-        $("#searchdata").keypress(function (e) {
-//            if (e.which === 13) {
-//                $("#form_submit").trigger("click");
-////                dTable.search($(this).val()).draw();
-//            }
-
-        });
+//        $("#searchdata").keypress(function (e) {
+////            if (e.which === 13) {
+////                $("#form_submit").trigger("click");
+//////                dTable.search($(this).val()).draw();
+////            }
+//
+//        });
         var no = 1;
         const addRow = function (datas) {
             datas["status"] = "realisasi";
@@ -94,7 +94,7 @@
                         changeCondition(datas["qty_jual"] + " " + datas["uom_jual"], "null", "0", true),
                         changeCondition(datas["qty2_jual"] + " " + datas["uom2_jual"], "null", "0", true),
                         datas["lokasi_fisik"],
-                        JSON.stringify(datas)
+                        datas["quant_id"] //JSON.stringify(datas)
                     ]).draw(false);
             no++;
         };
@@ -130,9 +130,6 @@
                                     addRow(data);
                                 }
                                 unblockUI(function () {
-//                                    setTimeout(function () {
-//                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-//                                    }, 1000);
                                 }, 50);
                                 alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                             }
@@ -143,10 +140,7 @@
                 } else {
                     alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
                     unblockUI(function () {
-//                        setTimeout(function () {
-//                            alert_notify('fa fa-check', 'Item sudah ada dalam list', 'warning', function () {});
-//                        }, 1000);
-                    },50);
+                    }, 50);
                 }
             } catch (e) {
 
@@ -159,7 +153,7 @@
                 false
                 );
 
-        $("#btn-tambah").on('click', function () {
+        $("#btn-tambah").off('click').on('click', function () {
             const data = new Promise((resolve, reject) => {
                 let dt = [];
                 $.each(dTable.rows().data(), function (idx, val) {
@@ -169,7 +163,7 @@
             });
 
             data.then(rsp => {
-                addItem(JSON.stringify(rsp), "", dTable);
+                addItem(JSON.stringify(rsp), "", dTable, "realisasi");
             });
 
         });

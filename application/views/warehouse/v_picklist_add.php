@@ -1,6 +1,12 @@
 <html>
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
+        
+        <style>
+            #btn-print{
+                display: none;
+            }
+        </style>
 
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -56,13 +62,17 @@
                                         </div>
 
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4"><label class="form-label required">Sales</label></div>
+                                            <div class="col-xs-4"><label class="form-label required">Marketing</label></div>
                                             <div class="col-xs-8 col-md-8">
                                                 <select class="form-control input-sm select2" name="sales" required>
                                                     <option></option>
                                                     <?php
                                                     foreach ($sales as $key => $value) {
-                                                        echo '<option value="' . $value->kode . '">' . $value->nama . '</option>';
+                                                        if ($this->session->userdata('nama')['sales_group'] === $value->kode) {
+                                                            echo '<option value="' . $value->kode . '" selected>' . $value->nama . '</option>';
+                                                        } else {
+                                                            echo '<option value="' . $value->kode . '">' . $value->nama . '</option>';
+                                                        }
                                                     }
                                                     ?>
                                                 </select>
@@ -76,6 +86,7 @@
                                                     <option></option>
                                                     <option value="export">EXPORT</option>
                                                     <option value="lokal">LOKAL</option>
+                                                    <option value="lain-lain">Lain-Lain</option>
                                                 </select>
                                             </div>                                    
                                         </div>
@@ -184,6 +195,7 @@
                     unblockUI(function () {});
                     alert_modal_warning("Hubungi Dept IT");
                 });
+                event.preventDefault();
             },
                     false
                     );
