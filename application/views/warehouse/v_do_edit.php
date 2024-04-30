@@ -579,31 +579,6 @@
                         ]
                     });
 
-
-
-                    const formedit = document.forms.namedItem("form-do");
-                    formedit.addEventListener(
-                            "submit",
-                            (event) => {
-                        please_wait(function () {});
-                        request("form-do").then(
-                                response => {
-                                    unblockUI(function () {
-                                        alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
-                                    }, 100);
-                                    if (response.status === 200) {
-                                        location.reload();
-                                    }
-                                }
-                        ).catch(err => {
-                            unblockUI(function () {});
-                            alert_modal_warning("Hubungi Dept IT");
-                        });
-                        event.preventDefault();
-                    },
-                            false
-                            );
-
                     $("#btn-print").on('click', function (e) {
                         e.preventDefault();
                         $("#print_data").modal({
@@ -684,6 +659,33 @@
                         $("#btn-submit-edit").trigger('click');
                     });
                 });
+
+
+
+
+
+                const formedit = document.forms.namedItem("form-do");
+                formedit.addEventListener(
+                        "submit",
+                        (event) => {
+                    please_wait(function () {});
+                    request("form-do").then(
+                            response => {
+                                unblockUI(function () {
+                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+                                }, 100);
+                                if (response.status === 200) {
+                                    location.reload();
+                                }
+                            }
+                    ).catch(err => {
+                        unblockUI(function () {});
+                        alert_modal_warning("Hubungi Dept IT");
+                    });
+                    event.preventDefault();
+                },
+                        false
+                        );
 
                 $("#send-broadcast").on("click", function () {
                     confirmRequest("Broadcast", "Kirim Data DO ke whatsapp ? ",
