@@ -293,7 +293,7 @@ class Adjustment extends MY_Controller
 
             $item_add = true;
             //insert ke adjustment_items
-            $sql_adjustment_items_batch .= "('".$kode_adjustment."', '".$quant_id."', '".addslashes($kode_produk)."','".addslashes($lot)."', '".addslashes($uom)."','".$qty."','".$qty."', '".addslashes($uom2)."','".$qty2."','".$qty2."', '".$mo['kode']."', '".$row_order."'), ";
+            $sql_adjustment_items_batch .= "('".$kode_adjustment."', '".$quant_id."', '".addslashes($kode_produk)."','".addslashes($lot)."', '".addslashes($uom)."','".$qty."',0, '".addslashes($uom2)."','".$qty2."',0, '".$mo['kode']."', '".$row_order."'), ";
 
             $list_product .= "(".$no.") ".$kode_produk." ".$nama_produk." ".$lot." ".$qty." ".$uom." ".$qty2." ".$uom2." <br>";
             $no++;
@@ -561,7 +561,7 @@ class Adjustment extends MY_Controller
       }else{
 
         // lock table
-        $this->_module->lock_tabel('stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, mst_produk WRITE, departemen WRITE, adjustment_items ai WRITE, mst_produk mp WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, stock_quant as sq WRITE');
+        $this->_module->lock_tabel('stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, mst_produk WRITE, departemen WRITE, adjustment_items ai WRITE, mst_produk mp WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, picklist_detail WRITE');
 
         // get move_id
         $last_move   = $this->_module->get_kode_stock_move();
@@ -577,8 +577,10 @@ class Adjustment extends MY_Controller
         $qty_data_adj_same   = false;
         $qty_adj_null        = false;
         $reserve_move_empty  = true;
+        $reserve_pl_empty  = true;
         $list_produk         = '';
         $list_produk2        = '';
+        $list_produk3        = '';
         $list_quant          = '';
         $lokasi_produk_valid = true;
         $quant               = true;
@@ -640,6 +642,8 @@ class Adjustment extends MY_Controller
                 $reff_note  = $sq['reff_note'];
                 $reserve_origin = $sq['reserve_origin'];
                 $reserve_move = $sq['reserve_move'];
+                // cek quant_id / lot apa terpesan di PL atau tidak 
+                $reserve_pl = $this->m_adjustment->cek_quant_id_in_picklist_by_kode($row->quant_id,$row->lot);
 
                 if($kode_lokasi != $sq['lokasi'] ){
                   $lokasi_produk_valid = false;
@@ -647,6 +651,9 @@ class Adjustment extends MY_Controller
                 }else if($reserve_move != ''){
                   $reserve_move_empty = false;
                   $list_produk2 .= $row->nama_produk." ".$row->lot." <br>";
+                }else if(!empty($reserve_pl)){
+                  $reserve_pl_empty = false;
+                  $list_produk3 .= $row->nama_produk." ".$row->lot." <br>";
                 }else{
 
                   // >> QTY 1
@@ -889,7 +896,7 @@ class Adjustment extends MY_Controller
         }// end foreach adjusment details
 
 
-        if($loop_adj == true AND $qty_data_adj_same == false AND $qty_adj_null == false AND $reserve_move_empty == true AND $lokasi_produk_valid == true AND $quant == true){
+        if($loop_adj == true AND $qty_data_adj_same == false AND $qty_adj_null == false AND $reserve_move_empty == true AND $lokasi_produk_valid == true AND $quant == true AND $reserve_pl_empty == true){
 
   
           // simpan stock move
@@ -1003,6 +1010,8 @@ class Adjustment extends MY_Controller
             $callback = array('status' => 'failed','message' => 'Produk atau Lot sudah tidak berada dilokasi <b>'.$kode_lokasi.'</b> !!<br> '.$list_produk, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if($reserve_move_empty == false){
             $callback = array('status' => 'failed','message' => 'Produk atau Lot terdapat <b>Reserve Move / Terpesan</b> oleh dokumen lain !!<br> '.$list_produk2, 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if($reserve_pl_empty == false){
+            $callback = array('status' => 'failed','message' => 'Produk atau Lot <b> sudah Masuk PL </b> !!<br> '.$list_produk3, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if($quant == false){
             $callback = array('status' => 'failed','message' => 'Produk atau Lot di <b>Stock tidak ditemukan / sudah di hapus </b> !!<br> '.$list_quant, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if(empty($item)){

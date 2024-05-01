@@ -150,7 +150,7 @@ class WaScheduleMessage extends MY_Controller {
             $setLastExe = ($waktu <= date("H:i:s")) ? false : true;
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
-            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama, $setLastExe,$footer)) {
+            if ($status = $this->m_WaScheduleMessage->simpan($pesan, $waktu, $nama, $setLastExe, $footer)) {
                 foreach ($berdasarkan as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Hari Yang Dipilih', 500);
@@ -205,7 +205,7 @@ class WaScheduleMessage extends MY_Controller {
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
             $setLastExe = ($waktu <= $waktu_sblm) ? false : true;
-            if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu, $nama, $setLastExe,$footer)) {
+            if (!$this->m_WaScheduleMessage->update($kode_decrypt, $pesan, $waktu, $nama, $setLastExe, $footer)) {
                 throw new \Exception("Gagal Mengubah Data", 500);
             }
             $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
@@ -273,6 +273,32 @@ class WaScheduleMessage extends MY_Controller {
         }
     }
 
+    public function disablePesan() {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $kode_decrypt = decrypt_url($this->input->post('id'));
+            $stt = $this->input->post("status");
+            if (!$kode_decrypt) {
+                throw new \Exception('Gagal Mengubah Data', 500);
+            }
+            $this->_module->startTransaction();
+            $this->m_WaScheduleMessage->updates(["disabled" => ($stt ? "0" : "!")], ["id" => $kode_decrypt]);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Mengubah Data', 500);
+            }
+            $this->_module->gen_history($sub_menu, 'wa_schedule', 'update', 'Mengubah Status Pesan Schedule ', $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->finishTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
     public function getData() {
         try {
             $data = array();
@@ -283,6 +309,7 @@ class WaScheduleMessage extends MY_Controller {
                 $no++;
                 $nama = $field->nama ?? "Default";
                 $field->day = $this->orderDays($field->day);
+                $disable = '<button type="button" data-toggle="tooltip" data-placement="top" title="' . ($field->disabled ? "Enable" : "Disable") . '" class="btn btn-default btn-sm disabled-sch" data-id="' . $kode_encrypt . '" data-status="' . $field->disabled . '"><i class="fa ' . ($field->disabled ? "fa-check" : "fa-close") . '"></i></button>';
                 $row = array(
                     $no,
                     '<a href="' . base_url('setting/wa_schedule/edit/' . $kode_encrypt) . '">' . $nama . '</a>',
@@ -291,7 +318,8 @@ class WaScheduleMessage extends MY_Controller {
                     $field->groupname,
                     str_replace("_", " ", $field->day),
                     $field->send_time,
-                    '<button type="button" class="btn btn-danger btn-sm btn-delete-doc" data-id="' . $kode_encrypt . '"><i class="fa fa-trash"></></button'
+                    $disable . '&nbsp' .
+                    '<button type="button" class="btn btn-danger btn-sm btn-delete-doc" data-id="' . $kode_encrypt . '"><i class="fa fa-trash"></i></button> '
                 );
                 $data[] = $row;
             }

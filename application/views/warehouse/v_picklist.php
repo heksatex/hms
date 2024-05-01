@@ -34,8 +34,8 @@
                                             <th>Tanggal Dibuat</th>
                                             <th>Jenis</th>
                                             <th>Type Bulk</th>
-                                            <th>Keterangan</th>
                                             <th>Marketing</th>
+                                            <th>Keterangan</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -70,10 +70,10 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 5],
+                            "targets": [0, 7],
                             "orderable": false
                         }
-                    ]
+                    ],
                 });
             });
         </script>

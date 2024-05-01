@@ -8,7 +8,7 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
 class M_Picklist extends CI_Model {
 
-    var $column_order = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
+    var $column_order = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', 'sales_nama', null, 'status', 'nama_user');
     var $order = ['tanggal_input' => 'desc'];
     var $column_search = array('no', 'jenis_jual', 'msg.nama_sales_group');
     protected $table = "picklist";
@@ -262,5 +262,25 @@ class M_Picklist extends CI_Model {
 
     protected function notInDO() {
         $this->db->where("no NOT IN (select no_picklist from delivery_order where status != 'cancel')", null, false);
+    }
+
+    public function getUserBC(array $condition) {
+        $this->db->from("user");
+        $this->db->select("telepon_wa");
+        if (count($condition) > 0) {
+            $loop = 0;
+            foreach ($condition as $key => $value) {
+                if ($loop === 0) {
+                    $this->db->group_start();
+                    $this->db->where($key, $value);
+                } else {
+                    $this->db->or_where($key, $value);
+                }
+                $loop++;
+            }
+            $this->db->group_end();
+        }
+        $query = $this->db->get();
+        return $query->result();
     }
 }

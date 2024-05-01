@@ -31,7 +31,7 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label required">Periode</label>
+                                                <label class="form-label required">Periode Kirim</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <input type="text" name="periode" id="periode" value="<?= $date ?>" class="form-control" required/>
@@ -92,7 +92,8 @@
                                             <div class="col-xs-8 col-md-8">
                                                 <select name="rekap" id="rekap" class="form-control">
                                                     <option value="global">Global</option>
-                                                    <option value="detail">Detail</option>
+                                                    <option value="corak">Corak</option>
+                                                    <option value="detail">Barcode</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -125,7 +126,8 @@
                                                     <th class="style" width="8px">No</th>
                                                     <th class="style">DO</th>
                                                     <th class="style">No SJ</th>
-                                                    <th class="style">Tanggal</th>
+                                                    <th class="style">Tanggal dibuat</th>
+                                                    <th class="style">Tanggal Kirim</th>
                                                     <th class="style">Type</th>
                                                     <th class="style">No Picklist</th>
                                                     <th class="style">Buyer</th>
@@ -133,6 +135,9 @@
                                                     <th class="style">Corak</th>
                                                     <th class="style">Warna</th>
                                                     <th class="style">Qty</th>
+                                                    <th class="style">Qty 2</th>
+                                                    <th class="style">Qty Jual</th>
+                                                    <th class="style">Qty 2 Jual</th>
                                                     <th class="style">LOT</th>
                                                     <th class="style">Marketing</th>
                                                 </tr>
@@ -221,8 +226,9 @@
                 });
 
                 $("#search").on("click", function () {
-                    tableGlobal.search("").draw(false);
-                });
+//                    tableGlobal.search("").draw(false);
+                      tableGlobal.ajax.reload();
+                }); 
             })
         </script>
     </body>

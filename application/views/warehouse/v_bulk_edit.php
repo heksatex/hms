@@ -170,11 +170,13 @@
                             $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                             $('.modal-title').text('Pilihan Mode Print ' + $(this).attr("data-id"));
                             $(".print_data").html($("#pilihan-print").html());
-                            let pl = $(this).attr("data-id");
+                            let bulk = $(this).attr("data-id");
+                            let pl = "<?= $picklist->no ?>";
                             $(".print-bulk").on('click', function () {
                                 $.post("<?= base_url('warehouse/bulk/print_bulk/') ?>",
                                         {
                                             "pl": pl,
+                                            "bulk": bulk,
                                             "print_mode": $(this).attr("data-print"),
                                             "type": "bulk"
                                         }

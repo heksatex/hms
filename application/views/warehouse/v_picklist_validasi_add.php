@@ -45,7 +45,7 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Form Validasi Picklist <strong><?= str_replace("_", " ", $access->permission) ?></strong></h3>
+                            <h3 class="box-title">Form Validasi Picklist <strong><?= str_replace("_", " ", $access->permission ?? "") ?></strong></h3>
                         </div>
                         <div class="box-body">
                             <?php if (isset($access->status) && $access->status) { ?>

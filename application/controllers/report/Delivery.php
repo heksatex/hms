@@ -64,7 +64,7 @@ class Delivery extends MY_Controller {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
             if ($corak !== null || $corak !== "") {
-                $condition = array_merge($condition, ['corak_remark LIKE' => '%' . $corak . '%']);
+                $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
             }
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap);
             $no = $_POST['start'];
@@ -74,6 +74,7 @@ class Delivery extends MY_Controller {
                     $no,
                     $value->no,
                     $value->no_sj,
+                    $value->tanggal_buat,
                     $value->tanggal_dokumen,
                     strtoupper($value->jenis_jual),
                     $value->no_picklist,
@@ -82,6 +83,9 @@ class Delivery extends MY_Controller {
                     $value->corak_remark,
                     $value->warna_remark,
                     $value->total_qty . ' ' . $value->uom,
+                    $value->total_qty2 . ' ' . $value->uom2,
+                    $value->total_qty_jual . ' ' . $value->uom_jual,
+                    $value->total_qty2_jual . ' ' . $value->uom2_jual,
                     $value->total_lot,
                     $value->marketing,
                 );
@@ -120,25 +124,32 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('A1', 'No');
             $sheet->setCellValue('B1', 'DO');
             $sheet->setCellValue('C1', 'No SJ');
-            $sheet->setCellValue('D1', 'Tanggal');
-            $sheet->setCellValue('E1', 'Tipe');
-            $sheet->setCellValue('F1', 'No.Picklist');
-            $sheet->setCellValue('G1', 'Buyer');
-            $sheet->setCellValue('H1', 'Alamat');
-            $sheet->setCellValue('I1', 'Corak');
-            $sheet->setCellValue('J1', 'Warna');
-            $sheet->setCellValue('K1', 'Qty / PCS');
-            $sheet->setCellValue('L1', 'Lot');
-            $sheet->setCellValue('M1', 'Satuan');
-            $sheet->setCellValue('N1', 'User');
-            $sheet->setCellValue('O1', 'Catatan');
-            $sheet->setCellValue('P1', 'Marketing');
+            $sheet->setCellValue('D1', 'Tanggal dibuat');
+            $sheet->setCellValue('E1', 'Tanggal dikirim');
+            $sheet->setCellValue('F1', 'Tipe');
+            $sheet->setCellValue('G1', 'No.Picklist');
+            $sheet->setCellValue('H1', 'Buyer');
+            $sheet->setCellValue('I1', 'Alamat');
+            $sheet->setCellValue('J1', 'Corak');
+            $sheet->setCellValue('K1', 'Warna');
+            $sheet->setCellValue('L1', 'Qty');
+            $sheet->setCellValue('M1', 'Uom');
+            $sheet->setCellValue('N1', 'Qty 2');
+            $sheet->setCellValue('O1', 'Uom 2');
+            $sheet->setCellValue('P1', 'Qty Jual');
+            $sheet->setCellValue('Q1', 'Uom Jual');
+            $sheet->setCellValue('R1', 'Qty 2 Jual');
+            $sheet->setCellValue('S1', 'Uom 2Jual');
+            $sheet->setCellValue('T1', 'Lot');
+            $sheet->setCellValue('U1', 'User');
+            $sheet->setCellValue('V1', 'Catatan');
+            $sheet->setCellValue('W1', 'Marketing');
             $condition = ['ddo.tanggal_dokumen >=' => $period[0], 'ddo.tanggal_dokumen <=' => $period[1], 'ddo.status' => 'done'];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
             if ($corak !== null || $corak !== "") {
-                $condition = array_merge($condition, ['corak_remark LIKE' => '%' . $corak . '%']);
+                $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
             }
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap);
             if (empty($list)) {
@@ -154,19 +165,26 @@ class Delivery extends MY_Controller {
                 $sheet->setCellValue("A" . $rowStartData, $no++);
                 $sheet->setCellValue('B' . $rowStartData, $value->no);
                 $sheet->setCellValue('C' . $rowStartData, $value->no_sj);
-                $sheet->setCellValue('D' . $rowStartData, date('Y-m-d', strtotime($value->tanggal_dokumen)));
-                $sheet->setCellValue('E' . $rowStartData, strtoupper($value->jenis_jual));
-                $sheet->setCellValue('F' . $rowStartData, $value->no_picklist);
-                $sheet->setCellValue('G' . $rowStartData, $value->nama);
-                $sheet->setCellValue('H' . $rowStartData, $value->alamat);
-                $sheet->setCellValue('I' . $rowStartData, $value->corak_remark);
-                $sheet->setCellValue('J' . $rowStartData, $value->warna_remark);
-                $sheet->setCellValue('K' . $rowStartData, $value->total_qty);
-                $sheet->setCellValue('L' . $rowStartData, $value->total_lot);
+                $sheet->setCellValue('D' . $rowStartData, date('Y-m-d', strtotime($value->tanggal_buat)));
+                $sheet->setCellValue('E' . $rowStartData, date('Y-m-d', strtotime($value->tanggal_dokumen)));
+                $sheet->setCellValue('F' . $rowStartData, strtoupper($value->jenis_jual));
+                $sheet->setCellValue('G' . $rowStartData, $value->no_picklist);
+                $sheet->setCellValue('H' . $rowStartData, $value->nama);
+                $sheet->setCellValue('I' . $rowStartData, $value->alamat);
+                $sheet->setCellValue('J' . $rowStartData, $value->corak_remark);
+                $sheet->setCellValue('K' . $rowStartData, $value->warna_remark);
+                $sheet->setCellValue('L' . $rowStartData, $value->total_qty);
                 $sheet->setCellValue('M' . $rowStartData, $value->uom);
-                $sheet->setCellValue('N' . $rowStartData, $value->user);
-                $sheet->setCellValue('O' . $rowStartData, $value->note);
-                $sheet->setCellValue('P' . $rowStartData, $value->marketing ?? "-");
+                $sheet->setCellValue('N' . $rowStartData, $value->total_qty2);
+                $sheet->setCellValue('O' . $rowStartData, $value->uom2);
+                $sheet->setCellValue('P' . $rowStartData, $value->total_qty_jual);
+                $sheet->setCellValue('Q' . $rowStartData, $value->uom_jual);
+                $sheet->setCellValue('R' . $rowStartData, $value->total_qty2_jual);
+                $sheet->setCellValue('S' . $rowStartData, $value->uom2_jual);
+                $sheet->setCellValue('T' . $rowStartData, $value->total_lot);
+                $sheet->setCellValue('U' . $rowStartData, $value->user);
+                $sheet->setCellValue('V' . $rowStartData, $value->note);
+                $sheet->setCellValue('W' . $rowStartData, $value->marketing ?? "-");
             }
             $writer = new Xlsx($spreadsheet);
             $filename = $rekap . ' periode ' . $period[0] . ' - ' . $period[1];
