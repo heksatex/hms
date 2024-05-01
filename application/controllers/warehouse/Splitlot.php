@@ -411,7 +411,7 @@ class Splitlot extends MY_Controller
                                 $items_empty = false;
                                 //$sql_insert_items .= "('".$kode_split."','".$start."','".$row['qty1']."','".$row['uom_qty1']."','".$row['qty2']."','".$row['uom_qty2']."','".$lot_baru."','".$row_order."' ), ";
                                 if($dept_id == 'GJD'){
-                                    $lot_baru    = $this->token->noUrut('split_gjd', date('ym'), true)->generate('S', '%05d')->get();
+                                    $lot_baru    = $this->token->noUrut('split_gjd', date('my'), true)->generate('S', '%05d')->get();
                                 }else{
                                     $lot_baru    = $lot;
                                 }

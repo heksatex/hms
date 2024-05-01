@@ -955,7 +955,7 @@ class Joinlot extends MY_Controller
                         // create stock
                         if($data_sm > 0){
 
-                            $lot_baru = $this->token->noUrut('stock_quant_a', date('ym'), true)->generate('', '%05d')->get();
+                            $lot_baru = $this->token->noUrut('stock_quant_a', date('my'), true)->generate('', '%05d')->get();
                             $origin   = $kode_adjustment."|".$row_order_adj;
                             // sm to adj
                             $data_sm[] = array('move_id'    => $move_id,
