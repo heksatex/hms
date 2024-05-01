@@ -744,11 +744,11 @@ class Barcodemanual extends MY_Controller
                             $grade      = $mb->grade;
 
                             if($grade == 'A'){
-                                $barcode_id = $this->token->noUrut('stock_quant_a', date('ym'), true)->generate('', '%05d')->get();
+                                $barcode_id = $this->token->noUrut('stock_quant_a', date('my'), true)->generate('', '%05d')->get();
                             }else if($grade == 'B'){
-                                $barcode_id = $this->token->noUrut('stock_quant_b', date('ym'), true)->generate($grade, '%05d')->get();
+                                $barcode_id = $this->token->noUrut('stock_quant_b', date('my'), true)->generate($grade, '%05d')->get();
                             }else if($grade == 'C'){
-                                $barcode_id = $this->token->noUrut('stock_quant_c', date('ym'), true)->generate($grade, '%05d')->get();
+                                $barcode_id = $this->token->noUrut('stock_quant_c', date('my'), true)->generate($grade, '%05d')->get();
                             }else{
                                 throw new \Exception('Grade tidak Valid !', 200);
                             }

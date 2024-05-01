@@ -469,13 +469,13 @@ class Outlet extends MY_Controller
                             }
 
                             if($grade == 'A'){
-                                $barcode_id = $this->token->noUrut('stock_quant_a', date('ym'), true)->generate('', '%05d')->get();
+                                $barcode_id = $this->token->noUrut('stock_quant_a', date('my'), true)->generate('', '%05d')->get();
                             }else if($grade == 'B'){
-                                $barcode_id = $this->token->noUrut('stock_quant_b', date('ym'), true)->generate($grade, '%05d')->get();
+                                $barcode_id = $this->token->noUrut('stock_quant_b', date('my'), true)->generate($grade, '%05d')->get();
                             }else if($grade == 'C'){
-                                $barcode_id = $this->token->noUrut('stock_quant_c', date('ym'), true)->generate($grade, '%05d')->get();
+                                $barcode_id = $this->token->noUrut('stock_quant_c', date('my'), true)->generate($grade, '%05d')->get();
                             // }else{
-                            //     $barcode_id = $this->token->noUrut('stock_quant_f', date('ym'), true)->generate($grade, '%05d')->get();
+                            //     $barcode_id = $this->token->noUrut('stock_quant_f', date('my'), true)->generate($grade, '%05d')->get();
                             }
 
                             // ** START HASIL PRODUKSI  **\\

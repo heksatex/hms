@@ -1,66 +1,67 @@
 <?php
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /*
-| -------------------------------------------------------------------------
-| URI ROUTING
-| -------------------------------------------------------------------------
-| This file lets you re-map URI requests to specific controller functions.
-|
-| Typically there is a one-to-one relationship between a URL string
-| and its corresponding controller class/method. The segments in a
-| URL normally follow this pattern:
-|
-|	example.com/class/method/id/
-|
-| In some instances, however, you may want to remap this relationship
-| so that a different class/function is called than the one
-| corresponding to the URL.
-|
-| Please see the user guide for complete details:
-|
-|	https://codeigniter.com/user_guide/general/routing.html
-|
-| -------------------------------------------------------------------------
-| RESERVED ROUTES
-| -------------------------------------------------------------------------
-|
-| There are three reserved routes:
-|
-|	$route['default_controller'] = 'welcome';
-|
-| This route indicates which controller class should be loaded if the
-| URI contains no data. In the above example, the "welcome" class
-| would be loaded.
-|
-|	$route['404_override'] = 'errors/page_missing';
-|
-| This route will tell the Router which controller/method to use if those
-| provided in the URL cannot be matched to a valid route.
-|
-|	$route['translate_uri_dashes'] = FALSE;
-|
-| This is not exactly a route, but allows you to automatically route
-| controller and method names that contain dashes. '-' isn't a valid
-| class or method name character, so it requires translation.
-| When you set this option to TRUE, it will replace ALL dashes in the
-| controller and method URI segments.
-|
-| Examples:	my-controller/index	-> my_controller/index
-|		my-controller/my-method	-> my_controller/my_method
-*/
+  | -------------------------------------------------------------------------
+  | URI ROUTING
+  | -------------------------------------------------------------------------
+  | This file lets you re-map URI requests to specific controller functions.
+  |
+  | Typically there is a one-to-one relationship between a URL string
+  | and its corresponding controller class/method. The segments in a
+  | URL normally follow this pattern:
+  |
+  |	example.com/class/method/id/
+  |
+  | In some instances, however, you may want to remap this relationship
+  | so that a different class/function is called than the one
+  | corresponding to the URL.
+  |
+  | Please see the user guide for complete details:
+  |
+  |	https://codeigniter.com/user_guide/general/routing.html
+  |
+  | -------------------------------------------------------------------------
+  | RESERVED ROUTES
+  | -------------------------------------------------------------------------
+  |
+  | There are three reserved routes:
+  |
+  |	$route['default_controller'] = 'welcome';
+  |
+  | This route indicates which controller class should be loaded if the
+  | URI contains no data. In the above example, the "welcome" class
+  | would be loaded.
+  |
+  |	$route['404_override'] = 'errors/page_missing';
+  |
+  | This route will tell the Router which controller/method to use if those
+  | provided in the URL cannot be matched to a valid route.
+  |
+  |	$route['translate_uri_dashes'] = FALSE;
+  |
+  | This is not exactly a route, but allows you to automatically route
+  | controller and method names that contain dashes. '-' isn't a valid
+  | class or method name character, so it requires translation.
+  | When you set this option to TRUE, it will replace ALL dashes in the
+  | controller and method URI segments.
+  |
+  | Examples:	my-controller/index	-> my_controller/index
+  |		my-controller/my-method	-> my_controller/my_method
+ */
 $route['default_controller'] = 'login';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-$route['admin']			= 'admin/overview';
+$route['admin'] = 'admin/overview';
 $route['manufacturing'] = 'manufacturing/manufacturing';
-$route['warehouse']     = 'warehouse/warehouse';
-$route['ppic']			= 'ppic/ppic';
-$route['lab']			= 'lab/lab';
-$route['sales']			= 'sales/sales';
-$route['setting']	 	= 'setting/setting';
-$route['report']	 	= 'report/report';
+$route['warehouse'] = 'warehouse/warehouse';
+$route['ppic'] = 'ppic/ppic';
+$route['lab'] = 'lab/lab';
+$route['sales'] = 'sales/sales';
+$route['setting'] = 'setting/setting';
+$route['report'] = 'report/report';
 //WA Group
 $route['setting/wa_group']['GET'] = 'setting/WaGroup/index';
 $route['setting/wa_group/add']['GET'] = 'setting/WaGroup/add';
@@ -81,6 +82,7 @@ $route['setting/wa_send_message']['GET'] = 'setting/WaSendMessage/index';
 $route['setting/wa_send_message/add']['GET'] = 'setting/WaSendMessage/add';
 $route['setting/wa_send_message/get_data']['POST'] = 'setting/WaSendMessage/getData';
 $route['setting/wa_send_message/kirim']['POST'] = 'setting/WaSendMessage/kirim';
+$route['setting/wa_send_message/resend']['POST'] = 'setting/WaSendMessage/resend';
 $route['setting/wa_send_message/get_user']['POST'] = 'setting/WaSendMessage/getListUser';
 //WA Schedule Message
 $route['setting/wa_schedule']['GET'] = 'setting/WaScheduleMessage/index';
@@ -90,7 +92,8 @@ $route['setting/wa_schedule/get_data']['POST'] = 'setting/WaScheduleMessage/getD
 $route['setting/wa_schedule/simpan']['POST'] = 'setting/WaScheduleMessage/simpan';
 $route['setting/wa_schedule/update']['POST'] = 'setting/WaScheduleMessage/update';
 $route['setting/wa_schedule/delete']['POST'] = 'setting/WaScheduleMessage/delete';
+$route['setting/wa_schedule/status']['POST'] = 'setting/WaScheduleMessage/disablePesan';
 
-$route['print/check'] = 'print/prints/check';
-$route['setting/wa_template/test']['GET'] = 'setting/WaTemplate/test';
+$route['print/check'] = 'warehouse/picklistvalidasi/check';
+$route['setting/wa_template/test']['GET'] = 'warehouse/picklistvalidasi/test';
 
