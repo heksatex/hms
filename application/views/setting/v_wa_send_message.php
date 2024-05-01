@@ -71,15 +71,39 @@
                     "columnDefs": [
                         {
                             "targets": [0, 1],
-                            "orderable": false,
+                            "orderable": false
                         },
                         {
                             "targets": 1,
                             render: function (data, type, full, meta) {
                                 return "<div class='text-wrap width-400'>" + data + "</div>";
                             }
-                        },
-                    ]
+                        }
+                    ],
+                    "fnDrawCallback": function () {
+                        $(".resend").off("click").on("click", function () {
+                            const e = this;
+                            confirmRequest("Kirim Pesan", "Kirim Ulang Pesan ? ", () => {
+                                $.ajax({
+                                    url: "<?php echo site_url('setting/wa_send_message/resend') ?>",
+                                    type: "POST",
+                                    data: {
+                                        id: $(e).attr("data-id")
+                                    },
+                                    beforeSend: function () {
+                                        please_wait(function () {});
+                                    },
+                                    success: function (data) {
+                                        location.reload();
+                                    },
+                                    complete: function (jqXHR, textStatus) {
+                                        unblockUI(function () {});
+                                    }
+                                });
+                            });
+                        });
+
+                    }
                 });
             })
         </script>

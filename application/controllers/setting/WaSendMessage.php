@@ -121,7 +121,7 @@ class WaSendMessage extends MY_Controller {
                     $field->message,
                     $field->touser,
                     $field->togroup,
-                    $field->status == 0 ? '<span class="text-success">Success</span>' : ($field->status == 1 ? '<span class="text-danger">Failed</span>' : '<span class="text-warning">Menunggu</span>'),
+                    $field->status == 0 ? '<span class="text-success">Success</span>' : ($field->status == 1 ? '<span class="text-danger">Failed</span>&nbsp<a href="#" data-id="' . $kode_encrypt . '" class="text-default resend">Resend</a>' : '<span class="text-warning">Menunggu</span>'),
                     date('D d m, Y H:i:s', strtotime($field->created_at)),
                 );
                 $data[] = $row;
@@ -135,6 +135,23 @@ class WaSendMessage extends MY_Controller {
             exit();
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
+        }
+    }
+
+    public function resend() {
+        try {
+            $id = decrypt_url($this->input->post('id'));
+            $condition = [
+                "id" => $id
+            ];
+            $this->m_WaSendMessage->update($condition, ["status" => 2]);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 }
