@@ -48,7 +48,7 @@
         </div>
         <div class="box-body">
 
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_job_list" action="<?=base_url()?>report/listOW/export_excel">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_job_list" action="">
                 <div class="col-md-8">
                     <div class="form-group">
                     <div class="col-md-12"> 
@@ -79,7 +79,7 @@
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-sm btn-default" name="btn-filter" id="btn-filter" >Proses</button>
-                    <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                 </div>
                 <div class="col-md-12">
                     <div class="form-group">
@@ -410,7 +410,6 @@
 
     $('#btn-filter').click(function(){ //button filter event click
         $('#btn-filter').button('loading');
-        $('#example1').DataTable().destroy();
 
         var check_stock = $("input[name=stock_grg]").is(':checked');
         var tgl_dari    = $('#tgldari').val();
@@ -440,12 +439,13 @@
         }else if(selisih > 30 ){
           alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
         }else{
+          $('#example1').DataTable().destroy();
           fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock);
         }
           //table.ajax.reload( function(){
         $('#btn-filter').button('reset');
           //});  //just reload table
-     });
+    });
      
 
       //modal view move items
@@ -463,6 +463,70 @@
             }   
         );
     }
+
+
+    $('#btn-excel').click(function(){ //button excel event click
+        $('#btn-excel').button('loading');
+      
+        var check_stock = $("input[name=stock_grg]").is(':checked');
+        var tgl_dari    = $('#tgldari').val();
+        var tgl_sampai  = $('#tglsampai').val();
+        var sc          = $('#sc').val();
+        var ow          = $('#ow').val();
+        var produk      = $('#produk').val();
+        var warna       = $('#warna').val();
+        var sales_group = $('#sales_group').val();
+        var no_ow       = $('#no_ow').val();
+        var status_ow   = $('#status_ow').val();
+
+        var tgldari_2 = $('#tgldari').data("DateTimePicker").date();
+        var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+
+        var timeDiff = 0;
+        if (tglsampai_2) {
+            timeDiff = (tglsampai_2 - tgldari_2) / 1000; // 000 mengubah hasil milisecond ke bentuk second
+        }
+        selisih = Math.floor(timeDiff/(86400)); // 1 hari = 25 jam, 1 jam=60 menit, 1 menit= 60 second , 1 hari = 86400 second
+
+
+        if(tgl_dari == '' || tgl_sampai == ''){
+          alert_modal_warning('Periode Tanggal Harus diisi !');
+        }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
+          alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
+        }else if(selisih > 30 ){
+          alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
+        }else{
+          // fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock);
+
+            $.ajax({
+                "type":'POST',
+                "url" : "<?php echo site_url('report/listOW/export_excel')?>",
+                "data": {tgldari:tgl_dari, tglsampai:tgl_sampai, sc:sc, ow:ow, produk:produk, sales_group:sales_group, no_ow:no_ow, status_ow:status_ow, stock_grg:check_stock},
+                "dataType":'json',
+                beforeSend: function() {
+                  $('#btn-excel').button('loading');
+                },error: function(){
+                  alert('Error Export Excel');
+                  $('#btn-excel').button('reset');
+                }
+            }).done(function(data){
+                if(data.status =="failed"){
+                  alert_modal_warning(data.message);
+                }else{
+                  var $a = $("<a>");
+                  $a.attr("href",data.file);
+                  $("body").append($a);
+                  $a.attr("download",data.filename);
+                  $a[0].click();
+                  $a.remove();
+                }
+                $('#btn-excel').button('reset');
+            });
+        }
+          //table.ajax.reload( function(){
+          // $('#btn-excel').button('reset');
+          //});  //just reload table
+    });
 
 
 </script>

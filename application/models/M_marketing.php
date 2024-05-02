@@ -325,7 +325,7 @@ class m_marketing extends CI_Model
         $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
 
 		if($this->input->post('expired') != 'All'){
-			if($this->input->post('expired') == 'Yes'){
+			if($this->input->post('expired') == 'Ya'){
 				$this->db->where("STR_TO_DATE(sq.create_date,'%Y-%m-%d') <= ",$tgl_sebelum);
 			}else{
 				$this->db->where("STR_TO_DATE(sq.create_date,'%Y-%m-%d') >= ",$tgl_sebelum);
@@ -428,7 +428,7 @@ class m_marketing extends CI_Model
         $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
 
 		if($this->input->post('expired') != 'All'){
-			if($this->input->post('expired') == 'Yes'){
+			if($this->input->post('expired') == 'Ya'){
 				$this->db->where("STR_TO_DATE(sq.create_date,'%Y-%m-%d') <= ",$tgl_sebelum);
 			}else{
 				$this->db->where("STR_TO_DATE(sq.create_date,'%Y-%m-%d') >= ",$tgl_sebelum);
@@ -482,7 +482,7 @@ class m_marketing extends CI_Model
         $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
 
 		if($this->input->post('expired') != 'All'){
-			if($this->input->post('expired') == 'Yes'){
+			if($this->input->post('expired') == 'Ya'){
 				$this->db->where("STR_TO_DATE(sq.create_date,'%Y-%m-%d') <= ",$tgl_sebelum);
 			}else{
 				$this->db->where("STR_TO_DATE(sq.create_date,'%Y-%m-%d') >= ",$tgl_sebelum);
