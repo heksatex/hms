@@ -436,8 +436,8 @@
           alert_modal_warning('Periode Tanggal Harus diisi !');
         }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
           alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
-        }else if(selisih > 30 ){
-          alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
+        // }else if(selisih > 30 ){
+        //   alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
         }else{
           $('#example1').DataTable().destroy();
           fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock);
@@ -493,8 +493,8 @@
           alert_modal_warning('Periode Tanggal Harus diisi !');
         }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
           alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
-        }else if(selisih > 30 ){
-          alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
+        // }else if(selisih > 30 ){
+        //   alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
         }else{
           // fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock);
 
