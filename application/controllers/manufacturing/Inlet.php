@@ -182,8 +182,8 @@ class Inlet extends MY_Controller
                     $callback = array('status' => 'failed', 'message' => 'Lot <b>'.$lot.'</b> sudah di Inlet !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if($data->id_category == 21){
                     $callback = array('status' => 'failed', 'message' => 'Kategori Kain tidak Boleh Kain Hasil Gudang Jadi !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-                }else if($data->lokasi_fisik != ''){
-                    $callback = array('status' => 'failed', 'message' => 'Lokasi Fisik / Rak harus Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                // }else if($data->lokasi_fisik != ''){
+                //     $callback = array('status' => 'failed', 'message' => 'Lokasi Fisik / Rak harus Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else{
 
                     $data_lot   = [];
