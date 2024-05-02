@@ -13,13 +13,14 @@
     }
     .title span {
         font-weight: 800;
-        border-bottom: solid;
         border-width: thin;
         font-size: 16px;
         text-decoration: underline;
+        padding-top: 1px;
     }
     .nosjprint{
         font-size: 14px;
+        font-weight: 800;
     }
     .item-right {
         display: flex;
@@ -66,6 +67,9 @@
         display: table-footer-group;
     }
     @media print {
+        html,body{
+            font-family: Tahoma, sans-serif;
+        }
         #pg {
             page-break-after: always;
         }
@@ -76,6 +80,16 @@
         }
         p{
             margin: 0;
+        }
+        .border_table {
+            border: 1px solid ;
+        }
+        table,
+        th,
+        td {
+            text-align: left;
+            border: 1px solid black;
+            border-collapse: collapse;
         }
     }
     #dialogoverlay{

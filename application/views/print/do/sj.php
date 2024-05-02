@@ -27,37 +27,39 @@
 
                 </div>
                 <div class="col-xs-4 item-right" style="margin-top: 10px;" >
-                        
-                            <div class="form-group">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-xs-2">
-                                            <label class="form-label">No</label>
-                                        </div>
-                                        <div class="col-xs-10">
-                                            <label class="form-label nosjprint" style="font-weight: 500;">: <?= $base->no_sj ?></label>
-                                        </div>
 
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-xs-12">
-                                        <div class="row">
-                                            <div class="col-xs-4">
-                                                <label class="form-label">Tanggal</label>
-                                            </div>
-                                            <div class="col-xs-8">
-                                                <label class="form-label" style="font-size: 15px; font-weight: 500;">: <?= date("d-M-Y") ?></label>
-                                            </div>
-                                        </div>
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <label class="form-label nosjprint" style="font-weight: 600;">No&nbsp;: <?= $base->no_sj ?></label>
+                                <!--                                <div class="col-xs-2">
+                                                                    <label class="form-label">No</label>
+                                                                </div>
+                                                                <div class="col-xs-10" style="margin-left: -10px;">
+                                                                    <label class="form-label nosjprint" style="font-weight: 600;">: <?= $base->no_sj ?></label>
+                                                                </div>-->
 
-                                    </div>
-                                </div>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <div class="row">
+                                    <label class="form-label" style="font-size: 14px; font-weight: 600;">No&nbsp;: <?= date("d-M-Y") ?></label>
+                                    <!--                                    <div class="col-xs-4">
+                                                                            <label class="form-label">Tanggal</label>
+                                                                        </div>
+                                                                        <div class="col-xs-8">
+                                                                            <label class="form-label" style="font-size: 15px; font-weight: 600;">: <?= date("d-M-Y") ?></label>
+                                                                        </div>-->
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
+                </div>
             </div>
             <div class="row">
-                <table class="table table-bordered header-table" style="width:100%">
+                <table class="table header-table" style="width:100%">
                     <thead>
                         <tr>
                             <td rowspan="2" class="row-1" style="font-size: 15px;
@@ -86,7 +88,7 @@
                 </table>
             </div>
             <div class="row">
-                <table class="table table-bordered" style="width:100%">
+                <table class="table" style="width:100%">
                     <thead>
                         <tr style="text-align: center;">
                             <?php if ((int) $base->type_bulk_id === 1) { ?>
@@ -101,93 +103,93 @@
                         </tr>
                     </thead>
                     <?php if ((int) $base->type_bulk_id === 1) { ?>
-                        <tbody>
-                            <?php
-                            $total_pcs = 0;
-                            $total_jumlah = 0;
-                            foreach ($data as $key => $value) {
-                                $total_jumlah += $value->total_qty;
-                                $total_pcs += $value->jumlah_qty;
-                                ?>
-                                <tr>
 
-                                    <td>
-                                        <?= $value->bulk_no_bulk ?>
-                                    </td>
-                                    <td>
-                                        <div class="deskripsi">
-                                            <?= $value->corak_remark . ' ' . $value->warna_remark ?>
-                                        </div>
-                                        <hr>
-                                        <span><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
-                                    </td>
-                                    <td style="text-align: right;font-weight: 600">
-                                        <div class="deskripsi" style="justify-content: end;">
-                                            <?= $value->jumlah_qty ?>
-                                        </div>
-                                        <hr>
-                                        <span style="text-align: right"><?= $value->jumlah_qty ?></span>
-                                    </td>
-                                    <td style="text-align: right;">
-                                        <div class="deskripsi" style="justify-content: end;">
-                                            <?= $value->total_qty . " " . $value->uom ?>
-                                        </div>
-                                        <hr>
-                                        <span style="text-align: right"><?= $value->total_qty . " " . $value->uom ?></span>
-                                    </td>
-                                </tr>
+                        <?php
+                        $total_pcs = 0;
+                        $total_jumlah = 0;
+                        foreach ($data as $key => $value) {
+                            $total_jumlah += $value->total_qty;
+                            $total_pcs += $value->jumlah_qty;
+                            ?>
+                            <tr>
 
-                            <?php } ?>
-                        </tbody>
+                                <td>
+                                    <?= $value->bulk_no_bulk ?>
+                                </td>
+                                <td>
+                                    <div class="deskripsi">
+                                        <?= $value->corak_remark . ' ' . $value->warna_remark ?>
+                                    </div>
+                                    <hr>
+                                    <span><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
+                                </td>
+                                <td style="text-align: right;font-weight: 600">
+                                    <div class="deskripsi" style="justify-content: end;">
+                                        <?= $value->jumlah_qty ?>
+                                    </div>
+                                    <hr>
+                                    <span style="text-align: right"><?= $value->jumlah_qty ?></span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="deskripsi" style="justify-content: end;">
+                                        <?= $value->total_qty . " " . $value->uom ?>
+                                    </div>
+                                    <hr>
+                                    <span style="text-align: right"><?= $value->total_qty . " " . $value->uom ?></span>
+                                </td>
+                            </tr>
+
+                        <?php } ?>
+
                     <?php } else { ?>
-                        <tbody>
-                            <?php
-                            $total_pcs = 0;
-                            $total_jumlah = 0;
-                            foreach ($data as $key => $value) {
-                                $total_jumlah += $value->total_qty;
-                                $total_pcs += $value->jumlah_qty;
-                                ?>
-                                <tr>
-                                    <td>
-                                        <div class="deskripsi">
-                                            <?= $value->corak_remark . ' ' . $value->warna_remark ?>
-                                        </div>
-                                    <td style="text-align: right;
-                                        font-weight: 600;">
-                                        <div class="deskripsi" style="justify-content: end;">
-                                            <?= $value->jumlah_qty ?>
-                                        </div>
-                                    </td>
-                                    <td style="text-align: right;;">
-                                        <div class="deskripsi" style="justify-content: end;">
-                                            <?= $value->total_qty . " " . $value->uom ?>
-                                        </div>
-                                    </td>
-                                </tr>
 
-                            <?php } ?>
-                        </tbody>
+                        <?php
+                        $total_pcs = 0;
+                        $total_jumlah = 0;
+                        foreach ($data as $key => $value) {
+                            $total_jumlah += $value->total_qty;
+                            $total_pcs += $value->jumlah_qty;
+                            ?>
+                            <tr>
+                                <td>
+                                    <div class="deskripsi">
+                                        <?= $value->corak_remark . ' ' . $value->warna_remark ?>
+                                    </div>
+                                <td style="text-align: right;
+                                    font-weight: 600;">
+                                    <div class="deskripsi" style="justify-content: end;">
+                                        <?= $value->jumlah_qty ?>
+                                    </div>
+                                </td>
+                                <td style="text-align: right;;">
+                                    <div class="deskripsi" style="justify-content: end;">
+                                        <?= $value->total_qty . " " . $value->uom ?>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        <?php } ?>
+
                     <?php } ?>
-                        <tr>
-                            <td colspan="2"></td>
-                            <td class="total_total">
+                    <tr>
+                        <td colspan="2"></td>
+                        <td class="total_total">
                             <div class="deskripsi" style="justify-content: end;
                                  font-weight: 600;">
                                  <?= $total_pcs ?>
                             </div>
 
                         </td>
-                             <td class="total_total">
+                        <td class="total_total">
                             <div class="deskripsi" style="justify-content: end;
                                  font-weight: 600;">
                                  <?= $total_jumlah ?>
                             </div>
 
                         </td>
-                        </tr>
+                    </tr>
                 </table>
-                
+
             </div>
             <div class="row">
                 <div class="footer">
