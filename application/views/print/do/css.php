@@ -3,7 +3,7 @@
         box-sizing: border-box;
     }
     body {
-        margin:  30px 10px 0px 10px;
+        margin:  10px 10px 0px 0px;
         font-family: "Times New Roman", Times, serif;
     }
     .title {

@@ -85,7 +85,7 @@ class Picklistvalidasi extends MY_Controller {
 //                    throw new Exception("No Picklist belum dalam status Validasi", 500);
 //                }
                 $picklist = $dataPl;
-                $picklist->total_lot = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no]);
+                $picklist->total_lot = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no,'valid !='=>'cancel']);
                 $picklist->total_validasi = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no, 'valid' => 'validasi']) ?? 0;
                 if ($picklist->total_lot < 1) {
                     throw new Exception("Tidak ada barcode pada Picklist " . $dataPl->no, 500);
