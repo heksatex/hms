@@ -3,7 +3,7 @@
         box-sizing: border-box;
     }
     body {
-        margin:  10px 10px 0px 0px;
+        margin:  -10px 10px 0px 0px;
         font-family: "Times New Roman", Times, serif;
     }
     .title {
@@ -37,7 +37,7 @@
     }
     hr {
         margin: 5px 0 5px 0;
-        border-top: 1px dotted gray;
+        border-top: 1px solid black;
     }
     .footer{
         display: flex;
@@ -68,6 +68,7 @@
     }
     @media print {
         html,body{
+            margin:  15px 10px 0px 0px;
             font-family: Tahoma, sans-serif;
         }
         #pg {
@@ -83,6 +84,11 @@
         }
         .border_table {
             border: 1px solid ;
+        }
+
+        .text-content {
+            font-weight: 800;
+            font-size: 12px;
         }
         table,
         th,
