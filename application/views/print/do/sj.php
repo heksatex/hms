@@ -44,7 +44,7 @@
                         <div class="form-group">
                             <div class="col-xs-12">
                                 <div class="row">
-                                    <label class="form-label" style="font-size: 14px; font-weight: 600;">No&nbsp;: <?= date("d-M-Y") ?></label>
+                                    <label class="form-label" style="font-size: 14px; font-weight: 600;">Tanggal&nbsp;: <?= date("d-M-Y", strtotime($base->tanggal_dokumen)) ?></label>
                                     <!--                                    <div class="col-xs-4">
                                                                             <label class="form-label">Tanggal</label>
                                                                         </div>
