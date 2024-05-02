@@ -68,16 +68,16 @@
                                 <p>Alamat</p>
 
                             </td>
-                            <td rowspan="2" class="border_table" style="width: 45%">
+                            <td rowspan="2" class="border_table text-content" style="width: 45%">
                                 <p><?= $base->nama ?></p>
                                 <p><?= $base->alamat ?></p>
                             </td>
-                            <td class="border_table" style="font-weight: 600;
+                            <td class="border_table text-content" style="font-weight: 600;
                                 font-size: 13px;
                                 width: 45%">Catatan</td>
                         </tr>
                         <tr>
-                            <td class="border_table" rowspan="2" style="font-size: 12px" id="catatan"><?= nl2br($base->note) ?> </td>
+                            <td class="border_table text-content" rowspan="2" style="font-size: 12px" id="catatan"><?= nl2br($base->note) ?> </td>
                         </tr>
                         <tr>
                             <td class="row-1 border_table" style="font-size: 15px">SC</td>
@@ -92,15 +92,15 @@
 
                     <thead>
                         <tr>
-                            <td rowspan="2" class="" style="width: 10px;">No</td>
+                            <td rowspan="2" class="text-content" style="width: 10px;">No</td>
                             <?php if ((int) $base->type_bulk_id === 1) { ?>
-                                <td rowspan="2" class="" style="width: 25px;">BAL ID</td>
+                                <td rowspan="2" class="text-content" style="width: 25px;">BAL ID</td>
                             <?php } ?>
-                            <td rowspan="2" class="" style="width: 210px;">Corak Design</td>
-                            <td rowspan="2" class="">Warna</td>
-                            <td colspan="10"class="">Rincian Qty/Pcs/GL</td>
-                            <td rowspan="2" class="" style="width: 20px;">GL/PCS</td>
-                            <td rowspan="2" class="" style="width: 120px;">Total QTY</td>
+                            <td rowspan="2" class="text-content" style="width: 210px;">Corak Design</td>
+                            <td rowspan="2" class="text-content">Warna</td>
+                            <td colspan="10"class="text-content">Rincian Qty/Pcs/GL</td>
+                            <td rowspan="2" class="text-content" style="width: 20px;">GL/PCS</td>
+                            <td rowspan="2" class="text-content" style="width: 120px;">Total QTY</td>
                         </tr>
 
                         <tr style="text-align: center;">
@@ -157,8 +157,8 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td class="" style="font-weight: 500"><?= $sub_jml_qty ?? 0 ?></td>
-                                            <td class="" style="font-weight: 500"><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
+                                            <td class="text-content"><?= $sub_jml_qty ?? 0 ?></td>
+                                            <td class="text-content"><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
                                         </tr>
                                         <?php
                                         $sub_total_qty = 0;
@@ -217,8 +217,8 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td style="font-weight: 600"><?= $sub_jml_qty ?? 0 ?></td>
-                                <td style="font-weight: 600"><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
+                                <td class="text-content"><?= $sub_jml_qty ?? 0 ?></td>
+                                <td class="text-content"><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
                             </tr>
                         </tbody>
                         <?php
@@ -274,7 +274,7 @@
                         </tbody>
                     <?php } ?>
                 </table>
-                <div class="col-xs-4">
+                <div class="col-xs-4 text-content">
                     <p><strong>Sub - Total GL/PCS :</strong> <?= $jml_qty ?> </p>
                     <p><strong>Sub - Total Qty :</strong> <?= $total_qty ?> </p>
                 </div>

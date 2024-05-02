@@ -68,7 +68,7 @@
                                 <p>Alamat</p>
 
                             </td>
-                            <td rowspan="2" style="width: 45%">
+                            <td rowspan="2" style="width: 45%" class="text-content">
                                 <p><?= $base->nama ?></p>
                                 <p><?= $base->alamat ?></p>
                             </td>
@@ -77,7 +77,7 @@
                                 width: 45%">Catatan</td>
                         </tr>
                         <tr>
-                            <td rowspan="3" style="font-size: 10px;" id="catatan"><?= nl2br($base->note) ?> </td>
+                            <td rowspan="3" style="font-size: 10px;" class="text-content" id="catatan"><?= nl2br($base->note) ?> </td>
                         </tr>
                         <tr>
                             <td class="row-1" style="font-size: 15px;">SC</td>
@@ -86,14 +86,14 @@
                         <tr>
                             <?php if ((int) $base->type_bulk_id === 1) { ?>
                                 <td class="row-1" style="font-size: 15px; width:15%">Total BAL / BULK</td>
-                                <td style="font-size: 10px;"><?= $count_bulk ?? 0 ?></td>
+                                <td style="font-size: 10px;" class="text-content"><?= $count_bulk ?? 0 ?></td>
                             <?php } ?>
                         </tr>
                     </thead>
                 </table>
             </div>
             <div class="row">
-                <table class="table" style="width:100%">
+                <table class="table text-content" style="width:100%">
                     <thead>
                         <tr style="text-align: center;">
                             <td class="row-1">No</td>

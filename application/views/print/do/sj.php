@@ -68,7 +68,7 @@
                                 <p>Alamat</p>
 
                             </td>
-                            <td rowspan="2" style="width: 45%">
+                            <td rowspan="2" style="width: 45%" class="text-content">
                                 <p><?= $base->nama ?></p>
                                 <p><?= $base->alamat ?></p>
                             </td>
@@ -77,7 +77,7 @@
                                 width: 45%">Catatan</td>
                         </tr>
                         <tr>
-                            <td rowspan="2" style="font-size: 10px;" id="catatan"><?= nl2br($base->note) ?> </td>
+                            <td rowspan="2" class="text-content" style="font-size: 10px;" id="catatan"><?= nl2br($base->note) ?> </td>
                         </tr>
                         <tr>
                             <td class="row-1" style="font-size: 15px;">SC</td>
@@ -113,29 +113,29 @@
                             ?>
                             <tr>
 
-                                <td>
+                                <td class="text-content">
                                     <?= $value->bulk_no_bulk ?>
                                 </td>
                                 <td>
-                                    <div class="deskripsi">
+                                    <div class="deskripsi text-content">
                                         <?= $value->corak_remark . ' ' . $value->warna_remark ?>
                                     </div>
                                     <hr>
-                                    <span><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
+                                    <span class="text-content"><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
                                 </td>
                                 <td style="text-align: right;font-weight: 600">
-                                    <div class="deskripsi" style="justify-content: end;">
+                                    <div class="deskripsi text-content" style="justify-content: end;">
                                         <?= $value->jumlah_qty ?>
                                     </div>
                                     <hr>
-                                    <span style="text-align: right"><?= $value->jumlah_qty ?></span>
+                                    <span style="text-align: right" class="text-content"><?= $value->jumlah_qty ?></span>
                                 </td>
                                 <td style="text-align: right;">
-                                    <div class="deskripsi" style="justify-content: end;">
+                                    <div class="deskripsi text-content" style="justify-content: end;">
                                         <?= $value->total_qty . " " . $value->uom ?>
                                     </div>
                                     <hr>
-                                    <span style="text-align: right"><?= $value->total_qty . " " . $value->uom ?></span>
+                                    <span style="text-align: right" class="text-content"><?= $value->total_qty . " " . $value->uom ?></span>
                                 </td>
                             </tr>
 
@@ -152,17 +152,17 @@
                             ?>
                             <tr>
                                 <td>
-                                    <div class="deskripsi">
+                                    <div class="deskripsi text-content">
                                         <?= $value->corak_remark . ' ' . $value->warna_remark ?>
                                     </div>
                                 <td style="text-align: right;
                                     font-weight: 600;">
-                                    <div class="deskripsi" style="justify-content: end;">
+                                    <div class="deskripsi text-content" style="justify-content: end;">
                                         <?= $value->jumlah_qty ?>
                                     </div>
                                 </td>
                                 <td style="text-align: right;;">
-                                    <div class="deskripsi" style="justify-content: end;">
+                                    <div class="deskripsi text-content" style="justify-content: end;">
                                         <?= $value->total_qty . " " . $value->uom ?>
                                     </div>
                                 </td>
@@ -174,13 +174,13 @@
                     <tr>
                         <td colspan="2"></td>
                         <td class="total_total">
-                            <div class="deskripsi" style="justify-content: end;
+                            <div class="deskripsi text-content" style="justify-content: end;
                                  font-weight: 600;">
                                  <?= $total_pcs ?>
                             </div>
 
                         </td>
-                        <td class="total_total">
+                        <td class="total_total text-content">
                             <div class="deskripsi" style="justify-content: end;
                                  font-weight: 600;">
                                  <?= $total_jumlah ?>
