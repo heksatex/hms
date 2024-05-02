@@ -52,8 +52,8 @@ class HPHcuttingshearing extends MY_Controller
 		if(strtotime($tglsampai) < strtotime($tgldari) ){
 			$callback = array('status' => 'failed', 'message' => 'Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );  
 
-		}else if($hasil > 30){ // cek maksimal 31 hari  
-			$callback = array('status' => 'failed', 'message' => 'Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+		// }else if($hasil > 30){ // cek maksimal 31 hari  
+		// 	$callback = array('status' => 'failed', 'message' => 'Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 
 		}else{
 
