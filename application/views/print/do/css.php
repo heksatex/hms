@@ -47,7 +47,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 15vh;
+        height: 8vh;
         font-size: 12px;
     }
     .total_pcs{
