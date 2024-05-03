@@ -198,6 +198,7 @@
                                                 <th class="style nowrap">Corak Remark</th>
                                                 <th class="style nowrap">Warna Remark</th>
                                                 <th class="style nowrap">Quality</th>
+                                                <th class="style nowrap">Grade</th>
                                                 <th class="style nowrap">Jml Pcs</th>
                                                 <th class="style nowrap">Qty</th>
                                                 <th class="style nowrap">Qty2</th>
@@ -230,6 +231,7 @@
                                                 <th class="style">Nama Produk</th>                            
                                                 <th class="style">Corak Remark</th>
                                                 <th class="style">Warna Remark</th>
+                                                <th class="style">Grade</th>
                                                 <th class="style">Lot</th>
                                                 <th class="style">Qty</th>
                                                 <th class="style">Qty2</th>
@@ -359,15 +361,15 @@
            
             "columnDefs": [
               { 
-                "targets": [0,12], 
+                "targets": [0,13], 
                 "orderable": false, 
               },
               { 
-                "targets": [5,6,7,8,9,10], 
+                "targets": [6,7,8,9,10,11], 
                 "className":"text-right nowrap",
               },
               { 
-                "targets": [11], 
+                "targets": [12], 
                 "className":"nowrap",
               },
             ],
@@ -402,17 +404,17 @@
                 "orderable": false, 
               },
               { 
-                "targets": [5,6,7,8,9], 
+                "targets": [6,7,8,9,10], 
                 "className":"text-right",
               },
               {
-               'targets':10,
-               'data' : 10,
+               'targets':11,
+               'data' : 11,
                'checkboxes': {
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[10];
+                   var rowId = rowData[11];
                 },
               },
             ],
@@ -420,7 +422,7 @@
               'style': 'multi'
             },
             'rowCallback': function(row, data, dataIndex){
-               var rowId = data[10];
+               var rowId = data[11];
             }
         });
  
@@ -809,7 +811,7 @@
     // print
     function print_lot(btn){
 
-        var myCheckboxes = table2.column(10).checkboxes.selected();
+        var myCheckboxes = table2.column(11).checkboxes.selected();
         var myCheckboxes_arr = new Array();
 
         $.each(myCheckboxes, function(index, rowId){        

@@ -97,8 +97,8 @@ class m_barcodemanual extends CI_Model
 		return $this->db->count_all_results();
 	} 
 
-	var $column_order2 = array(null, 'mmb.nama_produk', 'mmb.corak_remark', 'mmb.warna_remark','q.nama','mmb.jml_pcs','mmb.qty','mmb.qty2','mmb.qty_jual','mmb.qty2_jual','mmb.lebar_jadi','mmb.kode_k3l',null);
-	var $column_search2= array('mmb.nama_produk', 'mmb.kode_produk', 'mmb.corak_remark', 'mmb.warna_remark', 'q.nama','mmb.jml_pcs','mmb.qty','mmb.uom','mmb.qty2','mmb.uom2','mmb.qty_jual','mmb.uom_jual','mmb.qty2_jual','mmb.uom2_jual','mmb.lebar_jadi','mmb.uom_lebar_jadi','mmb.kode_k3l');
+	var $column_order2 = array(null, 'mmb.nama_produk', 'mmb.corak_remark', 'mmb.warna_remark','q.nama','mmb.grade','mmb.jml_pcs','mmb.qty','mmb.qty2','mmb.qty_jual','mmb.qty2_jual','mmb.lebar_jadi','mmb.kode_k3l',null);
+	var $column_search2= array('mmb.nama_produk', 'mmb.kode_produk', 'mmb.corak_remark', 'mmb.warna_remark', 'q.nama','mmb.grade','mmb.jml_pcs','mmb.qty','mmb.uom','mmb.qty2','mmb.uom2','mmb.qty_jual','mmb.uom_jual','mmb.qty2_jual','mmb.uom2_jual','mmb.lebar_jadi','mmb.uom_lebar_jadi','mmb.kode_k3l');
 	var $order2  	  = array('mmb.row_order' => 'asc');
 
 	private function _get_datatables_query2()
@@ -171,8 +171,8 @@ class m_barcodemanual extends CI_Model
 	} 
 
 	var $table3        = 'mrp_manual_batch_items';
-	var $column_order3 = array(null, 'nama_produk', 'corak_remark', 'warna_remark', 'lot' ,'qty','qty2', 'qty_jual', 'qty2_jual', 'lebar_jadi', null);
-	var $column_search3= array('nama_produk', 'kode_produk', 'corak_remark', 'warna_remark', 'qty','uom','qty2','uom2','qty_jual','uom_jual','qty2_jual','uom2_jual','lebar_jadi','uom_lebar_jadi');
+	var $column_order3 = array(null, 'nama_produk', 'corak_remark', 'warna_remark', 'grade' ,'lot' ,'qty','qty2', 'qty_jual', 'qty2_jual', 'lebar_jadi', null);
+	var $column_search3= array('nama_produk', 'kode_produk', 'corak_remark', 'warna_remark', 'grade' ,'qty','uom','qty2','uom2','qty_jual','uom_jual','qty2_jual','uom2_jual','lebar_jadi','uom_lebar_jadi');
 	var $order3  	  = array('row_order' => 'asc');
 
 	private function _get_datatables_query3()

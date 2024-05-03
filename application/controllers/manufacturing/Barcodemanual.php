@@ -92,6 +92,7 @@ class Barcodemanual extends MY_Controller
                 $row[] = $field->corak_remark;
                 $row[] = $field->warna_remark;
                 $row[] = $field->nama_quality;
+                $row[] = $field->grade;
                 $row[] = $field->jml_pcs;
                 $row[] = $field->qty.' '.$field->uom;
                 $row[] = $field->qty2.' '.$field->uom2;
@@ -138,6 +139,7 @@ class Barcodemanual extends MY_Controller
                 $row[] = '['.$field->kode_produk.'] '.$field->nama_produk;
                 $row[] = $field->corak_remark;
                 $row[] = $field->warna_remark;
+                $row[] = $field->grade;
                 $row[] = $field->lot;
                 $row[] = $field->qty.' '.$field->uom;
                 $row[] = $field->qty2.' '.$field->uom2;
@@ -333,8 +335,8 @@ class Barcodemanual extends MY_Controller
                 $uom2           = $this->input->post('uom2');
                 $qty_jual       = $this->input->post('qty_jual');
                 $uom_jual       = $this->input->post('uom_qty_jual');
-                $qty2_jual      = $this->input->post('uom_qty2_jual');
-                $uom2_jual      = $this->input->post('uom2_jual');
+                $qty2_jual      = $this->input->post('qty2_jual');
+                $uom2_jual      = $this->input->post('uom_qty2_jual');
                 $lebar_jadi     = $this->input->post('lebar_jadi');
                 $uom_lebar_jadi = $this->input->post('uom_lebar_jadi');
                 $kode_k3l       = $this->input->post('kode_k3l');
@@ -368,8 +370,8 @@ class Barcodemanual extends MY_Controller
                         $callback = array('status' => 'failed', 'message' => 'Corak Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
                     }else if(empty($warna_remark)){
                         $callback = array('status' => 'failed', 'message' => 'Warna Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
-                    // }else if(empty($grade)){
-                    //     $callback = array('status' => 'failed', 'message' => 'Grade Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($grade)){
+                        $callback = array('status' => 'failed', 'message' => 'Grade Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
                     }else if(empty($jml_pcs)){
                         $callback = array('status' => 'failed', 'message' => 'Jumlah Pcs Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
                     }else if(empty($qty)){
@@ -403,7 +405,7 @@ class Barcodemanual extends MY_Controller
                                                 'corak_remark'  => $corak_remark,
                                                 'warna_remark'  => $warna_remark,
                                                 'id_quality'    => $quality,
-                                                'grade'         => 'A',
+                                                'grade'         => $grade,
                                                 'jml_pcs'       => $jml_pcs,
                                                 'qty'           => $qty,
                                                 'uom'           => $uom,
@@ -457,6 +459,7 @@ class Barcodemanual extends MY_Controller
                                                     'corak_remark'  => $corak_remark,
                                                     'warna_remark'  => $warna_remark,
                                                     'id_quality'    => $quality,
+                                                    'grade'         => $grade,
                                                     'jml_pcs'       => $jml_pcs,
                                                     'qty'           => $qty,
                                                     'uom'           => $uom,
@@ -760,6 +763,7 @@ class Barcodemanual extends MY_Controller
                                         'no_batch'      => $no_batch,
                                         'quant_id'      => $quant_id_new,
                                         'lot'           => $barcode_id,
+                                        'grade'         => $mb->grade,
                                         'kode_produk'   => $mb->kode_produk,
                                         'nama_produk'   => $mb->nama_produk,
                                         'corak_remark'  => $corak_remark,

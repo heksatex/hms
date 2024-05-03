@@ -26,6 +26,26 @@
 					<select type="text" class="form-control input-sm select2 " name="quality" id="quality" style="width:100% !important;"></select>
 				</div>
 			</div>
+            <div class="col-md-12 col-xs-12">
+				<div class="col-12 col-md-12 col-lg-4"><label>Grade </label></div>
+				<div class="col-12 col-md-12 col-lg-8">
+                    <?php $list_grade = array('A','B','C');?>
+					<select type="text" class="form-control input-sm select2 " name="grade" id="grade" style="width:100% !important;" >
+                        <option value=""></option>
+                        <?php 
+                            $selected = '';
+                            foreach($list_grade as $lg){
+                                if($lg == $data_mbb->grade){
+                                    $selected = 'selected';
+                                }else{
+                                    $selected = '';
+                                }
+                                echo '<option value="'.$lg.'" '.$selected.'>'.$lg.'</option>';
+                            }
+                        ?>
+                    </select>
+				</div>
+			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Jml Pcs </label></div>
 				<div class="col-12 col-md-12 col-lg-8">
@@ -110,6 +130,11 @@
         allowClear: true,
         placeholder: '',
         width: '100%'
+    });
+
+    $('#grade').select2({
+        allowClear: true,
+        placeholder: '',
     });
 
     let nama_produk = '<?php echo ($data_mbb->nama_produk); ?>';
@@ -296,6 +321,7 @@
 		let lebar_jadi		= $('#lebar_jadi').val();
 		let uom_lebar_jadi	= $('#uom_lebar_jadi').val();
 		let k3l				= $('#k3l').val();
+		let grade			= $('#grade').val();
 
         if (kode_produk == null) {
             alert_notify('fa fa-warning', 'Kode Produk Harus dipilih !', 'danger', function() {});
@@ -306,6 +332,9 @@
         } else if (warna_remark.length === 0) {
             alert_notify('fa fa-warning', 'Warna Remark Harus diisi !', 'danger', function() {});
             $('#warna_remark').focus();
+        } else if (grade.length === 0) {
+            alert_notify('fa fa-warning', 'Grade Harus diisi !', 'danger', function() {});
+            $('#grade').select2('focus');
 		} else if (jml_pcs.length === 0) {
             alert_notify('fa fa-warning', 'Jml Pcs Minimal 1 !', 'danger', function() {});
             $('#jml_pcs').focus();
@@ -355,6 +384,7 @@
                     warna_remark: warna_remark,
 					jml_pcs     : jml_pcs,
 					quality		: quality,
+					grade	    : grade,
 					qty			: qty,
 					uom			: uom,
 					qty2		: qty2,
