@@ -118,7 +118,13 @@
                                 </td>
                                 <td>
                                     <div class="deskripsi text-content">
-                                        <?= $value->corak_remark . ' ' . $value->warna_remark ?>
+                                        <?php
+                                        if (empty($value->lebar_jadi) || $value->lebar_jadi === "-" || $value->lebar_jadi === "") {
+                                            echo $value->corak_remark . '/' . $value->warna_remark;
+                                        } else {
+                                            echo $value->corak_remark . '/' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi . '/' . $value->warna_remark;
+                                        }
+                                        ?>
                                     </div>
                                     <hr>
                                     <span class="text-content"><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
@@ -135,7 +141,7 @@
                                         <?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?>
                                     </div>
                                     <hr>
-                                    <span style="text-align: right" class="text-content"><?= $value->total_qty . " " . $value->uom ?></span>
+                                    <span style="text-align: right" class="text-content"><?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?></span>
                                 </td>
                             </tr>
 
@@ -170,7 +176,13 @@
                             <tr>
                                 <td>
                                     <div class="deskripsi text-content">
-                                        <?= $value->corak_remark . ' ' . $value->warna_remark ?>
+                                        <?php
+                                        if (empty($value->lebar_jadi) || $value->lebar_jadi === "-" || $value->lebar_jadi === "") {
+                                            echo $value->corak_remark . '/' . $value->warna_remark;
+                                        } else {
+                                            echo $value->corak_remark . '/' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi . '/' . $value->warna_remark;
+                                        }
+                                        ?>
                                     </div>
                                 <td style="text-align: right;
                                     font-weight: 600;">
