@@ -201,7 +201,7 @@ class M_deliveryorderdetail extends CI_Model {
 
     public function getDataWGroup($condition = [], $type_bulk = 1, $type = "") {
         $select = "pd.corak_remark,pd.warna_remark,sum(pd.qty) as total_qty,count(pd.qty) as jumlah_qty,pd.uom,pd.lebar_jadi,pd.uom_lebar_jadi";
-        $group = "pd.warna_remark, pd.corak_remark,pd.uom";
+        $group = "pd.warna_remark, pd.corak_remark,pd.uom,pd.lebar_jadi,pd.uom_lebar_jadi";
         $this->db->from($this->table . ' dod');
         $this->db->join('delivery_order do', 'do.id = dod.do_id');
         $this->db->where($condition);
@@ -212,6 +212,7 @@ class M_deliveryorderdetail extends CI_Model {
             $select .= ",bd.bulk_no_bulk";
             $this->db->join("bulk_detail bd", "bd.barcode = dod.barcode_id");
             $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode");
+            $this->db->order_by("bd.bulk_no_bulk","asc");
         } else {
             $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
         }

@@ -181,7 +181,7 @@
 
 
                                 <td><?= ($id === $tempID) ? '' : $value->jml_qty ?></td>
-                                <td style="text-align: right;"><?= ($id === $tempID) ? '' : $value->total_qty . ' ' . $satuan ?></td>
+                                <td style="text-align: right;"><?= ($id === $tempID) ? '' : number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>
                             </tr>
                             <?php
                             $id = $tempID;
@@ -194,7 +194,7 @@
                     <tr>
                         <td colspan="13"></td>
                         <td><?= $jml_qty ?></td>
-                        <td><?= $total_qty ?></td>
+                        <td><?= number_format($total_qty, 2, ".", ",") ?></td>
                     </tr>
                 </tfoot>
             </table>

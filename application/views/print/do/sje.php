@@ -114,7 +114,13 @@
                                     <?= $key + 1 ?>
                                 </td>
                                 <td >
-                                    <?= $value->corak_remark . ' ' . $value->warna_remark ?>
+                                    <?php
+                                        if (empty($value->lebar_jadi) || $value->lebar_jadi === "-" || $value->lebar_jadi === "") {
+                                            echo $value->corak_remark . '/' . $value->warna_remark;
+                                        } else {
+                                            echo $value->corak_remark . '/' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi . '/' . $value->warna_remark;
+                                        }
+                                        ?>
                                 </td>
                                 <td style="text-align: right;">
                                     <?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?>

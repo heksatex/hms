@@ -496,7 +496,7 @@ class Deliveryorder extends MY_Controller {
             $pl = $this->input->post("pl");
             $nodo = $this->input->post("nodo");
 
-            $data = $this->m_deliveryorder->getDataDetail(["a.no_picklist" => $pl, 'a.no' => $nodo, 'a.status' => 'draft'], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales");
+            $data = $this->m_deliveryorder->getDataDetail(["a.no_picklist" => $pl, 'a.no' => $nodo, 'a.status' => 'draft'], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales,p.nama_user as user_picklist");
             if (empty($data)) {
                 throw new \Exception('Data Tidak ditemukan', 500);
             }
@@ -522,8 +522,8 @@ class Deliveryorder extends MY_Controller {
             ];
 
             $mention = [];
-            $userss = $this->m_deliveryorder->userBC(['u.aktif' => '1', 'sales_group' => $data->kode_sales, 'telepon_wa !=' => '']);
-
+//            $userss = $this->m_deliveryorder->userBC(['u.aktif' => '1', 'sales_group' => $data->kode_sales, 'telepon_wa !=' => '']);
+            $userss = $this->m_deliveryorder->userBC(['nama' => $data->user, 'username' => 'prianto', 'nama' => $data->user_picklist]);
             foreach ($userss as $key => $value) {
                 $mention[] = $value->telepon_wa;
             }
@@ -559,7 +559,7 @@ class Deliveryorder extends MY_Controller {
             $nodo = $this->input->post("nodo");
             $this->_module->startTransaction();
 //            $data = $this->m_deliveryorder->getDataDetail(['a.no' => $do], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales");
-            $data = $this->m_deliveryorder->getDataDetail(["a.no_picklist" => $pl, 'a.no' => $nodo, 'a.status' => 'done'], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales");
+            $data = $this->m_deliveryorder->getDataDetail(["a.no_picklist" => $pl, 'a.no' => $nodo, 'a.status' => 'done'], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales,p.nama_user as user_picklist");
             if (empty($data)) {
                 throw new \Exception('Data Tidak ditemukan', 500);
             }
@@ -636,7 +636,8 @@ class Deliveryorder extends MY_Controller {
             ];
 
             $mention = [];
-            $userss = $this->m_deliveryorder->userBC(['u.aktif' => '1', 'sales_group' => $data->kode_sales, 'telepon_wa !=' => '']);
+//            $userss = $this->m_deliveryorder->userBC(['u.aktif' => '1', 'sales_group' => $data->kode_sales, 'telepon_wa !=' => '']);
+            $userss = $this->m_deliveryorder->userBC(['nama' => $data->user, 'username' => 'prianto', 'nama' => $data->user_picklist]);
 
             foreach ($userss as $key => $value) {
                 $mention[] = $value->telepon_wa;
