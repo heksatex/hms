@@ -73,7 +73,7 @@
                                 <p><?= $base->alamat ?></p>
                             </td>
                             <td class="border_table text-content" style="font-weight: 600;
-                                font-size: 13px;
+                                font-size: 18px;
                                 width: 45%">Catatan</td>
                         </tr>
                         <tr>
@@ -158,7 +158,7 @@
                                             <td></td>
                                             <td></td>
                                             <td class="text-content"><?= $sub_jml_qty ?? 0 ?></td>
-                                            <td class="text-content"><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
+                                            <td class="text-content"><?= (number_format($sub_total_qty ?? 0, 2, ".", ",")) . ' ' . $satuan ?></td>
                                         </tr>
                                         <?php
                                         $sub_total_qty = 0;
@@ -193,8 +193,10 @@
                                         <td class=""><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
 
 
-                                        <td class="" style=" text-align: center;"><?= $value->jumlah_qty ?></td>
-                                        <td class="" style="text-align: center;"><?= $value->total_qty . ' ' . $satuan ?></td>
+                                         <td class=""><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
+                                        <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' :  number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>
+<!--                                        <td class="" style=" text-align: center;"><?= $value->jumlah_qty ?></td>
+                                        <td class="" style="text-align: center;"><?= number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>-->
                                     </tr>
                                     <?php
                                     $id = $tempID;
@@ -218,7 +220,7 @@
                                 <td></td>
                                 <td></td>
                                 <td class="text-content"><?= $sub_jml_qty ?? 0 ?></td>
-                                <td class="text-content"><?= ($sub_total_qty ?? 0) . ' ' . $satuan ?></td>
+                                <td class="text-content"><?= number_format(($sub_total_qty ?? 0), 2, ".", ",") . ' ' . $satuan ?></td>
                             </tr>
                         </tbody>
                         <?php
@@ -264,7 +266,7 @@
 
 
                                         <td class=""><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
-                                        <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' : $value->total_qty . ' ' . $satuan ?></td>
+                                        <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' :  number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>
                                     </tr>
                                     <?php
                                     $id = $tempID;
@@ -276,7 +278,7 @@
                 </table>
                 <div class="col-xs-4 text-content">
                     <p><strong>Sub - Total GL/PCS :</strong> <?= $jml_qty ?> </p>
-                    <p><strong>Sub - Total Qty :</strong> <?= $total_qty ?> </p>
+                    <p><strong>Sub - Total Qty :</strong> <?= number_format($total_qty, 2, ".", ",") ?> </p>
                 </div>
             </div>
             <div class="row">
