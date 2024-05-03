@@ -73,7 +73,7 @@
                                 <p><?= $base->alamat ?></p>
                             </td>
                             <td style="font-weight: 600;
-                                font-size: 13px;
+                                font-size: 18px;
                                 width: 45%">Catatan</td>
                         </tr>
                         <tr>
@@ -117,7 +117,7 @@
                                     <?= $value->corak_remark . ' ' . $value->warna_remark ?>
                                 </td>
                                 <td style="text-align: right;">
-                                    <?= $value->total_qty . " " . $value->uom ?>
+                                    <?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?>
                                 </td>
                             </tr>
 
@@ -125,7 +125,7 @@
                         <tr>
                             <td></td>
                             <td  style="text-align: center;font-weight: 600;">TOTAL</td>
-                            <td  style="text-align: right;"><?= $total_jumlah ?></td>
+                            <td  style="text-align: right;"><?= number_format($total_jumlah, 2, ".", ",") ?></td>
                         </tr>
                     </tbody>
                 </table>
