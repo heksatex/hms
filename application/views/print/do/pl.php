@@ -73,11 +73,11 @@
                                 <p><?= $base->alamat ?></p>
                             </td>
                             <td class="border_table text-content" style="font-weight: 600;
-                                font-size: 18px;
+                                font-size: 14px;
                                 width: 45%">Catatan</td>
                         </tr>
                         <tr>
-                            <td class="border_table text-content" rowspan="2" style="font-size: 12px" id="catatan"><?= nl2br($base->note) ?> </td>
+                            <td class="border_table text-content" rowspan="2" style="font-size: 13px" id="catatan"><?= nl2br($base->note) ?> </td>
                         </tr>
                         <tr>
                             <td class="row-1 border_table" style="font-size: 15px">SC</td>
