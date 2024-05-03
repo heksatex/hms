@@ -955,7 +955,16 @@ class Joinlot extends MY_Controller
                         // create stock
                         if($data_sm > 0){
 
-                            $lot_baru = $this->token->noUrut('stock_quant_a', date('my'), true)->generate('', '%05d')->get();
+                            if($tmp_grade == 'A'){
+                                $lot_baru = $this->token->noUrut('stock_quant_a', date('my'), true)->generate('', '%05d')->get();
+                            }else if($tmp_grade == 'B'){
+                                $lot_baru = $this->token->noUrut('stock_quant_b', date('my'), true)->generate($tmp_grade, '%05d')->get();
+                            }else if($tmp_grade == 'C'){
+                                $lot_baru = $this->token->noUrut('stock_quant_c', date('my'), true)->generate($tmp_grade, '%05d')->get();
+                            }else{
+                                throw new \Exception('Grade tidak Valid !', 200);
+                            }
+
                             $origin   = $kode_adjustment."|".$row_order_adj;
                             // sm to adj
                             $data_sm[] = array('move_id'    => $move_id,
@@ -1006,7 +1015,7 @@ class Joinlot extends MY_Controller
                                                     'corak_remark'  => $tmp_corak_remark,
                                                     'warna_remark'  => $tmp_warna_remark,
                                                     'lot'           => trim($lot_baru),
-                                                    'nama_grade'    => 'A',
+                                                    'nama_grade'    => $tmp_grade,
                                                     'qty'           => $sum_qty,
                                                     'uom'           => $tmp_uom,
                                                     'qty2'          => $sum_qty2,
@@ -1068,7 +1077,7 @@ class Joinlot extends MY_Controller
                                                     'lebar_jadi'    => $tmp_lebar_jadi,
                                                     'uom_lebar_jadi'=> $tmp_uom_lebar_jadi,
                                                     'sales_group'   => $tmp_sales_group,
-                                                    'grade'         => 'A',
+                                                    'grade'         => $tmp_grade,
                                                     'status'        => "done",
                                                     'tanggal_transaksi' => $tgl
                             );
