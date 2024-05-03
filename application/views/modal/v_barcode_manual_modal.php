@@ -20,6 +20,17 @@
                     <input type="text" class="form-control input-sm" name="warna_remark" id="warna_remark"/>
 				</div>
 			</div>
+            <div class="col-md-12 col-xs-12">
+				<div class="col-12 col-md-12 col-lg-4"><label>Grade </label></div>
+				<div class="col-12 col-md-12 col-lg-8">
+					<select type="text" class="form-control input-sm select2 " name="grade" id="grade" style="width:100% !important;" >
+                        <option value=""></option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+				</div>
+			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Quality </label></div>
 				<div class="col-12 col-md-12 col-lg-8">
@@ -98,6 +109,11 @@
 <script type="text/javascript">
 
 	$('#k3l').select2({
+        allowClear: true,
+        placeholder: '',
+    });
+
+    $('#grade').select2({
         allowClear: true,
         placeholder: '',
     });
@@ -271,6 +287,7 @@
 		let lebar_jadi		= $('#lebar_jadi').val();
 		let uom_lebar_jadi	= $('#uom_lebar_jadi').val();
 		let k3l				= $('#k3l').val();
+		let grade		    = $('#grade').val();
 
         if (kode_produk == null) {
             alert_notify('fa fa-warning', 'Kode Produk Harus dipilih !', 'danger', function() {});
@@ -284,6 +301,9 @@
 		} else if (jml_pcs.length === 0) {
             alert_notify('fa fa-warning', 'Jml Pcs Minimal 1 !', 'danger', function() {});
             $('#jml_pcs').focus();
+        } else if (grade.length === 0) {
+            alert_notify('fa fa-warning', 'Grade Harus diisi !', 'danger', function() {});
+            $('#grade').focus();
 		} else if (qty.length === 0) {
             alert_notify('fa fa-warning', 'Qty Harus diisi !', 'danger', function() {});
             $('#qty').focus();
@@ -329,6 +349,7 @@
                     corak_remark: corak_remark,
                     warna_remark: warna_remark,
 					jml_pcs     : jml_pcs,
+					grade		: grade,
 					quality		: quality,
 					qty			: qty,
 					uom			: uom,
