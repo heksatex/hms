@@ -73,7 +73,7 @@
                                 <p><?= $base->alamat ?></p>
                             </td>
                             <td style="font-weight: 600;
-                                font-size: 13px;
+                                font-size: 18px;
                                 width: 45%">Catatan</td>
                         </tr>
                         <tr>
@@ -132,7 +132,7 @@
                                 </td>
                                 <td style="text-align: right;">
                                     <div class="deskripsi text-content" style="justify-content: end;">
-                                        <?= $value->total_qty . " " . $value->uom ?>
+                                        <?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?>
                                     </div>
                                     <hr>
                                     <span style="text-align: right" class="text-content"><?= $value->total_qty . " " . $value->uom ?></span>
@@ -140,6 +140,23 @@
                             </tr>
 
                         <?php } ?>
+                        <tr>
+                            <td colspan="2"></td>
+                            <td class="total_total">
+                                <div class="deskripsi text-content" style="justify-content: end;
+                                     font-weight: 600;">
+                                     <?= $total_pcs ?>
+                                </div>
+
+                            </td>
+                            <td class="total_total text-content">
+                                <div class="deskripsi" style="justify-content: end;
+                                     font-weight: 600;">
+                                     <?= number_format($total_jumlah, 2, ".", ",") ?>
+                                </div>
+
+                            </td>
+                        </tr>
 
                     <?php } else { ?>
 
@@ -163,31 +180,32 @@
                                 </td>
                                 <td style="text-align: right;;">
                                     <div class="deskripsi text-content" style="justify-content: end;">
-                                        <?= $value->total_qty . " " . $value->uom ?>
+                                        <?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?>
                                     </div>
                                 </td>
                             </tr>
 
                         <?php } ?>
+                        <tr>
+                            <td></td>
+                            <td class="total_total">
+                                <div class="deskripsi text-content" style="justify-content: end;
+                                     font-weight: 600;">
+                                     <?= $total_pcs ?>
+                                </div>
+
+                            </td>
+                            <td class="total_total text-content">
+                                <div class="deskripsi" style="justify-content: end;
+                                     font-weight: 600;">
+                                     <?= number_format($total_jumlah, 2, ".", ",") ?>
+                                </div>
+
+                            </td>
+                        </tr>
 
                     <?php } ?>
-                    <tr>
-                        <td colspan="2"></td>
-                        <td class="total_total">
-                            <div class="deskripsi text-content" style="justify-content: end;
-                                 font-weight: 600;">
-                                 <?= $total_pcs ?>
-                            </div>
 
-                        </td>
-                        <td class="total_total text-content">
-                            <div class="deskripsi" style="justify-content: end;
-                                 font-weight: 600;">
-                                 <?= $total_jumlah ?>
-                            </div>
-
-                        </td>
-                    </tr>
                 </table>
 
             </div>
