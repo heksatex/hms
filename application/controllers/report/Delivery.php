@@ -145,7 +145,9 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('U1', 'User');
             $sheet->setCellValue('V1', 'Catatan');
             $sheet->setCellValue('W1', 'Marketing');
-            $condition = ['ddo.tanggal_dokumen >=' => $period[0], 'ddo.tanggal_dokumen <=' => $period[1], 'ddo.status' => 'done'];
+            $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
+            $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
+            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done'];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
