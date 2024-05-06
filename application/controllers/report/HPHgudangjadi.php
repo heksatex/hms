@@ -28,7 +28,7 @@ class HPHgudangjadi extends MY_Controller
 
     public function loadData($record=0)
 	{
-        $recordPerPage = 10;
+        $recordPerPage = 100;
         if($record != 0){
            $record = ($record-1) * $recordPerPage;
         }
