@@ -21,7 +21,8 @@ class HPHgudangjadi extends MY_Controller
 		$data['mesin']  = $this->_module->get_list_mesin_report('GJD');
 		$data['mst_sales_group'] = $this->_module->get_list_sales_group();
         $data['jenis_kain'] = $this->_module->get_list_jenis_kain();        
-        $data['quality']    = $this->_module->get_list_quality();    
+        $data['quality']    = $this->_module->get_list_quality();   
+        $data['sales_group']= $this->_module->get_list_sales_group_by_view(); 
 		$this->load->view('report/v_hph_gudang_jadi', $data);
 	}
 
@@ -42,8 +43,11 @@ class HPHgudangjadi extends MY_Controller
 
             $dataRecord = $this->get_data($data_filter,$record,$recordPerPage);
 
-			$allcount           = count($dataRecord);
-	        $total_record       = 'Total Data : '. number_format($allcount);
+            $total_record = $dataRecord[0];
+            $result_record = $dataRecord[1];
+
+			$allcount           = $total_record;
+	        $total_record       = 'Total Data : '. number_format($total_record);
 
             $config['base_url']         = base_url().'report/HPHGudangjadi/loadData';
             $config['use_page_numbers'] = TRUE;
@@ -58,14 +62,14 @@ class HPHgudangjadi extends MY_Controller
             $this->pagination->initialize($config);
             $pagination         = $this->pagination->create_links();
 
-			$callback = array('record' => $dataRecord, 'total_record' => $total_record, 'pagination'=>$pagination,);
+			$callback = array('record' => $result_record, 'total_record' => $total_record, 'pagination'=>$pagination,);
 
 		} //else if validasi
 
 		echo json_encode($callback);
 	}
 
-    public function get_data(array $data_filter,$record=0,$recordPerPage=10)
+    public function get_data(array $data_filter,$record=0,$recordPerPage=0)
     {
 
             foreach($data_filter as $row){
@@ -280,6 +284,18 @@ class HPHgudangjadi extends MY_Controller
                 if(!empty($row['jenis']) AND $row['jenis']){
                     $show_jenis_hph =  $row['jenis'];
                 }
+
+                if(!empty($row['marketing'])){
+                    $where_marketing_hph         = " AND mrpin.sales_group = '".$row['marketing']."' ";
+                    $where_marketing_split       = " AND sq.sales_group = '".$row['marketing']."' ";
+                    $where_marketing_join        = " AND jl.sales_group = '".$row['marketing']."' ";
+                    $where_marketing_manual      = " AND mm.sales_group = '".$row['marketing']."' ";
+                }else{
+                    $where_marketing_hph         = "";
+                    $where_marketing_split       = "";
+                    $where_marketing_join        = "";
+                    $where_marketing_manual      = "";
+                }
                 
 
             }
@@ -289,7 +305,7 @@ class HPHgudangjadi extends MY_Controller
 
 			$dataRecord= [];
 
-			$where     = " WHERE mrpin.status NOT IN ('draft','cancel') AND mp.dept_id = '".$id_dept."' ".$where_tgldari_hph." ".$where_tglsampai_hph." ".$where_noHph_hph." ".$where_lotbahanBaku_hph." ".$where_namaProduk_hph." ".$where_corakRemark_hph." ".$where_warnaRemark_hph." ".$where_quality_hph." ".$where_jenisKain_hph." ".$where_lotBarangjadi_hph." ".$where_benang_hph." ".$where_lebarJadi_hph." ".$where_mc_hph." ".$where_colorOrder_hph." ".$where_salesOrder_hph." ".$where_grade_hph." ".$where_user_hph;
+			$where     = " WHERE mrpin.status NOT IN ('draft','cancel') AND mp.dept_id = '".$id_dept."' ".$where_tgldari_hph." ".$where_tglsampai_hph." ".$where_noHph_hph." ".$where_lotbahanBaku_hph." ".$where_namaProduk_hph." ".$where_corakRemark_hph." ".$where_warnaRemark_hph." ".$where_quality_hph." ".$where_jenisKain_hph." ".$where_lotBarangjadi_hph." ".$where_benang_hph." ".$where_lebarJadi_hph." ".$where_mc_hph." ".$where_colorOrder_hph." ".$where_salesOrder_hph." ".$where_grade_hph." ".$where_user_hph." ".$where_marketing_hph;
             if($show_jenis_hph == 'All' or $show_jenis_hph == 'HPH'){
                 $items = $this->m_HPHgudangjadi->get_list_hph_by_kode($where);
                 foreach ($items as $val) {
@@ -335,7 +351,7 @@ class HPHgudangjadi extends MY_Controller
             }
 
             // SPLIT LOT
-            $where     = " WHERE spl.dept_id = '".$id_dept."' ".$where_tgldari_split." ".$where_tglsampai_split." ".$where_noHph_split." ".$where_lotbahanBaku_split." ".$where_namaProduk_split." ".$where_corakRemark_split." ".$where_warnaRemark_split." ".$where_quality_split." ".$where_jenisKain_split." ".$where_lotBarangjadi_split." ".$where_benang_split." ".$where_lebarJadi_split." ".$where_colorOrder_split." ".$where_salesOrder_split." ".$where_grade_split." ".$where_user_split;
+            $where     = " WHERE spl.dept_id = '".$id_dept."' ".$where_tgldari_split." ".$where_tglsampai_split." ".$where_noHph_split." ".$where_lotbahanBaku_split." ".$where_namaProduk_split." ".$where_corakRemark_split." ".$where_warnaRemark_split." ".$where_quality_split." ".$where_jenisKain_split." ".$where_lotBarangjadi_split." ".$where_benang_split." ".$where_lebarJadi_split." ".$where_colorOrder_split." ".$where_salesOrder_split." ".$where_grade_split." ".$where_user_split." ".$where_marketing_split;
 
             if($show_jenis_hph == 'All' or $show_jenis_hph == 'SPLIT'){
                 if($where_mc_split != 'noField'){
@@ -382,7 +398,7 @@ class HPHgudangjadi extends MY_Controller
 
 
             // JOIN LOT
-            $where     = " WHERE jl.dept_id = '".$id_dept."' AND jl.status = 'done' ".$where_tgldari_join." ".$where_tglsampai_join." ".$where_noHph_join." ".$where_lotbahanBaku_join." ".$where_namaProduk_join." ".$where_corakRemark_join." ".$where_warnaRemark_join." ".$where_quality_join." ".$where_jenisKain_join." ".$where_lotBarangjadi_join." ".$where_benang_join." ".$where_lebarJadi_join." ".$where_mc_join." ".$where_colorOrder_join." ".$where_salesOrder_join." ".$where_grade_join." ".$where_user_join;
+            $where     = " WHERE jl.dept_id = '".$id_dept."' AND jl.status = 'done' ".$where_tgldari_join." ".$where_tglsampai_join." ".$where_noHph_join." ".$where_lotbahanBaku_join." ".$where_namaProduk_join." ".$where_corakRemark_join." ".$where_warnaRemark_join." ".$where_quality_join." ".$where_jenisKain_join." ".$where_lotBarangjadi_join." ".$where_benang_join." ".$where_lebarJadi_join." ".$where_mc_join." ".$where_colorOrder_join." ".$where_salesOrder_join." ".$where_grade_join." ".$where_user_join." ".$where_marketing_join;
             if($show_jenis_hph == 'All' or $show_jenis_hph == 'JOIN'){
                 $items = $this->m_HPHgudangjadi->get_list_join_by_kode($where);
                 foreach($items as $val) {
@@ -425,7 +441,7 @@ class HPHgudangjadi extends MY_Controller
             }
 
             // Barcode Manual
-            $where     = " WHERE mm.status = 'done' ".$where_tgldari_manual." ".$where_tglsampai_manual." ".$where_noHph_manual." ".$where_namaProduk_manual." ".$where_corakRemark_manual." ".$where_warnaRemark_manual." ".$where_quality_manual." ".$where_lotBarangjadi_manual." ".$where_lebarJadi_manual." ".$where_grade_manual." ".$where_user_manual;
+            $where     = " WHERE mm.status = 'done' ".$where_tgldari_manual." ".$where_tglsampai_manual." ".$where_noHph_manual." ".$where_namaProduk_manual." ".$where_corakRemark_manual." ".$where_warnaRemark_manual." ".$where_quality_manual." ".$where_lotBarangjadi_manual." ".$where_lebarJadi_manual." ".$where_grade_manual." ".$where_user_manual." ".$where_marketing_manual;
             if($show_jenis_hph == 'All' or $show_jenis_hph == 'MANUAL'){
                 if($where_lotbahanBaku_manual != 'noField' AND $where_jenisKain_manual != 'noField' AND $where_benang_manual != 'noField' AND $where_mc_manual != 'noField' AND $where_colorOrder_manual != 'noField' AND $where_salesOrder_manual != 'noField'){
                     $items = $this->m_HPHgudangjadi->get_list_barcode_manual_by_kode($where);
@@ -488,21 +504,23 @@ class HPHgudangjadi extends MY_Controller
       
         $key_values     = array_column($result_record, 'tgl_hph'); 
         array_multisort($key_values, SORT_ASC, $result_record);
-        if(empty($record)){
+        if(empty($result_record)){
             $result_record_show = $result_record;
         }else{
     
             $show_record = $record + $recordPerPage;
-            if(count($result_record) <= $show_record){
+            $total_all_record =  count($result_record);
+            if($total_all_record <= $show_record){
                 $show_record = count($result_record);
             }
+
             $result_record_show = [];
             for($i = $record; $i<$show_record; $i++){
                 $result_record_show[] = $result_record[$i];
             }
         }
 
-        return $result_record_show;
+        return array($total_all_record,$result_record_show);
     }
 
 

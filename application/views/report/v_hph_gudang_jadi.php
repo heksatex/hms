@@ -284,6 +284,21 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <div class="col-md-5">
+                                    <label>Marketing </label>
+                                </div>
+                                <div class="col-md-7">
+                                    <select type="text" class="form-control input-sm select2" name="marketing" id="marketing"  style="width:100% !important"> 
+                                        <option value="">-- Pilih Marketing--</option>
+                                        <?php 
+                                        foreach ($sales_group as $val) {
+                                            echo "<option value='".$val->kode_sales_group."'>".$val->nama_sales_group."</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-5">
                                     <label>User </label>
                                 </div>
                                 <div class="col-md-7">
@@ -474,6 +489,7 @@
         mc                 = $('#mc').val();
         color_order        = $('#color_order').val();
         sales_order        = $('#sales_order').val();
+        marketing          = $('#marketing').val();
         user               = $('#user').val();
         jenis              = $('#jenis').val();
         grade              = $('#grade').val();
@@ -490,8 +506,8 @@
             alert_modal_warning('Periode Tanggal Harus diisi !');
         }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
              alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');            
-        }else if(selisih > 31 ){
-            alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
+        // }else if(selisih > 31 ){
+        //     alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
         }else{  
 
             arr_filter.push({
@@ -513,6 +529,7 @@
                             user:user,
                             grade:grade,
                             jenis:jenis,
+                            marketing:marketing,
             });
 
             loadSearchData();
@@ -542,7 +559,6 @@
             $.ajax({
                 type: "POST",
                 dataType : "JSON",
-                // url : "<?php echo site_url('report/HPHgudangjadi/loadData')?>",
                 url : '<?=base_url()?>report/HPHgudangjadi/loadData/'+pageNum,
                 data : {arr_filter:JSON.stringify(arr_filter) },
                 success: function(data){
