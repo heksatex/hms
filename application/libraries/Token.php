@@ -21,6 +21,7 @@ class Token {
     protected $increment = 1;
     protected $generate = false;
     protected $model;
+    protected $changePrefix = false;
 
     public function __construct() {
         $this->model = & get_instance();
@@ -41,13 +42,22 @@ class Token {
         return $this;
     }
 
+    public function prefixAdd(string $prefix) {
+        $this->prefix .= $prefix;
+        $this->changePrefix = true;
+        return $this;
+    }
+
     public function get() {
         $data = $this->model->m_Token->getToken($this->modul, $this->periode, $this->prefix, $this->format, $this->increment);
         if (!$data) {
             return false;
         }
         if ($this->generate) {
-            return sprintf($this->prefix.$this->periode.$this->format, $data);
+            if ($this->changePrefix) {
+                return sprintf($this->prefix . $this->format, $data);
+            }
+            return sprintf($this->prefix . $this->periode . $this->format, $data);
         }
         return $data;
     }
