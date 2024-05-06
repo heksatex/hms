@@ -15,9 +15,9 @@ class M_deliveryorder extends CI_Model {
 
     protected $table = "delivery_order";
     protected $tableSJ = "delivery_order_sj";
-    protected $column_order = [null, 'delivery_order.no', 'no_sj', 'no_picklist'];
+    protected $column_order = [null, 'delivery_order.no', 'no_sj', 'no_picklist', 'tb.name', 'tanggal_dokumen', null, 'delivery_order.status'];
     protected $order = ['tanggal_buat' => 'desc'];
-    protected $column_search = array('no_sj', 'delivery_order.no', 'no_picklist', 'pr.nama');
+    protected $column_search = array('no_sj', 'delivery_order.no', 'no_picklist', 'pr.nama', "tanggal_buat", "tanggal_dokumen", "delivery_order.status","tb.name");
 
     public function __construct() {
         parent::__construct();
@@ -26,7 +26,8 @@ class M_deliveryorder extends CI_Model {
     protected function getDataQuery() {
         $this->db->from($this->table);
         $this->db->join("picklist p", 'p.no = delivery_order.no_picklist');
-        $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
+        $this->db->join("type_bulk tb", "tb.id = p.type_bulk_id", "left");
+                $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
         foreach ($this->column_search as $key => $value) {
             if ($_POST["search"]["value"]) {
                 $this->db->or_like($value, $_POST["search"]["value"]);
@@ -43,7 +44,7 @@ class M_deliveryorder extends CI_Model {
 
     public function getData($conditon = []) {
         $this->getDataQuery();
-        $this->db->select("delivery_order.*,pr.nama as buyer");
+        $this->db->select("delivery_order.*,pr.nama as buyer,tb.name as bulk");
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         if (count($conditon) > 0)
@@ -115,23 +116,26 @@ class M_deliveryorder extends CI_Model {
     protected function _getDataReport() {
         $this->db->from($this->table . ' ddo');
         $this->db->join("delivery_order_detail dod", 'dod.do_id = ddo.id');
-        $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
+        $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id)");
         $this->db->join("stock_quant sq", "sq.quant_id = pd.quant_id", "left");
         $this->db->join("picklist p", 'p.no = ddo.no_picklist');
         $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = p.sales_kode', 'left');
         $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,"
-                . "pd.corak_remark,pd.warna_remark,sq.uom,sq.uom2,sq.uom_jual,sq.uom2_jual,COUNT(pd.barcode_id) as total_lot,"
+                . "pd.corak_remark,pd.warna_remark,sq.uom,sq.uom2,sq.uom_jual,sq.uom2_jual,"
                 . "SUM(sq.qty) as total_qty,SUM(sq.qty2) as total_qty2,SUM(sq.qty_jual) as total_qty_jual,SUM(sq.qty2_jual) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note");
     }
 
     public function getDataReport(array $condition, $order = "", $rekap = "global", $summary = false) {
         $this->_getDataReport();
         if ($rekap === 'global') {
+            $this->db->select(",COUNT(pd.barcode_id) as total_lot");
             $this->db->group_by("ddo.no");
         } else if ($rekap === 'corak') {
+            $this->db->select(",COUNT(pd.barcode_id) as total_lot");
             $this->db->group_by("pd.corak_remark,pd.warna_remark,pd.uom");
         } else {
+            $this->db->select(",pd.barcode_id as total_lot");
             $this->db->group_by("pd.barcode_id");
         }
         if (count($condition) > 0)
