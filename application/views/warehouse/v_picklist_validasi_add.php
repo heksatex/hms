@@ -171,16 +171,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-<!--                                            <div class="form-group">
-                                                <div class="col-md-12 col-xs-12">
-                                                    <select class="form-control" aria-label="Default select example">
-                                                        <option value="all" selected>Filter Status Barcode</option>
-                                                        <option value="1">One</option>
-                                                        <option value="2">Two</option>
-                                                        <option value="3">Three</option>
-                                                    </select>
-                                                </div>
-                                            </div>-->
+                                            <!--                                            <div class="form-group">
+                                                                                            <div class="col-md-12 col-xs-12">
+                                                                                                <select class="form-control" aria-label="Default select example">
+                                                                                                    <option value="all" selected>Filter Status Barcode</option>
+                                                                                                    <option value="1">One</option>
+                                                                                                    <option value="2">Two</option>
+                                                                                                    <option value="3">Three</option>
+                                                                                                </select>
+                                                                                            </div>
+                                                                                        </div>-->
                                         </div>
                                         <div class="col-md-6 col-xs-12 table-responsive over">
                                             <div class="table-responsive over" style="max-height:200px;"  id="show_error">
@@ -329,6 +329,7 @@
                 var dataValid = 0;
                 var dataInvalid = 0;
                 var urutTable = 0;
+                var totalLot = 0;
                 const formvalidasi = document.forms.namedItem("form-validasi");
                 const addDataTable = function (data) {
                     urutTable++;
@@ -366,6 +367,7 @@
                                                 dataPicklist = response.data.picklist;
                                                 $("#pl").val(dataPicklist.no);
                                                 dataValid = dataPicklist.total_validasi;
+                                                totalLot = dataPicklist.total_lot;
                                                 dataInvalid = 0;
                                                 table.clear().draw();
                                                 $("#no_pl").html(dataPicklist.no);
@@ -387,6 +389,7 @@
                                                 var item = response?.data?.item;
                                                 addDataTable(item);
                                                 $("#scanValid").html(dataValid);
+                                                $("#invalid").html(totalLot - dataValid);
                                             }
                                             return;
                                         }

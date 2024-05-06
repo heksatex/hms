@@ -63,6 +63,27 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
+                                                <label class="form-label">Marketing</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <select name="marketing" class="form-control" id="marketing">
+                                                    <option value=""></option>
+                                                    <?php
+                                                    foreach ($sales as $key => $value) {
+                                                        if ($this->session->userdata('nama')['sales_group'] === $value->kode) {
+                                                            echo '<option value="' . $value->kode . '" selected>' . $value->nama . '</option>';
+                                                        } else {
+                                                            echo '<option value="' . $value->kode . '">' . $value->nama . '</option>';
+                                                        }
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
                                                 <label class="form-label">Order BY</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
@@ -216,6 +237,7 @@
                             d.rekap = $("#rekap").find(":selected").val();
                             d.corak = $("#corak").val();
                             d.order = $("#order").find(":selected").val();
+                            d.marketing = $("#marketing").find(":selected").val();
                         }
                     },
                     "columnDefs": [
@@ -228,8 +250,8 @@
 
                 $("#search").on("click", function () {
 //                    tableGlobal.search("").draw(false);
-                      tableGlobal.ajax.reload();
-                }); 
+                    tableGlobal.ajax.reload();
+                });
             })
         </script>
     </body>
