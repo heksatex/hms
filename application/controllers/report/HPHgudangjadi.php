@@ -504,12 +504,12 @@ class HPHgudangjadi extends MY_Controller
       
         $key_values     = array_column($result_record, 'tgl_hph'); 
         array_multisort($key_values, SORT_ASC, $result_record);
+        $total_all_record =  count($result_record);
         if(empty($result_record)){
             $result_record_show = $result_record;
         }else{
     
             $show_record = $record + $recordPerPage;
-            $total_all_record =  count($result_record);
             if($total_all_record <= $show_record){
                 $show_record = count($result_record);
             }
