@@ -22,10 +22,12 @@ class Delivery extends MY_Controller {
         $this->is_loggedin();
         $this->load->model("_module");
         $this->load->model("m_deliveryorder");
+        $this->load->model("m_Picklist");
     }
 
     public function index() {
         $data['id_dept'] = 'RDO';
+        $data['sales'] = $this->m_Picklist->getSales();
         $data['date'] = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d")))) . ' - ' . date('Y-m-d');
         $this->load->view('report/v_delivery', $data);
     }
@@ -47,25 +49,28 @@ class Delivery extends MY_Controller {
     public function search() {
         try {
             $periode = $this->input->post("periode");
-            $customer = $this->input->post("customer");
+            $marketing = $this->input->post("marketing");
             $corak = $this->input->post("corak");
             $order = $this->input->post("order");
 //            $summary = $this->input->post("summary");
             $rekap = $this->input->post("rekap");
+            $customer = $this->input->post("customer");
             $period = explode(" - ", $periode);
-
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done','pd.valid'=>'done'];
+            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done', 'pd.valid' => 'done'];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
             if ($corak !== null || $corak !== "") {
                 $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
+            }
+            if ($marketing !== "") {
+                $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap);
             $no = $_POST['start'];
@@ -114,6 +119,7 @@ class Delivery extends MY_Controller {
             $corak = $this->input->post("corak");
             $order = $this->input->post("order");
             $rekap = $this->input->post("rekap");
+            $marketing = $this->input->post("marketing");
             $period = explode(" - ", $periode);
 
             if (count($period) < 2) {
@@ -148,12 +154,15 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('W1', 'Marketing');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
-            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done','pd.valid'=>'done'];
+            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done', 'pd.valid' => 'done'];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
             if ($corak !== null || $corak !== "") {
                 $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
+            }
+            if ($marketing !== "") {
+                $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap);
             if (empty($list)) {
