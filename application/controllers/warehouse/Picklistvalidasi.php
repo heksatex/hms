@@ -44,7 +44,7 @@ class Picklistvalidasi extends MY_Controller {
             $data['id_dept'] = 'PLV';
             $data['access'] = $this->m_accessmenu->getDetail(['access_only' => getClientIP(), 'menu' => $this->uri->segment(2)]);
             $data["ids"] = $id;
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt],'','delivery');
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.id' => $kode_decrypt], '', 'delivery');
             $data['view_cancel'] = $this->load->view('modal/v_picklist_item_cancel', [], true);
             $this->load->view('warehouse/v_picklist_validasi_proses', $data);
         } catch (Exception $ex) {
@@ -54,6 +54,7 @@ class Picklistvalidasi extends MY_Controller {
 
     public function update() {
         $errorCode = 0;
+        $barcode = "";
         try {
             $username = $this->session->userdata('username');
             $nama = $this->session->userdata('nama');
@@ -85,7 +86,7 @@ class Picklistvalidasi extends MY_Controller {
 //                    throw new Exception("No Picklist belum dalam status Validasi", 500);
 //                }
                 $picklist = $dataPl;
-                $picklist->total_lot = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no,'valid !='=>'cancel']);
+                $picklist->total_lot = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no, 'valid !=' => 'cancel']);
                 $picklist->total_validasi = $this->m_PicklistDetail->getCountAllData(['no_pl' => $picklist->no, 'valid' => 'validasi']) ?? 0;
                 if ($picklist->total_lot < 1) {
                     throw new Exception("Tidak ada barcode pada Picklist " . $dataPl->no, 500);
@@ -107,30 +108,32 @@ class Picklistvalidasi extends MY_Controller {
 
                 $check = $this->m_Pickliststockquant->getDataItemPicklistScan(array_merge($cond, ['stock_quant.lokasi' => 'GJD/Stock', 'id_category' => 21]));
 
-                if (is_null($check)) {
-                    $list = $this->m_Pickliststockquant->getDataItemPicklistScanDetail($cond, true);
-                    if (empty($list)) {
-                        throw new \Exception('Barcode Tidak ditemukan', 500);
-                    }
-                    switch (true) {
-
-                        case (int) $list->id_category !== 21:
-                            throw new \Exception("Kategori Produk Tidak Valid (" . $list->nama_category . ")", 500);
-                        case $list->reserve_move !== "":
-                            throw new \Exception("Barcode " . $barcode . " reserve move " . $list->reserve_move, 500);
-
-                        case in_array(strtoupper($list->lokasi_fisik), ["PORT", "XPD"]) :
-                            throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi_fisik . ")", 500);
-
-                        case strtoupper($list->lokasi) !== 'GJD/STOCK':
-                            throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi . ")", 500);
-                        default :
-                            throw new \Exception('Barcode Tidak ditemukan', 500);
-                    }
-                }
                 if ($item->valid === 'validasi') {
                     $errorCode = 12;
                     throw new Exception("Barcode " . $barcode . " sudah valid", 500);
+                }
+                if (is_null($check)) {
+                    $errorCode = 12;
+                    throw new Exception("Scan barcode invalid", 500);
+//                    $list = $this->m_Pickliststockquant->getDataItemPicklistScanDetail($cond, true);
+//                    if (empty($list)) {
+//                        throw new \Exception('Barcode Tidak ditemukan', 500);
+//                    }
+//                    switch (true) {
+//
+//                        case (int) $list->id_category !== 21:
+//                            throw new \Exception("Kategori Produk Tidak Valid (" . $list->nama_category . ")", 500);
+//                        case $list->reserve_move !== "":
+//                            throw new \Exception("Barcode " . $barcode . " reserve move " . $list->reserve_move, 500);
+//
+//                        case in_array(strtoupper($list->lokasi_fisik), ["PORT", "XPD"]) :
+//                            throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi_fisik . ")", 500);
+//
+//                        case strtoupper($list->lokasi) !== 'GJD/STOCK':
+//                            throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi . ")", 500);
+//                        default :
+//                            throw new \Exception('Barcode Tidak ditemukan', 500);
+//                    }
                 }
 //                if ($item->valid !== 'realisasi') {
 //                    $errorCode = 12;
@@ -158,7 +161,7 @@ class Picklistvalidasi extends MY_Controller {
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', 'error_code' => $errorCode)));
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', 'error_code' => $errorCode, 'barcode' => $barcode)));
         }
     }
 
@@ -166,7 +169,7 @@ class Picklistvalidasi extends MY_Controller {
         try {
             $pl = $this->input->post('filter');
 
-            $condition = ['no_pl' => $pl, 'valid' => 'validasi'];
+            $condition = ['no_pl' => $pl, 'valid !=' => 'cancel'];
             $list = $this->m_PicklistDetail->getData($condition);
             $no = $_POST['start'];
             $data = [];
@@ -276,5 +279,53 @@ class Picklistvalidasi extends MY_Controller {
         } catch (Exception $ex) {
             
         }
+    }
+
+    public function check_error() {
+        try {
+            $barcode = $this->input->post("barcode");
+            $pl = $this->input->post("pl");
+            $message = "";
+            $cond = ['lot' => $barcode];
+            $list = $this->m_Pickliststockquant->getDataItemPicklistScanDetail($cond, true);
+            if (empty($list)) {
+                $message = "Barcode Tidak ditemukan";
+                throw new \Exception('Barcode Tidak ditemukan', 200);
+            }
+            switch (true) {
+
+                case (int) $list->id_category !== 21:
+                    $message = "Kategori Produk Tidak Valid (" . $list->nama_category . ")";
+//                    throw new \Exception("Kategori Produk Tidak Valid (" . $list->nama_category . ")", 500);
+                case $list->reserve_move !== "":
+//                    throw new \Exception("Barcode " . $barcode . " reserve move " . $list->reserve_move, 500);
+                    $message = "Barcode " . $barcode . " reserve move " . $list->reserve_move;
+                case in_array(strtoupper($list->lokasi_fisik), ["PORT", "XPD"]) :
+//                    throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi_fisik . ")", 500);
+                    $message = "Lokasi Tidak Valid (" . $list->lokasi_fisik . ")";
+                case strtoupper($list->lokasi) !== 'GJD/STOCK':
+//                    throw new \Exception("Lokasi Tidak Valid (" . $list->lokasi . ")", 500);
+                    $message = "Lokasi Tidak Valid (" . $list->lokasi_fisik . ")";
+                default :
+//                    throw new \Exception('Barcode Tidak ditemukan', 500);
+                    $message = "Barcode Tidak ditemukan";
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $message, 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function show_error() {
+
+        $barcode = $this->input->post("barcode");
+        $data = json_decode($barcode);
+        $this->output->set_status_header(200)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(['data' => $this->load->view('warehouse/v_picklist_validasi_show_error', ['data' => $data], true)]));
     }
 }
