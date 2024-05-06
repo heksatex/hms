@@ -78,6 +78,7 @@ class M_bulk extends CI_Model {
     public function getDataDetail(array $condition) {
         $this->db->from($this->table);
         $this->db->where($condition);
+        $this->db->order_by("id desc");
         return $this->db->select("*")->get()->row();
     }
 
@@ -152,7 +153,7 @@ class M_bulk extends CI_Model {
     protected $selectPicklist = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
     protected $column_orderPicklist = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
     protected $orderPicklist = ['tanggal_input' => 'desc'];
-    protected $column_searchPicklist = array('no', 'jenis_jual', 'msg.nama_sales_group');
+    protected $column_searchPicklist = array('no', 'jenis_jual', 'msg.nama_sales_group','p.nama','jenis_jual');
 
     protected function _bulkPicklist() {
         $this->db->select($this->selectPicklist . ', p.nama');
@@ -233,5 +234,19 @@ class M_bulk extends CI_Model {
         $this->db->join('partner', 'partner.id = customer_id', 'left');
         $this->db->join('type_bulk as tb', 'tb.id = type_bulk_id', 'left');
         return $this->db->select($select)->get()->row();
+    }
+
+    public function saveBatch(array $data) {
+        try {
+            $this->db->insert_batch($this->table, $data);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                log_message('error', json_encode($data));
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
     }
 }

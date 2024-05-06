@@ -143,6 +143,49 @@
                                                 </div>
                                             </form>
                                         </div>
+<!--                                        <div class="col-md-6 col-xs-12">
+                                            <div class="row">
+                                                <div class="col-xs-6">
+                                                    <div class="form-group">
+                                                        <div class="col-xs-8">
+                                                            <label class="label-pill">Total LOT</label>
+                                                        </div>
+                                                        <div class="col-xs-4">
+                                                            <span id="total-lot">0</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-xs-8">
+                                                            <label class="label-pill">Scan Valid</label>
+                                                        </div>
+                                                        <div class="col-xs-4">
+                                                            <span id="scan-valid">0</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-xs-6">
+                                                    <div class="form-group">
+                                                        <div class="col-xs-8">
+                                                            <label class="label-pill">Belum Scan</label>
+                                                        </div>
+                                                        <div class="col-xs-4">
+                                                            <span id="not-scan">0</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-xs-8">
+                                                            <label class="label-danger text-aqua">Scan Invalid</label>
+                                                        </div>
+                                                        <div class="col-xs-4">
+                                                            <span id="scan-invalid">0</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+
+                                        </div>-->
                                         <!--                                        <div class="col-md-6 col-xs-12">
                                                                                     <div class="form-group">
                                                                                         <div class="col-md-12 col-xs-12">
