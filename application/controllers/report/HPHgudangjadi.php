@@ -41,7 +41,7 @@ class HPHgudangjadi extends MY_Controller
 
 		}else{
 
-            $dataRecord = $this->get_data($data_filter,$record,$recordPerPage);
+            $dataRecord = $this->get_data($data_filter,$record,$recordPerPage,false);
 
             $total_record = $dataRecord[0];
             $result_record = $dataRecord[1];
@@ -69,7 +69,7 @@ class HPHgudangjadi extends MY_Controller
 		echo json_encode($callback);
 	}
 
-    public function get_data(array $data_filter,$record=0,$recordPerPage=0)
+    public function get_data(array $data_filter,$record=0,$recordPerPage=0,$excel)
     {
 
             foreach($data_filter as $row){
@@ -484,7 +484,7 @@ class HPHgudangjadi extends MY_Controller
                     }
                 }
             }
-            return $result_record = $this->urutkan($dataRecord,$record,$recordPerPage);
+            return $result_record = $this->urutkan($dataRecord,$record,$recordPerPage,$excel);
     }
 
 
@@ -499,7 +499,7 @@ class HPHgudangjadi extends MY_Controller
         return $tmp_result;
     }
 
-    function urutkan(array $result_record, $record, $recordPerPage)
+    function urutkan(array $result_record, $record, $recordPerPage, $excel)
     {
       
         $key_values     = array_column($result_record, 'tgl_hph'); 
@@ -519,8 +519,11 @@ class HPHgudangjadi extends MY_Controller
                 $result_record_show[] = $result_record[$i];
             }
         }
-
-        return array($total_all_record,$result_record_show);
+        if($excel == true){
+            return array($total_all_record,$result_record);
+        }else{
+            return array($total_all_record,$result_record_show);
+        }
     }
 
 
@@ -553,7 +556,8 @@ class HPHgudangjadi extends MY_Controller
             
             $where_date = '';
             
-            $dataRecord = $this->get_data($data_filter);
+            $record = $this->get_data($data_filter,0,0,true);
+            $dataRecord = $record[1] ?? '';
             $id_dept    = 'GJD';
 			$cek        = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
 
@@ -674,7 +678,6 @@ class HPHgudangjadi extends MY_Controller
 
                 // set align
                 $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-                $object->getActiveSheet()->getStyle('n'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 $object->getActiveSheet()->getStyle('X'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
                 
             
