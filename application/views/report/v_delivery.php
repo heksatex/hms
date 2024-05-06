@@ -67,7 +67,7 @@
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <select name="marketing" class="form-control" id="marketing">
-                                                    <option value=""></option>
+                                                    <option value="">All</option>
                                                     <?php
                                                     foreach ($sales as $key => $value) {
                                                         if ($this->session->userdata('nama')['sales_group'] === $value->kode) {

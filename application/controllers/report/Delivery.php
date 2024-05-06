@@ -56,7 +56,6 @@ class Delivery extends MY_Controller {
             $rekap = $this->input->post("rekap");
             $customer = $this->input->post("customer");
             $period = explode(" - ", $periode);
-            log_message('error', "ini " . $marketing);
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
