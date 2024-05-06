@@ -128,49 +128,69 @@
                                     </div>
 
                                 </div>
+                                <div class="col-md-6 col-xs-12">
+                                    <div class="form-group">
+                                        <div class="col-md-6 col-xs-12">
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-8">
+                                                        <label class="form-label">Total LOT</label>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <span id="totalLot"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-8">
+                                                        <label class="form-label">Belum Valid</label>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <span id="invalid"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-8">
+                                                        <label class="form-label">Scan Valid</label>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <span id="scanValid"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-8">
+                                                        <label class="form-label">Scan Invalid</label>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <span id="scanInvalid"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+<!--                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <select class="form-control" aria-label="Default select example">
+                                                        <option value="all" selected>Filter Status Barcode</option>
+                                                        <option value="1">One</option>
+                                                        <option value="2">Two</option>
+                                                        <option value="3">Three</option>
+                                                    </select>
+                                                </div>
+                                            </div>-->
+                                        </div>
+                                        <div class="col-md-6 col-xs-12 table-responsive over">
+                                            <div class="table-responsive over" style="max-height:200px;"  id="show_error">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php } ?>
-                            <div class="col-md-6 col-xs-12">
-                                <div class="form-group">
-                                    <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4">
-                                            <label class="form-label">Total LOT</label>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <span id="totalLot"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4">
-                                            <label class="form-label"></label>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4">
-                                            <label class="form-label">Scan Valid</label>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <span id="scanValid"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4">
-                                            <label class="form-label">Scan Invalid</label>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <span id="scanInvalid"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                         <div class="row">
                             <div class="col-md-12">
@@ -205,6 +225,28 @@
             <?php $this->load->view("admin/_partials/js.php") ?>
         </div>
         <script>
+            function check(barcode) {
+                $.ajax({
+                    url: "<?= base_url('warehouse/picklistvalidasi/check_error') ?>",
+                    type: "POST",
+                    data: {
+                        barcode: barcode,
+                        pl: $("#pl").val()
+                    },
+                    beforeSend: function (xhr) {
+                        please_wait(function () {});
+                    },
+                    success: function (data) {
+                        $("#show_err_" + barcode).html(data.message);
+                    },
+                    error: function (err) {
+
+                    },
+                    complete: function (jqXHR, textStatus) {
+                        unblockUI(function () {}, 50);
+                    }
+                });
+            }
 
             $(document).keydown(function (e) {
                 if (e.which === 113) {
@@ -223,18 +265,30 @@
             }
             );
             $(function () {
+                var error_barcode = [];
 
+                const loadError = function (barcode) {
+                    $.post("<?= base_url('warehouse/picklistvalidasi/show_error/') ?>",
+                            {
+                                "barcode": JSON.stringify(barcode)
+                            }
+                    , function (response) {
+                        var divp = document.getElementById('show_error');
+                        divp.innerHTML = response.data;
+                    });
+                }
                 $("#search").focus();
                 $("#btn-validasi").hide();
                 var audio = new Audio("<?= base_url('dist/error.wav') ?>");
                 audio.volume = 1.0;
                 const table = $("#item_realisai").DataTable({
                     "iDisplayLength": 10,
+                    "aLengthMenu": [[10, 50, 100, 1000], [10, 50, 100, 1000]],
                     "processing": true,
                     "serverSide": true,
                     "order": [],
                     "paging": true,
-                    "lengthChange": false,
+                    "lengthChange": true,
                     "searching": true,
                     "ordering": true,
                     "info": true,
@@ -294,7 +348,7 @@
                         async(event) => {
                     please_wait(function () {});
                     try {
-                        let status = await checkTable(event);
+                        let status = false;//await checkTable(event);
                         if (!status) {
 
                             request("form-validasi").then(
@@ -322,7 +376,10 @@
                                                 $("#totalLot").html(dataPicklist.total_lot);
                                                 $("#scanValid").html(dataPicklist.total_validasi);
                                                 $("#scanInvalid").html(dataInvalid);
+                                                $("#invalid").html(dataPicklist.total_lot - dataPicklist.total_validasi);
                                                 table.search("").draw(false);
+                                                error_barcode = [];
+                                                loadError(error_barcode);
                                                 return;
                                             }
                                             if (typeof response?.data?.item === "object") {
@@ -334,9 +391,23 @@
                                             return;
                                         }
                                         if (response.status === 500) {
-                                            if (response?.data?.error_code >= 0) {
+
+                                            if (response?.data?.error_code > 0) {
+                                                if (response?.data?.error_code === 11) {
+                                                    error_barcode.push({
+                                                        barcode: response?.data?.barcode,
+                                                        message: response?.data?.message
+                                                    });
+                                                } else if (response?.data?.error_code === 12) {
+                                                    error_barcode.push({
+                                                        barcode: response?.data?.barcode,
+                                                        message: ""
+                                                    });
+                                                }
                                                 dataInvalid++;
                                                 $("#scanInvalid").html(dataInvalid);
+                                                loadError(error_barcode);
+
                                             }
                                         }
                                         audio.play();
@@ -364,7 +435,6 @@
                 },
                         false
                         );
-
 
             });
 
