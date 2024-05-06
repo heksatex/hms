@@ -60,7 +60,7 @@ class Delivery extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done'];
+            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done','pd.valid'=>'done'];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
@@ -88,6 +88,7 @@ class Delivery extends MY_Controller {
                     $value->total_qty_jual . ' ' . $value->uom_jual,
                     $value->total_qty2_jual . ' ' . $value->uom2_jual,
                     $value->total_lot,
+                    $value->note,
                     $value->marketing,
                 );
                 $data[] = $row;
@@ -147,7 +148,7 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('W1', 'Marketing');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
-            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done'];
+            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done','pd.valid'=>'done'];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }

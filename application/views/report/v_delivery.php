@@ -139,6 +139,7 @@
                                                     <th class="style">Qty Jual</th>
                                                     <th class="style">Qty 2 Jual</th>
                                                     <th class="style">LOT</th>
+                                                    <th class="style">Catatan</th>
                                                     <th class="style">Marketing</th>
                                                 </tr>
                                             </thead>
