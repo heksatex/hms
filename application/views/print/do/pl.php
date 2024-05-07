@@ -142,7 +142,7 @@
                                 if (!is_null($bulk)) {
                                     if ($bulk !== $value->bulk_no_bulk) {
                                         ?>
-                                        <tr style="text-align: center;">
+                                        <tr>
                                             <td></td>
                                             <td></td>
                                             <td></td>
@@ -157,8 +157,8 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td class="text-content"><?= $sub_jml_qty ?? 0 ?></td>
-                                            <td class="text-content"><?= (number_format($sub_total_qty ?? 0, 2, ".", ",")) . ' ' . $satuan ?></td>
+                                            <td class="text-content" style="text-align: right;"><?= $sub_jml_qty ?? 0 ?></td>
+                                            <td class="text-content" style="text-align: right;"><?= (number_format($sub_total_qty ?? 0, 2, ".", ",")) . ' ' . $satuan ?></td>
                                         </tr>
                                         <?php
                                         $sub_total_qty = 0;
@@ -173,7 +173,7 @@
                                     $tempID = $value->bulk_no_bulk . $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
                                     $tempBulk = $value->bulk_no_bulk;
                                     ?>
-                                    <tr style="text-align: center; font-weight: 600;">
+                                    <tr style="text-align: right; font-weight: 600;">
 
                                         <td class=""><?= ($bulk === $tempBulk) ? '' : $no ?></td>
                                         <td class=""><?= ($bulk === $tempBulk) ? '' : $value->bulk_no_bulk ?></td>
@@ -204,7 +204,7 @@
                                         <td class=""><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
 
 
-                                        <td class=""><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
+                                        <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
                                         <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' : number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>
             <!--                                        <td class="" style=" text-align: center;"><?= $value->jumlah_qty ?></td>
                                         <td class="" style="text-align: center;"><?= number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>-->
@@ -215,7 +215,7 @@
                                 }
                             }
                             ?>
-                            <tr style="text-align: center;">
+                            <tr>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -230,8 +230,8 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td class="text-content"><?= $sub_jml_qty ?? 0 ?></td>
-                                <td class="text-content"><?= number_format(($sub_total_qty ?? 0), 2, ".", ",") . ' ' . $satuan ?></td>
+                                <td class="text-content" style="text-align: right;"><?= $sub_jml_qty ?? 0 ?></td>
+                                <td class="text-content"  style="text-align: right;"><?= number_format(($sub_total_qty ?? 0), 2, ".", ",") . ' ' . $satuan ?></td>
                             </tr>
                         </tbody>
                         <?php
@@ -258,7 +258,7 @@
                                     $satuan = $detailQty[0]->uom;
                                     $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
                                     ?>
-                                    <tr style="text-align: center; font-weight: 600">
+                                    <tr style="text-align: right; font-weight: 600">
 
                                         <td class=""><?= ($id === $tempID) ? '' : $no ?></td>
                                         <td class="" style="text-align: left;"><?php
@@ -286,7 +286,7 @@
                                         <td class=""><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
 
 
-                                        <td class=""><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
+                                        <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
                                         <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' : number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>
                                     </tr>
                                     <?php

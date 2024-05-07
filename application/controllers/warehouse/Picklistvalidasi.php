@@ -151,8 +151,6 @@ class Picklistvalidasi extends MY_Controller {
 //                $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($condition, $update)), $username);
                 $this->_module->gen_history($sub_menu, $pl, 'edit', ($nama["nama"] ?? "") . ' Melakukan validasi barcode ' . $barcode, $username);
                 if (!$this->_module->finishTransaction()) {
-
-                    $this->_module->rollbackTransaction();
                     throw new \Exception('Gagal validasi data', 500);
                 }
             }
@@ -161,6 +159,7 @@ class Picklistvalidasi extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success', 'picklist' => $picklist, 'item' => $item)));
         } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', 'error_code' => $errorCode, 'barcode' => $barcode)));
