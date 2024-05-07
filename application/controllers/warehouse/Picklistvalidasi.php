@@ -97,7 +97,7 @@ class Picklistvalidasi extends MY_Controller {
                 if (empty($pl)) {
                     throw new Exception("Tentukan dulu no picklist", 500);
                 }
-                $this->_module->startTransaction();
+//                $this->_module->startTransaction();
                 $item = $this->m_PicklistDetail->detailData(['no_pl' => $pl, "barcode_id" => $barcode]);
 
                 if (is_null($item)) {
@@ -143,11 +143,11 @@ class Picklistvalidasi extends MY_Controller {
                 $update = ['valid' => 'validasi', 'valid_date' => date('Y-m-d H:i:s')];
                 $condition = ['no_pl' => $pl, 'barcode_id' => $item->barcode_id, 'valid !=' => 'cancel'];
                 $sts = $this->m_PicklistDetail->updateStatus($condition, $update);
+                $this->m_Picklist->update(['status' => 'validasi'], ['no' => $pl]);
                 if (!empty($sts)) {
                     throw new Exception($sts, 500);
                 }
                 $this->m_Pickliststockquant->update(["move_date" => date('Y-m-d H:i:s'), "lokasi_fisik" => "XPD"], ["lot" => $barcode, 'quant_id' => $item->quant_id]);
-                $this->m_Picklist->update(['status' => 'validasi'], ['no' => $pl]);
 //                $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($condition, $update)), $username);
                 $this->_module->gen_history($sub_menu, $pl, 'edit', ($nama["nama"] ?? "") . ' Melakukan validasi barcode ' . $barcode, $username);
                 if (!$this->_module->finishTransaction()) {
@@ -159,6 +159,7 @@ class Picklistvalidasi extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-check', 'type' => 'success', 'picklist' => $picklist, 'item' => $item)));
         } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', 'error_code' => $errorCode, 'barcode' => $barcode)));
