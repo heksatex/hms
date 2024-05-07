@@ -52,7 +52,7 @@
             </td>
         </tr>
         <tr class="head">
-            
+
         </tr>
         <tr>
             <th>No Urut</th>
@@ -104,19 +104,19 @@
                 $showNoUrut = "";
                 $showNet = "";
                 $showGross = "";
-                if ($tempBulk !== $value->no_bulk) {
+                if ($tempBulk !== ($value->no_bulk ?? "")) {
                     $nourut++;
-                    $total_net += $value->net_weight;
-                    $total_groos += $value->gross_weight;
+                    $total_net += ($value->net_weight ?? 0);
+                    $total_groos += ($value->gross_weight ?? 0);
 
-                    $showGross = $value->gross_weight;
-                    $showNet = $value->net_weight;
+                    $showGross = ($value->gross_weight ?? 0);
+                    $showNet = ($value->net_weight ?? 0);
                     $showNoUrut = $nourut;
                 }
                 ?>
                 <tr>
                     <td class="text-kanan"><?= ($picklist->type_bulk_id === "1") ? $showNoUrut : $no ?></td>
-                    <td class="text-kanan"><?= ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk ?></td>
+                    <td class="text-kanan"><?= ($tempBulk === ($value->no_bulk ?? "")) ? '' : ($value->no_bulk ?? "") ?></td>
                     <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi) ?></td>
                     <td class="text-kanan"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
 
@@ -139,7 +139,7 @@
                 </tr>
                 <?php
                 $id = $tempID;
-                $tempBulk = $value->no_bulk;
+                $tempBulk = ($value->no_bulk ?? "");
             }
         }
         ?>

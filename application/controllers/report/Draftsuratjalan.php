@@ -93,11 +93,18 @@ class Draftsuratjalan extends MY_Controller {
             $total_net = 0;
             $total_groos = 0;
             $tempBulk = null;
+            if ($pkl->type_bulk_id === "1") {
+                $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom'], ["BULK"]
+                );
+            } else {
+                $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ['warna_remark', 'corak_remark', 'uom'], []
+                );
+            }
 
-            $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
-                    ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                    $nopl, ['warna_remark', 'corak_remark', 'uom'], ["BULK"]
-            );
             foreach ($picklist_detail as $key => $value) {
                 $no++;
                 $jml_qty += $value->jml_qty;
@@ -115,18 +122,18 @@ class Draftsuratjalan extends MY_Controller {
                     $showNoUrut = "";
                     $showNet = "";
                     $showGross = "";
-                    if ($tempBulk !== $value->no_bulk) {
+                    if ($tempBulk !== ($value->no_bulk ?? "")) {
                         $nourut++;
-                        $total_net += $value->net_weight;
-                        $total_groos += $value->gross_weight;
+                        $total_net += ($value->net_weight ?? 0);
+                        $total_groos += ($value->gross_weight ?? 0);
 
-                        $showGross = $value->gross_weight;
-                        $showNet = $value->net_weight;
+                        $showGross = ($value->gross_weight ?? 0);
+                        $showNet = ($value->net_weight ?? 0);
                         $showNoUrut = $nourut;
                     }
 
                     $sheet->setCellValue("A" . $rowStartData, ($pkl->type_bulk_id === "1") ? $showNoUrut : $no);
-                    $sheet->setCellValue('B' . $rowStartData, ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk);
+                    $sheet->setCellValue('B' . $rowStartData, ($tempBulk === ($value->no_bulk ?? "")) ? '' : ($value->no_bulk ?? ""));
                     $sheet->setCellValue("C" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
                     $sheet->setCellValue("D" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark));
                     $sheet->setCellValue("E" . $rowStartData, isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "");
@@ -147,7 +154,7 @@ class Draftsuratjalan extends MY_Controller {
                     $sheet->setCellValue('S' . $rowStartData, $showGross);
 
                     $id = $tempID;
-                    $tempBulk = $value->no_bulk;
+                    $tempBulk = ($value->no_bulk ?? "");
                 }
             }
 
@@ -198,10 +205,18 @@ class Draftsuratjalan extends MY_Controller {
             $data['picklist'] = $pkl;
 
             $datas['picklist'] = $pkl;
-            $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
-                    ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                    $nopl, ['warna_remark', 'corak_remark', 'uom'], ["BULK"]
-            );
+            if ($pkl->type_bulk_id === "1") {
+                $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom'], ["BULK"]
+                );
+            } else {
+                $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ['warna_remark', 'corak_remark', 'uom'], []
+                );
+            }
+
             $data['detail'] = $this->load->view('report/v_draft_surat_jalan_detail', $datas, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
