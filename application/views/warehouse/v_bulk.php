@@ -92,11 +92,10 @@
         <script>
             $(function () {
                 const table = $('#picklist').DataTable({
-                    "iDisplayLength": 50,
+                    "iDisplayLength": 25,
                     "processing": true,
                     "serverSide": true,
                     "order": [],
-
                     "paging": true,
                     "lengthChange": true,
                     "searching": true,
