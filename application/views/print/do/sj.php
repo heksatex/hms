@@ -107,6 +107,9 @@
                         <?php
                         $total_pcs = 0;
                         $total_jumlah = 0;
+                        $id = "";
+                        $total_pcs_bulk = 0;
+                        $total_jumlah_bulk = 0;
                         foreach ($data as $key => $value) {
                             $total_jumlah += $value->total_qty;
                             $total_pcs += $value->jumlah_qty;
@@ -114,7 +117,20 @@
                             <tr>
 
                                 <td class="text-content">
-                                    <?= $value->bulk_no_bulk ?>
+                                    <?php
+                                    if ($id === $value->bulk_no_bulk) {
+
+                                        echo "";
+                                    } else {
+                                        echo $value->bulk_no_bulk;
+                                        $total_jumlah_bulk = 0;
+                                        $total_pcs_bulk = 0;
+                                    }
+                                    $id = $value->bulk_no_bulk;
+                                    
+                                        $total_pcs_bulk += $value->jumlah_qty;
+                                        $total_jumlah_bulk += $value->total_qty;
+                                    ?>
                                 </td>
                                 <td>
                                     <div class="deskripsi text-content">
@@ -126,26 +142,85 @@
                                         }
                                         ?>
                                     </div>
-                                    <hr>
-                                    <span class="text-content"><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
+
+                                    <?php
+                                    if (empty($id)) {
+                                        
+                                    } else {
+                                        if (($key + 1) === count($data)) {
+                                            ?>
+                                            <hr>
+                                            <span class="text-content"><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
+                                            <?php
+                                        } else {
+                                            if ($id !== $data[$key + 1]->bulk_no_bulk) {
+                                                ?>
+                                                <hr>
+                                                <span class="text-content"><strong>Total BAL </strong> <?= $value->bulk_no_bulk ?></span>
+                                                <?php
+                                            }
+                                        }
+                                    }
+                                    ?>
+
+
                                 </td>
                                 <td style="text-align: right;font-weight: 600">
                                     <div class="deskripsi text-content" style="justify-content: end;">
                                         <?= $value->jumlah_qty ?>
                                     </div>
-                                    <hr>
-                                    <span style="text-align: right" class="text-content"><?= $value->jumlah_qty ?></span>
+                                    <?php
+                                    if (empty($id)) {
+                                        
+                                    } else {
+                                        if (($key + 1) === count($data)) {
+                                            ?>
+                                            <hr>
+                                            <span class="text-content"> <?= $total_pcs_bulk ?></span>
+                                            <?php
+                                        } else {
+                                            if ($id !== $data[$key + 1]->bulk_no_bulk) {
+                                                ?>
+                                                <hr>
+                                                <span class="text-content"><?= $total_pcs_bulk ?></span>
+                                                <?php
+                                            }
+                                        }
+                                    }
+                                    ?>
                                 </td>
                                 <td style="text-align: right;">
                                     <div class="deskripsi text-content" style="justify-content: end;">
                                         <?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?>
                                     </div>
-                                    <hr>
-                                    <span style="text-align: right" class="text-content"><?= number_format($value->total_qty, 2, ".", ",") . " " . $value->uom ?></span>
+                                    
+                                    <?php
+                                    if (empty($id)) {
+                                        
+                                    } else {
+                                        if (($key + 1) === count($data)) {
+                                            ?>
+                                            <hr>
+                                            <span style="text-align: right" class="text-content"><?= number_format($total_jumlah_bulk, 2, ".", ",") ?></span>
+                                            <?php
+                                        } else {
+                                            if ($id !== $data[$key + 1]->bulk_no_bulk) {
+                                                ?>
+                                                <hr>
+                                                <span style="text-align: right" class="text-content"><?= number_format($total_jumlah_bulk, 2, ".", ",")  ?></span>
+                                                <?php
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                    
                                 </td>
                             </tr>
 
-                        <?php } ?>
+                            <?php
+                            $id = $value->bulk_no_bulk;
+                        }
+                        ?>
                         <tr>
                             <td colspan="2"></td>
                             <td class="total_total">
@@ -158,7 +233,8 @@
                             <td class="total_total text-content">
                                 <div class="deskripsi" style="justify-content: end;
                                      font-weight: 600;">
-                                     <?= number_format($total_jumlah, 2, ".", ",") ?>
+                                    
+                                     <?=number_format($total_jumlah, 2, ".", ",") ?>
                                 </div>
 
                             </td>
