@@ -143,8 +143,19 @@ class M_PicklistDetail extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function detailReportQty($condition, $select = 'qty,uom') {
+    public function detailReportQty($condition, $select = 'qty,uom', array $join = []) {
         $this->db->from($this->table);
+
+        foreach ($join as $key => $value) {
+            switch ($value) {
+                case "BULK":
+                    $this->db->join("bulk_detail bd", "bd.picklist_detail_id = " . $this->table . ".id");
+                    break;
+
+                default:
+                    break;
+            }
+        }
         $this->db->where($condition);
         $this->db->select($select);
         return $this->db->get()->result();
