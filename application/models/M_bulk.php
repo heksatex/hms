@@ -108,13 +108,15 @@ class M_bulk extends CI_Model {
         return $subquery;
     }
 
-    public function listBulkDetail(array $condition) {
+    public function listBulkDetail(array $condition, $dataTable = true) {
         $this->order = ['bulk.no_bulk' => 'asc'];
         $this->_listBulkDetail($condition);
 //        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
         $q = $this->db->select('bulk.no_bulk,bulk.tanggal_input,total_qty,jumlah_qty')->get();
-        if ($_POST['length'] != -1)
-            $this->db->limit($_POST['length'], $_POST['start']);
+        if ($dataTable) {
+            if ($_POST['length'] != -1)
+                $this->db->limit($_POST['length'], $_POST['start']);
+        }
         return $q->result();
     }
 
@@ -126,13 +128,16 @@ class M_bulk extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function getCountDataFilteredBulk(array $condition = []) {
+    public function getCountDataFilteredBulk(array $condition = [], $dataTable = true) {
         $this->_listBulkDetail($condition);
 ////        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');.
 //        $this->db->from($this->table);
 //        $this->db->where($condition);
-        if ($_POST['length'] != -1)
-            $this->db->limit($_POST['length'], $_POST['start']);
+        if ($dataTable) {
+            if ($_POST['length'] != -1)
+                $this->db->limit($_POST['length'], $_POST['start']);
+        }
+
         $query = $this->db->get();
         return $query->num_rows();
     }
