@@ -454,6 +454,7 @@
                         $("#search").focus();
                     }
                     event.preventDefault();
+                    event.stopImmediatePropagation();
                 },
                         false
                         );
