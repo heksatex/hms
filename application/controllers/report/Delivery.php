@@ -86,8 +86,8 @@ class Delivery extends MY_Controller {
                     $value->no_picklist,
                     $value->nama,
                     $value->alamat,
-                    $value->corak_remark,
-                    $value->warna_remark,
+                    ($rekap === "global") ? "" : $value->corak_remark,
+                    ($rekap === "global") ? "" : $value->warna_remark,
                     $value->total_qty . ' ' . $value->uom,
                     $value->total_qty2 . ' ' . $value->uom2,
                     $value->total_qty_jual . ' ' . $value->uom_jual,
@@ -184,8 +184,8 @@ class Delivery extends MY_Controller {
                 $sheet->setCellValue('G' . $rowStartData, $value->no_picklist);
                 $sheet->setCellValue('H' . $rowStartData, $value->nama);
                 $sheet->setCellValue('I' . $rowStartData, $value->alamat);
-                $sheet->setCellValue('J' . $rowStartData, $value->corak_remark);
-                $sheet->setCellValue('K' . $rowStartData, $value->warna_remark);
+                $sheet->setCellValue('J' . $rowStartData, ($rekap === "global") ? "" : $value->corak_remark);
+                $sheet->setCellValue('K' . $rowStartData, ($rekap === "global") ? "" : $value->warna_remark);
                 $sheet->setCellValue('L' . $rowStartData, $value->total_qty);
                 $sheet->setCellValue('M' . $rowStartData, $value->uom);
                 $sheet->setCellValue('N' . $rowStartData, $value->total_qty2);
