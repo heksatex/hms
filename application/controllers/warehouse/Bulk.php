@@ -74,6 +74,8 @@ class Bulk extends MY_Controller {
                 );
                 $data[] = $row;
             }
+            log_message('error', $this->m_bulk->getCountAllDataBulk($condition));
+            log_message('error', $this->m_bulk->getCountDataFilteredBulk($condition));
             echo json_encode(array("draw" => $_POST['draw'],
                 "recordsTotal" => $this->m_bulk->getCountAllDataBulk($condition),
                 "recordsFiltered" => $this->m_bulk->getCountDataFilteredBulk($condition),
