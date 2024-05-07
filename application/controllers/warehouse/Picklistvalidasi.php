@@ -30,7 +30,9 @@ class Picklistvalidasi extends MY_Controller {
     public function index() {
         $data['id_dept'] = 'PLV';
         $sub_menu = $this->uri->segment(2);
-
+        $username = $this->session->userdata('username');
+        $kode = $this->_module->get_kode_sub_menu_deptid($sub_menu, $data['id_dept'])->row_array();
+        $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username, $kode['kode'])->num_rows();
         $this->menu = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
         $data['access'] = $this->m_accessmenu->getDetail(['access_only' => getClientIP(), 'menu' => $this->menu['kode']]);
         $this->load->view('warehouse/v_picklist_validasi_add', $data);
@@ -61,6 +63,11 @@ class Picklistvalidasi extends MY_Controller {
             $nama = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
 
+            $kode = $this->_module->get_kode_sub_menu_deptid($sub_menu, "PLV")->row_array();
+            $check_user = $this->_module->cek_priv_menu_by_user($username, $kode['kode'])->num_rows();
+            if ($check_user === 0) {
+                throw new Exception("user tidak diizinkan", 500);
+            }
             $pl = "";
             $picklist = null;
             $barcode = $this->input->post('search');
@@ -97,13 +104,14 @@ class Picklistvalidasi extends MY_Controller {
 
                 $pl = $this->input->post('pl');
                 if (empty($pl)) {
+                    $errorCode = 12;
                     throw new Exception("Tentukan dulu no picklist", 500);
                 }
 //                $this->_module->startTransaction();
                 $item = $this->m_PicklistDetail->detailData(['no_pl' => $pl, "barcode_id" => $barcode, 'valid !=' => 'cancel']);
 
                 if (is_null($item)) {
-                    $errorCode = 11;
+                    $errorCode = 12;
                     throw new Exception("Barcode " . $barcode . " Tidak Ada Dalam No PL " . $pl, 500);
                 }
                 $cond = ['lot' => $barcode];
@@ -111,8 +119,8 @@ class Picklistvalidasi extends MY_Controller {
                 $check = $this->m_Pickliststockquant->getDataItemPicklistScan(array_merge($cond, ['stock_quant.lokasi' => 'GJD/Stock', 'id_category' => 21]));
 
                 if ($item->valid === 'validasi') {
-                    $errorCode = 12;
-                    throw new Exception("Barcode " . $barcode . " sudah valid", 500);
+                    $errorCode = 11;
+                    throw new Exception("Barcode " . $barcode . " sudah divalidasi", 500);
                 }
                 if (is_null($check)) {
                     $errorCode = 12;
@@ -153,6 +161,7 @@ class Picklistvalidasi extends MY_Controller {
 //                $this->_module->gen_history($sub_menu, $pl, 'edit', logArrayToString('; ', array_merge($condition, $update)), $username);
                 $this->_module->gen_history($sub_menu, $pl, 'edit', ($nama["nama"] ?? "") . ' Melakukan validasi barcode ' . $barcode, $username);
                 if (!$this->_module->finishTransaction()) {
+                    $errorCode = 12;
                     throw new \Exception('Gagal validasi data', 500);
                 }
             }

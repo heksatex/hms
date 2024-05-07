@@ -18,6 +18,9 @@
                 font-weight: 400;
                 font-size: 200%;
             }
+            #btn-validasi{
+                display: none;
+            }
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
@@ -59,10 +62,16 @@
                                                         <label class="form-label required">Scan Barcode / No PL</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
-                                                        <input type='text' name="search" id="search" class="form-control input-lg scan-text" required autocomplete="off"/>
-                                                        <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
-                                                        <input type='hidden' name="pl" id="pl" value=""/>
-                                                        <input type="hidden" name="access" value="<?= $access->permission ?>">
+                                                        <?php
+                                                        if ($akses_menu === 1) {
+                                                            ?>
+                                                            <input type = 'text' name = "search" id = "search" class = "form-control input-lg scan-text" required autocomplete = "off"/>
+                                                            <label class = "text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
+                                                            <input type = 'hidden' name = "pl" id = "pl" value = ""/>
+                                                            <input type = "hidden" name = "access" value = "<?= $access->permission ?>">
+                                                            <?php
+                                                        }
+                                                        ?>
                                                     </div>
                                                 </div>
                                             </div>
@@ -278,9 +287,13 @@
                     });
                 }
                 $("#search").focus();
-                $("#btn-validasi").hide();
-                var audio = new Audio("<?= base_url('dist/error.wav') ?>");
-                audio.volume = 1.0;
+//                $("#btn-validasi").hide();
+                const playAudio = ((url) => {
+                    var audio = new Audio(url);
+                    audio.volume = 1;
+                    audio.play();
+                });
+
                 const table = $("#item_realisai").DataTable({
                     "iDisplayLength": 10,
                     "aLengthMenu": [[10, 50, 100, 1000], [10, 50, 100, 1000]],
@@ -363,6 +376,8 @@
                                         if (response.status === 200) {
 //                                                table.search($('#search').val()).draw();
 //                                                setDataChart();
+
+                                            playAudio("<?= base_url('dist/beep.MP3') ?>");
                                             if (response?.data?.picklist !== null) {
                                                 dataPicklist = response.data.picklist;
                                                 $("#pl").val(dataPicklist.no);
@@ -401,11 +416,15 @@
                                                         barcode: response?.data?.barcode,
                                                         message: response?.data?.message
                                                     });
+                                                    playAudio("<?= base_url('dist/beep.MP3') ?>");
                                                 } else if (response?.data?.error_code === 12) {
                                                     error_barcode.push({
                                                         barcode: response?.data?.barcode,
                                                         message: ""
                                                     });
+                                                    playAudio("<?= base_url('dist/error.wav') ?>");
+                                                } else {
+                                                    playAudio("<?= base_url('dist/error.wav') ?>");
                                                 }
                                                 dataInvalid++;
                                                 $("#scanInvalid").html(dataInvalid);
@@ -413,7 +432,7 @@
 
                                             }
                                         }
-                                        audio.play();
+//                                        audio.play();
                                     }
 
                             ).catch(e => {
