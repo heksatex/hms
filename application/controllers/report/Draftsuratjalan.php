@@ -118,7 +118,7 @@ class Draftsuratjalan extends MY_Controller {
                     $rowStartData += $no;
                     $page = $nn * $perpage;
                     $satuan = $detailQty[0]->uom;
-                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom;
+                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom . (($value->no_bulk ?? ""));
                     $showNoUrut = "";
                     $showNet = "";
                     $showGross = "";
