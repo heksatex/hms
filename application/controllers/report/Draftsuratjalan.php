@@ -109,7 +109,8 @@ class Draftsuratjalan extends MY_Controller {
                 $no++;
                 $jml_qty += $value->jml_qty;
                 $total_qty += $value->total_qty;
-                $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
+                $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark,
+                    'uom' => $value->uom, 'no_pl' => $value->no_pl], "qty,uom", ["BULK"]);
                 $perpage = 10;
                 $totalData = count($detailQty);
                 $totalPage = ceil($totalData / $perpage);
@@ -118,22 +119,22 @@ class Draftsuratjalan extends MY_Controller {
                     $rowStartData += $no;
                     $page = $nn * $perpage;
                     $satuan = $detailQty[0]->uom;
-                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom . (($value->no_bulk ?? ""));
+                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom . ($value->no_bulk ?? "");
                     $showNoUrut = "";
                     $showNet = "";
                     $showGross = "";
-                    if ($tempBulk !== ($value->no_bulk ?? "")) {
+                    if ($tempBulk !== $value->no_bulk) {
                         $nourut++;
-                        $total_net += ($value->net_weight ?? 0);
-                        $total_groos += ($value->gross_weight ?? 0);
+                        $total_net += $value->net_weight;
+                        $total_groos += $value->gross_weight;
 
-                        $showGross = ($value->gross_weight ?? 0);
-                        $showNet = ($value->net_weight ?? 0);
+                        $showGross = $value->gross_weight;
+                        $showNet = $value->net_weight;
                         $showNoUrut = $nourut;
                     }
 
                     $sheet->setCellValue("A" . $rowStartData, ($pkl->type_bulk_id === "1") ? $showNoUrut : $no);
-                    $sheet->setCellValue('B' . $rowStartData, ($tempBulk === ($value->no_bulk ?? "")) ? '' : ($value->no_bulk ?? ""));
+                    $sheet->setCellValue('B' . $rowStartData, ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk);
                     $sheet->setCellValue("C" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
                     $sheet->setCellValue("D" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark));
                     $sheet->setCellValue("E" . $rowStartData, isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "");
@@ -154,7 +155,7 @@ class Draftsuratjalan extends MY_Controller {
                     $sheet->setCellValue('S' . $rowStartData, $showGross);
 
                     $id = $tempID;
-                    $tempBulk = ($value->no_bulk ?? "");
+                    $tempBulk = $value->no_bulk;
                 }
             }
 
