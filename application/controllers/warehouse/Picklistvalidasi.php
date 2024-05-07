@@ -30,6 +30,7 @@ class Picklistvalidasi extends MY_Controller {
     public function index() {
         $data['id_dept'] = 'PLV';
         $sub_menu = $this->uri->segment(2);
+
         $this->menu = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
         $data['access'] = $this->m_accessmenu->getDetail(['access_only' => getClientIP(), 'menu' => $this->menu['kode']]);
         $this->load->view('warehouse/v_picklist_validasi_add', $data);
@@ -59,6 +60,7 @@ class Picklistvalidasi extends MY_Controller {
             $username = $this->session->userdata('username');
             $nama = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
+
             $pl = "";
             $picklist = null;
             $barcode = $this->input->post('search');
@@ -98,7 +100,7 @@ class Picklistvalidasi extends MY_Controller {
                     throw new Exception("Tentukan dulu no picklist", 500);
                 }
 //                $this->_module->startTransaction();
-                $item = $this->m_PicklistDetail->detailData(['no_pl' => $pl, "barcode_id" => $barcode]);
+                $item = $this->m_PicklistDetail->detailData(['no_pl' => $pl, "barcode_id" => $barcode, 'valid !=' => 'cancel']);
 
                 if (is_null($item)) {
                     $errorCode = 11;

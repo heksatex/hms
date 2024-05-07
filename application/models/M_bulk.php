@@ -113,19 +113,26 @@ class M_bulk extends CI_Model {
         $this->_listBulkDetail($condition);
 //        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
         $q = $this->db->select('bulk.no_bulk,bulk.tanggal_input,total_qty,jumlah_qty')->get();
-
+        if ($_POST['length'] != -1)
+            $this->db->limit($_POST['length'], $_POST['start']);
         return $q->result();
     }
 
     public function getCountAllDataBulk($condition) {
-        $this->_listBulkDetail($condition);
+//        $this->_listBulkDetail($condition);
 //        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
+        $this->db->from($this->table);
+        $this->db->where($condition);
         return $this->db->count_all_results();
     }
 
     public function getCountDataFilteredBulk(array $condition = []) {
         $this->_listBulkDetail($condition);
-//        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');
+////        $this->db->join('picklist_detail pl', 'pl.barcode_id = bd.barcode', 'left');.
+//        $this->db->from($this->table);
+//        $this->db->where($condition);
+        if ($_POST['length'] != -1)
+            $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
         return $query->num_rows();
     }
@@ -153,7 +160,7 @@ class M_bulk extends CI_Model {
     protected $selectPicklist = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
     protected $column_orderPicklist = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', null, 'sales_nama', 'status', 'nama_user');
     protected $orderPicklist = ['tanggal_input' => 'desc'];
-    protected $column_searchPicklist = array('no', 'jenis_jual', 'msg.nama_sales_group','p.nama','jenis_jual');
+    protected $column_searchPicklist = array('no', 'jenis_jual', 'msg.nama_sales_group', 'p.nama', 'jenis_jual');
 
     protected function _bulkPicklist() {
         $this->db->select($this->selectPicklist . ', p.nama');
