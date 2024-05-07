@@ -384,7 +384,7 @@ class Bulk extends MY_Controller {
     public function show_net_gross() {
         try {
             $pl = $this->input->post("pl");
-            $data["data"] = $this->m_bulk->listBulkDetail(['no_pl' => $pl]);
+            $data["data"] = $this->m_bulk->listBulkDetail(['no_pl' => $pl], false);
             $data["pl"] = $pl;
             $view = $this->load->view('warehouse/v_bulk_net_gross', $data, true);
             $this->output->set_status_header(200)
