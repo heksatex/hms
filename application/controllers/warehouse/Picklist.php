@@ -86,7 +86,7 @@ class Picklist extends MY_Controller {
 //            $data["mms"] = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
             $data['id_dept'] = 'PL';
             $data["ids"] = $id;
-            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt], "DO");
+            $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $kode_decrypt], "DO", "count_detail");
             $data['bulk'] = $this->m_Picklist->getTypeBulk();
             $data['sales'] = $this->m_Picklist->getSales();
             $data['do'] = $this->m_deliveryorder->getDataDetail(['no_picklist' => $kode_decrypt]);
@@ -96,10 +96,24 @@ class Picklist extends MY_Controller {
         }
     }
 
+    public function get_total() {
+        try {
+            $no = $this->input->post("pl");
+            $data = $this->m_Picklist->getDataByID(['picklist.no' => $no], "", "count_detail");
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode($data));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode([[]]));
+        }
+    }
+
     public function data() {
         try {
             $data = array();
-            $list = $this->m_Picklist->getData();
+            $list = $this->m_Picklist->getData(false, [], ["count_detail"]);
             $no = $_POST['start'];
             foreach ($list as $field) {
                 $kode_encrypt = encrypt_url($field->no);
@@ -114,6 +128,8 @@ class Picklist extends MY_Controller {
                     $field->sales_nama,
                     $field->keterangan,
                     $field->status,
+                    $field->pcs_qty ?? 0,
+                    $field->tot_qty ?? 0,
                 );
                 $data[] = $row;
             }
@@ -365,6 +381,10 @@ class Picklist extends MY_Controller {
             $barcodeInput = [];
             foreach ($data as $key => $value) {
                 $check = $this->m_Pickliststockquant->checkItemAvailable(['stock_quant.quant_id' => $value]);
+
+                if (in_array($check->lot, $barcodeInput)) {
+                    throw new \Exception("ada Duplikat Barcode di Picklist", 500);
+                }
                 switch (true) {
                     case $check->reserve_move !== "":
                         throw new \Exception("Barcode " . $check->lot . " reserve move " . $check->reserve_move, 500);
@@ -379,6 +399,9 @@ class Picklist extends MY_Controller {
                         throw new \Exception("Barcode " . $check->lot . " QTY Jual 0.00", 500);
                         break;
                     case $check->valid != null :
+                        if ($check->no_pl === $pl) {
+                            throw new \Exception("Barcode " . $check->lot . " sudah ada dipicklist.", 500);
+                        }
                         throw new \Exception("Barcode " . $check->lot . " sudah ada dipicklist lain.", 500);
                         break;
                 }
@@ -447,14 +470,22 @@ class Picklist extends MY_Controller {
             }
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
-
-            $user = $this->m_user->get_user_by_username($username);
-            if (in_array($user->level, ["Entry Data", ""])) {
-                throw new \Exception('Akses tidak diijinkan', 500);
-            }
             $id = $this->input->post('id');
             $pl = $this->input->post('pl');
             $status = $this->input->post('status');
+            $user = $this->m_user->get_user_by_username($username);
+            if (in_array($user->level, ["Entry Data", ""])) {
+                $conditions = ["lot" => $id];
+                $list = $this->m_Pickliststockquant->getDataItemPicklistScan(array_merge($conditions, ['id_category' => 21]), false, []);
+                if (count($list) < 1) {
+                    throw new \Exception('Data Tidak ditemukan', 500);
+                }
+                if ($list->lokasi_fisik === "XPD") {
+                    throw new \Exception('Akses tidak diijinkan, Silahkan Hubungi supervisor', 500);
+                }
+//                throw new \Exception('Akses tidak diijinkan', 500);
+            }
+
             $this->_module->startTransaction();
             $this->m_PicklistDetail->updateStatus(['barcode_id' => $id, 'valid !=' => "cancel"], ['valid' => "cancel"]);
             if (strtolower($status) === 'validasi') {
@@ -507,7 +538,8 @@ class Picklist extends MY_Controller {
                 'sales_kode' => $this->input->post('sales'),
                 'jenis_jual' => $this->input->post('jenis_jual'),
                 'customer_id' => $this->input->post('customer'),
-                'keterangan' => $this->input->post('ket')
+                'keterangan' => $this->input->post('ket'),
+                'sc' => $this->input->post('sc')
             );
 
             $this->m_Picklist->update($input, ['no' => $kode_decrypt]);
@@ -552,7 +584,8 @@ class Picklist extends MY_Controller {
                 'keterangan' => $this->input->post('ket'),
                 'tanggal_input' => date('Y-m-d H:i:s'),
                 'nama_user' => $this->session->userdata('nama')['nama'] ?? "",
-                'status' => 'draft'
+                'status' => 'draft',
+                'sc' => $this->input->post('sc')
             );
             $id = $this->m_Picklist->save($input);
             if (!$this->_module->finishTransaction()) {
@@ -608,7 +641,10 @@ class Picklist extends MY_Controller {
                 }
                 $noStatus[] = $value->quant_id;
             }
-            $this->m_PicklistDetail->updateStatusWin(['valid !=' => 'cancel'], ['valid ' => 'cancel'], ['quant_id' => array_merge($withStatus, $noStatus)]);
+            if (count($noStatus) > 0) {
+                $this->m_PicklistDetail->updateStatusWin(['valid !=' => 'cancel'], ['valid ' => 'cancel'], ['quant_id' => array_merge($withStatus, $noStatus)]);
+            }
+
             if (!empty($withStatus)) {
                 $this->m_Pickliststockquant->updateWin(["lokasi_fisik" => "PORT"], ["lot !=" => ''], ['quant_id' => $withStatus]);
             }
@@ -741,7 +777,7 @@ class Picklist extends MY_Controller {
         }
     }
 
-    public function lokasi_fisik() {    
+    public function lokasi_fisik() {
         try {
             $no = $this->input->get('no');
             $data = $this->m_PicklistDetail->reportLokasiFisikRak(['no_pl' => $no, 'valid !=' => 'cancel']);

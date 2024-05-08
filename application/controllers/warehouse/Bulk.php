@@ -190,32 +190,68 @@ class Bulk extends MY_Controller {
             $users = $this->session->userdata('nama');
             $sub_menu = $this->uri->segment(2);
             $total = $this->input->post('total') ?? 1;
+            $no_bulk = "";
+            $blk = $this->m_bulk->getDataDetail(['no_pl' => $this->input->post('pl')]);
             $this->_module->startTransaction();
-            for ($i = 0; $i < $total; $i++) {
-                $data = array(
-                    'no_pl' => $this->input->post('pl'),
-                    'tanggal_input' => date('Y-m-d H:i:s'),
-                    'user' => ($users["nama"] ?? $username)
-                );
-                if (!$no_bulk = $this->token->noUrut('bulk', date('ym'), true)->generate('BL', '%03d')->get()) {
+            $check_bulk_count = 1;
+            if (!empty($blk)) {
+                if (strlen($blk->no_bulk) === 9) {
+                    if (!$no_bulk = $this->token->noUrut('bulk', date('ym'), true)->generate('BL', '%01d')->prefixAdd("")->get()) {
+                        throw new \Exception("No Bulk tidak terbuat", 500);
+                    }
+                } else {
+                    $chk = substr($blk->no_bulk, 0, 2);
+                    if ($chk === "BL") {
+                        $nourut = substr($blk->no_bulk, -3);
+                        switch (strlen($blk->no_bulk)) {
+                            case 8:
+                                $no_bulk = substr($blk->no_bulk, 0, 5);
+                                break;
+                            case 7:
+                                $no_bulk = substr($blk->no_bulk, 0, 4);
+                                break;
+                            case 6:
+                                $no_bulk = substr($blk->no_bulk, 0, 3);
+                                break;
+                            default :
+                                $no_bulk = substr($blk->no_bulk, 0, 2);
+                        }
+
+                        $check_bulk_count += (int) ($nourut);
+                    } else {
+                        if (!$no_bulk = $this->token->noUrut('bulk', date('ym'), true)->generate('BL', '%01d')->prefixAdd("")->get()) {
+                            throw new \Exception("No Bulk tidak terbuat", 500);
+                        }
+                    }
+                }
+            } else {
+                if (!$no_bulk = $this->token->noUrut('bulk', date('ym'), true)->generate('BL', '%01d')->prefixAdd("")->get()) {
                     throw new \Exception("No Bulk tidak terbuat", 500);
                 }
-                $data['no_bulk'] = $no_bulk;
-                $insert = $this->m_bulk->save($data);
-                if (!empty($insert)) {
-                    throw new Exception("Gagal Membuat BAL ", 500);
-                }
+            }
+            $data = [];
+            for ($i = 0; $i < $total; $i++) {
+                $data[] = [
+                    'no_pl' => $this->input->post('pl'),
+                    'tanggal_input' => date('Y-m-d H:i:s'),
+                    'user' => ($users["nama"] ?? $username),
+                    'no_bulk' => sprintf($no_bulk . '%03d', ($check_bulk_count + $i))
+                ];
+            }
+            $insert = $this->m_bulk->saveBatch($data);
+            if (!empty($insert)) {
+                throw new Exception("Gagal Membuat BAL ", 500);
             }
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $data['no_bulk'], 'create', ($users["nama"] ?? $username) . ' Menambahkan bal / Bulk.', $username);
+            $this->_module->gen_history($sub_menu, $this->input->post('pl'), 'create', ($users["nama"] ?? $username) . ' Menambahkan bal / Bulk.', $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Bal / Bulk berhasil ditambahkan', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
-            $this->_module->finishTransaction();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -348,7 +384,7 @@ class Bulk extends MY_Controller {
     public function show_net_gross() {
         try {
             $pl = $this->input->post("pl");
-            $data["data"] = $this->m_bulk->listBulkDetail(['no_pl' => $pl]);
+            $data["data"] = $this->m_bulk->listBulkDetail(['no_pl' => $pl], false);
             $data["pl"] = $pl;
             $view = $this->load->view('warehouse/v_bulk_net_gross', $data, true);
             $this->output->set_status_header(200)
@@ -417,7 +453,7 @@ class Bulk extends MY_Controller {
                 $data['data'] = $this->m_bulkdetail->getDataListBulk($condition);
                 $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
             } else {
-                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['no_bulk' => $bulk]));
+                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['no_bulk' => $bulk]), true);
                 $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
             }
 
@@ -426,4 +462,89 @@ class Bulk extends MY_Controller {
             
         }
     }
+
+    //    public function save_add_bulk_() {
+//        try {
+//            $username = $this->session->userdata('username');
+//            $users = $this->session->userdata('nama');
+//            $sub_menu = $this->uri->segment(2);
+//            $total = $this->input->post('total') ?? 1;
+//            $this->_module->startTransaction();
+////            for ($i = 0; $i < $total; $i++) {
+////                $data = array(
+////                    'no_pl' => $this->input->post('pl'),
+////                    'tanggal_input' => date('Y-m-d H:i:s'),
+////                    'user' => ($users["nama"] ?? $username)
+////                );
+////                if (!$no_bulk = $this->token->noUrut('bulk', date('ym'), true)->generate('BL', '%03d')->get()) {
+////                    throw new \Exception("No Bulk tidak terbuat", 500);
+////                }
+////                $data['no_bulk'] = $no_bulk;
+////                $insert = $this->m_bulk->save($data);
+////                if (!empty($insert)) {
+////                    throw new Exception("Gagal Membuat BAL ", 500);
+////                }
+////            }
+//            //new generate
+//
+//            $check_bulk_count = 1;
+//            $blk = $this->m_bulk->getDataDetail(['no_pl' => $this->input->post('pl')]);
+////            $check_bulk_count = $this->m_bulk->getCountAllData(['no_pl' => $this->input->post('pl')]);
+//            $format = "";
+//            if (!empty($blk)) {
+//                $chk = substr($blk->no_bulk, 0, 2);
+//                if ($chk === "BL") {
+//                    
+//                } else {
+//                    $nourut = substr($blk->no_bulk, -3);
+//                    switch (strlen($chk)) {
+//                        case 7:
+//                            $format = substr($blk->no_bulk, 0, 4);
+//                            break;
+//                        case 6:
+//                            $format = substr($blk->no_bulk, 0, 3);
+//                            break;
+//                        case 5:
+//                            $format = substr($blk->no_bulk, 0, 2);
+//                            break;
+//                        default :
+//                            $format = substr($blk->no_bulk, 0, 1);
+//                    }
+//                }
+////                $dtExbulk = str_split($blk->no_bulk, 9);
+////                $no_bulk = $dtExbulk[0];
+////                $check_bulk_count += (int) ($dtExbulk[1] ?? 0);
+//            } else {
+//                if (!$no_bulk = $this->token->noUrut('bulk', date('ym'), true)->generate('BL', '%01d')->get()) {
+//                    throw new \Exception("No Bulk tidak terbuat", 500);
+//                }
+//            }
+//            $data = [];
+//            for ($i = 0; $i < $total; $i++) {
+//                $data[] = [
+//                    'no_pl' => $this->input->post('pl'),
+//                    'tanggal_input' => date('Y-m-d H:i:s'),
+//                    'user' => ($users["nama"] ?? $username),
+//                    'no_bulk' => sprintf($no_bulk . '%03d', ($check_bulk_count + $i))
+//                ];
+//            }
+//            $insert = $this->m_bulk->saveBatch($data);
+//            if (!empty($insert)) {
+//                throw new Exception("Gagal Membuat BAL ", 500);
+//            }
+//
+//            if (!$this->_module->finishTransaction()) {
+//                throw new \Exception('Gagal Menyimpan Data', 500);
+//            }
+//            $this->_module->gen_history($sub_menu, $this->input->post('pl'), 'create', ($users["nama"] ?? $username) . ' Menambahkan bal / Bulk.', $username);
+//            $this->output->set_status_header(200)
+//                    ->set_content_type('application/json', 'utf-8')
+//                    ->set_output(json_encode(array('message' => 'Bal / Bulk berhasil ditambahkan', 'icon' => 'fa fa-check', 'type' => 'success')));
+//        } catch (Exception $ex) {
+//            $this->_module->rollbackTransaction();
+//            $this->output->set_status_header($ex->getCode() ?? 500)
+//                    ->set_content_type('application/json', 'utf-8')
+//                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+//        }
+//    }
 }

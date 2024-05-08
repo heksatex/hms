@@ -48,13 +48,18 @@ class M_bulkdetail extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function getDataListBulk(array $condition) {
+    public function getDataListBulk(array $condition, $item = false) {
         $this->db->from($this->table . ' bd');
         $this->db->where($condition);
         $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk', 'right');
         $this->db->join('picklist_detail pl', '(pl.barcode_id = bd.barcode and pl.valid != "cancel")');
         $this->db->group_by('pl.warna_remark, pl.corak_remark,pl.uom,b.no_bulk');
-        $this->db->order_by("no_bulk asc,pl.corak_remark asc");
+//        if (!$item) {
+        $this->db->order_by("no_bulk asc,pl.corak_remark asc,pl.warna_remark asc,pl.uom asc");
+//        } else {
+//            $this->db->order_by("bd.tanggal_input desc,no_bulk asc,pl.corak_remark asc,pl.warna_remark asc");
+//        }
+
         $query = $this->db->select('b.no_bulk,pl.corak_remark,pl.warna_remark,sum(qty) as total_qty,count(qty) as jumlah_qty')->get();
         return $query->result();
     }

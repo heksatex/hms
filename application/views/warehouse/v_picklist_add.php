@@ -97,6 +97,12 @@
                                             </div>                                    
                                         </div>
                                         <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4"><label class="form-label" >SC</label></div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <textarea type="text" class="form-control input-sm resize-ta" id="sc" name="sc"></textarea>
+                                            </div>                                    
+                                        </div>
+                                        <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label class="form-label required">Customer</label></div>
                                             <div class="col-xs-8 col-md-8">
                                                 <select class="form-control input-sm" name="customer" id="customer" required>

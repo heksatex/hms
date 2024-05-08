@@ -52,7 +52,7 @@
             </td>
         </tr>
         <tr class="head">
-            
+
         </tr>
         <tr>
             <th>No Urut</th>
@@ -92,7 +92,8 @@
             $no++;
             $jml_qty += $value->jml_qty;
             $total_qty += $value->total_qty;
-            $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
+            $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', "bd.bulk_no_bulk" => $value->no_bulk, 'corak_remark' => $value->corak_remark,
+                'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl], "qty,uom", ["BULK"]);
             $perpage = 10;
             $totalData = count($detailQty);
             $totalPage = ceil($totalData / $perpage);
@@ -100,7 +101,7 @@
             for ($nn = 0; $nn < $totalPage; $nn++) {
                 $page = $nn * $perpage;
                 $satuan = $detailQty[0]->uom;
-                $tempID = $value->warna_remark . $value->corak_remark . $value->uom;
+                $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->no_bulk;
                 $showNoUrut = "";
                 $showNet = "";
                 $showGross = "";

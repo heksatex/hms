@@ -90,7 +90,7 @@ class Deliveryorder extends MY_Controller {
 //                            'dod.do_id' => $data["do"]->id
 //                        ]
 //                );
-                $recordsTotal = $this->m_deliveryorderdetail->countDetail(['dod.do_id' => $data["do"]->id]);
+                $recordsTotal = $this->m_deliveryorderdetail->countDetail(['dod.do_id' => $data["do"]->id, 'pd.valid' => 'done']);
             }
             $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist], '', 'delivery');
 
@@ -429,17 +429,21 @@ class Deliveryorder extends MY_Controller {
             $insertStokMvItem = [];
             $insertStokMvProd = [];
             $updateStokQuant = [];
-
+            $check_barcode = [];
             foreach ($item as $key => $value) {
                 $check = $this->checkLokasi(['stock_quant.quant_id' => $value->quant_id]);
                 if (!empty($check)) {
                     throw new \Exception($check, 500);
+                }
+                if (in_array($value->quant_id, $check_barcode)) {
+                    throw new \Exception("ada Duplikat Barcode di Picklist", 500);
                 }
                 $insertDetail[] = ['do_id' => $data_do->id, 'barcode_id' => $value->barcode_id, 'status' => 'done'];
                 $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','" . $value->lebar_greige . "','" . $value->uom_lebar_greige . "','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
                 $updateStokQuant [] = ["move_date" => date('Y-m-d H:i:s'), "lokasi_fisik" => "", "lokasi" => "CST/Stock", 'quant_id' => $value->quant_id];
+                $check_barcode[] = $value->quant_id;
                 if (isset($smproduk[$value->kode_produk])) {
                     $smproduk[$value->kode_produk]["qty"] += $value->qty;
                 } else {
@@ -569,7 +573,7 @@ class Deliveryorder extends MY_Controller {
             $nosm = "SM" . $this->_module->get_kode_stock_move();
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
-            $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $data->id, 'a.status' => 'done'], ['PD', 'SQ']);
+            $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $data->id, 'a.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ']);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
             $smproduk = [];
             $updateIn = [
@@ -673,6 +677,8 @@ class Deliveryorder extends MY_Controller {
                     '<a href="' . base_url('warehouse/deliveryorder/edit/' . $kode_encrypt) . '">' . $field->no . '</a>',
                     $field->no_sj,
                     $field->no_picklist,
+                    $field->bulk,
+                    $field->tanggal_dokumen,
                     $field->buyer,
                     $field->status,
                 );
@@ -1020,7 +1026,7 @@ class Deliveryorder extends MY_Controller {
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $do . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
 
-            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'done'], ['PD', 'SQ'], ['a.barcode_id' => $barcode]);
+            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ'], ['a.barcode_id' => $barcode]);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
             $smproduk = [];
             $updateIn = [

@@ -93,16 +93,24 @@ class Draftsuratjalan extends MY_Controller {
             $total_net = 0;
             $total_groos = 0;
             $tempBulk = null;
+            if ($pkl->type_bulk_id === "1") {
+                $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom'], ["BULK"]
+                );
+            } else {
+                $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ['warna_remark', 'corak_remark', 'uom'], []
+                );
+            }
 
-            $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
-                    ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                    $nopl, ['warna_remark', 'corak_remark', 'uom'], ["BULK"]
-            );
             foreach ($picklist_detail as $key => $value) {
                 $no++;
                 $jml_qty += $value->jml_qty;
                 $total_qty += $value->total_qty;
-                $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
+                $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', "bd.bulk_no_bulk" => $value->no_bulk, 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark,
+                    'uom' => $value->uom, 'no_pl' => $value->no_pl], "qty,uom", ["BULK"]);
                 $perpage = 10;
                 $totalData = count($detailQty);
                 $totalPage = ceil($totalData / $perpage);
@@ -111,7 +119,7 @@ class Draftsuratjalan extends MY_Controller {
                     $rowStartData += $no;
                     $page = $nn * $perpage;
                     $satuan = $detailQty[0]->uom;
-                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom;
+                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->no_bulk;
                     $showNoUrut = "";
                     $showNet = "";
                     $showGross = "";
@@ -198,10 +206,18 @@ class Draftsuratjalan extends MY_Controller {
             $data['picklist'] = $pkl;
 
             $datas['picklist'] = $pkl;
-            $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
-                    ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                    $nopl, ['warna_remark', 'corak_remark', 'uom'], ["BULK"]
-            );
+            if ($pkl->type_bulk_id === "1") {
+                $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom'], ["BULK"]
+                );
+            } else {
+                $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
+                        ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
+                        $nopl, ['warna_remark', 'corak_remark', 'uom'], []
+                );
+            }
+
             $data['detail'] = $this->load->view('report/v_draft_surat_jalan_detail', $datas, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

@@ -18,6 +18,9 @@
                 font-weight: 400;
                 font-size: 200%;
             }
+            #btn-validasi{
+                display: none;
+            }
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
@@ -59,10 +62,16 @@
                                                         <label class="form-label required">Scan Barcode / No PL</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
-                                                        <input type='text' name="search" id="search" class="form-control input-lg scan-text" required autocomplete="off"/>
-                                                        <label class="text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
-                                                        <input type='hidden' name="pl" id="pl" value=""/>
-                                                        <input type="hidden" name="access" value="<?= $access->permission ?>">
+                                                        <?php
+                                                        if ($akses_menu === 1) {
+                                                            ?>
+                                                            <input type = 'text' name = "search" id = "search" class = "form-control input-lg scan-text" required autocomplete = "off"/>
+                                                            <label class = "text-sm text-info">Tekan F2 Untuk Kembali ke Scan</label>
+                                                            <input type = 'hidden' name = "pl" id = "pl" value = ""/>
+                                                            <input type = "hidden" name = "access" value = "<?= $access->permission ?>">
+                                                            <?php
+                                                        }
+                                                        ?>
                                                     </div>
                                                 </div>
                                             </div>
@@ -171,16 +180,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-<!--                                            <div class="form-group">
-                                                <div class="col-md-12 col-xs-12">
-                                                    <select class="form-control" aria-label="Default select example">
-                                                        <option value="all" selected>Filter Status Barcode</option>
-                                                        <option value="1">One</option>
-                                                        <option value="2">Two</option>
-                                                        <option value="3">Three</option>
-                                                    </select>
-                                                </div>
-                                            </div>-->
+                                            <!--                                            <div class="form-group">
+                                                                                            <div class="col-md-12 col-xs-12">
+                                                                                                <select class="form-control" aria-label="Default select example">
+                                                                                                    <option value="all" selected>Filter Status Barcode</option>
+                                                                                                    <option value="1">One</option>
+                                                                                                    <option value="2">Two</option>
+                                                                                                    <option value="3">Three</option>
+                                                                                                </select>
+                                                                                            </div>
+                                                                                        </div>-->
                                         </div>
                                         <div class="col-md-6 col-xs-12 table-responsive over">
                                             <div class="table-responsive over" style="max-height:200px;"  id="show_error">
@@ -278,9 +287,13 @@
                     });
                 }
                 $("#search").focus();
-                $("#btn-validasi").hide();
-                var audio = new Audio("<?= base_url('dist/error.wav') ?>");
-                audio.volume = 1.0;
+//                $("#btn-validasi").hide();
+                const playAudio = ((url) => {
+                    var audio = new Audio(url);
+                    audio.volume = 1;
+                    audio.play();
+                });
+
                 const table = $("#item_realisai").DataTable({
                     "iDisplayLength": 10,
                     "aLengthMenu": [[10, 50, 100, 1000], [10, 50, 100, 1000]],
@@ -329,6 +342,7 @@
                 var dataValid = 0;
                 var dataInvalid = 0;
                 var urutTable = 0;
+                var totalLot = 0;
                 const formvalidasi = document.forms.namedItem("form-validasi");
                 const addDataTable = function (data) {
                     urutTable++;
@@ -362,10 +376,13 @@
                                         if (response.status === 200) {
 //                                                table.search($('#search').val()).draw();
 //                                                setDataChart();
+
+                                            playAudio("<?= base_url('dist/beep.MP3') ?>");
                                             if (response?.data?.picklist !== null) {
                                                 dataPicklist = response.data.picklist;
                                                 $("#pl").val(dataPicklist.no);
                                                 dataValid = dataPicklist.total_validasi;
+                                                totalLot = dataPicklist.total_lot;
                                                 dataInvalid = 0;
                                                 table.clear().draw();
                                                 $("#no_pl").html(dataPicklist.no);
@@ -387,6 +404,7 @@
                                                 var item = response?.data?.item;
                                                 addDataTable(item);
                                                 $("#scanValid").html(dataValid);
+                                                $("#invalid").html(totalLot - dataValid);
                                             }
                                             return;
                                         }
@@ -398,11 +416,15 @@
                                                         barcode: response?.data?.barcode,
                                                         message: response?.data?.message
                                                     });
+                                                    playAudio("<?= base_url('dist/beep.MP3') ?>");
                                                 } else if (response?.data?.error_code === 12) {
                                                     error_barcode.push({
                                                         barcode: response?.data?.barcode,
                                                         message: ""
                                                     });
+                                                    playAudio("<?= base_url('dist/error.wav') ?>");
+                                                } else {
+                                                    playAudio("<?= base_url('dist/error.wav') ?>");
                                                 }
                                                 dataInvalid++;
                                                 $("#scanInvalid").html(dataInvalid);
@@ -410,7 +432,7 @@
 
                                             }
                                         }
-                                        audio.play();
+//                                        audio.play();
                                     }
 
                             ).catch(e => {
@@ -432,6 +454,7 @@
                         $("#search").focus();
                     }
                     event.preventDefault();
+                    event.stopImmediatePropagation();
                 },
                         false
                         );

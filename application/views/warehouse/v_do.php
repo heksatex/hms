@@ -26,9 +26,11 @@
                                     <thead>                          
                                         <tr>
                                             <th class="style" width="10px">No</th>
-                                            <th class="style">No Delivery Order</th>
+                                            <th class="style">No DO</th>
                                             <th class="style">Surat Jalan</th>
                                             <th class="style">Picklist</th>
+                                            <th class="style">Tipe</th>
+                                            <th class="style">Tanggal Kirim</th>
                                             <th class="style">Buyer</th>
                                             <th class="style">Status</th>
                                         </tr>
@@ -55,12 +57,12 @@
             $(function () {
 
                 const dataTable = $("#delivery").DataTable({
-                    "iDisplayLength": 10,
+                    "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
                     "order": [],
                     "paging": true,
-                    "lengthChange": false,
+                    "lengthChange": true,
                     "searching": true,
                     "ordering": true,
                     "info": true,
@@ -70,7 +72,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0,4,5],
+                            "targets": [0, 6],
                             "orderable": false
                         }
                     ]
@@ -92,7 +94,7 @@
                     }, function (data) {
                         setTimeout(function () {
                             $(".tambah_data").html(data.data);
-                            
+
                         }, 1000);
                         $(".modal-footer #btn-tambah").hide();
                     });
