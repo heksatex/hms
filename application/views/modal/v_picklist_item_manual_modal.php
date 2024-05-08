@@ -221,7 +221,7 @@
 //            dTable.search($(this).val()).draw();
 //        });
         $('input', dTable.cells().nodes()).prop('checked', false);
-        $("#btn-tambah").off("click").unbind("click").on('click', function () {
+        $("#btn-tambah").unbind("click").off("click").on('click', function () {
             $("#btn-tambah").button("loading");
             var rows_selected = dTable.column(0).checkboxes.selected();
             const data = new Promise((resolve, reject) => {
@@ -249,7 +249,7 @@
             });
         });
 
-        $("#picklist-item-manual").on('click', 'button', function () {
+        $("#picklist-item-manual").unbind("click").off("click").on('click', 'button', function () {
 
             var row = $(this).closest('tr');
             var data = dTable.row(row).data();

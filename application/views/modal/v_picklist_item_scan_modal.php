@@ -153,7 +153,7 @@
                 false
                 );
 
-        $("#btn-tambah").off('click').unbind("click").on('click', function () {
+        $("#btn-tambah").unbind("click").off('click').on('click', function () {
             $("#btn-tambah").button("loading");
             const data = new Promise((resolve, reject) => {
                 let dt = [];
