@@ -60,6 +60,10 @@
       overflow-x: auto;
     }
 
+   .nowrap{
+      white-space: nowrap;
+    }
+
     /*over show tampilan dekstop*/
     @media screen and (min-width: 768px) {
       .over {
@@ -286,28 +290,34 @@
                   <thead>
                     <tr>
                       <th  class="style bb no">No. </th>
-                      <th  class='style bb'  width='80px'><!--a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)"-->Kode Produk</a></th>
-                      <th  class='style bb'  width='300px'><!--a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)"-->Nama Produk</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Dibuat</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Diterima</a></th>
-                      <th  class='style bb'  width='200px'><!--a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)"-->Lot</a></th>
-                      <th  class='style bb'  width='50px'><!--a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"-->Grade</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)"-->Qty</a></th>
-                      <th  class='style bb'  width='50px'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
-                      <th  class='style bb'  width='50px'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)"-->Qty Opname</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="lebar_greige data-order="desc" href="javascript:void(0)"-->Lbr.Greige</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)"-->Lbr.Jadi</a></th>
-                      <th  class='style bb'  width='200px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi</a></th>
-                      <th  class='style bb'  width='100px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi Fisik</a></th>
-                      <th  class='style bb'  width='200px'><!--a class="column_sort" id="reff_note" data-order="desc" href="javascript:void(0)"-->Reff Note</a></th>
-                      <th  class='style bb'  width='80px'><!--a class="column_sort" id="reserve_move" data-order="desc" href="javascript:void(0)"-->Reserve Move</a></th>
+                      <th  class='style bb nowrap'  width='80px'><!--a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)"-->Kode Produk</a></th>
+                      <th  class='style bb nowrap'  width='300px'><!--a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)"-->Nama Produk</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Dibuat</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)"-->Tanggal  Diterima</a></th>
+                      <th  class='style bb nowrap'  width='200px'><!--a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)"-->Lot</a></th>
+                      <th  class='style bb nowrap'  width='200px'><!--a class="column_sort" id="corak_remark" data-order="desc" href="javascript:void(0)"-->Corak Remark</a></th>
+                      <th  class='style bb nowrap'  width='200px'><!--a class="column_sort" id="warna_remark" data-order="desc" href="javascript:void(0)"-->Warna Remark</a></th>
+                      <th  class='style bb nowrap'  width='50px'><!--a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"-->Grade</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)"-->Qty</a></th>
+                      <th  class='style bb nowrap'  width='50px'><!--a class="column_sort" id="uom" data-order="desc" href="javascript:void(0)"-->Uom</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)"-->Qty2</a></th>
+                      <th  class='style bb nowrap'  width='50px'><!--a class="column_sort" id="uom2" data-order="desc" href="javascript:void(0)"-->Uom2</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="qty_jual" data-order="desc" href="javascript:void(0)"-->Qty Jual</a></th>
+                      <th  class='style bb nowrap'  width='50px'><!--a class="column_sort" id="uom_jual" data-order="desc" href="javascript:void(0)"-->Uom Jual</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="qty2_jual" data-order="desc" href="javascript:void(0)"-->Qty2 Jual</a></th>
+                      <th  class='style bb nowrap'  width='50px'><!--a class="column_sort" id="uom2_jual" data-order="desc" href="javascript:void(0)"-->Uom2 Jual</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)"-->Qty Opname</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="lebar_greige data-order="desc" href="javascript:void(0)"-->Lbr.Greige</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)"-->Lbr.Jadi</a></th>
+                      <th  class='style bb nowrap'  width='200px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi</a></th>
+                      <th  class='style bb nowrap'  width='100px'><!--a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)"-->Lokasi Fisik</a></th>
+                      <th  class='style bb nowrap'  width='200px'><!--a class="column_sort" id="reff_note" data-order="desc" href="javascript:void(0)"-->Reff Note</a></th>
+                      <th  class='style bb nowrap'  width='80px'><!--a class="column_sort" id="reserve_move" data-order="desc" href="javascript:void(0)"-->Reserve Move</a></th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td colspan="18" align="center">Tidak ada Data</td>
+                      <td colspan="18" align="left">Tidak ada Data</td>
                     </tr>
                   </tbody>
                 </table>
@@ -560,11 +570,17 @@
                           $("<td>").text(value.create_date),
                           $("<td>").text(value.move_date),
                           $("<td class='min-width-130'>").text(value.lot),
+                          $("<td>").text(value.corak_remark),
+                          $("<td>").text(value.warna_remark),
                           $("<td>").text(value.grade),
                           $("<td align='right'>").text(value.qty),
                           $("<td>").text(value.uom),
                           $("<td align='right'>").text(value.qty2),
                           $("<td>").text(value.uom2),
+                          $("<td align='right'>").text(value.qty_jual),
+                          $("<td>").text(value.uom_jual),
+                          $("<td align='right'>").text(value.qty2_jual),
+                          $("<td>").text(value.uom2_jual),
                           $("<td align='right'>").text(value.qty_opname),
                           $("<td align='right'>").text(value.lebar_greige),
                           $("<td align='right'>").text(value.lebar_jadi),
@@ -583,7 +599,7 @@
                     $('#btn-filter').button('reset');
 
                     if(empty == true && arr_grouping.length == 0){
-                      var tr = $("<tr>").append($("<td colspan='18' align='center'>").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='18' align='left'>").text('Tidak ada Data'));
                       tbody.append(tr);
                       $("#example1").append(tbody);
                     }
@@ -776,7 +792,7 @@
           unblockUI( function() {});
 
           if(data.record == ''){
-            var tr = $("<tr>").append($("<td colspan='18' align='center'>").text('Tidak ada Data'));
+            var tr = $("<tr>").append($("<td colspan='18' align='left'>").text('Tidak ada Data'));
             tbody.append(tr);
             $("#example1").append(tbody);
           }
@@ -836,11 +852,17 @@
                       $("<td>").text(value.create_date),
                       $("<td>").text(value.move_date),
                       $("<td class='min-width-130'>").text(value.lot),
+                      $("<td>").text(value.corak_remark),
+                      $("<td>").text(value.warna_remark),
                       $("<td>").text(value.grade),
                       $("<td  align='right'>").text(value.qty),
                       $("<td>").text(value.uom),
                       $("<td  align='right'>").text(value.qty2),
                       $("<td>").text(value.uom2),
+                      $("<td align='right'>").text(value.qty_jual),
+                      $("<td>").text(value.uom_jual),
+                      $("<td align='right'>").text(value.qty2_jual),
+                      $("<td>").text(value.uom2_jual),
                       $("<td align='right'>").text(value.qty_opname),
                       $("<td  align='right'>").text(value.lebar_greige),
                       $("<td  align='right'>").text(value.lebar_jadi),
@@ -852,7 +874,7 @@
               tbody.append(tr);
           });
           if(empty){
-            var tr = $("<tr>").append($("<td colspan='18' align='center'>").text('Tidak ada Data'));
+            var tr = $("<tr>").append($("<td colspan='18' align='left'>").text('Tidak ada Data'));
             tbody.append(tr);
           }
          $("#example1_processing").css('display','none');// hidden loading processing in table
@@ -1133,10 +1155,16 @@
                           row += "<td>"+value.move_date+"</td>";
                           row += "<td class='min-width-130'>"+value.lot+"</td>";
                           row += "<td>"+value.nama_grade+"</td>";
+                          row += "<td>"+value.corak_remark+"</td>";
+                          row += "<td>"+value.warna_remark+"</td>";
                           row += "<td align='right'>"+value.qty+"</td>";
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td align='right'>"+value.qty_jual+"</td>";
+                          row += "<td>"+value.uom_jual+"</td>";
+                          row += "<td align='right'>"+value.qty2_jual+"</td>";
+                          row += "<td>"+value.uom2_jual+"</td>";
                           row += "<td align='right'>"+value.qty_opname+"</td>";
                           row += "<td align='right'>"+value.lebar_greige+"</td>";
                           row += "<td align='right'>"+value.lebar_jadi+"</td>";
@@ -1255,11 +1283,17 @@
                           row += "<td>"+value.create_date+"</td>";
                           row += "<td>"+value.move_date+"</td>";
                           row += "<td class='min-width-130'>"+value.lot+"</td>";
+                          row += "<td>"+value.corak_remark+"</td>";
+                          row += "<td>"+value.warna_remark+"</td>";
                           row += "<td>"+value.nama_grade+"</td>";
                           row += "<td align='right' >"+value.qty+"</td>";
                           row += "<td>"+value.uom+"</td>";
                           row += "<td align='right'>"+value.qty2+"</td>";
                           row += "<td>"+value.uom2+"</td>";
+                          row += "<td align='right'>"+value.qty_jual+"</td>";
+                          row += "<td>"+value.uom_jual+"</td>";
+                          row += "<td align='right'>"+value.qty2_jual+"</td>";
+                          row += "<td>"+value.uom2_jual+"</td>";
                           row += "<td>"+value.qty_opname+"</td>";
                           row += "<td>"+value.lebar_greige+"</td>";
                           row += "<td>"+value.lebar_jadi+"</td>";
