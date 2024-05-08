@@ -653,6 +653,8 @@ class Inlet extends MY_Controller
                     throw new \Exception('Data Lot'.$lot.' tidak ditemukan di Stock !', 200);
                 }else if($get->lokasi != 'GJD/Stock'){
                     throw new \Exception('Lokasi tidak valid, Data Lot'.$lot.' berada dilokasi '.$get->lokasi ?? '' .' !', 200);
+                }else if($get->lokasi_fisik == 'XPD'){
+                    throw new \Exception('Lokasi Fisik sudah <b> XPD </b> !', 200);
                 }else{
                     if($get->nama_grade == 'F'){
                         $callback = array('status' => 'failed', 'message' => 'Grade F tidak bisa Edit HPH !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
@@ -675,7 +677,7 @@ class Inlet extends MY_Controller
                         // cek apakah barcode masuk PL
                         $cek_pl = $this->m_inlet->cek_barcode_in_picklist($quant_id,$lot)->row();
                         if(!empty($cek_pl)){
-                            throw new \Exception('Tidak Bisi disimpan, Data Lot '.$lot.' Sudah Masuk PL !', 200);
+                            throw new \Exception('Data Lot '.$lot.' Sudah Masuk PL !', 200);
                         }
                         $kode_mrp           = $inlet->kode_mrp;
                         $kode_produk_fg     = $get->kode_produk;
