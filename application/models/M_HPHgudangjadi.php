@@ -99,7 +99,7 @@ class M_HPHgudangjadi extends CI_Model
                                                     mm.nama_user
                                     FROM mrp_manual mm
                                     INNER JOIN mrp_manual_batch mb ON mm.kode = mb.kode
-                                    INNER JOIN mrp_manual_batch_items mbi ON mb.kode =mbi.kode
+                                    INNER JOIN mrp_manual_batch_items mbi ON mb.kode =mbi.kode AND mb.no_batch = mbi.no_batch
                                     LEFT JOIN mst_quality mq ON mb.id_quality = mq.id
                                     LEFT JOIN mst_sales_group msg ON mm.sales_group = msg.kode_sales_group                              
                                     $where 

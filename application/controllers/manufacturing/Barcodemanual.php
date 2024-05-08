@@ -17,6 +17,7 @@ class Barcodemanual extends MY_Controller
         $this->load->library('prints');
         $this->load->library('barcode');
         $this->load->model('m_accessmenu');
+        $this->load->model('m_outlet');
 	}
 
     public function index()
@@ -88,6 +89,7 @@ class Barcodemanual extends MY_Controller
                 $no++;
                 $row = array();
                 $row[] = $no;
+                $row[] = $field->no_batch;
                 $row[] = '<a href="#" class="edit_batch" data-row="' . $field->row_order . '"  data-title="Edit"> ['.$field->kode_produk.'] '.$field->nama_produk.' </a>';
                 $row[] = $field->corak_remark;
                 $row[] = $field->warna_remark;
@@ -136,7 +138,8 @@ class Barcodemanual extends MY_Controller
                 $no++;
                 $row = array();
                 $row[] = $no;
-                $row[] = '['.$field->kode_produk.'] '.$field->nama_produk;
+                $row[] = $field->no_batch;
+                $row[] = '<a href="#" class="edit_batch_items" data-lot="' . $field->lot . '"  data-title="Edit"> ['.$field->kode_produk.'] '.$field->nama_produk.' </a>';;
                 $row[] = $field->corak_remark;
                 $row[] = $field->warna_remark;
                 $row[] = $field->grade;
@@ -146,6 +149,7 @@ class Barcodemanual extends MY_Controller
                 $row[] = $field->qty_jual.' '.$field->uom_jual;
                 $row[] = $field->qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
+                $row[] = $field->kode_k3l;
                 $row[] = $field->quant_id;
                 $data[] = $row;
             }
@@ -522,6 +526,158 @@ class Barcodemanual extends MY_Controller
     }
 
 
+    function save_mrp_batch_items()
+    {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+                $kode           = $this->input->post('kode');
+                $kode_produk    = $this->input->post('kode_produk');
+                $corak_remark   = $this->input->post('corak_remark');
+                $warna_remark   = $this->input->post('warna_remark');
+                $qty_jual       = $this->input->post('qty_jual');
+                $uom_jual       = $this->input->post('uom_qty_jual');
+                $qty2_jual      = $this->input->post('qty2_jual');
+                $uom2_jual      = $this->input->post('uom_qty2_jual');
+                $lebar_jadi     = $this->input->post('lebar_jadi');
+                $uom_lebar_jadi = $this->input->post('uom_lebar_jadi');
+                $kode_k3l       = $this->input->post('kode_k3l');
+                $row_order      = $this->input->post('row');
+                $lot            = $this->input->post('lot');
+                $quant_id            = $this->input->post('quant_id');
+
+                // start transaction
+                $this->_module->startTransaction();
+
+                $sub_menu  = $this->uri->segment(2);
+                $username = addslashes($this->session->userdata('username')); 
+
+                $tgl            = date('Y-m-d H:i:s');
+                $mrpm           = $this->m_barcodemanual->get_data_mrp_manual_by_id($kode);
+
+                if(empty($mrpm)){
+                    throw new \Exception('Data Barcode Manual tidak ditemukan !', 200);
+                }else if($mrpm->status == 'process'){
+                    throw new \Exception('Maaf, Data Tidak Bisa Disimpan, Status masih Process !', 200);
+                }else if($mrpm->status == 'cancel'){
+                    throw new \Exception('Maaf, Data Tidak Bisa Disimpan, Status Sudah Cancel !', 200);
+                }else{
+                    $access         = $this->cek_akses_menu();
+                    if(empty($access->status)){
+                        $callback = array('status' => 'failed', 'message' => 'PC ini tidak diizinkan membuat Barcode Manual !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                    }else if(empty($kode_produk)){
+                        $callback = array('status' => 'failed', 'message' => 'Produk Kosong !', 'icon' => 'fa fa-warrning' , 'type' => 'danger');
+                    }else if(empty($corak_remark)){
+                        $callback = array('status' => 'failed', 'message' => 'Corak Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($warna_remark)){
+                        $callback = array('status' => 'failed', 'message' => 'Warna Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else if(empty($uom_lebar_jadi)){
+                        $callback = array('status' => 'failed', 'message' => 'Uom Lebar Jadi Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else{
+                      
+                        // nama_produk
+                        $nm = $this->_module->cek_produk_by_kode_produk($kode_produk)->row_array();
+                        $nama_produk = $nm['nama_produk'] ?? '';
+
+                        if(empty($nama_produk)){
+                            $callback = array('status' => 'failed', 'message' => 'Nama Produk tidak ditemukan !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                        }else{
+
+                            $cek_pl = $this->m_inlet->cek_barcode_in_picklist($quant_id,$lot)->row();
+                            //get data stock by kode
+                            $get = $this->_module->get_stock_quant_by_id($quant_id)->row();
+                            if(empty($get) or empty($quant_id)){
+                                $callback = array('status' => 'failed', 'message' => 'Data Lot'.$lot.' tidak ditemukan di Stock !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                            }else if($get->lokasi != 'GJD/Stock'){
+                                $callback = array('status' => 'failed', 'message' => 'Lokasi tidak valid, Data Lot'.$lot.' berada dilokasi '.$get->lokasi ?? '' .' !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                            }else if($get->lokasi_fisik == 'XPD'){
+                                $callback = array('status' => 'failed', 'message' => 'Lokasi Fisik sudah <b> XPD </b> ! ', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                            }else if(!empty($cek_pl)){
+                                $callback = array('status' => 'failed', 'message' => 'Data Lot '.$lot.' Sudah Masuk PL ! ', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                            }else{
+                                // cek row
+                                $mrpmb = $this->m_barcodemanual->get_data_mrp_manual_batch_items_by_row($kode,$lot)->row();
+                                if(empty($mrpmb)){
+                                    throw new \Exception('Data Barcode Manual tidak ditemukan !', 200);
+                                }else{
+                                    // get data quant sebelumnya
+                                    $note_before = $get->kode_produk.' '.$get->nama_produk." | ".$get->corak_remark." | ".$get->warna_remark. " | ".$get->qty_jual." ".$get->uom_jual. " | ".$get->qty2_jual." ".$get->uom2_jual. " | ".$get->lebar_jadi." ".$get->uom_lebar_jadi;
+
+                                    $data_update = array();
+                                    $data = array(
+                                                    'corak_remark'  => $corak_remark,
+                                                    'warna_remark'  => $warna_remark,
+                                                    'qty_jual'      => $qty_jual,
+                                                    'uom_jual'      => $uom_jual,
+                                                    'qty2_jual'     => $qty2_jual,
+                                                    'uom2_jual'     => $uom2_jual,
+                                                    'lebar_jadi'    => $lebar_jadi,
+                                                    'uom_lebar_jadi'=> $uom_lebar_jadi,
+                                                    'kode_k3l'      => $kode_k3l,
+                                                    'row_order'     => $row_order
+                                    );                     
+
+                                    array_push($data_update,$data);
+                                    $update = $this->m_barcodemanual->update_data_barcode_manual_items_batch($data_update,$kode,$lot);
+                                    
+                                    $data_update_quant = array(
+                                                    'corak_remark'  => $corak_remark,
+                                                    'warna_remark'  => $warna_remark,
+                                                    'qty_jual'      => $qty_jual,
+                                                    'uom_jual'      => $uom_jual,
+                                                    'qty2_jual'     => $qty2_jual,
+                                                    'uom2_jual'     => $uom2_jual,
+                                                    'lebar_jadi'    => $lebar_jadi,
+                                                    'uom_lebar_jadi'=> $uom_lebar_jadi,
+                                    );   
+
+                                    $update = $this->m_barcodemanual->update_data_stock_quant($data_update_quant,$quant_id,$lot);
+
+                                    // if(empty($update)){
+                                    //     throw new \Exception('Gagal Mengubah data ', 500);
+                                    // }
+
+                                    $jenis_log = "edit";
+                                    $note_after = $kode_produk.' '.$nama_produk." | ".$corak_remark." | ".$warna_remark. " | ".$qty_jual." ".$uom_jual. " | ".$qty2_jual." ".$uom2_jual. " | ".$lebar_jadi." ".$uom_lebar_jadi;
+                                    $note_log  = "Edit Data Batch Items lot ".$lot."<br> ".$note_before." <b> -> </b> <br> ".$note_after;
+                                    $data_history = array(
+                                                    'datelog'   => date("Y-m-d H:i:s"),
+                                                    'kode'      => $kode,
+                                                    'jenis_log' => $jenis_log,
+                                                    'note'      => $note_log  );
+                                    
+                                    // load in library
+                                    $this->_module->gen_history_ip($sub_menu,$username,$data_history);
+
+                                    if (!$this->_module->finishTransaction()) {
+                                        throw new \Exception('Gagal Menyimpan Data2', 500);
+                                    }
+
+                                    $callback = array('status'=>'success', 'message' =>'Data Berhasil Diubah !', 'icon'=> 'fa fa-check', 'type'=>'success');
+
+                                }
+                            }
+                        }
+
+                    }
+
+                }
+
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+                // finish transaction
+                $this->_module->finishTransaction();
+            }
+            
+        }catch(Exception $ex){
+            $this->_module->finishTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
     function delete_mrp_batch()
     {
         try{
@@ -608,7 +764,9 @@ class Barcodemanual extends MY_Controller
     {
         $kode               = $this->input->post('kode');
         $data['kode']       = $kode;
-        $data['kode_k3l']   = $this->_module->get_list_kode_k3l();        
+        $data['kode_k3l']   = $this->_module->get_list_kode_k3l(); 
+        $uom_konversi                   = $this->m_outlet->get_list_uom_konversi();
+        $data['uom_konversi']           = json_encode($uom_konversi);       
         return $this->load->view('modal/v_barcode_manual_modal',$data);
     }
 
@@ -620,7 +778,19 @@ class Barcodemanual extends MY_Controller
         $data['row_mb']     = $row;
         $data['data_mbb']   = $this->m_barcodemanual->get_data_mrp_manual_batch_by_row($kode,$row)->row();
         $data['kode_k3l']   = $this->_module->get_list_kode_k3l();        
+        $uom_konversi                   = $this->m_outlet->get_list_uom_konversi();
+        $data['uom_konversi']           = json_encode($uom_konversi);       
         return $this->load->view('modal/v_barcode_manual_edit_modal',$data);
+    }
+
+    function edit_batch_items_modal()
+    {
+        $kode               = $this->input->post('kode');
+        $lot                = $this->input->post('lot');
+        $data['kode']       = $kode;
+        $data['data_mbi']   = $this->m_barcodemanual->get_data_mrp_manual_batch_items_by_row($kode,$lot)->row();
+        $data['kode_k3l']   = $this->_module->get_list_kode_k3l();        
+        return $this->load->view('modal/v_barcode_manual_edit_items_modal',$data);
     }
 
 
@@ -778,6 +948,7 @@ class Barcodemanual extends MY_Controller
                                         'uom2_jual'     => $mb->uom2_jual,
                                         'lebar_jadi'    => $mb->lebar_jadi,
                                         'uom_lebar_jadi'=> $mb->uom_lebar_jadi,
+                                        'kode_k3l'      => $mb->kode_k3l,
                                         'row_order'     => $row_order_items,
                                         'nama_user'     => $nama_user
                             );
