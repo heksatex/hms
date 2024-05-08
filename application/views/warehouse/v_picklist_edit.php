@@ -109,6 +109,12 @@
                                             </div>                                    
                                         </div>
                                         <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4"><label class="form-label" >SC</label></div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <textarea type="text" class="form-control input-sm resize-ta" id="ket" name="ket"><?= $picklist->sc ?></textarea>
+                                            </div>                                    
+                                        </div>
+                                        <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label class="form-label required">Customer</label></div>
                                             <div class="col-xs-8 col-md-8">
                                                 <select class="form-control input-sm select2" name="customer" id="customer" required>
@@ -124,6 +130,24 @@
                                             <input type="hidden" value="<?= $ids ?>" name="ids">
                                             <input type="hidden" value="<?= $picklist->no ?>" name="no_pl">
                                             <input type="hidden" value="<?= json_encode($picklist) ?>" name="existsing">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label">Total PCS Item</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <span id="total_pcs"><?= $picklist->pcs_qty ?? 0 ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label">Total QTY Item</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <span id="total_qty"><?= $picklist->tot_qty ?? 0 ?></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -148,6 +172,28 @@
         </div>
 
         <script>
+
+            const updateTotal = (() => {
+                $.ajax({
+                    url: "<?= base_url('warehouse/picklist/get_total') ?>",
+                    type: "post",
+                    data: {
+                        pl: "<?= $picklist->no ?>"
+                    },
+                    success: function (data) {
+//                        location.reload();
+                        $("#total_pcs").html(data?.pcs_qty);
+                        $("#total_qty").html(data?.tot_qty);
+                    },
+                    error: function (req, error) {
+                        unblockUI(function () {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                            }, 500);
+                        });
+                    } 
+                });
+            });
             $(function () {
                 $("#cetak-lokasi-item").on("click", function () {
                     let url = "<?= base_url("warehouse/picklist/lokasi_fisik?no=$picklist->no") ?>";

@@ -60,8 +60,8 @@ class Picklistrealisasi extends MY_Controller {
 
                 $kode_encrypt = encrypt_url($field->id);
                 $no++;
-                $realisasi = $this->_persentase($field->total_item ?? 0, $field->st, ['realisasi', 'validasi']);
-                $validasi = $this->_persentase($field->total_item ?? 0, $field->st, 'validasi');
+                $realisasi = $this->_persentase($field->total_item ?? 0, $field->st, ['realisasi', 'validasi',"done"]);
+                $validasi = $this->_persentase($field->total_item ?? 0, $field->st, [ 'validasi',"done"]);
                 $row = array(
                     $no,
                     '<a href="' . base_url('warehouse/' . $submenu . '/edit/' . $kode_encrypt) . '">' . $field->no . '</a>',

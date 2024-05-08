@@ -221,7 +221,8 @@
 //            dTable.search($(this).val()).draw();
 //        });
         $('input', dTable.cells().nodes()).prop('checked', false);
-        $("#btn-tambah").off("click").on('click', function () {
+        $("#btn-tambah").off("click").unbind("click").on('click', function () {
+            $("#btn-tambah").button("loading");
             var rows_selected = dTable.column(0).checkboxes.selected();
             const data = new Promise((resolve, reject) => {
                 let dt = [];
@@ -237,10 +238,14 @@
                 });
                 resolve(dt);
             });
+            $("#btn-tambah").button("reset");
+            $("#btn-tambah").show();
             data.then((rsp) => {
                 addItem(JSON.stringify(rsp), "", dTable, 'draft');
             }).catch(e => {
                 addItem(JSON.stringify([]), e.message);
+            }).finally(() => {
+                $("#btn-tambah").button("reset");
             });
         });
 
