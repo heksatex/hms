@@ -90,7 +90,7 @@ class Deliveryorder extends MY_Controller {
 //                            'dod.do_id' => $data["do"]->id
 //                        ]
 //                );
-                $recordsTotal = $this->m_deliveryorderdetail->countDetail(['dod.do_id' => $data["do"]->id]);
+                $recordsTotal = $this->m_deliveryorderdetail->countDetail(['dod.do_id' => $data["do"]->id, 'pd.valid' => 'done']);
             }
             $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist], '', 'delivery');
 
@@ -569,7 +569,7 @@ class Deliveryorder extends MY_Controller {
             $nosm = "SM" . $this->_module->get_kode_stock_move();
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
-            $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $data->id, 'a.status' => 'done','pd.valid'=>'done'], ['PD', 'SQ']);
+            $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $data->id, 'a.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ']);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
             $smproduk = [];
             $updateIn = [
@@ -1022,7 +1022,7 @@ class Deliveryorder extends MY_Controller {
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $do . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
 
-            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'done','pd.valid'=>'done'], ['PD', 'SQ'], ['a.barcode_id' => $barcode]);
+            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ'], ['a.barcode_id' => $barcode]);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
             $smproduk = [];
             $updateIn = [
