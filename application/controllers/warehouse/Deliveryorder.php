@@ -429,17 +429,21 @@ class Deliveryorder extends MY_Controller {
             $insertStokMvItem = [];
             $insertStokMvProd = [];
             $updateStokQuant = [];
-
+            $check_barcode = [];
             foreach ($item as $key => $value) {
                 $check = $this->checkLokasi(['stock_quant.quant_id' => $value->quant_id]);
                 if (!empty($check)) {
                     throw new \Exception($check, 500);
+                }
+                if (in_array($value->quant_id, $check_barcode)) {
+                    throw new \Exception("ada Duplikat Barcode di Picklist", 500);
                 }
                 $insertDetail[] = ['do_id' => $data_do->id, 'barcode_id' => $value->barcode_id, 'status' => 'done'];
                 $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','" . $value->lebar_greige . "','" . $value->uom_lebar_greige . "','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
                 $updateStokQuant [] = ["move_date" => date('Y-m-d H:i:s'), "lokasi_fisik" => "", "lokasi" => "CST/Stock", 'quant_id' => $value->quant_id];
+                $check_barcode[] = $value->quant_id;
                 if (isset($smproduk[$value->kode_produk])) {
                     $smproduk[$value->kode_produk]["qty"] += $value->qty;
                 } else {

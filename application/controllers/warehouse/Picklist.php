@@ -381,6 +381,10 @@ class Picklist extends MY_Controller {
             $barcodeInput = [];
             foreach ($data as $key => $value) {
                 $check = $this->m_Pickliststockquant->checkItemAvailable(['stock_quant.quant_id' => $value]);
+
+                if (in_array($check->lot, $barcodeInput)) {
+                    throw new \Exception("ada Duplikat Barcode di Picklist", 500);
+                }
                 switch (true) {
                     case $check->reserve_move !== "":
                         throw new \Exception("Barcode " . $check->lot . " reserve move " . $check->reserve_move, 500);
