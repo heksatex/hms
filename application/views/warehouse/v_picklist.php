@@ -2,7 +2,14 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
-
+        <style>
+            .cancelPL{
+                color: red;
+            }
+            .donePL{
+                color: green;
+            }
+        </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -25,7 +32,7 @@
                     <div class="box">
                         <div class="box-body">
                             <div class="col-xs-12 table-responsive">
-                                <table id="picklist" class="table table-striped">
+                                <table id="picklist" class="table">
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
@@ -37,6 +44,8 @@
                                             <th>Marketing</th>
                                             <th>Keterangan</th>
                                             <th>Status</th>
+                                            <th>Pcs</th>
+                                            <th>Total Qty</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -70,10 +79,17 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 7],
+                            "targets": [0, 7,9,10],
                             "orderable": false
                         }
                     ],
+                    "createdRow": function (row, data, dataIndex) {
+                        if (data[8] === "Cancel") {
+                            $(row).addClass('cancelPL');
+                        }else if(data[8] === "Done") {
+                            $(row).addClass('donePL');
+                        }
+                    }
                 });
             });
         </script>

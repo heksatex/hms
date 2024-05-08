@@ -189,6 +189,7 @@ if ($picklist->status === 'cancel') {
                 status: $(e).attr("data-status")
             },
             "success": function (data) {
+                updateTotal();
                 tbl.search("").draw(false);
                 unblockUI(function () {
                     alert_notify(data.icon, data.message, data.type, function () {});
@@ -265,6 +266,7 @@ if ($picklist->status === 'cancel') {
                 "item": data,
                 "status": status
             }, "success": function (data) {
+                updateTotal();
                 unblockUI(function () {
                     alert_notify(data.icon, data.message, data.type, function () {});
                 }, 50);

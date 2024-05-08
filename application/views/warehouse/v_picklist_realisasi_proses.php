@@ -111,6 +111,15 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="col-xs-4"><label class="form-label required">Customer</label></div>
+                                        <div class="col-xs-8 col-md-8">
+                                            <span><?= strtoupper($picklist->nama) ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                             <div class="col-md-6 col-xs-12">
                                 <div id="itemChart"></div>
@@ -268,13 +277,13 @@
 //                                                setTimeout(function () {
 //                                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
 //                                                }, 1000);
-                                            },50);
+                                            }, 50);
                                         }
 
                                 );
 
                             } catch (e) {
-                                unblockUI(function () {},50);
+                                unblockUI(function () {}, 50);
                                 alert_modal_warning("Hubungi Dept IT");
                             } finally {
                                 $("#search").val("");

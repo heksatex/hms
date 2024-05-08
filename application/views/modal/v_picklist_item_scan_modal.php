@@ -153,7 +153,8 @@
                 false
                 );
 
-        $("#btn-tambah").off('click').on('click', function () {
+        $("#btn-tambah").off('click').unbind("click").on('click', function () {
+            $("#btn-tambah").button("loading");
             const data = new Promise((resolve, reject) => {
                 let dt = [];
                 $.each(dTable.rows().data(), function (idx, val) {
@@ -164,6 +165,11 @@
 
             data.then(rsp => {
                 addItem(JSON.stringify(rsp), "", dTable, "realisasi");
+            }).catch(e => {
+//                addItem(JSON.stringify([]), e.message);
+                console.log(e);
+            }).finally(() => {
+                $("#btn-tambah").button("reset");
             });
 
         });
