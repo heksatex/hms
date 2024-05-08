@@ -84,6 +84,18 @@
                     <input type='text' class="form-control input-sm" name="nama_produk" id="nama_produk" value="<?php echo htmlentities($list->nama_produk); ?>" readonly="readonly" />
                   </div>
                 </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Corak Remark </label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <input type='text' class="form-control input-sm" name="corak_remark" id="corak_remark" value="<?php echo htmlentities($list->corak_remark); ?>" >
+                  </div>
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Warna Remark </label></div>
+                  <div class="col-xs-8 col-md-8">
+                    <input type='text' class="form-control input-sm" name="warna_remark" id="warna_remark" value="<?php echo htmlentities($list->warna_remark); ?>" >
+                  </div>
+                </div>
                  <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Lot </label></div>
                   <div class="col-xs-8 col-md-8">
@@ -132,6 +144,59 @@
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Qty Jual</label></div>
+                  <div class="col-xs-8">
+                      <input type='text' class="form-control input-sm" name="qty_jual" id="qty_jual" value="<?php echo $list->qty_jual; ?>" >
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Uom Jual</label></div>
+                  <div id="ta" class="col-xs-8">
+                    <select class="form-control input-sm " id="uom_jual" name="uom_jual">
+                        <option value=""></option>
+                        <?php 
+                          foreach ($list_uom as $row) {
+                            if($list->uom_jual == $row->short){
+                              echo "<option selected>".$row->short."</option>";
+                            }else{
+                              echo "<option >".$row->short."</option>";
+                            }
+                          }
+                        ?>
+                    </select>
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Qty2 Jual</label></div>
+                  <div class="col-xs-8">
+                      <input type='text' class="form-control input-sm" name="qty2_jual" id="qty2_jual" value="<?php echo $list->qty2_jual; ?>" >
+                  </div>                                    
+                </div>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Uom2 Jual</label></div>
+                  <div id="ta" class="col-xs-8">
+                    <select class="form-control input-sm " id="uom2_jual" name="uom2_jual">
+                        <option value=""></option>
+                        <?php 
+                          foreach ($list_uom as $row) {
+                            if($list->uom2_jual == $row->short){
+                              echo "<option selected>".$row->short."</option>";
+                            }else{
+                              echo "<option >".$row->short."</option>";
+                            }
+                          }
+                        ?>
+                    </select>
+                  </div>                                    
+                </div>
+             
+              </div>
+
+            </div>
+            <div class="col-md-6" >
+              <div class="form-group"> 
+
+                <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Qty Opname </label></div>
                   <div class="col-xs-8">
                     <input type='text' class="form-control input-sm" name="qty_opname" id="qty_opname"  value="<?php echo $list->qty_opname; ?>"  readonly/>
@@ -142,15 +207,9 @@
                   <div class="col-xs-8">
                     <input type='text' class="form-control input-sm" name="qty_opname" id="qty_opname"  value="<?php echo $list->uom_opname; ?>" readonly>
                   </div>
-                </div>
-             
-              </div>
+                </div>  
 
-            </div>
-            <div class="col-md-6" >
-              <div class="form-group">   
-
-              <div class="col-md-12 col-xs-12">
+                <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Lebar Greige </label></div>
                   <div id="ta" class="col-xs-8">
                     <input type='text' class="form-control input-sm" name="lebar_greige" id="lebar_greige"  value="<?php echo $list->lebar_greige; ?>"  />
@@ -282,6 +341,12 @@
                 lebar_jadi       :$('#lebar_jadi').val(),
                 uom_lebar_jadi   :$('#uom_lebar_jadi').val(),
                 lokasi   :$('#lokasi').val(),
+                corak_remark   :$('#corak_remark').val(),
+                warna_remark   :$('#warna_remark').val(),
+                qty_jual   :$('#qty_jual').val(),
+                uom_jual   :$('#uom_jual').val(),
+                qty2_jual  :$('#qty2_jual').val(),
+                uom2_jual  :$('#uom2_jual').val(),
 
           },success: function(data){
             
@@ -328,6 +393,7 @@
           backdrop: 'static'
         });
         $('.modal-title').text('Pilih Design Barcode ?');
+         $("#print_data .modal-dialog .modal-content .modal-footer .btn-print-barcode").remove();
         $.post('<?php echo site_url()?>warehouse/stockquants/mode_print_modal',
         { quant_id:quant_id},
         function(html){
@@ -336,6 +402,14 @@
         );
       }
   });
+
+   // load new page print
+  function print_voucher() {
+        var win = window.open();
+        win.document.write($("#printed").html());
+        win.document.close();
+        setTimeout(function(){ win.print(); win.close();}, 200);
+  }
 
 
 </script>
