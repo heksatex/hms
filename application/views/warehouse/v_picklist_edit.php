@@ -111,7 +111,7 @@
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label class="form-label" >SC</label></div>
                                             <div class="col-xs-8 col-md-8">
-                                                <textarea type="text" class="form-control input-sm resize-ta" id="ket" name="ket"><?= $picklist->sc ?></textarea>
+                                                <textarea type="text" class="form-control input-sm resize-ta" id="sc" name="sc"><?= $picklist->sc ?></textarea>
                                             </div>                                    
                                         </div>
                                         <div class="col-md-12 col-xs-12">
