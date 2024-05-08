@@ -390,6 +390,7 @@ class M_inlet extends CI_Model
 	{
 		$this->db->where('quant_id',$quant_id);
 		$this->db->where('barcode_id',$lot);
+		$this->db->where_not_in('valid','cancel');
 		$query = $this->db->get('picklist_detail');
 		return $query;
 		
