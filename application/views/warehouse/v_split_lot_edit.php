@@ -11,6 +11,15 @@
                 display: none;
               }
     <?php } ?>
+    .select2-container--focus{
+	    border:  1px solid #66afe9;
+    }
+
+    .select2-container--default .select2-selection--single{
+        height : 30px;
+        font-size : 12px;
+        padding: 5px 12px;
+    }
   </style>
 </head>
 
@@ -96,7 +105,20 @@
                                     <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk"   value="<?php echo htmlentities($split->nama_produk); ?>" readonly>                    
                                 </div>                                    
                             </div>
-
+                            <?php if($split->dept_id == 'GJD'){?>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Corak Remark  </label></div>
+                                <div class="col-xs-8">
+                                    <input type="text" class="form-control input-sm" name="corak_remark" id="corak_remark"  value="<?php echo $split->corak_remark; ?>"  readonly >                    
+                                </div>                                    
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Warna Remark  </label></div>
+                                <div class="col-xs-8">
+                                    <input type="text" class="form-control input-sm" name="warna_remark" id="warna_remark"  value="<?php echo $split->warna_remark; ?>"  readonly >                    
+                                </div>                                    
+                            </div>
+                            <?php } ?>
                             <div class="col-md-12 col-xs-12">
                                 <div class="col-xs-4"><label>Barcode/Lot  </label></div>
                                 <div class="col-xs-8">
@@ -143,6 +165,16 @@
                                     <input type="text" class="form-control input-sm" name="uom_qty2_jual" id="uom_qty2_jual"  value="<?php echo $split->uom2_jual; ?>" readonly>                    
                                 </div>                                    
                             </div>
+
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Lebar Jadi  </label></div>
+                                <div class="col-xs-5">
+                                    <input type="text" class="form-control input-sm" name="lebar_jadi" id="lebar_jadi"  value="<?php echo $split->lebar_jadi; ?>" readonly>                    
+                                </div> 
+                                <div class="col-xs-3">
+                                    <input type="text" class="form-control input-sm" name="uom_lebar_jadi" id="uom_lebar_jadi"  value="<?php echo $split->uom_lebar_jadi; ?>" readonly>                    
+                                </div>                                    
+                            </div>
                             <?php } ?>
                         </div>
 
@@ -168,6 +200,10 @@
                           <thead>                          
                             <tr>
                               <th class="style no">No.</th>
+                              <?php if($split->dept_id == 'GJD'){?>
+                              <th class="style" style="width:120px;" >Corak Remark</th>
+                              <th class="style" style="width:120px;" >Warna Remark</th>
+                             <?php }?>
                               <th class="style" style="width:100px;" >Qty1</th>
                               <th class="style" width="80px">Uom</th>
                               <th class="style" style="width:100px;" >Qty2</th>
@@ -177,9 +213,11 @@
                               <th class="style" width="80px">Uom Jual</th>
                               <th class="style" style="width:100px;" >Qty2 Jual</th>
                               <th class="style" width="80px">Uom2 Jual</th>
+                              <th class="style" width="100px">Lbr.Jadi</th>
+                              <th class="style" width="100px">Uom Lbr.Jadi</th>
                               <?php }?>
-                              <th class="style" width="100px">Lot Baru</th>
-                              <th class="style" width="50px">
+                              <th class="style" width="80px">Lot Baru</th>
+                              <th class="style" width="80px">
                                 <?php if(($split->dept_id) == 'GJD'){?>
                                     All <input type="checkbox" name="checkQAll" id="checkQAll"></th>
                                 <?php }?>
@@ -191,6 +229,10 @@
                                   ?>
                                     <tr class="num">
                                       <td></td>
+                                      <?php if($split->dept_id == 'GJD'){?>
+                                      <td><a href="#" class="edit_items" data-lot="<?php echo $row->lot_baru ?>"  data-title="Edit"> <?php echo $row->corak_remark?></a></td>
+                                      <td><?php echo $row->warna_remark?></td>
+                                      <?php }?>
                                       <td align="right"><?php echo number_format($row->qty,2)?></td>
                                       <td><?php echo $row->uom?></td>
                                       <td align="right"><?php echo number_format($row->qty2,2)?></td>
@@ -200,6 +242,8 @@
                                       <td><?php echo $row->uom_jual?></td>
                                       <td align="right"><?php echo number_format($row->qty2_jual,2)?></td>
                                       <td><?php echo $row->uom2_jual?></td>
+                                      <td><?php echo $row->lebar_jadi?></td>
+                                      <td><?php echo $row->uom_lebar_jadi?></td>
                                       <?php }?>
                                       <td class="text-wrap width-200"><?php echo $row->lot_baru?></td>
                                       <td>
@@ -323,6 +367,36 @@
         win.document.write($("#printed").html());
         win.document.close();
         setTimeout(function(){ win.print(); win.close();}, 200);
+    }
+
+     $(document).on("click", ".edit_items", function(e) {
+        let lot = $(this).attr('data-lot');
+        edit_items(lot)
+    });
+
+    function edit_items(lot){
+        var kode     = "<?php echo $split->kode_split; ?>";
+        
+        $('#btn-tambah').button('reset');
+        $("#tambah_data").modal({
+                    show: true,
+                    backdrop: 'static'
+        })
+           
+        $("#tambah_data").removeClass('modal fade lebar').addClass('modal fade lebar_mode');
+        $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('add_batch');
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+    
+        $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Edit Items');
+        $.post('<?php echo site_url()?>warehouse/splitlot/edit_items_modal',
+              {kode:kode,lot:lot},
+        ).done(function(html){
+              setTimeout(function() {
+                        $(".add_batch").html(html)  
+              },1000);
+              $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+        });
     }
   
 </script>

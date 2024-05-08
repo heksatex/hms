@@ -112,8 +112,8 @@ class M_splitLot extends CI_Model
 	}
 
 	var $table2  	    = 'stock_quant';
-	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
-	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'reserve_move');
+	var $column_order2  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'lokasi_fisik',  'reff_note',  'reserve_move');
+	var $column_search2 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note', 'lokasi_fisik', 'reserve_move');
 	var $order2  	    = array('move_date' => 'desc');
 	
 
@@ -122,10 +122,10 @@ class M_splitLot extends CI_Model
 		$departemen  = addslashes($this->input->post('departemen'));
 
 		if($departemen == 'GJD'){
-			$column_order2    = array(null, 'sq.kode_produk', 'sq.nama_produk', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual','sq.nama_grade', 'sq.reff_note', 'sq.reserve_move');
-			$column_search2   = array('sq.kode_produk','sq.nama_produk', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual', 'sq.nama_grade', 'sq.reff_note', 'sq.reserve_move');
+			$column_order2    = array(null, 'sq.kode_produk', 'sq.nama_produk','sq.corak_remark','sq.warna_remark', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual','sq.nama_grade', 'sq.lokasi_fisik','sq.reff_note', 'sq.reserve_move');
+			$column_search2   = array('sq.kode_produk','sq.nama_produk','sq.corak_remark','sq.warna_remark',  'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual', 'sq.nama_grade','sq.lokasi_fisik','sq.reff_note', 'sq.reserve_move');
 
-			$this->db->SELECT("sq.quant_id, sq.kode_produk, sq.nama_produk, sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.reff_note, sq.reserve_move, mp.id_jenis_kain, mjk.nama_jenis_kain,mp.lebar_jadi, mp.uom_lebar_jadi, mp.id_category, sq.lokasi_fisik, sq.nama_grade");
+			$this->db->SELECT("sq.quant_id, sq.kode_produk, sq.nama_produk, sq.corak_remark, sq.warna_remark,  sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.reff_note, sq.reserve_move, mp.id_jenis_kain, mjk.nama_jenis_kain,mp.lebar_jadi, mp.uom_lebar_jadi, mp.id_category, sq.lokasi_fisik, sq.nama_grade");
 			$this->db->FROM("stock_quant sq");
 			$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk", "INNER");
 			$this->db->JOIN("mst_jenis_kain mjk","mp.id_jenis_kain = mjk.id", "LEFT");
@@ -209,9 +209,9 @@ class M_splitLot extends CI_Model
 		return $this->db->count_all_results();
 	}
 
-    public function save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,$nama_produk,$lot,$qty,$uom_qty,$qty2,$uom_qty2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$note,$nama_user)
+    public function save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,$nama_produk,$lot,$qty,$uom_qty,$qty2,$uom_qty2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$note,$nama_user,$corak_remark,$warna_remark,$lebar_jadi,$uom_lebar_jadi)
     {
-        $this->db->query("INSERT INTO split (kode_split,tanggal,dept_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,qty_jual,uom_jual,qty2_jual,uom2_jual,note,nama_user) values ('$kode_split','$tgl','$departemen','$quant_id','$kode_produk','$nama_produk','$lot','$qty','$uom_qty','$qty2','$uom_qty2','$qty_jual','$uom_jual','$qty2_jual','$uom2_jual','$note','$nama_user')") ;
+        $this->db->query("INSERT INTO split (kode_split,tanggal,dept_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,qty_jual,uom_jual,qty2_jual,uom2_jual,note,nama_user,corak_remark,warna_remark,lebar_jadi,uom_lebar_jadi) values ('$kode_split','$tgl','$departemen','$quant_id','$kode_produk','$nama_produk','$lot','$qty','$uom_qty','$qty2','$uom_qty2','$qty_jual','$uom_jual','$qty2_jual','$uom2_jual','$note','$nama_user','$corak_remark','$warna_remark','$lebar_jadi','$uom_lebar_jadi')") ;
 		return is_array($this->db->error());
     }
 
@@ -223,7 +223,7 @@ class M_splitLot extends CI_Model
 
     public function get_data_split_by_kode($kode)
     {
-        return $this->db->query("SELECT s.kode_split,s.tanggal,s.dept_id,s.quant_id,s.kode_produk,s.nama_produk,s.lot,s.qty,s.uom,s.qty2,s.uom2,s.note,s.nama_user, d.nama as nama_departemen, s.qty_jual, s.uom_jual, s.qty2_jual, s.uom2_jual
+        return $this->db->query("SELECT s.kode_split,s.tanggal,s.dept_id,s.quant_id,s.kode_produk,s.nama_produk,s.lot,s.qty,s.uom,s.qty2,s.uom2,s.note,s.nama_user, d.nama as nama_departemen, s.qty_jual, s.uom_jual, s.qty2_jual, s.uom2_jual, s.corak_remark, s.warna_remark, s.lebar_jadi, s.uom_lebar_jadi
                         FROM split s
                         LEFT JOIN departemen d ON s.dept_id = d.kode
                         WHERE s.kode_split = '$kode' ")->row(); 
@@ -264,6 +264,31 @@ class M_splitLot extends CI_Model
 		$result = $this->db->get("picklist_detail");
 		return $result->num_rows();
 		
+	}
+
+	public function get_data_split_items_by_lot($kode,$lot)
+    {
+		$this->db->where('lot_baru',$lot);
+		$this->db->where('kode_split',$kode);
+		$result = $this->db->get('split_items');
+		return $result->row();
+    }
+
+
+	function update_data_split_items($data_update, $kode = null, $lot = null )
+	{
+		$this->db->where('kode_split', $kode);
+		$this->db->where('lot_baru', $lot);
+		$query = $this->db->update('split_items', $data_update);
+        return $this->db->affected_rows();
+	}
+
+	function update_data_stock_quant(array $data_update, $quant_id, $lot)
+	{
+		$this->db->where('quant_id', $quant_id);
+		$this->db->where('lot', $lot);
+		$query = $this->db->update('stock_quant', $data_update);
+        return $this->db->affected_rows();
 	}
 
 
