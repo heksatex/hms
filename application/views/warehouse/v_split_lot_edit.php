@@ -230,7 +230,7 @@
                                     <tr class="num">
                                       <td></td>
                                       <?php if($split->dept_id == 'GJD'){?>
-                                      <td><a href="#" class="edit_items" data-lot="<?php echo $row->lot_baru ?>"  data-title="Edit"> <?php echo $row->corak_remark?></a></td>
+                                      <td><a href="#" class="edit_items" data-lot="<?php echo $row->lot_baru ?>"  data-title="Edit"> <?php echo $row->corak_remark ?? 'Edit'?> </a></td>
                                       <td><?php echo $row->warna_remark?></td>
                                       <?php }?>
                                       <td align="right"><?php echo number_format($row->qty,2)?></td>

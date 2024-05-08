@@ -4,7 +4,7 @@
   <?php $this->load->view("admin/_partials/head.php") ?>
   <style>
         .min_width_100{
-            min-width:100%
+            min-width:100px;
         }
         .min_width_150{
             min-width:150px;
