@@ -10,7 +10,7 @@ class M_Picklist extends CI_Model {
 
     var $column_order = array(null, 'no', 'p.nama', 'tanggal_input', 'jenis_jual', 'bulk_nama', 'sales_nama', null, 'status', 'nama_user');
     var $order = ['tanggal_input' => 'desc'];
-    var $column_search = array('no', 'jenis_jual', 'msg.nama_sales_group');
+    var $column_search = array('no', 'jenis_jual', 'msg.nama_sales_group', 'status', "tb.name", "p.nama");
     protected $table = "picklist";
     protected $level_sales_group;
     protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
@@ -29,6 +29,7 @@ class M_Picklist extends CI_Model {
         $this->db->join('partner as p', 'p.id = customer_id', 'left');
         $this->db->join('mst_status as ms', 'ms.kode = status', 'left');
         $this->filteredSales();
+        $this->getMenu();
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
@@ -51,6 +52,19 @@ class M_Picklist extends CI_Model {
         }
     }
 
+    protected function getMenu() {
+        switch ($this->_menu) {
+            case "count_detail":
+                $this->db->join("picklist_detail pdt", "(picklist.no = pdt.no_pl and pdt.valid <>'cancel')", "left");
+                $this->db->group_by("picklist.no");
+                $this->db->select(" sum(pdt.qty) as tot_qty,sum(pdt.qty2) as tot_qty2, count(pdt.qty) as pcs_qty,sum(pdt.qty2) as pcs_qty2");
+                break;
+
+            default:
+                break;
+        }
+    }
+
     public function getCountDataFiltered(array $condition = [], array $menu = []) {
 
         if (count($condition) > 0)
@@ -70,6 +84,9 @@ class M_Picklist extends CI_Model {
                     break;
                 case "delivery":
                     $this->_menu = "delivery";
+                    break;
+                case "count_detail":
+                    $this->_menu = "count_detail";
                     break;
                 default:
                     break;
@@ -100,6 +117,9 @@ class M_Picklist extends CI_Model {
                         break;
                     case "delivery":
                         $this->_menu = "delivery";
+                        break;
+                    case "count_detail":
+                        $this->_menu = "count_detail";
                         break;
                     default:
                         break;
@@ -138,6 +158,9 @@ class M_Picklist extends CI_Model {
                 case "delivery":
                     $this->_menu = "delivery";
                     break;
+                case "count_detail":
+                    $this->_menu = "count_detail";
+                    break;
                 default:
                     break;
             }
@@ -170,6 +193,15 @@ class M_Picklist extends CI_Model {
             case "DO":
                 $this->db->join('delivery_order do', '(do.no_picklist = ' . $this->table . '.no and do.status = "done")', 'left');
                 $select .= ",do.no_sj,do.status as sj_status";
+                break;
+
+            default:
+                break;
+        }
+        switch ($menu) {
+            case "count_detail":
+                $this->_menu = "count_detail";
+                $this->getMenu();
                 break;
 
             default:
@@ -250,8 +282,8 @@ class M_Picklist extends CI_Model {
 
     protected function joinDetail() {
         $this->db->select($this->select . ",GROUP_CONCAT(CONCAT(f.valid, ',', f.cnt) SEPARATOR '|' ) as st,total_item");
-        $this->db->join('(select no_pl,valid,count(id) as cnt from picklist_detail GROUP BY no_pl,valid ) f', 'f.no_pl = picklist.no');
-        $this->db->join('(select no_pl,count(id) as total_item from picklist_detail GROUP BY no_pl ) e', 'e.no_pl = picklist.no', 'left');
+        $this->db->join('(select no_pl,valid,count(id) as cnt from picklist_detail where  valid <> "cancel" GROUP BY no_pl,valid ) f', 'f.no_pl = picklist.no');
+        $this->db->join('(select no_pl,count(id) as total_item from picklist_detail where valid <> "cancel" GROUP BY no_pl ) e', 'e.no_pl = picklist.no', 'left');
         $this->db->group_by('picklist.id');
     }
 

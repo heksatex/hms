@@ -153,7 +153,7 @@ class m_Pickliststockquant extends CI_Model {
     }
 
     public function checkItemAvailable(array $condition) {
-        $this->db->select('stock_quant.*,pd.valid');
+        $this->db->select('stock_quant.*,pd.valid,pd.no_pl');
         $this->db->from($this->table);
         $this->db->join('picklist_detail pd', '(pd.quant_id = stock_quant.quant_id) and (pd.valid != "cancel")', 'left');
         $this->db->where($condition);
