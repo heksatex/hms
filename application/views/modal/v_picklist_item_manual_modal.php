@@ -249,7 +249,7 @@
             });
         });
 
-        $("#picklist-item-manual").on('click', 'button', function () {
+        $("#picklist-item-manual").off("click").unbind("click").on('click', 'button', function () {
 
             var row = $(this).closest('tr');
             var data = dTable.row(row).data();
