@@ -8,6 +8,10 @@
               <th class="no">No</th>
               <th>Kode Produk</th>
               <th>Nama Produk</th>
+              <?php if($departemen == 'GJD'){?>
+                <th>Corak Remark</th>
+                <th>Warna Remark</th>
+               <?php } ?>
               <th>Lot</th>
               <th>Qty</th>
               <th>Qty2</th>
@@ -16,6 +20,7 @@
                 <th>Qty2 Jual</th>
                 <?php } ?>
               <th>Grade</th>
+              <th>Lokasi Fisik</th>
               <th>Reff Notes</th>
               <th>Reserve Move</th>
               <th></th>
@@ -32,7 +37,8 @@
 <script type="text/javascript">
   
   var dept = "<?php echo $departemen;?>";
-  var kolom = (dept=='GJD')? 11 : 9;
+  var kolom = (dept=='GJD')? 14 : 10;
+  var id_kolom = (dept=='GJD')? 13 : 9;
   $(document).ready( function () {
         var  table = $('#example2').DataTable({ 
             "processing": true, 
@@ -56,10 +62,19 @@
                 "targets" : kolom,
                 "orderable": false, 
                 "createdCell": function (td, cellData, rowData, row, col) {
-                   var rowId = rowData[8];
-                   if(rowId.includes('SM') == true){  
+                   var rowId = rowData[id_kolom];
+                  //  if(rowId.includes('SM') == true){  
+                   if(rowId.length > 0){  
                       $(td).html('');
                    }
+
+                   if(dept == 'GJD'){
+                      var rowId2 = rowData[11];
+                      if(rowId.length > 0 || rowId2 == 'XPD'){
+                          $(td).html('');
+                      }
+                   }
+
                 }, 
               },
               { 

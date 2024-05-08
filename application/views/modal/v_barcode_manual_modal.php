@@ -146,6 +146,45 @@
             }
     }
 
+
+    $(document).on("keyup", "#qty_jual", function(){
+        let qty_jual = $('#qty_jual').val();
+        let uom_jual = $('#uom_qty_jual').val();
+        if(uom_jual == 'Yrd'){
+            result = konversi_uom('Yrd','Mtr',qty_jual);
+            if(result == 0){
+                result = '';
+            }
+            $('#qty').val(result);
+            
+        }
+
+    });
+
+	function konversi_uom(uom1From,uom2To,valueUom){
+
+            let arr_konversi = new Array();
+            list_konversi = <?php echo $uom_konversi?>
+            // alert(JSON.stringify(list_konversi));
+            result_convert = 0;
+            $.each(list_konversi, function(key, val) {
+                if(val.uom1 == uom1From && val.uom2 == uom2To){
+                    // alert(val.faktor);
+                    result_convert = valueUom*val.faktor;
+                }
+            });
+
+            fixed = roundNum(result_convert)
+            return fixed;
+
+    }
+
+    
+    //validasi round decimal 
+    function roundNum(number){
+        return +(Math.round(number + "e+2") + "e-2");
+    }
+
 	//select 2 product
 	$("#kode_produk").select2({
 		allowClear: true,
@@ -326,7 +365,7 @@
             alert_notify('fa fa-warning', 'Uom Qty2 Jual Harus dpilih !', 'danger', function() {});
 			$('#uom_qty2_jual').select2('focus');
 		} else if (lebar_jadi.length === 0) {
-            alert_notify('fa fa-warning', 'Lebar_jadi Harus diisi !', 'danger', function() {});
+            alert_notify('fa fa-warning', 'Lebar jadi Harus diisi !', 'danger', function() {});
 			$('#lebar_jadi').focus();
 		} else if (uom_lebar_jadi == null) {
             alert_notify('fa fa-warning', 'Uom Lebar Jadi Harus dpilih !', 'danger', function() {});
