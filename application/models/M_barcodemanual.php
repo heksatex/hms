@@ -97,8 +97,8 @@ class m_barcodemanual extends CI_Model
 		return $this->db->count_all_results();
 	} 
 
-	var $column_order2 = array(null, 'mmb.nama_produk', 'mmb.corak_remark', 'mmb.warna_remark','q.nama','mmb.grade','mmb.jml_pcs','mmb.qty','mmb.qty2','mmb.qty_jual','mmb.qty2_jual','mmb.lebar_jadi','mmb.kode_k3l',null);
-	var $column_search2= array('mmb.nama_produk', 'mmb.kode_produk', 'mmb.corak_remark', 'mmb.warna_remark', 'q.nama','mmb.grade','mmb.jml_pcs','mmb.qty','mmb.uom','mmb.qty2','mmb.uom2','mmb.qty_jual','mmb.uom_jual','mmb.qty2_jual','mmb.uom2_jual','mmb.lebar_jadi','mmb.uom_lebar_jadi','mmb.kode_k3l');
+	var $column_order2 = array(null, 'mmb.no_batch', 'mmb.nama_produk', 'mmb.corak_remark', 'mmb.warna_remark','q.nama','mmb.grade','mmb.jml_pcs','mmb.qty','mmb.qty2','mmb.qty_jual','mmb.qty2_jual','mmb.lebar_jadi','mmb.kode_k3l',null);
+	var $column_search2= array('mmb.no_batch','mmb.nama_produk', 'mmb.kode_produk', 'mmb.corak_remark', 'mmb.warna_remark', 'q.nama','mmb.grade','mmb.jml_pcs','mmb.qty','mmb.uom','mmb.qty2','mmb.uom2','mmb.qty_jual','mmb.uom_jual','mmb.qty2_jual','mmb.uom2_jual','mmb.lebar_jadi','mmb.uom_lebar_jadi','mmb.kode_k3l');
 	var $order2  	  = array('mmb.row_order' => 'asc');
 
 	private function _get_datatables_query2()
@@ -171,8 +171,8 @@ class m_barcodemanual extends CI_Model
 	} 
 
 	var $table3        = 'mrp_manual_batch_items';
-	var $column_order3 = array(null, 'nama_produk', 'corak_remark', 'warna_remark', 'grade' ,'lot' ,'qty','qty2', 'qty_jual', 'qty2_jual', 'lebar_jadi', null);
-	var $column_search3= array('nama_produk', 'kode_produk', 'corak_remark', 'warna_remark', 'grade' ,'qty','uom','qty2','uom2','qty_jual','uom_jual','qty2_jual','uom2_jual','lebar_jadi','uom_lebar_jadi');
+	var $column_order3 = array(null, 'no_batch', 'nama_produk', 'corak_remark', 'warna_remark', 'grade' ,'lot' ,'qty','qty2', 'qty_jual', 'qty2_jual', 'lebar_jadi', 'kode_k3l',null);
+	var $column_search3= array('no_batch','nama_produk', 'kode_produk', 'corak_remark', 'warna_remark', 'grade' ,'qty','uom','qty2','uom2','qty_jual','uom_jual','qty2_jual','uom2_jual','lebar_jadi','uom_lebar_jadi','lot', 'kode_k3l');
 	var $order3  	  = array('row_order' => 'asc');
 
 	private function _get_datatables_query3()
@@ -360,6 +360,13 @@ class m_barcodemanual extends CI_Model
 		return $result;
 	}
 
+	function get_data_mrp_manual_batch_items_by_row($kode,$lot)
+	{
+		$this->db->where('lot',$lot);
+		$this->db->where('kode',$kode);
+		$result = $this->db->get('mrp_manual_batch_items');
+		return $result;
+	}
 	function delete_data_barcode_manual_batch($kode,$row)
 	{
 		try{
@@ -379,6 +386,23 @@ class m_barcodemanual extends CI_Model
 	{
 		$this->db->where('kode', $kode);
 		$this->db->update_batch('mrp_manual_batch', $data_update, 'row_order');
+        return $this->db->affected_rows();
+	}
+
+	function update_data_barcode_manual_items_batch($data_update, $kode = null, $lot = null )
+	{
+		$this->db->where('kode', $kode);
+		$this->db->where('lot', $lot);
+		$query = $this->db->update_batch('mrp_manual_batch_items', $data_update, 'row_order');
+		// log_message('error',$this->db->last_query());
+        return $this->db->affected_rows();
+	}
+
+	function update_data_stock_quant(array $data_update, $quant_id, $lot)
+	{
+		$this->db->where('quant_id', $quant_id);
+		$this->db->where('lot', $lot);
+		$query = $this->db->update('stock_quant', $data_update);
         return $this->db->affected_rows();
 	}
 
@@ -457,7 +481,7 @@ class m_barcodemanual extends CI_Model
 	{
 		$this->db->WHERE('mbi.kode',$kode);
 		$this->db->WHERE('mbi.quant_id',$quant_id);
-		$this->db->SELECT('mbi.kode, mbi.tanggal_buat, mbi.lot, mbi.corak_remark, mbi.warna_remark, mbi.qty, mbi.uom, mbi.qty2, mbi.uom2, mbi.qty_jual, mbi.uom_jual, mbi.qty2_jual, mbi.uom2_jual, mbi.lebar_jadi, mbi.uom_lebar_jadi, mb.kode_k3l ');
+		$this->db->SELECT('mbi.kode, mbi.tanggal_buat, mbi.lot, mbi.corak_remark, mbi.warna_remark, mbi.qty, mbi.uom, mbi.qty2, mbi.uom2, mbi.qty_jual, mbi.uom_jual, mbi.qty2_jual, mbi.uom2_jual, mbi.lebar_jadi, mbi.uom_lebar_jadi, IFNULL(mb.kode_k3l, mbi.kode_k3l) as kode_k3l ');
 		$this->db->FROM("mrp_manual_batch mb");
 		$this->db->JOIN("mrp_manual_batch_items mbi","mb.kode = mb.kode AND mb.no_batch = mbi.no_batch AND mb.kode_produk = mbi.kode_produk"  ,"INNER" );
 		$query = $this->db->get();
