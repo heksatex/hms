@@ -453,10 +453,32 @@ class Bulk extends MY_Controller {
                 $data['data'] = $this->m_bulkdetail->getDataListBulk($condition);
                 $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
             } else {
-                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['no_bulk' => $bulk]), true);
+                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['no_bulk' => $bulk]));
                 $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
             }
 
+            echo json_encode($pers);
+        } catch (Exception $ex) {
+            
+        }
+    }
+
+    public function show_view_detail() {
+        try {
+            $pl = $this->input->post("pl");
+            $bulk = $this->input->post("bulk");
+            if (empty($pl) || trim($pl) === "") {
+                
+            }
+            $condition = ['b.no_pl' => $pl];
+            if (!empty($bulk) || (!trim($pl) === "")) {
+                $condition = array_merge($condition, ['no_bulk' => $bulk]);
+            }
+
+            log_message('error', json_encode($condition));
+
+            $data['data'] = $this->m_bulkdetail->getDataListBulk($condition, true);
+            $pers = $this->load->view('modal/v_bulk_show_detail', $data);
             echo json_encode($pers);
         } catch (Exception $ex) {
             
