@@ -6,8 +6,8 @@
 class M_inlet extends CI_Model
 {   
     var $table        = 'mrp_inlet';
-    var $column_order = array(null, 'lot', 'tanggal', 'kode_mrp', 'nama_sales_group','nama_produk', 'corak_remark', 'warna_remark','lebar_jadi', 'desain_barcode', 'nama_status',null);
-	var $column_search= array('lot', 'tanggal', 'kode_mrp', 'nama_sales_group','nama_produk', 'corak_remark', 'warna_remark','lebar_jadi', 'desain_barcode','nama_status');
+    var $column_order = array(null, 'in.lot', 'tanggal', 'in.kode_mrp', 'nama_sales_group','in.nama_produk', 'in.corak_remark', 'in.warna_remark','in.lebar_jadi', 'in.desain_barcode', 'nama_status',null);
+	var $column_search= array('in.lot', 'tanggal', 'in.kode_mrp', 'nama_sales_group','in.nama_produk', 'in.corak_remark', 'in.warna_remark','in.lebar_jadi', 'in.desain_barcode','nama_status');
 	var $order  	  = array('tanggal' => 'desc');
 	
 	private function _get_datatables_query()
