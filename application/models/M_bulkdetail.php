@@ -75,7 +75,7 @@ class M_bulkdetail extends CI_Model {
     public function getDataListBulks($condition = [], $whereIn = [], $whereNotIn = []) {
         $this->db->from($this->table . ' bd');
         $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk');
-        $this->db->join('picklist_detail a', 'a.barcode_id = bd.barcode');
+        $this->db->join('picklist_detail a', '(a.barcode_id = bd.barcode and a.valid <> "cancel")');
         $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id');
         $this->db->where($condition);
         if (count($whereIn) > 0) {
