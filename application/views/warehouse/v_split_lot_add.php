@@ -546,11 +546,7 @@
         if(tambah){
             var tbl_qty = document.getElementsByClassName('tbl_qty');
 		    var inx_tbl_qty = tbl_qty.length-1;
-            // if(dept == 'GJD'){
-            //     var tbl_uom_lebar_jadi = document.getElementsByClassName('tbl_uom_lebar_jadi');
-            //     var inx_tbl_uom_lebar_jadi = tbl_uom_lebar_jadi.length-1;
-            //     // alert(inx_tbl_uom_lebar_jadi)
-            // }
+          
             var index = $("#table_items tbody tr:last-child").index();
             var row   ='<tr class="num">'
                 row  +='<td></td>';
@@ -578,11 +574,11 @@
             $('#table_items tbody').append(row);
             // $("#table_items tbody tr").eq(index + 1).find(".add, .edit").toggle();
             // $('[data-toggle="tooltip"]').tooltip();
-            // if(dept == 'GJD'){
-            //     var option = new Option('Inch', 'Inch');
-            //     $('#table_items tbody tr').eq(index+1).find('#tbl_uom_lebar_jadi').append(option);
-            //     // alert('tes');
-            // }
+            if(dept == 'GJD'){
+                var $option = $("<option selected></option>").val('Inch').text('Inch');
+                $('#table_items tbody tr #tbl_uom_lebar_jadi option[value="'+tbl_uom_lebar_jadi_value+'"]').eq(index+1).prop('selected', true); 
+                //  $("#select option[value=1]").prop('selected', true); 
+            }
             
             tbl_qty[inx_tbl_qty+1].focus();
 

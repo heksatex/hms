@@ -272,33 +272,34 @@ class Splitlot extends MY_Controller
 
                         // insert into adj 
                         $type_adjustment = 6; // 6 = split
-                        $sql_adjustment .= "('".$kode_adjustment."', '".$tgl."','".$nama_departemen."','".$lokasi_stock."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."', '".$type_adjustment."'), ";
+                        
+                        // $sql_adjustment .= "('".$kode_adjustment."', '".$tgl."','".$nama_departemen."','".$lokasi_stock."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."', '".$type_adjustment."'), ";
 
-                        $method         = $departemen.'|ADJ';
-                        $lokasi_dari    = $lokasi_stock;
-                        $lokasi_tujuan  = $lokasi_adj;
+                        // $method         = $departemen.'|ADJ';
+                        // $lokasi_dari    = $lokasi_stock;
+                        // $lokasi_tujuan  = $lokasi_adj;
 
-                        $qty1_move = 0 - $qty;
-                        $qty2_move = 0 - $qty2;
+                        // $qty1_move = 0 - $qty;
+                        // $qty2_move = 0 - $qty2;
 
-                        // ADJ OUT
-                        // insert to adj items
-                        $sql_adjustment_items .= "('".$kode_adjustment."','".$quant_id."','".$kode_produk."','".$lot."','".$uom_qty."','".$qty."',0,'".$uom_qty2."','".$qty2."',0,'".$move_id."','".$qty1_move."','".$qty2_move."',$row_order), ";
+                        // // ADJ OUT
+                        // // insert to adj items
+                        // $sql_adjustment_items .= "('".$kode_adjustment."','".$quant_id."','".$kode_produk."','".$lot."','".$uom_qty."','".$qty."',0,'".$uom_qty2."','".$qty2."',0,'".$move_id."','".$qty1_move."','".$qty2_move."',$row_order), ";
 
-                        $origin_out      = $kode_adjustment.'|'.$row_order;
+                        // $origin_out      = $kode_adjustment.'|'.$row_order;
 
-                        // stock_move ADJ OUT
-                        $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin_out."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
+                        // // stock_move ADJ OUT
+                        // $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin_out."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
 
-                        // insert stock move produk
-                        $sql_stock_move_produk_batch .= "('".$move_id."','".($kode_produk)."','".($nama_produk)."','".$qty."','".$uom_qty."','".$status_done."','1',''), ";
+                        // // insert stock move produk
+                        // $sql_stock_move_produk_batch .= "('".$move_id."','".($kode_produk)."','".($nama_produk)."','".$qty."','".$uom_qty."','".$status_done."','1',''), ";
                         
                         // insert stock_move_items
-                        $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".($kode_produk)."', '".($nama_produk)."','".$lot."','".$qty."','".($uom_qty)."','".$qty2."','".$uom_qty2."','".$status_done."','1','','".$tgl."','','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
+                        // $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".($kode_produk)."', '".($nama_produk)."','".$lot."','".$qty."','".($uom_qty)."','".$qty2."','".$uom_qty2."','".$status_done."','1','','".$tgl."','','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
                         
-                        $last_move = $last_move + 1;
-                        $move_id   = "SM".$last_move;
-                        $row_order++;
+                        // $last_move = $last_move + 1;
+                        // $move_id   = "SM".$last_move;
+                        // $row_order++;
 
                         // lock table
                         // $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE, stock_move_produk WRITE, stock_move_items WRITE, adjustment WRITE, adjustment_items WRITE, split WRITE, split_items WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE');
@@ -404,6 +405,9 @@ class Splitlot extends MY_Controller
 
                             // stock_move ADJ OUT
                             $sql_stock_move_batch .= "('".$move_id."','".$tgl."','".$origin_out."','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','".$status_done."','1',''), ";
+
+                            // insert stock move produk
+                            $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($kode_produk)."','".addslashes($nama_produk)."','".$qty."','".$uom_qty."','".$status_done."','1',''), ";
                             
                             // insert stock_move_items
                             $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".$lot."','".$qty."','".($uom_qty)."','".$qty2."','".$uom_qty2."','".$status_done."','1','','".$tgl."','','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."'), ";
