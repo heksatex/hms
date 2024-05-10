@@ -82,6 +82,12 @@
                                 <textarea class="form-control input-sm" name="note" id="note" ><?php echo htmlentities($join->note);?></textarea>
                             </div>                                    
                         </div>
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-4"><label>Tanda Join</label></div>
+                            <div class="col-xs-8">
+                                <input type="checkbox" name="tanda_join" id="tanda_join" <?php echo $join->tanda_join == 'true'? 'checked' : '' ?> value="true">
+                            </div>                                    
+                        </div>
                     </div>
 
                     <div class="col-md-6" id="scan_lot" >
@@ -492,6 +498,12 @@
         let dept = "<?php echo $join->dept_id;?>";
         let note = $("#note").val();
         var status = "<?php echo $join->status;?>";
+        let tanda = $("input:checked").val();
+        if(tanda == 'true'){
+            tanda_join = 'true';
+        }else{
+            tanda_join = 'false'
+        }
         if(status == 'done'){
             alert_modal_warning('Status Join Lot sudah Done ! ');
         }else if(status == 'cancel'){
@@ -514,7 +526,7 @@
                         $('#btn-simpan').button('loading');
                         please_wait(function(){});
                     },
-                    data: {kode:kode, dept:dept, note:note}, 
+                    data: {kode:kode, dept:dept, note:note, tanda_join:tanda_join}, 
                     success: function(data){
                        if(data.status == 'failed'){
                             unblockUI( function() {
