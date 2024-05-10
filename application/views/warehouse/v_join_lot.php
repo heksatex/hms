@@ -68,12 +68,20 @@
                                             <div class="col-xs-4"><label>Nama Produk</label></div>
                                             <div class="col-xs-8">
                                                 <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" />
+                                            </div>
+                                            <div class="col-xs-4"><label>Corak Remark</label></div>
+                                            <div class="col-xs-8">
+                                                <input type="text" class="form-control input-sm" name="corak_remark" id="corak_remark" />
                                             </div>                                    
+                                            <div class="col-xs-4"><label>Warna Remark</label></div>
+                                            <div class="col-xs-8">
+                                                <input type="text" class="form-control input-sm" name="warna_remark" id="warna_remark" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <div class="col-xs-4"><label>Lot </label></div>
+                                            <div class="col-xs-4"><label>Barcode/Lot </label></div>
                                             <div class="col-xs-8">
                                                 <input type="text" class="form-control input-sm" name="lot" id="lot" />
                                             </div>
@@ -106,8 +114,13 @@
                     <th>Tanggal transaksi</th>
                     <th>Departemen</th>
                     <th>Jml Join</th>
+                    <th>Nama Produk</th>
+                    <th>Corak Remark</th>
+                    <th>Warna Remark</th>
+                    <th>Barcode/Lot</th>
                     <th>Notes</th>
                     <th>Status</th>
+                    <th></th>
                     </tr>
                 </thead>
                 </table>
@@ -127,6 +140,11 @@
 
 <?php $this->load->view("admin/_partials/js.php") ?>
 
+<div id="load_modal">
+    <!-- Load Partial Modal -->
+   <?php $this->load->view("admin/_partials/modal.php") ?>
+</div>
+
 <script type="text/javascript">
 
     //* Show collapse advanced search
@@ -143,8 +161,8 @@
     $(document).ready(function() {
  
         //datatables
-        table = $('#example1').DataTable({ 
-            "stateSave": true,
+        var table = $('#example1').DataTable({ 
+            // "stateSave": true,
             "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-5'><'col-sm-7'p>>",
@@ -166,29 +184,54 @@
                     data.dept_id      = $('#departemen').val();
                     data.nama_produk  = $('#nama_produk').val();
                     data.lot          = $('#lot').val();
-                    data.note = $('#note').val();
+                    data.warna_remark = $('#warna_remark').val();
+                    data.corak_remark = $('#corak_remark').val();
+                    data.note         = $('#note').val();
                 },
             },
  
             "columnDefs": [
-              { 
-                  "targets": [ 0 ], 
-                  "orderable": false, 
-              },
-              {
-                "targets" : 1,
-                 render: function (data, type, full, meta) {
-                        return "<div class='text-wrap width-110'>" + data + "</div>";
-                }
-              },
-              {
-                "targets" : 2,
-                 render: function (data, type, full, meta) {
-                        return "<div class='text-wrap width-70'>" + data + "</div>";
-                }
-              },
-
+                { 
+                    "targets": [ 0 ], 
+                    "orderable": false, 
+                },
+                {
+                    "targets" : 1,
+                    render: function (data, type, full, meta) {
+                            return "<div class='text-wrap width-110'>" + data + "</div>";
+                    }
+                },
+                {
+                    "targets" : 2,
+                    render: function (data, type, full, meta) {
+                            return "<div class='text-wrap width-70'>" + data + "</div>";
+                    }
+                },
+                {
+                'targets':12,
+                'data' : 12,
+                'checkboxes': {
+                    'selectRow': true
+                    },
+                    'createdCell':  function (td, cellData, rowData, row, col){
+                        var rowId = rowData[12];
+                    },
+                },
             ],
+            "select": {
+                'style': 'multi'
+            },
+            // 'rowCallback': function(row, data, dataIndex){
+            //     var rowId = data[12];
+            // }
+            'rowCallback': function(row, data, dataIndex){
+               // Get row ID
+               var rowId = data[11];
+                // If row ID is in the list of selected row IDs
+                if (rowId != 'Done'){
+                  $(row).find('input[type="checkbox"]').prop('disabled', true);
+               }
+            }
         });
 
         $('#btn-filter').click(function(){ //button filter event click
@@ -199,7 +242,48 @@
         });
        
  
+  
+
+        $(document).on('click','#btn-print',function(e){
+            e.preventDefault();
+
+            var myCheckboxes = table.column(12).checkboxes.selected();
+            var myCheckboxes_arr = new Array();
+
+            $.each(myCheckboxes, function(index, rowId){        
+                myCheckboxes_arr.push(rowId);
+            });
+
+            if (myCheckboxes.length === 0) {
+                alert_notify('fa fa-warning', 'Pilih LOT terlebih dahulu yang akan di print !', 'danger', function() {});
+            }else{
+                $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                $("#print_data").modal({
+                    show: true,
+                    backdrop: 'static'
+                });
+                $("#print_data .modal-dialog .modal-content .modal-footer #btn-print-modal").remove();
+
+                $('.modal-title').text('Pilih Desain Barcode dan K3L ');
+                $.post('<?php echo site_url()?>warehouse/joinlot/print_modal2',
+                { data:myCheckboxes_arr},
+                    function(html){
+                        setTimeout(function() {$(".print_data").html(html);  },1000);
+                        $("#print_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print-modal" name="btn-print-modal" >Print</button>');
+
+                    }   
+                );
+            }
+        });
     });
+
+     // load new page print
+    function print_voucher() {
+        var win = window.open();
+        win.document.write($("#printed").html());
+        win.document.close();
+        setTimeout(function(){ win.print(); win.close();}, 200);
+    }
  
 </script>
 

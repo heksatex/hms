@@ -93,6 +93,12 @@
                                 <textarea class="form-control input-sm" name="note" id="note" ></textarea>
                             </div>                                    
                         </div>
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-4"><label>Tanda Join</label></div>
+                            <div class="col-xs-8">
+                                <input type="checkbox" name="tanda_join" id="tanda_join" value="true">
+                            </div>                                    
+                        </div>
                     </div>
 
                     <div class="col-md-6" >
@@ -205,6 +211,12 @@
             
         let dept = $("#departemen").val();
         let note = $("#note").val();
+        let tanda = $("input:checked").val();
+        if(tanda == 'true'){
+            tanda_join = 'true';
+        }else{
+            tanda_join = 'false'
+        }
 
         if(dept.length === 0){
             alert_notify("fa fa-warning","Departemen Harus diisi !","danger",function(){});
@@ -224,7 +236,7 @@
                         $('#btn-simpan').button('loading');
                         please_wait(function(){});
                     },
-                    data: {dept:dept, note:note},
+                    data: {dept:dept, note:note, tanda_join:tanda_join},
                     success: function(data){
                        if(data.status == 'failed'){
                             unblockUI( function() {
