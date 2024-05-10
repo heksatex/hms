@@ -230,7 +230,7 @@
                                     <tr class="num">
                                       <td></td>
                                       <?php if($split->dept_id == 'GJD'){?>
-                                      <td><a href="#" class="edit_items" data-lot="<?php echo $row->lot_baru ?>"  data-title="Edit"> <?php echo $row->corak_remark ?? 'Edit'?> </a></td>
+                                      <td><a href="#" class="edit_items" data-lot="<?php echo $row->lot_baru ?>"  data-title="Edit"> <?php echo !empty($row->corak_remark)? $row->corak_remark :'Edit' ?> </a></td>
                                       <td><?php echo $row->warna_remark?></td>
                                       <?php }?>
                                       <td align="right"><?php echo number_format($row->qty,2)?></td>
@@ -398,6 +398,30 @@
               $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
         });
     }
+
+    
+    // untuk focus after select2 close
+    $(document).on('focus', '.select2', function(e) {
+        if (e.originalEvent) {
+            var s2element = $(this).siblings('select');
+            s2element.select2('open');
+            // Set focus back to select2 element on closing.
+            s2element.on('select2:closing', function(e) {
+                s2element.select2('focus');
+            });
+        }
+    });
+
+    $(document).on('select2:opening', '.select2', function(e) {
+        if ($(this).attr('readonly') == 'readonly') {
+            //   console.log( 'can not open : readonly' );
+            e.preventDefault();
+            $(this).select2('close');
+            return false;
+        } else {
+            //   console.log( 'can be open : free' );
+        }
+    });
   
 </script>
 
