@@ -181,8 +181,12 @@ class Picklistvalidasi extends MY_Controller {
     public function data_detail() {
         try {
             $pl = $this->input->post('filter');
-
+            $status = $this->input->post('status');
             $condition = ['no_pl' => $pl, 'valid !=' => 'cancel'];
+            if (!empty($status) || trim($status) !== "") {
+                $condition = array_merge($condition, ["valid" => $status]);
+            }
+
             $list = $this->m_PicklistDetail->getData($condition);
             $no = $_POST['start'];
             $data = [];

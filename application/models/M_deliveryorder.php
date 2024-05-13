@@ -15,9 +15,9 @@ class M_deliveryorder extends CI_Model {
 
     protected $table = "delivery_order";
     protected $tableSJ = "delivery_order_sj";
-    protected $column_order = [null, 'delivery_order.no', 'no_sj', 'no_picklist', 'tb.name', 'tanggal_dokumen', null, 'delivery_order.status'];
+    protected $column_order = [null, 'delivery_order.no', 'no_sj', 'no_picklist', 'tb.name', 'tanggal_dokumen', null, null, 'delivery_order.status'];
     protected $order = ['tanggal_buat' => 'desc'];
-    protected $column_search = array('no_sj', 'delivery_order.no', 'no_picklist', 'pr.nama', "tanggal_buat", "tanggal_dokumen", "delivery_order.status", "tb.name");
+    protected $column_search = array('no_sj', 'delivery_order.no', 'no_picklist', 'pr.nama', "tanggal_buat", "tanggal_dokumen", "delivery_order.status", "tb.name", "msg.nama_sales_group");
 
     public function __construct() {
         parent::__construct();
@@ -26,11 +26,20 @@ class M_deliveryorder extends CI_Model {
     protected function getDataQuery() {
         $this->db->from($this->table);
         $this->db->join("picklist p", 'p.no = delivery_order.no_picklist');
+        $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = p.sales_kode', 'left');
         $this->db->join("type_bulk tb", "tb.id = p.type_bulk_id", "left");
         $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
         foreach ($this->column_search as $key => $value) {
-            if ($_POST["search"]["value"]) {
-                $this->db->or_like($value, $_POST["search"]["value"]);
+            if ($_POST['search']['value']) {
+                if ($key === 0) {
+                    $this->db->group_start();
+                    $this->db->like($value, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($value, $_POST['search']['value']);
+                }
+
+                if (count($this->column_search) - 1 === $key)
+                    $this->db->group_end();
             }
         }
 
@@ -44,7 +53,7 @@ class M_deliveryorder extends CI_Model {
 
     public function getData($conditon = []) {
         $this->getDataQuery();
-        $this->db->select("delivery_order.*,pr.nama as buyer,tb.name as bulk");
+        $this->db->select("delivery_order.*,pr.nama as buyer,tb.name as bulk,msg.nama_sales_group as sales_nama");
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         if (count($conditon) > 0)
@@ -207,6 +216,15 @@ class M_deliveryorder extends CI_Model {
         }
 
 
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getTotalBarcode(array $condition) {
+        $this->db->from("picklist_detail pd");
+        $this->db->select("count(pd.barcode_id) as total,pd.valid");
+        $this->db->where($condition);
+        $this->db->group_by("pd.valid");
         $query = $this->db->get();
         return $query->result();
     }
