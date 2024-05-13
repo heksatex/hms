@@ -121,7 +121,9 @@ class Stockquants extends MY_Controller
     
                 }
                 // finish transaction
-                $this->_module->finishTransaction();
+                if(!$this->_module->finishTransaction()){
+                    throw new \Exception(" Data Gagal Disimpan !", 200);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             }
         

@@ -209,12 +209,16 @@
                 },
                 {
                 'targets':12,
-                'data' : 12,
+                // 'data' : 12,
                 'checkboxes': {
                     'selectRow': true
                     },
                     'createdCell':  function (td, cellData, rowData, row, col){
-                        var rowId = rowData[12];
+                        // var rowId = rowData[12];
+                        var rowId2 = rowData[11];
+                        if (rowId2 != 'Done'){
+                            this.api().cell(td).checkboxes.disable();
+                        }
                     },
                 },
             ],
@@ -225,12 +229,12 @@
             //     var rowId = data[12];
             // }
             'rowCallback': function(row, data, dataIndex){
-               // Get row ID
-               var rowId = data[11];
+                // Get row ID
+                var rowId = data[11];
                 // If row ID is in the list of selected row IDs
                 if (rowId != 'Done'){
                   $(row).find('input[type="checkbox"]').prop('disabled', true);
-               }
+                }
             }
         });
 

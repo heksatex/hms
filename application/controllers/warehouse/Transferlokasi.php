@@ -375,10 +375,10 @@ class Transferlokasi extends MY_Controller
 					    $this->_module->gen_history($sub_menu, $kode_tl, $jenis_log, $note_log, $username);
 
 		      			$callback = array('status' => 'success', 'message' => 'Scan Barcode Berhasil', 'icon' =>'fa fa-check', 'type' => 'success'  ); 
-                        // unlock table
-	                    $this->_module->unlock_tabel();
-
-	      			}
+						  
+					}
+					// unlock table
+					$this->_module->unlock_tabel();
 
 	      		}
 
