@@ -174,10 +174,10 @@ class Deliveryorder extends MY_Controller {
                 $data[] = array(
                     $no,
                     $value->bulk_no_bulk ?? "",
-                    $value->barcode_id  ?? "",
-                    $value->corak_remark  ?? "",
-                    $value->warna_remark  ?? "",
-                    $value->qty  ?? ""
+                    $value->barcode_id ?? "",
+                    $value->corak_remark ?? "",
+                    $value->warna_remark ?? "",
+                    $value->qty ?? ""
                 );
             }
             echo json_encode(array("draw" => $_POST['draw'],
@@ -402,10 +402,11 @@ class Deliveryorder extends MY_Controller {
             $tgl_dok = date("Y-m-d H:i:s", $time_dokumen);
             $diff = date_diff(date_create($now), date_create($tgl_dok));
             $interval = (int) $diff->format("%a");
+            log_message('error', "interval : " . $interval);
             $data = [
                 'no' => $nodo,
                 'no_sj' => $nosj,
-                'tanggal_dokumen' => $interval ? $tgl_dok : $now,
+                'tanggal_dokumen' => $tgl_dok,
                 'tanggal_buat' => $now,
                 'note' => $this->input->post("ket"),
                 'status' => 'draft',
