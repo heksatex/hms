@@ -402,7 +402,6 @@ class Deliveryorder extends MY_Controller {
             $tgl_dok = date("Y-m-d H:i:s", $time_dokumen);
             $diff = date_diff(date_create($now), date_create($tgl_dok));
             $interval = (int) $diff->format("%a");
-            log_message('error', "interval : " . $interval);
             $data = [
                 'no' => $nodo,
                 'no_sj' => $nosj,
