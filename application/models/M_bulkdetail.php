@@ -48,19 +48,17 @@ class M_bulkdetail extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function getDataListBulk(array $condition, $item = false) {
+    public function getDataListBulk(array $condition, $detail = false) {
         $this->db->from($this->table . ' bd');
         $this->db->where($condition);
         $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk', 'right');
         $this->db->join('picklist_detail pl', '(pl.barcode_id = bd.barcode and pl.valid != "cancel")');
-        $this->db->group_by('pl.warna_remark, pl.corak_remark,pl.uom,b.no_bulk');
-//        if (!$item) {
+        if (!$detail) {
+            $this->db->group_by('pl.warna_remark, pl.corak_remark,pl.uom,b.no_bulk');
+            $this->db->select("sum(qty) as total_qty,count(qty) as jumlah_qty");
+        }
         $this->db->order_by("no_bulk asc,pl.corak_remark asc,pl.warna_remark asc,pl.uom asc");
-//        } else {
-//            $this->db->order_by("bd.tanggal_input desc,no_bulk asc,pl.corak_remark asc,pl.warna_remark asc");
-//        }
-
-        $query = $this->db->select('b.no_bulk,pl.corak_remark,pl.warna_remark,sum(qty) as total_qty,count(qty) as jumlah_qty')->get();
+        $query = $this->db->select('b.no_bulk,pl.corak_remark,pl.warna_remark,qty')->get();
         return $query->result();
     }
 
@@ -77,7 +75,7 @@ class M_bulkdetail extends CI_Model {
     public function getDataListBulks($condition = [], $whereIn = [], $whereNotIn = []) {
         $this->db->from($this->table . ' bd');
         $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk');
-        $this->db->join('picklist_detail a', 'a.barcode_id = bd.barcode');
+        $this->db->join('picklist_detail a', '(a.barcode_id = bd.barcode and a.valid <> "cancel")');
         $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id');
         $this->db->where($condition);
         if (count($whereIn) > 0) {
@@ -100,5 +98,65 @@ class M_bulkdetail extends CI_Model {
         $this->db->join('picklist_detail pl', '(pl.barcode_id = bd.barcode and pl.valid != "cancel")');
         $query = $this->db->select('count(DISTINCT(b.no_bulk)) as total_bulk, sum(qty) as total_qty, count(qty) as jumlah_qty')->get();
         return $query->row();
+    }
+
+    protected function _barcodeOnBulk() {
+        $columnSearch = ["bulk_no_bulk", "pd.barcode_id", "pd.corak_remark", "pd.warna_remark", "qty"];
+        $columnOrder = [null, "bulk_no_bulk", "pd.barcode_id", "pd.corak_remark", "pd.warna_remar", "qty"];
+        $order = ['bulk_no_bulk' => 'asc'];
+
+        $this->db->from($this->table . ' bd');
+        $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
+        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id", "right");
+        $this->db->select("bulk_no_bulk,barcode_id,corak_remark,warna_remark,qty");
+        foreach ($columnSearch as $key => $value) {
+            if ($_POST['search']['value']) {
+                if ($key === 0) {
+                    $this->db->group_start();
+                    $this->db->like($value, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($value, $_POST['search']['value']);
+                }
+
+                if (count($columnSearch) - 1 === $key)
+                    $this->db->group_end();
+            }
+        }
+        if (isset($_POST['order'])) { // here order processing
+            $this->db->order_by($columnOrder[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($order)) {
+            $order = $order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+    }
+
+    public function getDataBulk(array $condition = []) {
+        $this->_barcodeOnBulk();
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        if ($_POST['length'] != -1)
+            $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCountDataFilteredBulk(array $condition = []) {
+        $this->_barcodeOnBulk();
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function getCountAllDataBulk(array $condition = []) {
+        $this->db->from($this->table . ' bd');
+        $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
+        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id", "right");
+        if (count($condition) > 0) {
+            $this->db->where($condition);
+        }
+        return $this->db->count_all_results();
     }
 }

@@ -196,7 +196,7 @@
             date: new Date()
                     //                    maxDate: new Date()
         });
-        $("#btn-simpan").on("click", function () {
+        $("#btn-simpan").unbind("click").off("click").on("click", function () {
             $("#form-do-submit").trigger('click');
         });
         const formdo = document.forms.namedItem("form-do");

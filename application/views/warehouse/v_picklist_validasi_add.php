@@ -180,16 +180,17 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!--                                            <div class="form-group">
-                                                                                            <div class="col-md-12 col-xs-12">
-                                                                                                <select class="form-control" aria-label="Default select example">
-                                                                                                    <option value="all" selected>Filter Status Barcode</option>
-                                                                                                    <option value="1">One</option>
-                                                                                                    <option value="2">Two</option>
-                                                                                                    <option value="3">Three</option>
-                                                                                                </select>
-                                                                                            </div>
-                                                                                        </div>-->
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <select class="form-control" aria-label="" name="filter_status" id="filter-status">
+                                                        <option value="">Tampilkan Semua</option>
+                                                        <option value="draft">Draft</option>
+                                                        <option value="realisasi">Realisasi</option>
+                                                        <option value="validasi">Validasi</option>
+                                                        <option value="done">Done</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-6 col-xs-12 table-responsive over">
                                             <div class="table-responsive over" style="max-height:200px;"  id="show_error">
@@ -310,6 +311,7 @@
                         "type": "POST",
                         "data": function (d) {
                             d.filter = $("#pl").val();
+                            d.status = $("#filter-status").find(":selected").val();
                         }
                     },
                     "columnDefs": [
@@ -393,7 +395,8 @@
                                                 $("#totalLot").html(dataPicklist.total_lot);
                                                 $("#scanValid").html(dataPicklist.total_validasi);
                                                 $("#scanInvalid").html(dataInvalid);
-                                                $("#invalid").html(dataPicklist.total_lot - dataPicklist.total_validasi);
+                                                if (dataPicklist.status !== "done")
+                                                    $("#invalid").html(dataPicklist.total_lot - dataPicklist.total_validasi);
                                                 table.search("").draw(false);
                                                 error_barcode = [];
                                                 loadError(error_barcode);
@@ -458,6 +461,10 @@
                 },
                         false
                         );
+
+                $("#filter-status").on("change", (() => {
+                    table.search("").draw(false);
+                }));
 
             });
 

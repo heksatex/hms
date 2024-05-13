@@ -32,6 +32,7 @@
                                             <th class="style">Tipe</th>
                                             <th class="style">Tanggal Kirim</th>
                                             <th class="style">Buyer</th>
+                                            <th class="style">Marketing</th>
                                             <th class="style">Status</th>
                                         </tr>
                                     </thead>
@@ -72,7 +73,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 6],
+                            "targets": [0, 6, 7],
                             "orderable": false
                         }
                     ]

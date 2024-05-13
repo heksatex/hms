@@ -172,7 +172,7 @@
                             $(".print_data").html($("#pilihan-print").html());
                             let bulk = $(this).attr("data-id");
                             let pl = "<?= $picklist->no ?>";
-                            $(".print-bulk").on('click', function () {
+                            $(".print-bulk").unbind("click").off("click").on('click', function () {
                                 $.post("<?= base_url('warehouse/bulk/print_bulk/') ?>",
                                         {
                                             "pl": pl,
@@ -208,7 +208,7 @@
                         false
                         );
 
-                $("#btn-add-bulk").on('click', function (e) {
+                $("#btn-add-bulk").unbind("click").off("click").on('click', function (e) {
                     e.preventDefault();
                     bootbox.prompt({
                         title: "Tambah Bulk",

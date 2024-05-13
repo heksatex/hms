@@ -79,11 +79,21 @@ class Deliveryorder extends MY_Controller {
 //            $data["section"] = "EDIT";
             $data["user"] = $this->m_user->get_user_by_username($this->session->userdata('username'));
             $data["do"] = $this->m_deliveryorder->getDataDetail(['a.no' => $kode_decrypt]);
+            $total_status = ["valid" => 0, "invalid" => 0];
             if (is_null($data["do"])) {
                 throw new Exception();
             }
             if ($data["do"]->status === 'draft') {
+                $getTotalItem = $this->m_deliveryorder->getTotalBarcode(['no_pl' => $data["do"]->no_picklist, 'valid !=' => 'cancel']);
                 $recordsTotal = $this->m_PicklistDetail->getCountDetail(['no_pl' => $data["do"]->no_picklist, 'valid !=' => 'cancel']);
+
+                foreach ($getTotalItem as $key => $value) {
+                    if (in_array($value->valid, ["done", "validasi", "retur"])) {
+                        $total_status["valid"] += $value->total;
+                        continue;
+                    }
+                    $total_status["invalid"] += $value->total;
+                }
             } else {
 //                $recordsTotal = $this->m_deliveryorderdetail->countData(
 //                        [
@@ -95,6 +105,7 @@ class Deliveryorder extends MY_Controller {
             $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist], '', 'delivery');
 
             $data['total_detail'] = $recordsTotal;
+            $data["total_status"] = $total_status;
             $this->load->view('warehouse/v_do_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -109,6 +120,22 @@ class Deliveryorder extends MY_Controller {
             $data["type"] = $this->input->post("type");
             $data ["form"] = "edit";
             $datas = $this->load->view("warehouse/v_do_list_detail", $data, true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' => $datas]));
+        } catch (Exception $ex) {
+            $data ["pl"] = $this->input->post("pl");
+            $datas = $this->load->view("warehouse/v_do_list_detail_bulk", $data, true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' => $datas]));
+        }
+    }
+
+    public function list_detail_view_bulk() {
+        try {
+            $data ["pl"] = $this->input->post("pl");
+            $datas = $this->load->view("warehouse/v_do_list_detail_bulk", $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(['data' => $datas]));
@@ -128,6 +155,37 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(['data' => $datas]));
+        } catch (Exception $ex) {
+            
+        }
+    }
+
+    public function list_detail_bulk() {
+        try {
+            $pl = $this->input->post("pl");
+            $condition = ["pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
+            $data = array();
+            $no = $_POST['start'];
+            $list = $this->m_bulkdetail->getDataBulk($condition);
+            $recordsTotal = $this->m_bulkdetail->getCountAllDataBulk($condition);
+            $recordsFiltered = $this->m_bulkdetail->getCountDataFilteredBulk($condition);
+            foreach ($list as $value) {
+                $no++;
+                $data[] = array(
+                    $no,
+                    $value->bulk_no_bulk ?? "",
+                    $value->barcode_id  ?? "",
+                    $value->corak_remark  ?? "",
+                    $value->warna_remark  ?? "",
+                    $value->qty  ?? ""
+                );
+            }
+            echo json_encode(array("draw" => $_POST['draw'],
+                "recordsTotal" => $recordsTotal,
+                "recordsFiltered" => $recordsFiltered,
+                "data" => $data,
+            ));
+            exit();
         } catch (Exception $ex) {
             
         }
@@ -680,6 +738,7 @@ class Deliveryorder extends MY_Controller {
                     $field->bulk,
                     $field->tanggal_dokumen,
                     $field->buyer,
+                    $field->sales_nama,
                     $field->status,
                 );
                 $data[] = $row;

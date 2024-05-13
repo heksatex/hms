@@ -40,6 +40,12 @@ const checkIsFuncExist = function (func) {
 var statusInput = 0;
 var input = "";
 const checkScannerInput = function (e, tanda = "*", listVal = {}) {
+
+    if (e.key === "Backspace" || e.key === "]") {
+        statusInput = 0;
+        input = "";
+        return;
+    }
     if (e.key === tanda)
         statusInput++;
 

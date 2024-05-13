@@ -143,49 +143,49 @@
                                                 </div>
                                             </form>
                                         </div>
-<!--                                        <div class="col-md-6 col-xs-12">
-                                            <div class="row">
-                                                <div class="col-xs-6">
-                                                    <div class="form-group">
-                                                        <div class="col-xs-8">
-                                                            <label class="label-pill">Total LOT</label>
-                                                        </div>
-                                                        <div class="col-xs-4">
-                                                            <span id="total-lot">0</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-xs-8">
-                                                            <label class="label-pill">Scan Valid</label>
-                                                        </div>
-                                                        <div class="col-xs-4">
-                                                            <span id="scan-valid">0</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-xs-6">
-                                                    <div class="form-group">
-                                                        <div class="col-xs-8">
-                                                            <label class="label-pill">Belum Scan</label>
-                                                        </div>
-                                                        <div class="col-xs-4">
-                                                            <span id="not-scan">0</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <div class="col-xs-8">
-                                                            <label class="label-danger text-aqua">Scan Invalid</label>
-                                                        </div>
-                                                        <div class="col-xs-4">
-                                                            <span id="scan-invalid">0</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                            </div>
-
-                                        </div>-->
+                                        <!--                                        <div class="col-md-6 col-xs-12">
+                                                                                    <div class="row">
+                                                                                        <div class="col-xs-6">
+                                                                                            <div class="form-group">
+                                                                                                <div class="col-xs-8">
+                                                                                                    <label class="label-pill">Total LOT</label>
+                                                                                                </div>
+                                                                                                <div class="col-xs-4">
+                                                                                                    <span id="total-lot">0</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="form-group">
+                                                                                                <div class="col-xs-8">
+                                                                                                    <label class="label-pill">Scan Valid</label>
+                                                                                                </div>
+                                                                                                <div class="col-xs-4">
+                                                                                                    <span id="scan-valid">0</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        
+                                                                                        <div class="col-xs-6">
+                                                                                            <div class="form-group">
+                                                                                                <div class="col-xs-8">
+                                                                                                    <label class="label-pill">Belum Scan</label>
+                                                                                                </div>
+                                                                                                <div class="col-xs-4">
+                                                                                                    <span id="not-scan">0</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="form-group">
+                                                                                                <div class="col-xs-8">
+                                                                                                    <label class="label-danger text-aqua">Scan Invalid</label>
+                                                                                                </div>
+                                                                                                <div class="col-xs-4">
+                                                                                                    <span id="scan-invalid">0</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        
+                                                                                    </div>
+                                        
+                                                                                </div>-->
                                         <!--                                        <div class="col-md-6 col-xs-12">
                                                                                     <div class="form-group">
                                                                                         <div class="col-md-12 col-xs-12">
@@ -268,6 +268,41 @@
                 $("#bal_aktif").html("-");
                 $("#search").focus();
             };
+            const checkDetail = ((pl, bulk) => {
+                please_wait(() => {
+                });
+
+                console.log(bulk);
+                $("#view_data").modal({
+                    show: true,
+                    backdrop: 'static'
+                });
+                $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                $('.modal-title').text("Detail List Item Bulk " + bulk );
+                $.post('<?php echo site_url() ?>warehouse/bulk/show_view_detail',
+                        {
+                            "bulk": bulk,
+                            "pl": pl
+
+                        },
+                        function (html) {
+                            setTimeout(function () {
+                                $(".view_body").html(html);
+                            }, 1000);
+                        }
+                );
+                unblockUI(() => {
+                }, 50);
+
+            });
+            const hideDetail = (() => {
+                $("#view_data").modal('hide');
+            });
+            $('#view_data').on('hidden.bs.modal', function () {
+
+                $("#search").val("");
+                $("#search").focus();
+            });
             $(document).keydown(function (e) {
                 checkInput(e, "=", {
                     "=scan=": function () {
@@ -283,7 +318,13 @@
                     },
                     "=bulk=": function () {
                         checkStatusBulk();
-                    }
+                    },
+                    "=detail=": function () {
+                        checkDetail($("#pl").val(), $("#no_bulk").val());
+                    },
+                    "=hidedetail=": (() => {
+                        hideDetail();
+                    })
                 });
             });
 
@@ -319,7 +360,7 @@
                 statusScan = "Silahkan Scan Barcode Picklist";
                 $("#search").focus();
 
-                $("#btn-simpan").on('click', function (e) {
+                $("#btn-simpan").unbind("click").off("click").on('click', function (e) {
                     e.preventDefault();
                     $("#tambah_data").modal({
                         show: true,
@@ -333,7 +374,7 @@
                             $("#btn-tambah").html("Simpan");
                         }, 1000);
                     });
-                    $("#btn-tambah").on("click", function () {
+                    $("#btn-tambah").unbind("click").off("click").on("click", function () {
                         $("#btn_form_net_gross").trigger("click");
                     });
                 });
@@ -345,10 +386,10 @@
                     please_wait(function () {});
                     try {
                         let search = $("#search").val();
-                        if (search.charAt(0) === "=") {
+                        if (search.charAt(0) === "=" || search.charAt(0) === "[") {
 
                             $("#search").val("");
-                            throw new Error("errorMessage");
+                            throw new Error("");
                         }
                         let checkFirstString = search.slice(0, 2);
                         checkFirstString = checkFirstString.toLowerCase();

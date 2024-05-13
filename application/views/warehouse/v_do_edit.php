@@ -15,6 +15,15 @@
             .btn-data-table{
                 font-family: "inherit"
             }
+            
+            <?php
+            if((int)$picklist->type_bulk_id !== 1){
+                ?>
+            .item-on-bulk{
+                visibility: hidden;
+            }
+            <?php }
+            ?> 
         </style>
         <?php $this->load->view("admin/_partials/js.php") ?>
     </head>
@@ -224,6 +233,8 @@
 
                             <?php if ($do->status === 'draft') { ?>
                                 <div class="col-md-12 table-responsive over">
+                                    <p><label>Item / Barcode Belum Valid : <span><?= $total_status["invalid"] ?></span></label></p>
+                                    <p><label>Item / Barcode Sudah Valid : <span><?= $total_status["valid"] ?></span></label></p>
                                     <?php if ((int) $picklist->type_bulk_id === 2) { ?>
                                         <p><label>Total Item : <span><?= $total_detail->total_item ?? 0 ?></span></label></p>
                                         <p><label>Total Qty : <span><?= $total_detail->total_qty ?? 0 ?></span></label></p>
@@ -362,7 +373,7 @@
                     //                    $("#btn-cancel").hide();
                     $("#btn-print").hide();
 
-                    $("#btn-cancel").on("click", function () {
+                    $("#btn-cancel").unbind("click").off("click").on("click", function () {
                         confirmRequest("Delivery", "Batalkan Draft Delivery Order ?", function () {
                             please_wait(function () {});
                             $.ajax({
@@ -385,7 +396,7 @@
                             });
                         });
                     });
-                    $("#btn-kirim").on("click", function () {
+                    $("#btn-kirim").unbind("click").off("click").on("click", function () {
                         confirmRequest("Delivery", "Kirim delivery order ?", function () {
                             please_wait(function () {});
                             $.ajax({
@@ -444,11 +455,11 @@
                             "className": "btn btn-default detail-data btn-data-table",
                             "action": function (e, dt, node, config) {
                                 e.preventDefault();
-                                $("#tambah_data").modal({
+                                $("#view_data").modal({
                                     show: true,
                                     backdrop: 'static'
                                 });
-                                $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                                $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                                 $('.modal-title').text('List Detail Item');
                                 $.post("<?= base_url('warehouse/deliveryorder/list_detail_view_add') ?>",
                                         {
@@ -459,7 +470,29 @@
                                         },
                                         function (data) {
                                             setTimeout(function () {
-                                                $(".tambah_data").html(data.data);
+                                                $(".view_body").html(data.data);
+                                            }, 1000);
+                                        });
+                            }
+                        },
+                        {
+                            "text": '<i class="fa fa-list"> <span>Item sudah masuk Bulk</span>',
+                            "className": "btn btn-default item-on-bulk",
+                            "action": function (e, dt, node, config) {
+                                e.preventDefault();
+                                $("#view_data").modal({
+                                    show: true,
+                                    backdrop: 'static'
+                                });
+                                $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                                $('.modal-title').text('Item sudah masuk Bulk');
+                                $.post("<?= base_url('warehouse/deliveryorder/list_detail_view_bulk') ?>",
+                                        {
+                                            pl: "<?= $picklist->no ?>"
+                                        },
+                                        function (data) {
+                                            setTimeout(function () {
+                                                $(".view_body").html(data.data);
                                             }, 1000);
                                         });
                             }
@@ -579,7 +612,7 @@
                         ]
                     });
 
-                    $("#btn-print").on('click', function (e) {
+                    $("#btn-print").unbind("click").off("click").on('click', function (e) {
                         e.preventDefault();
                         $("#print_data").modal({
                             show: true,
@@ -588,7 +621,7 @@
                         $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                         $('.modal-title').text('Pilihan Mode Print');
                         $(".print_data").html($("#pilihan-print").html());
-                        $(".print-sj").on("click", function () {
+                        $(".print-sj").unbind("click").off("click").on("click", function () {
                             $.post("<?= base_url('warehouse/deliveryorder/print_sj/') ?>",
                                     {
                                         "print_mode": $(this).attr("data-print"),
@@ -608,7 +641,7 @@
                         });
                     });
 
-                    $("#btn-cancel").on("click", function () {
+                    $("#btn-cancel").unbind("click").off("click").on("click", function () {
                         confirmRequest("Batalkan Delivery", "Batalkan No Delivery Order <strong><?= $do->no ?></strong>", function () {
                             please_wait(function () {});
                             $.ajax({
@@ -654,7 +687,7 @@
                     date: new Date(parseInt("<?= strtotime($do->tanggal_dokumen ?? date('Y-m-d H:i:s')) ?>") * 1000)
                 });
 
-                $("#btn-simpan").on('click', function () {
+                $("#btn-simpan").unbind("click").off("click").on('click', function () {
                     confirmRequest("Peringatan", "Ubah Data Delivery Order", function () {
                         $("#btn-submit-edit").trigger('click');
                     });
@@ -687,7 +720,7 @@
                         false
                         );
 
-                $("#send-broadcast").on("click", function () {
+                $("#send-broadcast").unbind("click").off("click").on("click", function () {
                     confirmRequest("Broadcast", "Kirim Data DO ke whatsapp ? ",
                             function () {
                                 please_wait(function () {});
