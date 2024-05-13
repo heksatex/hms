@@ -432,23 +432,25 @@ class M_PicklistDetail extends CI_Model {
     }
 
     public function reportLokasiFisikRak(array $condition) {
-        $this->db->select("lokasi_fisik");
+        $this->db->select("sq.lokasi_fisik");
         $this->db->from($this->table);
+        $this->db->join("stock_quant sq", "sq.quant_id = picklist_detail.quant_id", "left");
         $this->db->where($condition);
-        $this->db->group_by('lokasi_fisik');
-        $this->db->order_by("lokasi_fisik", "asc");
+        $this->db->group_by('sq.lokasi_fisik');
+        $this->db->order_by("sq.lokasi_fisik", "asc");
         $query = $this->db->get();
         return $query->result();
     }
 
     public function reportLokasiFisik(array $condition, array $in = []) {
         $this->db->from($this->table);
-        $this->db->select("lokasi_fisik,barcode_id,corak_remark,warna_remark,qty");
+        $this->db->join("stock_quant sq", "sq.quant_id = picklist_detail.quant_id", "left");
+        $this->db->select("sq.lokasi_fisik,barcode_id,picklist_detail.corak_remark,picklist_detail.warna_remark,picklist_detail.qty");
         $this->db->where($condition);
         foreach ($in as $key => $value) {
             $this->db->where_in($key, $value);
         }
-        $this->db->order_by("lokasi_fisik", "asc");
+        $this->db->order_by("sq.lokasi_fisik", "asc");
         $query = $this->db->get();
         return $query->result();
     }
