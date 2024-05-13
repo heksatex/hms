@@ -49,7 +49,7 @@ class Outlet extends MY_Controller
             }
 
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));

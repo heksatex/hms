@@ -2416,14 +2416,14 @@ class MO extends MY_Controller
             // unlock table
             $this->_module->unlock_tabel();
             // finish transaction
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
 
             // echo json_encode($callback);
         }catch(Exception $ex){
             // unlock table
             $this->_module->unlock_tabel();
 
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -3024,7 +3024,7 @@ class MO extends MY_Controller
             // unlock table
             $this->_module->unlock_tabel();
 
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -3712,14 +3712,14 @@ class MO extends MY_Controller
             // unlock table
             $this->_module->unlock_tabel();
             // finish transaction
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             // echo json_encode($callback);
 
         }catch(Exception $ex){
             // unlock table
             $this->_module->unlock_tabel();
 
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -4134,14 +4134,14 @@ class MO extends MY_Controller
             // unlock table
             $this->_module->unlock_tabel();
             // finish transaction
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             // echo json_encode($callback);
 
         }catch(Exception $ex){
             // unlock table
             $this->_module->unlock_tabel();
 
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
