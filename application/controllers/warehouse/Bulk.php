@@ -474,9 +474,6 @@ class Bulk extends MY_Controller {
             if (!empty($bulk) || (!trim($pl) === "")) {
                 $condition = array_merge($condition, ['no_bulk' => $bulk]);
             }
-
-            log_message('error', json_encode($condition));
-
             $data['data'] = $this->m_bulkdetail->getDataListBulk($condition, true);
             $pers = $this->load->view('modal/v_bulk_show_detail', $data);
             echo json_encode($pers);

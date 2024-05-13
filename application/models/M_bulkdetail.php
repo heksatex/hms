@@ -58,7 +58,7 @@ class M_bulkdetail extends CI_Model {
             $this->db->select("sum(qty) as total_qty,count(qty) as jumlah_qty");
         }
         $this->db->order_by("no_bulk asc,pl.corak_remark asc,pl.warna_remark asc,pl.uom asc");
-        $query = $this->db->select('b.no_bulk,pl.corak_remark,pl.warna_remark,qty')->get();
+        $query = $this->db->select('b.no_bulk,pl.corak_remark,pl.warna_remark,qty,pl.barcode_id,pl.uom,pl.lebar_jadi,pl.uom_lebar_jadi')->get();
         return $query->result();
     }
 
