@@ -641,9 +641,9 @@ class Picklist extends MY_Controller {
                 }
                 $noStatus[] = $value->quant_id;
             }
-            if (count($noStatus) > 0) {
-                $this->m_PicklistDetail->updateStatusWin(['valid !=' => 'cancel'], ['valid ' => 'cancel'], ['quant_id' => array_merge($withStatus, $noStatus)]);
-            }
+//            if (count($noStatus) > 0) {
+            $this->m_PicklistDetail->updateStatusWin(['valid !=' => 'cancel', 'no_pl' => $pl], ['valid ' => 'cancel'], ['quant_id' => array_merge($withStatus, $noStatus)]);
+//            }
 
             if (!empty($withStatus)) {
                 $this->m_Pickliststockquant->updateWin(["lokasi_fisik" => "PORT"], ["lot !=" => ''], ['quant_id' => $withStatus]);
