@@ -380,18 +380,18 @@ class Joinlot extends MY_Controller
 
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal Simpan data ', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 
-                // if (!$this->_module->finishTransaction()) {
-                //     throw new \Exception('Gagal Simpan data ', 500);
-                // }
             }
-            // finish transaction
-            $this->_module->finishTransaction();
+            // // finish transaction
+            // $this->_module->finishTransaction();
 
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -627,14 +627,16 @@ class Joinlot extends MY_Controller
 
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal Mencari Data', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 
-                $this->_module->finishTransaction();
             }
 
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -1211,11 +1213,13 @@ class Joinlot extends MY_Controller
 
                 }
                 // finish transaction
-                $this->_module->finishTransaction();
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal Menyimpan Data', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             }
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ??  500)
                     ->set_content_type('application/json','utf-8')
                     ->set_output(json_encode(array('status'=>'failed','message'=>$ex->getMessage(), 'icon'=>'fa fa-warning', 'type'=>'danger')));
