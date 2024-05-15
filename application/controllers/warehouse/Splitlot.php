@@ -437,8 +437,8 @@ class Splitlot extends MY_Controller
                                 $data_insert_items[] = array(
                                                         'kode_split'        => $kode_split,
                                                         'quant_id_baru'     => $start,
-                                                        'corak_remark'      => $row['corak_remark'] ?? '',
-                                                        'warna_remark'      => $row['warna_remark'] ?? '',
+                                                        'corak_remark'      => trim($row['corak_remark']) ?? '',
+                                                        'warna_remark'      => trim($row['warna_remark']) ?? '',
                                                         'qty'               => $row['qty1'],
                                                         'uom'               => $row['uom_qty1'],
                                                         'qty2'              => $row['qty2'],
@@ -489,8 +489,8 @@ class Splitlot extends MY_Controller
                                                         'move_date'     => $tgl,
                                                         'kode_produk'   => $kode_produk,
                                                         'nama_produk'   => $nama_produk,
-                                                        'corak_remark'  => $row['corak_remark'] ?? '',
-                                                        'warna_remark'  => $row['warna_remark'] ?? '',
+                                                        'corak_remark'  => trim($row['corak_remark']) ?? '',
+                                                        'warna_remark'  => trim($row['warna_remark']) ?? '',
                                                         'lot'           => trim($lot_baru),
                                                         'nama_grade'    => $sq['nama_grade'],
                                                         'qty'           => $row['qty1'],
@@ -712,8 +712,8 @@ class Splitlot extends MY_Controller
                                     $note_before = $get->corak_remark." | ".$get->warna_remark. " | ".$get->qty_jual." ".$get->uom_jual. " | ".$get->qty2_jual." ".$get->uom2_jual. " | ".$get->lebar_jadi." ".$get->uom_lebar_jadi;
 
                                     $data_update_items = array(
-                                                    'corak_remark'  => $corak_remark,
-                                                    'warna_remark'  => $warna_remark,
+                                                    'corak_remark'  => trim($corak_remark),
+                                                    'warna_remark'  => trim($warna_remark),
                                                     'qty_jual'      => $qty_jual,
                                                     'uom_jual'      => $uom_jual,
                                                     'qty2_jual'     => $qty2_jual,
@@ -725,8 +725,8 @@ class Splitlot extends MY_Controller
                                     $update = $this->m_splitLot->update_data_split_items($data_update_items,$kode,$lot);
                                     
                                     $data_update_quant = array(
-                                                    'corak_remark'  => $corak_remark,
-                                                    'warna_remark'  => $warna_remark,
+                                                    'corak_remark'  => trim($corak_remark),
+                                                    'warna_remark'  => trim($warna_remark),
                                                     'qty_jual'      => $qty_jual,
                                                     'uom_jual'      => $uom_jual,
                                                     'qty2_jual'     => $qty2_jual,
