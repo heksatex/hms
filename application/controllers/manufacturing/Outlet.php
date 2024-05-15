@@ -344,7 +344,7 @@ class Outlet extends MY_Controller
                     $inlet     = $this->m_inlet->get_data_inlet_by_id($id_inlet);
 
                     // lock table
-                    $this->_module->lock_tabel("stock_quant WRITE, mrp_production WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, mrp_production_rm_target WRITE, mrp_production_rm_hasil WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_move WRITE, mrp_satuan WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, mrp_inlet  WRITE, stock_move_items as smi WRITE, stock_quant as sq WRITE, mst_produk WRITE, token_increment WRITE,departemen as d WRITE, mrp_production_rm_target as rmt WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE,mrp_production_fg_hasil  as fg WRITE, mrp_production as mrp write, mrp_production_fg_target as tfg WRITE");
+                    // $this->_module->lock_tabel("stock_quant WRITE, mrp_production WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, mrp_production_rm_target WRITE, mrp_production_rm_hasil WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_move WRITE, mrp_satuan WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, mrp_inlet  WRITE, stock_move_items as smi WRITE, stock_quant as sq WRITE, mst_produk WRITE, token_increment WRITE,departemen as d WRITE, mrp_production_rm_target as rmt WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE,mrp_production_fg_hasil  as fg WRITE, mrp_production as mrp write, mrp_production_fg_target as tfg WRITE");
 
 
                     // get data inlet
@@ -540,8 +540,8 @@ class Outlet extends MY_Controller
                                                             'move_date'     => $tgl,
                                                             'kode_produk'   => $kode_produk_fg,
                                                             'nama_produk'   => $nama_produk_fg,
-                                                            'corak_remark'  => $corak_remark_fix,
-                                                            'warna_remark'  => $warna_remark_fix,
+                                                            'corak_remark'  => trim($corak_remark_fix),
+                                                            'warna_remark'  => trim($warna_remark_fix),
                                                             'lot'           => trim($barcode_id),
                                                             'nama_grade'    => $grade,
                                                             'qty'           => $hph_mtr,
@@ -1238,7 +1238,7 @@ class Outlet extends MY_Controller
                     }
 
                     // unlock table
-                    $this->_module->unlock_tabel();
+                    // $this->_module->unlock_tabel();
 
                 }
 
@@ -1251,7 +1251,7 @@ class Outlet extends MY_Controller
             }
 
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
