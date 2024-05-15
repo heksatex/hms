@@ -789,7 +789,7 @@ class Picklist extends MY_Controller {
             foreach ($data as $value) {
                 $tempLokasi[] = $value->lokasi_fisik;
             }
-            $datas = $this->m_PicklistDetail->reportLokasiFisik(['no_pl' => $no, 'valid !=' => 'cancel'], ['lokasi_fisik' => $tempLokasi]);
+            $datas = $this->m_PicklistDetail->reportLokasiFisik(['no_pl' => $no, 'valid !=' => 'cancel'], ['sq.lokasi_fisik' => $tempLokasi]);
             if (empty($datas)) {
                 throw new Exception("", 500);
             }
