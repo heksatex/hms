@@ -297,19 +297,22 @@ class Barcodemanual extends MY_Controller
                         // load in library
                         $this->_module->gen_history_ip($sub_menu,$username,$data_history);
 
-                        if (!$this->_module->finishTransaction()) {
-                            throw new \Exception('Gagal Menyimpan Data2', 500);
-                        }
+                       
                         $callback = array('message' => 'Data Berhasil Disimpan', 'icon' => 'fa fa-check', 'type' => 'success', 'isi'=> encrypt_url($kode) );
                     }
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal Menyimpan Data2', 500);
+                }
+
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
                 // finish transaction
-                $this->_module->finishTransaction();
+                // $this->_module->finishTransaction();
             }
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -511,14 +514,15 @@ class Barcodemanual extends MY_Controller
                     }
 
                 }
-
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal Disimpan', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
             }
             
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -665,13 +669,16 @@ class Barcodemanual extends MY_Controller
 
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal disimpan', 500);
+                }
+
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
             }
             
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -746,14 +753,17 @@ class Barcodemanual extends MY_Controller
 
                 }
 
+                 if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal dihapus', 500);
+                }
+
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
 
             }
 
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -830,8 +840,8 @@ class Barcodemanual extends MY_Controller
                 $nu        = $this->_module->get_nama_user($username)->row_array(); 
                 $nama_user = addslashes($nu['nama']);
 
-                //lock table
-                $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE,  mrp_manual_batch_items WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, stock_move WRITE, departemen as d WRITE, token_increment WRITE, stock_move_produk WRITE, stock_move_items WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, mst_access_menu WRITE ");
+                // //lock table
+                // $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE,  mrp_manual_batch_items WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, stock_move WRITE, departemen as d WRITE, token_increment WRITE, stock_move_produk WRITE, stock_move_items WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, mst_access_menu WRITE ");
  
                 $tgl        = date('Y-m-d H:i:s');
                 $mrpm       = $this->m_barcodemanual->get_data_mrp_manual_by_id($kode);
@@ -1156,28 +1166,27 @@ class Barcodemanual extends MY_Controller
                         throw new \Exception('Gagal Generate Data1 ', 500);
                     }
 
-                    if (!$this->_module->finishTransaction()) {
-                        throw new \Exception('Gagal Generate Data2 ', 500);
-                    }
+                   
 
                     $callback = array('status'=>'success', 'message' =>'Data Berhasil di Generate !', 'icon'=> 'fa fa-check', 'type'=>'success');
 
                 }
 
                 // unlock table
-                $this->_module->unlock_tabel();
+                // $this->_module->unlock_tabel();
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal Generate Data2 ', 500);
+                }
 
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
 
             }
 
         }catch(Exception $ex){
             // unlock table
-            $this->_module->unlock_tabel();
-
-            $this->_module->finishTransaction();
+            // $this->_module->unlock_tabel();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -1197,7 +1206,7 @@ class Barcodemanual extends MY_Controller
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
 
-                $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch WRITE");
+                // $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch WRITE");
                 
                 // start transaction
                 $this->_module->startTransaction();
@@ -1234,17 +1243,19 @@ class Barcodemanual extends MY_Controller
                     $callback = array('status'=>'success', 'message' =>'Data Berhasil dibatalkan !', 'icon'=> 'fa fa-check', 'type'=>'success');
 
                 }
+
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal dibatalkan ', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
-                // unlock table
-                $this->_module->unlock_tabel();
 
             }
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             // unlock table
-            $this->_module->unlock_tabel();
+            // $this->_module->unlock_tabel();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));

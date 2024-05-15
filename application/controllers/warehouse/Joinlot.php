@@ -175,13 +175,12 @@ class Joinlot extends MY_Controller
                 }
 
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
 
             }
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -391,6 +390,7 @@ class Joinlot extends MY_Controller
 
         }catch(Exception $ex){
             // finish transaction
+            $this->_module->finishRollBack();
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
@@ -636,6 +636,7 @@ class Joinlot extends MY_Controller
 
         }catch(Exception $ex){
             // finish transaction
+            $this->_module->finishRollBack();
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
@@ -696,12 +697,16 @@ class Joinlot extends MY_Controller
 
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal dihapus', 500);
+                }
+
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                $this->_module->finishTransaction();
             }
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -728,9 +733,9 @@ class Joinlot extends MY_Controller
                 $cek_status  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
                 
                 if($cek_status->status == 'done'){
-                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status Join Lot Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa batalkan, Status Join Lot Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else if($cek_status->status == 'cancel'){
-                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status Join Lot Cancel !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa batalkan, Status Join Lot Cancel !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else{
 
                     $items = $this->m_joinLot->get_data_join_lot_items_by_kode($kode_join);
@@ -754,13 +759,15 @@ class Joinlot extends MY_Controller
                     }
 
                 }
-
+                
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal dibatalkan', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
             }
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ??  500)
                     ->set_content_type('application/json','utf-8')
                     ->set_output(json_encode(array('status'=>'failed','message'=>$ex->getMessage(), 'icon'=>'fa fa-warning', 'type'=>'danger')));
@@ -1214,11 +1221,12 @@ class Joinlot extends MY_Controller
                 }
                 // finish transaction
                 if (!$this->_module->finishTransaction()) {
-                    throw new \Exception('Gagal Menyimpan Data', 500);
+                    throw new \Exception('Gagal generate Data', 500);
                 }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             }
         }catch(Exception $ex){
+            $this->_module->finishRollBack();
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ??  500)
                     ->set_content_type('application/json','utf-8')
