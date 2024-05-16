@@ -48,7 +48,7 @@
         </div>
         <div class="box-body">
 
-            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_job_list" action="<?=base_url()?>report/outstandingow/export_excel">
+            <form name="input" class="form-horizontal" role="form" method="POST" id="frm_job_list">
                 <div class="col-md-8">
                   <div class="form-group">
                     <div class="col-md-6"> 
@@ -104,8 +104,8 @@
                   </div>
                 </div>
                 <div class="col-md-4">
-                    <button type="button" class="btn btn-sm btn-default" name="btn-filter" id="btn-filter" >Proses</button>
-                    <button type="submit" class="btn btn-sm btn-default" name="btn-generate" id="btn-excel" > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                    <button type="button" class="btn btn-sm btn-default" name="btn-filter" id="btn-filter" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." >Proses</button>
+                    <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                 </div>
             </form>
             <br>
@@ -145,39 +145,6 @@
 <?php $this->load->view("admin/_partials/js.php") ?>
 
 <script type="text/javascript">
-
-    //* Show collapse advanced search
-    $('#advancedSearch').on('shown.bs.collapse', function () {
-        $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
-    });
-
-    //* Hide collapse advanced search
-    $('#advancedSearch').on('hidden.bs.collapse', function () {
-        $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
-    });
-
-    var d     = new Date();
-    var month = d.getMonth();
-    var day   = d.getDate();
-    var day_30 = d.getDate()-30;
-    var year  = d.getFullYear();
-
-    // set date tgldari
-    $('#tgldari').datetimepicker({
-        defaultDate : new Date(year, month, day_30),
-        format : 'D-MMMM-YYYY',
-        ignoreReadonly: true,
-        maxDate: new Date
-        
-    });
-
-    // set date tglsampai
-    $('#tglsampai').datetimepicker({
-        defaultDate : new Date(),
-        format : 'D-MMMM-YYYY',
-        ignoreReadonly: true,
-        maxDate: new Date
-    });
 
     $(document).ready(function() {
 
@@ -285,6 +252,41 @@
       }
     }
      
+
+    
+  $('#btn-excel').click(function(){
+
+      var sc          = $('#sc').val();
+      var ow          = $('#ow').val();
+      var produk      = $('#produk').val();
+      var warna       = $('#warna').val();
+      var sales_group = $('#sales_group').val();
+      $.ajax({
+            "type":'POST',
+            "url": "<?php echo site_url('report/outstandingow/export_excel')?>",
+            "data": {sc:sc, ow:ow, produk:produk,warna:warna, sales_group:sales_group},
+            "dataType":'json',
+            beforeSend: function() {
+              $('#btn-excel').button('loading');
+            },error: function(){
+              alert("Export Excel error");
+              $('#btn-excel').button('reset');
+            }
+      }).done(function(data){
+            if(data.status == "failed"){
+              alert_modal_warning(data.message);
+            }else{
+              var $a = $("<a>");
+              $a.attr("href",data.file);
+              $("body").append($a);
+              $a.attr("download",data.filename);
+              $a[0].click();
+              $a.remove();
+            }
+            $('#btn-excel').button('reset');
+      });
+
+  });
 
 </script>
 
