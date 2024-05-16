@@ -2412,9 +2412,10 @@ class MO extends MY_Controller
                 }
             }
 
-            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // unlock table
             $this->_module->unlock_tabel();
+
+            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // finish transaction
             // $this->_module->finishTransaction();
 
@@ -3013,9 +3014,9 @@ class MO extends MY_Controller
 
             }
 
-            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // unlock table
             $this->_module->unlock_tabel();
+            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // finish transaction
             // $this->_module->finishTransaction();
             // echo json_encode($callback);
@@ -3700,17 +3701,17 @@ class MO extends MY_Controller
                         }
                     }
 
-                    if (!$this->_module->finishTransaction()) {
-                        throw new \Exception('Gagal Simpan Produksi Batch ', 500);
-                    }
+                    // if (!$this->_module->finishTransaction()) {
+                    //     throw new \Exception('Gagal Simpan Produksi Batch ', 500);
+                    // }
                 }
-            
             
             }
 
-            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // unlock table
             $this->_module->unlock_tabel();
+            
+            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // finish transaction
             // $this->_module->finishTransaction();
             // echo json_encode($callback);
@@ -4130,9 +4131,9 @@ class MO extends MY_Controller
                 }
             }
 
-            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // unlock table
             $this->_module->unlock_tabel();
+            $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             // finish transaction
             // $this->_module->finishTransaction();
             // echo json_encode($callback);
