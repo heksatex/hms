@@ -92,6 +92,7 @@
                     <th>Qty Jual</th>
                     <th>Qty Jual 2</th>
                     <th>Lokasi Fisik</th>
+                    <th>Lebar Jadi</th>
                     <th></th>
                     <th></th>
                     <th>#</th>
@@ -187,7 +188,7 @@
             },
             "columnDefs": [
                 {
-                    "targets": [11],
+                    "targets": [9,12],
                     "orderable": false
                 },
                 {
@@ -197,12 +198,12 @@
                     }
                 },
                 {
-                    "targets": 9,
+                    "targets": 10,
                     "visible": false,
                     "searchable": false
                 },
                 {
-                    'targets': 10,
+                    'targets': 11,
                     "visible": false,
                     "searchable": false
                 }
