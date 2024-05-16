@@ -40,6 +40,7 @@
                     <th class="style">Qty Jual</th>
                     <th class="style">Qty 2 Jual</th>
                     <th class="style">Lokasi Fisik</th>
+                    <th class="style">Lebar Jadi</th>
                     <th class="style">Aksi</th>
                 </tr>
             </thead>
@@ -94,6 +95,7 @@
                         changeCondition(datas["qty_jual"] + " " + datas["uom_jual"], "null", "0", true),
                         changeCondition(datas["qty2_jual"] + " " + datas["uom2_jual"], "null", "0", true),
                         datas["lokasi_fisik"],
+                         changeCondition(datas["lebar_jadi"] + " " + datas["uom_lebar_jadi"], "null", "0", true),
                         datas["quant_id"] //JSON.stringify(datas)
                     ]).draw(false);
             no++;
@@ -158,7 +160,7 @@
             const data = new Promise((resolve, reject) => {
                 let dt = [];
                 $.each(dTable.rows().data(), function (idx, val) {
-                    dt.push(val[9]);
+                    dt.push(val[10]);
                 });
                 resolve(dt);
             });
