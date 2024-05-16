@@ -107,7 +107,7 @@ class M_bulkdetail extends CI_Model {
 
         $this->db->from($this->table . ' bd');
         $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
-        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id", "right");
+        $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode", "right");
         $this->db->select("bulk_no_bulk,barcode_id,corak_remark,warna_remark,qty");
         foreach ($columnSearch as $key => $value) {
             if ($_POST['search']['value']) {
@@ -153,7 +153,7 @@ class M_bulkdetail extends CI_Model {
     public function getCountAllDataBulk(array $condition = []) {
         $this->db->from($this->table . ' bd');
         $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
-        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id", "right");
+        $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode", "right");
         if (count($condition) > 0) {
             $this->db->where($condition);
         }
