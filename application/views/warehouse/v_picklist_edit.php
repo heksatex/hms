@@ -191,7 +191,7 @@
                                 alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
                             }, 500);
                         });
-                    } 
+                    }
                 });
             });
             $(function () {
@@ -230,7 +230,7 @@
                 allowClear: true,
                 placeholder: 'Pilih'
             });
-            $("#btn-simpan").attr("disabled", true);
+//            $("#btn-simpan").attr("disabled", true);
             $('.select2').on('change', function () {
                 $("#btn-simpan").removeAttr("disabled");
             });
@@ -240,6 +240,8 @@
             const checkStatus = function () {
                 if ("<?= $picklist->status ?>" === 'cancel') {
                     $("#btnShow").hide();
+                } else if ("<?= $picklist->status ?>" === 'done') {
+                    $("#btn-simpan").hide();
                 }
             };
             $("#customer").select2({
@@ -276,7 +278,14 @@
                 $("#alamat").val("");
             });
             $("#btn-simpan").on('click', function () {
-                $("#btn_form_edit").trigger("click");
+                confirmRequest("Picklist", "Ubah data picklist ? ", (() => {
+                    if ("<?= $picklist->no_sj ?>" !== "") {
+                        alert_notify('fa fa-close', "Picklist sudah masuk Delivery Order", 'danger', function () {});
+                        return false;
+                    }
+                    $("#btn_form_edit").trigger("click");
+                }));
+
             });
             $("#btn-print").on('click', function () {
                 window.open('<?= base_url('warehouse/picklist/print?nopl=' . $picklist->no) ?>', '_blank');
