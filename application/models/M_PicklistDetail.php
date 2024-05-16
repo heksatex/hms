@@ -127,9 +127,9 @@ class M_PicklistDetail extends CI_Model {
                 case "BULK":
                     $this->db->select("bbd.no_bulk,bbd.gross_weight,bbd.net_weight");
                     $this->db->join("("
-                            . "select b.no_pl,b.net_weight,b.gross_weight,bd.picklist_detail_id,b.no_bulk from bulk b
+                            . "select b.no_pl,b.net_weight,b.gross_weight,bd.barcode,b.no_bulk from bulk b
                                 join bulk_detail bd on bd.bulk_no_bulk = b.no_bulk where b.no_pl = '" . $nopl . "'"
-                            . ") as bbd ", "bbd.picklist_detail_id = picklist_detail.id", "left");
+                            . ") as bbd ", "bbd.barcode = picklist_detail.barcode_id", "left");
 
                     $this->db->order_by('bbd.no_bulk', 'asc');
                     break;
@@ -149,7 +149,7 @@ class M_PicklistDetail extends CI_Model {
         foreach ($join as $key => $value) {
             switch ($value) {
                 case "BULK":
-                    $this->db->join("bulk_detail bd", "bd.picklist_detail_id = " . $this->table . ".id");
+                    $this->db->join("bulk_detail bd", "bd.barcode = " . $this->table . ".barcode_id");
                     break;
 
                 default:
