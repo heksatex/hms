@@ -242,6 +242,7 @@ class Picklist extends MY_Controller {
                     $field->qty_jual . " " . $field->uom_jual,
                     $field->qty2_jual . " " . $field->uom2_jual,
                     $field->lokasi_fisik,
+                    $field->lebar_jadi . ' ' . (($field->lebar_jadi === "-") ? "" : $field->uom_lebar_jadi),
                     null, //json_encode($field),
                     $field->no_pl,
                     $button
@@ -338,6 +339,7 @@ class Picklist extends MY_Controller {
                     $field->qty . " " . $field->uom,
                     $field->qty2 . " " . $field->uom2,
                     $field->lokasi_fisik,
+                    $field->lebar_jadi . ' ' . (($field->lebar_jadi === "-") ? "" : $field->uom_lebar_jadi),
                     $field->valid,
                     $field->valid_date,
                     $status
@@ -641,12 +643,12 @@ class Picklist extends MY_Controller {
                 }
                 $noStatus[] = $value->quant_id;
             }
-//            if (count($noStatus) > 0) {
-            $this->m_PicklistDetail->updateStatusWin(['valid !=' => 'cancel', 'no_pl' => $pl], ['valid ' => 'cancel'], ['quant_id' => array_merge($withStatus, $noStatus)]);
-//            }
+            if (count($datas) > 0) {
+                $this->m_PicklistDetail->updateStatusWin(['valid !=' => 'cancel', 'no_pl' => $pl], ['valid ' => 'cancel'], ['quant_id' => array_merge($withStatus, $noStatus)]);
 
-            if (!empty($withStatus)) {
-                $this->m_Pickliststockquant->updateWin(["lokasi_fisik" => "PORT"], ["lot !=" => ''], ['quant_id' => $withStatus]);
+                if (!empty($withStatus)) {
+                    $this->m_Pickliststockquant->updateWin(["lokasi_fisik" => "PORT"], ["lot !=" => ''], ['quant_id' => $withStatus]);
+                }
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Membatalkan Picklist', 500);

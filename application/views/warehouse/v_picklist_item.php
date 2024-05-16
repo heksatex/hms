@@ -36,6 +36,7 @@ if ($picklist->status === 'cancel') {
                             <th class="style" style="width:80px;" >Qty 1</th>
                             <th class="style" width="80px">Qty 2</th>
                             <th class="style" >Lokasi Fisik</th>
+                            <th class="style">Lebar Jadi</th>
                             <th class="style" >Status</th>
                             <th class="style">Validasi Di</th>
                             <th class="style">#</th>
@@ -146,7 +147,7 @@ if ($picklist->status === 'cancel') {
         },
         "columnDefs": [
             {
-                "targets": [0, 7, 8, 9],
+                "targets": [0, 7, 8, 9,10],
                 "orderable": false
             }
         ],

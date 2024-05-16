@@ -24,7 +24,7 @@ class M_PicklistDetail extends CI_Model {
     protected $table = "picklist_detail";
     var $column_order = array(null, 'a.barcode_id', 'a.quant_id', 'barcode_id', 'a.kode_produk', 'a.nama_produk', 'sq.lokasi_fisik', 'a.valid');
     var $order = ['tanggal_masuk' => 'desc'];
-    var $column_search = array('a.barcode_id', 'a.quant_id', 'a.kode_produk', 'a.nama_produk');
+    var $column_search = array('a.barcode_id', 'a.quant_id', 'a.kode_produk', 'a.nama_produk','a.lokasi_fisik','a.corak_remark','a.warna_remark','a.valid');
 
     public function insertItem(array $data) {
         try {
@@ -262,7 +262,7 @@ class M_PicklistDetail extends CI_Model {
         if (isset($_POST['order'])) {
             $this->db->order_by($columnOrder[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
         } else {
-            $this->db->order_by('tanggal_masuk', 'ASC');
+//            $this->db->order_by('tanggal_masuk', 'ASC');
         }
         $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom');
         $this->db->select('pd.corak_remark,pd.warna_remark,sum(qty) as total_qty,count(qty) as jumlah_qty,uom');
@@ -299,7 +299,8 @@ class M_PicklistDetail extends CI_Model {
         }
         if (count($joinBulk) > 0) {
             $this->db->join("bulk_detail bd", "pd.barcode_id = bd.barcode");
-            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
+//            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
+            $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
             $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
         }
         if (count($notIn) > 0) {
@@ -317,9 +318,11 @@ class M_PicklistDetail extends CI_Model {
             $this->db->where($condition);
         }
         if (count($joinBulk) > 0) {
-            $this->db->join("bulk_detail bd", "pd.barcode_id = bd.barcode");
-            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
+            $this->db->join("bulk_detail bd", "(pd.barcode_id = bd.barcode)","right");
+//            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
+            $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
             $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
+            $this->db->select('barcode_id');
         }
         if (count($notIn) > 0) {
             foreach ($notIn as $key => $value) {
