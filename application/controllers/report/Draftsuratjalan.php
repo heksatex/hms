@@ -105,6 +105,7 @@ class Draftsuratjalan extends MY_Controller {
                 );
             }
 
+            $rowStartData = 5;
             foreach ($picklist_detail as $key => $value) {
                 $no++;
                 $jml_qty += $value->jml_qty;
@@ -114,9 +115,7 @@ class Draftsuratjalan extends MY_Controller {
                 $perpage = 10;
                 $totalData = count($detailQty);
                 $totalPage = ceil($totalData / $perpage);
-                $rowStartData = 5;
                 for ($nn = 0; $nn < $totalPage; $nn++) {
-                    $rowStartData += $no;
                     $page = $nn * $perpage;
                     $satuan = $detailQty[0]->uom;
                     $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->no_bulk;
@@ -156,6 +155,7 @@ class Draftsuratjalan extends MY_Controller {
 
                     $id = $tempID;
                     $tempBulk = $value->no_bulk;
+                    $rowStartData ++;
                 }
             }
 
