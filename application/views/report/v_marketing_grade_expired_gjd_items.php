@@ -55,7 +55,7 @@
       <!--  box content -->
       <div class="box ">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>View By Product</b></h3>
+          <h3 class="box-title"><b>Grade & Expired (GJD)</b></h3>
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
@@ -97,12 +97,21 @@
                         </div>
                       </div>
                       </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Total Lot</label></div>
-                                <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
-                            </div>
+                      <div class="col-md-12">
+                        <div class=" row col-md-6">
+                          <div class="form-group">
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Total Lot</label></div>
+                                  <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
+                              </div>
+                          </div>
+                        </div>
+                        <div class=" col-md-6">
+                          <div class="form-group">
+                              <div class="col-md-12 col-xs-12">
+                                 <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                              </div>
+                          </div>
                         </div>
                       </div>
                 </form>
@@ -120,9 +129,12 @@
                                         <th class="style ">Corak</th>
                                         <th class="style ">Warna</th>
                                         <th class="style ws">Lebar Jadi</th>
-                                        <th class="style text-right">Qty1</th>
-                                        <th class="style text-right">Qty2</th>
+                                        <th class="style text-right">Qty1 [JUAL]</th>
+                                        <th class="style text-right">Qty2 [JUAL]</th>
                                         <th class="style ws">Lokasi Fisik / Rak</th>
+                                        <th class="style ws">Lot/KP</th>
+                                        <th class="style ws">SO/SC</th>
+                                        <th class="style ws">Picklist (PL)</th>
                                         <th class="style ws">Keterangan</th>
                                     </tr>
                                 </thead>
@@ -171,7 +183,7 @@
            
             "columnDefs": [
               { 
-                "targets": [0,9], 
+                "targets": [0,12], 
                 "orderable": false, 
               },
               { 
@@ -196,6 +208,33 @@
       return new Intl.NumberFormat('en-US').format(n);
     }
 
+    // button excel
+    $('#btn-excel').click(function(){
+        $.ajax({
+            "type":'POST',
+            "url": "<?php echo site_url('report/Marketing/export_excel_grade_expired')?>",
+            "data": {"product": "<?php echo $product;?>", "color":"<?php echo $color; ?>", "marketing":"<?php echo $mkt?>", "lebar_jadi" : "<?php echo $lebar_jadi;?>", "uom_jual":"<?php echo $uom_jual?>", "grade":"<?php echo $grade;?>", "expired":"<?php echo $expired;?>"},
+            "dataType":'json',
+            beforeSend: function() {
+              $('#btn-excel').button('loading');
+            },error: function(){
+              alert('Error Export Excel');
+              $('#btn-excel').button('reset');
+            }
+        }).done(function(data){
+            if(data.status =="failed"){
+              alert_modal_warning(data.message);
+            }else{
+              var $a = $("<a>");
+              $a.attr("href",data.file);
+              $("body").append($a);
+              $a.attr("download",data.filename);
+              $a[0].click();
+              $a.remove();
+            }
+            $('#btn-excel').button('reset');
+        });
+    });
 
 
 </script>

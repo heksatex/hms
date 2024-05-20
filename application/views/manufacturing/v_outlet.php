@@ -573,7 +573,9 @@
                                                         </div> -->
                                                     </div>
                                                     <div class="col-md-12 col-xs-12 pad_left_empty" style="padding-top:10px">
+                                                    <?php if($akses_menu > 0 ){?>
                                                         <button type="button" name="btn-simpan" id="btn-simpan" class="btn btn-sm btn-primary" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Simpan</button>
+                                                    <?php } ?>
                                                     </div>
                                                   </div>
                                                 </div>

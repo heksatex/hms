@@ -60,43 +60,53 @@
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
                       <div class="col-md-12">
-                      <div class="row col-md-6">
-                        <div class="form-group empty_mb"> 
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Product / Corak</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $product; ?></div>
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Warna</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $color; ?></div>
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Marketing</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $nama_mkt; ?></div>
-                            </div>
-                        </div> 
-                      </div>
-                      <div class="row col-md-6">
-                        <div class="form-group"> 
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Lebar Jadi</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $lebar_jadi; ?></div>
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Uom</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $uom_jual; ?></div>
-                            </div>
+                        <div class="row col-md-6">
+                          <div class="form-group empty_mb"> 
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Product / Corak</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $product; ?></div>
+                              </div>
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Warna</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $color; ?></div>
+                              </div>
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Marketing</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $nama_mkt; ?></div>
+                              </div>
+                          </div> 
+                        </div>
+                        <div class="row col-md-6">
+                          <div class="form-group"> 
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Lebar Jadi</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $lebar_jadi; ?></div>
+                              </div>
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Uom</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $uom_jual; ?></div>
+                              </div>
+                          </div>
                         </div>
                       </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Total Lot</label></div>
-                                <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
-                            </div>
+                      <div class="col-md-12">
+                        <div class=" row col-md-6">
+                          <div class="form-group">
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Total Lot</label></div>
+                                  <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
+                              </div>
+                          </div>
+                        </div>
+                        <div class=" col-md-6">
+                          <div class="form-group">
+                              <div class="col-md-12 col-xs-12">
+                                 <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                              </div>
+                          </div>
                         </div>
                       </div>
+                
                 </form>
 
                 <div class="row">
@@ -111,9 +121,12 @@
                                         <th class="style ">Corak</th>
                                         <th class="style ">Warna</th>
                                         <th class="style ws">Lebar Jadi</th>
-                                        <th class="style text-right">Qty1</th>
-                                        <th class="style text-right">Qty2</th>
+                                        <th class="style text-right">Qty1 [JUAL]</th>
+                                        <th class="style text-right">Qty2 [JUAL]</th>
                                         <th class="style ws">Lokasi Fisik / Rak</th>
+                                        <th class="style ws">Lot/KP</th>
+                                        <th class="style ws">SO/SC</th>
+                                        <th class="style ws">Picklist (PL)</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -186,7 +199,33 @@
       return new Intl.NumberFormat('en-US').format(n);
     }
 
-
+    // button excel
+    $('#btn-excel').click(function(){
+        $.ajax({
+            "type":'POST',
+            "url": "<?php echo site_url('report/Marketing/export_excel_view_by_product')?>",
+            "data":  {"product": "<?php echo $product;?>", "color":"<?php echo $color; ?>", "marketing":"<?php echo $mkt?>", "lebar_jadi" : "<?php echo $lebar_jadi;?>", "uom_jual":"<?php echo $uom_jual?>"},
+            "dataType":'json',
+            beforeSend: function() {
+              $('#btn-excel').button('loading');
+            },error: function(){
+              alert('Error Export Excel');
+              $('#btn-excel').button('reset');
+            }
+        }).done(function(data){
+            if(data.status =="failed"){
+              alert_modal_warning(data.message);
+            }else{
+              var $a = $("<a>");
+              $a.attr("href",data.file);
+              $("body").append($a);
+              $a.attr("download",data.filename);
+              $a[0].click();
+              $a.remove();
+            }
+            $('#btn-excel').button('reset');
+        });
+    });
 
 </script>
 

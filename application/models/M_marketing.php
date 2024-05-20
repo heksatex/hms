@@ -122,8 +122,8 @@ class m_marketing extends CI_Model
 		return $this->db->count_all_results();
 	} 
 
-	var $column_order2 = array(null, 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik');
-	var $column_search2= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik');
+	var $column_order2 = array(null, 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order', 'pl.no_pl');
+	var $column_search2= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik', 'kp_lot.lot', 'sq.sales_order' ,'pl.no_pl');
 	var $order2  	  = array('sq.lot' => 'asc');
 
 	function get_query_items()
@@ -149,9 +149,16 @@ class m_marketing extends CI_Model
         }
 
 
-		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik");
+		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
+							kp_lot.lot as lot_asal, pl.no_pl ");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+		$this->db->JOIN("
+						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
+						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
+						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
+		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
 
@@ -196,6 +203,13 @@ class m_marketing extends CI_Model
 		}
 	}
 
+	function get_datatables2_excel()
+	{
+		$this->get_query_items();
+		$query = $this->db->get();
+		return $query->result();
+	}
+
 	function get_datatables2()
 	{
 		$this->_get_datatables_query2();
@@ -219,8 +233,8 @@ class m_marketing extends CI_Model
 	} 
 
 
-	var $column_order3 = array(null, 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik');
-	var $column_search3= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual');
+	var $column_order3 = array(null, 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order','pl.no_pl');
+	var $column_search3= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order','pl.no_pl');
 	var $order3  	  = array('sq.lot' => 'asc');
 
 	function get_query_items3()
@@ -229,9 +243,16 @@ class m_marketing extends CI_Model
     		$this->db->where('sq.lokasi_fisik',$this->input->post('lokasi'));
         }
 
-		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik");
+		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
+							kp_lot.lot as lot_asal, pl.no_pl ");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+		$this->db->JOIN("
+						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
+						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
+						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
+		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
 
@@ -274,6 +295,13 @@ class m_marketing extends CI_Model
 			$order = $this->order3;
 			$this->db->order_by(key($order), $order[key($order)]);
 		}
+	}
+
+	function get_datatables3_excel()
+	{
+		$this->get_query_items3();
+		$query = $this->db->get();
+		return $query->result();
 	}
 
 	function get_datatables3()
@@ -446,8 +474,8 @@ class m_marketing extends CI_Model
 
 
 
-	var $column_order5 = array(null, 'sq.create_date','sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik',null);
-	var $column_search5= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik');
+	var $column_order5 = array(null, 'sq.create_date','sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order','pl.no_pl',null);
+	var $column_search5= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order', 'pl.no_pl');
 	var $order5  	  = array('sq.lot' => 'asc');
 
 	function get_query_items5()
@@ -491,9 +519,16 @@ class m_marketing extends CI_Model
         }
 
 
-		$this->db->SELECT("sq.create_date,sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik");
+		$this->db->SELECT("sq.create_date,sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
+							kp_lot.lot as lot_asal, pl.no_pl ");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+		$this->db->JOIN("
+						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
+						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
+						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
+		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
 
@@ -536,6 +571,13 @@ class m_marketing extends CI_Model
 			$order = $this->order5;
 			$this->db->order_by(key($order), $order[key($order)]);
 		}
+	}
+
+	function get_datatables5_excel()
+	{
+		$this->get_query_items5();
+		$query = $this->db->get();
+		return $query->result();
 	}
 
 	function get_datatables5()
@@ -754,9 +796,9 @@ class m_marketing extends CI_Model
 	} 
 
 
-	var $column_order8 = array(null, 'lot','corak_remark','warna_remark','lebar_jadi','qty_jual','qty_jual','lokasi_fisik');
-	var $column_search8= array('lot','warna_remark','corak_remark','lebar_jadi','qty_jual','lokasi_fisik');
-	var $order8  	  = array('lot' => 'asc');
+	var $column_order8 = array(null, 'sq.lot','corak_remark','warna_remark','sq.lebar_jadi','sq.qty_jual','qty_jual','lokasi_fisik','kp_lot.lot', 'sq.sales_order','pl.no_pl');
+	var $column_search8= array('sq.lot','warna_remark','corak_remark','sq.lebar_jadi','sq.qty_jual','lokasi_fisik','kp_lot.lot', 'sq.sales_order','pl.no_pl');
+	var $order8  	  = array('sq.lot' => 'asc');
 
 	function get_query_items8()
 	{
@@ -768,9 +810,16 @@ class m_marketing extends CI_Model
     		$this->db->like('sq.warna_remark',$this->input->post('color'));
         }
 
-		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik");
+		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
+							kp_lot.lot as lot_asal, pl.no_pl ");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+		$this->db->JOIN("
+						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
+						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
+						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
+		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
 
@@ -813,6 +862,13 @@ class m_marketing extends CI_Model
 			$order = $this->order8;
 			$this->db->order_by(key($order), $order[key($order)]);
 		}
+	}
+
+	function get_datatables8_excel()
+	{
+		$this->get_query_items8();
+		$query = $this->db->get();
+		return $query->result();
 	}
 
 	function get_datatables8()
