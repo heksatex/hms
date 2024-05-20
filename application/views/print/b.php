@@ -38,23 +38,23 @@
                             <div class="data-center data-text">
                                 <div id="isef_p">Pattern
                                 </div>
-                                <div id="i75tl" style="font-size: 75%"><?= $data["pattern"] ?? "" ?>
+                                <div id="i75tl"><?= $data["pattern"] ?? "" ?>
                                 </div>
                                 <div id="isef_p">Color
                                 </div>
-                                <div id="i75tl" style="font-size: 75%"><?= $data["isi_color"] ?? "" ?>
+                                <div id="i75tl"><?= $data["isi_color"] ?? "" ?>
                                 </div>
                                 <div id="isef"><?= $data["isi_satuan_lebar"] ?? "" ?>
                                 </div>
-                                <div id="i75tl" style="font-size: 75%"><?= $data["isi_lebar"] ?? "" ?>
+                                <div id="i75tl"><?= $data["isi_lebar"] ?? "" ?>
                                 </div>
                                 <div id="isef"><?= $data["isi_satuan_qty1"] ?? "" ?>
                                 </div>
-                                <div  style="font-size: 75%" id="<?= isset($data["isi_qty1"]) ? "i75tl" : "" ?>"><?= $data["isi_qty1"] ?? "" ?>
+                                <div id="<?= isset($data["isi_qty1"]) ? "i75tl" : "" ?>"><?= $data["isi_qty1"] ?? "" ?>
                                 </div>
                                 <div id="<?= isset($data["isi_satuan_qty2"]) ? "isef" : "" ?>"><?= $data["isi_satuan_qty2"] ?? "" ?>
                                 </div>
-                                <div  style="font-size: 75%" id="<?= isset($data["isi_qty2"]) ? "i75tl" : "" ?>"><?= $data["isi_qty2"] ?? "" ?>
+                                <div id="<?= isset($data["isi_qty2"]) ? "i75tl" : "" ?>"><?= $data["isi_qty2"] ?? "" ?>
                                 </div>
                             </div>
                         </div>

@@ -227,13 +227,13 @@ class Picklistvalidasi extends MY_Controller {
     public function test() {
         try {
             $code = new Code\Code128New();
-            $datsa = $this->m_PicklistDetail->contoh(60, 40);
+            $datsa = $this->m_PicklistDetail->contoh(["052319809","072308123"], 40);
             $this->prints->setView('print/a');
             foreach ($datsa as $key => $value) {
                 $gen_code = $code->generate($value->barcode_id, "", 50, "vertical");
                 $this->prints->addDatas([
-                    'pattern' => $value->nama_produk,
-                    'isi_color' => $value->corak_remark,
+                    'pattern' => $value->corak_remark,
+                    'isi_color' => $value->warna_remark,
                     'isi_satuan_lebar' => 'WIDTH [' . $value->uom_lebar_jadi . ']',
                     'isi_lebar' => $value->lebar_jadi,
                     'isi_satuan_qty1' => 'QTY [' . $value->uom . ']',
