@@ -155,7 +155,8 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
@@ -249,7 +250,8 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
@@ -525,7 +527,8 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
@@ -816,7 +819,8 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-						UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");

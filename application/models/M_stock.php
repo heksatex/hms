@@ -14,7 +14,8 @@ class M_stock extends CI_Model
 								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group
 								INNER JOIN mst_produk mp ON sq.kode_produk = mp.kode_produk
 								LEFT JOIN (SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-											UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl WHERE jl.status = 'done' 
 											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot ON kp_lot.quant_id = sq.quant_id
 								LEFT JOIN mst_category cat ON mp.id_category = cat.id
@@ -31,7 +32,8 @@ class M_stock extends CI_Model
 								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group
 								INNER JOIN mst_produk mp ON sq.kode_produk = mp.kode_produk
 								LEFT JOIN (SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-											UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot ON kp_lot.quant_id = sq.quant_id
 								LEFT JOIN mst_category cat ON mp.id_category = cat.id
@@ -49,7 +51,8 @@ class M_stock extends CI_Model
 								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group 
 								INNER JOIN mst_produk mp ON sq.kode_produk = mp.kode_produk
 								LEFT JOIN (SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-											UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot ON kp_lot.quant_id = sq.quant_id
 								LEFT JOIN mst_category cat ON mp.id_category = cat.id
@@ -67,7 +70,8 @@ class M_stock extends CI_Model
 									LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group 
 									INNER JOIN mst_produk mp ON sq.kode_produk = mp.kode_produk
 									LEFT JOIN (SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-											UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot ON kp_lot.quant_id = sq.quant_id
 									LEFT JOIN mst_category cat ON mp.id_category = cat.id
@@ -86,7 +90,8 @@ class M_stock extends CI_Model
 									LEFT JOIN  mst_sales_group sg ON sq.sales_group = sg.kode_sales_group 
 									INNER JOIN mst_produk mp ON sq.kode_produk = mp.kode_produk
 									LEFT JOIN (SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-											UNION SELECT jl.lot, jli.quant_id FROM join_lot jl INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
+											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = 'done' 
 											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot ON kp_lot.quant_id = sq.quant_id
 									LEFT JOIN mst_category cat ON mp.id_category = cat.id
