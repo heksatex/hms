@@ -127,6 +127,8 @@ class Marketing extends MY_Controller
                 $row[] = $field->qty_jual.' '.$field->uom_jual;
                 $row[] = $field->qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->lokasi_fisik;
+                $row[] = $field->lot_asal;
+                $row[] = $field->sales_order;
                 $data[] = $row;
             }
     
@@ -143,6 +145,137 @@ class Marketing extends MY_Controller
             die();
         }
         
+    }
+
+    function export_excel_view_by_product()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables2_excel();
+
+        $product    = $this->input->post('product');
+        $color      = $this->input->post('color');
+        $marketing  = $this->input->post('marketing'); // MKT001
+        $lebar_jadi = $this->input->post('lebar_jadi');
+        $uom_jual   = $this->input->post('uom_jual');
+
+        if($marketing!= 'All'){
+            $marketing = $this->_module->get_nama_sales_Group_by_kode($marketing);
+        }else{
+            $marketing = 'All';
+        }
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Report Marketing View By Product');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET Filter
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Product / Corak');
+ 		$object->getActiveSheet()->SetCellValue('B3', ': '.$product);
+		$object->getActiveSheet()->mergeCells('B3:D3');
+
+        $object->getActiveSheet()->SetCellValue('A4', 'Warna');
+ 		$object->getActiveSheet()->SetCellValue('B4', ': '.$color);
+		$object->getActiveSheet()->mergeCells('B4:D4');
+
+        $object->getActiveSheet()->SetCellValue('A5', 'Marketing');
+ 		$object->getActiveSheet()->SetCellValue('B5', ': '.$marketing);
+		$object->getActiveSheet()->mergeCells('B5:D5');
+
+        $object->getActiveSheet()->SetCellValue('G3', 'Lebar Jadi');
+ 		$object->getActiveSheet()->SetCellValue('H3', ': '.$lebar_jadi);
+		$object->getActiveSheet()->mergeCells('H3:I3');
+
+        $object->getActiveSheet()->SetCellValue('G4', 'Uom');
+ 		$object->getActiveSheet()->SetCellValue('H4', ': '.$uom_jual);
+		$object->getActiveSheet()->mergeCells('H4:I4');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:M7")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+    		
+            $object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
+        }
+
+        $rowCount  = 8;
+        $num       = 1;
+        foreach ($get_data as $val) {
+
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->warna_remark);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lokasi_fisik);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lot_asal);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->sales_order);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+
+
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Report Marketing View By Product.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
     }
 
     function stockbylokasi()
@@ -180,6 +313,8 @@ class Marketing extends MY_Controller
                 $row[] = $field->qty_jual.' '.$field->uom_jual;
                 $row[] = $field->qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->lokasi_fisik;
+                $row[] = $field->lot_asal;
+                $row[] = $field->sales_order;
                 $data[] = $row;
             }
     
@@ -195,6 +330,112 @@ class Marketing extends MY_Controller
         }else{
             die();
         }
+    }
+
+    function export_excel_view_by_lokasi()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables3_excel();
+
+        $lokasi    = $this->input->post('lokasi');
+
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Report Marketing View By Lokasi');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET Filter
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Lokasi');
+ 		$object->getActiveSheet()->SetCellValue('B3', ': '.$lokasi);
+		$object->getActiveSheet()->mergeCells('B3:D3');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:M5")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+    		
+            $object->getActiveSheet()->getStyle($val.'5')->applyFromArray($styleArray);
+        }
+
+        $rowCount  = 6;
+        $num       = 1;
+        foreach ($get_data as $val) {
+
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->warna_remark);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lokasi_fisik);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lot_asal);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->sales_order);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+
+
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Report Marketing View By Lokasi.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
     }
 
     function gradeexpiredgjd()
@@ -309,6 +550,8 @@ class Marketing extends MY_Controller
                 $row[] = $field->qty_jual.' '.$field->uom_jual;
                 $row[] = $field->qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->lokasi_fisik;
+                $row[] = $field->lot_asal;
+                $row[] = $field->sales_order;
                 $row[] = $ket_kain;
                 $data[] = $row;
             }
@@ -327,6 +570,159 @@ class Marketing extends MY_Controller
         }
         
     }
+
+    function export_excel_grade_expired()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables5_excel();
+
+        $product    = $this->input->post('product');
+        $color      = $this->input->post('color');
+        $marketing  = $this->input->post('marketing'); // MKT001
+      ;
+
+        $product        = $this->input->post('product');
+        $color          = $this->input->post('color');
+        $mkt            = $this->input->post('marketing');
+        $lebar_jadi     = $this->input->post('lebar_jadi');
+        $uom_jual       = $this->input->post('uom_jual');
+        $grade          = $this->input->post('grade');
+        $expired        = $this->input->post('expired');
+        $nama_mkt       = $this->_module->get_nama_sales_Group_by_kode($this->input->post('mkt')) ?? 'All';
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Report Grade & Expired');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET Filter
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Product / Corak');
+ 		$object->getActiveSheet()->SetCellValue('B3', ': '.$product);
+		$object->getActiveSheet()->mergeCells('B3:D3');
+
+        $object->getActiveSheet()->SetCellValue('A4', 'Warna');
+ 		$object->getActiveSheet()->SetCellValue('B4', ': '.$color);
+		$object->getActiveSheet()->mergeCells('B4:D4');
+
+        $object->getActiveSheet()->SetCellValue('A5', 'Marketing');
+ 		$object->getActiveSheet()->SetCellValue('B5', ': '.$marketing);
+		$object->getActiveSheet()->mergeCells('B5:D5');
+
+        $object->getActiveSheet()->SetCellValue('A6', 'Grade');
+ 		$object->getActiveSheet()->SetCellValue('B6', ': '.$grade);
+		$object->getActiveSheet()->mergeCells('B6:D6');
+
+        $object->getActiveSheet()->SetCellValue('A7', 'Expired');
+ 		$object->getActiveSheet()->SetCellValue('B7', ': '.$expired);
+		$object->getActiveSheet()->mergeCells('B7:D7');
+
+        $object->getActiveSheet()->SetCellValue('G3', 'Lebar Jadi');
+ 		$object->getActiveSheet()->SetCellValue('H3', ': '.$lebar_jadi);
+		$object->getActiveSheet()->mergeCells('H3:I3');
+
+        $object->getActiveSheet()->SetCellValue('G4', 'Uom');
+ 		$object->getActiveSheet()->SetCellValue('H4', ': '.$uom_jual);
+		$object->getActiveSheet()->mergeCells('H4:I4');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:O9")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC','Keterangan');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 9, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+    		
+            $object->getActiveSheet()->getStyle($val.'9')->applyFromArray($styleArray);
+        }
+        $tgl_sekarang = date('Y-m-d');
+        $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
+        $rowCount  = 10;
+        $num       = 1;
+        foreach ($get_data as $val) {
+
+            if(date('Y-m-d', strtotime($val->create_date)) < $tgl_sebelum){
+                $ket_kain = 'Expired';
+            }else{
+                $ket_kain = '';
+            }
+
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->create_date);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->warna_remark);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lokasi_fisik);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->lot_asal);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->sales_order);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $ket_kain);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+
+
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Report Grade & Expired.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
+    }
+
 
 
     function listwarnabyproduct()
@@ -452,6 +848,8 @@ class Marketing extends MY_Controller
                 $row[] = $field->qty_jual.' '.$field->uom_jual;
                 $row[] = $field->qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->lokasi_fisik;
+                $row[] = $field->lot_asal;
+                $row[] = $field->sales_order;
                 $data[] = $row;
             }
     
@@ -468,6 +866,117 @@ class Marketing extends MY_Controller
             die();
         }
         
+    }
+
+     function export_excel_view_by_warna()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables8_excel();
+
+        $product    = $this->input->post('product');
+        $color    = $this->input->post('color');
+
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Report Marketing Warna By Product');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET Filter
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Product / Corak');
+ 		$object->getActiveSheet()->SetCellValue('B3', ': '.$product);
+		$object->getActiveSheet()->mergeCells('B3:D3');
+
+        $object->getActiveSheet()->SetCellValue('A4', 'Warna');
+ 		$object->getActiveSheet()->SetCellValue('B4', ': '.$color);
+		$object->getActiveSheet()->mergeCells('B4:D4');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:M6")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 6, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+    		
+            $object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
+        }
+
+        $rowCount  = 7;
+        $num       = 1;
+        foreach ($get_data as $val) {
+
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->warna_remark);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lokasi_fisik);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lot_asal);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->sales_order);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+
+
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Report Marketing Warna By Product.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
     }
 
     function stockhistorygjd()
