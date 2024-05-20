@@ -167,7 +167,7 @@
                                                                 <label class="form-label">Order BY</label>
                                                             </div>
                                                             <div class="col-xs-8 col-md-8">
-                                                                <select name="order" class="form-control" id="order" disabled>
+                                                                <select name="order" class="form-control" id="order">
                                                                     <option value="no_sj">No SJ</option>
                                                                     <option value="nama">Customer</option>
                                                                     <option value="jenis_jual">Type</option>
