@@ -24,7 +24,7 @@ class M_PicklistDetail extends CI_Model {
     protected $table = "picklist_detail";
     var $column_order = array(null, 'a.barcode_id', 'a.quant_id', 'barcode_id', 'a.kode_produk', 'a.nama_produk', 'sq.lokasi_fisik', 'a.valid');
     var $order = ['tanggal_masuk' => 'desc'];
-    var $column_search = array('a.barcode_id', 'a.quant_id', 'a.kode_produk', 'a.nama_produk','sq.lokasi_fisik','a.corak_remark','a.warna_remark','a.valid');
+    var $column_search = array('a.barcode_id', 'a.quant_id', 'a.kode_produk', 'a.nama_produk', 'sq.lokasi_fisik', 'a.corak_remark', 'a.warna_remark', 'a.valid');
 
     public function insertItem(array $data) {
         try {
@@ -234,8 +234,8 @@ class M_PicklistDetail extends CI_Model {
 
     public function contoh($limit, $size) {
         $this->db->from($this->table);
-        $this->db->join('stock_quant sq', 'sq.lot = picklist_detail.barcode_id');
-        $this->db->limit($limit, $size);
+        $this->db->join('stock_quant sq', '(sq.quant_id = picklist_detail.quant_id and valid <> "cancel")');
+        $this->db->where_in("barcode_id", $limit);
         $rest = $this->db->select("barcode_id,sq.nama_produk,picklist_detail.corak_remark,sq.warna_remark,picklist_detail.lebar_jadi,picklist_detail.uom_lebar_jadi,picklist_detail.qty,picklist_detail.uom")->get();
         return $rest->result();
     }
@@ -318,7 +318,7 @@ class M_PicklistDetail extends CI_Model {
             $this->db->where($condition);
         }
         if (count($joinBulk) > 0) {
-            $this->db->join("bulk_detail bd", "(pd.barcode_id = bd.barcode)","right");
+            $this->db->join("bulk_detail bd", "(pd.barcode_id = bd.barcode)", "right");
 //            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
             $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
             $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
