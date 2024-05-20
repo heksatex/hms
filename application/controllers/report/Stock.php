@@ -201,8 +201,8 @@ class Stock extends MY_Controller
         		$dataRecord[]  = array('group'      => 'Yes',
         							   'nama_field' => $gp->nama_field,
         							   'grouping'   => $gp->grouping,
-        							   'qty'        => 'Qty1 = '.number_format($gp->tot_qty,2),
-        							   'qty2'       => 'Qty2 = '.number_format($gp->tot_qty2,2),
+        							   'qty'        => 'Qty1 [HPH] = '.number_format($gp->tot_qty,2),
+        							   'qty2'       => 'Qty2 [HPH] = '.number_format($gp->tot_qty2,2),
                                        'by'         => $nama_field_real
         						);
                 //$tot_group++;
@@ -215,10 +215,16 @@ class Stock extends MY_Controller
 
         }else{
             $name_total="Total Data : ";
-
+                $tgl_sekarang = date('Y-m-d');
+                $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
     	    	$list = $this->m_stock->get_list_stock_by($where_lokasi,$where_result,$order_by,$record,$recordPerPage)->result();
     	    	foreach ($list as $row) {
     	    		# code...
+                    if(date('Y-m-d', strtotime($row->create_date)) < $tgl_sebelum){
+                        $ket_exp = 'Expired';
+                    }else{
+                        $ket_exp = '';
+                    }
     	    		$dataRecord[] = array(
     	    							  'lot'   		=> $row->lot,
     	    							  'tgl_dibuat'  => $row->create_date,
@@ -241,7 +247,9 @@ class Stock extends MY_Controller
     	    							  'umur_produk' => $row->umur,
                                           'qty_jual'    => $row->qty_jual.' '.$row->uom_jual,
                                           'qty2_jual'   => $row->qty2_jual.' '.$row->uom2_jual,
-                                          'no_pl'   => $row->no_pl,
+                                          'no_pl'       => $row->no_pl,
+                                          'ket_exp'     => $ket_exp,
+                                          'lot_asal'    => $row->lot_asal
     	    							);
     	    	}
 
@@ -358,34 +366,42 @@ class Stock extends MY_Controller
         }
 
         if($group_ke == count($data_group)){// loadchild list
-
+            $tgl_sekarang = date('Y-m-d');
+            $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
 
             $list = $this->m_stock->get_list_stock_by($where_lokasi,$where_result,$order_by,$record,$recordPerPage)->result();
             foreach ($list as $row) {
-                # code...
+            	# code...
+                if(date('Y-m-d', strtotime($row->create_date)) < $tgl_sebelum){
+                    $ket_exp = 'Expired';
+                }else{
+                    $ket_exp = '';
+                }
                 $list_items[] = array(
-                                      'lot'         => $row->lot,
-                                      'tgl_dibuat'  => $row->create_date,
-                                      'tgl_diterima'=> $row->move_date,
-                                      'grade'       => $row->nama_grade,
-                                      'lokasi'      => $row->lokasi,
-                                      'lokasi_fisik'  => $row->lokasi_fisik,
-                                      'kode_produk' => $row->kode_produk,
-                                      'nama_produk' => $row->nama_produk,
-                                      'corak_remark' => $row->corak_remark,
-    	    						  'warna_remark' => $row->warna_remark,
-   	    							  'kategori'    => $row->nama_category,
-                                      'qty' 		=> $row->qty.' '.$row->uom,
-    	    						  'qty2'        => $row->qty2.' '.$row->uom2,
-                                      'lebar_greige'=> $row->lebar_greige.' '.$row->uom_lebar_greige,
-    	    						  'lebar_jadi'  => $row->lebar_jadi.' '.$row->uom_lebar_jadi,
-                                      'sales_order' => $row->sales_order,
-                                      'sales_group' => $row->nama_sales_group,
-                                      'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
-                                      'umur_produk' => $row->umur,
-                                      'no_pl'       => $row->no_pl,
-                                      'qty_jual'    => $row->qty_jual.' '.$row->uom_jual,
-                                      'qty2_jual'   => $row->qty2_jual.' '.$row->uom2_jual,
+                                        'lot'         => $row->lot,
+                                        'tgl_dibuat'  => $row->create_date,
+                                        'tgl_diterima'=> $row->move_date,
+                                        'grade'       => $row->nama_grade,
+                                        'lokasi'      => $row->lokasi,
+                                        'lokasi_fisik'  => $row->lokasi_fisik,
+                                        'kode_produk' => $row->kode_produk,
+                                        'nama_produk' => $row->nama_produk,
+                                        'corak_remark' => $row->corak_remark,
+                                        'warna_remark' => $row->warna_remark,
+                                        'kategori'    => $row->nama_category,
+                                        'qty' 		=> $row->qty.' '.$row->uom,
+                                        'qty2'        => $row->qty2.' '.$row->uom2,
+                                        'lebar_greige'=> $row->lebar_greige.' '.$row->uom_lebar_greige,
+                                        'lebar_jadi'  => $row->lebar_jadi.' '.$row->uom_lebar_jadi,
+                                        'sales_order' => $row->sales_order,
+                                        'sales_group' => $row->nama_sales_group,
+                                        'qty_opname'  => $row->qty_opname.' '.$row->uom_opname,
+                                        'umur_produk' => $row->umur,
+                                        'no_pl'       => $row->no_pl,
+                                        'qty_jual'    => $row->qty_jual.' '.$row->uom_jual,
+                                        'qty2_jual'   => $row->qty2_jual.' '.$row->uom2_jual,
+                                        'ket_exp'     => $ket_exp,
+                                        'lot_asal'      => $row->lot_asal,
                                     );
             }
             $allcount  = $this->m_stock->get_record_stock($where_lokasi,$where_result);
@@ -491,7 +507,32 @@ class Stock extends MY_Controller
                         }
 
                         $nama_field = " (datediff(now(), sq.move_date) ) ";
-                        
+                    
+                    }else if($row['nama_field'] == 'move_date' OR $row['nama_field'] == 'create_date' ){
+                        $date_format = date('Y-m-d H:i:s', strtotime($row['value']));
+                        if($row['operator'] == '<'){
+                            $isi        = "< '".$date_format."' ";
+                        }else if($row['operator'] == '>'){
+                            $isi        = "> '".$date_format."' ";
+                        }else if($row['operator'] == '<='){
+                            $isi        = "<= '".$date_format."' ";
+                        }else{ 
+                            // ($row['operator'] == '>='){
+                            $isi        = ">= '".$date_format."' ";
+                        }
+
+                        $nama_field = " sq.".$row['nama_field']." ";
+
+                    }else if($row['nama_field'] == 'ket_exp'){ 
+                        $tgl_sekarang = date('Y-m-d');
+                        $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
+                        if($row['value'] == 'Yes'){
+                            $isi = " <= '".$tgl_sebelum."' ";
+                        }else{
+                            $isi = " >= '".$tgl_sebelum."' ";
+                        }
+                        $nama_field = " STR_TO_DATE(sq.create_date,'%Y-%m-%d') ";
+
                     }else if($row['nama_field'] == 'opname'){ 
                         if($row['value'] == 'done'){
                             $isi = " > 0";
@@ -589,6 +630,8 @@ class Stock extends MY_Controller
             $where = 'mp.id_category';
         }else if($nama_field == 'no_pl'){
             $where = 'no_pl';
+        }else if($nama_field == 'kp_lot'){
+            $where = 'kp_lot.lot';
         }else{
             $where = 'sq.'.$nama_field;
         }
@@ -605,13 +648,30 @@ class Stock extends MY_Controller
         return $where;
     }
 
+    function cek_column_excel($jml)
+    {
+        $max    = $jml; 
+        $result = 'A';
+        $arr_column = [];
+        for ($l = 'A', $i = 1; $i < $max; $l++, $i++) {
+            // if($i == $index){
+            //     $result = $l;
+            // }
+            $arr_column[] = $l;
+        }
+        return $arr_column;
+    }
+
 
     function export_excel_stock()
     {
 
     	$this->load->library('excel');
         ob_start();
-        $where_result= $this->input->post('sql');
+        $where_result   = $this->input->post('sql');
+        $checkboxes_hide= $this->input->post('checkboxes_hide');
+
+       
         //$order_by = "ORDER BY quant_id desc";
         $where_lokasi = " (lokasi LIKE '%Stock%' OR lokasi  LIKE '%Transit Location%') ";
 
@@ -631,7 +691,7 @@ class Stock extends MY_Controller
 		$object->getActiveSheet()->mergeCells('A1:L1');
 
         //bold huruf
-        $object->getActiveSheet()->getStyle("A1:AD4")->getFont()->setBold(true);
+        $object->getActiveSheet()->getStyle("A1:AF4")->getFont()->setBold(true);
 
         // Border 
 		$styleArray = array(
@@ -641,20 +701,19 @@ class Stock extends MY_Controller
               )
             )
         );
-
-
+        
         // header table
-        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Corak Remark', 'Warna Remark', 'Kategori' ,'Qty1','Uom1', 'Qty2', 'Uom2', 'Qty1 Jual', 'Uom1 Jual' , 'Qty2 Jual', 'Uom2 Jual', 'Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Picklist (PL)', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Corak Remark', 'Warna Remark', 'Kategori' ,'Qty1 [HPH]','Uom1 [HPH]', 'Qty2 [HPH]', 'Uom2 [HPH]', 'Qty1 [JUAL]', 'Uom1 [JUAL]' , 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Picklist (PL)', 'KP/Lot Asal', 'Ket Expired','Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
-            # code...
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 4, $judul);  
             $column++;
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y', 'Z', 'AA', 'AB','AC','AD');
+    	// $index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y', 'Z', 'AA', 'AB','AC','AD','AE','AF');
+        $index_header = $this->cek_column_excel(33);
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -662,13 +721,21 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->getStyle($val.'5')->applyFromArray($styleArray);
         }
 
+        $tgl_sekarang = date('Y-m-d');
+        $tgl_sebelum = date('Y-m-d', strtotime('-3 month', strtotime($tgl_sekarang)));
 
         //body
         $num      = 1;
         $rowCount = 5;
         $list     = $this->m_stock->get_list_stock_by_noLimit($where_lokasi,$where_result)->result();
+        $tmp_val  = [];
         foreach ($list as $val) {
             # code...
+            if(date('Y-m-d', strtotime($val->create_date)) < $tgl_sebelum){
+                $ket_exp = 'Expired';
+            }else{
+                $ket_exp = '';
+            }
             $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
             $object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->quant_id);
             $object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->lot);
@@ -698,7 +765,9 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $val->qty_opname);
             $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $val->uom_opname);
             $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $val->no_pl);
-            $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $val->umur);
+            $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $val->lot_asal);
+            $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $ket_exp);
+            $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $val->umur);
 
              //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -732,10 +801,29 @@ class Stock extends MY_Controller
 			$object->getActiveSheet()->getStyle('AB'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('AC'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('AD'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('AF'.$rowCount)->applyFromArray($styleArray);
 
             $rowCount++;
 
+        }
 
+        if(count($checkboxes_hide)){
+            //hide column
+            foreach ($checkboxes_hide as $val) {
+                if($val == 13 ){ // qty1 HPH
+                    $object->getActiveSheet()->removeColumn('M');
+                    $object->getActiveSheet()->removeColumn('M');
+                }else if($val == 14){
+                    if(count($checkboxes_hide) == 1){
+                        $object->getActiveSheet()->removeColumn('O');
+                        $object->getActiveSheet()->removeColumn('O');
+                    }else{
+                        $object->getActiveSheet()->removeColumn('M');
+                        $object->getActiveSheet()->removeColumn('M');
+                    }
+                }
+            }
         }
 
         $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
