@@ -27,6 +27,10 @@ class Outlet extends MY_Controller
         $data['list_remark']            = $this->m_outlet->get_list_remark_by_grade();
         $uom_konversi                   = $this->m_outlet->get_list_uom_konversi();
         $data['uom_konversi']           = json_encode($uom_konversi);
+        $sub_menu                       = $this->uri->segment(2);
+        $username                       = $this->session->userdata('username'); 
+        $kode                           = $this->_module->get_kode_sub_menu_deptid($sub_menu,"OUTLET")->row_array();
+        $data['akses_menu']             = $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
         $this->load->view('manufacturing/v_outlet', $data);      
     }
 
@@ -298,6 +302,9 @@ class Outlet extends MY_Controller
                 $sub_menu = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
                 $nama_user = $this->_module->get_nama_user($username)->row_array();
+
+                $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,"OUTLET")->row_array();
+                $akses_menu= $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
                 
                 $id_inlet = $this->input->post('id');
                 $sisa_hph_mtr = $this->input->post('sisa_hph_mtr');// sisa mtr
@@ -318,7 +325,9 @@ class Outlet extends MY_Controller
                 // start transaction
                 $this->_module->startTransaction();
 
-                if(empty($id_inlet)){
+                if(empty($akses_menu)){
+                    $callback = array('status' => 'failed', 'message' => 'Maaf, Anda tidak mempunyai Akses ke Menu Ini !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                }else if(empty($id_inlet)){
                     // throw new \Exception('Waktu Anda Telah Habis', 401);
                     $callback = array('status' => 'failed', 'message' => 'Id Inlet Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if(empty($hph_mtr) AND empty($hph_kg)){
@@ -344,7 +353,7 @@ class Outlet extends MY_Controller
                     $inlet     = $this->m_inlet->get_data_inlet_by_id($id_inlet);
 
                     // lock table
-                    // $this->_module->lock_tabel("stock_quant WRITE, mrp_production WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, mrp_production_rm_target WRITE, mrp_production_rm_hasil WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_move WRITE, mrp_satuan WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, mrp_inlet  WRITE, stock_move_items as smi WRITE, stock_quant as sq WRITE, mst_produk WRITE, token_increment WRITE,departemen as d WRITE, mrp_production_rm_target as rmt WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE,mrp_production_fg_hasil  as fg WRITE, mrp_production as mrp write, mrp_production_fg_target as tfg WRITE");
+                    $this->_module->lock_tabel("stock_quant WRITE, mrp_production WRITE, mrp_production_fg_hasil WRITE, mrp_production_fg_target WRITE, mrp_production_rm_target WRITE, mrp_production_rm_hasil WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_move WRITE, mrp_satuan WRITE, mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, mrp_inlet  WRITE, stock_move_items as smi WRITE, stock_quant as sq WRITE, mst_produk WRITE, token_increment WRITE,departemen as d WRITE, mrp_production_rm_target as rmt WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE,mrp_production_fg_hasil  as fg WRITE, mrp_production as mrp write, mrp_production_fg_target as tfg WRITE");
 
 
                     // get data inlet
@@ -1230,21 +1239,20 @@ class Outlet extends MY_Controller
 
 
                             }
-                            
     
                         }
-
 
                     }
 
                     // unlock table
                     // $this->_module->unlock_tabel();
-
                 }
 
                 if (!$this->_module->finishTransaction()) {
                     throw new \Exception('Gagal Menyimpan Data', 500);
                 }
+
+              
    
                 $this->output->set_status_header(200)
                         ->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
@@ -1252,9 +1260,13 @@ class Outlet extends MY_Controller
 
         }catch(Exception $ex){
             $this->_module->rollbackTransaction();
+            $this->_module->unlock_tabel();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+       } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -1269,13 +1281,18 @@ class Outlet extends MY_Controller
                 $username = addslashes($this->session->userdata('username')); 
                 $id_inlet  = $this->input->post('id');
 
+                $sub_menu = $this->uri->segment(2);
+                $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,"OUTLET")->row_array();
+                $akses_menu= $this->_module->cek_priv_menu_by_user($username,$kode['kode'])->num_rows();
+
                 $inlet     = $this->m_inlet->get_data_inlet_by_id($id_inlet);
 
                 // start transaction
                 $this->_module->startTransaction();
 
-                // get data inlet
-                if(empty($inlet->id)){
+                if(empty($akses_menu)){
+                    $callback = array('status' => 'failed', 'message' => 'Maaf, Anda tidak mempunyai Akses ke Menu Ini !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                }else if(empty($inlet->id)){
                     $callback = array('status' => 'failed', 'message' => 'Data KP/Lot Inlet tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if($inlet->status == 'done'){
                     $callback = array('status' => 'failed', 'message' => 'Data KP/Lot Inlet sudah Done  !', 'icon' =>'fa fa-warning', 'type' => 'danger');
