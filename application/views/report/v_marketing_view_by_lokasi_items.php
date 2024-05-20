@@ -103,6 +103,7 @@
                                         <th class="style ws">Lokasi Fisik / Rak</th>
                                         <th class="style ws">Lot/KP</th>
                                         <th class="style ws">SO/SC</th>
+                                        <th class="style ws">Picklist (PL)</th>
                                     </tr>
                                 </thead>
                             </table>

@@ -134,6 +134,7 @@
                                         <th class="style ws">Lokasi Fisik / Rak</th>
                                         <th class="style ws">Lot/KP</th>
                                         <th class="style ws">SO/SC</th>
+                                        <th class="style ws">Picklist (PL)</th>
                                         <th class="style ws">Keterangan</th>
                                     </tr>
                                 </thead>
@@ -182,7 +183,7 @@
            
             "columnDefs": [
               { 
-                "targets": [0,11], 
+                "targets": [0,12], 
                 "orderable": false, 
               },
               { 

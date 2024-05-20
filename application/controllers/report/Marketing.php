@@ -129,6 +129,7 @@ class Marketing extends MY_Controller
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->lot_asal;
                 $row[] = $field->sales_order;
+                $row[] = $field->no_pl;
                 $data[] = $row;
             }
     
@@ -196,7 +197,7 @@ class Marketing extends MY_Controller
 		$object->getActiveSheet()->mergeCells('H4:I4');
 
        //bold huruf
-		$object->getActiveSheet()->getStyle("A1:M7")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:N7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -208,7 +209,7 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC');
+        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC', 'Picklist (PL)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -218,7 +219,7 @@ class Marketing extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -242,6 +243,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lokasi_fisik);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lot_asal);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->sales_order);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->no_pl);
 
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -258,6 +260,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 		
 	        $rowCount++;
 		}
@@ -315,6 +318,7 @@ class Marketing extends MY_Controller
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->lot_asal;
                 $row[] = $field->sales_order;
+                $row[] = $field->no_pl;
                 $data[] = $row;
             }
     
@@ -356,7 +360,7 @@ class Marketing extends MY_Controller
 		$object->getActiveSheet()->mergeCells('B3:D3');
 
        //bold huruf
-		$object->getActiveSheet()->getStyle("A1:M5")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:N5")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -368,7 +372,7 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC');
+        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC','Picklist (PL)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -378,7 +382,7 @@ class Marketing extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -402,6 +406,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lokasi_fisik);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lot_asal);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->sales_order);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->no_pl);
 
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -418,6 +423,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 		
 	        $rowCount++;
 		}
@@ -552,6 +558,7 @@ class Marketing extends MY_Controller
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->lot_asal;
                 $row[] = $field->sales_order;
+                $row[] = $field->no_pl;
                 $row[] = $ket_kain;
                 $data[] = $row;
             }
@@ -630,7 +637,7 @@ class Marketing extends MY_Controller
 		$object->getActiveSheet()->mergeCells('H4:I4');
 
        //bold huruf
-		$object->getActiveSheet()->getStyle("A1:O9")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:P9")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -642,7 +649,7 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC','Keterangan');
+        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC','Picklist (PL)','Keterangan');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -652,7 +659,7 @@ class Marketing extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -684,7 +691,8 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lokasi_fisik);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->lot_asal);
 			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->sales_order);
-			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $ket_kain);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->no_pl);
+			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $ket_kain);
 
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -703,6 +711,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('P'.$rowCount)->applyFromArray($styleArray);
 		
 	        $rowCount++;
 		}
@@ -850,6 +859,7 @@ class Marketing extends MY_Controller
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->lot_asal;
                 $row[] = $field->sales_order;
+                $row[] = $field->no_pl;
                 $data[] = $row;
             }
     
@@ -897,7 +907,7 @@ class Marketing extends MY_Controller
 		$object->getActiveSheet()->mergeCells('B4:D4');
 
        //bold huruf
-		$object->getActiveSheet()->getStyle("A1:M6")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:N6")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -909,7 +919,7 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC');
+        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC', 'Picklist (PL)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -919,7 +929,7 @@ class Marketing extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -943,6 +953,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lokasi_fisik);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lot_asal);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->sales_order);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->no_pl);
 
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -959,6 +970,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 		
 	        $rowCount++;
 		}
