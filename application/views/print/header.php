@@ -37,29 +37,31 @@
         }
         #isef_p{
             text-align:right;
-            font-size:67%;
+            font-size:60%;
             padding:2px 2px 2px 2px;
             font-family:Arial, Helvetica, sans-serif;
-            font-weight:600;
+            font-weight:400;
             text-transform: uppercase;
         }
         #i75tl{
             text-align:right;
-            font-size:64%;
-            padding:2px 2px 2px 2px;
-            font-family:Arial, Helvetica, sans-serif;
-            font-weight:400;
-            border-bottom: solid;
-            border-width: thin;
-            word-wrap: break-word;
-            
-        }
-        #isef{
-            text-align:right;
-            font-size:67%;
+            font-size:80%;
             padding:2px 2px 2px 2px;
             font-family:Arial, Helvetica, sans-serif;
             font-weight:600;
+            border-bottom: solid;
+            border-width: thin;
+            word-wrap: break-word;
+            padding-bottom: 3px;
+            padding-top: 3px;
+
+        }
+        #isef{
+            text-align:right;
+            font-size:60%;
+            padding:2px 2px 2px 2px;
+            font-family:Arial, Helvetica, sans-serif;
+            font-weight:400;
         }
         .data-center{
             height: 100vh;

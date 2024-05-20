@@ -147,11 +147,26 @@ class M_deliveryorder extends CI_Model {
             $this->db->select(",pd.barcode_id as total_lot");
             $this->db->group_by("pd.barcode_id");
         }
-        if (count($condition) > 0)
+        if (count($condition) > 0) {
             $this->db->where($condition);
-
-        if (!empty($order))
-            $this->db->order_by($order);
+        }
+//        if (!empty($order)) {
+//            if ($summary) {
+        switch ($order) {
+            case"nama":
+                $this->db->order_by("nama asc, no_sj asc");
+                break;
+            case "jenis_jual":
+                $this->db->order_by("jenis_jual asc, no_sj asc");
+                break;
+            default:
+                $this->db->order_by("no_sj asc");
+                break;
+        }
+//            } else {
+//                $this->db->order_by($order);
+//            }
+//        }
 
         if (isset($_POST['length'])) {
             if ($_POST['length'] != -1)
