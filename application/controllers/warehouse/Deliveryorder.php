@@ -338,6 +338,8 @@ class Deliveryorder extends MY_Controller {
             if ($data->tanggal_dokumen === $dok_date) {
                 
             } else {
+                $this->_module->lock_tabel("token_increment WRITE,token_increment it READ,user WRITE, main_menu_sub WRITE, log_history WRITE,"
+                        . "delivery_order WRITE,delivery_order_sj WRITE");
                 $nosjs = $this->m_deliveryorder->checkNoSJ(['no_sj LIKE' => $data->tipe_no_sj . '/' . date('y', strtotime($dok_date)) . '/' . getRomawi(date('m', strtotime($dok_date))) . '/%']);
 //                $nosjs = $this->m_deliveryorder->checkNoSJ(['no_sj LIKE' => $data->tipe_no_sj . '%']);
                 if (!is_null($nosjs)) {
@@ -370,6 +372,8 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -386,6 +390,8 @@ class Deliveryorder extends MY_Controller {
             $time_dokumen = strtotime($tanggal_dokumen);
             $pl = $this->input->post("pl");
             $this->_module->startTransaction();
+            $this->_module->lock_tabel("picklist READ,token_increment WRITE,token_increment it READ,user WRITE, main_menu_sub WRITE, log_history WRITE,"
+                    . "delivery_order WRITE,delivery_order_sj WRITE");
             $now = date("Y-m-d H:i:s");
             if (!$nodo = $this->token->noUrut('deliveryorder', date('ym'), true)->generate('DO', '%04d')->get()) {
                 throw new \Exception("No Delivery Order tidak terbuat", 500);
@@ -433,6 +439,8 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -457,7 +465,10 @@ class Deliveryorder extends MY_Controller {
                 throw new \Exception('Picklist harus dalam status Validasi', 500);
             }
             $condition = ["no_pl" => $data_do->no_picklist, "valid" => "validasi"];
-
+            $this->_module->startTransaction();
+            $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,delivery_order_detail WRITE,picklist WRITE,picklist_detail WRITE,"
+                    . "delivery_order WRITE,delivery_order_sj WRITE,stock_move_produk WRITE,stock_move_items WRITE,stock_move WRITE,deliveryorder_stock_move WRITE,"
+                    . "stock_quant WRITE,stock_quant sq WRITE,picklist_detail a WRITE,picklist_detail pd WRITE,mst_produk mp WRITE");
             $nosm = "SM" . $this->_module->get_kode_stock_move();
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|OUT','GJD/Stock','CST/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
@@ -541,6 +552,8 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -1069,6 +1082,9 @@ class Deliveryorder extends MY_Controller {
             $doid = $this->input->post("doid");
 //            $nosj = $this->input->post("no_sj");
             $this->_module->startTransaction();
+            $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,delivery_order_detail WRITE,picklist WRITE,picklist_detail WRITE,"
+                    . "delivery_order_detail dod WRITE,stock_move_produk WRITE,stock_move_items WRITE,stock_move WRITE,deliveryorder_stock_move WRITE,"
+                    . "stock_quant WRITE,stock_quant sq WRITE,picklist_detail pd WRITE,mst_produk mp WRITE,delivery_order do WRITE,delivery_order_detail a WRITE");
             $barcode = [];
             $pl = "";
             foreach ($dataItem as $key => $value) {
@@ -1142,6 +1158,8 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -1149,7 +1167,7 @@ class Deliveryorder extends MY_Controller {
         try {
             $doid = $this->input->post("doid");
 
-            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'retur'], ["PD"]);
+            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'retur','pd.valid <>'=>'cancel'], ["PD"]);
             $data = [];
             $no = 0;
             foreach ($list as $value) {
