@@ -200,7 +200,7 @@ class Deliveryorder extends MY_Controller {
             $type = $this->input->post("tipe");
             $notin = json_decode($this->input->post('not_in'));
             $form = $this->input->post("form");
-            $condition = ["pd.no_pl" => $pl, 'a.do_id' => $doid];
+            $condition = ["pd.no_pl" => $pl, 'dod.do_id' => $doid];
             $data = array();
             $recordsTotal = 0;
             $recordsFiltered = 0;
@@ -247,9 +247,9 @@ class Deliveryorder extends MY_Controller {
                 $whereIn = [];
                 $join = [];
                 if (count($notin) > 0) {
-                    $whereNotIn = ['a.barcode_id' => $notin];
+                    $whereNotIn = ['dod.barcode_id' => $notin];
                 }
-                $condition = ['a.no_pl' => $pl, 'a.valid ' => 'validasi'];
+                $condition = ['dod.no_pl' => $pl, 'dod.valid ' => 'validasi'];
 
                 if ($type === "1" && count(json_decode($bulk)) === 0) {
                     throw new Exception("");
@@ -468,7 +468,7 @@ class Deliveryorder extends MY_Controller {
             $this->_module->startTransaction();
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,delivery_order_detail WRITE,picklist WRITE,picklist_detail WRITE,"
                     . "delivery_order WRITE,delivery_order_sj WRITE,stock_move_produk WRITE,stock_move_items WRITE,stock_move WRITE,deliveryorder_stock_move WRITE,"
-                    . "stock_quant WRITE,stock_quant sq WRITE,picklist_detail a WRITE,picklist_detail pd WRITE,mst_produk mp WRITE");
+                    . "stock_quant WRITE,stock_quant sq WRITE,picklist_detail a WRITE,picklist_detail pd WRITE,mst_produk mp WRITE,bulk_detail bd WRITE,bulk b WRITE");
             $nosm = "SM" . $this->_module->get_kode_stock_move();
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|OUT','GJD/Stock','CST/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
@@ -633,6 +633,9 @@ class Deliveryorder extends MY_Controller {
             $pl = $this->input->post("pl");
             $nodo = $this->input->post("nodo");
             $this->_module->startTransaction();
+            $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,delivery_order_detail WRITE,picklist p WRITE,delivery_order WRITE,user u WRITE,wa_template write,"
+                    . "delivery_order_sj WRITE,stock_move_produk WRITE,stock_move_items WRITE,stock_move WRITE,deliveryorder_stock_move WRITE,delivery_order_detail dod WRITE,delivery_order a WRITE, delivery_order do WRITE,"
+                    . "stock_quant WRITE,stock_quant sq WRITE,picklist_detail pd WRITE,mst_produk mp WRITE, partner pn write,mst_sales_group msg write");
 //            $data = $this->m_deliveryorder->getDataDetail(['a.no' => $do], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales");
             $data = $this->m_deliveryorder->getDataDetail(["a.no_picklist" => $pl, 'a.no' => $nodo, 'a.status' => 'done'], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales,p.nama_user as user_picklist");
             if (empty($data)) {
@@ -644,7 +647,7 @@ class Deliveryorder extends MY_Controller {
             $nosm = "SM" . $this->_module->get_kode_stock_move();
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $nodo . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
-            $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $data->id, 'a.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ']);
+            $list = $this->m_deliveryorderdetail->getDataAll(['do_id' => $data->id, 'dod.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ']);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
             $smproduk = [];
             $updateIn = [
@@ -732,6 +735,8 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -1101,7 +1106,7 @@ class Deliveryorder extends MY_Controller {
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $do . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
 
-            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ'], ['a.barcode_id' => $barcode]);
+            $list = $this->m_deliveryorderdetail->getDataAll(['dod.do_id' => $doid, 'dod.status' => 'done', 'pd.valid' => 'done'], ['PD', 'SQ'], ['dod.barcode_id' => $barcode]);
             $rowMoveItem = $this->_module->get_row_order_stock_move_items_by_kode($nosm);
             $smproduk = [];
             $updateIn = [
@@ -1167,7 +1172,7 @@ class Deliveryorder extends MY_Controller {
         try {
             $doid = $this->input->post("doid");
 
-            $list = $this->m_deliveryorderdetail->getDataAll(['a.do_id' => $doid, 'a.status' => 'retur','pd.valid <>'=>'cancel'], ["PD"]);
+            $list = $this->m_deliveryorderdetail->getDataAll(['dod.do_id' => $doid, 'dod.status' => 'retur', 'pd.valid <>' => 'cancel'], ["PD"]);
             $data = [];
             $no = 0;
             foreach ($list as $value) {
