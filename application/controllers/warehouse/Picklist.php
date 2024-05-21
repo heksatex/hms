@@ -376,14 +376,16 @@ class Picklist extends MY_Controller {
 //            $ids = $this->input->post("ids");
             $data = json_decode($datas);
             $this->_module->startTransaction();
-            $dataLastDetail = $this->m_PicklistDetail->detailData(['no_pl' => $pl, 'valid !=' => "cancel"], 'row_order');
+            $this->_module->lock_tabel("picklist_detail WRITE,picklist_detail pd READ,stock_quant READ,stock_quant sq WRITE,partner Write,type_bulk as tb WRITE,"
+                    . "user WRITE, main_menu_sub WRITE, log_history WRITE,picklist WRITE,mst_sales_group msg WRITE");
+            $dataLastDetail = $this->m_PicklistDetail->detailData(['no_pl' => $pl, 'valid !=' => "cancel"], false, "row_order");
+
             $rowOrder = (isset($dataLastDetail->row_order)) ? ($dataLastDetail->row_order + 1) : 1;
             $status = "";
             $datainsert = [];
             $barcodeInput = [];
             foreach ($data as $key => $value) {
                 $check = $this->m_Pickliststockquant->checkItemAvailable(['stock_quant.quant_id' => $value]);
-
                 if (in_array($check->lot, $barcodeInput)) {
                     throw new \Exception("ada Duplikat Barcode di Picklist", 500);
                 }
@@ -462,6 +464,8 @@ class Picklist extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -489,6 +493,7 @@ class Picklist extends MY_Controller {
             }
 
             $this->_module->startTransaction();
+            $this->_module->lock_tabel("picklist_detail WRITE,stock_quant WRITE,user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk mp WRITE");
             $this->m_PicklistDetail->updateStatus(['barcode_id' => $id, 'valid !=' => "cancel"], ['valid' => "cancel"]);
             if (strtolower($status) === 'validasi') {
                 $this->m_Pickliststockquant->update(["lokasi_fisik" => "PORT"], ["lot" => $id]);
@@ -505,6 +510,8 @@ class Picklist extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -573,6 +580,7 @@ class Picklist extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
             $this->_module->startTransaction();
+            $this->_module->lock_tabel("picklist write,token_increment WRITE,token_increment it READ,user WRITE, main_menu_sub WRITE, log_history WRITE");
             if (!$nopl = $this->token->noUrut('picklist', date('ym'), true)->generate('PL', '%04d')->get()) {
                 throw new \Exception("No Picklist tidak terbuat", 500);
             }
@@ -602,6 +610,8 @@ class Picklist extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -630,7 +640,7 @@ class Picklist extends MY_Controller {
 //                throw new \Exception('Picklist sudah masuk delivery order', 500);
 //            }
             $this->_module->startTransaction();
-
+            $this->_module->lock_tabel("picklist_detail WRITE,stock_quant WRITE,picklist write,user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk mp WRITE");
             $this->m_Picklist->update(['status' => 'cancel'], ['no' => $pl]);
 //            $this->m_PicklistDetail->updateStatus(['no_pl' => $pl], ["valid" => "cancel"]);
             $datas = $this->m_PicklistDetail->detailReportQty(['no_pl' => $pl, 'valid !=' => 'cancel'], "quant_id,valid");
@@ -663,6 +673,8 @@ class Picklist extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 

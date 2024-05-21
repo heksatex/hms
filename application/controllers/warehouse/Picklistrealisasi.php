@@ -65,11 +65,12 @@ class Picklistrealisasi extends MY_Controller {
                 $row = array(
                     $no,
                     '<a href="' . base_url('warehouse/' . $submenu . '/edit/' . $kode_encrypt) . '">' . $field->no . '</a>',
+                    $field->nama,
                     $field->tanggal_input,
                     $field->jenis_jual,
                     $field->bulk_nama,
-                    $field->keterangan,
                     $field->sales_nama,
+                    $field->keterangan,
                     $field->total_item,
                     $realisasi[0] . ' (' . number_format($realisasi[1], 1) . '%)',
                     $validasi[0] . ' (' . number_format($validasi[1], 1) . '%)',

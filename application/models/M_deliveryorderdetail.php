@@ -84,10 +84,10 @@ class M_deliveryorderdetail extends CI_Model {
         $this->column_search = ["pd.barcode_id", "pd.nama_produk", "pd.warna_remark", "pd.corak_remark", "pd.no_pl", "pd.kode_produk"];
         $this->column_order = [null, "pd.barcode_id", "pd.nama_produk", "pd.warna_remark", "pd.corak_remark", "pd.no_pl", "pd.kode_produk", null];
         $this->order = ["nodo" => "DESC"];
-        $this->db->from($this->table . ' a');
-        $this->db->join("picklist_detail pd", "pd.barcode_id = a.barcode_id");
-        $this->db->select("pd.*,a.do_id as nodo");
-        $this->db->group_by("a.barcode_id");
+        $this->db->from($this->table . ' dod');
+        $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
+        $this->db->select("pd.*,dod.do_id as nodo");
+        $this->db->group_by("dod.barcode_id");
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
@@ -151,9 +151,9 @@ class M_deliveryorderdetail extends CI_Model {
     }
 
     public function getDataDetailCountAll(array $condition = [], array $join = []) {
-        $this->db->from($this->table . ' a');
-        $this->db->join("picklist_detail pd", "pd.barcode_id = a.barcode_id");
-        $this->db->group_by("a.barcode_id");
+        $this->db->from($this->table . ' dod');
+        $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
+        $this->db->group_by("dod.barcode_id");
         foreach ($join as $value) {
             switch ($value) {
                 case "BULK":
@@ -164,7 +164,7 @@ class M_deliveryorderdetail extends CI_Model {
                     break;
             }
         }
-        $this->db->select("a.id");
+        $this->db->select("dod.id");
         $this->db->where($condition);
         return $this->db->count_all_results();
     }
@@ -250,8 +250,8 @@ class M_deliveryorderdetail extends CI_Model {
     }
 
     public function getDataAll($condition, array $join = [], array $whereIn = []) {
-        $this->db->from($this->table . ' a');
-        $this->db->join("delivery_order do", 'do.id = a.do_id');
+        $this->db->from($this->table . ' dod');
+        $this->db->join("delivery_order do", 'do.id = dod.do_id');
         $this->db->where($condition);
         foreach ($whereIn as $key => $value) {
             $this->db->where_in($key, $value);
@@ -260,7 +260,7 @@ class M_deliveryorderdetail extends CI_Model {
             switch ($value) {
                 case "PD":
 //                    $this->db->join('pickist_detail pd','pd.no_pl = do.no_picklist');
-                    $this->db->join("picklist_detail pd", "(pd.barcode_id = a.barcode_id) and (pd.no_pl = do.no_picklist)");
+                    $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id) and (pd.no_pl = do.no_picklist)");
                     $this->db->join("stock_quant sq", "sq.quant_id = pd.quant_id");
                     $this->db->select("pd.quant_id,pd.kode_produk,no_pl,pd.nama_produk,pd.warna_remark,pd.corak_remark,pd.sales_order,sq.lebar_jadi,sq.uom_lebar_jadi,"
                             . "sq.qty_jual,sq.uom_jual,sq.qty2_jual,sq.uom2_jual,sq.qty,sq.qty2,sq.uom,sq.uom2");
@@ -272,7 +272,7 @@ class M_deliveryorderdetail extends CI_Model {
                     break;
             }
         }
-        $this->db->select('a.*');
+        $this->db->select('dod.*');
         $query = $this->db->get();
         return $query->result();
     }
