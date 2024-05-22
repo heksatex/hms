@@ -42,6 +42,7 @@ foreach ($list as $key => $value) {
         <td><?= $value->nama ?></td>
         <td><?= substr($value->alamat, 0, 50) . ' ...' ?></td>
         <td><?= ($rekap === "global") ? "" : $value->corak_remark ?></td>
+        <td><?= ($rekap === "global") ? "" : $value->lebar_jadi ?></td>
         <td><?= ($rekap === "global") ? "" : $value->warna_remark ?></td>
         <td class="text-right"><?= number_format($value->total_qty, 2) . ' ' . $value->uom ?></td>
         <td  class="text-right"><?= number_format($value->total_qty2, 2) . ' ' . $value->uom2 ?></td>
@@ -57,6 +58,7 @@ foreach ($list as $key => $value) {
             if ($value->no_sj !== $list[$key + 1]->no_sj) {
                 ?>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -95,6 +97,7 @@ foreach ($list as $key => $value) {
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                 </tr>
                 <?php
                 $sum = $sumDef;
@@ -106,6 +109,7 @@ foreach ($list as $key => $value) {
         } else {
             ?>
             <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
