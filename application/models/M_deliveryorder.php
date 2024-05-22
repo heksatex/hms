@@ -131,7 +131,7 @@ class M_deliveryorder extends CI_Model {
         $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
         $this->db->join('mst_sales_group as msg', 'msg.kode_sales_group = p.sales_kode', 'left');
         $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,"
-                . "pd.corak_remark,pd.warna_remark,sq.uom,sq.uom2,sq.uom_jual,sq.uom2_jual,"
+                . "pd.corak_remark,pd.warna_remark,sq.uom,sq.uom2,sq.uom_jual,sq.uom2_jual,sq.lebar_jadi,"
                 . "SUM(sq.qty) as total_qty,SUM(sq.qty2) as total_qty2,SUM(sq.qty_jual) as total_qty_jual,SUM(sq.qty2_jual) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note");
     }
 
@@ -142,7 +142,7 @@ class M_deliveryorder extends CI_Model {
             $this->db->group_by("ddo.no");
         } else if ($rekap === 'detail') {
             $this->db->select(",COUNT(pd.barcode_id) as total_lot");
-            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.uom");
+            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.uom,pd.lebar_jadi");
         } else {
             $this->db->select(",pd.barcode_id as total_lot");
             $this->db->group_by("pd.barcode_id");
@@ -157,7 +157,7 @@ class M_deliveryorder extends CI_Model {
                 $this->db->order_by("nama asc, no_sj asc");
                 break;
             case "jenis_jual":
-                $this->db->order_by("jenis_jual asc, no_sj asc");
+                $this->db->order_by("jenis_jual asc, no_sj asc");   
                 break;
             default:
                 $this->db->order_by("no_sj asc");
