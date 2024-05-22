@@ -135,6 +135,7 @@
                                         <th class="style ws">Lot/KP</th>
                                         <th class="style ws">SO/SC</th>
                                         <th class="style ws">Picklist (PL)</th>
+                                        <th class="style ws">Umur (Hari)</th>
                                         <th class="style ws">Keterangan</th>
                                     </tr>
                                 </thead>
@@ -183,7 +184,7 @@
            
             "columnDefs": [
               { 
-                "targets": [0,12], 
+                "targets": [0,13], 
                 "orderable": false, 
               },
               { 
