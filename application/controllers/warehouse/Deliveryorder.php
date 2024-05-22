@@ -635,7 +635,7 @@ class Deliveryorder extends MY_Controller {
             $this->_module->startTransaction();
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,delivery_order_detail WRITE,picklist p WRITE,delivery_order WRITE,user u WRITE,wa_template write,"
                     . "delivery_order_sj WRITE,stock_move_produk WRITE,stock_move_items WRITE,stock_move WRITE,deliveryorder_stock_move WRITE,delivery_order_detail dod WRITE,delivery_order a WRITE, delivery_order do WRITE,"
-                    . "stock_quant WRITE,stock_quant sq WRITE,picklist_detail pd WRITE,mst_produk mp WRITE, partner pn write,mst_sales_group msg write");
+                    . "stock_quant WRITE,stock_quant sq WRITE,picklist_detail pd WRITE,mst_produk mp WRITE, partner pn write,mst_sales_group msg write,wa_group WRITE, picklist WRITE, picklist_detail WRITE,wa_send_message WRITE");
 //            $data = $this->m_deliveryorder->getDataDetail(['a.no' => $do], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales");
             $data = $this->m_deliveryorder->getDataDetail(["a.no_picklist" => $pl, 'a.no' => $nodo, 'a.status' => 'done'], true, "a.*,p.jenis_jual,p.type_bulk_id,pn.nama,msg.nama_sales_group as sales,msg.kode_sales_group as kode_sales,p.nama_user as user_picklist");
             if (empty($data)) {
