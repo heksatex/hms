@@ -42,7 +42,7 @@ foreach ($list as $key => $value) {
         <td><?= $value->nama ?></td>
         <td><?= substr($value->alamat, 0, 50) . ' ...' ?></td>
         <td><?= ($rekap === "global") ? "" : $value->corak_remark ?></td>
-        <td><?= ($rekap === "global") ? "" : $value->lebar_jadi ?></td>
+        <td><?= ($rekap === "global") ? "" : (($value->lebar_jadi === "-" || is_null($value->lebar_jadi)) ? "" : ($value->lebar_jadi . " " . $value->uom_lebar_jadi)) ?></td>
         <td><?= ($rekap === "global") ? "" : $value->warna_remark ?></td>
         <td class="text-right"><?= number_format($value->total_qty, 2) . ' ' . $value->uom ?></td>
         <td  class="text-right"><?= number_format($value->total_qty2, 2) . ' ' . $value->uom2 ?></td>
