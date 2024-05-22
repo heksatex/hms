@@ -6,7 +6,7 @@
 
 </head>
 
-<body class="hold-transition skin-black fixed sidebar-mini">
+<body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
 <!-- Site wrapper -->
 <div class="wrapper">
 
