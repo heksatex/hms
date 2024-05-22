@@ -107,7 +107,8 @@ class Picklistvalidasi extends MY_Controller {
                     $errorCode = 12;
                     throw new Exception("Tentukan dulu no picklist", 500);
                 }
-//                $this->_module->startTransaction();
+                $this->_module->startTransaction();
+                $this->_module->lock_tabel("picklist_detail WRITE,stock_quant sq WRITE,stock_quant WRITE,picklist WRITE,user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk mp WRITE");
                 $item = $this->m_PicklistDetail->detailData(['no_pl' => $pl, "barcode_id" => $barcode, 'valid !=' => 'cancel']);
 
                 if (is_null($item)) {
@@ -175,6 +176,8 @@ class Picklistvalidasi extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', 'error_code' => $errorCode, 'barcode' => $barcode)));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -227,7 +230,7 @@ class Picklistvalidasi extends MY_Controller {
     public function test() {
         try {
             $code = new Code\Code128New();
-            $datsa = $this->m_PicklistDetail->contoh(["052319809","072308123"], 40);
+            $datsa = $this->m_PicklistDetail->contoh(["052319809", "072308123"], 40);
             $this->prints->setView('print/a');
             foreach ($datsa as $key => $value) {
                 $gen_code = $code->generate($value->barcode_id, "", 50, "vertical");

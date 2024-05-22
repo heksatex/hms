@@ -29,12 +29,13 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
-                                            <th>No Picklist</th>                  
+                                            <th>No Picklist</th>
+                                            <th>Customer</th>   
                                             <th>Tanggal Dibuat</th>
                                             <th>Jenis</th>
                                             <th>Type Bulk</th>
-                                            <th>Keterangan</th>
                                             <th>Marketing</th>
+                                            <th>Keterangan</th>
                                             <th>Total Lot</th>
                                             <th>Realisasi Lot ( % )</th>
                                             <th>Validasi Lot ( % )</th>
@@ -73,7 +74,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 5,7,8],
+                            "targets": [0, 7,8,9,10],
                             "orderable": false
                         }
                     ]
