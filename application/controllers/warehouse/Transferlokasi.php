@@ -72,10 +72,14 @@ class Transferlokasi extends MY_Controller
                 $row[] = $no;
                 $row[] = $field->kode_produk;
                 $row[] = $field->nama_produk;
+                $row[] = $field->corak_remark;
+                $row[] = $field->warna_remark;
                 $row[] = $field->lokasi_asal;
                 $row[] = $field->lot;
                 $row[] = $field->qty.' '.$field->uom;
                 $row[] = $field->qty2.' '.$field->uom2;
+				$row[] = $field->qty_jual.' '.$field->uom_jual;
+                $row[] = $field->qty2_jual.' '.$field->uom2_jual;
                 if($field->status == 'draft' OR $field->status == 'ready' ){
                     $row[] = '<button type="button" class="btn btn-danger btn-xs delete_item_transfer" data-row="' . $field->row_order . '" data-quant="' .$field->quant_id. '" data-title="Hapus"><i class="fa fa-trash"></></button>';
                 }else{
@@ -346,14 +350,20 @@ class Transferlokasi extends MY_Controller
 		      				$kode_produk  = $val->kode_produk;
 		      				$nama_produk  = $val->nama_produk;
 		      				$lokasi_asal  = $val->lokasi_fisik;
+		      				$corak_remark  = $val->corak_remark;
+		      				$warna_remark  = $val->warna_remark;
 		      				$lot          = $val->lot;
 		      				$qty          = $val->qty;
 		      				$uom          = $val->uom;
 		      				$qty2         = $val->qty2;
 		      				$uom2         = $val->uom2;
+							$qty_jual     = $val->qty_jual;
+		      				$uom_jual     = $val->uom_jual;
+		      				$qty2_jual    = $val->qty2_jual;
+		      				$uom2_jual    = $val->uom2_jual;
 
 		      				//insert into transfer_lokasi_items
-		      				$this->m_transferLokasi->save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$ro);
+		      				$this->m_transferLokasi->save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$ro,$corak_remark,$warna_remark);
 		      				$ro++;
 		      				$count++;
 		      			}
@@ -489,6 +499,9 @@ class Transferlokasi extends MY_Controller
             $case          = '';
             $where         = '';
 
+			//lock table
+	        $this->_module->lock_tabel('transfer_lokasi WRITE, transfer_lokasi_items WRITE, stock_quant WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE, departemen as d WRITE, transfer_lokasi as a write');
+
 	    	$tl       = $this->m_transferLokasi->get_transfer_lokasi_by_kode($kode_tl);
 	    	$lokasi_tujuan = addslashes($tl->lokasi_tujuan);
 
@@ -512,8 +525,7 @@ class Transferlokasi extends MY_Controller
 				$callback = array('status' => 'failed','message' => 'Maaf, Transfer Lokasi hanya bisa di Transfer Lokasi kan oleh User yang membuat Transfer Lokasi Tersebut !', 'icon' =>'fa fa-check', 'type' => 'danger');
 	   		}else{
 
-		    	//lock table
-	            $this->_module->lock_tabel('transfer_lokasi WRITE, transfer_lokasi_items WRITE, stock_quant WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE');
+		    	
 
 		    	// foreach list transfer lokasi items
 		    	$tli = $this->m_transferLokasi->get_transfer_lokasi_items_by_kode($kode_tl);
@@ -587,10 +599,12 @@ class Transferlokasi extends MY_Controller
 		    		$callback = array('status' => 'success', 'message' => 'Transfer Lokasi Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success'  ); 
 		    	}
 
-		    	// unlock tabel
-	            $this->_module->unlock_tabel();
+		    	
 
            	}
+
+			// unlock tabel
+	        $this->_module->unlock_tabel();
 
 	   	}
 

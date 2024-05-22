@@ -368,7 +368,7 @@
             }
           },error: function (xhr, ajaxOptions, thrownError) {
             unblockUI(function() {});
-            ('#btn-simpan').button('reset');
+            $('#btn-simpan').button('reset');
             if(xhr.status == 401){
                 var err = JSON.parse(xhr.responseText);
                 alert(err.message);

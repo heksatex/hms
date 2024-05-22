@@ -988,15 +988,7 @@
     var cmbSearch   = $('#cmbSearch').val();
     var cmbOperator = $('#cmbOperator').val();
 
-    // var check_column    = false;
-    var checkboxes_arr =  new Array(); 
-    var checkboxes_arr = $('input[name="columnHide[]"]').map(function(e, i) {
-            if(this.checked == true){
-              // check_column = true;
-              return i.value;
-            }
-    }).get();
-
+   
     var id      = 'id-'+search;
     var caption_field = translate_cmb(cmbSearch);// translate cmbsearch
 
@@ -1057,13 +1049,6 @@
 
       // loaddata
       loadSearchData();
-      // $("#example1 tr > *:nth-child("+isi+")").toggleClass('columnHide');
-
-      $.each(checkboxes_arr, function(index,isi){
-        // alert(isi);
-          $("#example1 tr > *:nth-child("+isi+")").removeClass('columnHide');
-          $("#example1 tr > *:nth-child("+isi+")").toggleClass('columnHide');
-      });
 
     }
          
@@ -1110,13 +1095,40 @@
 
   });
 
+  function hideColumn()
+  {
+
+    // var check_column    = false;
+    var checkboxes_arr =  new Array(); 
+    var checkboxes_arr = $('input[name="columnHide[]"]').map(function(e, i) {
+            if(this.checked == true){
+              // check_column = true;
+              return i.value;
+            }
+    }).get();
+
+    var arr_index   = [13,14];
+
+    $.each(arr_index, function(row,val){
+        $("#example1 tr > *:nth-child("+val+")").removeClass('columnHide');
+    });
+
+    $.each(checkboxes_arr, function(index,isi){
+        //alert(isi);
+        $("#example1 tr > *:nth-child("+isi+")").toggleClass('columnHide');
+    });
+
+    return;
+  }
+
   function loadSearchData(pageNum=null){
 
-     $("#example1_processing").css('display','');// show loading processing in table
+    $("#example1_processing").css('display','');// show loading processing in table
 
-     if(pageNum == null){
-        pageNum = 0;
-     }
+    if(pageNum == null){
+       pageNum = 0;
+    }
+
 
     // var check_transit  = false;
     // var checkboxes_arr =  new Array(); 
@@ -1128,10 +1140,10 @@
     //         }
     // }).get();
 
-     $("#example1 tbody").remove();
-     please_wait(function(){});
+    $("#example1 tbody").remove();
+    please_wait(function(){});
 
-     $.ajax({
+    $.ajax({
                 type: "POST",
                 dataType : "JSON",
                 url : '<?=base_url()?>report/stock/loadData/'+pageNum,
@@ -1157,8 +1169,8 @@
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
                         $row += "<td colspan='4'>"+value.grouping+"</td>";
-                        $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                        $row += "<td align='right'  colspan='2'>"+value.qty2+"</td>";
+                        $row += "<td align='right' class='nowrap' colspan='2'>"+value.qty+"</td>";
+                        $row += "<td align='right' class='nowrap'  colspan='2'>"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "</tr>";
                         $row += "</tbody>";
@@ -1186,6 +1198,7 @@
                       $('#search').val('');// kosongkan search
                   }
                   $("#example1_processing").css('display','none'); // hidden loading
+                  hideColumn();
                   unblockUI( function() {});
                 },error : function(jqXHR, textStatus, errorThrown){
                   //alert(jqXHR.responseText);
@@ -1194,7 +1207,9 @@
                   $('#btn-search').button('reset');
                   unblockUI( function() {});
                 }
-     });
+    });
+
+   
   }
 
     
@@ -1326,7 +1341,7 @@
     var page_next = '';
     var page_prev = '';
     var this_icon = '';
-
+  
     // ambil data berdasarkan data-content='edit'
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
         kode     = $(this).attr('data-isi');
@@ -1407,8 +1422,8 @@
                       $row  += "<td></td>";
                       $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$group+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
                       $row  += "<td colspan='4' style='min-width:120px'>"+value.grouping+"</td>";
-                      $row  += "<td align='right' colspan='2' class='ws'>"+value.qty+"</td>";
-                      $row  += "<td align='right' colspan='2' class='ws style='min-width:100px'>"+value.qty2+"</td>";
+                      $row  += "<td align='right' colspan='2' class='nowrap' >"+value.qty+"</td>";
+                      $row  += "<td align='right' colspan='2' class='nowrap'  style='min-width:100px'>"+value.qty2+"</td>";
                       $row  += "<td class='list_pagination' colspan='3' style='min-width:80px'></td>";
                       $row  += "</tr>";
                       $row  += "</tbody>";
@@ -1473,7 +1488,7 @@
               // kembalikan icon ke awal
               this_icon.css('pointer-events','');
               this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
-             
+              hideColumn()
             },error: function (jqXHR, textStatus, errorThrown){
               alert('Error Load Child Root');
               // kembalikan icon ke awal
@@ -1483,12 +1498,12 @@
       });
 
     }
-    
+     
   });
 
   // klik button previous
   $(document).on("click", "button[data-pager-action='previous']", function(e){
-    
+       
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
         kode     = $(this).attr('data-isi');
         group_by = $(this).attr('data-group');
@@ -1507,14 +1522,15 @@
     loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
     this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
     this_icon.css('pointer-events','none');
+   
   });
 
 
 
  // klik button next
   $(document).on("click", "button[data-pager-action='next']", function(e){
-    
-    $(this).parents("tr").find("td[data-content='edit']").each(function(){
+
+       $(this).parents("tr").find("td[data-content='edit']").each(function(){
         kode     = $(this).attr('data-isi');
         group_by = $(this).attr('data-group');
         tbody_id = $(this).attr('data-tbody');
@@ -1531,6 +1547,7 @@
     loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
     this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
     this_icon.css('pointer-events','none');
+   
   });
 
 
@@ -1548,7 +1565,9 @@
 
             // }).get();
 
-           $.ajax({
+        
+
+          $.ajax({
             type : 'POST',
             dataType: 'json',
             url  : '<?=base_url()?>report/stock/loadChild',
@@ -1573,8 +1592,8 @@
                           $row  += "<td></td>";
                           $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$group+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
                           $row  += "<td colspan='4' style='min-width:120px'>"+value.grouping+"</td>";
-                          $row  += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                          $row  += "<td align='right' colspan='2' style='min-width:100px'>"+value.qty2+"</td>";
+                          $row  += "<td align='right' colspan='2' class='nowrap' >"+value.qty+"</td>";
+                          $row  += "<td align='right' colspan='2' class='nowrap'  style='min-width:100px'>"+value.qty2+"</td>";
                           $row  += "<td class='list_pagination' colspan='3' style='min-width:80px'></td>";
                           $row  += "</tr>";
                           $row  += "</tbody>";
@@ -1662,6 +1681,7 @@
                 }
                 this_icon.html(icon);
                 this_icon.css('pointer-events','');   
+                hideColumn()
 
             },error: function (jqXHR, textStatus, errorThrown){
               //alert(jqXHR.responseText);
@@ -1675,8 +1695,9 @@
               this_icon.html(icon);
               this_icon.css('pointer-events','');   
             }
-      });
+          });
 
+        
     return;
   }
 
@@ -1769,8 +1790,8 @@
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
                         $row += "<td colspan='4'>"+value.grouping+"</td>";
-                        $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                        $row += "<td align='right' >"+value.qty2+"</td>";
+                        $row += "<td align='right' class='nowrap' colspan='2'>"+value.qty+"</td>";
+                        $row += "<td align='right'class='nowrap' >"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "<td colspan='2' ></td>";
                         $row += "</tr>";
@@ -1786,6 +1807,7 @@
               tbody = loadRecord(data.record);
             
               $("#example1").append(tbody);
+              hideColumn()
             }
 
             $("#example1_processing").css('display','none');// hidden loading processing in table
@@ -1797,7 +1819,9 @@
             $("#example1_processing").css('display','none');// hidden loading processing in table
             unblockUI( function() {});
           }
-      })
+      });
+
+     
       
   }); 
 

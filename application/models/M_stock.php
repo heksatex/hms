@@ -8,7 +8,7 @@ class M_stock extends CI_Model
 
 	public function get_list_stock_by($where_lokasi,$where,$order_by,$rowno,$recordPerPage)
 	{
-		return $this->db->query("SELECT sq.quant_id, sq.create_date, sq.kode_produk, sq.nama_produk, sq.lot, sq.nama_grade, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.lokasi_fisik, sq.lokasi, sq.reff_note, sq.move_date, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi, (datediff(now(), sq.move_date) ) as umur , sq.sales_order, sq.sales_group, sg.nama_sales_group, sq.qty_opname, sq.uom_opname, cat.nama_category, sq.corak_remark, sq.warna_remark, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, pl.no_pl,kp_lot.lot as lot_asal
+		return $this->db->query("SELECT sq.quant_id, sq.create_date, sq.kode_produk, sq.nama_produk, sq.lot, sq.nama_grade, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.lokasi_fisik, sq.lokasi, sq.reff_note, sq.move_date, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi, (datediff(now(), sq.create_date) ) as umur , sq.sales_order, sq.sales_group, sg.nama_sales_group, sq.qty_opname, sq.uom_opname, cat.nama_category, sq.corak_remark, sq.warna_remark, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, pl.no_pl,kp_lot.lot as lot_asal
 							
 								FROM stock_quant sq
 								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group
@@ -26,7 +26,7 @@ class M_stock extends CI_Model
 
 	public function get_list_stock_by_noLimit($where,$order_by)
 	{
-		return $this->db->query("SELECT sq.quant_id, sq.create_date, sq.kode_produk, sq.nama_produk, sq.lot, sq.nama_grade, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.lokasi_fisik, sq.lokasi, sq.reff_note, sq.move_date, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi, (datediff(now(), sq.move_date) ) as umur , sq.sales_order, sq.sales_group, sg.nama_sales_group, sq.qty_opname, sq.uom_opname, cat.nama_category, sq.corak_remark, sq.warna_remark,sq.warna_remark, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, pl.no_pl,kp_lot.lot as lot_asal
+		return $this->db->query("SELECT sq.quant_id, sq.create_date, sq.kode_produk, sq.nama_produk, sq.lot, sq.nama_grade, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.lokasi_fisik, sq.lokasi, sq.reff_note, sq.move_date, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi, (datediff(now(), sq.create_date) ) as umur , sq.sales_order, sq.sales_group, sg.nama_sales_group, sq.qty_opname, sq.uom_opname, cat.nama_category, sq.corak_remark, sq.warna_remark,sq.warna_remark, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, pl.no_pl,kp_lot.lot as lot_asal
 							
 								FROM stock_quant sq
 								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group

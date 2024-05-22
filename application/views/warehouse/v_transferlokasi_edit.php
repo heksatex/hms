@@ -12,12 +12,24 @@
    </style>
 <?php 
     }
+    if($tl->lokasi_tujuan != 'GJD'){
+?>
+    <style>
+        table tr > *:nth-child(4),
+        table tr > *:nth-child(5),
+        table tr > *:nth-child(10),
+        table tr > *:nth-child(11){
+            display : none
+        }
+    </style>
+<?php
+    }
 ?>
 
    
 </head>
 
-<body class="hold-transition skin-black fixed sidebar-mini">
+<body class="hold-transition skin-black fixed sidebar-mini sidebar-collapse">
 <!-- Site wrapper -->
 <div class="wrapper">
 
@@ -147,10 +159,14 @@
                             <th class="style no">No.</th>
                             <th class="style">Kode Produk</th>                            
                             <th class="style">Nama Produk</th>
+                            <th class="style">Corak Remark</th>
+                            <th class="style">Warna Remark</th>
                             <th class="style">Lokasi Asal</th>
                             <th class="style">Lot</th>
-                            <th class="style">Qty</th>                          
-                            <th class="style">Qty2</th>                            
+                            <th class="style">Qty1 [HPH]</th>                          
+                            <th class="style">Qty2 [HPH]</th>                            
+                            <th class="style">Qty1 [JUAL]</th>                            
+                            <th class="style">Qty2 [JUAL]</th>                            
                             <th class="style no" style="min-width:50px;">#</th>
                           </tr>
                         </thead>
@@ -196,6 +212,12 @@
     $('#lokasi_tujuan').prop('disabled', true);
     $('#barcode_id').prop('disabled', true);
   }
+
+  const playAudio = ((url) => {
+      var audio = new Audio(url);
+      audio.volume = 1;
+      audio.play();
+  });
 
  //untuk merrefresh 
   function refresh_transferLokasi(){
@@ -389,6 +411,7 @@
               refresh_transferLokasi();
               document.getElementById('barcode_id').focus();             
               alert_notify(data.icon,data.message,data.type,function(){});
+              playAudio("<?= base_url('dist/beep.MP3') ?>");
           }
           $('#btn-scan').button('reset');
                   
@@ -546,11 +569,11 @@
            
             "columnDefs": [
               { 
-                "targets": [0,7], 
+                "targets": [0,11], 
                 "orderable": false, 
               },
               { 
-                "targets": [5,6], 
+                "targets": [7,8,9,10], 
                 "className":"text-right nowrap",
               },
               { 

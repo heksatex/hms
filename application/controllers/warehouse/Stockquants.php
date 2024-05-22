@@ -55,6 +55,9 @@ class Stockquants extends MY_Controller
                 // start transaction
                 $this->_module->startTransaction();
 
+                //lock table
+                $this->_module->lock_tabel('log_history WRITE, user WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, mst_produk as mp WRITE, mst_category as cat WRITE, picklist WRITE, stock_quant WRITE, picklist_detail WRITE, mrp_production_fg_hasil WRITE, stock_move_items WRITE');
+
                 $username    = addslashes($this->session->userdata('username'));
                 $sub_menu    = $this->uri->segment(2);
                 $quant_id    = $this->input->post('quant_id');
@@ -133,6 +136,9 @@ class Stockquants extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            //unlock table
+            $this->_module->unlock_tabel();
         }
     }
 

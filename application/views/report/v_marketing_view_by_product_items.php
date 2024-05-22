@@ -127,6 +127,7 @@
                                         <th class="style ws">Lot/KP</th>
                                         <th class="style ws">SO/SC</th>
                                         <th class="style ws">Picklist (PL)</th>
+                                        <th class="style ws">Umur (Hari)</th>
                                     </tr>
                                 </thead>
                             </table>

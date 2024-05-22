@@ -99,8 +99,8 @@ class M_transferLokasi extends CI_Model
 		return $this->db->count_all_results();
 	}
 
-	var $column_order2 = array(null, 'kode_produk','nama_produk','lokasi_asal','lot','qty','qty2',null);
-	var $column_search2= array('kode_produk','nama_produk','lokasi_asal','lot','qty','uom','qty2','uom2');
+	var $column_order2 = array(null, 'kode_produk','nama_produk','corak_remark','warna_remark','lokasi_asal','lot','qty','qty2','qty_jual','qty2_jual',null);
+	var $column_search2= array('kode_produk','nama_produk','lokasi_asal','lot','qty','uom','qty2','uom2','qty_jual','qty2_jual','corak_remark','warna_remark');
 	var $order2  	  = array('row_order' => 'desc');
 	var $table2       = 'transfer_lokasi_items';
 
@@ -287,7 +287,7 @@ class M_transferLokasi extends CI_Model
 	}
 
 
-	public function save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$ro)
+	public function save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$ro,$corak_remark,$warna_remark)
 	{
 		$data = array(
 						'kode_tl' 		=> $kode_tl,
@@ -295,11 +295,17 @@ class M_transferLokasi extends CI_Model
 						'kode_produk'	=> $kode_produk,
 						'nama_produk'	=> $nama_produk,
 						'lokasi_asal'   => $lokasi_asal,
+						'corak_remark'   => $corak_remark,
+						'warna_remark'   => $warna_remark,
 						'lot'			=> $lot,
 						'qty'           => $qty,
 						'uom'           => $uom,
                         'qty2'          => $qty2,
 						'uom2'          => $uom2,
+						'qty_jual'      => $qty_jual,
+						'uom_jual'      => $uom_jual,
+						'qty2_jual'     => $qty2_jual,
+						'uom2_jual'     => $uom2_jual,
 						'row_order'     => $ro
 
 

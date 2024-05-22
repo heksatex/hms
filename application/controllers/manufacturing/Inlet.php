@@ -244,8 +244,8 @@ class Inlet extends MY_Controller
                 $mesin          = ($this->input->post('mesin'));
                 $operator       = ($this->input->post('operator'));
 
-                // start transaction
-                $this->_module->startTransaction();
+                // // start transaction
+                // $this->_module->startTransaction();
 
                 // get nama_jenis_kain_by_id, ket
                 $get_njk = $this->m_produk->get_mst_jenis_kain_by_id($jenis_kain)->row();
@@ -304,8 +304,10 @@ class Inlet extends MY_Controller
 
                 }else{
 
+                    // $this->_module->startTransaction();
+
                     // lock table
-                    // $this->_module->lock_tabel('mrp_inlet WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, mst_produk as mp WRITE, mst_jenis_kain as mjk WRITE, stock_move as sm WRITE, warna as w WRITE, mrp_production as mrp WRITE, mrp_production_rm_target as rmt WRITE, sales_contract as sc WRITE, mst_sales_group as msg WRITE, stock_quant WRITE, stock_move_items WRITE');
+                    $this->_module->lock_tabel('mrp_inlet WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, mst_produk as mp WRITE, mst_jenis_kain as mjk WRITE, stock_move as sm WRITE, warna as w WRITE, mrp_production as mrp WRITE, mrp_production_rm_target as rmt WRITE, sales_contract as sc WRITE, mst_sales_group as msg WRITE, stock_quant WRITE, stock_move_items WRITE');
 
                     if(!empty($id)){ // update
 
@@ -440,18 +442,21 @@ class Inlet extends MY_Controller
                     // unlock table
                     // $this->_module->unlock_tabel();
                 }
-                if (!$this->_module->finishTransaction()) {
-                    throw new \Exception('Data  Gagal diubah', 500);
-                }
+                // if (!$this->_module->finishTransaction()) {
+                //     throw new \Exception('Data  Gagal diubah', 500);
+                // }
                 $this->output->set_status_header(200)
                         ->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             }
         } catch(Exception $ex){
-            $this->_module->finishRollBack();
-            $this->_module->rollbackTransaction();
+            // $this->_module->finishRollBack();
+            // $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
         }
         // echo json_encode($callback);
         
@@ -636,7 +641,7 @@ class Inlet extends MY_Controller
                 $username  = addslashes($this->session->userdata('username'));
 
                 // start transaction
-                $this->_module->startTransaction();
+                // $this->_module->startTransaction();
 
                 $tgl            = date('Y-m-d H:i:s');
                 $inlet = $this->m_inlet->get_data_inlet_by_id($id_inlet);
@@ -646,7 +651,7 @@ class Inlet extends MY_Controller
                 }
 
                 //lock table 
-                // $this->_module->lock_tabel('log_history WRITE, user WRITE, main_menu_sub WRITE, mrp_satuan WRITE,stock_quant WRITE, picklist_detail WRITE, mrp_inlet WRITE, mrp_production_fg_hasil WRITE, stock_move_items WRITE');
+                $this->_module->lock_tabel('log_history WRITE, user WRITE, main_menu_sub WRITE, mrp_satuan WRITE,stock_quant WRITE, picklist_detail WRITE, mrp_inlet WRITE, mrp_production_fg_hasil WRITE, stock_move_items WRITE');
 
                 //get data stock by kode
                 $get = $this->_module->get_stock_quant_by_id($quant_id)->row();
@@ -824,14 +829,16 @@ class Inlet extends MY_Controller
 
                     }
                     
-                    if (!$this->_module->finishTransaction()) {
-                        throw new \Exception('Gagal Simpan data ', 500);
-                    }
-                    // unlock table
-                    // $this->_module->unlock_tabel();
-                    $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+                    
                    
                 }
+
+                // if (!$this->_module->finishTransaction()) {
+                //     throw new \Exception('Gagal Simpan data ', 500);
+                // }
+                // unlock table
+                // $this->_module->unlock_tabel();
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 
             }
         
@@ -839,11 +846,14 @@ class Inlet extends MY_Controller
             // unlock table
             // $this->_module->unlock_tabel();
             // finish transaction
-            $this->_module->finishRollBack();
-            $this->_module->rollbackTransaction();;
+            // $this->_module->finishRollBack();
+            // $this->_module->rollbackTransaction();;
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
         }
     }
 
