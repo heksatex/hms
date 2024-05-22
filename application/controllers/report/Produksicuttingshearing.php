@@ -588,7 +588,7 @@ class Produksicuttingshearing extends MY_Controller
     {
 
         $this->load->library("excel");
-
+        ob_start();
         $object = new PHPExcel();
         $object->setActiveSheetIndex(0);
 
@@ -1044,12 +1044,19 @@ class Produksicuttingshearing extends MY_Controller
         }   
 
         // << BODY
-        $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
+     
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Jadwal Produksi Cutting Shearing.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
 
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="Jadwal Produksi Cutting Shearing.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		die(json_encode($response));
 
     }
 
