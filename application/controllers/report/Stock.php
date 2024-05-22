@@ -703,7 +703,7 @@ class Stock extends MY_Controller
         );
         
         // header table
-        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Corak Remark', 'Warna Remark', 'Kategori' ,'Qty1 [HPH]','Uom1 [HPH]', 'Qty2 [HPH]', 'Uom2 [HPH]', 'Qty1 [JUAL]', 'Uom1 [JUAL]' , 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Picklist (PL)', 'KP/Lot Asal', 'Ket Expired','Umur (Hari)');
+        $table_head_columns  = array('No', 'Quant ID','Lot', 'Grade', 'Tgl dibuat', 'Tgl diterima', 'Lokasi', 'Lokasi Fisik', 'Kode Produk', 'Nama Produk', 'Corak Remark', 'Warna Remark', 'Kategori' ,'Qty1 [HPH]','Uom1 [HPH]', 'Qty2 [HPH]', 'Uom2 [HPH]', 'Qty1 [JUAL]', 'Uom1 [JUAL]' , 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lbr Greige', 'Uom Lbr Greige', 'Lbr Jadi', 'Uom Lbr Jadi', 'SC', 'Marketing',' Qty Opname','Uom Opname', 'Picklist (PL)', 'KP/Lot Asal', 'Ket Expired','Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -713,7 +713,7 @@ class Stock extends MY_Controller
 
         // set with and border
     	// $index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y', 'Z', 'AA', 'AB','AC','AD','AE','AF');
-        $index_header = $this->cek_column_excel(33);
+        $index_header = $this->cek_column_excel(34);
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -740,34 +740,35 @@ class Stock extends MY_Controller
             $object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->quant_id);
             $object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->lot);
             $object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->nama_grade);
-            $object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->move_date);
-            $object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lokasi);
-            $object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->lokasi_fisik);
-            $object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->kode_produk);
-            $object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->nama_produk);
-            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->corak_remark);
-            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->warna_remark);
-            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->nama_category);
-            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->qty);
-            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->uom);
-            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->qty2);
-            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->uom2);
-            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->qty_jual);
-            $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->uom_jual);
-            $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->qty2_jual);
-            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->uom2_jual);
-            $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->lebar_greige);
-            $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->uom_lebar_greige);
-            $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('X'.$rowCount, $val->uom_lebar_jadi);
-            $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $val->sales_order);
-            $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $val->nama_sales_group);
-            $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $val->qty_opname);
-            $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $val->uom_opname);
-            $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $val->no_pl);
-            $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $val->lot_asal);
-            $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $ket_exp);
-            $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $val->umur);
+            $object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->create_date);
+            $object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->move_date);
+            $object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->lokasi);
+            $object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->lokasi_fisik);
+            $object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->kode_produk);
+            $object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->nama_produk);
+            $object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->corak_remark);
+            $object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->warna_remark);
+            $object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_category);
+            $object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->qty);
+            $object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->uom);
+            $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->qty2);
+            $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->uom2);
+            $object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->qty_jual);
+            $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->uom_jual);
+            $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->qty2_jual);
+            $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->uom2_jual);
+            $object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->lebar_greige);
+            $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val->uom_lebar_greige);
+            $object->getActiveSheet()->SetCellValue('X'.$rowCount, $val->lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $val->uom_lebar_jadi);
+            $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $val->sales_order);
+            $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $val->nama_sales_group);
+            $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $val->qty_opname);
+            $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $val->uom_opname);
+            $object->getActiveSheet()->SetCellValue('AD'.$rowCount, $val->no_pl);
+            $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $val->lot_asal);
+            $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $ket_exp);
+            $object->getActiveSheet()->SetCellValue('AG'.$rowCount, $val->umur);
 
              //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -803,6 +804,7 @@ class Stock extends MY_Controller
 			$object->getActiveSheet()->getStyle('AD'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('AE'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('AF'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('AG'.$rowCount)->applyFromArray($styleArray);
 
             $rowCount++;
 
@@ -812,15 +814,15 @@ class Stock extends MY_Controller
             //hide column
             foreach ($checkboxes_hide as $val) {
                 if($val == 13 ){ // qty1 HPH
-                    $object->getActiveSheet()->removeColumn('M');
-                    $object->getActiveSheet()->removeColumn('M');
+                    $object->getActiveSheet()->removeColumn('N');
+                    $object->getActiveSheet()->removeColumn('N');
                 }else if($val == 14){
                     if(count($checkboxes_hide) == 1){
-                        $object->getActiveSheet()->removeColumn('O');
-                        $object->getActiveSheet()->removeColumn('O');
+                        $object->getActiveSheet()->removeColumn('P');
+                        $object->getActiveSheet()->removeColumn('P');
                     }else{
-                        $object->getActiveSheet()->removeColumn('M');
-                        $object->getActiveSheet()->removeColumn('M');
+                        $object->getActiveSheet()->removeColumn('N');
+                        $object->getActiveSheet()->removeColumn('N');
                     }
                 }
             }
