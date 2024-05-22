@@ -44,7 +44,7 @@
                 border: 1px solid #ddd;
             }
 
-            #tabelDelivery.hides tr > *:nth-child(12),#tabelDelivery.hides tr > *:nth-child(13){
+            #tabelDelivery.hides tr > *:nth-child(13),#tabelDelivery.hides tr > *:nth-child(14){
                 display: none;
             }
 
@@ -232,6 +232,7 @@
                                                 <th class="style bb ws">Buyer</th>
                                                 <th class="style bb ws">Alamat</th>
                                                 <th class="style bb ws">Corak</th>
+                                                <th class="style bb ws">Lebar</th>
                                                 <th class="style bb ws">Warna</th>
                                                 <th class="style bb ws text-right">QTY 1 [HPH]</th>
                                                 <th class="style bb ws text-right">QTY 2 [HPH]</th>
