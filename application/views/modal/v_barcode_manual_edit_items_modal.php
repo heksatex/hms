@@ -105,8 +105,6 @@
         width: '100%'
     });
 
-   
-
     var $newOption = $("<option></option>").val("<?php echo $data_mbi->uom_jual?>").text("<?php echo $data_mbi->uom_jual?>");
     $("#uom_qty_jual").empty().append($newOption).trigger('change');
     var $newOption = $("<option></option>").val("<?php echo $data_mbi->uom2_jual?>").text("<?php echo $data_mbi->uom2_jual?>");
@@ -277,7 +275,7 @@
                         var err = JSON.parse(xhr.responseText);
                         alert(err.message);
                     }else{
-                        alert("Error Simpan Data !")
+                        alert(xhr.responseText)
                     }                   
                 }
             });

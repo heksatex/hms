@@ -1289,6 +1289,8 @@ class Outlet extends MY_Controller
 
                 // start transaction
                 $this->_module->startTransaction();
+                // lock table
+                $this->_module->lock_tabel("stock_quant WRITE, mrp_production WRITE, log_history WRITE, user WRITE ,main_menu_sub WRITE, mrp_production_rm_target as rm WRITE, stock_quant as sq WRITE, stock_move_items as smi WRITE, mrp_inlet as inm WRITE, mrp_production_fg_hasil  as fg WRITE, mrp_production_fg_hasil as fg2 WRITE, mrp_production_rm_target rm2 WRITE, mrp_production_rm_target rm3 WRITE,stock_move_items smi2 WRITE, stock_move_items smi3 WRITE, mrp_inlet WRITE");
 
                 if(empty($akses_menu)){
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Anda tidak mempunyai Akses ke Menu Ini !', 'icon' =>'fa fa-warning', 'type' => 'danger');
@@ -1385,6 +1387,9 @@ class Outlet extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
         }
     }
 

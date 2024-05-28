@@ -191,6 +191,9 @@ class Splitlot extends MY_Controller
 
                 //start transaction
                 $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE, stock_move_produk WRITE, stock_move_items WRITE, adjustment WRITE, adjustment_items WRITE, split WRITE, split_items WRITE, departemen as d WRITE, picklist_detail WRITE, token_increment WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE');
                 
                 if(empty($dept_id)){
                     $callback = array('status' => 'failed', 'field' => 'departemen', 'message' => 'Departemen Harus dipilih !', 'icon' =>'fa fa-warning',   'type' => 'danger' );
@@ -301,8 +304,7 @@ class Splitlot extends MY_Controller
                         // $move_id   = "SM".$last_move;
                         // $row_order++;
 
-                        // lock table
-                        // $this->_module->lock_tabel('stock_quant WRITE, stock_move WRITE, stock_move_produk WRITE, stock_move_items WRITE, adjustment WRITE, adjustment_items WRITE, split WRITE, split_items WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE');
+                        
 
                         // cek total split qty 1 dan qty2 terhadapt qty1 dan qty2 sebelum split
                         $sum_tbl_qty1 = 0;
@@ -618,13 +620,13 @@ class Splitlot extends MY_Controller
                         
                     }
 
-
                 }
-                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 
                 if (!$this->_module->finishTransaction()) {
                     throw new \Exception('Gagal Simpan data ', 500);
                 }
+
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             }
 
         }catch(Exception $ex){
@@ -634,6 +636,10 @@ class Splitlot extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'field'=> '','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -668,13 +674,14 @@ class Splitlot extends MY_Controller
                 // start transaction
                 $this->_module->startTransaction();
 
+                // lock table
+                $this->_module->lock_tabel('stock_quant WRITE, split WRITE, split_items WRITE, departemen as d WRITE, picklist_detail WRITE, token_increment WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, split as s WRITE, user_priv WRITE');
+
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
 
                 $tgl            = date('Y-m-d H:i:s');
                 $split           = $this->m_splitLot->get_data_split_by_kode($kode);
-
-            
 
                 if(empty($split)){
                     throw new \Exception('Data Split tidak ditemukan !', 200);
@@ -778,6 +785,10 @@ class Splitlot extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', 'status' => 'failed')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 

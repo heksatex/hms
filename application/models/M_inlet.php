@@ -480,13 +480,13 @@ class M_inlet extends CI_Model
 	{
 		$query = $this->db->query("SELECT inm.qty, inm.qty2,  
 				(SELECT sum(fg.qty) as total_qty FROM mrp_production_fg_hasil fg WHERE inm.kode_mrp =  fg.kode AND inm.id = fg.id_inlet) as hasil_qty,
-				(SELECT sum(fg.qty2) as total_qty2 FROM mrp_production_fg_hasil fg WHERE inm.kode_mrp =  fg.kode AND inm.id = fg.id_inlet) as hasil_qty2,
-				(SELECT sum(smi.qty) as total_qty FROM mrp_production_rm_target rm 
-					INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id AND smi.status = 'ready'
-					WHERE smi.quant_id = inm.quant_id AND inm.kode_mrp = rm.kode AND inm.status != 'cancel') as qty_ready,
-				(SELECT sum(smi.qty2) as total_qty FROM mrp_production_rm_target rm 
-					INNER JOIN stock_move_items smi ON smi.move_id = rm.move_id AND smi.status = 'ready'
-					WHERE smi.quant_id = inm.quant_id AND inm.kode_mrp = rm.kode AND inm.status != 'cancel' ) as qty2_ready
+				(SELECT sum(fg2.qty2) as total_qty2 FROM mrp_production_fg_hasil fg2 WHERE inm.kode_mrp =  fg2.kode AND inm.id = fg2.id_inlet) as hasil_qty2,
+				(SELECT sum(smi2.qty) as total_qty FROM mrp_production_rm_target rm2
+					INNER JOIN stock_move_items smi2 ON smi2.move_id = rm2.move_id AND smi2.status = 'ready'
+					WHERE smi2.quant_id = inm.quant_id AND inm.kode_mrp = rm2.kode AND inm.status != 'cancel') as qty_ready,
+				(SELECT sum(smi3.qty2) as total_qty FROM mrp_production_rm_target rm3 
+					INNER JOIN stock_move_items smi3 ON smi3.move_id = rm3.move_id AND smi3.status = 'ready'
+					WHERE smi3.quant_id = inm.quant_id AND inm.kode_mrp = rm3.kode AND inm.status != 'cancel' ) as qty2_ready
 				FROM mrp_inlet inm
 				WHERE inm.id = '$id'");
 		return $query->row();
