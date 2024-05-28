@@ -131,19 +131,20 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('H1', 'Buyer');
             $sheet->setCellValue('I1', 'Alamat');
             $sheet->setCellValue('J1', 'Corak');
-            $sheet->setCellValue('K1', 'Warna');
-            $sheet->setCellValue('L1', 'Qty HPH');
-            $sheet->setCellValue('M1', 'Uom');
-            $sheet->setCellValue('N1', 'Qty 2 HPH');
-            $sheet->setCellValue('O1', 'Uom 2');
-            $sheet->setCellValue('P1', 'Qty Jual');
-            $sheet->setCellValue('Q1', 'Uom Jual');
-            $sheet->setCellValue('R1', 'Qty 2 Jual');
-            $sheet->setCellValue('S1', 'Uom 2Jual');
-            $sheet->setCellValue('T1', 'Lot');
-            $sheet->setCellValue('U1', 'User');
-            $sheet->setCellValue('V1', 'Catatan');
-            $sheet->setCellValue('W1', 'Marketing');
+            $sheet->setCellValue('K1', 'Lebar');
+            $sheet->setCellValue('L1', 'Warna');
+            $sheet->setCellValue('M1', 'Qty HPH');
+            $sheet->setCellValue('N1', 'Uom');
+            $sheet->setCellValue('O1', 'Qty 2 HPH');
+            $sheet->setCellValue('P1', 'Uom 2');
+            $sheet->setCellValue('Q1', 'Qty Jual');
+            $sheet->setCellValue('R1', 'Uom Jual');
+            $sheet->setCellValue('S1', 'Qty 2 Jual');
+            $sheet->setCellValue('T1', 'Uom 2Jual');
+            $sheet->setCellValue('U1', 'Lot');
+            $sheet->setCellValue('V1', 'User');
+            $sheet->setCellValue('W1', 'Catatan');
+            $sheet->setCellValue('X1', 'Marketing');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
@@ -210,19 +211,20 @@ class Delivery extends MY_Controller {
                 $sheet->setCellValue('H' . $rowStartData, $value->nama);
                 $sheet->setCellValue('I' . $rowStartData, $value->alamat);
                 $sheet->setCellValue('J' . $rowStartData, ($rekap === "global") ? "" : $value->corak_remark);
-                $sheet->setCellValue('K' . $rowStartData, ($rekap === "global") ? "" : $value->warna_remark);
-                $sheet->setCellValue('L' . $rowStartData, $value->total_qty);
-                $sheet->setCellValue('M' . $rowStartData, $value->uom);
-                $sheet->setCellValue('N' . $rowStartData, $value->total_qty2);
-                $sheet->setCellValue('O' . $rowStartData, $value->uom2);
-                $sheet->setCellValue('P' . $rowStartData, $value->total_qty_jual);
-                $sheet->setCellValue('Q' . $rowStartData, $value->uom_jual);
-                $sheet->setCellValue('R' . $rowStartData, $value->total_qty2_jual);
-                $sheet->setCellValue('S' . $rowStartData, $value->uom2_jual);
-                $sheet->setCellValue('T' . $rowStartData, $value->total_lot);
-                $sheet->setCellValue('U' . $rowStartData, $value->user);
-                $sheet->setCellValue('V' . $rowStartData, $value->note);
-                $sheet->setCellValue('W' . $rowStartData, $value->marketing ?? "-");
+                $sheet->setCellValue('K' . $rowStartData, ($rekap === "global") ? "" : $value->lebar_jadi);
+                $sheet->setCellValue('L' . $rowStartData, ($rekap === "global") ? "" : $value->warna_remark);
+                $sheet->setCellValue('M' . $rowStartData, $value->total_qty);
+                $sheet->setCellValue('N' . $rowStartData, $value->uom);
+                $sheet->setCellValue('O' . $rowStartData, $value->total_qty2);
+                $sheet->setCellValue('P' . $rowStartData, $value->uom2);
+                $sheet->setCellValue('Q' . $rowStartData, $value->total_qty_jual);
+                $sheet->setCellValue('R' . $rowStartData, $value->uom_jual);
+                $sheet->setCellValue('S' . $rowStartData, $value->total_qty2_jual);
+                $sheet->setCellValue('T' . $rowStartData, $value->uom2_jual);
+                $sheet->setCellValue('U' . $rowStartData, $value->total_lot);
+                $sheet->setCellValue('V' . $rowStartData, $value->user);
+                $sheet->setCellValue('W' . $rowStartData, $value->note);
+                $sheet->setCellValue('X' . $rowStartData, $value->marketing ?? "-");
                 if ($summary === "1") {
                     if (isset($list[$key + 1])) {
                         if ($value->no_sj !== $list[$key + 1]->no_sj) {
@@ -237,19 +239,20 @@ class Delivery extends MY_Controller {
                             $sheet->setCellValue('H' . $rowStartData, "");
                             $sheet->setCellValue('I' . $rowStartData, "");
                             $sheet->setCellValue('J' . $rowStartData, "");
-                            $sheet->setCellValue('K' . $rowStartData, "SUM : " . $value->no_sj);
-                            $sheet->setCellValue('L' . $rowStartData, number_format($sum["total_qty"], 2));
-                            $sheet->setCellValue('M' . $rowStartData, $sumUom["uom"]);
-                            $sheet->setCellValue('N' . $rowStartData, number_format($sum["total_qty2"], 2));
-                            $sheet->setCellValue('O' . $rowStartData, $sumUom["uom2"]);
-                            $sheet->setCellValue('P' . $rowStartData, number_format($sum["total_qty_jual"], 2));
-                            $sheet->setCellValue('Q' . $rowStartData, $sumUom["uom_jual"]);
-                            $sheet->setCellValue('R' . $rowStartData, number_format($sum["total_qty2_jual"], 2));
-                            $sheet->setCellValue('S' . $rowStartData, $sumUom["uom2_jual"]);
-                            $sheet->setCellValue('T' . $rowStartData, $sum["total_lot"]);
-                            $sheet->setCellValue('U' . $rowStartData, $value->user);
-                            $sheet->setCellValue('V' . $rowStartData, $value->note);
-                            $sheet->setCellValue('W' . $rowStartData, $value->marketing ?? "-");
+                            $sheet->setCellValue('K' . $rowStartData, "");
+                            $sheet->setCellValue('L' . $rowStartData, "SUM : " . $value->no_sj);
+                            $sheet->setCellValue('M' . $rowStartData, number_format($sum["total_qty"], 2));
+                            $sheet->setCellValue('N' . $rowStartData, $sumUom["uom"]);
+                            $sheet->setCellValue('O' . $rowStartData, number_format($sum["total_qty2"], 2));
+                            $sheet->setCellValue('P' . $rowStartData, $sumUom["uom2"]);
+                            $sheet->setCellValue('Q' . $rowStartData, number_format($sum["total_qty_jual"], 2));
+                            $sheet->setCellValue('R' . $rowStartData, $sumUom["uom_jual"]);
+                            $sheet->setCellValue('S' . $rowStartData, number_format($sum["total_qty2_jual"], 2));
+                            $sheet->setCellValue('T' . $rowStartData, $sumUom["uom2_jual"]);
+                            $sheet->setCellValue('U' . $rowStartData, $sum["total_lot"]);
+                            $sheet->setCellValue('V' . $rowStartData, $value->user);
+                            $sheet->setCellValue('W' . $rowStartData, $value->note);
+                            $sheet->setCellValue('X' . $rowStartData, $value->marketing ?? "-");
 
                             $rowStartData++;
                             $sheet->setCellValue("A" . $rowStartData, "");
@@ -275,6 +278,7 @@ class Delivery extends MY_Controller {
                             $sheet->setCellValue('U' . $rowStartData, "");
                             $sheet->setCellValue('V' . $rowStartData, "");
                             $sheet->setCellValue('W' . $rowStartData, "");
+                            $sheet->setCellValue('X' . $rowStartData, "");
 
                             $sum = $sumDef;
                             $sumUom = $sumUomDef;
@@ -291,25 +295,26 @@ class Delivery extends MY_Controller {
                         $sheet->setCellValue('H' . $rowStartData, "");
                         $sheet->setCellValue('I' . $rowStartData, "");
                         $sheet->setCellValue('J' . $rowStartData, "");
-                        $sheet->setCellValue('K' . $rowStartData, "SUM : " . $value->no_sj);
-                        $sheet->setCellValue('L' . $rowStartData, number_format($sum["total_qty"], 2));
-                        $sheet->setCellValue('M' . $rowStartData, $sumUom["uom"]);
-                        $sheet->setCellValue('N' . $rowStartData, number_format($sum["total_qty2"], 2));
-                        $sheet->setCellValue('O' . $rowStartData, $sumUom["uom2"]);
-                        $sheet->setCellValue('P' . $rowStartData, number_format($sum["total_qty_jual"], 2));
-                        $sheet->setCellValue('Q' . $rowStartData, $sumUom["uom_jual"]);
-                        $sheet->setCellValue('R' . $rowStartData, number_format($sum["total_qty2_jual"], 2));
-                        $sheet->setCellValue('S' . $rowStartData, $sumUom["uom2_jual"]);
-                        $sheet->setCellValue('T' . $rowStartData, $sum["total_lot"]);
-                        $sheet->setCellValue('U' . $rowStartData, $value->user);
-                        $sheet->setCellValue('V' . $rowStartData, $value->note);
-                        $sheet->setCellValue('W' . $rowStartData, $value->marketing ?? "-");
+                        $sheet->setCellValue('K' . $rowStartData, "");
+                        $sheet->setCellValue('L' . $rowStartData, "SUM : " . $value->no_sj);
+                        $sheet->setCellValue('M' . $rowStartData, number_format($sum["total_qty"], 2));
+                        $sheet->setCellValue('N' . $rowStartData, $sumUom["uom"]);
+                        $sheet->setCellValue('O' . $rowStartData, number_format($sum["total_qty2"], 2));
+                        $sheet->setCellValue('P' . $rowStartData, $sumUom["uom2"]);
+                        $sheet->setCellValue('Q' . $rowStartData, number_format($sum["total_qty_jual"], 2));
+                        $sheet->setCellValue('R' . $rowStartData, $sumUom["uom_jual"]);
+                        $sheet->setCellValue('S' . $rowStartData, number_format($sum["total_qty2_jual"], 2));
+                        $sheet->setCellValue('T' . $rowStartData, $sumUom["uom2_jual"]);
+                        $sheet->setCellValue('U' . $rowStartData, $sum["total_lot"]);
+                        $sheet->setCellValue('V' . $rowStartData, $value->user);
+                        $sheet->setCellValue('W' . $rowStartData, $value->note);
+                        $sheet->setCellValue('X' . $rowStartData, $value->marketing ?? "-");
                     }
                 }
                 $tempid = $value->no_sj;
             }
             if (!$qtyHph) {
-                $spreadsheet->getActiveSheet()->removeColumn("L", 4);
+                $spreadsheet->getActiveSheet()->removeColumn("M", 4);
             }
             $writer = new Xlsx($spreadsheet);
             $filename = "delivery_" . $rekap . ' periode ' . $period[0] . ' - ' . $period[1];
