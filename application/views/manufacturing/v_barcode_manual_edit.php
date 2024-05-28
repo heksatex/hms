@@ -676,7 +676,7 @@
 
     function edit_batch_items(lot){
         var kode     = "<?php echo $mrpm->kode; ?>";
-        // var status   = "<?php echo $mrpm->status; ?>";
+        var status   = "<?php echo $mrpm->status; ?>";
         let acces    = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
@@ -687,9 +687,9 @@
                     show: true,
                     backdrop: 'static'
             })
-            // if(status== 'done' || status == 'cancel'){
-                // $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
-            // }
+            if(status== 'done' || status == 'cancel'){
+                $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+            }
             $("#tambah_data").removeClass('modal fade lebar').addClass('modal fade lebar_mode');
             $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('add_batch');
             $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
@@ -703,6 +703,7 @@
                         $(".add_batch").html(html)  
                     },1000);
                 $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+                $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-tambah" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button></div>');
             });
         }
     }
@@ -836,7 +837,7 @@
                                     var err = JSON.parse(xhr.responseText);
                                     alert(err.message);
                                 }else{
-                                    alert("Error cancel Data!")
+                                    alert(xhr.responseText)
                                 }   
                             }
                         });

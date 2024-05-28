@@ -1,54 +1,65 @@
 
-<form class="form-horizontal" id="form_edit_batch" name="form_edit_batch">
+<form class="form-horizontal" id="form_edit" name="form_edit_batch">
 	<div class="form-group">
 		<div class="col-md-12">
+            <div class="col-md-12 col-xs-12">
+				<div class="col-12 col-md-12 col-lg-4"><label>Kode Produk</label></div>
+				<div class="col-12 col-md-12 col-lg-8">
+                    <input type="text"  class="form-control input-sm"  name="kode_produk" id="kode_produk" value="<?php echo $data_join->kode_produk; ?>" readonly>
+				</div>
+			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Nama Produk</label></div>
 				<div class="col-12 col-md-12 col-lg-8">
-                    <input type="hidden" name="kode_produk" id="kode_produk" value="<?php echo $data_mbi->kode_produk; ?>">
-                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" value="<?php echo htmlentities($data_mbi->nama_produk); ?>" readonly>
+                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" value="<?php echo htmlentities($data_join->nama_produk); ?>" readonly>
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Corak Remark</label></div>
 				<div class="col-12 col-md-12 col-lg-8">
-                    <input type="text" class="form-control input-sm" name="corak_remark" id="corak_remark" value="<?php echo $data_mbi->corak_remark;?>"/>
+                    <input type="text" class="form-control input-sm" name="corak_remark" id="corak_remark" value="<?php echo $data_join->corak_remark;?>"/>
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Warna Remark</label></div>
 				<div class="col-12 col-md-12 col-lg-8">
-                    <input type="text" class="form-control input-sm" name="warna_remark" id="warna_remark"  value="<?php echo $data_mbi->warna_remark;?>"/>
+                    <input type="text" class="form-control input-sm" name="warna_remark" id="warna_remark"  value="<?php echo $data_join->warna_remark;?>"/>
 				</div>
 			</div>
             <div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Lot</label></div>
 				<div class="col-12 col-md-12 col-lg-8">
-                    <input type="text" class="form-control input-sm" name="lot" id="lot"  value="<?php echo $data_mbi->lot;?>" readonly/>
+                    <input type="text" class="form-control input-sm" name="lot" id="lot"  value="<?php echo $data_join->lot;?>" readonly/>
+				</div>
+			</div>
+            <div class="col-md-12 col-xs-12">
+				<div class="col-12 col-md-12 col-lg-4"><label>Grade</label></div>
+				<div class="col-12 col-md-12 col-lg-8">
+                    <input type="text" class="form-control input-sm" name="grade" id="grade"  value="<?php echo $data_join->grade;?>" readonly/>
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Qty </label></div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<input type="text" class="form-control input-sm text-right" name="qty" id="qty" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_mbi->qty;?>" readonly/>
+					<input type="text" class="form-control input-sm text-right" name="qty" id="qty" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_join->qty;?>" readonly/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
-                    <input type="text" class="form-control input-sm" name="uom_qty" id="uom_qty" readonly  value="<?php echo $data_mbi->uom;?>">
+                    <input type="text" class="form-control input-sm" name="uom_qty" id="uom_qty" readonly  value="<?php echo $data_join->uom;?>">
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Qty2 </label></div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<input type="text" class="form-control input-sm text-right" name="qty2" id="qty2" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_mbi->qty2;?>" readonly/>
+					<input type="text" class="form-control input-sm text-right" name="qty2" id="qty2" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_join->qty2;?>" readonly/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
-                    <input type="text" class="form-control input-sm" name="uom_qty2" id="uom_qty2" readonly  value="<?php echo $data_mbi->uom2;?>">
+                    <input type="text" class="form-control input-sm" name="uom_qty2" id="uom_qty2" readonly  value="<?php echo $data_join->uom2;?>">
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Qty Jual </label></div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<input type="text" class="form-control input-sm text-right" name="qty_jual" id="qty_jual" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_mbi->qty_jual;?>"/>
+					<input type="text" class="form-control input-sm text-right" name="qty_jual" id="qty_jual" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_join->qty_jual;?>"/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
 					<select type="text" class="form-control input-sm select2 uom" name="uom_qty_jual" id="uom_qty_jual" style="width:100% !important;"></select>
@@ -57,7 +68,7 @@
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Qty2 Jual </label></div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<input type="text" class="form-control input-sm text-right" name="qty2_jual" id="qty2_jual" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_mbi->qty2_jual;?>"/>
+					<input type="text" class="form-control input-sm text-right" name="qty2_jual" id="qty2_jual" data-decimal="2" oninput="enforceNumberValidation(this)"  value="<?php echo $data_join->qty2_jual;?>"/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
 					<select type="text" class="form-control input-sm select2 uom" name="uom_qty2_jual" id="uom_qty2_jual" style="width:100% !important;"></select>
@@ -66,50 +77,25 @@
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Lebar Jadi </label></div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<input type="text" class="form-control input-sm text-right" name="lebar_jadi" id="lebar_jadi"  value="<?php echo $data_mbi->lebar_jadi;?>"/>
+					<input type="text" class="form-control input-sm text-right" name="lebar_jadi" id="lebar_jadi"  value="<?php echo $data_join->lebar_jadi;?>"/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
 					<select type="text" class="form-control input-sm select2 uom" name="uom_lebar_jadi" id="uom_lebar_jadi" style="width:100% !important;"></select>
 				</div>
 			</div>
-			<div class="col-md-12 col-xs-12">
-                <div class="col-12 col-md-12 col-lg-4"><label>Kode K3L</label></div>
-                <div class="col-12 col-md-12 col-lg-8">
-                	<select class="form-control input-sm select2" name="k3l" id="k3l" style="width:100% !important;" >
-                        <option value=""></option>
-                        <?php 
-                            $selected="";
-                            foreach ($kode_k3l as $row) {
-                                if($row->kode == $data_mbi->kode_k3l)    {
-                                    $selected = "selected";
-                                }
-                        ?>
-                                <option value='<?php echo $row->kode; ?>' <?php echo $selected; ?> ><?php echo $row->kode;?></option>
-                        <?php  
-                            $selected="";
-                            }
-                        ?>
-                    </select> 
-                </div>                                    
-            </div>
 		</div>		
 	</div>
 </form>
 
 
 <script type="text/javascript">
+   
 
-	$('#k3l').select2({
-        allowClear: true,
-        placeholder: '',
-        width: '100%'
-    });
-
-    var $newOption = $("<option></option>").val("<?php echo $data_mbi->uom_jual?>").text("<?php echo $data_mbi->uom_jual?>");
+    var $newOption = $("<option></option>").val("<?php echo $data_join->uom_jual?>").text("<?php echo $data_join->uom_jual?>");
     $("#uom_qty_jual").empty().append($newOption).trigger('change');
-    var $newOption = $("<option></option>").val("<?php echo $data_mbi->uom2_jual?>").text("<?php echo $data_mbi->uom2_jual?>");
+    var $newOption = $("<option></option>").val("<?php echo $data_join->uom2_jual?>").text("<?php echo $data_join->uom2_jual?>");
     $("#uom_qty2_jual").empty().append($newOption).trigger('change');
-    var $newOption = $("<option></option>").val("<?php echo $data_mbi->uom_lebar_jadi?>").text("<?php echo $data_mbi->uom_lebar_jadi?>");
+    var $newOption = $("<option></option>").val("<?php echo $data_join->uom_lebar_jadi?>").text("<?php echo $data_join->uom_lebar_jadi?>");
     $("#uom_lebar_jadi").empty().append($newOption).trigger('change');
 	
 	// validasi decimal/ onlynumber
@@ -188,11 +174,10 @@
         let uom_qty2_jual	= $('#uom_qty2_jual').val();
 		let lebar_jadi		= $('#lebar_jadi').val();
 		let uom_lebar_jadi	= $('#uom_lebar_jadi').val();
-		let k3l				= $('#k3l').val();
-        let lot             = "<?php echo $data_mbi->lot; ?>";
-        var quant_id        = "<?php echo $data_mbi->quant_id; ?>"
+        let lot             = "<?php echo $data_join->lot; ?>";
+        var quant_id        = "<?php echo $data_join->quant_id; ?>"
 
-        if (kode_produk == null) {
+        if (kode_produk.length === 0) {
             alert_notify('fa fa-warning', 'Produk Kosong !', 'danger', function() {});
             $('#nama_produk').focus();
         }else if (lot.length === 0) {
@@ -225,7 +210,7 @@
             $.ajax({
                 type: "POST",
                 dataType: "json",
-                url: '<?php echo base_url('manufacturing/barcodemanual/save_mrp_batch_items')?>',
+                url: '<?php echo base_url('warehouse/joinlot/save_join_lot_result')?>',
                 beforeSend: function(e) {
                     if (e && e.overrideMimeType) {
                         e.overrideMimeType("application/json;charset=UTF-8");
@@ -242,10 +227,8 @@
 					uom_qty2_jual: uom_qty2_jual,
 					lebar_jadi	: lebar_jadi,
 					uom_lebar_jadi : uom_lebar_jadi,
-					kode_k3l: k3l,
 					lot: lot,
 					quant_id: quant_id,
-                    row     : "<?php echo $data_mbi->row_order?>"
                 },
                 success: function(data) {
                     if (data.status == 'failed') {
@@ -275,15 +258,11 @@
                         var err = JSON.parse(xhr.responseText);
                         alert(err.message);
                     }else{
-                        alert(xhr.responseText)
+                        alert("Error Simpan Data !")
                     }                   
                 }
             });
         }
     });
          
-	
-	
-  
-	  
 </script>

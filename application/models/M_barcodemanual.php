@@ -9,12 +9,12 @@ class m_barcodemanual extends CI_Model
 	var $column_search= array('mrp.kode', 'mrp.tanggal_buat','mrp.tanggal_transaksi', 'msg.nama_sales_group', 'mta.name_type','mrp.tot_batch', 'mrp.kode_adjustment', 'mrp.notes', 'mrp.nama_user', 'nama_status', 'mmbi.lot');
 	var $order  	  = array('mrp.tanggal_buat' => 'desc');
 
-    protected $db_debug;
+    // protected $db_debug;
 
-    public function __construct() {
-        $this->db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
-    }
+    // public function __construct() {
+    //     $this->db_debug = $this->db->db_debug;
+    //     $this->db->db_debug = FALSE;
+    // }
 
     private function _get_datatables_query()
 	{
@@ -488,7 +488,7 @@ class m_barcodemanual extends CI_Model
         return $query->row();
 	}
 
-    public function __destruct() {
-        $this->db->db_debug = $this->db_debug;
-    }
+    // public function __destruct() {
+    //     $this->db->db_debug = $this->db_debug;
+    // }
 }

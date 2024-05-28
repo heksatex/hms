@@ -203,8 +203,12 @@ class Barcodemanual extends MY_Controller
                 $type       = $this->input->post('type');
                 $notes      = $this->input->post('notes');
                 $tgl        = date('Y-m-d H:i:s');
+
                 // start transaction
                 $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel(" mrp_manual WRITE, user WRITE, mst_sales_group WRITE, mst_access_menu WRITE, main_menu_sub WRITE, mst_type_adjustment WRITE, log_history WRITE,token_increment WRITE ");
 
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
@@ -316,6 +320,10 @@ class Barcodemanual extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -351,6 +359,9 @@ class Barcodemanual extends MY_Controller
 
                 // start transaction
                 $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel("stock_quant WRITE, mrp_manual WRITE, mst_produk WRITE, mrp_manual_batch WRITE,log_history WRITE, user WRITE ,main_menu_sub WRITE, mst_access_menu WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE");
 
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
@@ -526,6 +537,10 @@ class Barcodemanual extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -554,6 +569,10 @@ class Barcodemanual extends MY_Controller
 
                 // start transaction
                 $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel("stock_quant WRITE, mrp_manual WRITE, mst_access_menu WRITE, mst_produk WRITE, picklist_detail WRITE,mrp_manual_batch_items WRITE, log_history WRITE, user WRITE ,main_menu_sub WRITE");
+
 
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
@@ -682,6 +701,10 @@ class Barcodemanual extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -698,6 +721,9 @@ class Barcodemanual extends MY_Controller
 
                 // start transaction
                 $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE,  mst_access_menu WRITE, log_history WRITE, user WRITE ,main_menu_sub WRITE");
 
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
@@ -767,6 +793,10 @@ class Barcodemanual extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -840,8 +870,8 @@ class Barcodemanual extends MY_Controller
                 $nu        = $this->_module->get_nama_user($username)->row_array(); 
                 $nama_user = addslashes($nu['nama']);
 
-                // //lock table
-                // $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE,  mrp_manual_batch_items WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, stock_move WRITE, departemen as d WRITE, token_increment WRITE, stock_move_produk WRITE, stock_move_items WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, mst_access_menu WRITE ");
+                //lock table
+                $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch as mmb WRITE, mst_quality as q WRITE,  mrp_manual_batch_items WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, stock_move WRITE, departemen as d WRITE, token_increment WRITE, stock_move_produk WRITE, stock_move_items WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, mst_access_menu WRITE ");
  
                 $tgl        = date('Y-m-d H:i:s');
                 $mrpm       = $this->m_barcodemanual->get_data_mrp_manual_by_id($kode);
@@ -1190,6 +1220,10 @@ class Barcodemanual extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -1206,10 +1240,11 @@ class Barcodemanual extends MY_Controller
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
 
-                // $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE, mrp_manual_batch WRITE");
                 
                 // start transaction
                 $this->_module->startTransaction();
+
+                $this->_module->lock_tabel("mrp_manual WRITE, mrp_manual_batch WRITE,log_history WRITE, user WRITE ,main_menu_sub WRITE ");
                 
                 $mrpm       = $this->m_barcodemanual->get_data_mrp_manual_by_id($kode);
 
@@ -1259,6 +1294,10 @@ class Barcodemanual extends MY_Controller
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 

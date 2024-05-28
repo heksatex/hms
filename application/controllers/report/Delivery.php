@@ -211,7 +211,7 @@ class Delivery extends MY_Controller {
                 $sheet->setCellValue('H' . $rowStartData, $value->nama);
                 $sheet->setCellValue('I' . $rowStartData, $value->alamat);
                 $sheet->setCellValue('J' . $rowStartData, ($rekap === "global") ? "" : $value->corak_remark);
-                $sheet->setCellValue('K' . $rowStartData, ($rekap === "global") ? "" : $value->lebar_jadi);
+                $sheet->setCellValue('K' . $rowStartData, ($rekap === "global") ? "" : (($value->lebar_jadi === "-" || is_null($value->lebar_jadi)) ? "" : ($value->lebar_jadi . " " . $value->uom_lebar_jadi)));
                 $sheet->setCellValue('L' . $rowStartData, ($rekap === "global") ? "" : $value->warna_remark);
                 $sheet->setCellValue('M' . $rowStartData, $value->total_qty);
                 $sheet->setCellValue('N' . $rowStartData, $value->uom);
