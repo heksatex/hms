@@ -190,14 +190,28 @@ class Trackinglot extends MY_Controller
                                   );
                 }
 
-                $join  = $this->m_trackingLot->get_join_by_lot($txtlot);
+                // join
+                $join  = $this->m_trackingLot->get_join_lot_by_lot($txtlot);
                 foreach($join as $joins){
                   $kode_encrypt = encrypt_url($joins->kode_join);
                   $result_record[] = array('tanggal' => $joins->tanggal_transaksi, 
                                     'kode'        => $joins->kode_join,
                                     'link'        => 'warehouse/joinlot/edit/'.$kode_encrypt,
+                                    'keterangan'  => 'Lot ini di Hilangkan untuk di JOIN di Departemen '.$joins->nama_departemen,
+                                    'status'      => $joins->nama_status,
+                                    'user'        => $joins->nama_user,
+                                  );
+                }
+
+                // hasil join
+                $hjoin  = $this->m_trackingLot->get_hasil_join_by_lot($txtlot);
+                foreach($hjoin as $joins){
+                  $kode_encrypt = encrypt_url($joins->kode_join);
+                  $result_record[] = array('tanggal' => $joins->tanggal_transaksi, 
+                                    'kode'        => $joins->kode_join,
+                                    'link'        => 'warehouse/joinlot/edit/'.$kode_encrypt,
                                     'keterangan'  => 'Lot ini dibuat dari hasil JOIN di Departemen '.$joins->nama_departemen.' dari Lot '.$joins->lot_asal,
-                                    'status'      => '-',
+                                    'status'      => $joins->nama_status,
                                     'user'        => $joins->nama_user,
                                   );
                 }
