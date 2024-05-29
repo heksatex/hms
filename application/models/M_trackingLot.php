@@ -120,14 +120,25 @@ class M_trackinglot extends CI_Model
                                 WHERE si.lot_baru LIKE '$lot%'   ")->result();
     }
 
-    
-    function get_join_by_lot($lot){
+    function get_join_lot_by_lot($lot){
+
         return $this->db->query("SELECT j.kode_join, j.tanggal_transaksi, j.dept_id, j.lot, j.nama_user,ms.nama_status, d.nama as nama_departemen,
                                 (SELECT GROUP_CONCAT(lot SEPARATOR ' + ') FROM join_lot_items jli WHERE  jli.kode_join = j.kode_join) as lot_asal
                                 FROM join_lot j
                                 INNER JOIN departemen d ON d.kode = j.dept_id
                                 INNER JOIN mst_status ms ON j.status = ms.kode
-                                WHERE j.lot LIKE '$lot%' 
+                                INNER JOIN join_lot_items jli ON j.kode_join = j.kode_join
+                                WHERE jli.lot LIKE '$lot%' 
+                                GROUP BY jli.kode_join  ")->result();
+    }
+    
+    function get_hasil_join_by_lot($lot){
+        return $this->db->query("SELECT j.kode_join, j.tanggal_transaksi, j.dept_id, j.lot, j.nama_user,ms.nama_status, d.nama as nama_departemen,
+                                (SELECT GROUP_CONCAT(lot SEPARATOR ' + ') FROM join_lot_items jli WHERE  jli.kode_join = j.kode_join) as lot_asal
+                                FROM join_lot j
+                                INNER JOIN departemen d ON d.kode = j.dept_id
+                                INNER JOIN mst_status ms ON j.status = ms.kode
+                                WHERE j.lot LIKE '$lot%'  AND j.status = 'done'
                                 GROUP BY j.kode_join  ")->result();
     }
 
