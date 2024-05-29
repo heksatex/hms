@@ -127,7 +127,7 @@ class M_trackinglot extends CI_Model
                                 FROM join_lot j
                                 INNER JOIN departemen d ON d.kode = j.dept_id
                                 INNER JOIN mst_status ms ON j.status = ms.kode
-                                INNER JOIN join_lot_items jli ON j.kode_join = j.kode_join
+                                INNER JOIN join_lot_items jli ON jli.kode_join = j.kode_join
                                 WHERE jli.lot LIKE '$lot%' 
                                 GROUP BY jli.kode_join  ")->result();
     }
