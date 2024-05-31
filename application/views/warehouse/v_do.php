@@ -82,7 +82,7 @@
                 $("#btnShow").html("");
                 $("#btnShow").html($("#shwmdl").html());
 
-                $("#btn-tambah").on("click", function (e) {
+                $("#btn-tambah").unbind("click").off("click").on("click", function (e) {
                     e.preventDefault();
                     $("#tambah_data").modal({
                         show: true,
