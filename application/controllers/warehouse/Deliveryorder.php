@@ -360,10 +360,11 @@ class Deliveryorder extends MY_Controller {
                 $addMessage = "No SJ Berubah Dari " . $data->no_sj . ' Menjadi ' . $nosj;
             }
             $this->m_deliveryorder->update($update, $condition);
-            $this->_module->gen_history($sub_menu, $id, 'edit', ($users["nama"] ?? $username) . ' Mengubah Dokumen ' . $addMessage . ' DO - ' . $id, $username);
+
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
+            $this->_module->gen_history($sub_menu, $id, 'edit', ($users["nama"] ?? $username) . ' Mengubah Dokumen ' . $addMessage . ' DO - ' . $id, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -391,7 +392,7 @@ class Deliveryorder extends MY_Controller {
             $pl = $this->input->post("pl");
             $this->_module->startTransaction();
             $this->_module->lock_tabel("picklist READ,token_increment WRITE,token_increment it READ,user WRITE, main_menu_sub WRITE, log_history WRITE,"
-                    . "delivery_order WRITE,delivery_order_sj WRITE");
+                    . "delivery_order WRITE,delivery_order_sj WRITE,delivery_order a READ");
             $now = date("Y-m-d H:i:s");
             if (!$nodo = $this->token->noUrut('deliveryorder', date('ym'), true)->generate('DO', '%04d')->get()) {
                 throw new \Exception("No Delivery Order tidak terbuat", 500);
@@ -405,13 +406,17 @@ class Deliveryorder extends MY_Controller {
                     throw new \Exception("No SJ tidak terbuat", 500);
                 }
             }
+            $check = $this->m_deliveryorder->getDataDetail(["no_picklist" => $pl, "status <>" => "cancel"]);
+            if ($check) {
+                throw new Exception("PL Sudah terbuat Delivery ", 500);
+            }
             $tgl_dok = date("Y-m-d H:i:s", $time_dokumen);
             $diff = date_diff(date_create($now), date_create($tgl_dok));
             $interval = (int) $diff->format("%a");
             $data = [
                 'no' => $nodo,
                 'no_sj' => $nosj,
-                'tanggal_dokumen' => $tgl_dok,
+                'tanggal_dokumen' => $now,
                 'tanggal_buat' => $now,
                 'note' => $this->input->post("ket"),
                 'status' => 'draft',
