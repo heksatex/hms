@@ -416,7 +416,7 @@ class Deliveryorder extends MY_Controller {
             $data = [
                 'no' => $nodo,
                 'no_sj' => $nosj,
-                'tanggal_dokumen' => $now,
+                'tanggal_dokumen' => ($interval < 1) ? $now : $tgl_dok,
                 'tanggal_buat' => $now,
                 'note' => $this->input->post("ket"),
                 'status' => 'draft',
