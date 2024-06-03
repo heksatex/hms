@@ -411,8 +411,8 @@ class Deliveryorder extends MY_Controller {
                 throw new Exception("PL Sudah terbuat Delivery ", 500);
             }
             $tgl_dok = date("Y-m-d H:i:s", $time_dokumen);
-            $diff = date_diff(date_create($now), date_create($tgl_dok));
-            $interval = (int) $diff->format("%a");
+            $diff = date_diff(date_create(date("Y-m-d")), date_create(date("Y-m-d", $time_dokumen)));
+            $interval = $diff->format("%a");
             $data = [
                 'no' => $nodo,
                 'no_sj' => $nosj,
