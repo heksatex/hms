@@ -173,10 +173,10 @@ class HPHgudangjadi extends MY_Controller
                 }
 
                 if(!empty($row['jenis_kain'])){
-                    $where_jenisKain_hph         = " AND mrpin.id_jenis_kain = '".$row['jenis_kain']."' ";
-                    $where_jenisKain_split       = " AND hfg.id_jenis_kain = '".$row['jenis_kain']."' ";
-                    $where_jenisKain_join        = " AND hfg.id_jenis_kain = '".$row['jenis_kain']."' ";
-                    $where_jenisKain_manual      = "noField";
+                    $where_jenisKain_hph         = " AND  mrpin.id_jenis_kain = '".$row['jenis_kain']."' ";
+                    $where_jenisKain_split       = " AND ( hfg.id_jenis_kain = '".$row['jenis_kain']."' OR mp.id_jenis_kain = '".$row['jenis_kain']."' ) ";
+                    $where_jenisKain_join        = " AND ( hfg.id_jenis_kain = '".$row['jenis_kain']."'  OR mp.id_jenis_kain = '".$row['jenis_kain']."' ) ";
+                    $where_jenisKain_manual      = " AND ( mp.id_jenis_kain = '".$row['jenis_kain']."' OR mp.id_jenis_kain = '".$row['jenis_kain']."' ) ";
                 }else{
                     $where_jenisKain_hph         = "";
                     $where_jenisKain_split       = "";
@@ -256,11 +256,19 @@ class HPHgudangjadi extends MY_Controller
                     $where_salesOrder_manual      = "";
                 }
 
-                if(!empty($row['grade']) AND $row['grade'] != 'All'){
-                    $where_grade_hph         = " AND fg.nama_grade = '".$row['grade']."' ";
-                    $where_grade_split       = " AND sq.nama_grade = '".$row['grade']."' ";
-                    $where_grade_join        = " AND jl.grade = '".$row['grade']."' ";
-                    $where_grade_manual      = " AND mb.grade = '".$row['grade']."' ";
+                if(!empty($row['grade'])){
+                    $list_grade  = '';
+                    foreach($row['grade'] as $gd){
+                            $list_grade .= "'$gd', ";
+                    }
+                    $list_grade = rtrim($list_grade, ', ');
+
+                    if(!empty($list_grade)){
+                        $where_grade_hph         = " AND fg.nama_grade IN (".$list_grade.") ";
+                        $where_grade_split       = " AND sq.nama_grade IN (".$list_grade.") ";
+                        $where_grade_join        = " AND jl.grade IN (".$list_grade.") ";
+                        $where_grade_manual      = " AND mb.grade IN (".$list_grade.") ";
+                    }
                 }else{
                     $where_grade_hph         = "";
                     $where_grade_split       = "";
@@ -306,7 +314,12 @@ class HPHgudangjadi extends MY_Controller
 			$dataRecord= [];
 
 			$where     = " WHERE mrpin.status NOT IN ('draft','cancel') AND mp.dept_id = '".$id_dept."' ".$where_tgldari_hph." ".$where_tglsampai_hph." ".$where_noHph_hph." ".$where_lotbahanBaku_hph." ".$where_namaProduk_hph." ".$where_corakRemark_hph." ".$where_warnaRemark_hph." ".$where_quality_hph." ".$where_jenisKain_hph." ".$where_lotBarangjadi_hph." ".$where_benang_hph." ".$where_lebarJadi_hph." ".$where_mc_hph." ".$where_colorOrder_hph." ".$where_salesOrder_hph." ".$where_grade_hph." ".$where_user_hph." ".$where_marketing_hph;
-            if($show_jenis_hph == 'All' or $show_jenis_hph == 'HPH'){
+            if($show_jenis_hph == 'All' or $show_jenis_hph == 'HPH' or $show_jenis_hph == "SUSUT"){
+                if($show_jenis_hph == "HPH"){
+                    $where = $where." AND fg.lokasi ='GJD/Stock' ";
+                }else{ // susut
+                    $where = $where." AND fg.lokasi ='GJD/Waste' ";
+                }
                 $items = $this->m_HPHgudangjadi->get_list_hph_by_kode($where);
                 foreach ($items as $val) {
 
@@ -380,7 +393,7 @@ class HPHgudangjadi extends MY_Controller
                                             'jenis_kain' => $val->nama_jenis_kain,
                                             'gramasi'    => $val->gramasi,
                                             'berat'      => $val->berat,
-                                            'benang'     => $val->gramasi,
+                                            'benang'     => $val->benang,
                                             'qty1_jual'  => $val->qty_jual,
                                             'uom_jual'   => $val->uom_jual,
                                             'qty2_jual'  => $val->qty2_jual,
@@ -425,7 +438,7 @@ class HPHgudangjadi extends MY_Controller
                                         'jenis_kain' => $val->nama_jenis_kain,
                                         'gramasi'    => $val->gramasi,
                                         'berat'      => $val->berat,
-                                        'benang'     => $val->gramasi,
+                                        'benang'     => $val->benang,
                                         'qty1_jual'  => $val->qty_jual,
                                         'uom_jual'   => $val->uom_jual,
                                         'qty2_jual'  => $val->qty2_jual,
@@ -466,7 +479,7 @@ class HPHgudangjadi extends MY_Controller
                                             'grade'      => $val->grade,
                                             'lbr_jadi'   => $val->lebar_jadi,
                                             'uom_lbr_jadi'=> $val->uom_lebar_jadi,
-                                            'jenis_kain' => '',
+                                            'jenis_kain' => $val->nama_jenis_kain,
                                             'gramasi'    => '',
                                             'berat'      => '',
                                             'benang'     => '',

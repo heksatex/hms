@@ -271,8 +271,8 @@
                                     <label>Grade </label>
                                 </div>
                                 <div class="col-md-7">
-                                    <select type="text" class="form-control input-sm select2" name="grade" id="grade" style="width:100% !important">
-                                    <option>All</option>
+                                    <select type="text" class="form-control input-sm select2" name="grade" id="grade" style="width:100% !important" multiple="">
+                                    <!-- <option>All</option> -->
                                     <option>A</option>
                                     <option>B</option>
                                     <option>C</option>
@@ -316,6 +316,7 @@
                                     <option>SPLIT</option>
                                     <option>JOIN</option>
                                     <option>MANUAL</option>
+                                    <option>SUSUT</option>
                                     </select>
                                 </div>
                             </div>

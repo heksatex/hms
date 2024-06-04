@@ -37,7 +37,7 @@ class M_HPHgudangjadi extends CI_Model
     public function get_list_split_by_kode($where)
     {
             $ip  = $this->input->ip_address();
-            return $this->db->query("SELECT '$ip' as ip, hfg.gramasi, hfg.operator, hfg.benang, hfg.berat, hfg.co, hfg.sc, hfg.nama_quality, hfg.nama_jenis_kain, spl.kode_split as no_hph, spl.tanggal, spl.kode_produk, spl.nama_produk, spl.qty as qty_awal, spl.qty2  as qty2_awal, spl.uom as uom_awal, spl.uom2 as uom2_awal,
+            return $this->db->query("SELECT '$ip' as ip, hfg.gramasi, hfg.operator, hfg.benang, hfg.berat, hfg.co, hfg.sc, hfg.nama_quality, IF(hfg.id_jenis_kain != null,  hfg.nama_jenis_kain, mjk.nama_jenis_kain) as nama_jenis_kain, spl.kode_split as no_hph, spl.tanggal, spl.kode_produk, spl.nama_produk, spl.qty as qty_awal, spl.qty2  as qty2_awal, spl.uom as uom_awal, spl.uom2 as uom2_awal,
                                                 spl.lot, 
                                                 sq.lot as lot_gjd,
                                                 sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark, 
@@ -56,6 +56,8 @@ class M_HPHgudangjadi extends CI_Model
                                             LEFT JOIN mst_quality mq ON mrpin.id_quality = mq.id						
                                             LEFT JOIN mst_jenis_kain mjk on mrpin.id_jenis_kain = mjk.id
                                             WHERE mp.dept_id = 'GJD') as hfg ON hfg.quant_id = spl.quant_id 
+                                    INNER JOIN mst_produk mp ON spl.kode_produk =  mp.kode_produk
+                                    LEFT JOIN mst_jenis_kain mjk on mp.id_jenis_kain = mjk.id                         
                                     $where
                                     ORDER BY spl.tanggal desc ")->result();
     }
@@ -65,7 +67,7 @@ class M_HPHgudangjadi extends CI_Model
     public function get_list_join_by_kode($where)
     {
             $ip  = $this->input->ip_address();
-            return $this->db->query("SELECT '$ip' as ip, hfg.gramasi, hfg.berat, hfg.operator, hfg.benang, hfg.nama_quality, hfg.nama_jenis_kain, hfg.co, hfg.sc, jl.kode_join as no_hph, jl.tanggal_transaksi, jl.kode_produk, jl.nama_produk, jl.corak_remark, 
+            return $this->db->query("SELECT '$ip' as ip, hfg.gramasi, hfg.berat, hfg.operator, hfg.benang, hfg.nama_quality,  IF(hfg.id_jenis_kain != null,  hfg.nama_jenis_kain, mjk.nama_jenis_kain) as nama_jenis_kain,hfg.co, hfg.sc, jl.kode_join as no_hph, jl.tanggal_transaksi, jl.kode_produk, jl.nama_produk, jl.corak_remark, 
                                             jl.warna_remark, jl.lot as lot_gjd, jl.qty, jl.uom, jl.qty2, jl.uom2, 
                                             jl.qty_jual, jl.uom_jual, jl.qty2_jual, jl.uom2_jual, jl.lebar_jadi, jl.uom_lebar_jadi, jl.grade, jl.nama_user,
                                             msg.nama_sales_group,
@@ -80,7 +82,9 @@ class M_HPHgudangjadi extends CI_Model
                                             INNER JOIN mrp_inlet  mrpin ON fg.id_inlet = mrpin.id
                                             LEFT JOIN mst_quality mq ON mrpin.id_quality = mq.id						
                                             LEFT JOIN mst_jenis_kain mjk on mrpin.id_jenis_kain = mjk.id
-                                            WHERE mp.dept_id = 'GJD') as hfg ON hfg.quant_id = jli.quant_id                            
+                                            WHERE mp.dept_id = 'GJD') as hfg ON hfg.quant_id = jli.quant_id
+                                    INNER JOIN mst_produk mp ON jl.kode_produk =  mp.kode_produk
+                                    LEFT JOIN mst_jenis_kain mjk on mp.id_jenis_kain = mjk.id                         
                                     $where 
                                     GROUP BY jl.kode_join
                                     order by jl.tanggal_transaksi desc")->result();
@@ -96,10 +100,13 @@ class M_HPHgudangjadi extends CI_Model
                                                     mb.id_quality,
                                                     mb.grade, 
                                                     mq.nama as nama_quality,
-                                                    mm.nama_user
+                                                    mm.nama_user,
+                                                    mjk.nama_jenis_kain
                                     FROM mrp_manual mm
                                     INNER JOIN mrp_manual_batch mb ON mm.kode = mb.kode
                                     INNER JOIN mrp_manual_batch_items mbi ON mb.kode =mbi.kode AND mb.no_batch = mbi.no_batch
+                                    INNER JOIN mst_produk mp ON mbi.kode_produk =  mp.kode_produk
+                                    LEFT JOIN mst_jenis_kain mjk on mp.id_jenis_kain = mjk.id
                                     LEFT JOIN mst_quality mq ON mb.id_quality = mq.id
                                     LEFT JOIN mst_sales_group msg ON mm.sales_group = msg.kode_sales_group                              
                                     $where 
