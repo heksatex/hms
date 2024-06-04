@@ -39,6 +39,12 @@ class M_inlet extends CI_Model
 			$this->db->JOIN("mrp_production_fg_hasil fg","fg.id_inlet = in.id", "LEFT");
         }
 
+		if($this->input->post('checkTgl') == 1){
+			$this->db->where('in.tanggal >=', date("Y-m-d H:i:s", strtotime($this->input->post('tgldari')) ));
+			$this->db->where('in.tanggal <=', date("Y-m-d H:i:s", strtotime($this->input->post('tglsampai')) ));
+
+		}
+
 		// $this->db->from($this->table);
 		$this->db->SELECT("in.id, in.lot, in.tanggal, in.kode_mrp, in.sales_group, in.nama_produk, in.corak_remark, in.warna_remark, in.lebar_jadi,in.uom_lebar_jadi, in.desain_barcode, ms.nama_status, msg.nama_sales_group, in.status");
 		$this->db->FROM("mrp_inlet in");
