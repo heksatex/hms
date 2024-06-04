@@ -125,7 +125,7 @@
                         </div>
                         <div class="form-group"> 
                             <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Wana remark </label></div>
+                                <div class="col-xs-4"><label>Warna remark </label></div>
                                 <div class="col-xs-1 limit_capt"><label>:</label></div>
                                 <div class="col-xs-8" id="warna_remark">
                                 </div>
