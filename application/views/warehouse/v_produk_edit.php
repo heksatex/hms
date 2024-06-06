@@ -103,7 +103,7 @@
                   <div class="col-md-12 col-xs-12">
                     <div class="col-xs-4"><label>Kode Produk </label></div>
                     <div class="col-xs-8">
-                      <input type="text" class="form-control input-sm" name="kodeproduk" id="kodeproduk" readonly="readonly" value="<?php echo $produk->kode_produk?>"/>
+                      <input type="text" class="form-control input-sm" name="kodeproduk" id="kodeproduk" readonly="readonly" value="<?php echo htmlentities($produk->kode_produk)?>"/>
                     </div>                                    
                   </div>
                   <div class="col-md-12 col-xs-12">
@@ -142,11 +142,11 @@
                     <span class="glyphicon glyphicon-transfer"></span>
                     <span class="glyphicon-class"><?php echo $moves->jml_moves ?> Moves</span>
                   </li>
-                  <li class="pointer" onclick="cek_bom('<?php echo $produk->kode_produk ?>','<?php echo htmlentities($produk->nama_produk) ?>')" data-toggle="tooltip" title="Lihat BoM Produk">
+                  <li class="pointer" onclick="cek_bom('<?php echo htmlentities($produk->kode_produk) ?>','<?php echo htmlentities($produk->nama_produk) ?>')" data-toggle="tooltip" title="Lihat BoM Produk">
                     <span class="glyphicon glyphicon-list-alt"></span>
                     <span class="glyphicon-class"><?php echo $bom->jml_bom ?> BoM</span>
                   </li>                        
-                  <li class="pointer" onclick="cek_mo('<?php echo $produk->kode_produk ?>','<?php echo htmlentities($produk->nama_produk) ?>' )"  data-toggle="tooltip" title="Lihat MO Produk">
+                  <li class="pointer" onclick="cek_mo('<?php echo htmlentities($produk->kode_produk) ?>','<?php echo htmlentities($produk->nama_produk) ?>' )"  data-toggle="tooltip" title="Lihat MO Produk">
                     <span class="glyphicon glyphicon-cog" ></span>
                     <span class="glyphicon-class"><?php echo $mo->jml_mo ?> MO</span>
                   </li>
@@ -810,7 +810,7 @@
     $(document).on('click','#btn-duplicate',function(e){
           e.preventDefault();
           var id          = "<?php echo $produk->id; ?>";
-          var kode_produk = "<?php echo $produk->kode_produk; ?>";
+          var kode_produk = `<?php echo $produk->kode_produk; ?>`;
           var duplicate   = 'true';
 
           if(id == "" || kode_produk == ""){
