@@ -58,6 +58,7 @@ class Trackinglot extends MY_Controller
                                     'lokasi'        => $get['lokasi'],
                                     'lokasi_fisik'  => $get['lokasi_fisik'],
                                     'reff_note'     => $get['reff_note'],
+                                    'lot_asal'     => $get['lot_asal'],
                                     'jml'           => $jml_barcode,
 
                                     );
