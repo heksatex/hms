@@ -199,6 +199,14 @@
                         </div> 
                         <div class="form-group"> 
                             <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Barcode / Lot / KP Asal </label></div>
+                                <div class="col-xs-1 limit_capt"><label>:</label></div>
+                                <div class="col-xs-8" id="lot_asal">
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
                                 <div class="col-xs-4"><label>Jml Barcode </label></div>
                                 <div class="col-xs-1 limit_capt"><label>:</label></div>
                                 <div class="col-xs-8" id="jml">
@@ -303,6 +311,7 @@
         $('#lokasi_fisik').text('');
         $('#reff_note').text('');
         $('#jml').text('');
+        $('#lot_asal').text('');
         
         if(txtlot == ''){
             alert_notify('fa fa-warning','Barcode / Lot tidak boleh kosong !','danger',function(){});
@@ -349,6 +358,7 @@
                         $('#lokasi_fisik').text(value.lokasi_fisik);
                         $('#reff_note').text(value.reff_note);
                         $('#jml').text(value.jml);
+                        $('#lot_asal').text(value.lot_asal);
                         //alert(value.lot)
                     });
 

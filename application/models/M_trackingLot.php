@@ -9,9 +9,16 @@ class M_trackinglot extends CI_Model
 
     function get_data_info_by_lot($lot)
     {
-        $this->db->where('lot',$lot);
-		$this->db->order_by('create_date','desc');
-		$query = $this->db->get('stock_quant');
+        $this->db->where('sq.lot',$lot);
+		$this->db->order_by('sq.create_date','desc');
+        $this->db->select('sq.*, kp_lot.lot as lot_asal   ');
+        $this->db->from('stock_quant as sq');
+        $this->db->JOIN('(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
+											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
+											FROM join_lot jl	WHERE jl.status = "done" 
+											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
+											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot', 'kp_lot.quant_id = sq.quant_id', 'LEFT');
+		$query = $this->db->get();
 		return $query->row_array();
     }
 
