@@ -332,6 +332,10 @@ class Outlet extends MY_Controller
                     $callback = array('status' => 'failed', 'message' => 'Id Inlet Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if(empty($hph_mtr) AND empty($hph_kg)){
                     $callback = array('status' => 'failed', 'field' => 'qty_mtr_hph','message' => 'Qty Mtr HPH atau Qty Kg HPH harus diisi  !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                }else if($grade != 'F' AND empty($hph_mtr)){
+                    $callback = array('status' => 'failed', 'field' => 'qty_mtr_hph','message' => 'Qty Mtr HPH  harus diisi  !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                }else if($grade != 'F' AND empty($hph_kg)){
+                    $callback = array('status' => 'failed', 'field' => 'qty_kg_hph','message' => 'Qty Kg HPH  harus diisi  !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if(empty($grade)){
                     $callback = array('status' => 'failed', 'message' => 'Grade Harus dipilih !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if(empty($arr_uom_jual) AND ($grade == 'A' or $grade == 'B' or $grade == 'C') ){

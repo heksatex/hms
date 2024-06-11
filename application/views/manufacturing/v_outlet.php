@@ -907,6 +907,12 @@
                 alert_notify("fa fa-warning","Data Inlet Kosong !","danger",function(){});
             }else if(grade_radio == ''){
                 alert_notify("fa fa-warning","Grade Harus dipilih !","danger",function(){});
+            }else if( ( parseFloat(hph_mtr) <= 0 || hph_mtr.length === 0 ) && grade_radio != 'F'){
+                alert_notify("fa fa-warning","Qty Mtr HPH  harus diisi  !","danger",function(){});
+                $('#qty_mtr_hph').focus();
+            }else if( (parseFloat(hph_kg) <= 0 ||  hph_kg.length === 0 ) && grade_radio != 'F'){
+                alert_notify("fa fa-warning","Qty Kg HPH  harus diisi  !","danger",function(){});
+                $('#qty_kg_hph').focus();
             }else{
                 // alert("tes");
                 $.ajax({
@@ -1008,7 +1014,6 @@
                     }
                 });
             }
-
 
         });
 

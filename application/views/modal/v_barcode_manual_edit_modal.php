@@ -338,25 +338,25 @@
 		} else if (jml_pcs.length === 0) {
             alert_notify('fa fa-warning', 'Jml Pcs Minimal 1 !', 'danger', function() {});
             $('#jml_pcs').focus();
-		} else if (qty.length === 0) {
-            alert_notify('fa fa-warning', 'Qty Harus diisi !', 'danger', function() {});
-            $('#qty').focus();
+		// } else if (qty.length === 0) {
+        //     alert_notify('fa fa-warning', 'Qty Harus diisi !', 'danger', function() {});
+        //     $('#qty').focus();
 		} else if (uom == null) {
             alert_notify('fa fa-warning', 'Uom Harus dipilih !', 'danger', function() {});
 			$('#uom_qty').select2('focus');
-		} else if (qty2.length === 0) {
+		} else if (parseFloat(qty2) <= 0) {
             alert_notify('fa fa-warning', 'Qty2 Harus diisi !', 'danger', function() {});
             $('#qty2').focus();
 		} else if (uom2 == null) {
             alert_notify('fa fa-warning', 'Uom2 Harus dipilih !', 'danger', function() {});
 			$('#uom_qty2').select2('focus');
-		} else if (qty_jual.length === 0) {
+		} else if (parseFloat(qty_jual) <= 0 ) {
             alert_notify('fa fa-warning', 'Qty Jual Harus diisi !', 'danger', function() {});
 			$('#qty_jual').focus();
-		} else if (qty_jual.length > 0 && uom_qty_jual == null) {
+		} else if (parseFloat(qty_jual) > 0 && uom_qty_jual == null) {
             alert_notify('fa fa-warning', 'Uom Qty Jual Harus dipilih !', 'danger', function() {});
 			$('#uom_qty_jual').select2('focus');
-		} else if (qty2_jual.length > 0 && uom_qty2_jual == null) {
+		} else if (parseFloat(qty2_jual) > 0 && uom_qty2_jual == null) {
             alert_notify('fa fa-warning', 'Uom Qty2 Jual Harus dipilih !', 'danger', function() {});
 			$('#uom_qty2_jual').select2('focus');
 		} else if (lebar_jadi.length === 0) {
