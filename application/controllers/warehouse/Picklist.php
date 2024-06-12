@@ -410,7 +410,7 @@ class Picklist extends MY_Controller {
                         break;
                 }
 
-                $sc = explode("|", $check->reserve_origin);
+                $sc = $check->sales_order;
                 $barcodeInput[] = $check->lot;
                 $datainsert[] = [
                     "id" => null,
@@ -427,7 +427,7 @@ class Picklist extends MY_Controller {
                     'qty2' => $check->qty2_jual ?? 0.00,
                     'uom' => $check->uom_jual,
                     'uom2' => $check->uom2_jual,
-                    'sales_order' => isset($sc[0]) ? $sc[0] : "",
+                    'sales_order' => $sc,
                     'lokasi_fisik' => $check->lokasi_fisik,
                     'tanggal_masuk' => date('Y-m-d H:i:s'),
                     'valid' => $this->input->post('status') ?? "draft",
@@ -443,6 +443,9 @@ class Picklist extends MY_Controller {
 //                }
             }
             $this->m_PicklistDetail->insertBatch($datainsert);
+            $sc = $this->m_PicklistDetail->getSc(["no_pl" => $pl, 'valid <>' => "cancel", "sales_order <>" => "", "sales_order is NOT NULL" => null]);
+            $this->m_Picklist->update(['sc' => $sc->sc ?? ""], ['no' => $pl]);
+
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
@@ -493,11 +496,13 @@ class Picklist extends MY_Controller {
             }
 
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("picklist_detail WRITE,stock_quant WRITE,user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk mp WRITE");
+            $this->_module->lock_tabel("picklist_detail WRITE,picklist WRITE,stock_quant WRITE,user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk mp WRITE");
             $this->m_PicklistDetail->updateStatus(['barcode_id' => $id, 'valid !=' => "cancel"], ['valid' => "cancel"]);
             if (strtolower($status) === 'validasi') {
                 $this->m_Pickliststockquant->update(["lokasi_fisik" => "PORT"], ["lot" => $id]);
             }
+            $sc = $this->m_PicklistDetail->getSc(["no_pl" => $pl, 'valid <>' => "cancel", "sales_order <>" => "", "sales_order is NOT NULL" => null]);
+            $this->m_Picklist->update(['sc' => $sc->sc ?? ""], ['no' => $pl]);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menghapus Data', 500);
             }
@@ -548,7 +553,8 @@ class Picklist extends MY_Controller {
                 'jenis_jual' => $this->input->post('jenis_jual'),
                 'customer_id' => $this->input->post('customer'),
                 'keterangan' => $this->input->post('ket'),
-                'sc' => $this->input->post('sc')
+                'sc' => $this->input->post('sc'),
+                'alamat_kirim' => $this->input->post('alamat')
             );
 
             $this->m_Picklist->update($input, ['no' => $kode_decrypt]);
@@ -595,7 +601,8 @@ class Picklist extends MY_Controller {
                 'tanggal_input' => date('Y-m-d H:i:s'),
                 'nama_user' => $this->session->userdata('nama')['nama'] ?? "",
                 'status' => 'draft',
-                'sc' => $this->input->post('sc')
+                'sc' => $this->input->post('sc'),
+                'alamat_kirim' => $this->input->post("alamat")
             );
             $id = $this->m_Picklist->save($input);
             if (!$this->_module->finishTransaction()) {
@@ -610,7 +617,7 @@ class Picklist extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-        }finally {
+        } finally {
             $this->_module->unlock_tabel();
         }
     }

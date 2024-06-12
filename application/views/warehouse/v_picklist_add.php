@@ -1,10 +1,13 @@
 <html>
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
-        
+
         <style>
             #btn-print{
                 display: none;
+            }
+            .form-check-label{
+                font-size: 80%;
             }
         </style>
 
@@ -40,7 +43,7 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 col-xs-12">
                                         <!--                                        <div class="col-md-12 col-xs-12">
                                                                                     <div class="col-xs-4"><label>Tanggal</label></div>
                                                                                     <div class="col-xs-8 col-md-8">
@@ -110,11 +113,21 @@
                                                 </select>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="col-md-6 col-xs-12">
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4"><label></label></div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <textarea type="text" class="form-control input-sm resize-ta" name="alamat" id="alamat" readonly></textarea>
-                                            </div>                                    
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="alamat" id="delivery" value="" checked>
+                                                <label class="form-check-label" for="delivery" id="lbl_delivery">
+                                                    Alamat Pengiriman : 
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="alamat" value="" id="invoice">
+                                                <label class="form-check-label" for="invoice" id="lbl_invoice">
+                                                    Alamat Invoice : 
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -158,7 +171,8 @@
                                 return {
                                     id: obj.id,
                                     text: obj.text,
-                                    address: obj.alamat
+                                    address: obj.alamat,
+                                    inv_address: obj.alamat_invoice
                                 };
                             })
                         };
@@ -167,10 +181,18 @@
             });
 
             $("#customer").on('select2:select', function (e) {
-                $("#alamat").val($("#customer :selected").data().data.address);
+                setAddres($("#customer :selected").data().data.inv_address, $("#customer :selected").data().data.address);
+//                $("#alamat").val($("#customer :selected").data().data.address);
             });
             $("#customer").on('select2:unselect', function (e) {
-                $("#alamat").val("");
+                setAddres("", "");
+            });
+
+            const setAddres = ((inv, address) => {
+                $("#lbl_invoice").html("Alamat Invoice : " + inv);
+                $("#lbl_delivery").html("Alamat Pengiriman :" + address);
+                $("#delivery").val(address);
+                $("#invoice").val(inv);
             });
             var datenow = new Date();
             datenow.setMonth(datenow.getMonth());

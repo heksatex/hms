@@ -67,6 +67,7 @@
                     "searching": true,
                     "ordering": true,
                     "info": true,
+                    "stateSave": true,
                     "ajax": {
                         "url": "<?= base_url('warehouse/deliveryorder/data') ?>",
                         "type": "POST"

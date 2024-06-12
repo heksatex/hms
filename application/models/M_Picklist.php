@@ -13,7 +13,7 @@ class M_Picklist extends CI_Model {
     var $column_search = array('no', 'jenis_jual', 'msg.nama_sales_group', 'status', "tb.name", "p.nama");
     protected $table = "picklist";
     protected $level_sales_group;
-    protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user';
+    protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user,alamat_kirim';
     protected $_menu = "";
 
     public function __construct() {
@@ -187,7 +187,7 @@ class M_Picklist extends CI_Model {
 
     public function getDataByID($condition = [], $join = "", $menu = "") {
         $this->db->from($this->table);
-        $select = $this->table . '.*, partner.id as ids,nama,delivery_street as alamat,tb.name as bulk, msg.nama_sales_group as sales';
+        $select = $this->table . '.*, partner.id as ids,nama,delivery_street as alamat,invoice_street as alamat_invoice,tb.name as bulk, msg.nama_sales_group as sales';
 //        $this->db->where($this->table . '.id', $id);
         switch ($join) {
             case "DO":
@@ -237,7 +237,7 @@ class M_Picklist extends CI_Model {
     }
 
     public function getCustomer($param) {
-        return $this->db->query("select id,nama as text,delivery_street as alamat from partner where customer = 1 and "
+        return $this->db->query("select id,nama as text,delivery_street as alamat,invoice_street as alamat_invoice from partner where customer = 1 and "
                         . "nama LIKE '%" . $param . "%' or delivery_street LIKE '%" . $param . "%' group by id order by nama asc limit 10")->result();
     }
 
@@ -277,7 +277,7 @@ class M_Picklist extends CI_Model {
         $this->db->where($condition);
         $this->db->join('partner', 'partner.id = customer_id', 'left');
         $this->db->join('delivery_order do', '(do.no_picklist = picklist.no and do.status = "done")', 'left');
-        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,do.no_sj')->get()->row();
+        return $this->db->select($this->table . '.*, partner.id as ids,nama,delivery_street as alamat,do.no_sj,alamat_kirim')->get()->row();
     }
 
     protected function joinDetail() {

@@ -107,7 +107,7 @@
                 <tr>
                     <td style="width: 50%;">
                         <p><strong>Kepada</strong> <b><?= $picklist->nama ?></b></p>
-                        <p><strong>Alamat</strong> <span><?= $picklist->alamat ?></span></p>
+                        <p><strong>Alamat</strong> <span><?= $picklist->alamat_kirim ?? $picklist->alamat ?></span></p>
                     </td>
                     <td style="width: 50%; overflow: auto;"> 
                         <p><strong>Catatan</strong></p>

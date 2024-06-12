@@ -221,6 +221,16 @@ class M_PicklistDetail extends CI_Model {
         }
     }
 
+    public function getSc(array $condition, $group = null) {
+        $this->db->from($this->table);
+        $this->db->where($condition);
+        if (!is_null($group)) {
+            $this->db->group_by($group);
+        }
+        $result = $this->db->select('GROUP_CONCAT(DISTINCT sales_order) as sc');
+        return $result->get()->row();
+    }
+
     public function getBarcodeID($condition = [], $whereNotIn = []) {
         $this->db->from($this->table . ' a');
         $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id');
