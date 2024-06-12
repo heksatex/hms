@@ -100,6 +100,7 @@
                     "lengthChange": true,
                     "searching": true,
                     "ordering": true,
+                    "stateSave": true,
                     "info": true,
                     "autoWidth": false,
                     "ajax": {

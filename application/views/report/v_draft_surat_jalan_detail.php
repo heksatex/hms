@@ -34,7 +34,7 @@
                 Alamat : 
             </td>
             <td>
-                <?= $picklist->alamat ?? "" ?>
+                <?= $picklist->alamat_kirim ?? $picklist->alamat ?>
             </td>
         </tr>
         <tr class="head">

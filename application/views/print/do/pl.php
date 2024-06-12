@@ -70,7 +70,7 @@
                             </td>
                             <td rowspan="2" class="border_table text-content" style="width: 45%">
                                 <p><?= $base->nama ?></p>
-                                <p><?= $base->alamat ?></p>
+                                <p><?= $base->alamat_kirim ?? $base->alamat ?></p>
                             </td>
                             <td class="border_table text-content" style="font-weight: 600;
                                 font-size: 14px;

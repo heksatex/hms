@@ -59,7 +59,7 @@ class Draftsuratjalan extends MY_Controller {
             $sheet->setCellValue('A2', "Pack");
             $sheet->setCellValue('B2', $pkl->no ?? "");
             $sheet->setCellValue('C2', "Alamat");
-            $sheet->setCellValue('D2', $pkl->alamat ?? "");
+            $sheet->setCellValue('D2', $pkl->alamat_kirim ?? $pkl->alamat);
 
             $sheet->setCellValue('A3', "Tanggal");
             $sheet->setCellValue('B3', $pkl->tanggal_input ?? "");
