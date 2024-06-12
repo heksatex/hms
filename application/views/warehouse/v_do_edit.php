@@ -129,7 +129,7 @@
                                                     <label class="form-label">Alamat</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <span style="text-transform: uppercase"><?= $picklist->alamat ?></span>
+                                                    <span style="text-transform: uppercase"><?= $picklist->alamat_kirim ?? $picklist->alamat ?></span>
                                                 </div>
                                             </div>
                                         </div>

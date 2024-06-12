@@ -73,20 +73,21 @@
                     "ordering": true,
                     "info": true,
                     "autoWidth": false,
+                    "stateSave": true,
                     "ajax": {
                         "url": "<?php echo site_url('warehouse/picklist/data') ?>",
                         "type": "POST"
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 7,9,10],
+                            "targets": [0, 7, 9, 10],
                             "orderable": false
                         }
                     ],
                     "createdRow": function (row, data, dataIndex) {
                         if (data[8] === "Cancel") {
                             $(row).addClass('cancelPL');
-                        }else if(data[8] === "Done") {
+                        } else if (data[8] === "Done") {
                             $(row).addClass('donePL');
                         }
                     }

@@ -171,6 +171,7 @@
             "processing": true,
             "serverSide": true,
             "order": [[8, 'desc']],
+            "stateSave": true,
             "paging": true,
             "lengthChange": true,
             "searching": true,
@@ -188,7 +189,7 @@
             },
             "columnDefs": [
                 {
-                    "targets": [9,12],
+                    "targets": [9, 12],
                     "orderable": false
                 },
                 {

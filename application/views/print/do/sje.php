@@ -70,7 +70,7 @@
                             </td>
                             <td rowspan="2" style="width: 45%" class="text-content">
                                 <p><?= $base->nama ?></p>
-                                <p><?= $base->alamat ?></p>
+                                <p><?= $base->alamat_kirim ?? $base->alamat ?></p>
                             </td>
                             <td style="font-weight: 600;
                                 font-size: 14px;

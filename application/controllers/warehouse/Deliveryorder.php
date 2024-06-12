@@ -788,7 +788,7 @@ class Deliveryorder extends MY_Controller {
                 throw new \Exception();
             }
             $condition = ["do.no" => $kode_decrypt];
-            $base = $this->m_deliveryorder->getDataDetail(["a.no" => $kode_decrypt], true, "a.*,concat(pn.delivery_street,' ',pn.delivery_city,' ',pn.delivery_state) as alamat, pn.nama,p.type_bulk_id");
+            $base = $this->m_deliveryorder->getDataDetail(["a.no" => $kode_decrypt], true, "a.*,concat(pn.delivery_street,' ',pn.delivery_city,' ',pn.delivery_state) as alamat, pn.nama,p.type_bulk_id,alamat_kirim");
             $data["base"] = $base;
             if ($jenis === "sje") {
                 $data["count_bulk"] = $this->m_deliveryorderdetail->getCountBulk($condition);

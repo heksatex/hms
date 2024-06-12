@@ -37,6 +37,8 @@ foreach ($list as $key => $value) {
         <td><?= $value->no_sj ?></td>
         <td><?= $value->tanggal_buat ?></td>
         <td><?= $value->tanggal_dokumen ?></td>
+        <td><?= $value->status ?? "" ?></td>
+        <td><?= ($status === "cancel") ? $value->tanggal_batal : ($status === "retur") ? $value->tanggal_retur : ($value->tanggal_batal ?? $value->tanggal_retur) ?></td>
         <td><?= strtoupper($value->jenis_jual) ?></td>
         <td><?= $value->no_picklist ?></td>
         <td><?= $value->nama ?></td>
@@ -55,9 +57,11 @@ foreach ($list as $key => $value) {
     <?php
     if ($summary === "1") {
         if (isset($list[$key + 1])) {
-            if ($value->no_sj !== $list[$key + 1]->no_sj) {
+            if (($value->no . '-' . $value->status) !== $list[$key + 1]->no . '-' . $list[$key + 1]->status) {
                 ?>
                 <tr>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -79,6 +83,8 @@ foreach ($list as $key => $value) {
                     <td><?= $value->marketing ?></td>
                 </tr>
                 <tr>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -120,6 +126,8 @@ foreach ($list as $key => $value) {
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
+                <td></td>
                 <td class="text-right text-bold">SUM : <?= $value->no_sj ?></td>
                 <td  class="text-right"><?= number_format($sum["total_qty"], 2) . ' ' . $sumUom["uom"] ?></td>
                 <td  class="text-right"><?= number_format($sum["total_qty2"], 2) . ' ' . $sumUom["uom2"] ?></td>
@@ -135,7 +143,7 @@ foreach ($list as $key => $value) {
 
         <?php
     }
-    $tempid = $value->no_sj;
+    $tempid = $value->no . '-' . $value->status;
     $no++;
 }
 ?>

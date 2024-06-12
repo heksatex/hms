@@ -158,7 +158,7 @@
                                     $("#nosj").html(picklist?.no_sj);
                                     $("#tgl_pl").html(picklist?.tanggal_input);
                                     $("#buyer").html(picklist?.nama);
-                                    $("#buyer_addr").html(picklist?.alamat);
+                                    $("#buyer_addr").html(picklist.alamat_kirim ? picklist.alamat_kirim:picklist.alamat);
                                     $("#note").html(picklist?.keterangan);
                                     $("#result").append(detail);
 //                                    console.log(detail);
