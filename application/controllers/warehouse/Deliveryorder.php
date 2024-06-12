@@ -1190,7 +1190,8 @@ class Deliveryorder extends MY_Controller {
                     $value->corak_remark,
                     $value->warna_remark,
                     ($value->qty_jual ?? 0) . ' ' . $value->uom_jual,
-                    ($value->qty2_jual ?? 0) . ' ' . $value->uom2_jual
+                    ($value->qty2_jual ?? 0) . ' ' . $value->uom2_jual,
+                    ""
                 ];
                 $data[] = $row;
             }
