@@ -512,7 +512,7 @@ class Deliveryorder extends MY_Controller {
                 if (in_array($value->quant_id, $check_barcode)) {
                     throw new \Exception("ada Duplikat Barcode di Picklist", 500);
                 }
-                $insertDetail[] = ['do_id' => $data_do->id, 'barcode_id' => $value->barcode_id, 'status' => 'done'];
+                $insertDetail[] = ['do_id' => $data_do->id, 'barcode_id' => $value->barcode_id, 'picklist_detail_id' => $value->picklist_detail_id, 'status' => 'done'];
                 $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','" . $value->lebar_greige . "','" . $value->uom_lebar_greige . "','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
