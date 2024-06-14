@@ -100,7 +100,7 @@ class Deliveryorder extends MY_Controller {
 //                            'dod.do_id' => $data["do"]->id
 //                        ]
 //                );
-                $recordsTotal = $this->m_deliveryorderdetail->countDetail(['dod.do_id' => $data["do"]->id, 'pd.valid' => 'done']);
+                $recordsTotal = $this->m_deliveryorderdetail->countDetail(['dod.do_id' => $data["do"]->id]);
             }
             $data['picklist'] = $this->m_Picklist->getDataByID(['picklist.no' => $data["do"]->no_picklist], '', 'delivery');
 
@@ -970,7 +970,7 @@ class Deliveryorder extends MY_Controller {
             $data = array();
             $nod = decrypt_url($this->input->post('id'));
             $bulk = $this->input->post('bulk');
-            $condition = ["pd.valid !=" => "cancel", 'do.no' => $nod];
+            $condition = ['do.no' => $nod];
             $list = $this->m_deliveryorderdetail->getData($condition, ["BULK"]);
             $no = $_POST['start'];
             if ((int) $bulk === 1) {
@@ -1177,7 +1177,7 @@ class Deliveryorder extends MY_Controller {
         try {
             $doid = $this->input->post("doid");
 
-            $list = $this->m_deliveryorderdetail->getDataAll(['dod.do_id' => $doid, 'dod.status' => 'retur', 'pd.valid <>' => 'cancel'], ["PD"]);
+            $list = $this->m_deliveryorderdetail->getDataAll(['dod.do_id' => $doid, 'dod.status' => 'retur'], ["PD"]);
             $data = [];
             $no = 0;
             foreach ($list as $value) {
