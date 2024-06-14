@@ -28,7 +28,7 @@
 			    <div class="box-comment">
 			        <!-- User image -->
 			        <img src="<?php echo base_url('dist/img/profile_default.png') ?>" class="user-image" alt="User Image">
-			        <div class="comment-text">
+			        <div class="comment-text" style="word-wrap:break-word;">
 			            <span class="username">
 			               <?php echo  $row->nama_user;?>  <?php echo "| ". $row->jenis_log;?>  
 			            <span class="text-muted pull-right"><?php echo  date("d M Y H:i:s", strtotime($row->datelog));?></span>
