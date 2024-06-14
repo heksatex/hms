@@ -224,6 +224,7 @@
                       <option value="lokasi_fisik">Lokasi Fisik</option>
                       <option value="sales_order">Sales Contract [SC]</option>
                       <option value="sales_group">Marketing</option>
+                      <option value="no_pl">Picklist (PL)</option>
                       <option value="opname">Status Opname</option>
                       <option value="ket_exp">Expired</option>
                     </select>
@@ -793,6 +794,8 @@
       field  = 'Corak Remark';
     }else if(field == 'warna_remark'){
       field  = 'Warna Remark';
+    }else if(field == 'no_pl'){
+      field  = 'Picklist (PL)';
     }else if(field == 'ket_exp'){
       field  = 'Expired';
     }
