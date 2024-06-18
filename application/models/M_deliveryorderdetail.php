@@ -38,7 +38,8 @@ class M_deliveryorderdetail extends CI_Model {
         $this->column_search = array_merge($this->column_search, ["pd.warna_remark", "pd.corak_remark"]);
         $this->db->from($this->table . ' a');
         $this->db->join("delivery_order do", 'do.id = a.do_id');
-        $this->db->join("picklist_detail pd", "pd.barcode_id = a.barcode_id");
+//        $this->db->join("picklist_detail pd", "pd.barcode_id = a.barcode_id");
+        $this->db->join("(select * from picklist_detail group by barcode_id) pd","pd.barcode_id = a.barcode_id");
         foreach ($this->join as $value) {
             switch ($value) {
                 case 'BULK':
@@ -313,10 +314,10 @@ class M_deliveryorderdetail extends CI_Model {
     public function countDetail(array $condition) {
         $this->db->from($this->table . ' dod');
         $this->db->join("delivery_order do", "do.id = dod.do_id");
-        $this->db->join('picklist_detail pd', '(pd.barcode_id = dod.barcode_id and pd.valid != "cancel")');
+        $this->db->join('stock_quant sq', '(sq.lot = dod.barcode_id)');
         $this->db->where($condition);
 //        $this->db->group_by("pd.barcode_id");
-        $query = $this->db->select('count(pd.barcode_id) as total_item, sum(pd.qty) as total_qty, count(pd.qty) as jumlah_qty')->get();
+        $query = $this->db->select('count(sq.lot) as total_item, sum(sq.qty_jual) as total_qty, count(sq.qty_jual) as jumlah_qty')->get();
         return $query->row();
     }
 }
