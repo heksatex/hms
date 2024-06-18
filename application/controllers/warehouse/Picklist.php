@@ -377,13 +377,16 @@ class Picklist extends MY_Controller {
             $data = json_decode($datas);
             $this->_module->startTransaction();
             $this->_module->lock_tabel("picklist_detail WRITE,picklist_detail pd READ,stock_quant READ,stock_quant sq WRITE,partner Write,type_bulk as tb WRITE,"
-                    . "user WRITE, main_menu_sub WRITE, log_history WRITE,picklist WRITE,mst_sales_group msg WRITE");
+                    . " user WRITE, main_menu_sub WRITE, log_history WRITE,picklist WRITE,mst_sales_group msg WRITE");
             $dataLastDetail = $this->m_PicklistDetail->detailData(['no_pl' => $pl, 'valid !=' => "cancel"], false, "row_order");
 
             $rowOrder = (isset($dataLastDetail->row_order)) ? ($dataLastDetail->row_order + 1) : 1;
             $status = "";
             $datainsert = [];
             $barcodeInput = [];
+            $picklist = $this->m_Picklist->getDataPicklist(["no" => $pl, "status <>" => "cancel"]);
+            $pcsTotal = 0;
+            $qtyTotal = 0.0;
             foreach ($data as $key => $value) {
                 $check = $this->m_Pickliststockquant->checkItemAvailable(['stock_quant.quant_id' => $value]);
                 if (in_array($check->lot, $barcodeInput)) {
@@ -441,10 +444,14 @@ class Picklist extends MY_Controller {
 //                    }
 //                    throw new \Exception($insrt, 500);
 //                }
+                $pcsTotal += 1;
+                $qtyTotal += $check->qty_jual;
             }
             $this->m_PicklistDetail->insertBatch($datainsert);
             $sc = $this->m_PicklistDetail->getSc(["no_pl" => $pl, 'valid <>' => "cancel", "sales_order <>" => "", "sales_order is NOT NULL" => null]);
-            $this->m_Picklist->update(['sc' => $sc->sc ?? ""], ['no' => $pl]);
+            $picklist->pcs_qty += $pcsTotal;
+            $picklist->tot_qty += $qtyTotal;
+            $this->m_Picklist->update(['sc' => ($sc->sc ?? ""), 'tot_qty' => $picklist->tot_qty, "pcs_qty" => $picklist->pcs_qty], ['no' => $pl]);
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
@@ -497,12 +504,15 @@ class Picklist extends MY_Controller {
 
             $this->_module->startTransaction();
             $this->_module->lock_tabel("picklist_detail WRITE,picklist WRITE,stock_quant WRITE,user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk mp WRITE");
+            $picklist = $this->m_Picklist->getDataPicklist(["no" => $pl, 'barcode_id' => $id, 'valid !=' => "cancel"], "*", "detail");
             $this->m_PicklistDetail->updateStatus(['barcode_id' => $id, 'valid !=' => "cancel"], ['valid' => "cancel"]);
             if (strtolower($status) === 'validasi') {
                 $this->m_Pickliststockquant->update(["lokasi_fisik" => "PORT"], ["lot" => $id]);
             }
             $sc = $this->m_PicklistDetail->getSc(["no_pl" => $pl, 'valid <>' => "cancel", "sales_order <>" => "", "sales_order is NOT NULL" => null]);
-            $this->m_Picklist->update(['sc' => $sc->sc ?? ""], ['no' => $pl]);
+            $pcs = $picklist->pcs_qty - 1;
+            $qty = $picklist->tot_qty - $picklist->qty;
+            $this->m_Picklist->update(['sc' => ($sc->sc ?? ""), "pcs_qty" => $pcs, "tot_qty" => $qty], ['no' => $pl]);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menghapus Data', 500);
             }
