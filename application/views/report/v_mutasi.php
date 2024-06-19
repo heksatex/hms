@@ -955,7 +955,8 @@
                               no_in++;
 
                               // info total++ in
-                              value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              // value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              value_in_lot = value[in_lot] !== null ? parseInt(value[in_lot]) : 0;
                               value_in_qty1 = value[in_qty1] !== null ? parseFloat(value[in_qty1])  : 0;
                               value_in_qty2 = value[in_qty2] !== null ? parseFloat(value[in_qty2])  : 0 ;
                               value_in_opname = value[in_opname] !== null ? parseFloat(value[in_opname])  : 0 ;
@@ -1054,7 +1055,8 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
                               no_out++;
 
-                              value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              // value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              value_out_lot = value[out_lot] !== null   ? parseInt(value[out_lot]) : 0;
                               value_out_qty1 = value[out_qty1] !== null ? parseFloat(value[out_qty1])  : 0;
                               value_out_qty2 = value[out_qty2] !== null ? parseFloat(value[out_qty2])  : 0 ;
                               value_out_opname = value[out_opname] !== null ? parseFloat(value[out_opname])  : 0 ;
@@ -1511,7 +1513,8 @@
                               no_in++;
 
                               // info total++ in
-                              value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              // value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              value_in_lot  = value[in_lot] !== null ? parseInt(value[in_lot]) : 0;
                               value_in_qty1 = value[in_qty1] !== null ? parseFloat(value[in_qty1])  : 0;
                               value_in_qty2 = value[in_qty2] !== null ? parseFloat(value[in_qty2])  : 0 ;
                               value_in_opname = value[in_opname] !== null ? parseFloat(value[in_opname])  : 0 ;
@@ -1644,7 +1647,8 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
                               no_out++;
 
-                              value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              // value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              value_out_lot = value[out_lot] !== null ? parseInt(value[out_lot]) : 0;
                               value_out_qty1 = value[out_qty1] !== null ? parseFloat(value[out_qty1])  : 0;
                               value_out_qty2 = value[out_qty2] !== null ? parseFloat(value[out_qty2])  : 0 ;
                               value_out_opname = value[out_opname] !== null ? parseFloat(value[out_opname])  : 0 ;
