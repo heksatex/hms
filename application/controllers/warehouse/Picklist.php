@@ -434,7 +434,13 @@ class Picklist extends MY_Controller {
                     'lokasi_fisik' => $check->lokasi_fisik,
                     'tanggal_masuk' => date('Y-m-d H:i:s'),
                     'valid' => $this->input->post('status') ?? "draft",
-                    'row_order' => $key + $rowOrder
+                    'row_order' => $key + $rowOrder,
+                    'qty_hph' => $check->qty,
+                    'uom_hph' => $check->uom,
+                    'qty2_hph' => $check->qty2,
+                    'uom2_hph' => $check->uom2,
+                    'lebar_greige' => $check->lebar_greige ?? null,
+                    'uom_lebar_greige' => $check->uom_lebar_greige ?? null
                 ];
                 $status = (($status === "") ? ($check->status ?? "") : $status);
 

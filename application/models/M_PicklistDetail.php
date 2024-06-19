@@ -238,7 +238,7 @@ class M_PicklistDetail extends CI_Model {
         foreach ($whereNotIn as $key => $value) {
             $this->db->where_not_in($key, $value);
         }
-        $result = $this->db->select('a.barcode_id,sq.*');
+        $result = $this->db->select('a.barcode_id,sq.*,a.id as picklist_detail_id');
         return $result->get()->result();
     }
 
