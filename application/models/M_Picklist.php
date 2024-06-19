@@ -13,7 +13,7 @@ class M_Picklist extends CI_Model {
     var $column_search = array('no', 'jenis_jual', 'msg.nama_sales_group', 'status', "tb.name", "p.nama");
     protected $table = "picklist";
     protected $level_sales_group;
-    protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user,alamat_kirim';
+    protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user,alamat_kirim,tot_qty,pcs_qty';
     protected $_menu = "";
 
     public function __construct() {
@@ -55,9 +55,9 @@ class M_Picklist extends CI_Model {
     protected function getMenu() {
         switch ($this->_menu) {
             case "count_detail":
-                $this->db->join("picklist_detail pdt", "(picklist.no = pdt.no_pl and pdt.valid <>'cancel')", "left");
-                $this->db->group_by("picklist.no");
-                $this->db->select(" sum(pdt.qty) as tot_qty,sum(pdt.qty2) as tot_qty2, count(pdt.qty) as pcs_qty,sum(pdt.qty2) as pcs_qty2");
+//                $this->db->join("picklist_detail pdt", "(picklist.no = pdt.no_pl and pdt.valid <>'cancel')", "left");
+//                $this->db->group_by("picklist.no");
+//                $this->db->select(" sum(pdt.qty) as tot_qty,sum(pdt.qty2) as tot_qty2, count(pdt.qty) as pcs_qty,sum(pdt.qty2) as pcs_qty2");
                 break;
 
             default:
@@ -183,6 +183,20 @@ class M_Picklist extends CI_Model {
                         . 'where user.username = "' . $this->session->userdata('username') . '"')
                 ->row_array();
         return $sales_group["nama_sales_group"] ?? "";
+    }
+
+    public function getDataPicklist(array $condition, string $select = "*", $join = "") {
+        $this->db->from($this->table);
+        switch ($join) {
+            case "detail":
+                $this->db->join("picklist_detail", "picklist.no = picklist_detail.no_pl");
+                break;
+
+            default:
+                break;
+        }
+        $this->db->where($condition);
+        return $this->db->select($select)->get()->row();
     }
 
     public function getDataByID($condition = [], $join = "", $menu = "") {
