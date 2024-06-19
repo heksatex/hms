@@ -552,7 +552,7 @@ class Deliveryorder extends MY_Controller {
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Surat Jalan berhasil dibuat', 'icon' => 'fa fa-check', 'type' => 'success')));
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
