@@ -536,7 +536,7 @@ class Deliveryorder extends MY_Controller {
                 $insertStokMvProd[] = "('" . $nosm . "','" . $key . "','" . $value['nama'] . "','" . $value['qty'] . "','" . $value['uom'] . "','done','" . $value['order'] . "','')";
             }
 
-            $this->m_deliveryorder->update(['status' => 'done'], ['id' => $data_do->id]);
+            $this->m_deliveryorder->update(['status' => 'done', 'tanggal_buat' => date("Y-m-d H:i:s")], ['id' => $data_do->id]);
             $this->_module->gen_history($sub_menu, $data_do->no, 'edit', ($users["nama"] ?? $username) . ' Merubah status DO - ' . $data_do->no . ' Menjadi TERKIRIM', $username);
             $this->m_deliveryorderdetail->insertBatch($insertDetail);
             $this->_module->simpan_stock_move_items_batch(implode(",", $insertStokMvItem));
