@@ -271,8 +271,6 @@
             const checkDetail = ((pl, bulk) => {
                 please_wait(() => {
                 });
-
-                console.log(bulk);
                 $("#view_data").modal({
                     show: true,
                     backdrop: 'static'
