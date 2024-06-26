@@ -111,7 +111,7 @@ class Delivery extends MY_Controller {
             $customer = $this->input->post("customer");
             $period = explode(" - ", $periode);
             $qtyHph = $this->input->post("qtyhph");
-            $tgl_buat = $this->input->post("tgl_buat");
+            $tgl_buat = $this->input->post("tgl_buat") ?? "0";
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
