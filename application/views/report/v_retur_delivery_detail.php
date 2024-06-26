@@ -38,7 +38,7 @@ foreach ($list as $key => $value) {
         <td><?= $value->tanggal_buat ?></td>
         <td><?= $value->tanggal_dokumen ?></td>
         <td><?= $value->status ?? "" ?></td>
-        <td><?= ($status === "cancel") ? $value->tanggal_batal : ($status === "retur") ? $value->tanggal_retur : ($value->tanggal_batal ?? $value->tanggal_retur) ?></td>
+        <td><?= ($status === "cancel") ? $value->tanggal_batal : (($status === "retur") ? $value->tanggal_retur : ($value->tanggal_batal ?? $value->tanggal_retur)) ?></td>
         <td><?= strtoupper($value->jenis_jual) ?></td>
         <td><?= $value->no_picklist ?></td>
         <td><?= $value->nama ?></td>

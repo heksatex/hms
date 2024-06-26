@@ -23,15 +23,19 @@ class Delivery extends MY_Controller {
         $this->load->model("_module");
         $this->load->model("m_deliveryorder");
         $this->load->model("m_Picklist");
+        $this->load->model("m_user");
         $this->load->library('pagination');
     }
 
     public function index() {
+        $username = $this->session->userdata('username');
         $data['id_dept'] = 'RDO';
         $data['sales'] = $this->m_Picklist->getSales();
+        $data['user'] = $this->m_user->get_user_by_username($username);
         $data['date'] = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d")))) . ' - ' . date('Y-m-d');
         $this->load->view('report/v_delivery_new', $data);
     }
+
     public function search($page = 1) {
         try {
             $periode = $this->input->post("periode");
@@ -41,6 +45,7 @@ class Delivery extends MY_Controller {
             $summary = $this->input->post("summary");
             $rekap = $this->input->post("rekap");
             $customer = $this->input->post("customer");
+            $tgl_buat = $this->input->post("tgl_buat");
             $period = explode(" - ", $periode);
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
@@ -48,7 +53,12 @@ class Delivery extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done', 'pd.valid' => 'done'];
+            $condition = ['ddo.status' => 'done', 'dod.status' => 'done'];
+            if ($tgl_buat === "0") {
+                $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
+            } else {
+                $condition = array_merge($condition, ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir]);
+            }
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
@@ -101,6 +111,7 @@ class Delivery extends MY_Controller {
             $customer = $this->input->post("customer");
             $period = explode(" - ", $periode);
             $qtyHph = $this->input->post("qtyhph");
+            $tgl_buat = $this->input->post("tgl_buat");
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
@@ -133,7 +144,12 @@ class Delivery extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir, 'ddo.status' => 'done', 'pd.valid' => 'done'];
+            $condition = ['ddo.status' => 'done', 'dod.status' => 'done'];
+            if ($tgl_buat === "0") {
+                $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
+            } else {
+                $condition = array_merge($condition, ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir]);
+            }
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }

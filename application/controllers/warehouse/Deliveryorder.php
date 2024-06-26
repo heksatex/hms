@@ -247,9 +247,9 @@ class Deliveryorder extends MY_Controller {
                 $whereIn = [];
                 $join = [];
                 if (count($notin) > 0) {
-                    $whereNotIn = ['dod.barcode_id' => $notin];
+                    $whereNotIn = ['a.barcode_id' => $notin];
                 }
-                $condition = ['dod.no_pl' => $pl, 'dod.valid ' => 'validasi'];
+                $condition = ['a.no_pl' => $pl, 'a.valid ' => 'validasi'];
 
                 if ($type === "1" && count(json_decode($bulk)) === 0) {
                     throw new Exception("");
