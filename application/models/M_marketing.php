@@ -8,6 +8,8 @@ class m_marketing extends CI_Model
 
 	protected $lokasi 	= 'GJD/Stock';
 	protected $category = '21';
+	protected $lokasi_fisik = '6Z.01.Z';
+
 
     var $column_order = array(null, 'sq.corak_remark','sq.lebar_jadi','gl','qty1','sq.uom_jual');
 	var $column_search= array('sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.uom_jual');
@@ -32,6 +34,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		$this->db->group_by('sq.corak_remark');
 		$this->db->group_by('sq.lebar_jadi');
 		$this->db->group_by('sq.uom_jual');
@@ -119,6 +122,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		return $this->db->count_all_results();
 	} 
 
@@ -162,6 +166,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
 	}
@@ -257,6 +262,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
 	}
@@ -368,6 +374,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		$this->db->group_by('sq.corak_remark');
 		$this->db->group_by('sq.lebar_jadi');
 		$this->db->group_by('sq.uom_jual');
@@ -471,6 +478,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		return $this->db->count_all_results();
 	} 
 
@@ -534,6 +542,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
 	}
@@ -621,6 +630,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		$this->db->group_by('sq.corak_remark');
 
         return;
@@ -698,6 +708,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		return $this->db->count_all_results();
 	} 
 
@@ -717,6 +728,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		$this->db->group_by('sq.warna_remark');
 
         return;
@@ -794,7 +806,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
-
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		return $this->db->count_all_results();
 	} 
 
@@ -826,6 +838,7 @@ class m_marketing extends CI_Model
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
 	}
