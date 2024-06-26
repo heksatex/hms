@@ -82,6 +82,24 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <?php
+                                    if (in_array($user->level, ["Super Administrator", "Administrator"])) {
+                                        ?>
+
+                                        <div class="form-group">
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Tanggal Dibuat</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8">
+                                                    <label class="col-sm-2 checkbox-inline">
+                                                        <input id="tgl_buat" name="tgl_buat" type="checkbox" value="1"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php
+                                    }
+                                    ?>
                                     <div class="form-group">
                                         <div class="col-md-12">
                                             <div class="col-md-4">
@@ -298,7 +316,8 @@
                             rekap: $("#rekap").find(":selected").val(),
                             corak: $("#corak").val(),
                             order: $("#order").find(":selected").val(),
-                            marketing: $("#marketing").find(":selected").val()
+                            marketing: $("#marketing").find(":selected").val(),
+                            tgl_buat: $("#tgl_buat").is(":checked") ? 1 : 0,
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
