@@ -11,7 +11,7 @@ class M_bulkdetail extends CI_Model {
     protected $table = "bulk_detail";
     protected $column_order = array(null, 'bulk_no_bulk', 'barcode', 'tanggal_buat', 'user');
     protected $order = ['tanggal_buat' => 'desc'];
-    protected $fillable = "bulk_detail.id,bulk_no_bulk,bulk_detail.barcode,bulk_detail.tanggal_input,bulk_detail.user";
+    protected $fillable = "bulk_detail.id,bulk_no_bulk,bulk_detail.barcode,bulk_detail.tanggal_input,bulk_detail.user,bulk_detail.bulk_id";
 
     public function insert(array $data) {
         try {
@@ -28,6 +28,7 @@ class M_bulkdetail extends CI_Model {
 
     public function getDataDetail(array $condition, $joinBulk = false) {
         $this->db->from($this->table);
+        $this->db->join("picklist_detail pd", "(pd.id = bulk_detail.picklist_detail_id and pd.valid != 'cancel')");
         if ($joinBulk)
             $this->joinBulk();
         $this->db->where($condition);
@@ -41,6 +42,7 @@ class M_bulkdetail extends CI_Model {
     public function getTotalItem($condition = []) {
         $this->db->from($this->table);
         $this->db->join('bulk b', 'b.no_bulk = bulk_no_bulk');
+        $this->db->join('picklist_detail pl', '(pl.id = bulk_detail.picklist_detail_id and pl.valid != "cancel")');
         if (count($condition) > 0) {
             $this->db->where($condition);
         }
