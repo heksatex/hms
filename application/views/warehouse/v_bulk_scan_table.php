@@ -11,8 +11,9 @@
             <thead>
                 <tr>
                     <th class="style" width="10px">No</th>
-                    <th class="style"width="20px">BAL ID</th>
+                    <th class="style"width="15px">BAL ID</th>
                     <th class="style" width="20px">Description</th>
+                    <th class="style" width="20px">Lebar</th>
                     <th class="style" width="10px">PCS</th>
                     <th class="style" width="10px">QTY</th>
 
@@ -39,8 +40,11 @@
                             <?= $value->corak_remark . " - " . $value->warna_remark ?>
                         </td>
                         <td class="bolded list">
-                            <?= ($value->jumlah_qty) ?>
+                            <?= $value->lebar_jadi . ' - ' . $value->uom_lebar_jadi ?>
                         </td>
+                        <td class="bolded list">
+                            <?= ($value->jumlah_qty) ?>
+                        </td class="bolded list">
                         <td class="bolded list">
                             <?= ($value->total_qty) ?>
                         </td>
