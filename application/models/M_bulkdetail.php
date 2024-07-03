@@ -56,7 +56,7 @@ class M_bulkdetail extends CI_Model {
         $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk', 'right');
         $this->db->join('picklist_detail pl', '(pl.id = bd.picklist_detail_id and pl.valid != "cancel")');
         if (!$detail) {
-            $this->db->group_by('pl.warna_remark, pl.corak_remark,pl.uom,b.no_bulk');
+            $this->db->group_by('pl.warna_remark, pl.corak_remark,pl.uom,b.no_bulk,pl.lebar_jadi,pl.uom_lebar_jadi');
             $this->db->select("sum(qty) as total_qty,count(qty) as jumlah_qty");
         }
         $this->db->order_by("no_bulk asc,pl.corak_remark asc,pl.warna_remark asc,pl.uom asc");
