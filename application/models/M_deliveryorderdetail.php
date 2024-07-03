@@ -208,12 +208,13 @@ class M_deliveryorderdetail extends CI_Model {
         $this->db->where($condition);
         if ($type_bulk === 1) {
             if ($type !== "sje") {
-                $group .= ",bd.bulk_no_bulk";
+                $group .= ",bulk_no_bulk";
             }
-            $select .= ",bd.bulk_no_bulk";
-            $this->db->join("bulk_detail bd", "bd.picklist_detail_id = dod.picklist_detail_id");
-            $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id");
-            $this->db->order_by("bd.bulk_no_bulk", "asc");
+            $select .= ",bulk_no_bulk";
+//            $this->db->join("bulk_detail bd", "bd.picklist_detail_id = dod.picklist_detail_id");
+//            $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id");
+            $this->db->join("(select pd.*,bulk_no_bulk from picklist_detail pd join bulk_detail bd on bd.barcode = pd.barcode_id) as pd","pd.id = dod.picklist_detail_id");
+            $this->db->order_by("bulk_no_bulk", "asc");
         } else {
             $this->db->join("picklist_detail pd", "pd.id = dod.picklist_detail_id");
         }
@@ -240,7 +241,7 @@ class M_deliveryorderdetail extends CI_Model {
         $this->db->from("picklist_detail pd");
         $this->db->where($condition);
         if ($joinbulk) {
-            $this->db->join("bulk_detail bd", "bd.picklist_detail_id = pd.id");
+            $this->db->join("bulk_detail bd", "bd.barcode = pd.barcode_id");
         }
         $this->db->select('qty,uom');
         return $this->db->get()->result();
