@@ -129,7 +129,7 @@ class M_PicklistDetail extends CI_Model {
                     $this->db->join("("
                             . "select b.no_pl,b.net_weight,b.gross_weight,bd.barcode,b.no_bulk,bd.picklist_detail_id from bulk b
                                 join bulk_detail bd on bd.bulk_no_bulk = b.no_bulk where b.no_pl = '" . $nopl . "'"
-                            . ") as bbd ", "bbd.picklist_detail_id = picklist_detail.id", "left");
+                            . ") as bbd ", "bbd.barcode = picklist_detail.barcode_id", "left");
 
                     $this->db->order_by('bbd.no_bulk', 'asc');
                     break;
