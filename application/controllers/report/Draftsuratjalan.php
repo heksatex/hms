@@ -96,12 +96,12 @@ class Draftsuratjalan extends MY_Controller {
             if ($pkl->type_bulk_id === "1") {
                 $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
                         ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom'], ["BULK"]
+                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom', 'lebar_jadi', 'uom_lebar_jadi'], ["BULK"]
                 );
             } else {
                 $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
                         ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                        $nopl, ['warna_remark', 'corak_remark', 'uom'], []
+                        $nopl, ['warna_remark', 'corak_remark', 'uom', 'lebar_jadi', 'uom_lebar_jadi'], []
                 );
             }
 
@@ -155,7 +155,7 @@ class Draftsuratjalan extends MY_Controller {
 
                     $id = $tempID;
                     $tempBulk = $value->no_bulk;
-                    $rowStartData ++;
+                    $rowStartData++;
                 }
             }
 
@@ -209,12 +209,12 @@ class Draftsuratjalan extends MY_Controller {
             if ($pkl->type_bulk_id === "1") {
                 $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
                         ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom'], ["BULK"]
+                        $nopl, ["bbd.no_bulk", 'warna_remark', 'corak_remark', 'uom', 'lebar_jadi', 'uom_lebar_jadi'], ["BULK"]
                 );
             } else {
                 $datas['picklist_detail'] = $this->m_PicklistDetail->detailDraftReport(
                         ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
-                        $nopl, ['warna_remark', 'corak_remark', 'uom'], []
+                        $nopl, ['warna_remark', 'corak_remark', 'uom', 'lebar_jadi', 'uom_lebar_jadi'], []
                 );
             }
 
