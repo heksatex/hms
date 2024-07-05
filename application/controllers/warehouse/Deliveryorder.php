@@ -163,7 +163,8 @@ class Deliveryorder extends MY_Controller {
     public function list_detail_bulk() {
         try {
             $pl = $this->input->post("pl");
-            $condition = ["b.no_pl" => $pl, "pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
+//            $condition = ["b.no_pl" => $pl, "pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
+             $condition = ["pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
             $data = array();
             $no = $_POST['start'];
             $list = $this->m_bulkdetail->getDataBulk($condition);
