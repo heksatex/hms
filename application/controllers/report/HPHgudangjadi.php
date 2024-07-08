@@ -357,7 +357,7 @@ class HPHgudangjadi extends MY_Controller
                                         'nama_user'  => $val->nama_user,
                                         'operator'   => $val->operator,
                                         'keterangan' => 'Barcode HPH',
-
+                                        'notes'      => ''
                                         );
                 
                 }
@@ -404,6 +404,7 @@ class HPHgudangjadi extends MY_Controller
                                             'nama_user'  => $val->nama_user,
                                             'operator'   => $val->operator,
                                             'keterangan' => 'Barcode SPLIT',
+                                            'notes'      => $val->note
                                             );
                     }
                 }
@@ -449,6 +450,7 @@ class HPHgudangjadi extends MY_Controller
                                         'nama_user'  => $val->nama_user,
                                         'operator'   => $val->operator,
                                         'keterangan' => 'Barcode JOIN',
+                                        'notes'      => $val->note
                                         );
                 }
             }
@@ -493,6 +495,7 @@ class HPHgudangjadi extends MY_Controller
                                             'nama_user'  => $val->nama_user,
                                             'operator'   => '',
                                             'keterangan' => 'Barcode Manual',
+                                            'notes'      => $val->notes
                                             );
                     }
                 }
@@ -617,7 +620,7 @@ class HPHgudangjadi extends MY_Controller
 
 
             // header table
-            $table_head_columns  = array('No', 'No.HPH', 'MC GJD', 'Lot(Bahan Baku)' ,'Nama Produk', 'Qty (Bahan Baku)', 'Uom (Bahan Baku)', 'Qty2 (Bahan Baku)', 'Uom2 (Bahan Baku)', 'Quality', 'Tanggal.Proses', 'Lot(Barang jadi)', 'Corak Remark', 'Warna Remark', 'Qty1 HPH', 'Uom1 HPH', 'Qty2 HPH', 'Uom2 HPH', 'Grade','L.Jadi','uom L.Jadi','Jenis Kain', 'Gramasi', 'Berat/Mtr/pnl', 'Benang', 'Qty1 Jual', 'Uom1 Jual', 'Qty2 Jual', 'Uom2 Jual','Marketing','SC','CO','Keterangan','Operator','User');
+            $table_head_columns  = array('No', 'No.HPH', 'MC GJD', 'Lot(Bahan Baku)' ,'Nama Produk', 'Qty (Bahan Baku)', 'Uom (Bahan Baku)', 'Qty2 (Bahan Baku)', 'Uom2 (Bahan Baku)', 'Quality', 'Tanggal.Proses', 'Lot(Barang jadi)', 'Corak Remark', 'Warna Remark', 'Qty1 HPH', 'Uom1 HPH', 'Qty2 HPH', 'Uom2 HPH', 'Grade','L.Jadi','uom L.Jadi','Jenis Kain', 'Gramasi', 'Berat/Mtr/pnl', 'Benang', 'Qty1 Jual', 'Uom1 Jual', 'Qty2 Jual', 'Uom2 Jual','Marketing','SC','CO','Keterangan','Notes','Operator','User');
             $column = 0;
             foreach ($table_head_columns as $field) {
 
@@ -686,8 +689,9 @@ class HPHgudangjadi extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('AE'.$rowCount, $val['sc']);
                 $object->getActiveSheet()->SetCellValue('AF'.$rowCount, $val['co']);
                 $object->getActiveSheet()->SetCellValue('AG'.$rowCount, $val['keterangan']);
-                $object->getActiveSheet()->SetCellValue('AH'.$rowCount, $val['operator']);
-                $object->getActiveSheet()->SetCellValue('AI'.$rowCount, $val['nama_user']);
+                $object->getActiveSheet()->SetCellValue('AH'.$rowCount, $val['notes']);
+                $object->getActiveSheet()->SetCellValue('AI'.$rowCount, $val['operator']);
+                $object->getActiveSheet()->SetCellValue('AJ'.$rowCount, $val['nama_user']);
 
                 // set align
                 $object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -733,6 +737,7 @@ class HPHgudangjadi extends MY_Controller
                 $object->getActiveSheet()->getStyle('AG'.$rowCount)->applyFromArray($styleArray);
                 $object->getActiveSheet()->getStyle('AH'.$rowCount)->applyFromArray($styleArray);
                 $object->getActiveSheet()->getStyle('AI'.$rowCount)->applyFromArray($styleArray);
+                $object->getActiveSheet()->getStyle('AJ'.$rowCount)->applyFromArray($styleArray);
 
                 $rowCount++;
             }
