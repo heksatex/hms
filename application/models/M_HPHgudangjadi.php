@@ -43,7 +43,8 @@ class M_HPHgudangjadi extends CI_Model
                                                 sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark, 
                                                 sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual,
                                                 spl.nama_user,
-                                        		msg.nama_sales_group, sq.nama_grade
+                                        		msg.nama_sales_group, sq.nama_grade,
+                                                spl.note
                                     FROM split spl
                                     INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
                                     INNER JOIN stock_quant sq ON sq.quant_id = spli.quant_id_baru
@@ -72,7 +73,8 @@ class M_HPHgudangjadi extends CI_Model
                                             jl.qty_jual, jl.uom_jual, jl.qty2_jual, jl.uom2_jual, jl.lebar_jadi, jl.uom_lebar_jadi, jl.grade, jl.nama_user,
                                             msg.nama_sales_group,
                                             (SELECT GROUP_CONCAT(lot SEPARATOR ' + ') FROM join_lot_items jli WHERE  jli.kode_join = jl.kode_join) as lot_asal,
-                                            sum(jli.qty) as tot_qty1, jli.uom as uom_tot, sum(jli.qty2) as tot_qty2, jli.uom2 as uom2_tot
+                                            sum(jli.qty) as tot_qty1, jli.uom as uom_tot, sum(jli.qty2) as tot_qty2, jli.uom2 as uom2_tot,
+                                            jl.note
                                     FROM join_lot jl
                                     INNER JOIN join_lot_items jli ON jl.kode_join = jli.kode_join
                                     LEFT JOIN mst_sales_group msg ON jl.sales_group = msg.kode_sales_group      
@@ -101,7 +103,8 @@ class M_HPHgudangjadi extends CI_Model
                                                     mb.grade, 
                                                     mq.nama as nama_quality,
                                                     mm.nama_user,
-                                                    mjk.nama_jenis_kain
+                                                    mjk.nama_jenis_kain,
+                                                    mm.notes
                                     FROM mrp_manual mm
                                     INNER JOIN mrp_manual_batch mb ON mm.kode = mb.kode
                                     INNER JOIN mrp_manual_batch_items mbi ON mb.kode =mbi.kode AND mb.no_batch = mbi.no_batch

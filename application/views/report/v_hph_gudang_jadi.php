@@ -361,6 +361,7 @@
                               <th  class='style bb ws'>SC </th>
                               <th  class='style bb ws'>CO </th>
                               <th  class='style bb ws style="min-width: 100px" '>Keterangan </th>
+                              <th  class='style bb ws style="min-width: 100px" '>Notes </th>
                               <th  class='style bb ws style="min-width: 100px" '>Operator </th>
                               <th  class='style bb ws' style="min-width: 100px" >Nama User</th>
                             </tr>
@@ -607,6 +608,7 @@
                                  $("<td>").text(value.sc),
                                  $("<td>").text(value.co),
                                  $("<td>").text(value.keterangan),
+                                 $("<td>").text(value.notes),
                                  $("<td>").text(value.operator),
                                  $("<td>").text(value.nama_user),
                         );
