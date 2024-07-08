@@ -135,7 +135,7 @@ class M_deliveryorder extends CI_Model {
 //                . "SUM(sq.qty) as total_qty,SUM(sq.qty2) as total_qty2,SUM(sq.qty_jual) as total_qty_jual,SUM(sq.qty2_jual) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note");
 
         $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,alamat_kirim,"
-                . "pd.corak_remark,pd.warna_remark,pd.uom_hph as uom,pd.uom2_hph as uom2,pd.uom as uom_jual,pd.uom2 as uom2_jual,pd.lebar_jadi,pd.uom_lebar_jadi,"
+                . "pd.corak_remark,pd.warna_remark,pd.uom_hph as uom,pd.uom2_hph as uom2,pd.uom as uom_jual,pd.uom2 as uom2_jual,pd.lebar_jadi,pd.uom_lebar_jadi,pd.nama_produk,"
                 . "SUM(pd.qty_hph) as total_qty,SUM(pd.qty2_hph) as total_qty2,SUM(pd.qty) as total_qty_jual,SUM(pd.qty2) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note");
     }
 

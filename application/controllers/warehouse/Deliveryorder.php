@@ -163,7 +163,8 @@ class Deliveryorder extends MY_Controller {
     public function list_detail_bulk() {
         try {
             $pl = $this->input->post("pl");
-            $condition = ["pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
+//            $condition = ["b.no_pl" => $pl, "pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
+             $condition = ["pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
             $data = array();
             $no = $_POST['start'];
             $list = $this->m_bulkdetail->getDataBulk($condition);
@@ -488,7 +489,7 @@ class Deliveryorder extends MY_Controller {
                 if (is_null($bulkList) || count($bulkList) < 1) {
                     throw new Exception("Silahkan scan item terlebih dahulu", 500);
                 }
-                $condition = ["a.no_pl" => $data_do->no_picklist];
+                $condition = ["a.no_pl" => $data_do->no_picklist, "b.no_pl" => $data_do->no_picklist];
                 $wherein = $bulkList;
                 if (count($notin) > 0) {
                     $whereNotIn = ['bd.bulk_no_bulk' => $notin];
@@ -793,7 +794,7 @@ class Deliveryorder extends MY_Controller {
             if ($jenis === "sje") {
                 $data["count_bulk"] = $this->m_deliveryorderdetail->getCountBulk($condition);
             }
-            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition, ['pd.valid !=' => 'cancel']), (int) $base->type_bulk_id, $jenis);
+            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition,[]), (int) $base->type_bulk_id, $jenis);
             $this->load->view("print/do/" . $jenis, $data);
         } catch (Exception $ex) {
             show_404();
@@ -825,9 +826,9 @@ class Deliveryorder extends MY_Controller {
             $bulk = json_decode($bal);
 
             if (count($bulk) > 0) {
-                $data = $this->m_bulkdetail->getTotalItemBulk(['pl.no_pl' => $picklist], ["b.no_bulk" => $bulk]);
+                $data = $this->m_bulkdetail->getTotalItemBulk(['pl.no_pl' => $picklist, 'b.no_pl' => $picklist], ["b.no_bulk" => $bulk]);
             } else {
-                $data = $this->m_bulkdetail->getTotalItemBulk(['pl.no_pl' => $picklist]);
+                $data = $this->m_bulkdetail->getTotalItemBulk(['pl.no_pl' => $picklist, 'b.no_pl' => $picklist]);
             }
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

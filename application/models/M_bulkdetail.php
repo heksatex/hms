@@ -11,7 +11,7 @@ class M_bulkdetail extends CI_Model {
     protected $table = "bulk_detail";
     protected $column_order = array(null, 'bulk_no_bulk', 'barcode', 'tanggal_buat', 'user');
     protected $order = ['tanggal_buat' => 'desc'];
-    protected $fillable = "bulk_detail.id,bulk_no_bulk,bulk_detail.barcode,bulk_detail.tanggal_input,bulk_detail.user";
+    protected $fillable = "bulk_detail.id,bulk_no_bulk,bulk_detail.barcode,bulk_detail.tanggal_input,bulk_detail.user,bulk_detail.bulk_id";
 
     public function insert(array $data) {
         try {
@@ -28,6 +28,7 @@ class M_bulkdetail extends CI_Model {
 
     public function getDataDetail(array $condition, $joinBulk = false) {
         $this->db->from($this->table);
+        $this->db->join("picklist_detail pd", "(pd.id = bulk_detail.picklist_detail_id and pd.valid != 'cancel')");
         if ($joinBulk)
             $this->joinBulk();
         $this->db->where($condition);
@@ -41,6 +42,7 @@ class M_bulkdetail extends CI_Model {
     public function getTotalItem($condition = []) {
         $this->db->from($this->table);
         $this->db->join('bulk b', 'b.no_bulk = bulk_no_bulk');
+        $this->db->join('picklist_detail pl', '(pl.id = bulk_detail.picklist_detail_id and pl.valid != "cancel")');
         if (count($condition) > 0) {
             $this->db->where($condition);
         }
@@ -52,9 +54,9 @@ class M_bulkdetail extends CI_Model {
         $this->db->from($this->table . ' bd');
         $this->db->where($condition);
         $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk', 'right');
-        $this->db->join('picklist_detail pl', '(pl.barcode_id = bd.barcode and pl.valid != "cancel")');
+        $this->db->join('picklist_detail pl', '(pl.id = bd.picklist_detail_id and pl.valid != "cancel")');
         if (!$detail) {
-            $this->db->group_by('pl.warna_remark, pl.corak_remark,pl.uom,b.no_bulk');
+            $this->db->group_by('pl.warna_remark, pl.corak_remark,pl.uom,b.no_bulk,pl.lebar_jadi,pl.uom_lebar_jadi');
             $this->db->select("sum(qty) as total_qty,count(qty) as jumlah_qty");
         }
         $this->db->order_by("no_bulk asc,pl.corak_remark asc,pl.warna_remark asc,pl.uom asc");
@@ -95,7 +97,7 @@ class M_bulkdetail extends CI_Model {
             $this->db->where_in($key, $value);
         }
         $this->db->join('bulk b', 'b.no_bulk = bd.bulk_no_bulk', 'right');
-        $this->db->join('picklist_detail pl', '(pl.barcode_id = bd.barcode and pl.valid != "cancel")');
+        $this->db->join('picklist_detail pl', '(pl.id = bd.picklist_detail_id and pl.valid != "cancel")');
         $query = $this->db->select('count(DISTINCT(b.no_bulk)) as total_bulk, sum(qty) as total_qty, count(qty) as jumlah_qty')->get();
         return $query->row();
     }
@@ -105,9 +107,12 @@ class M_bulkdetail extends CI_Model {
         $columnOrder = [null, "bulk_no_bulk", "pd.barcode_id", "pd.corak_remark", "pd.warna_remar", "qty"];
         $order = ['bulk_no_bulk' => 'asc'];
 
-        $this->db->from($this->table . ' bd');
-        $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
-        $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode", "right");
+//        $this->db->from($this->table . ' bd');
+//        $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
+//        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id", "right");
+
+        $this->db->from("picklist_detail pd");
+        $this->db->join("(select bulk_no_bulk,bulk.no_pl,picklist_detail_id from bulk_detail join bulk on bulk.no_bulk = bulk_detail.bulk_no_bulk ) b", "b.picklist_detail_id = pd.id", "left");
         $this->db->select("bulk_no_bulk,barcode_id,corak_remark,warna_remark,qty");
         foreach ($columnSearch as $key => $value) {
             if ($_POST['search']['value']) {
@@ -153,7 +158,7 @@ class M_bulkdetail extends CI_Model {
     public function getCountAllDataBulk(array $condition = []) {
         $this->db->from($this->table . ' bd');
         $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
-        $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode", "right");
+        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id", "right");
         if (count($condition) > 0) {
             $this->db->where($condition);
         }

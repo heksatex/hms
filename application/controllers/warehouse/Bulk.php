@@ -307,9 +307,15 @@ class Bulk extends MY_Controller {
                     if ($check->valid !== "validasi") {
                         throw new Exception("Barcode belum divalidasi", 500);
                     }
+
+                    $bulks = $this->m_bulk->getDataDetail(['no_pl' => $nopl, 'no_bulk' => $bulk]);
+                    if (empty($bulks) || is_null($bulks)) {
+                        throw new Exception("Bulk " . $bulk . " Untuk " . $nopl . " Ditemukan", 500);
+                    }
                     $users = $this->session->userdata('nama');
                     $sub_menu = $this->uri->segment(2);
                     $dataInsert = [
+                        'bulk_id' => $bulks->id,
                         'bulk_no_bulk' => $bulk,
                         'picklist_detail_id' => $check->id,
                         'barcode' => $value,
@@ -317,12 +323,12 @@ class Bulk extends MY_Controller {
                         'user' => $users["nama"] ?? ""
                     ];
 
-                    $checkExist = $this->m_bulkdetail->getDataDetail(['barcode' => $value]);
+                    $checkExist = $this->m_bulkdetail->getDataDetail(['barcode' => $value, 'pd.no_pl' => $nopl, 'bulk.no_pl' => $nopl], true);
                     if ($checkExist) {
                         if ($checkExist->bulk_no_bulk === $bulk) {
                             throw new Exception("Barcode " . $value . " Duplikat", 505);
                         }
-                        $insrt = $this->m_bulkdetail->updateBulkDetail(['barcode' => $value], ['bulk_no_bulk' => $bulk]);
+                        $insrt = $this->m_bulkdetail->updateBulkDetail(['barcode' => $value], ['bulk_no_bulk' => $bulk, 'bulk_id' => $bulks->id]);
                         $message = "Berhasil Pindah Item Pada BAL / Bulk";
                     } else {
                         $insrt = $this->m_bulkdetail->insert($dataInsert);
@@ -348,12 +354,12 @@ class Bulk extends MY_Controller {
 //                    if (empty($bulk) || is_null($bulk)) {
 //                        throw new Exception("Silahkan Pilih dulu no Bulk", 500);
 //                    }
-                    $query = ["barcode" => $value];
-                    $check = $this->m_bulkdetail->getDataDetail(array_merge($query, ["no_pl" => $nopl]), true);
+                    $query = ["barcode" => $value, 'pd.no_pl' => $nopl, 'bulk.no_pl' => $nopl];
+                    $check = $this->m_bulkdetail->getDataDetail(array_merge($query), true);
                     if (empty($check) || is_null($check)) {
                         throw new Exception("Data Barcode " . $value . " tidak ditemulan dibulk " . $bulk, 500);
                     }
-                    $this->m_bulkdetail->delete($query);
+                    $this->m_bulkdetail->delete(["id" => $check->id]);
                     $message = "Berhasil Membatalkan Barcode " . $value . " Pada Bulk " . $bulk;
                     $this->_module->gen_history($sub_menu, $bulk, 'edit', ($users["nama"] ?? "") . ' Membatalkan Barcode ' . $value . ' Pada Bulk ' . $bulk, $username);
                     break;
@@ -444,16 +450,16 @@ class Bulk extends MY_Controller {
             $pl = $this->input->post('pl');
             $bulk = $this->input->post('bulk');
             $condition = ['b.no_pl' => $pl];
-            $data["totalan"] = $this->m_bulkdetail->getTotalItemBulk($condition);
+            $data["totalan"] = $this->m_bulkdetail->getTotalItemBulk(array_merge($condition, ['pl.no_pl' => $pl]));
 //            $data["total_item"] = $this->m_bulkdetail->getTotalItem($condition);
-            $data["total_item_bulk"] = $this->m_bulkdetail->getTotalItem(array_merge($condition, ['no_bulk' => $bulk]));
+            $data["total_item_bulk"] = $this->m_bulkdetail->getTotalItem(array_merge($condition, ['pl.no_pl' => $pl]));
             $data["bulk"] = $bulk;
             $pers = [];
             if (empty($bulk) || is_null($bulk)) {
-                $data['data'] = $this->m_bulkdetail->getDataListBulk($condition);
+                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['pl.no_pl' => $pl]));
                 $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
             } else {
-                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['no_bulk' => $bulk]));
+                $data['data'] = $this->m_bulkdetail->getDataListBulk(array_merge($condition, ['no_bulk' => $bulk, 'pl.no_pl' => $pl]));
                 $pers = $this->load->view('warehouse/v_bulk_scan_table', $data);
             }
 

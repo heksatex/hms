@@ -44,7 +44,10 @@
                 border: 1px solid #ddd;
             }
 
-            #tabelDelivery.hides tr > *:nth-child(13),#tabelDelivery.hides tr > *:nth-child(14){
+            #tabelDelivery.hides tr > *:nth-child(14),#tabelDelivery.hides tr > *:nth-child(15){
+                display: none;
+            }
+            #tabelDelivery.hide_intrn tr > *:nth-child(13){
                 display: none;
             }
 
@@ -209,23 +212,25 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-4">
-                                                            </div>
-                                                            <div class="col-xs-8 col-md-8">
-                                                                <label class="col-sm-2 checkbox-inline">
+                                                            <div class="col-xs-6">
+                                                                <label class="checkbox-inline">
                                                                     <input id="summary" name="summary" type="checkbox" value="1">Summary</label>
+                                                            </div>
+                                                            <div class="col-xs-6">
+
                                                                 <input type="hidden" name="page" id="page" value="1">
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
                                                         <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-4">
-                                                                <label class="form-label">Qty HPH</label>
+                                                            <div class="col-xs-6">
+                                                                <label class="checkbox-inline">
+                                                                    <input id="cintern" name="cintern" type="checkbox" value="1">Corak Intern</label>
                                                             </div>
-                                                            <div class="col-xs-8 col-md-8">
-                                                                <label class="col-sm-2 checkbox-inline">
-                                                                    <input id="qtyHph" name="qtyhph" type="checkbox" value="1">Tampilkan</label>
+                                                            <div class="col-xs-6">
+                                                                <label class="checkbox-inline">
+                                                                    <input id="qtyHph" name="qtyhph" type="checkbox" value="1">Qty HPH</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -249,9 +254,10 @@
                                                 <th class="style bb ws">No Picklist</th>
                                                 <th class="style bb ws">Buyer</th>
                                                 <th class="style bb ws">Alamat</th>
-                                                <th class="style bb ws">Corak</th>
+                                                <th class="style bb ws">Corak Jual</th>
                                                 <th class="style bb ws">Lebar</th>
                                                 <th class="style bb ws">Warna</th>
+                                                <th class="style bb ws">Corak Intern</th>
                                                 <th class="style bb ws text-right">QTY 1 [HPH]</th>
                                                 <th class="style bb ws text-right">QTY 2 [HPH]</th>
                                                 <th class="style bb ws text-right">QTY 1 [JUAL]</th>
@@ -293,6 +299,7 @@
             });
             $(function () {
                 $("#tabelDelivery").toggleClass("hides");
+                $("#tabelDelivery").toggleClass("hide_intrn");
                 $('input[name="periode"]').daterangepicker({
                     endDate: moment().startOf('day'),
                     startDate: moment().startOf('day').add(-1, 'week'),
@@ -304,6 +311,10 @@
                 $("#qtyHph").on("change", function () {
                     $("#tabelDelivery").toggleClass("hides");
                 });
+                $("#cintern").on("change", function () {
+                    $("#tabelDelivery").toggleClass("hide_intrn");
+                });
+
 
                 const loadData = ((page) => {
                     $.ajax({
