@@ -43,7 +43,7 @@ class Adjustment extends MY_Controller
 		$dataItems   = [];
 
 		if($load == 'header'){
-			$head = $this->m_reportAdjustment->get_list_group_nama_produk_adj_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
+			$head = $this->m_reportAdjustment->get_list_group_nama_produk_adj_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)->result();
 			$total_adj_in = 0;
 			foreach ($head as $val) {
 				$dataRecord[] = array(
@@ -64,7 +64,7 @@ class Adjustment extends MY_Controller
 
 			}
 
-			$head = $this->m_reportAdjustment->get_list_group_nama_produk_adj_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
+			$head = $this->m_reportAdjustment->get_list_group_nama_produk_adj_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)->result();
 			$total_adj_out = 0;
 			foreach ($head as $val) {
 				$dataRecord2[] = array(
@@ -102,7 +102,7 @@ class Adjustment extends MY_Controller
 				$where_adj  = " AND sm.lokasi_dari LIKE '%/Stock%' AND sm.lokasi_tujuan LIKE '%/ADJ%' ";
 			}
 
-			$items = $this->m_reportAdjustment->get_list_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai,$data_isi,$where_adj,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
+			$items = $this->m_reportAdjustment->get_list_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai,$data_isi,$where_adj,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)->result();
 			foreach ($items as $val) {
 				# code...
 				$dataItems[] = array( 'kode_adjustment' => $val->kode_adjustment,
@@ -164,14 +164,14 @@ class Adjustment extends MY_Controller
 				$sheet = $sheet1;
 				$adj   = " IN ";
 				$where_adj  = " AND sm.lokasi_dari LIKE '%/Adj%' AND sm.lokasi_tujuan LIKE '%/Stock%' ";
-				$head = $this->m_reportAdjustment->get_list_group_nama_produk_adj_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
-				$total 	= $this->m_reportAdjustment->get_jml_item_adjustment_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes);
+				$head = $this->m_reportAdjustment->get_list_group_nama_produk_adj_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)->result();
+				$total 	= $this->m_reportAdjustment->get_jml_item_adjustment_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot);
 			}else{
 				$sheet = $sheet2;
 				$adj   = " OUT ";
 				$where_adj  = " AND sm.lokasi_dari LIKE '%/Stock%' AND sm.lokasi_tujuan LIKE '%/ADJ%' ";
-				$head 	= $this->m_reportAdjustment->get_list_group_nama_produk_adj_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
-				$total 	= $this->m_reportAdjustment->get_jml_item_adjustment_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes);
+				$head 	= $this->m_reportAdjustment->get_list_group_nama_produk_adj_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)->result();
+				$total 	= $this->m_reportAdjustment->get_jml_item_adjustment_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot);
 			}
 
 			// SET JUDUL
