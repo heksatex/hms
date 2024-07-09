@@ -93,7 +93,7 @@
             $jml_qty += $value->jml_qty;
             $total_qty += $value->total_qty;
             $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', "bd.bulk_no_bulk" => $value->no_bulk, 'corak_remark' => $value->corak_remark,
-                'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl], "qty,uom", ["BULK"]);
+                'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl, 'uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi,], "qty,uom", ["BULK"]);
             $perpage = 10;
             $totalData = count($detailQty);
             $totalPage = ceil($totalData / $perpage);
@@ -101,7 +101,7 @@
             for ($nn = 0; $nn < $totalPage; $nn++) {
                 $page = $nn * $perpage;
                 $satuan = $detailQty[0]->uom;
-                $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->no_bulk;
+                $tempID = $value->no_bulk . $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
                 $showNoUrut = "";
                 $showNet = "";
                 $showGross = "";
