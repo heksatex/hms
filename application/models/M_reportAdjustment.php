@@ -35,8 +35,9 @@ class M_reportAdjustment extends CI_Model
 								FROM adjustment_items b 
 								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
 								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk
-								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done' AND (b.qty2_move > 0 or b.qty_move > 0) $where
-								GROUP BY (b.qty2_move > 0 or b.qty_move > 0), b.kode_produk
+								INNER JOIN stock_move sm ON b.move_id = sm.move_id
+								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done' AND sm.lokasi_dari LIKE '%/Adj%' AND sm.lokasi_tujuan LIKE '%/Stock%' $where
+								GROUP BY b.kode_produk
 								ORDER BY mp.nama_produk asc	");
 	}
 
@@ -47,8 +48,9 @@ class M_reportAdjustment extends CI_Model
 								FROM adjustment_items b 
 								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
 								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk
-								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done' AND (b.qty2_move < 0 or b.qty_move < 0) $where
-								GROUP BY (b.qty2_move < 0 or b.qty_move < 0), b.kode_produk
+								INNER JOIN stock_move sm ON b.move_id = sm.move_id
+								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done' AND sm.lokasi_dari LIKE '%/Stock%' AND sm.lokasi_tujuan LIKE '%/ADJ%' $where
+								GROUP BY  b.kode_produk
 								ORDER BY mp.nama_produk asc	");
 	}
 
@@ -60,6 +62,7 @@ class M_reportAdjustment extends CI_Model
 								FROM adjustment_items b 
 								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
 								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk
+								INNER JOIN stock_move sm ON b.move_id = sm.move_id
 								LEFT JOIN mst_type_adjustment mta ON a.id_type_adjustment = mta.id
 								WHERE a.kode_lokasi = '$kode_lokasi' AND a.create_date >= '$tgldari' AND a.create_date <= '$tglsampai' AND b.kode_produk = '$data_isi' AND a.status = 'done' $where $where_adj
 								ORDER BY mp.nama_produk asc");
@@ -72,7 +75,8 @@ class M_reportAdjustment extends CI_Model
 								FROM adjustment_items b 
 								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
 								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk
-								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done'  AND (b.qty2_move > 0 or b.qty_move > 0) $where")->row_array();
+								INNER JOIN stock_move sm ON b.move_id = sm.move_id
+								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done'  AND sm.lokasi_dari LIKE '%/Adj%' AND sm.lokasi_tujuan LIKE '%/Stock%' $where")->row_array();
 		return $query['tot_lot'];
 	}
 
@@ -83,7 +87,8 @@ class M_reportAdjustment extends CI_Model
 								FROM adjustment_items b 
 								INNER JOIN adjustment a ON b.kode_adjustment = a.kode_adjustment
 								INNER JOIN mst_produk mp ON b.kode_produk = mp.kode_produk
-								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done' AND (b.qty2_move < 0 or b.qty_move < 0) $where")->row_array();
+								INNER JOIN stock_move sm ON b.move_id = sm.move_id
+								WHERE a.kode_lokasi = '$lokasi' AND a.create_date >= '$tgl_dari' AND a.create_date <= '$tgl_sampai' AND a.status = 'done' AND sm.lokasi_dari LIKE '%/Stock%' AND sm.lokasi_tujuan LIKE '%/ADJ%' $where")->row_array();
 		return $query['tot_lot'];
 	}
 

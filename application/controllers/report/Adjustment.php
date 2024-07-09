@@ -97,9 +97,9 @@ class Adjustment extends MY_Controller
 			$view        = $this->input->post('view');// in /out
 
 			if($view == 'in'){
-				$where_adj  = " AND (b.qty2_move > 0 or b.qty_move > 0) ";
+				$where_adj  = " AND sm.lokasi_dari LIKE '%/Adj%' AND sm.lokasi_tujuan LIKE '%/Stock%' ";
 			}else{
-				$where_adj  = " AND (b.qty2_move < 0 or b.qty_move < 0) ";
+				$where_adj  = " AND sm.lokasi_dari LIKE '%/Stock%' AND sm.lokasi_tujuan LIKE '%/ADJ%' ";
 			}
 
 			$items = $this->m_reportAdjustment->get_list_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai,$data_isi,$where_adj,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
@@ -163,13 +163,13 @@ class Adjustment extends MY_Controller
 			if($a == 0){
 				$sheet = $sheet1;
 				$adj   = " IN ";
-				$where_adj  = " AND (b.qty2_move > 0 or b.qty_move > 0) ";
+				$where_adj  = " AND sm.lokasi_dari LIKE '%/Adj%' AND sm.lokasi_tujuan LIKE '%/Stock%' ";
 				$head = $this->m_reportAdjustment->get_list_group_nama_produk_adj_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
 				$total 	= $this->m_reportAdjustment->get_jml_item_adjustment_in_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes);
 			}else{
 				$sheet = $sheet2;
 				$adj   = " OUT ";
-				$where_adj  = " AND (b.qty2_move < 0 or b.qty_move < 0) ";
+				$where_adj  = " AND sm.lokasi_dari LIKE '%/Stock%' AND sm.lokasi_tujuan LIKE '%/ADJ%' ";
 				$head 	= $this->m_reportAdjustment->get_list_group_nama_produk_adj_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
 				$total 	= $this->m_reportAdjustment->get_jml_item_adjustment_out_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes);
 			}
