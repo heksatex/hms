@@ -101,7 +101,7 @@ class M_bulk extends CI_Model {
     protected function _listBulkDetailSub($condition): string {
         $this->db->from("bulk_detail cbd");
         $this->db->select("cbd.bulk_no_bulk,cbd.barcode,cbd.tanggal_input,sum(pl.qty) as total_qty,count(pl.qty) as jumlah_qty,valid");
-        $this->db->join("picklist_detail pl", "(pl.id = cbd.picklist_detail_id and valid != 'cancel')", "left");
+        $this->db->join("picklist_detail pl", "(pl.barcode_id = cbd.barcode and valid != 'cancel')", "left");
         $this->db->where($condition);
         $this->db->group_by('bulk_no_bulk');
         $subquery = $this->db->get_compiled_select();
