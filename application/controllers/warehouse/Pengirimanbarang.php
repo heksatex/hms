@@ -743,7 +743,7 @@ class Pengirimanbarang extends MY_Controller
                 $where      .= "'".$quantid."',";
 
                 $get_jml_qty = $get_jml_qty + $qty;
-                if($get_jml_qty > $qty_produk AND $deptid == 'GRG'){
+                if(round($get_jml_qty,2) > round($qty_produk,2) AND $deptid == 'GRG'){
                   $qty_quant_lebih = true;
                   break;
                 }
