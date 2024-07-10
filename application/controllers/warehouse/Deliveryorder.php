@@ -164,7 +164,7 @@ class Deliveryorder extends MY_Controller {
         try {
             $pl = $this->input->post("pl");
 //            $condition = ["b.no_pl" => $pl, "pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
-             $condition = ["pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
+            $condition = ["pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
             $data = array();
             $no = $_POST['start'];
             $list = $this->m_bulkdetail->getDataBulk($condition);
@@ -749,7 +749,18 @@ class Deliveryorder extends MY_Controller {
     public function data() {
         try {
             $data = array();
-            $list = $this->m_deliveryorder->getData();
+            $customer = $this->input->post("customer");
+            $periode = $this->input->post("tanggal_kirim");
+            $period = explode(" - ", $periode);
+            $condition = ['pr.nama LIKE ' => '%' . $customer . '%'];
+            if (count($period) > 1) {
+                $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
+                $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
+                $condition = array_merge($condition, ['tanggal_dokumen >=' => $tanggalAwal, 'tanggal_dokumen <=' => $tanggalAkhir]);
+               
+            }
+
+            $list = $this->m_deliveryorder->getData($condition);
             $no = $_POST['start'];
             foreach ($list as $field) {
                 $kode_encrypt = encrypt_url($field->no);
@@ -769,7 +780,7 @@ class Deliveryorder extends MY_Controller {
             }
             echo json_encode(array("draw" => $_POST['draw'],
                 "recordsTotal" => $this->m_deliveryorder->getDataCountAll(),
-                "recordsFiltered" => $this->m_deliveryorder->getDataCountFiltered(),
+                "recordsFiltered" => $this->m_deliveryorder->getDataCountFiltered($condition),
                 "data" => $data,
             ));
             exit();
@@ -794,7 +805,7 @@ class Deliveryorder extends MY_Controller {
             if ($jenis === "sje") {
                 $data["count_bulk"] = $this->m_deliveryorderdetail->getCountBulk($condition);
             }
-            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition,[]), (int) $base->type_bulk_id, $jenis);
+            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition, []), (int) $base->type_bulk_id, $jenis);
             $this->load->view("print/do/" . $jenis, $data);
         } catch (Exception $ex) {
             show_404();
