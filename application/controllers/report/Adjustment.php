@@ -302,7 +302,7 @@ class Adjustment extends MY_Controller
 				$rowCount++;
 
 
-				$items = $this->m_reportAdjustment->get_list_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_produk,$where_adj,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)->result();
+				$items = $this->m_reportAdjustment->get_list_item_adjustment_by_kode($kode_lokasi,$tgldari,$tglsampai,$kode_produk,$where_adj,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)->result();
 
 				foreach ($items as $val) {
 					# code...
