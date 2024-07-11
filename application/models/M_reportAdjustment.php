@@ -71,7 +71,7 @@ class M_reportAdjustment extends CI_Model
 								ORDER BY mp.nama_produk asc");
 	}
 
-	public function get_jml_item_adjustment_in_by_kode($lokasi, $tgl_dari, $tgl_sampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)
+	public function get_jml_item_adjustment_in_by_kode($lokasi, $tgl_dari, $tgl_sampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)
 	{
 		$where = $this->craete_where($kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot);
 		$query =  $this->db->query("SELECT  count(lot) as tot_lot
@@ -83,7 +83,7 @@ class M_reportAdjustment extends CI_Model
 		return $query['tot_lot'];
 	}
 
-	public function get_jml_item_adjustment_out_by_kode($lokasi, $tgl_dari, $tgl_sampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes)
+	public function get_jml_item_adjustment_out_by_kode($lokasi, $tgl_dari, $tgl_sampai,$kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot)
 	{
 		$where = $this->craete_where($kode_adjustment,$nama_produk,$type_adjustment,$user,$notes,$lot);
 		$query =  $this->db->query("SELECT  count(lot) as tot_lot
