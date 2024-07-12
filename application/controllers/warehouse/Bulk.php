@@ -476,7 +476,7 @@ class Bulk extends MY_Controller {
             if (empty($pl) || trim($pl) === "") {
                 
             }
-            $condition = ['b.no_pl' => $pl];
+            $condition = ['b.no_pl' => $pl, 'pl.no_pl' => $pl];
             if (!empty($bulk) || (!trim($pl) === "")) {
                 $condition = array_merge($condition, ['no_bulk' => $bulk]);
             }
