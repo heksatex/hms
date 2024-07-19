@@ -107,6 +107,7 @@ class Picklistrealisasi extends MY_Controller {
                     $field->warna_remark,
                     $field->qty . " " . $field->uom,
                     $field->qty2 . " " . $field->uom2,
+                    $field->lebar_jadi . " " . $field->uom_lebar_jadi,
                     $field->lokasi_fisik,
                     $field->valid,
                 );
