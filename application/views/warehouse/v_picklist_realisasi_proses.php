@@ -148,6 +148,7 @@
                                                         <th class="style">Warna Remark</th>
                                                         <th class="style" style="width:80px;" >Qty 1</th>
                                                         <th class="style" width="80px">Qty 2</th>
+                                                        <th class="style">Lebar Jadi</th>
                                                         <th class="style" >Lokasi Fisik</th>
                                                         <th class="style" >Status</th>
                                                     </tr>
@@ -178,7 +179,7 @@
                     "iDisplayLength": 10,
                     "processing": true,
                     "serverSide": true,
-                    "order": [[6, "desc"], [2, "desc"]],
+                    "order": [[7, "desc"], [2, "desc"]],
                     "paging": true,
                     "lengthChange": false,
                     "searching": true,
@@ -194,7 +195,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0,8],
                             "orderable": false
                         }
                     ]
