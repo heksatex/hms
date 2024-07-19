@@ -4,7 +4,7 @@
         <div class="col-md-12 col-xs-12">
             <div class="col-xs-4"><label>Desain Barcode</label></div>
                 <div class="col-xs-8 col-md-8">
-                    <select class="form-control input-sm select2" name="desain_barcode" id="desain_barcode" >
+                    <select class="form-control input-sm select2" name="pdesain_barcode" id="pdesain_barcode" >
                         <option value=""></option>
                         <?php foreach ($desain_barcode as $row) {?>
                              <option value='<?php echo $row->kode_desain; ?>'><?php echo $row->kode_desain;?></option>
@@ -27,10 +27,10 @@
 
     // });
     // print
-    $("#btn-print-modal").unbind( "click" );
-    $("#btn-print-modal").off("click").on("click",function(e) {
+    $("#btn-print-modal-batch").unbind( "click" );
+    $("#btn-print-modal-batch").off("click").on("click",function(e) {
 
-        let desain_barcode  = $('#desain_barcode').val();
+        let desain_barcode  = $('#pdesain_barcode').val();
         let data_arr = [];
 
         <?php foreach($data_print as $a){ ?>
@@ -58,7 +58,7 @@
                 },
                 data: {
                     id_inlet        : "<?php echo $id_inlet ?>",
-                    data            :data_arr,
+                    data            : data_arr,
                     desain_barcode  : desain_barcode,
                 },
                 success: function(data) {

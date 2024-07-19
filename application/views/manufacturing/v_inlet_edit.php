@@ -597,7 +597,7 @@
         $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('lot_hph');
         $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
 
-        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-print").remove();
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-print-modal").remove();
 
         $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
         $('.modal-title').text('Edit Data HPH Lot');
@@ -607,7 +607,7 @@
             setTimeout(function() {
                 $(".lot_hph").html(html)  
             },1000);
-            $("#tambah_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print" name="btn-print" >Print</button>');
+            $("#tambah_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print-modal" name="btn-print-modal" >Print</button>');
             $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
         }).fail(function(response) {
             var err = JSON.parse(response.responseText);
@@ -730,14 +730,14 @@
                     show: true,
                     backdrop: 'static'
                 });
-                $("#print_data .modal-dialog .modal-content .modal-footer #btn-print-modal").remove();
+                $("#print_data .modal-dialog .modal-content .modal-footer #btn-print-modal-batch").remove();
 
                 $('.modal-title').text('Pilih Desain Barcode  ');
                 $.post('<?php echo site_url()?>manufacturing/inlet/print_modal',
-                {  id :  "<?php echo $inlet->id; ?>", data:myCheckboxes_arr},
+                {  id :  "<?php echo $inlet->id; ?>",data:myCheckboxes_arr},
                     function(html){
                         setTimeout(function() {$(".print_data").html(html);  },1000);
-                        $("#print_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print-modal" name="btn-print-modal" >Print</button>');
+                        $("#print_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print-modal-batch" name="btn-print-modal-batch" >Print</button>');
 
                     }   
                 );
