@@ -1292,5 +1292,15 @@ class M_mo extends CI_Model
 		return $result->num_rows();
 	}
 
+	public function cek_mrp_cacat_by_quant($kode,$quant_id)
+	{
+		$this->db->select("quant_id");
+		$this->db->from("mrp_production_cacat");
+		$this->db->where('kode',$kode);
+		$this->db->where('quant_id',$quant_id);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
 
 }

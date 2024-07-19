@@ -6600,7 +6600,7 @@ class MO extends MY_Controller
 
 
             // lock table
-            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_fg_hasil WRITE, stock_quant WRITE, acc_stock_move_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production_fg_target WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, adjustment as adj WRITE, adjustment_items as adji WRITE');
+            $this->_module->lock_tabel('mrp_production WRITE, mrp_production_fg_hasil WRITE, stock_quant WRITE, acc_stock_move_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production_fg_target WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, adjustment as adj WRITE, adjustment_items as adji WRITE, mrp_production_cacat WRITE');
 
 
             //cek status mrp_production = done
@@ -6645,6 +6645,9 @@ class MO extends MY_Controller
                     // cek lot apa di adj atau tidak 
                     $cek_adj_lot = $this->m_mo->cek_lot_adj_by_quant($quant_id);
 
+                    // cek KP / lot sudah ada cacat atau belum 
+                    $cek_cacat = $this->m_mo->cek_mrp_cacat_by_quant($kode,$quant_id);
+
                     if($cek_adj_lot > 0 ){
                         $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot <b>'.$lot.'</b> ini Tidak Bisa Dihapus, karena sudah di Adjustment !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else if($lokasi_hph != $cek_lokasi->lokasi){
@@ -6653,6 +6656,8 @@ class MO extends MY_Controller
                         $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot  <b>'.$lot.'</b> ini Tidak Bisa Dihapus, karena sudah terdapat Konsumsi Bahan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else  if($tgl_hph != $tgl_now){// cek apa tgl hph == tgl batal
                         $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot <b>'.$lot.'</b> ini  Tidak Bisa Dihapus, karena sudah Berbeda Bulan !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    }else if($cek_cacat > 0){
+                        $callback = array('status' => 'failed', 'message'=>'Maaf, KP/Lot  <b>'.$lot.'</b> ini Tidak Bisa Dihapus, karena sudah terdapat inputan Rekam Cacat Lot !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                     }else{
 
                         $thn = date("Y", strtotime($tanggal));
