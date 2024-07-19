@@ -342,6 +342,7 @@
                                                 <th class="style nowrap">Lbr.Jadi</th>
                                                 <th class="style ">Lokasi Sekarang</th>
                                                 <th class="style nowrap">User HPH</th>
+                                                <th class="style nowrap">#</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -548,24 +549,34 @@
             },
            
             "columnDefs": [
-              {
-                "targets":[0],
-                "className":"max-width-5"
-              },
-              { 
-                "targets": [0], 
-                "orderable": false, 
-              },
-              { 
-                "targets": [8,9,10,11], 
-                "className":"text-right nowrap",
-              },
+                {
+                    "targets":[0],
+                    "className":"max-width-5"
+                },
+                { 
+                    "targets": [0], 
+                    "orderable": false, 
+                },
+                { 
+                    "targets": [8,9,10,11], 
+                    "className":"text-right nowrap",
+                },
+                {
+                    "targets" : 15,
+                    'checkboxes': {
+                        'selectRow': true
+                    },
+                },
             ],
             "createdRow": function( row, data, dataIndex){
-              if( data[15].includes('SPL') == true ){
+              if( data[16].includes('SPL') == true ){
                 $(row).addClass('text-red');
               }
-            }          
+            }  ,
+            "select": {
+                'style': 'multi'
+            },
+             
         });
  
     });
@@ -586,7 +597,7 @@
         $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('lot_hph');
         $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
 
-        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-print").remove();
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-print-modal").remove();
 
         $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
         $('.modal-title').text('Edit Data HPH Lot');
@@ -596,7 +607,7 @@
             setTimeout(function() {
                 $(".lot_hph").html(html)  
             },1000);
-            $("#tambah_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print" name="btn-print" >Print</button>');
+            $("#tambah_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print-modal" name="btn-print-modal" >Print</button>');
             $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
         }).fail(function(response) {
             var err = JSON.parse(response.responseText);
@@ -699,6 +710,39 @@
         });
 
     }
+
+
+    $(document).on('click','#btn-print',function(e){
+            e.preventDefault();
+
+            var myCheckboxes = table.column(15).checkboxes.selected();
+            var myCheckboxes_arr = new Array();
+
+            $.each(myCheckboxes, function(index, rowId){        
+                myCheckboxes_arr.push(rowId);
+            });
+
+            if (myCheckboxes.length === 0) {
+                alert_notify('fa fa-warning', 'Pilih LOT terlebih dahulu yang akan di print !', 'danger', function() {});
+            }else{
+                $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                $("#print_data").modal({
+                    show: true,
+                    backdrop: 'static'
+                });
+                $("#print_data .modal-dialog .modal-content .modal-footer #btn-print-modal-batch").remove();
+
+                $('.modal-title').text('Pilih Desain Barcode  ');
+                $.post('<?php echo site_url()?>manufacturing/inlet/print_modal',
+                {  id :  "<?php echo $inlet->id; ?>",data:myCheckboxes_arr},
+                    function(html){
+                        setTimeout(function() {$(".print_data").html(html);  },1000);
+                        $("#print_data .modal-dialog .modal-content .modal-footer").prepend('<button class="btn btn-default btn-sm" id="btn-print-modal-batch" name="btn-print-modal-batch" >Print</button>');
+
+                    }   
+                );
+            }
+        });
    
 </script>
 

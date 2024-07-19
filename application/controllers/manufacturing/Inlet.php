@@ -568,6 +568,7 @@ class Inlet extends MY_Controller
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->lokasi;
                 $row[] = $field->nama_user;
+                $row[] = $field->quant_id;
                 $row[] = $field->kode_split ?? '';
                 $data[] = $row;
             }
@@ -935,6 +936,97 @@ class Inlet extends MY_Controller
             }
             // break;
             $this->prints->addDatas($data_print_array);
+        }
+     
+        return $this->prints->generate();
+    }
+
+
+    public function print_modal()
+    {
+        $data['data_print'] = ($this->input->post('data'));
+        $data['id_inlet'] = ($this->input->post('id'));
+        $data['desain_barcode']   = $this->_module->get_list_desain_barcode_by_type('LBK');    
+        return $this->load->view('modal/v_hph_print_modal', $data);
+    }
+
+
+    function print_barcode_modal()
+    {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+                $id_inlet   = $this->input->post('id_inlet');
+                $data       = $this->input->post('data');
+                $desain_barcode  = $this->input->post('desain_barcode');
+
+                if(empty($desain_barcode)){
+                    throw new \Exception('Desain Barcode Harus dipilih !', 200);                
+                }else{
+
+                    if(empty($data)){
+                        throw new \Exception('Data Lot tidak ditemukan !', 200);
+                    }else{
+
+                        $inlet = $this->m_inlet->get_data_inlet_by_id($id_inlet);
+                        if(empty($inlet)){
+                            throw new \Exception('Data Inlet tidak ditemukan !', 200);
+                        }
+                        
+                        $data_print = $this->print_barcode2($desain_barcode,$data,$inlet);
+                        if(empty($data_print)){
+                            throw new \Exception('Data Print tidak ditemukan !', 500);
+                        }
+                        $callback = array('status' => 'success', 'message' => 'Print Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success', 'data_print' =>$data_print);
+                    }
+                }
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+
+    function print_barcode2($desain_barcode,$data_stock,$inlet)
+    {
+        $kode_mrp = $inlet->kode_mrp; 
+        $kode_k3l = $inlet->kode_k3l;
+        $desain_barcode = strtolower($desain_barcode);
+        $code = new Code\Code128New();
+        $this->prints->setView('print/'.$desain_barcode);
+        $data_print_array = array();
+        $data_qty2_jual = array();
+        for($a=0; $a<count($data_stock); $a++){
+            $get = $this->_module->get_stock_quant_by_id($data_stock[$a])->result();
+            foreach($get as $row){
+                $gen_code = $code->generate($row->lot, "", 60, "vertical");
+                $tanggal = date('Ymd', strtotime($row->create_date));
+                $data_print_array = array(
+                            'pattern' => $row->corak_remark,
+                            'isi_color' => !empty($row->warna_remark)? $row->warna_remark : '&nbsp' ,
+                            'isi_satuan_lebar' => 'WIDTH ('.$row->uom_lebar_jadi.')',
+                            'isi_lebar' => !empty($row->lebar_jadi)? $row->lebar_jadi : '&nbsp',
+                            'isi_satuan_qty1' => 'QTY ['.$row->uom_jual.']',
+                            'isi_qty1' => round($row->qty_jual,2),
+                            'barcode_id' => $row->lot,
+                            'tanggal_buat' => $tanggal,
+                            'no_pack_brc' => $kode_mrp,
+                            'barcode' => $gen_code,
+                            'k3l' => $kode_k3l
+                );
+                if(!empty((double)$row->qty2_jual)){
+                    $data_qty2_jual = array('isi_satuan_qty2' => 'QTY2 ['.$row->uom2_jual.']', 'isi_qty2' => round($row->qty2_jual,2));
+                    $data_print_array = array_merge($data_print_array,$data_qty2_jual);
+                }
+                // break;
+                $this->prints->addDatas($data_print_array);
+            }
         }
      
         return $this->prints->generate();
