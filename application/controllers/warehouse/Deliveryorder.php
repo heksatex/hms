@@ -222,9 +222,9 @@ class Deliveryorder extends MY_Controller {
                             $no,
                             $field->bulk_no_bulk,
                             $field->barcode_id,
-                            $field->nama_produk,
                             $field->corak_remark,
                             $field->warna_remark,
+                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
@@ -235,9 +235,9 @@ class Deliveryorder extends MY_Controller {
                         $row = [
                             $no,
                             $field->barcode_id,
-                            $field->nama_produk,
                             $field->corak_remark,
                             $field->warna_remark,
+                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
@@ -269,9 +269,9 @@ class Deliveryorder extends MY_Controller {
                             $no,
                             $field->bulk_no_bulk ?? "",
                             $field->barcode_id,
-                            $field->nama_produk,
                             $field->corak_remark,
                             $field->warna_remark,
+                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
@@ -282,9 +282,9 @@ class Deliveryorder extends MY_Controller {
                         $row = [
                             $no,
                             $field->barcode_id,
-                            $field->nama_produk,
                             $field->corak_remark,
                             $field->warna_remark,
+                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
