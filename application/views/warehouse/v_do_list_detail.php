@@ -7,9 +7,9 @@
                     <th class="style">BAL ID</th>
                 <?php } ?>
                 <th class="style">Barcode</th>
-                <th class="style">Produk</th>
                 <th class="style">Corak Remark</th>
                 <th class="style">Warna Remark</th>
+                <th class="style">Lebar Kain Jadi</th>
                 <th class="style" style="width:80px;" >Qty 1</th>
                 <!--<th class="style">#</th>-->
             </tr>
