@@ -156,7 +156,6 @@ class m_marketing extends CI_Model
 		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
 							kp_lot.lot as lot_asal, pl.no_pl, (datediff(now(), sq.create_date) ) as umur  ");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
 						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
@@ -165,7 +164,6 @@ class m_marketing extends CI_Model
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
@@ -252,7 +250,6 @@ class m_marketing extends CI_Model
 		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
 							kp_lot.lot as lot_asal, pl.no_pl ");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
 						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
@@ -261,7 +258,6 @@ class m_marketing extends CI_Model
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
@@ -475,9 +471,7 @@ class m_marketing extends CI_Model
 
 		$this->db->SELECT("sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, count(sq.lot) as gl, sum(sq.qty_jual) as qty1, sq.uom_jual, ");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		return $this->db->count_all_results();
 	} 
@@ -532,7 +526,6 @@ class m_marketing extends CI_Model
 		$this->db->SELECT("sq.create_date,sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
 							kp_lot.lot as lot_asal, pl.no_pl,(datediff(now(), sq.create_date) ) as umur ");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
 						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
@@ -541,7 +534,6 @@ class m_marketing extends CI_Model
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
@@ -627,9 +619,7 @@ class m_marketing extends CI_Model
 
 		$this->db->SELECT("sq.corak_remark, count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		$this->db->group_by('sq.corak_remark');
 
@@ -705,9 +695,7 @@ class m_marketing extends CI_Model
 
 		$this->db->SELECT("sq.corak_remark, count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		return $this->db->count_all_results();
 	} 
@@ -725,9 +713,7 @@ class m_marketing extends CI_Model
 
 		$this->db->SELECT("sq.warna_remark, count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		$this->db->group_by('sq.warna_remark');
 
@@ -803,9 +789,7 @@ class m_marketing extends CI_Model
 
 		$this->db->SELECT("sq.warna_remark, count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 		return $this->db->count_all_results();
 	} 
@@ -828,7 +812,6 @@ class m_marketing extends CI_Model
 		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
 							kp_lot.lot as lot_asal, pl.no_pl ");
 		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
 						UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
@@ -837,7 +820,6 @@ class m_marketing extends CI_Model
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
 		return;
