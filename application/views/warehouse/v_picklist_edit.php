@@ -167,6 +167,14 @@
                                                 <span id="total_qty"><?= $picklist->tot_qty ?? 0 ?></span>
                                             </div>
                                         </div>
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label">Refresh Totalan</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <button id="refresh-total" type="button"><i class="fa fa-refresh"></i></button>
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -193,12 +201,13 @@
 
         <script>
 
-            const updateTotal = (() => {
+            const updateTotal = ((refresh = 0) => {
                 $.ajax({
                     url: "<?= base_url('warehouse/picklist/get_total') ?>",
                     type: "post",
                     data: {
-                        pl: "<?= $picklist->no ?>"
+                        pl: "<?= $picklist->no ?>",
+                        refresh: refresh
                     },
                     success: function (data) {
 //                        location.reload();
@@ -215,6 +224,11 @@
                 });
             });
             $(function () {
+
+                $("#refresh-total").off("click").on("click", function () {
+                    updateTotal(1);
+                });
+
                 $("#cetak-lokasi-item").on("click", function () {
                     let url = "<?= base_url("warehouse/picklist/lokasi_fisik?no=$picklist->no") ?>";
                     var win = window.open(url, "width=1000,height=700");

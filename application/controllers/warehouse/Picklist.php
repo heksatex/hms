@@ -99,6 +99,14 @@ class Picklist extends MY_Controller {
     public function get_total() {
         try {
             $no = $this->input->post("pl");
+            $refresh = $this->input->post("refresh");
+            if ($refresh === "1") {
+                $total = $this->m_Picklist->getTotalItem(['no_pl' => $no, 'valid <>' => 'cancel']);
+                if (!$total) {
+                    throw new \Exception('Gagal Memperbaharui Totalan', 410);
+                }
+                $this->m_Picklist->update(['pcs_qty' => $total->jumlah, 'tot_qty' => $total->total_qty], ['picklist.no' => $no]);
+            }
             $data = $this->m_Picklist->getDataByID(['picklist.no' => $no], "", "count_detail");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
