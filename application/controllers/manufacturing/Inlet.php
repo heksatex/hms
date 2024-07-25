@@ -551,7 +551,7 @@ class Inlet extends MY_Controller
                 $row[] = $no;
                 $row[] = $field->create_date;
                 $row[] = $field->kode_produk;
-                if($field->nama_grade == 'F'){
+                if($field->nama_grade == 'F' || $field->kode_split == 'hsplit'){
                     $row[] = $field->nama_produk;
                 }else{
                     $row[] = ' <a href="javascript:void(0)" class="edit_lot" title="Edit" data-toggle="tooltip" data-quant="'.$field->quant_id.'">'.$field->nama_produk.'</a>';
