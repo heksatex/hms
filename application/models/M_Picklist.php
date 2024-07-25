@@ -65,6 +65,13 @@ class M_Picklist extends CI_Model {
         }
     }
 
+    public function getTotalItem($array) {
+        $this->db->select("count(id) as jumlah,sum(qty) as total_qty,sum(qty2) as total_qty2,sum(qty_hph) as total_qty_hph,sum(qty2_hph) as total_qty2_hph");
+        $this->db->from("picklist_detail");
+        $this->db->where($array);
+        return $this->db->get()->row();
+    }
+
     public function getCountDataFiltered(array $condition = [], array $menu = []) {
 
         if (count($condition) > 0)
