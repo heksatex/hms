@@ -356,6 +356,8 @@ class M_inlet extends CI_Model
 		$this->db->JOIN("mrp_production_fg_hasil fg","fg.kode = in.kode_mrp AND in.id = fg.id_inlet" , "INNER");
 		$this->db->JOIN("stock_quant sq","sq.quant_id = fg.quant_id", "INNER");
 		$this->db->JOIN("split spl","spl.quant_id = fg.quant_id", "LEFT");
+		$this->db->where('in.id',$id_inlet);
+		$this->db->where('sq.quant_id',$quant_id);
 		$query1 = $this->db->get_compiled_select();
 
 		$this->db->SELECT("'' as kode_split, fg.id_inlet, fg.kode, sq.quant_id, spl.tanggal, sq.kode_produk,sq.nama_produk, sq.lot,sq.nama_grade, sq.qty,sq.uom,sq.qty2,sq.uom2,spl.nama_user,sq.qty_jual,sq.uom_jual,sq.qty2_jual,sq.uom2_jual,sq.lokasi,sq.lebar_jadi,sq.uom_lebar_jadi,sq.corak_remark,sq.warna_remark"); 
@@ -363,6 +365,7 @@ class M_inlet extends CI_Model
 		$this->db->JOIN("split spl","fg.quant_id = spl.quant_id","INNER");
 		$this->db->JOIN("split_items spli","spl.kode_split = spli.kode_split","INNER");
 		$this->db->JOIN("stock_quant sq ","sq.quant_id = spli.quant_id_baru","INNER");
+		$this->db->where('sq.quant_id',$quant_id);
 		$query2 = $this->db->get_compiled_select();
 
 		$this->db->where('id',$id_inlet);
