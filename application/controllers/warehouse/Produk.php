@@ -257,7 +257,7 @@ class Produk extends MY_Controller
           }
 
          
-          if((strpos($nama_produk, 'TRC-') === FALSE) OR (strpos($nama_produk, 'J-') === FALSE)){
+          if((strpos($nama_produk, 'TRC-') === FALSE) AND (strpos($nama_produk, 'J-') === FALSE)){
             $nama_produk_valid = FALSE;
           }
           
@@ -272,7 +272,7 @@ class Produk extends MY_Controller
         }else if(!empty($cek['kode_produk']) AND $status == 'edit'){
 
           //update/edit produk
-          $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
+          $this->m_produk->update_produk($id,trim($namaproduk),$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
 
           if(!empty($sql_insert_mst_sub_parent)){
             $sql_insert_mst_sub_parent = rtrim($sql_insert_mst_sub_parent, ', ');
@@ -287,7 +287,7 @@ class Produk extends MY_Controller
           //insert/add produk
           $id_new = $this->m_produk->get_last_id_mst_produk();
           
-          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
+          $this->m_produk->save_produk($kodeproduk,trim($namaproduk),$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
           $kodeproduk_encr = encrypt_url($id_new);
 
           if(!empty($sql_insert_mst_sub_parent)){
