@@ -132,6 +132,16 @@
             padding-top: 10%;
             line-height: 1.3;
         }
+        .k3l {
+            font-size: 190%;
+        }
+        #noregk3l #iop3i {
+            font-weight: 600;
+            line-height: 0.3 !important;
+        }
+        #noregk3l #iop3i div p{
+            font-size: 130%;
+        }
         @media print {
             #is1i {
                 page-break-after: always;

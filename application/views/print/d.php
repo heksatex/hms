@@ -28,7 +28,7 @@
                                     </div>
                                     <div id="iop3i">
                                         <div>
-                                            <p>No Registrasi K3L</p> <span style="font-size: 150%;"><?= $data["k3l"] ?? "" ?></span>
+                                            <p>No Registrasi K3L</p> <span class="k3l"><?= $data["k3l"] ?? "" ?></span>
                                         </div>
                                     </div>
                                 </div>
