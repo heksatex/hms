@@ -135,7 +135,7 @@
                       <input type="radio" id="view" name="view[]" value="DetailProduk">
                       <label for="detail">Detail Produk</label>
                     </div>
-                    <div class="col-xs-6 col-sm-3 col-md-3">
+                    <div class="col-xs-6 col-sm-3 col-md-3" style="display: none;"  id="dd_show">
                       <input type="radio" id="view" name="view[]" value="DetailLotDatar">
                       <label for="detail">Detail Datar</label>
                     </div>
@@ -458,6 +458,18 @@
           //alert('Error data');
           //alert(xhr.responseText);
         }
+      }
+  });
+
+  $("#departemen").on('select2:unselect', function (e) {
+      $("#dd_show").hide();
+  });
+
+  $("#departemen").on('change', function (e) {
+      if($(this).val() == 'GRG'){
+        $("#dd_show").show();
+      }else{
+        $("#dd_show").hide();
       }
   });
 
