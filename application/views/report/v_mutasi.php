@@ -683,7 +683,7 @@
                           $('#pagination2').html(value.pagination);
                         }
                       });
-                    }else if(data.format == '2'){
+                    }else if(data.format == '2' || data.format == '3'){
                       $.each(data.result,function(key,value){
 
                         create_table_format2('example1',data.view,value.head_table1,value.record,value.field_view,departemen);
@@ -2129,13 +2129,15 @@
             });
 
             // consume
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_proses)+"</td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
-            // if(view == "Global" || view == "DetailProduk" ){
-            // }
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty1)+" "+value.con_qty1_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty2)+" "+value.con_qty2_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
+            if(departement != 'DF2'){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_proses)+"</td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
+              // if(view == "Global" || view == "DetailProduk" ){
+              // }
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty1)+" "+value.con_qty1_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty2)+" "+value.con_qty2_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
+            }
 
             // ADJ IN 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_proses)+"</td>";
@@ -2146,16 +2148,18 @@
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty2)+" "+value.adj_in_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+" </td>";
 
-            // produce
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_proses)+"</td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
-            // if(view == "Global" || view == "DetailProduk" ){
-            // }
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty1)+" "+value.prod_qty1_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty2)+" "+value.prod_qty2_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
+            if(departement != 'DF2'){
+              // produce
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_proses)+"</td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
+              // if(view == "Global" || view == "DetailProduk" ){
+              // }
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty1)+" "+value.prod_qty1_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty2)+" "+value.prod_qty2_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
+            }
 
-            if(view == "DetailLot" && (departement == 'FIN' || departemen == 'DF'))
+            if(view == "DetailLot" && (departement == 'FIN' || departemen == 'DF' || departement == 'DF2'))
             // process
             $.each(field_view, function(a,b){
                   for (var i = 0, l = b.in.length; i<l; i++){
