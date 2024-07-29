@@ -2136,7 +2136,7 @@ class Mutasi extends MY_Controller
             ob_start();
             $object = new PHPExcel();
             $object->setActiveSheetIndex(0);
-            
+            ini_set('memory_limit', '4096M');
             $get_dept  = $this->_module->get_nama_dept_by_kode($departemen);
             $type_dept = $get_dept->row_array();
             if($type_dept['type_dept'] == 'manufaktur' or $type_dept['kode'] == 'GJD'){
