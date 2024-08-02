@@ -561,7 +561,6 @@ class Recycle extends MY_Controller {
     public function search($p = 0) {
         try {
             $kp = $this->input->post("kp") ?? [];
-            log_message("error", count($kp));
 //            $mo = $this->input->post("mo");
 //            $corak = $this->input->post("corak");
             $perPage = 25;

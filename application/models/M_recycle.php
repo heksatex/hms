@@ -41,7 +41,7 @@ class M_recycle extends CI_Model {
                 . "on (cod.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',1) and "
                 . "cod.row_order = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(pb.origin,'|',3) ,'|',-2),'|',-1))"
                 . "where pb.dept_id = 'GRG' and pb.status = 'done' "
-                . ") p", "on p.lot = mph.lot");
+                . ") p", "on p.lot = mph.lot","left");
         
         $this->db->group_by("mph.lot");
     }
