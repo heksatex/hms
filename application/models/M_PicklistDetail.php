@@ -49,8 +49,8 @@ class M_PicklistDetail extends CI_Model {
         $this->db->from($this->table . ' a');
 
         $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id');
-        $this->db->join("bulk_detail dt", "dt.picklist_detail_id = a.barcode_id", "left");
-        $this->db->join("delivery_order_detail dod", "(dod.picklist_detail_id = a.id and dod.status = 'done')", "left");
+        $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id", "left");
+        $this->db->join("delivery_order_detail dod", "(dod.barcode_id = a.barcode_id and dod.status = 'done')", "left");
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
@@ -283,7 +283,7 @@ class M_PicklistDetail extends CI_Model {
             $this->db->where($condition);
         }
         if (count($joinBulk) > 0) {
-            $this->db->join("bulk_detail bd", "pd.id = bd.picklist_detail_id");
+            $this->db->join("bulk_detail bd", "pd.barcode_id = bd.barcode");
 //            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
             $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
             $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
@@ -307,7 +307,7 @@ class M_PicklistDetail extends CI_Model {
             $this->db->where($condition);
         }
         if (count($joinBulk) > 0) {
-            $this->db->join("bulk_detail bd", "pd.id = bd.picklist_detail_id");
+            $this->db->join("bulk_detail bd", "pd.barcode_id = bd.barcode");
 //            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
             $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
             $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
@@ -327,7 +327,7 @@ class M_PicklistDetail extends CI_Model {
             $this->db->where($condition);
         }
         if (count($joinBulk) > 0) {
-            $this->db->join("bulk_detail bd", "(pd.id = bd.picklist_detail_id)", "right");
+            $this->db->join("bulk_detail bd", "(pd.barcode_id = bd.barcode)", "right");
 //            $this->db->join("bulk b", "b.no_pl = pd.no_pl");
             $this->db->group_by('pd.warna_remark, pd.corak_remark,pd.uom,bd.bulk_no_bulk');
             $this->db->where_in('bd.bulk_no_bulk', $joinBulk);
@@ -371,7 +371,7 @@ class M_PicklistDetail extends CI_Model {
         foreach ($join as $key => $value) {
             switch ($value) {
                 case "BULK":
-                    $this->db->join("bulk_detail dt", "dt.picklist_detail_id = a.id");
+                    $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
                     $this->db->select(",dt.bulk_no_bulk");
                     $this->db->order_by("bulk_no_bulk", "ASC");
                     foreach ($in as $key => $value) {
@@ -402,7 +402,7 @@ class M_PicklistDetail extends CI_Model {
         foreach ($join as $key => $value) {
             switch ($value) {
                 case "BULK":
-                    $this->db->join("bulk_detail dt", "dt.picklist_detail_id = a.id");
+                    $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
                     foreach ($in as $key => $value) {
                         $this->db->where_in($key, $value);
                     }
@@ -427,7 +427,7 @@ class M_PicklistDetail extends CI_Model {
         foreach ($join as $key => $value) {
             switch ($value) {
                 case "BULK":
-                    $this->db->join("bulk_detail dt", "dt.picklist_detail_id = a.id");
+                    $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id");
                     foreach ($in as $key => $value) {
                         $this->db->where_in($key, $value);
                     }
