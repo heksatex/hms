@@ -212,6 +212,7 @@ class Deliveryorder extends MY_Controller {
                 if ($type === "1") {
                     $join = ["BULK"];
                 }
+                $condition = array_merge($condition,['pd.valid !='=>'cancel']);
                 $list = $this->m_deliveryorderdetail->getDataDetail($condition, $join);
                 $recordsTotal = $this->m_deliveryorderdetail->getDataDetailCountAll($condition, $join);
                 $recordsFiltered = $this->m_deliveryorderdetail->getDataDetailCountFiltered($condition);
@@ -805,7 +806,7 @@ class Deliveryorder extends MY_Controller {
             if ($jenis === "sje") {
                 $data["count_bulk"] = $this->m_deliveryorderdetail->getCountBulk($condition);
             }
-            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition, []), (int) $base->type_bulk_id, $jenis);
+            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition, ['pd.valid <>'=>'cancel']), (int) $base->type_bulk_id, $jenis);
             $this->load->view("print/do/" . $jenis, $data);
         } catch (Exception $ex) {
             show_404();
