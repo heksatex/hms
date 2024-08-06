@@ -53,7 +53,7 @@ class Delivery extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.status' => 'done', 'dod.status' => 'done'];
+            $condition = ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid <>' => 'cancel'];
             if ($tgl_buat === "0") {
                 $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
             } else {
@@ -146,7 +146,7 @@ class Delivery extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.status' => 'done', 'dod.status' => 'done'];
+            $condition = ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid <>' => 'cancel'];
             if ($tgl_buat === "0") {
                 $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
             } else {
