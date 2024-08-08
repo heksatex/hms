@@ -103,8 +103,14 @@ class Recycle extends MY_Controller {
         "DF-PKI" => [
             "type" => "out",
             "dept_id_tujuan" => "INS2",
-            "dept_id_mutasi" => "DYE",
-            "dept_id_dari" => "DYE"
+            "dept_id_mutasi" => [
+                "type" => "in",
+                "data" => ["SET", "FIN", "BRS", "FBR", "PAD", "DYE"]
+            ],
+            "dept_id_dari" => [
+                "type" => "in",
+                "data" => ["SET", "FIN", "BRS", "FBR", "PAD", "DYE"]
+            ]
         ],
         "DF-PKG" => [
             "type" => "out",
@@ -155,9 +161,9 @@ class Recycle extends MY_Controller {
             "dept_id_dari" => "INS2"
         ],
         "GJ-PDI" => [
-            "type" => "out",
+            "type" => "in",
             "dept_id_tujuan" => "GJD",
-            "dept_id_mutasi" => "INS2",
+            "dept_id_mutasi" => "GJD",
             "dept_id_dari" => "INS2"
         ]
     ];
@@ -191,7 +197,8 @@ class Recycle extends MY_Controller {
             $corak = $this->input->get("corak");
             $condition = [
                 "mph.lot LIKE" => "%" . trim($this->input->get("q")) . "%",
-                "mp.dept_id" => "TRI"
+                "mp.dept_id" => "TRI",
+                "mph.lokasi LIKE" => '%Stock'
             ];
             if (!(empty(trim($mo)))) {
                 $condition = array_merge($condition, ["mph.kode" => $mo]);
@@ -204,6 +211,44 @@ class Recycle extends MY_Controller {
             echo json_encode($data);
         } catch (Exception $ex) {
             echo json_encode([]);
+        }
+    }
+
+    public function data_list_kp() {
+        try {
+            $mo = $this->input->post("mo");
+            $condition = [
+                "mp.dept_id" => "TRI",
+                "mph.kode" => $mo,
+                "mph.lokasi LIKE" => '%Stock'
+            ];
+            $datas = $this->m_recycle->getDataKp($condition);
+            $no = $_POST['start'];
+            $data = [];
+
+            foreach ($datas as $value) {
+                $no++;
+                $data [] = array(
+                    $value->lot,
+                    $value->lot
+                );
+            }
+            echo json_encode(
+                    array("draw" => $_POST['draw'],
+                        "recordsTotal" => $this->m_recycle->getCountAllDataKp($condition),
+                        "recordsFiltered" => $this->m_recycle->getCountDataKpFiltered($condition),
+                        "data" => $data,
+                    )
+            );
+            exit();
+        } catch (Exception $ex) {
+            echo json_encode(
+                    array("draw" => $_POST['draw'],
+                        "recordsTotal" => 0,
+                        "recordsFiltered" => 0,
+                        "data" => [],
+                    )
+            );
         }
     }
 
@@ -223,27 +268,34 @@ class Recycle extends MY_Controller {
 //                $condition = array_merge($condition, ["p.nama_produk LIKE" => "%" . $corak . "%"]);
 //            }
             if (is_string($kp)) {
+                $kp = json_decode($kp);
+            }
+
+            if (is_string($kp)) {
                 throw new Exception("Silahkan Pilih KP Terlebih dahulu", 500);
             }
-            
-            if(count($kp) < 1) {
+
+            if (count($kp) < 1) {
                 throw new Exception("Silahkan Pilih KP Terlebih dahulu", 500);
             }
             $condition = ['mph.lot' => $kp];
             $data = $this->m_recycle->setWhereIn($condition)
-                            ->setSelect('mph.lot as kp,mph.qty,mph.uom,mph.qty2,mph.uom2,p.kode as go,nama_route,p.nama_produk,p.nama_warna,p.produk_parent,p.nama_jenis_kain')->result();
+                            ->setSelect('mph.lot as kp,mph.qty,mph.uom,mph.qty2,mph.uom2')->result($kp);
             $datas = $data;
             $queryDetail = [];
+            $listKP = [];
             foreach ($datas as $keys => $values) {
                 foreach ($this->submodul as $key => $value) {
                     $query = $this->m_recycle->detail(array_merge($value, ["lot" => $values->kp]), true);
                     $queryDetail = array_merge($queryDetail, [$query]);
                 }
+                $listKP[] = $this->m_recycle->getGo(["pb.dept_id" => "GRG", "pb.status" => "done", "smi.lot" => $values->kp],
+                        "concat(pb.kode,'#',nama_route,'#',prod.nama_produk,'#',nama_warna,'#',produk_parent,'#',nama_jenis_kain) as go");
                 $detail = $this->m_recycle->getDetail('(' . implode(" ) UNION ALL ( ", $queryDetail) . ')');
                 $data[$keys]->detail = $detail;
                 $queryDetail = [];
             }
-
+            $queryGo = '(' . implode(" ) UNION ALL ( ", $listKP) . ')';
             $spreadsheet = new Spreadsheet();
             $indexJudul = 3;
             $sheet = $spreadsheet->getActiveSheet();
@@ -422,16 +474,16 @@ class Recycle extends MY_Controller {
             $sheet->setCellValue('DB' . ($indexJudul + 1), 'Penerimaan dari GRG')->getStyle("DB" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->getActiveSheet()->mergeCells("DB" . ($indexJudul + 1) . ":" . "DG" . ($indexJudul + 1));
 
-            $sheet->setCellValue('DH' . ($indexJudul + 1), 'Pengiriman ke SET')->getStyle("DH" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue('DH' . ($indexJudul + 1), 'Penerimaan ke SET')->getStyle("DH" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->getActiveSheet()->mergeCells("DH" . ($indexJudul + 1) . ":" . "DM" . ($indexJudul + 1));
 
-            $sheet->setCellValue('DN' . ($indexJudul + 1), 'Pengiriman ke PAD')->getStyle("DN" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue('DN' . ($indexJudul + 1), 'Penerimaan ke PAD')->getStyle("DN" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->getActiveSheet()->mergeCells("DN" . ($indexJudul + 1) . ":" . "DS" . ($indexJudul + 1));
 
-            $sheet->setCellValue('DT' . ($indexJudul + 1), 'Pengiriman ke FIN')->getStyle("DT" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue('DT' . ($indexJudul + 1), 'Penerimaan ke FIN')->getStyle("DT" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->getActiveSheet()->mergeCells("DT" . ($indexJudul + 1) . ":" . "DY" . ($indexJudul + 1));
 
-            $sheet->setCellValue('DZ' . ($indexJudul + 1), 'Pengiriman ke FBR')->getStyle("DZ" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->setCellValue('DZ' . ($indexJudul + 1), 'Penerimaan ke FBR')->getStyle("DZ" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->getActiveSheet()->mergeCells("DZ" . ($indexJudul + 1) . ":" . "EE" . ($indexJudul + 1));
             $sheet->setCellValue('EF' . ($indexJudul + 1), 'Pengiriman ke GJD')->getStyle("EF" . ($indexJudul + 1))->getAlignment()->setHorizontal(PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->getActiveSheet()->mergeCells("EF" . ($indexJudul + 1) . ":" . "EK" . ($indexJudul + 1));
@@ -500,19 +552,22 @@ class Recycle extends MY_Controller {
             $sheet->setCellValue('EW' . ($indexJudul + 2), 'Uom 2');
 
             $indexData = $indexJudul + 3;
+            $go = $this->m_recycle->getDetail($queryGo);
             foreach ($data as $key => $value) {
+                $datago = (object) $go[$key];
+                $datago = explode("#", $datago->go);
                 $sheet->setCellValue('A' . $indexData, ($key + 1));
                 $sheet->setCellValue('B' . $indexData, $value->kp);
                 $sheet->setCellValue('C' . $indexData, $value->qty);
                 $sheet->setCellValue('D' . $indexData, $value->uom);
                 $sheet->setCellValue('E' . $indexData, $value->qty2);
                 $sheet->setCellValue('F' . $indexData, $value->uom2);
-                $sheet->setCellValue('G' . $indexData, $value->go);
-                $sheet->setCellValue('H' . $indexData, $value->nama_route);
-                $sheet->setCellValue('I' . $indexData, $value->nama_produk);
-                $sheet->setCellValue('J' . $indexData, $value->nama_warna);
-                $sheet->setCellValue('K' . $indexData, $value->produk_parent);
-                $sheet->setCellValue('L' . $indexData, $value->nama_jenis_kain);
+                $sheet->setCellValue('G' . $indexData, $datago["0"] ? (($datago["0"] === "N/A") ? "" : $datago["0"]) : "");
+                $sheet->setCellValue('H' . $indexData, $datago["1"] ?? "");
+                $sheet->setCellValue('I' . $indexData, $datago["2"] ?? "");
+                $sheet->setCellValue('J' . $indexData, $datago["3"] ?? "");
+                $sheet->setCellValue('K' . $indexData, $datago["4"] ?? "");
+                $sheet->setCellValue('L' . $indexData, $datago["5"] ?? "");
                 $col = 16;
                 foreach ($value->detail as $keys => $values) {
                     $values = (object) $values;
@@ -563,6 +618,9 @@ class Recycle extends MY_Controller {
             $kp = $this->input->post("kp") ?? [];
 //            $mo = $this->input->post("mo");
 //            $corak = $this->input->post("corak");
+            if (is_string($kp)) {
+                $kp = json_decode($kp);
+            }
             $perPage = 25;
             $page = $this->input->post("page") ?? 0;
 //            $condition = [];
@@ -578,12 +636,12 @@ class Recycle extends MY_Controller {
             if (is_string($kp)) {
                 throw new Exception("Silahkan Pilih KP Terlebih dahulu", 500);
             }
-            if(count($kp) < 1) {
+            if (count($kp) < 1) {
                 throw new Exception("Silahkan Pilih KP Terlebih dahulu", 500);
             }
             $condition = ['mph.lot' => $kp];
             $base = $this->m_recycle->setWhereIn($condition)
-                    ->setSelect('mph.lot as kp,mph.qty,mph.uom,mph.qty2,mph.uom2,p.kode as go,nama_route,p.nama_produk,p.nama_warna,p.produk_parent,p.nama_jenis_kain');
+                    ->setSelect('mph.lot as kp,mph.qty,mph.uom,mph.qty2,mph.uom2');
 
             $count = $base->resultCount();
 
@@ -592,9 +650,10 @@ class Recycle extends MY_Controller {
             if ($page > 0) {
                 $_POST['start'] = ($page - 1) * $perPage;
             }
-            $header = $base->result();
+            $header = $base->result($kp);
             $queryDetail = [];
             $headers = $header;
+            $listKP = [];
             foreach ($headers as $keys => $values) {
                 foreach ($this->submodul as $key => $value) {
                     $query = $this->m_recycle->detail(array_merge($value, ["lot" => $values->kp]), true);
@@ -603,9 +662,13 @@ class Recycle extends MY_Controller {
                 $detail = $this->m_recycle->getDetail('(' . implode(" ) UNION ALL ( ", $queryDetail) . ')');
                 $header[$keys]->detail = $detail;
                 $queryDetail = [];
+                $listKP[] = $this->m_recycle->getGo(["pb.dept_id" => "GRG", "pb.status" => "done", "smi.lot" => $values->kp],
+                        "concat(pb.kode,'#',nama_route,'#',prod.nama_produk,'#',nama_warna,'#',produk_parent,'#',nama_jenis_kain) as go");
+//                log_message("error", json_encode($listKP));
             }
-
-            $data["data"] = $this->load->view('report/v_recycle_detail', ['header' => $header, 'page' => $page, 'perpage' => $perPage], true);
+            $queryGo = '(' . implode(" ) UNION ALL ( ", $listKP) . ')';
+            $go = $this->m_recycle->getDetail($queryGo);
+            $data["data"] = $this->load->view('report/v_recycle_detail', ['header' => $header, 'page' => $page, 'perpage' => $perPage, 'go' => $go], true);
 
             $config['base_url'] = base_url() . 'report/recycle';
             $config['use_page_numbers'] = TRUE;
@@ -636,7 +699,18 @@ class Recycle extends MY_Controller {
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-            
+        }
+    }
+
+    public function show_list_kp() {
+        try {
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' => $this->load->view('report/v_recycle_modal_list_kp', ["mo" => $this->input->post("mo")], true)]));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 

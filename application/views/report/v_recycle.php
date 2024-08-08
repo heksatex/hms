@@ -88,6 +88,7 @@
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <input type="text" name="corak" id="corak" class="form-control corak"/>
+                                                <input type="hidden" name="kp" id="kp" class="form-control kp"/>
                                             </div>
                                         </div>
                                     </div>
@@ -96,11 +97,13 @@
                                             <div class="col-xs-4">
                                                 <label class="form-label">KP</label>
                                             </div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <!--<input type="text" name="kp" id="kp" class="form-control"/>-->
-                                                <select name="kp[]" class="form-control" id="kp" multiple>
-                                                    <option value="">Pilih KP</option>
-                                                </select>
+                                            <div class="col-xs-8 col-md-8 option-kp">
+                                                <div class="option-kp-child">
+                                                    <select name="kps[]" class="form-control " id="kps" multiple>
+                                                        <option value="">Pilih KP</option>
+                                                    </select>
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -692,9 +695,28 @@
                     </div>
                 </section>
             </div>
+            <template class="option-select">
+                <div class="option-kp-child">
+                    <select class="form-control" id="kps" name="_name_" multiple>
+                        <option value="">Pilih KP</option>
+                    </select>
+                </div>
+            </template>
+            <template class="option-table">
+                <div class="option-kp-child">
+                    <button type="button" class="btn btn-default btn-sm btn-pilih-kp"> Pilih KP / LOT</button>
+                    <span>0</span> KP/LOT Terpilih
+                </div>
+            </template>
+
+            <footer class="main-footer">
+                <?php $this->load->view("admin/_partials/modal.php") ?>
+
+            </footer>
         </div>
         <?php $this->load->view("admin/_partials/js.php") ?>
-        <script>
+        <script data-exec-on-popstate>
+            var kp = [];
             $(function () {
                 $("#mo").select2({
                     placeholder: '-Pilih MO-',
@@ -712,37 +734,82 @@
                     }
                 });
 
+
+                $("#kps").on("change", function () {
+                    kp = $(this).val();
+                });
                 $("#mo").on("change", function () {
                     $("#kp").val("").trigger('change');
+                    var valMo = $(this).val();
+                    $(".option-kp").find(".option-kp-child").remove();
+                    if (valMo === "") {
+                        var mainTemplate = $('template.option-select');
+                        var $newElement = mainTemplate.html().replace(/_name_/g, "kps[]");
+                        $(".option-kp").html($newElement);
+                        loadKp();
+                    } else {
+                        var mainTemplate = $('template.option-table');
+                        var $newElement = mainTemplate.html();
+                        $(".option-kp").html($newElement);
+                        loadListKp();
+                    }
+
+                    kp = [];
                 });
-                $(".corak").on("change",function(){
+                $(".corak").on("change", function () {
                     $("#kp").val("").trigger('change');
                 });
 
-                $("#kp").select2({
-                    placeholder: '-Pilih KP-',
-                    allowClear: true,
-                    tags: "true",
-                    ajax: {
-                        url: "<?= base_url('report/recycle/get_list_kp') ?>",
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            var q = {
-                                q: params.term,
-                                corak: $("#corak").val(),
-                                mo: $("#mo").find(":selected").val(),
-                            };
-
-                            return q;
-                        },
-                        processResults: function (data) {
-                            return {
-                                results: data
-                            };
-                        }
-                    }
+                const loadListKp = (() => {
+                    $(".btn-pilih-kp").on("click", function (e) {
+                        e.preventDefault();
+                        $("#tambah_data").modal({
+                            show: true,
+                            backdrop: 'static'
+                        });
+                        $('#tambah_data').on('hidden.bs.modal', function () {
+                            $(".option-kp-child span").html(kp.length);
+                        });
+                        $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                        $('.modal-title').text('Pilih List KP');
+                        $.post("<?= base_url('report/recycle/show_list_kp') ?>", {mo: $("#mo").find(":selected").val()}, function (data) {
+                            setTimeout(function () {
+                                var hhtml = data.data.replace("lebar", "lebar_mode");
+                                $(".tambah_data").html(hhtml);
+                                $("#btn-tambah").html("Ok");
+//                                $(".modal-footer").prepend('<button type="button" name="btn-submit" id="btn-submit" data-loading-text="<i class=`fa fa-spinner fa-spin `></i> processing..."class="btn btn-primary btn-sm">Simpan</button>');
+                            }, 500);
+                        });
+                    });
                 });
+
+                const loadKp = (() => {
+                    $("#kps").select2({
+                        placeholder: '-Pilih KP-',
+                        allowClear: true,
+                        tags: "true",
+                        ajax: {
+                            url: "<?= base_url('report/recycle/get_list_kp') ?>",
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                var q = {
+                                    q: params.term,
+                                    corak: $("#corak").val(),
+                                    mo: $("#mo").find(":selected").val(),
+                                };
+
+                                return q;
+                            },
+                            processResults: function (data) {
+                                return {
+                                    results: data
+                                };
+                            }
+                        }
+                    });
+                });
+                loadKp();
 
                 $(window).keydown(function (event) {
                     if (event.keyCode === 13) {
@@ -753,6 +820,7 @@
 
                 const formrd = document.forms.namedItem("form-rd");
                 formrd.addEventListener("submit", (event) => {
+                    $("#kp").val(JSON.stringify(kp));
                     please_wait(function () {});
                     request("form-rd").then(
                             response => {
@@ -780,7 +848,7 @@
                         url: "<?= base_url('report/recycle/search/') ?>" + page,
                         type: "POST",
                         data: {
-                            kp: $("#kp").val(),
+                            kp: JSON.stringify(kp),
                             mo: $("#mo").find(":selected").val(),
                             corak: $("#corak").val(),
                             page: page
