@@ -3,6 +3,8 @@ $page = ($page > 0) ? ($page - 1) : 0;
 $no = ($page * $perpage);
 foreach ($header as $key => $value) {
     $no++;
+    $datago = (object) $go[$key];
+    $datago = explode("#", $datago->go);
     ?>
     <tr>
         <td><?= $no ?></td>
@@ -11,12 +13,12 @@ foreach ($header as $key => $value) {
         <td><?= $value->uom ?></td>
         <td><?= $value->qty2 ?></td>
         <td><?= $value->uom2 ?></td>
-        <td><?= $value->go ?></td>
-        <td><?= $value->nama_route ?></td>
-        <td><?= $value->nama_produk ?></td>
-        <td><?= $value->nama_warna ?></td>
-        <td><?= $value->produk_parent ?></td>
-        <td><?= $value->nama_jenis_kain ?></td>
+        <td><?= $datago["0"] ? (($datago["0"] === "N/A") ? "" : $datago["0"]) : "" ?></td>
+        <td><?= $datago["1"] ?? "" ?></td>
+        <td><?= $datago["2"] ?? "" ?></td>
+        <td><?= $datago["3"] ?? "" ?></td>
+        <td><?= $datago["4"] ?? "" ?></td>
+        <td><?= $datago["5"] ?? "" ?></td>
         <?php
         foreach ($value->detail as $keys => $values) {
             $values = (object) $values;
