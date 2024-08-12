@@ -1135,7 +1135,7 @@ class Joinlot extends MY_Controller
                                                 'qty_adjustment2'   => 0,
                                                 'move_id'           => $move_id,
                                                 'qty_move'          => $qty1_move,
-                                                'qty2_move'         => $qty1_move,
+                                                'qty2_move'         => $qty2_move,
                                                 'row_order'         => $row_order_adj);
 
                             $sum_qty        = $sum_qty + $ij->qty;
