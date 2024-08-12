@@ -171,7 +171,7 @@
             "processing": true,
             "serverSide": true,
             "order": [[8, 'desc']],
-            "stateSave": true,
+            "stateSave": false,
             "paging": true,
             "lengthChange": true,
             "searching": true,
