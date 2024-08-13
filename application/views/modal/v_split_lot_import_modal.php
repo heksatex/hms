@@ -23,6 +23,9 @@
               <th>Lokasi Fisik</th>
               <th>Reff Notes</th>
               <th>Reserve Move</th>
+              <?php if($departemen == 'GJD'){?>
+                <th>Marketing</th>
+              <?php } ?>
               <th></th>
             </tr>
           </thead>
@@ -37,7 +40,7 @@
 <script type="text/javascript">
   
   var dept = "<?php echo $departemen;?>";
-  var kolom = (dept=='GJD')? 14 : 10;
+  var kolom = (dept=='GJD')? 15 : 10;
   var id_kolom = (dept=='GJD')? 13 : 9;
   $(document).ready( function () {
         var  table = $('#example2').DataTable({ 

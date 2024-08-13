@@ -92,6 +92,12 @@
 
                     <div class="col-md-6" >
                         <div class="col-md-12 col-xs-12">
+                            <?php if($split->dept_id == 'GJD'){?>
+                                    <div class="col-xs-4"><label>Marketing </label></div>
+                                    <div class="col-xs-8">
+                                        <input type="text" class="form-control input-sm" name="nama_sales_group" id="nama_sales_group"  value="<?php echo $split->nama_sales_group; ?>" readonly>                    
+                                    </div>                                    
+                             <?php } ?>
                             <div class="col-xs-4"><label>Kode Produk  </label></div>
                                 <div class="col-xs-8">
                                     <input type="hidden" class="form-control input-sm" name="quant_id" id="quant_id"  value="<?php echo $split->quant_id; ?>" readonly >  

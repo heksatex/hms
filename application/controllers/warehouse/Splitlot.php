@@ -134,7 +134,10 @@ class Splitlot extends MY_Controller
                 $row[] = $field->reff_note;
                 $row[] = $field->reserve_move;
                 if($departemen == 'GJD'){
-                    $row[] = '<a href="#" class="btn btn-primary btn-xs pilih" quant_id="'.$field->quant_id.'" kode_produk="'.$field->kode_produk.'"  nama_produk="'.htmlentities($field->nama_produk).'" corak_remark="'.htmlentities($field->corak_remark).'" warna_remark="'.htmlentities($field->warna_remark).'" lot ="'.$field->lot.'" qty="'.$field->qty.'" uom="'.$field->uom.'" qty2="'.$field->qty2.'" uom2="'.$field->uom2.'"  qty_jual="'.$field->qty_jual.'" uom_jual="'.$field->uom_jual.'"  qty2_jual="'.$field->qty2_jual.'" uom2_jual="'.$field->uom2_jual.'" lebar_jadi="'.$field->lebar_jadi.'"  uom_lebar_jadi="'.$field->uom_lebar_jadi.'"data-togle="tooltip" title="Pilih Produk"><i  class="fa fa-check"></i> Pilih</a>';
+                    $row[] = $field->nama_sales_group;
+                }
+                if($departemen == 'GJD'){
+                    $row[] = '<a href="#" class="btn btn-primary btn-xs pilih" quant_id="'.$field->quant_id.'" kode_produk="'.$field->kode_produk.'"  nama_produk="'.htmlentities($field->nama_produk).'" corak_remark="'.htmlentities($field->corak_remark).'" warna_remark="'.htmlentities($field->warna_remark).'" lot ="'.$field->lot.'" qty="'.$field->qty.'" uom="'.$field->uom.'" qty2="'.$field->qty2.'" uom2="'.$field->uom2.'"  qty_jual="'.$field->qty_jual.'" uom_jual="'.$field->uom_jual.'"  qty2_jual="'.$field->qty2_jual.'" uom2_jual="'.$field->uom2_jual.'" lebar_jadi="'.$field->lebar_jadi.'"  uom_lebar_jadi="'.$field->uom_lebar_jadi.'" kode_sales_group="'.$field->sales_group.'" nama_sales_group="'.$field->nama_sales_group.'" data-togle="tooltip" title="Pilih Produk"><i  class="fa fa-check"></i> Pilih</a>';
                 }else{
                     $row[] = '<a href="#" class="btn btn-primary btn-xs pilih" quant_id="'.$field->quant_id.'" kode_produk="'.$field->kode_produk.'"  nama_produk="'.htmlentities($field->nama_produk).'" lot ="'.$field->lot.'" qty="'.$field->qty.'" uom="'.$field->uom.'" qty2="'.$field->qty2.'" uom2="'.$field->uom2.'" data-togle="tooltip" title="Pilih Produk"><i  class="fa fa-check"></i> Pilih</a>';
                 }
@@ -167,6 +170,8 @@ class Splitlot extends MY_Controller
                 $sub_menu  = $this->uri->segment(2);
 
                 $dept_id        = addslashes($this->input->post('departemen'));
+                $kode_sales_group       = ($this->input->post('kode_sales_group'));
+                $nama_sales_group       = ($this->input->post('nama_sales_group'));
                 $quant_id       = ($this->input->post('quant_id'));
                 $kode_produk    = ($this->input->post('kode_produk'));
                 $nama_produk    = ($this->input->post('nama_produk'));
@@ -526,7 +531,7 @@ class Splitlot extends MY_Controller
 
                                 if(!empty($data_insert_items)){
                                     // insert to split
-                                    $result1 = $this->m_splitLot->save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,addslashes($nama_produk),$lot,$qty,$uom_qty,$qty2,$uom_qty2,$qty_jual,$uom_qty_jual,$qty2_jual,$uom_qty2_jual,$note,addslashes($nama_user['nama']),addslashes($corak_remark),addslashes($warna_remark),$lebar_jadi,$uom_lebar_jadi);
+                                    $result1 = $this->m_splitLot->save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,addslashes($nama_produk),$lot,$qty,$uom_qty,$qty2,$uom_qty2,$qty_jual,$uom_qty_jual,$qty2_jual,$uom_qty2_jual,$note,addslashes($nama_user['nama']),addslashes($corak_remark),addslashes($warna_remark),$lebar_jadi,$uom_lebar_jadi,$kode_sales_group);
                                     if($result1['message'] != null){
                                         throw new \Exception('Simpan Data Split Gagal !', 200);                       
                                     }

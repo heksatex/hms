@@ -125,10 +125,11 @@ class M_splitLot extends CI_Model
 			$column_order2    = array(null, 'sq.kode_produk', 'sq.nama_produk','sq.corak_remark','sq.warna_remark', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual','sq.nama_grade', 'sq.lokasi_fisik','sq.reff_note', 'sq.reserve_move');
 			$column_search2   = array('sq.kode_produk','sq.nama_produk','sq.corak_remark','sq.warna_remark',  'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual', 'sq.nama_grade','sq.lokasi_fisik','sq.reff_note', 'sq.reserve_move');
 
-			$this->db->SELECT("sq.quant_id, sq.kode_produk, sq.nama_produk, sq.corak_remark, sq.warna_remark,  sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.reff_note, sq.reserve_move, mp.id_jenis_kain, mjk.nama_jenis_kain,mp.lebar_jadi, mp.uom_lebar_jadi, mp.id_category, sq.lokasi_fisik, sq.nama_grade");
+			$this->db->SELECT("sq.quant_id, sq.kode_produk, sq.nama_produk, sq.corak_remark, sq.warna_remark,  sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.reff_note, sq.reserve_move, mp.id_jenis_kain, mjk.nama_jenis_kain,mp.lebar_jadi, mp.uom_lebar_jadi, mp.id_category, sq.lokasi_fisik, sq.nama_grade, msg.nama_sales_group, sq.sales_group");
 			$this->db->FROM("stock_quant sq");
 			$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk", "INNER");
 			$this->db->JOIN("mst_jenis_kain mjk","mp.id_jenis_kain = mjk.id", "LEFT");
+			$this->db->JOIN("mst_sales_group  msg","msg.kode_sales_group = sq.sales_group","left");
 		}else{
 			$column_order2   = $this->column_order2;
 			$column_search2   = $this->column_search2;
@@ -209,9 +210,9 @@ class M_splitLot extends CI_Model
 		return $this->db->count_all_results();
 	}
 
-    public function save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,$nama_produk,$lot,$qty,$uom_qty,$qty2,$uom_qty2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$note,$nama_user,$corak_remark,$warna_remark,$lebar_jadi,$uom_lebar_jadi)
+    public function save_splitlot($kode_split,$tgl,$departemen,$quant_id,$kode_produk,$nama_produk,$lot,$qty,$uom_qty,$qty2,$uom_qty2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$note,$nama_user,$corak_remark,$warna_remark,$lebar_jadi,$uom_lebar_jadi,$kode_sales_group)
     {
-        $this->db->query("INSERT INTO split (kode_split,tanggal,dept_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,qty_jual,uom_jual,qty2_jual,uom2_jual,note,nama_user,corak_remark,warna_remark,lebar_jadi,uom_lebar_jadi) values ('$kode_split','$tgl','$departemen','$quant_id','$kode_produk','$nama_produk','$lot','$qty','$uom_qty','$qty2','$uom_qty2','$qty_jual','$uom_jual','$qty2_jual','$uom2_jual','$note','$nama_user','$corak_remark','$warna_remark','$lebar_jadi','$uom_lebar_jadi')") ;
+        $this->db->query("INSERT INTO split (kode_split,tanggal,dept_id,quant_id,kode_produk,nama_produk,lot,qty,uom,qty2,uom2,qty_jual,uom_jual,qty2_jual,uom2_jual,note,nama_user,corak_remark,warna_remark,lebar_jadi,uom_lebar_jadi,sales_group) values ('$kode_split','$tgl','$departemen','$quant_id','$kode_produk','$nama_produk','$lot','$qty','$uom_qty','$qty2','$uom_qty2','$qty_jual','$uom_jual','$qty2_jual','$uom2_jual','$note','$nama_user','$corak_remark','$warna_remark','$lebar_jadi','$uom_lebar_jadi','$kode_sales_group')") ;
 		return is_array($this->db->error());
     }
 
@@ -223,9 +224,10 @@ class M_splitLot extends CI_Model
 
     public function get_data_split_by_kode($kode)
     {
-        return $this->db->query("SELECT s.kode_split,s.tanggal,s.dept_id,s.quant_id,s.kode_produk,s.nama_produk,s.lot,s.qty,s.uom,s.qty2,s.uom2,s.note,s.nama_user, d.nama as nama_departemen, s.qty_jual, s.uom_jual, s.qty2_jual, s.uom2_jual, s.corak_remark, s.warna_remark, s.lebar_jadi, s.uom_lebar_jadi
+        return $this->db->query("SELECT s.kode_split,s.tanggal,s.dept_id,s.quant_id,s.kode_produk,s.nama_produk,s.lot,s.qty,s.uom,s.qty2,s.uom2,s.note,s.nama_user, d.nama as nama_departemen, s.qty_jual, s.uom_jual, s.qty2_jual, s.uom2_jual, s.corak_remark, s.warna_remark, s.lebar_jadi, s.uom_lebar_jadi, msg.nama_sales_group
                         FROM split s
                         LEFT JOIN departemen d ON s.dept_id = d.kode
+						LEFT JOIN mst_sales_group msg ON s.sales_group = msg.kode_sales_group
                         WHERE s.kode_split = '$kode' ")->row(); 
     }
 
