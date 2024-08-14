@@ -680,7 +680,7 @@ class Splitlot extends MY_Controller
                 $this->_module->startTransaction();
 
                 // lock table
-                $this->_module->lock_tabel('stock_quant WRITE, split WRITE, split_items WRITE, departemen as d WRITE, picklist_detail WRITE, token_increment WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, split as s WRITE, user_priv WRITE');
+                $this->_module->lock_tabel('stock_quant WRITE, split WRITE, split_items WRITE, departemen as d WRITE, picklist_detail WRITE, token_increment WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, split as s WRITE, user_priv WRITE, mst_sales_group as msg WRITE');
 
                 $sub_menu  = $this->uri->segment(2);
                 $username = addslashes($this->session->userdata('username')); 
