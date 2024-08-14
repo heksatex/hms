@@ -690,7 +690,7 @@ class Outlet extends MY_Controller
                                             if($get_sq['qty_opname'] > 0 AND $qty_1_rm > 0){
                                                 $qty_op_new = ($get_sq['qty_opname'] / $qty_1_rm) * $hph_mtr;
                                                 $qty_op_update = $get_sq['qty_opname'] - round($qty_op_new,2);
-                                                $uom_opname_rm = $get_sq['qty_opname'];
+                                                $uom_opname_rm = $get_sq['uom_opnme'];
                                             }
 
                                             if((double)$hph_kg < (double)$qty_2_rm){
