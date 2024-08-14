@@ -276,9 +276,10 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT fg.kode, fg.move_id, fg.quant_id, fg.kode_produk, fg.kode_produk, fg.nama_produk, 
 										fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.row_order, sq.reff_note, fg.qty2, fg.uom2, fg.lebar_greige, fg.uom_lebar_greige, fg.lebar_jadi, fg.uom_lebar_jadi,(SELECT lot FROM adjustment_items adji 
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
-									where adj.status = 'done' AND adji.quant_id = fg.quant_id AND adj.id_type_adjustment IN ('1','2') limit 1 ) as lot_adj
+									where adj.status = 'done' AND adji.quant_id = fg.quant_id AND adj.id_type_adjustment IN ('1','2') limit 1 ) as lot_adj, mrpin.lot as lot_asal
 								FROM mrp_production_fg_hasil fg 
 								INNER JOIN stock_quant sq ON fg.quant_id =  sq.quant_id
+								LEFT JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 								WHERE fg.kode = '".$kode."' AND fg.lokasi NOT IN ('".$lokasi_waste."') ORDER BY fg.row_order")->result();
 	}
 

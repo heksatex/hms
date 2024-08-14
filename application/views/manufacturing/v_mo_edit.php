@@ -923,6 +923,9 @@
                           <tr>
                             <th class="style no">No.</th>
                             <th class="style">Product</th>
+                            <?php if($list->dept_id == 'GJD'){ ?>
+                              <th class="style">Lot Asal</th>
+                            <?php }?>
                             <th class="style">Lot</th>
                             <th class="style" style="text-align: right;">Qty</th>
                             <th class="style">uom</th>
@@ -950,6 +953,9 @@
                               <tr class="num" <?php echo $color ?>>
                                 <td></td>
                                 <td ><?php echo $row->nama_produk?></td>
+                                <?php if($list->dept_id == 'GJD'){ ?>
+                                  <td><?php echo $row->lot_asal?></td>
+                                <?php }?>
                                 <td><?php echo $row->lot?></td>
                                 <td align="right"><?php echo number_format($row->qty,2)?></td>
                                 <td><?php echo $row->uom?></td>

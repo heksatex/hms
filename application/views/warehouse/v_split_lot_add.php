@@ -91,8 +91,15 @@
                                     <button type="button" class="btn btn-primary btn-sm" id="btn-import-produk" >Tampilkan Barang di Lokasi</button>            
                                 </div>
                             </div> 
-
-
+                            <span id="show_mkt" style="display: none;">
+                                <div class="col-md-12 col-xs-12">
+                                    <div class="col-xs-4"><label>Marketing </label></div>
+                                    <div class="col-xs-8">
+                                        <input type="hidden" class="form-control input-sm" name="kode_sales_group" id="kode_sales_group" readonly>   
+                                        <input type="text" class="form-control input-sm" name="nama_sales_group" id="nama_sales_group" readonly>                    
+                                    </div>                                    
+                                </div>
+                            </span>
                             <div class="col-md-12 col-xs-12">
                                 <div class="col-xs-4"><label>Kode Produk  </label></div>
                                 <div class="col-xs-8">
@@ -298,6 +305,7 @@
         var dept = $('#departemen').val();
         if($('#departemen').val() != ''){
             if(dept == 'GJD'){
+                $("#show_mkt").show();
                 $("#show_qty_jual").show();
 
                 $('#table_items thead tr').remove();
@@ -318,6 +326,7 @@
                         +'<th class="style" width="50px"></th><tr>';
                 $('#table_items thead').append(row);
             }else{
+                $("#show_mkt").hide();
                 $("#show_qty_jual").hide();
                 $('#table_items thead tr').remove();
                 var row = '<tr><th class="style" width="50px">No.</th>'
@@ -347,6 +356,7 @@
             $("#table_items tbody tr").remove();
 
         }else{
+            $("#show_mkt").hide();
             $("#show_qty_jual").hide();
         }
     }
@@ -399,6 +409,8 @@
 
 
     $(document).on('click', '.pilih', function (e) {
+      document.getElementById("kode_sales_group").value = $(this).attr('kode_sales_group');
+      document.getElementById("nama_sales_group").value = $(this).attr('nama_sales_group');
       document.getElementById("quant_id").value = $(this).attr('quant_id');
       document.getElementById("kode_produk").value = $(this).attr('kode_produk');
       document.getElementById("nama_produk").value = $(this).attr('nama_produk');
@@ -599,6 +611,8 @@
    
         let tambah      = true;
         let items_split = false;
+        let kode_sales_group    = $('#kode_sales_group').val();
+        let nama_sales_group    = $('#nama_sales_group').val();
         let quant_id    = $('#quant_id').val();
         let kode_produk = $('#kode_produk').val();
         let nama_produk = $('#nama_produk').val();
@@ -632,8 +646,6 @@
         }else if(uom_qty == ''){
             alert_notify('fa fa-warning','Uom Qty1 tidak boleh kosong !','danger',function(){});
         }else{
-
-            
 
             if(departemen == 'GJD'){
                 $('.tbl_corak_remark').each(function(index,value){
@@ -798,7 +810,7 @@
                                             e.overrideMimeType("application/json;charset=UTF-8");
                                         }
                                     },
-                                    data: {lot:lot, quant_id:quant_id, kode_produk:kode_produk, nama_produk:nama_produk, corak_remark:corak_remark, warna_remark:warna_remark, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, qty_jual:qty_jual, uom_qty_jual:uom_qty_jual, qty2_jual:qty2_jual, uom_qty2_jual:uom_qty2_jual, lebar_jadi:lebar_jadi, uom_lebar_jadi:uom_lebar_jadi, departemen:departemen, note:note, data_split:JSON.stringify(arr),
+                                    data: {lot:lot, quant_id:quant_id, kode_sales_group:kode_sales_group,nama_sales_group:nama_sales_group, kode_produk:kode_produk, nama_produk:nama_produk, corak_remark:corak_remark, warna_remark:warna_remark, qty:qty, uom_qty:uom_qty, qty2:qty2, uom_qty2:uom_qty2, qty_jual:qty_jual, uom_qty_jual:uom_qty_jual, qty2_jual:qty2_jual, uom_qty2_jual:uom_qty2_jual, lebar_jadi:lebar_jadi, uom_lebar_jadi:uom_lebar_jadi, departemen:departemen, note:note, data_split:JSON.stringify(arr),
                                     },success: function(data){
                                         if(data.status == "failed"){
                                             //jika ada form belum keiisi
