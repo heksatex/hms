@@ -70,7 +70,8 @@ class Penerimaanharian extends MY_Controller
 									'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
 									'status'		=> $row->nama_status,
 									'reff_note'		=> $row->reff_note,
-									'in'           => 'Yes'
+									'in'           => 'Yes',
+									'lot_adj'		=> $row->lot_adj
 
 				);
 				$total++;
@@ -91,7 +92,9 @@ class Penerimaanharian extends MY_Controller
 									'qty2'			=> number_format($row->qty2,2).' '.$row->uom2,
 									'status'		=> $row->nama_status,
 									'reff_note'		=> $row->reff_note,
-									'in'           => 'No'
+									'in'           => 'No',
+									'lot_adj'		=> $row->lot_adj
+
 				);
 				$total++;
 			}
@@ -112,8 +115,9 @@ class Penerimaanharian extends MY_Controller
 									'qty2'			=> number_format($row->tot_qty2,2).' ',
 									'status'		=> $row->nama_status,
 									'reff_note'		=> $row->reff_note,
-									'in'           => 'Yes'
-
+									'in'           => 'Yes',
+									'lot_adj'		=> '',
+									
 				);
 				$total++;
 			}
@@ -133,7 +137,8 @@ class Penerimaanharian extends MY_Controller
 									'qty2'			=> number_format($row->tot_qty2,2).' ',
 									'status'		=> $row->nama_status,
 									'reff_note'		=> $row->reff_note,
-									'in'           => 'No'
+									'in'           => 'No',
+									'lot_adj'		=> '',
 				);
 				$total++;
 			}
@@ -230,6 +235,18 @@ class Penerimaanharian extends MY_Controller
 			  )
 		);	
 
+		$styleArrayColor = array(
+			'font'  => array(
+				'bold'  => true,
+				'color' => array('rgb' => 'FF0000'),
+			),
+			'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			)
+	  	);	
+
 		// header table
 		if($view == 'Detail'){
 			$table_head_columns  = array('No', 'kode','Tgl Kirim','Origin','Reff Picking','Kode Produk','Nama Produk','Lot','Qty1','Uom1','Qty2','Uom2','Status','Reff Note');
@@ -318,21 +335,27 @@ class Penerimaanharian extends MY_Controller
 				$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 				$object->getActiveSheet()->getStyle('N'.$rowCount.':N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 
+				if($row->lot_adj != ''){
+					$styleCell = $styleArrayColor;
+				}else{
+					$styleCell = $styleArray;
+				}
+
 				//set border true
-				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleCell);
 
 				$rowCount++;
 			}
@@ -363,21 +386,27 @@ class Penerimaanharian extends MY_Controller
 				$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 				$object->getActiveSheet()->getStyle('N'.$rowCount.':N'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true); 
 
+				if($row->lot_adj != ''){
+					$styleCell = $styleArrayColor;
+				}else{
+					$styleCell = $styleArray;
+				}
+
 				//set border true
-				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
-				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+				$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleCell);
+				$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleCell);
 
 				$rowCount++;
 			}
