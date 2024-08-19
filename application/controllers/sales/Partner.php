@@ -165,8 +165,8 @@ class Partner extends MY_Controller
 				$callback = array('status' => 'failed', 'field' => 'invoice_street', 'message' => 'Invoice Street Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($invoice_country)){
 	        	$callback = array('status' => 'failed', 'field' => 'invoice_country', 'message' => 'Invoice Country Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
-	        }else if(empty($invoice_state)){
-	        	$callback = array('status' => 'failed', 'field' => 'invoice_state', 'message' => 'Invoice State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+	        // }else if(empty($invoice_state)){
+	        // 	$callback = array('status' => 'failed', 'field' => 'invoice_state', 'message' => 'Invoice State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($invoice_city)){
 	        	$callback = array('status' => 'failed', 'field' => 'invoice_city', 'message' => 'Invoice City Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 
@@ -177,8 +177,8 @@ class Partner extends MY_Controller
 	        	$callback = array('status' => 'failed', 'field' => 'delivery_street', 'message' => 'Delivery Street Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($delivery_country)){
 	        	$callback = array('status' => 'failed', 'field' => 'delivery_country', 'message' => 'Delivery Country Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
-	        }else if(empty($delivery_state)){
-	        	$callback = array('status' => 'failed', 'field' => 'delivery_state', 'message' => 'Delivery State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+	        // }else if(empty($delivery_state)){
+	        // 	$callback = array('status' => 'failed', 'field' => 'delivery_state', 'message' => 'Delivery State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($delivery_city)){
 	        	$callback = array('status' => 'failed', 'field' => 'delivery_city', 'message' => 'Delivery Street Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else{

@@ -210,6 +210,7 @@
                             </tr>
                           </tbody>
                       </table>
+                      <small><b>*Jika terdapat baris yang berwarna <font color="red">MERAH</font> maka Product/Lot tersebut telah di proses ADJUSTMENT !!</b></small>
                       <div id="example1_processing" class="table_processing" style="display: none">
                         Processing...
                       </div>
@@ -502,19 +503,25 @@
                           link = '<a href="<?=base_url()?>warehouse/penerimaanbarang/edit/'+value.kode_enc+'" data-toggle="tooltip" title="Lihat Penerimaan Barang" target="_blank">'+value.kode+'</a>'
                         }
 
+                        if(value.lot_adj != ''){
+                          color = "style='color:red';";
+                        }else{
+                          color = "";
+                        }
+
                         var tr = $("<tr>").append(
-                                 $("<td>").text(no++),
-                                 $("<td>").html(link),
-                                 $("<td>").text(value.tgl_kirim),
-                                 $("<td>").text(value.origin),
-                                 $("<td>").text(value.reff_picking),
-                                 $("<td>").text(value.kode_produk),
-                                 $("<td>").text(value.nama_produk),
-                                 $("<td class='nowrap' "+width_lot+">").text(value.lot),
-                                 $("<td align='right'>").text(value.qty1),
-                                 $("<td align='right'>").text(value.qty2),
-                                 $("<td>").text(value.status),
-                                 $("<td>").text(value.reff_note),
+                                 $("<td "+color+">").text(no++),
+                                 $("<td "+color+">").html(link),
+                                 $("<td "+color+">").text(value.tgl_kirim),
+                                 $("<td "+color+">").text(value.origin),
+                                 $("<td "+color+">").text(value.reff_picking),
+                                 $("<td "+color+">").text(value.kode_produk),
+                                 $("<td "+color+">").text(value.nama_produk),
+                                 $("<td class='nowrap' "+width_lot+" "+color+">").text(value.lot),
+                                 $("<td align='right' "+color+">").text(value.qty1),
+                                 $("<td align='right' "+color+">").text(value.qty2),
+                                 $("<td "+color+">").text(value.status),
+                                 $("<td "+color+">").text(value.reff_note),
                         );
                         tbody.append(tr);
                     });
