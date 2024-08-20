@@ -135,10 +135,13 @@ class M_bulkdetail extends CI_Model {
         }
     }
 
-    public function getDataBulk(array $condition = []) {
+    public function getDataBulk(array $condition = [], $whereRaw = null) {
         $this->_barcodeOnBulk();
         if (count($condition) > 0) {
             $this->db->where($condition);
+        }
+        if ($whereRaw !== null){
+            $this->db->where($whereRaw);
         }
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
@@ -146,21 +149,27 @@ class M_bulkdetail extends CI_Model {
         return $query->result();
     }
 
-    public function getCountDataFilteredBulk(array $condition = []) {
+    public function getCountDataFilteredBulk(array $condition = [], $whereRaw = null) {
         $this->_barcodeOnBulk();
         if (count($condition) > 0) {
             $this->db->where($condition);
+        }
+        if ($whereRaw !== null){
+            $this->db->where($whereRaw);
         }
         $query = $this->db->get();
         return $query->num_rows();
     }
 
-    public function getCountAllDataBulk(array $condition = []) {
+    public function getCountAllDataBulk(array $condition = [], $whereRaw = null) {
         $this->db->from($this->table . ' bd');
         $this->db->join("bulk b", "b.no_bulk = bd.bulk_no_bulk");
         $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode", "right");
         if (count($condition) > 0) {
             $this->db->where($condition);
+        }
+        if ($whereRaw !== null){
+            $this->db->where($whereRaw);
         }
         return $this->db->count_all_results();
     }
