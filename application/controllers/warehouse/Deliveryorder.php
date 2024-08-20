@@ -164,12 +164,13 @@ class Deliveryorder extends MY_Controller {
         try {
             $pl = $this->input->post("pl");
 //            $condition = ["b.no_pl" => $pl, "pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
-            $condition = ["pd.no_pl" => $pl,'b.no_pl'=>$pl, 'pd.valid <>' => "cancel"];
+            $condition = ["pd.no_pl" => $pl, 'pd.valid <>' => "cancel"];
             $data = array();
             $no = $_POST['start'];
-            $list = $this->m_bulkdetail->getDataBulk($condition);
-            $recordsTotal = $this->m_bulkdetail->getCountAllDataBulk($condition);
-            $recordsFiltered = $this->m_bulkdetail->getCountDataFilteredBulk($condition);
+            $whereRaw = "(b.no_pl = '{$pl}' or b.no_pl is null)";
+            $list = $this->m_bulkdetail->getDataBulk($condition, $whereRaw);
+            $recordsTotal = $this->m_bulkdetail->getCountAllDataBulk($condition, $whereRaw);
+            $recordsFiltered = $this->m_bulkdetail->getCountDataFilteredBulk($condition, $whereRaw);
             foreach ($list as $value) {
                 $no++;
                 $data[] = array(
@@ -212,7 +213,7 @@ class Deliveryorder extends MY_Controller {
                 if ($type === "1") {
                     $join = ["BULK"];
                 }
-                $condition = array_merge($condition,['pd.valid !='=>'cancel']);
+                $condition = array_merge($condition, ['pd.valid !=' => 'cancel']);
                 $list = $this->m_deliveryorderdetail->getDataDetail($condition, $join);
                 $recordsTotal = $this->m_deliveryorderdetail->getDataDetailCountAll($condition, $join);
                 $recordsFiltered = $this->m_deliveryorderdetail->getDataDetailCountFiltered($condition);
@@ -225,7 +226,7 @@ class Deliveryorder extends MY_Controller {
                             $field->barcode_id,
                             $field->corak_remark,
                             $field->warna_remark,
-                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
+                            $field->lebar_jadi . ' ' . $field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
@@ -238,7 +239,7 @@ class Deliveryorder extends MY_Controller {
                             $field->barcode_id,
                             $field->corak_remark,
                             $field->warna_remark,
-                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
+                            $field->lebar_jadi . ' ' . $field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
@@ -272,7 +273,7 @@ class Deliveryorder extends MY_Controller {
                             $field->barcode_id,
                             $field->corak_remark,
                             $field->warna_remark,
-                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
+                            $field->lebar_jadi . ' ' . $field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
@@ -285,7 +286,7 @@ class Deliveryorder extends MY_Controller {
                             $field->barcode_id,
                             $field->corak_remark,
                             $field->warna_remark,
-                            $field->lebar_jadi.' '.$field->uom_lebar_jadi,
+                            $field->lebar_jadi . ' ' . $field->uom_lebar_jadi,
                             $field->qty . ' ' . $field->uom
                         ];
                         $data[] = $row;
@@ -758,7 +759,6 @@ class Deliveryorder extends MY_Controller {
                 $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
                 $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
                 $condition = array_merge($condition, ['tanggal_dokumen >=' => $tanggalAwal, 'tanggal_dokumen <=' => $tanggalAkhir]);
-               
             }
 
             $list = $this->m_deliveryorder->getData($condition);
@@ -806,7 +806,7 @@ class Deliveryorder extends MY_Controller {
             if ($jenis === "sje") {
                 $data["count_bulk"] = $this->m_deliveryorderdetail->getCountBulk($condition);
             }
-            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition, ['pd.valid <>'=>'cancel']), (int) $base->type_bulk_id, $jenis);
+            $data["data"] = $this->m_deliveryorderdetail->getDataWGroup(array_merge($condition, ['pd.valid <>' => 'cancel']), (int) $base->type_bulk_id, $jenis);
             $this->load->view("print/do/" . $jenis, $data);
         } catch (Exception $ex) {
             show_404();
