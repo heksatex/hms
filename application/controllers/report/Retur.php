@@ -61,18 +61,18 @@ class Retur extends MY_Controller {
             }
 
             if ($status === "cancel") {
-                $condition = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => $status]);
+                $condition = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => $status, 'pd.valid <>' => 'done']);
                 $list = $this->m_deliveryretur->getDataReport($condition, $order, $rekap);
                 $countAll = $this->m_deliveryretur->getDataReportTotal($condition, $order, $rekap);
             } else if ($status === "retur") {
-                $condition = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => $status, 'ddo.status' => 'done']);
+                $condition = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => $status, 'ddo.status' => 'done', 'pd.valid <>' => 'done']);
                 $list = $this->m_deliveryretur->getDataReport($condition, $order, $rekap);
                 $countAll = $this->m_deliveryretur->getDataReportTotal($condition, $order, $rekap);
             } else {
 
-                $queryCancel = $this->m_deliveryretur->getDataReport(array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => 'cancel']),
+                $queryCancel = $this->m_deliveryretur->getDataReport(array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => 'cancel', 'pd.valid <>' => 'done']),
                         $order, $rekap, true);
-                $queryRetur = $this->m_deliveryretur->getDataReport(array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur', 'ddo.status' => 'done']),
+                $queryRetur = $this->m_deliveryretur->getDataReport(array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur', 'ddo.status' => 'done', 'pd.valid <>' => 'done']),
                         $order, $rekap, true);
                 $list = $this->m_deliveryretur->getDataReportUnion([$queryCancel, $queryRetur], $order, $rekap);
                 $countAll = $this->m_deliveryretur->getDataReportTotalUnion([$queryCancel, $queryRetur], $rekap);
@@ -145,7 +145,7 @@ class Retur extends MY_Controller {
             } else {
                 $queryCancel = $this->m_deliveryretur->getDataReport(array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => 'cancel']),
                         $order, $rekap, true);
-                $queryRetur = $this->m_deliveryretur->getDataReport(array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur', 'ddo.status' => 'done']),
+                $queryRetur = $this->m_deliveryretur->getDataReport(array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']),
                         $order, $rekap, true);
                 $list = $this->m_deliveryretur->getDataReportUnion([$queryCancel, $queryRetur], $order, $rekap);
             }
@@ -198,7 +198,7 @@ class Retur extends MY_Controller {
                 $sheet->setCellValue('D' . $rowStartData, date('Y-m-d', strtotime($value->tanggal_buat)));
                 $sheet->setCellValue('E' . $rowStartData, date('Y-m-d', strtotime($value->tanggal_dokumen)));
                 $sheet->setCellValue('F' . $rowStartData, $value->status ?? "");
-                $sheet->setCellValue("G" . $rowStartData, ($status === "cancel") ? $value->tanggal_batal : ($status === "retur") ? $value->tanggal_retur:($value->tanggal_batal ?? $value->tanggal_retur));
+                $sheet->setCellValue("G" . $rowStartData, ($status === "cancel") ? $value->tanggal_batal : ($status === "retur") ? $value->tanggal_retur : ($value->tanggal_batal ?? $value->tanggal_retur));
                 $sheet->setCellValue('H' . $rowStartData, strtoupper($value->jenis_jual));
                 $sheet->setCellValue('I' . $rowStartData, $value->no_picklist);
                 $sheet->setCellValue('J' . $rowStartData, $value->nama);
