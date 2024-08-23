@@ -146,9 +146,9 @@ class M_deliveryorder extends CI_Model {
             $this->db->group_by("ddo.no");
         } else if ($rekap === 'detail') {
             $this->db->select(",COUNT(dod.barcode_id) as total_lot");
-            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom");
+            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom,no_picklist");
         } else {
-            $this->db->select(",dod.barcode_id as total_lot");
+            $this->db->select(",dod.barcode_id as total_lot,no_picklist");
             $this->db->group_by("dod.barcode_id");
         }
         if (count($condition) > 0) {
@@ -187,9 +187,9 @@ class M_deliveryorder extends CI_Model {
             $this->db->group_by("ddo.no");
         } else if ($rekap === 'detail') {
             $this->db->select(",COUNT(dod.barcode_id) as total_lot");
-            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom");
+            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom,no_picklist");
         } else {
-            $this->db->select(",dod.barcode_id as total_lot");
+            $this->db->select(",dod.barcode_id as total_lot,no_picklist");
             $this->db->group_by("dod.barcode_id");
         }
         if (count($condition) > 0)
@@ -206,9 +206,9 @@ class M_deliveryorder extends CI_Model {
             $this->db->group_by("ddo.no");
         } else if ($rekap === 'detail') {
             $this->db->select(",COUNT(dod.barcode_id) as total_lot");
-            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom");
+            $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom,no_picklist");
         } else {
-            $this->db->select(",dod.barcode_id as total_lot");
+            $this->db->select(",dod.barcode_id as total_lot,no_picklist");
             $this->db->group_by("dod.barcode_id");
         }
         if (count($condition) > 0)
