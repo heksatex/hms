@@ -19,7 +19,7 @@ class M_HPHdf extends CI_Model
 								INNER JOIN warna w ON w.id = mp.id_warna
 								LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id 
 								LEFT JOIN mst_sales_group mg ON mpfg.sales_group = mg.kode_sales_group
-								LEFT JOIN pengiriman_barang pb ON mp.origin = pb.origin AND pb.dept_id = 'GRG'
+								LEFT JOIN pengiriman_barang pb ON mp.origin = pb.origin AND pb.dept_id = 'GRG' AND pb.status ='done'
 								$where ORDER BY mpfg.kode asc, mpfg.create_date asc
 								")->result();
 	}
@@ -36,7 +36,7 @@ class M_HPHdf extends CI_Model
 								INNER JOIN warna w ON w.id = mp.id_warna
 								LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id 
 								LEFT JOIN mst_sales_group mg ON mpfg.sales_group = mg.kode_sales_group
-								LEFT JOIN pengiriman_barang pb ON mp.origin = pb.origin AND pb.dept_id = 'GRG'
+								LEFT JOIN pengiriman_barang pb ON mp.origin = pb.origin AND pb.dept_id = 'GRG'  AND pb.status ='done'
 								$where
 								");
 		$result = $query->result_array();      
