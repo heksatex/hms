@@ -315,8 +315,9 @@ class HPHgudangjadi extends MY_Controller
 
 			$where     = " WHERE mrpin.status NOT IN ('draft','cancel') AND mp.dept_id = '".$id_dept."' ".$where_tgldari_hph." ".$where_tglsampai_hph." ".$where_noHph_hph." ".$where_lotbahanBaku_hph." ".$where_namaProduk_hph." ".$where_corakRemark_hph." ".$where_warnaRemark_hph." ".$where_quality_hph." ".$where_jenisKain_hph." ".$where_lotBarangjadi_hph." ".$where_benang_hph." ".$where_lebarJadi_hph." ".$where_mc_hph." ".$where_colorOrder_hph." ".$where_salesOrder_hph." ".$where_grade_hph." ".$where_user_hph." ".$where_marketing_hph;
             if($show_jenis_hph == 'All' or $show_jenis_hph == 'HPH' or $show_jenis_hph == "SUSUT"){
-                // if($show_jenis_hph == "SUSUT" ){
-                //     $where = $where." AND fg.lokasi ='GJD/Waste' ";
+                if($show_jenis_hph == "SUSUT" ){
+                    $where = $where." AND fg.lokasi ='GJD/Waste' ";
+                }
                 // }else{ // stock / ALl
                 //     $where = $where." AND fg.lokasi ='GJD/Stock' ";
                 // }
