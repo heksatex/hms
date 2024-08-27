@@ -20,7 +20,7 @@ class M_deliveryretur extends CI_Model {
     protected function _getDataReport() {
         $this->db->from('delivery_order ddo');
         $this->db->join("delivery_order_detail dod", 'dod.do_id = ddo.id ');
-        $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id)");
+        $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id and pd.no_pl = no_picklist)");
         $this->db->select("ddo.no,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,ddo.tanggal_batal,dod.tanggal_retur,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,"
                 . "alamat_kirim,pd.corak_remark,pd.warna_remark,pd.uom as uom_jual,pd.uom2 as uom2_jual,pd.uom_hph as uom,pd.uom2_hph as uom2,pd.lebar_jadi,pd.uom_lebar_jadi,"
                 . "SUM(pd.qty_hph) as total_qty,SUM(pd.qty2_hph) as total_qty2,SUM(pd.qty) as total_qty_jual,SUM(pd.qty2) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note,dod.status");
@@ -46,7 +46,7 @@ class M_deliveryretur extends CI_Model {
             $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom_jual,dod.status,no_picklist");
         } else {
             $this->db->select(",pd.barcode_id as total_lot");
-            $this->db->group_by("pd.barcode_id,dod.status,no_picklist");
+            $this->db->group_by("ddo.no,pd.barcode_id,dod.status,no_picklist");
         }
         if (count($condition) > 0) {
             $this->db->where($condition);
@@ -104,7 +104,7 @@ class M_deliveryretur extends CI_Model {
 //        } else if ($rekap === 'detail') {
 //            $this->db->group_by("no,corak_remark,warna_remark,lebar_jadi,uom,status,no_picklist");
 //        } else {
-//            $this->db->group_by("total_lot,status,no_picklist");
+//            $this->db->group_by("no,total_lot,status,no_picklist");
 //        }
         switch ($order) {
             case"nama":
