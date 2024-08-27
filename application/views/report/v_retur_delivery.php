@@ -144,7 +144,7 @@
                                                             </div>
                                                             <div class="col-xs-8 col-md-8">
                                                                 <select name="status" class="form-control" id="status">
-                                                                    <<option value="retur_batal">Retur dan Batal</option>
+                                                                    <option value="retur_batal">Retur dan Batal</option>
                                                                     <option value="retur">Retur</option>
                                                                     <option value="cancel">Batal</option>
                                                                 </select>
@@ -174,9 +174,9 @@
                                                             </div>
                                                             <div class="col-xs-8 col-md-8">
                                                                 <select name="rekap" id="rekap" class="form-control">
-                                                                    <option value="global">Global</option>
-                                                                    <option value="detail" selected>Detail</option>
-                                                                    <option value="barcode">Barcode</option>
+                                                                    <option value="global" disabled>Global</option>
+                                                                    <option value="detail" disabled>Detail</option>
+                                                                    <option value="barcode" selected>Barcode</option>
                                                                 </select>
                                                             </div>
                                                         </div>
