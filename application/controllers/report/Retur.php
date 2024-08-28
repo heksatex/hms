@@ -61,18 +61,18 @@ class Retur extends MY_Controller {
             }
 
             if ($status === "cancel") {
-                $condition = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => $status]);
+                $condition = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => $status]);
                 $list = $this->m_deliveryretur->getDataReport($condition, $order, $rekap);
                 $countAll = $this->m_deliveryretur->getDataReportTotal($condition, $order, $rekap);
             } else if ($status === "retur") {
-                $condition = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => $status, 'ddo.status' => 'done']);
+                $condition = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => $status]);
                 $list = $this->m_deliveryretur->getDataReport($condition, $order, $rekap);
                 $countAll = $this->m_deliveryretur->getDataReportTotal($condition, $order, $rekap);
             } else {
 
-                $queryCancel = $this->m_deliveryretur->getDataReport(array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => 'cancel']),
+                $queryCancel = $this->m_deliveryretur->getDataReport(array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => 'cancel']),
                         $order, $rekap, true);
-                $queryRetur = $this->m_deliveryretur->getDataReport(array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur', 'ddo.status' => 'done']),
+                $queryRetur = $this->m_deliveryretur->getDataReport(array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']),
                         $order, $rekap, true);
                 $list = $this->m_deliveryretur->getDataReportUnion([$queryCancel, $queryRetur], $order, $rekap);
                 $countAll = $this->m_deliveryretur->getDataReportTotalUnion([$queryCancel, $queryRetur], $rekap);
@@ -137,13 +137,13 @@ class Retur extends MY_Controller {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
             if ($status === "cancel") {
-                $condition = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => $status]);
+                $condition = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => $status]);
                 $list = $this->m_deliveryretur->getDataReport($condition, $order, $rekap);
             } else if ($status === "retur") {
-                $condition = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => $status, 'ddo.status' => 'done']);
+                $condition = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => "retur"]);
                 $list = $this->m_deliveryretur->getDataReport($condition, $order, $rekap);
             } else {
-                $queryCancel = $this->m_deliveryretur->getDataReport(array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'ddo.status' => 'cancel']),
+                $queryCancel = $this->m_deliveryretur->getDataReport(array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => 'cancel']),
                         $order, $rekap, true);
                 $queryRetur = $this->m_deliveryretur->getDataReport(array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']),
                         $order, $rekap, true);
