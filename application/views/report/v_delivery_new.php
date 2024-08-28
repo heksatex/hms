@@ -217,7 +217,8 @@
                                                                     <input id="summary" name="summary" type="checkbox" value="1">Summary</label>
                                                             </div>
                                                             <div class="col-xs-6">
-
+                                                                <label class="checkbox-inline">
+                                                                    <input id="returbatal" name="returbatal" type="checkbox" value="1">Tampilkan Retur dan Batal</label>
                                                                 <input type="hidden" name="page" id="page" value="1">
                                                             </div>
                                                         </div>
@@ -265,6 +266,7 @@
                                                 <th class="style bb ws">LOT</th>
                                                 <th class="style bb ws">Catatan</th>
                                                 <th class="style bb ws">Marketing</th>
+                                                <th class="style bb ws">Status</th>
                                             </tr>
                                             <tbody id="tBody" class="ws">
 
@@ -329,6 +331,7 @@
                             order: $("#order").find(":selected").val(),
                             marketing: $("#marketing").find(":selected").val(),
                             tgl_buat: $("#tgl_buat").is(":checked") ? 1 : 0,
+                            returbatal: $("#returbatal").is(":checked") ? 1 : 0
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {

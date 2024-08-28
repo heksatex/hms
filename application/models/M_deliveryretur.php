@@ -23,7 +23,7 @@ class M_deliveryretur extends CI_Model {
         $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id and pd.no_pl = no_picklist)");
         $this->db->select("ddo.no,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,ddo.tanggal_batal,dod.tanggal_retur,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,"
                 . "alamat_kirim,pd.corak_remark,pd.warna_remark,pd.uom as uom_jual,pd.uom2 as uom2_jual,pd.uom_hph as uom,pd.uom2_hph as uom2,pd.lebar_jadi,pd.uom_lebar_jadi,"
-                . "SUM(pd.qty_hph) as total_qty,SUM(pd.qty2_hph) as total_qty2,SUM(pd.qty) as total_qty_jual,SUM(pd.qty2) as total_qty2_jual,msg.nama_sales_group as marketing,ddo.user,ddo.note,dod.status");
+                . "msg.nama_sales_group as marketing,ddo.user,ddo.note,dod.status");
 //        $this->db->join("stock_quant sq", "sq.quant_id = pd.quant_id", "left");
 //        $this->db->join("(select pd.barcode_id,pd.quant_id,pd.corak_remark,pd.warna_remark,sq.uom,sq.qty,sq.qty2,sq.qty_jual,sq.qty2_jual,"
 //                . "sq.uom2,sq.uom_jual,sq.uom2_jual,sq.lebar_jadi,sq.uom_lebar_jadi,pd.id"
@@ -39,14 +39,14 @@ class M_deliveryretur extends CI_Model {
     public function getDataReport(array $condition, $order = "", $rekap = "global", $raw = false) {
         $this->_getDataReport();
         if ($rekap === 'global') {
-            $this->db->select(",COUNT(pd.barcode_id) as total_lot");
+            $this->db->select("SUM(pd.qty_hph) as total_qty,SUM(pd.qty2_hph) as total_qty2,SUM(pd.qty) as total_qty_jual,SUM(pd.qty2) as total_qty2_jual,,COUNT(pd.barcode_id) as total_lot");
             $this->db->group_by("ddo.no,dod.status");
         } else if ($rekap === 'detail') {
-            $this->db->select(",COUNT(pd.barcode_id) as total_lot");
+            $this->db->select(",SUM(pd.qty_hph) as total_qty,SUM(pd.qty2_hph) as total_qty2,SUM(pd.qty) as total_qty_jual,SUM(pd.qty2) as total_qty2_jual,COUNT(pd.barcode_id) as total_lot");
             $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom_jual,dod.status,no_picklist");
         } else {
-            $this->db->select(",pd.barcode_id as total_lot");
-            $this->db->group_by("ddo.no,pd.barcode_id,dod.status,no_picklist");
+            $this->db->select(",pd.qty_hph as total_qty,pd.qty2_hph as total_qty2,pd.qty as total_qty_jual,pd.qty2 as total_qty2_jual,pd.barcode_id as total_lot");
+//            $this->db->group_by("ddo.no,pd.barcode_id,no_picklist,dod.status");
         }
         if (count($condition) > 0) {
             $this->db->where($condition);
@@ -77,14 +77,14 @@ class M_deliveryretur extends CI_Model {
     public function getDataReportTotal(array $condition, $order = "", $rekap = "global", $raw = false) {
         $this->_getDataReport();
         if ($rekap === 'global') {
-            $this->db->select(",COUNT(pd.barcode_id) as total_lot");
+            $this->db->select(",SUM(pd.qty_hph) as total_qty,SUM(pd.qty2_hph) as total_qty2,SUM(pd.qty) as total_qty_jual,SUM(pd.qty2) as total_qty2_jual,COUNT(pd.barcode_id) as total_lot");
             $this->db->group_by("ddo.no,dod.status");
         } else if ($rekap === 'detail') {
-            $this->db->select(",COUNT(pd.barcode_id) as total_lot");
+            $this->db->select(",SUM(pd.qty_hph) as total_qty,SUM(pd.qty2_hph) as total_qty2,SUM(pd.qty) as total_qty_jual,SUM(pd.qty2) as total_qty2_jual,COUNT(pd.barcode_id) as total_lot");
             $this->db->group_by("ddo.no,pd.corak_remark,pd.warna_remark,pd.lebar_jadi,uom_jual,dod.status,no_picklist");
         } else {
             $this->db->select(",pd.barcode_id as total_lot");
-            $this->db->group_by("ddo.no,pd.barcode_id,dod.status,no_picklist");
+//            $this->db->group_by("ddo.no,pd.barcode_id,no_picklist,dod.status");
         }
         if (count($condition) > 0)
             $this->db->where($condition);

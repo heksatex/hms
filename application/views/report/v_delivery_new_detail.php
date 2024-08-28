@@ -52,6 +52,7 @@ foreach ($list as $key => $value) {
         <td class="text-right"><?= $value->total_lot ?></td>
         <td><?= substr($value->note, 0, 50) ?></td>
         <td><?= $value->marketing ?></td>
+        <td><?= $value->dod_status ?></td>
     </tr>
     <?php
     if ($summary === "1") {
@@ -79,8 +80,10 @@ foreach ($list as $key => $value) {
                     <td class="text-right"><?= $sum["total_lot"] ?></td>
                     <td><?= substr($value->note, 0, 50) ?></td>
                     <td><?= $value->marketing ?></td>
+                    <td></td>
                 </tr>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -132,6 +135,7 @@ foreach ($list as $key => $value) {
                 <td class="text-right"><?= $sum["total_lot"] ?></td>
                 <td><?= substr($value->note, 0, 50) ?></td>
                 <td><?= $value->marketing ?></td>
+                <td></td>
             </tr>
             <?php
         }

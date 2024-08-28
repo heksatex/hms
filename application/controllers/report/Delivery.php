@@ -47,13 +47,17 @@ class Delivery extends MY_Controller {
             $customer = $this->input->post("customer");
             $tgl_buat = $this->input->post("tgl_buat");
             $period = explode(" - ", $periode);
+            $returbatal = $this->input->post("returbatal");
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid <>' => 'cancel'];
+            $condition = ['pd.valid <>' => 'cancel'];
+            if ($returbatal === "0") {
+                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done']);
+            }
             if ($tgl_buat === "0") {
                 $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
             } else {
@@ -70,8 +74,8 @@ class Delivery extends MY_Controller {
             }
 //            $_POST['start'] = $page ?? 1;
 //            $_POST['length'] = 1000;
-            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap);
-            $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap);
+            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
+            $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, $returbatal);
             $totalPaging = 0;
             $paging = [
                 'total' => $countAll
@@ -113,9 +117,11 @@ class Delivery extends MY_Controller {
             $qtyHph = $this->input->post("qtyhph");
             $cintern = $this->input->post("cintern");
             $tgl_buat = $this->input->post("tgl_buat") ?? "0";
+            $returbatal = $this->input->post("returbatal");
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
+
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setCellValue('A1', 'No');
@@ -143,10 +149,14 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('W1', 'User');
             $sheet->setCellValue('X1', 'Catatan');
             $sheet->setCellValue('Y1', 'Marketing');
+            $sheet->setCellValue('Z1', 'Status');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid <>' => 'cancel'];
+            $condition = ['pd.valid <>' => 'cancel'];
+            if ($returbatal === "0") {
+                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done']);
+            }
             if ($tgl_buat === "0") {
                 $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
             } else {
@@ -161,7 +171,7 @@ class Delivery extends MY_Controller {
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
-            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap);
+            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
             $pool = new ApcuCachePool();
             $sCache = new SimpleCacheBridge($pool);
             Settings::setCache($sCache);
@@ -229,6 +239,7 @@ class Delivery extends MY_Controller {
                 $sheet->setCellValue('w' . $rowStartData, $value->user);
                 $sheet->setCellValue('x' . $rowStartData, $value->note);
                 $sheet->setCellValue('y' . $rowStartData, $value->marketing ?? "-");
+                $sheet->setCellValue('z' . $rowStartData, $value->dod_status);
                 if ($summary === "1") {
                     if (isset($list[$key + 1])) {
                         if ($value->no_sj !== $list[$key + 1]->no_sj) {
@@ -258,6 +269,7 @@ class Delivery extends MY_Controller {
                             $sheet->setCellValue('w' . $rowStartData, $value->user);
                             $sheet->setCellValue('x' . $rowStartData, $value->note);
                             $sheet->setCellValue('y' . $rowStartData, $value->marketing ?? "-");
+                            $sheet->setCellValue('Z' . $rowStartData, "");
 
                             $rowStartData++;
                             $sheet->setCellValue("A" . $rowStartData, "");
@@ -285,6 +297,7 @@ class Delivery extends MY_Controller {
                             $sheet->setCellValue('W' . $rowStartData, "");
                             $sheet->setCellValue('X' . $rowStartData, "");
                             $sheet->setCellValue('Y' . $rowStartData, "");
+                            $sheet->setCellValue('Z' . $rowStartData, "");
 
                             $sum = $sumDef;
                             $sumUom = $sumUomDef;
@@ -316,6 +329,7 @@ class Delivery extends MY_Controller {
                         $sheet->setCellValue('w' . $rowStartData, $value->user);
                         $sheet->setCellValue('x' . $rowStartData, $value->note);
                         $sheet->setCellValue('y' . $rowStartData, $value->marketing ?? "-");
+                        $sheet->setCellValue('Z' . $rowStartData, "");
                     }
                 }
                 $tempid = $value->no_sj;
