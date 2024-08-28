@@ -125,7 +125,7 @@ class M_deliveryorder extends CI_Model {
     protected function _getDataReport() {
         $this->db->from($this->table . ' ddo');
         $this->db->join("delivery_order_detail dod", 'dod.do_id = ddo.id');
-        $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id)");
+        $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id and pd.no_pl = no_picklist)");
 //        $this->db->join("stock_quant sq", "sq.quant_id = pd.quant_id", "left");
         $this->db->join("picklist p", 'p.no = ddo.no_picklist');
         $this->db->join('partner pr', 'pr.id = p.customer_id', 'left');
