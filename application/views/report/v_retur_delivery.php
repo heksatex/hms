@@ -174,8 +174,8 @@
                                                             </div>
                                                             <div class="col-xs-8 col-md-8">
                                                                 <select name="rekap" id="rekap" class="form-control">
-                                                                    <option value="global" disabled>Global</option>
-                                                                    <option value="detail" disabled>Detail</option>
+                                                                    <!--<option value="global" >Global</option>-->
+                                                                    <!--<option value="detail" >Detail</option>-->
                                                                     <option value="barcode" selected>Barcode</option>
                                                                 </select>
                                                             </div>
