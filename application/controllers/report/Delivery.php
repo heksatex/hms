@@ -54,10 +54,7 @@ class Delivery extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['pd.valid <>' => 'cancel'];
-            if ($returbatal === "0") {
-                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done']);
-            }
+            $condition = [];
             if ($tgl_buat === "0") {
                 $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
             } else {
@@ -72,29 +69,33 @@ class Delivery extends MY_Controller {
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
-//            $_POST['start'] = $page ?? 1;
-//            $_POST['length'] = 1000;
-            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
-            $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, $returbatal);
+            if ($returbatal === "0") {
+                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
+                $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
+                $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, $returbatal);
+            } else {
+                $doneCondition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
+                $done = $this->m_deliveryorder->getDataReport($doneCondition, $order, $rekap, "0", true);
+                $donecountAll = $this->m_deliveryorder->getDataReportTotal($doneCondition, $order, $rekap, "0", true);
+
+                unset($condition["ddo.tanggal_dokumen >="],$condition["ddo.tanggal_dokumen <="], $condition["ddo.tanggal_buat >="], $condition["ddo.tanggal_buat <="]);
+                $returkondisi = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']);
+                $retur = $this->m_deliveryorder->getDataReport($returkondisi, $order, $rekap, "1", true);
+                $returcountAll = $this->m_deliveryorder->getDataReportTotal($returkondisi, $order, $rekap, "1", true);
+                
+                $cancelkondisi = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => 'cancel']);
+                $cancel = $this->m_deliveryorder->getDataReport($cancelkondisi, $order, $rekap, "1", true);
+                $cancelcountAll = $this->m_deliveryorder->getDataReportTotal($cancelkondisi, $order, $rekap, "1", true);
+
+                $list = $this->m_deliveryorder->getDataReportUnion([$done, $retur,$cancel], $order);
+                $countAll = $this->m_deliveryorder->getDataReportTotalUnion([$donecountAll, $returcountAll,$cancelcountAll]);
+            }
             $totalPaging = 0;
             $paging = [
                 'total' => $countAll
             ];
             $data["paging"] = $paging;
 
-//            $config['base_url'] = "#";
-//            $config['use_page_numbers'] = TRUE;
-//            $config['total_rows'] = $countAll;
-//            $config['per_page'] = $_POST['length'];
-            //$config['first_link']     = FALSE;
-            //$config['last_link']      = FALSE;
-//            $config['num_links'] = 1;
-//            $config['next_link'] = '>';
-//            $config['prev_link'] = '<';
-//            $config['attributes'] = array('class' => 'paging-report');
-//            $this->pagination->initialize($config);
-//            $pagination = $this->pagination->create_links();
-//            $data['pagination'] = $pagination;
             $data['data'] = $this->load->view('report/v_delivery_new_detail', ['list' => $list, 'rekap' => $rekap, 'summary' => $summary, 'rekap' => $rekap], true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
