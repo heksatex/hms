@@ -15,10 +15,12 @@ class M_Picklist extends CI_Model {
     protected $level_sales_group;
     protected $select = 'picklist.id,no,tanggal_input,jenis_jual,tb.name as bulk_nama,msg.nama_sales_group as sales_nama,ms.nama_status as status,keterangan,nama_user,alamat_kirim,tot_qty,pcs_qty';
     protected $_menu = "";
+    protected $user;
 
     public function __construct() {
         parent::__construct();
         $this->level_sales_group = $this->getLevelSales();
+        $this->user = $this->getUser($this->session->userdata('username'));
     }
 
     protected function getDataQuery() {
@@ -179,9 +181,17 @@ class M_Picklist extends CI_Model {
 
     protected function filteredSales() {
         if ($this->level_sales_group !== 'Administrator') {
-            if (!in_array($this->_menu, ['realisasi', 'validasi', 'delivery']))
-                $this->db->where('sales_kode', $this->session->userdata('nama')['sales_group']);
+            if (!in_array($this->_menu, ['realisasi', 'validasi', 'delivery'])) {
+                $this->db->where('sales_kode', ($this->user->sales_group ?? ""));
+            }
         }
+    }
+
+    protected function getUser($username) {
+        $this->db->from("user");
+        $this->db->where(["username" => $username]);
+        $result = $this->db->select("*")->get();
+        return $result->row();
     }
 
     public function getLevelSales(): string {
