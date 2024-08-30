@@ -78,17 +78,17 @@ class Delivery extends MY_Controller {
                 $done = $this->m_deliveryorder->getDataReport($doneCondition, $order, $rekap, "0", true);
                 $donecountAll = $this->m_deliveryorder->getDataReportTotal($doneCondition, $order, $rekap, "0", true);
 
-                unset($condition["ddo.tanggal_dokumen >="],$condition["ddo.tanggal_dokumen <="], $condition["ddo.tanggal_buat >="], $condition["ddo.tanggal_buat <="]);
+                unset($condition["ddo.tanggal_dokumen >="], $condition["ddo.tanggal_dokumen <="], $condition["ddo.tanggal_buat >="], $condition["ddo.tanggal_buat <="]);
                 $returkondisi = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']);
                 $retur = $this->m_deliveryorder->getDataReport($returkondisi, $order, $rekap, "1", true);
                 $returcountAll = $this->m_deliveryorder->getDataReportTotal($returkondisi, $order, $rekap, "1", true);
-                
+
                 $cancelkondisi = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => 'cancel']);
                 $cancel = $this->m_deliveryorder->getDataReport($cancelkondisi, $order, $rekap, "1", true);
                 $cancelcountAll = $this->m_deliveryorder->getDataReportTotal($cancelkondisi, $order, $rekap, "1", true);
 
-                $list = $this->m_deliveryorder->getDataReportUnion([$done, $retur,$cancel], $order);
-                $countAll = $this->m_deliveryorder->getDataReportTotalUnion([$donecountAll, $returcountAll,$cancelcountAll]);
+                $list = $this->m_deliveryorder->getDataReportUnion([$done, $retur, $cancel], $order);
+                $countAll = $this->m_deliveryorder->getDataReportTotalUnion([$donecountAll, $returcountAll, $cancelcountAll]);
             }
             $totalPaging = 0;
             $paging = [
@@ -154,10 +154,7 @@ class Delivery extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = ['pd.valid <>' => 'cancel'];
-            if ($returbatal === "0") {
-                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done']);
-            }
+            $condition = [];
             if ($tgl_buat === "0") {
                 $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
             } else {
@@ -172,7 +169,27 @@ class Delivery extends MY_Controller {
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
-            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
+            if ($returbatal === "0") {
+                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
+                $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
+//                $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, $returbatal);
+            } else {
+                $doneCondition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
+                $done = $this->m_deliveryorder->getDataReport($doneCondition, $order, $rekap, "0", true);
+//                $donecountAll = $this->m_deliveryorder->getDataReportTotal($doneCondition, $order, $rekap, "0", true);
+
+                unset($condition["ddo.tanggal_dokumen >="], $condition["ddo.tanggal_dokumen <="], $condition["ddo.tanggal_buat >="], $condition["ddo.tanggal_buat <="]);
+                $returkondisi = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']);
+                $retur = $this->m_deliveryorder->getDataReport($returkondisi, $order, $rekap, "1", true);
+//                $returcountAll = $this->m_deliveryorder->getDataReportTotal($returkondisi, $order, $rekap, "1", true);
+
+                $cancelkondisi = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => 'cancel']);
+                $cancel = $this->m_deliveryorder->getDataReport($cancelkondisi, $order, $rekap, "1", true);
+//                $cancelcountAll = $this->m_deliveryorder->getDataReportTotal($cancelkondisi, $order, $rekap, "1", true);
+
+                $list = $this->m_deliveryorder->getDataReportUnion([$done, $retur, $cancel], $order);
+//                $countAll = $this->m_deliveryorder->getDataReportTotalUnion([$donecountAll, $returcountAll, $cancelcountAll]);
+            }
             $pool = new ApcuCachePool();
             $sCache = new SimpleCacheBridge($pool);
             Settings::setCache($sCache);
