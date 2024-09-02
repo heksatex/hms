@@ -118,7 +118,7 @@ class Delivery extends MY_Controller {
             $qtyHph = $this->input->post("qtyhph");
             $cintern = $this->input->post("cintern");
             $tgl_buat = $this->input->post("tgl_buat") ?? "0";
-            $returbatal = $this->input->post("returbatal");
+            $returbatal = $this->input->post("returbatal") ?? "0";
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
