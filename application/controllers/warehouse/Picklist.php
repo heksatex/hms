@@ -776,7 +776,7 @@ class Picklist extends MY_Controller {
         $logo_type = pathinfo(FCPATH . 'dist/img/static/heksatex_c.jpg', PATHINFO_EXTENSION);
         $logo = base64_encode($logo_path);
         $data['picklist'] = $this->m_Picklist->getDataReportPL(['no' => $pl]);
-        $data['picklist_detail'] = $this->m_PicklistDetail->detailReport(['no_pl' => $pl, 'valid !=' => 'cancel'], ['warna_remark', 'corak_remark', 'uom']);
+        $data['picklist_detail'] = $this->m_PicklistDetail->detailReport(['no_pl' => $pl, 'valid !=' => 'cancel'], ['warna_remark', 'corak_remark','lebar_jadi','uom_lebar_jadi','uom']);
         $data['nopl'] = $pl;
         $data['logo'] = 'data:image/' . $logo_type . ';base64,' . $logo;
         $data['barcode'] = 'data:image/' . $logo_type . ';base64,' . $gen_code;
