@@ -153,14 +153,16 @@
                         $no++;
                         $jml_qty += $value->jml_qty;
                         $total_qty += $value->total_qty;
-                        $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !='=>'cancel','corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl]);
+                        $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !='=>'cancel',
+                            'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom,
+                            'lebar_jadi'=>$value->lebar_jadi,'uom_lebar_jadi'=>$value->uom_lebar_jadi, 'no_pl' => $value->no_pl]);
                         $perpage = 10;
                         $totalData = count($detailQty);
                         $totalPage = ceil($totalData / $perpage);
                         for ($nn = 0; $nn < $totalPage; $nn++) {
                             $page = $nn * $perpage;
                             $satuan = $detailQty[0]->uom;
-                            $tempID = $value->warna_remark . $value->corak_remark . $value->uom;
+                            $tempID = $value->warna_remark . $value->corak_remark . $value->uom.$value->uom_lebar_jadi.$value->lebar_jadi;
                             ?>
                             <tr>
 

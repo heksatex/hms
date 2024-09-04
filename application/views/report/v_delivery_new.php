@@ -5,7 +5,9 @@
         <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
         <link rel="stylesheet" type="text/css" href="<?= base_url('plugins/daterangepicker/daterangepicker.css'); ?>" />
         <style type="text/css">
-
+            .bolden{
+                font-family:"Arial Black"
+            }
             h3{
                 display: block !important;
                 text-align: center !important;
@@ -75,16 +77,6 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-rd" id="form-rd" action="<?= base_url('report/delivery/export') ?>">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
-                                    <div class="form-group">
-                                        <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
-                                                <label class="form-label required">Periode Kirim</label>
-                                            </div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <input type="text" name="periode" id="periode" value="<?= $date ?>" class="form-control" required/>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <?php
                                     if (in_array($user->level, ["Super Administrator", "Administrator"])) {
                                         ?>
@@ -92,17 +84,29 @@
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Tanggal Dibuat</label>
+                                                    <label class="form-label">Filter Tanggal</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <label class="col-sm-2 checkbox-inline">
-                                                        <input id="tgl_buat" name="tgl_buat" type="checkbox" value="1"></label>
+                                                    <select name="tgl_buat" class="form-control" id="tgl_buat">
+                                                        <option value="0">Filter Terhadap Tanggal Kirim / Dokumen</option>
+                                                        <option value="1">Filter Terhadap Tanggal Sistem</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
                                         <?php
                                     }
                                     ?>
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label required hide" id="label_filter_tanggal">Periode Tanggal Kirim</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <input type="text" name="periode" id="periode" value="<?= $date ?>" class="form-control" required/>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="form-group">
                                         <div class="col-md-12">
                                             <div class="col-md-4">
@@ -249,8 +253,8 @@
                                                 <th  class="style bb ws no" >No</th>
                                                 <th class="style bb ws">DO</th>
                                                 <th class="style bb ws">No SJ</th>
-                                                <th class="style bb ws">Tanggal dibuat</th>
-                                                <th class="style bb ws">Tanggal Kirim</th>
+                                                <th class="style bb ws">Tanggal Sistem</th>
+                                                <th class="style bb ws">Tanggal Dokumen</th>
                                                 <th class="style bb ws">Type</th>
                                                 <th class="style bb ws">No Picklist</th>
                                                 <th class="style bb ws">Buyer</th>
@@ -317,6 +321,14 @@
                     $("#tabelDelivery").toggleClass("hide_intrn");
                 });
 
+                $("#tgl_buat").on("change", function () {
+                    console.log($(this).val());
+                    if ($(this).val() === "0") {
+                        $("#label_filter_tanggal").html("Periode Tanggal Kirim");
+                    } else {
+                        $("#label_filter_tanggal").html("Periode Tanggal Sistem");
+                    }
+                });
 
                 const loadData = ((page) => {
                     $.ajax({
@@ -330,7 +342,7 @@
                             corak: $("#corak").val(),
                             order: $("#order").find(":selected").val(),
                             marketing: $("#marketing").find(":selected").val(),
-                            tgl_buat: $("#tgl_buat").is(":checked") ? 1 : 0,
+                            tgl_buat: $("#tgl_buat").val(),
                             returbatal: $("#returbatal").is(":checked") ? 1 : 0
                         },
                         beforeSend: function (xhr) {
