@@ -60,13 +60,16 @@ class Deliverymutasi extends MY_Controller {
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
-            if (count($status) > 0) {
-                $in = [];
-                foreach ($status as $value) {
-                    $in[] = $value;
+            if (is_array($status)) {
+                if (count($status) > 0) {
+                    $in = [];
+                    foreach ($status as $value) {
+                        $in[] = $value;
+                    }
+                    $condition = array_merge($condition, ["dod.status in ('" . implode("','", $in) . "')" => null]);
                 }
-                $condition = array_merge($condition, ["dod.status in ('" . implode("','", $in) . "')" => null]);
             }
+
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
@@ -106,6 +109,7 @@ class Deliverymutasi extends MY_Controller {
             $period = explode(" - ", $periode);
             $qtyHph = $this->input->post("qtyhph");
             $cintern = $this->input->post("cintern");
+            $status = $this->input->post("status");
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
@@ -139,7 +143,18 @@ class Deliverymutasi extends MY_Controller {
             $sheet->setCellValue('Z1', 'Status');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
+
             $condition = ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir];
+
+            if (is_array($status)) {
+                if (count($status) > 0) {
+                    $in = [];
+                    foreach ($status as $value) {
+                        $in[] = $value;
+                    }
+                    $condition = array_merge($condition, ["dod.status in ('" . implode("','", $in) . "')" => null]);
+                }
+            }
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
