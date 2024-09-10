@@ -55,7 +55,6 @@
 
         </style>
     </head>
-
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
             <header class="main-header">
@@ -72,35 +71,15 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title"><b>Report Delivery</b></h3>
+                            <h3 class="box-title"><b>Report Delivery Untuk Mutasi</b></h3>
                         </div>
                         <div class="box-body">
-                            <form class="form-horizontal" method="POST" name="form-rd" id="form-rd" action="<?= base_url('report/delivery/export') ?>">
+                            <form class="form-horizontal" method="POST" name="form-rd" id="form-rd" action="<?= base_url('report/deliverymutasi/export') ?>">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
-                                    <?php
-                                    if (in_array($user->level, ["Super Administrator", "Administrator"])) {
-                                        ?>
-
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">Filter Tanggal</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <select name="tgl_buat" class="form-control" id="tgl_buat">
-                                                        <option value="0">Filter Terhadap Tanggal Kirim / Dokumen</option>
-                                                        <option value="1">Filter Terhadap Tanggal Sistem</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <?php
-                                    }
-                                    ?>
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label required hide" id="label_filter_tanggal">Periode Tanggal Kirim</label>
+                                                <label class="form-label required" id="label_filter_tanggal">Periode Tanggal Sistem</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <input type="text" name="periode" id="periode" value="<?= $date ?>" class="form-control" required/>
@@ -129,11 +108,6 @@
                                 <div class="col-md-4">
                                     <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
                                     <button type="submit" class="btn btn-sm btn-default" name="btn-excel" id="export" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o"  style="color:green"></i> Excel</button>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="pull-right text-right">
-                                        <div id='pagination'></div>
-                                    </div>
                                 </div>
                                 <br>
                                 <br>
@@ -222,8 +196,7 @@
                                                             </div>
                                                             <div class="col-xs-6">
                                                                 <label class="checkbox-inline">
-                                                                    <input id="returbatal" name="returbatal" type="checkbox" value="1">Tampilkan Retur dan Batal</label>
-                                                                <input type="hidden" name="page" id="page" value="1">
+                                                                    <input id="qtyHph" name="qtyhph" type="checkbox" value="1">Qty HPH</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -232,10 +205,6 @@
                                                             <div class="col-xs-6">
                                                                 <label class="checkbox-inline">
                                                                     <input id="cintern" name="cintern" type="checkbox" value="1">Corak Intern</label>
-                                                            </div>
-                                                            <div class="col-xs-6">
-                                                                <label class="checkbox-inline">
-                                                                    <input id="qtyHph" name="qtyhph" type="checkbox" value="1">Qty HPH</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -287,7 +256,6 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script type="text/javascript">
-            //* Show collapse advanced search
             $('#advancedSearch').on('shown.bs.collapse', function () {
                 $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
             });
@@ -296,7 +264,6 @@
             $('#advancedSearch').on('hidden.bs.collapse', function () {
                 $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
             });
-            // disable enter
             $(window).keydown(function (event) {
                 if (event.keyCode === 13) {
                     event.preventDefault();
@@ -313,7 +280,6 @@
                         format: 'YYYY-MM-DD'
                     }
                 });
-
                 $("#qtyHph").on("change", function () {
                     $("#tabelDelivery").toggleClass("hides");
                 });
@@ -321,17 +287,9 @@
                     $("#tabelDelivery").toggleClass("hide_intrn");
                 });
 
-                $("#tgl_buat").on("change", function () {
-                    if ($(this).val() === "0") {
-                        $("#label_filter_tanggal").html("Periode Tanggal Kirim");
-                    } else {
-                        $("#label_filter_tanggal").html("Periode Tanggal Sistem");
-                    }
-                });
-
                 const loadData = ((page) => {
                     $.ajax({
-                        url: "<?= base_url('report/delivery/search/') ?>" + page,
+                        url: "<?= base_url('report/deliverymutasi/search') ?>",
                         type: "POST",
                         data: {
                             periode: $("#periode").val(),
@@ -340,9 +298,7 @@
                             rekap: $("#rekap").find(":selected").val(),
                             corak: $("#corak").val(),
                             order: $("#order").find(":selected").val(),
-                            marketing: $("#marketing").find(":selected").val(),
-                            tgl_buat: $("#tgl_buat").val(),
-                            returbatal: $("#returbatal").is(":checked") ? 1 : 0
+                            marketing: $("#marketing").find(":selected").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
@@ -353,28 +309,25 @@
                             $("#tBody").html(data.data.data);
 //                            $("#pagination").html(data.data.pagination);
                             $("#total_record").html(data.data.paging["total"]);
-                            $(".paging-report").on("click", function () {
-                                var pg = $(this).attr("data-ci-pagination-page");
-                                getPage(pg);
-                            });
+//                            $(".paging-report").on("click", function () {
+//                                var pg = $(this).attr("data-ci-pagination-page");
+//                                getPage(pg);
+//                            });
                         }),
                         complete: function (sq) {
                             unblockUI(function () {}, 100);
                         }
                     });
                 });
-
                 $("#search").on("click", function () {
                     $("#page").val(1);
                     var page = $("#page").val();
                     loadData(page);
                 });
-
                 const getPage = ((page) => {
                     $("#page").val(page);
                     loadData(page);
                 });
-
                 const formrd = document.forms.namedItem("form-rd");
                 formrd.addEventListener(
                         "submit",

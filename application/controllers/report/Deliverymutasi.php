@@ -2,7 +2,13 @@
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/EmptyPHP.php to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Scripting/PHPClass.php to edit this template
+ */
+
+/**
+ * Description of Deliverymutasi
+ *
+ * @author RONI
  */
 defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 
@@ -15,8 +21,9 @@ use Cache\Bridge\SimpleCache\SimpleCacheBridge;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Delivery extends MY_Controller {
+class Deliverymutasi extends MY_Controller {
 
+    //put your code here
     public function __construct() {
         parent::__construct();
         $this->is_loggedin();
@@ -28,15 +35,13 @@ class Delivery extends MY_Controller {
     }
 
     public function index() {
-        $username = $this->session->userdata('username');
-        $data['id_dept'] = 'RDO';
+        $data['id_dept'] = 'RDOM';
         $data['sales'] = $this->m_Picklist->getSales();
-        $data['user'] = $this->m_user->get_user_by_username($username);
         $data['date'] = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d")))) . ' - ' . date('Y-m-d');
-        $this->load->view('report/v_delivery_new', $data);
+        $this->load->view('report/v_delivery_mutasi', $data);
     }
 
-    public function search($page = 1) {
+    public function search() {
         try {
             $periode = $this->input->post("periode");
             $marketing = $this->input->post("marketing");
@@ -45,21 +50,14 @@ class Delivery extends MY_Controller {
             $summary = $this->input->post("summary");
             $rekap = $this->input->post("rekap");
             $customer = $this->input->post("customer");
-            $tgl_buat = $this->input->post("tgl_buat");
             $period = explode(" - ", $periode);
-            $returbatal = $this->input->post("returbatal");
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
-            $condition = [];
-            if ($tgl_buat === "0") {
-                $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
-            } else {
-                $condition = array_merge($condition, ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir]);
-            }
+            $condition = ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
@@ -69,39 +67,21 @@ class Delivery extends MY_Controller {
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
-            if ($returbatal === "0") {
-                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
-                $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
-                $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, $returbatal);
-            } else {
-                $doneCondition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
-                $done = $this->m_deliveryorder->getDataReport($doneCondition, $order, $rekap, "0", true);
-                $donecountAll = $this->m_deliveryorder->getDataReportTotal($doneCondition, $order, $rekap, "0", true);
-
-                unset($condition["ddo.tanggal_dokumen >="], $condition["ddo.tanggal_dokumen <="], $condition["ddo.tanggal_buat >="], $condition["ddo.tanggal_buat <="]);
-                $returkondisi = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']);
-                $retur = $this->m_deliveryorder->getDataReport($returkondisi, $order, $rekap, "1", true);
-                $returcountAll = $this->m_deliveryorder->getDataReportTotal($returkondisi, $order, $rekap, "1", true);
-
-                $cancelkondisi = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => 'cancel']);
-                $cancel = $this->m_deliveryorder->getDataReport($cancelkondisi, $order, $rekap, "1", true);
-                $cancelcountAll = $this->m_deliveryorder->getDataReportTotal($cancelkondisi, $order, $rekap, "1", true);
-
-                $list = $this->m_deliveryorder->getDataReportUnion([$done, $retur, $cancel], $order);
-                $countAll = $this->m_deliveryorder->getDataReportTotalUnion([$donecountAll, $returcountAll, $cancelcountAll]);
-            }
-            $totalPaging = 0;
+            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, "1");
+            $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, "1");
             $paging = [
                 'total' => $countAll
             ];
             $data["paging"] = $paging;
 
-            $data['data'] = $this->load->view('report/v_delivery_new_detail', ['list' => $list, 'rekap' => $rekap, 'summary' => $summary, 'rekap' => $rekap], true);
+            $data['data'] = $this->load->view('report/v_delivery_mutasi_detail', ['list' => $list, 'rekap' => $rekap, 'summary' => $summary, 'rekap' => $rekap], true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $data)));
         } catch (Exception $ex) {
-            
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'danger', "data" => [])));
         }
     }
 
@@ -117,12 +97,9 @@ class Delivery extends MY_Controller {
             $period = explode(" - ", $periode);
             $qtyHph = $this->input->post("qtyhph");
             $cintern = $this->input->post("cintern");
-            $tgl_buat = $this->input->post("tgl_buat") ?? "0";
-            $returbatal = $this->input->post("returbatal") ?? "0";
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
-
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setCellValue('A1', 'No');
@@ -153,13 +130,7 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('Z1', 'Status');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
-            $data = [];
-            $condition = [];
-            if ($tgl_buat === "0") {
-                $condition = array_merge($condition, ['ddo.tanggal_dokumen >=' => $tanggalAwal, 'ddo.tanggal_dokumen <=' => $tanggalAkhir]);
-            } else {
-                $condition = array_merge($condition, ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir]);
-            }
+            $condition = ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir];
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
@@ -169,27 +140,8 @@ class Delivery extends MY_Controller {
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
-            if ($returbatal === "0") {
-                $condition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
-                $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, $returbatal);
-//                $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, $returbatal);
-            } else {
-                $doneCondition = array_merge($condition, ['ddo.status' => 'done', 'dod.status' => 'done', 'pd.valid' => 'done']);
-                $done = $this->m_deliveryorder->getDataReport($doneCondition, $order, $rekap, "0", true);
-//                $donecountAll = $this->m_deliveryorder->getDataReportTotal($doneCondition, $order, $rekap, "0", true);
-
-                unset($condition["ddo.tanggal_dokumen >="], $condition["ddo.tanggal_dokumen <="], $condition["ddo.tanggal_buat >="], $condition["ddo.tanggal_buat <="]);
-                $returkondisi = array_merge($condition, ['dod.tanggal_retur >=' => $tanggalAwal, 'dod.tanggal_retur <=' => $tanggalAkhir, 'dod.status' => 'retur']);
-                $retur = $this->m_deliveryorder->getDataReport($returkondisi, $order, $rekap, "1", true);
-//                $returcountAll = $this->m_deliveryorder->getDataReportTotal($returkondisi, $order, $rekap, "1", true);
-
-                $cancelkondisi = array_merge($condition, ['ddo.tanggal_batal >=' => $tanggalAwal, 'ddo.tanggal_batal <=' => $tanggalAkhir, 'dod.status' => 'cancel']);
-                $cancel = $this->m_deliveryorder->getDataReport($cancelkondisi, $order, $rekap, "1", true);
-//                $cancelcountAll = $this->m_deliveryorder->getDataReportTotal($cancelkondisi, $order, $rekap, "1", true);
-
-                $list = $this->m_deliveryorder->getDataReportUnion([$done, $retur, $cancel], $order);
-//                $countAll = $this->m_deliveryorder->getDataReportTotalUnion([$donecountAll, $returcountAll, $cancelcountAll]);
-            }
+            $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, "1");
+            $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, "1");
             $pool = new ApcuCachePool();
             $sCache = new SimpleCacheBridge($pool);
             Settings::setCache($sCache);
@@ -260,7 +212,7 @@ class Delivery extends MY_Controller {
                 $sheet->setCellValue('z' . $rowStartData, $value->dod_status);
                 if ($summary === "1") {
                     if (isset($list[$key + 1])) {
-                        if ($value->no_sj !== $list[$key + 1]->no_sj) {
+                        if ($value->no_sj . "_" . $value->dod_status !== $list[$key + 1]->no_sj . "_" . $list[$key + 1]->dod_status) {
                             $rowStartData++;
                             $sheet->setCellValue("A" . $rowStartData, "");
                             $sheet->setCellValue('B' . $rowStartData, "");
@@ -359,8 +311,8 @@ class Delivery extends MY_Controller {
                 $spreadsheet->getActiveSheet()->removeColumn("M", 1);
             }
             $writer = new Xlsx($spreadsheet);
-            $filename = "delivery_" . $rekap . ' periode ' . $period[0] . ' - ' . $period[1];
-            $url = "dist/storages/report/delivery";
+            $filename = "delivery_mutasi_" . $rekap . ' periode ' . $period[0] . ' - ' . $period[1];
+            $url = "dist/storages/report/delivery_mutasi";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
             }
