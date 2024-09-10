@@ -27,6 +27,7 @@ class M_analisa_kain_cacat extends CI_Model {
         $this->db->from("mrp_production mrpp");
         $this->db->join("mrp_production_fg_hasil mrppfghs", "(mrppfghs.kode = mrpp.kode and mrppfghs.lokasi LIKE '%Stock')");
         $this->db->join("mst_produk mp", "mp.kode_produk = mrpp.kode_produk");
+        $this->db->join("mst_produk_sub_parent mpsp","mpsp.id = mp.id_sub_parent");
     }
 
     public function setWheres(array $where) {
@@ -58,7 +59,6 @@ class M_analisa_kain_cacat extends CI_Model {
         foreach ($this->whereIn as $key => $value) {
             $this->db->where_in($key, $value);
         }
-        $this->db->limit(50, 1);
 
         $query = $this->db->select($this->select)->get();
         return $query->result();

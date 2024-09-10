@@ -209,6 +209,24 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">Status</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <select name="status[]" id="status" class="form-control" style="width: 100%" multiple>
+                                                                    <option></option>
+                                                                    <option value="done">Done</option>
+                                                                    <option value="cancel">Cancel</option>
+                                                                    <option value="retur">Retur</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -271,6 +289,10 @@
                 }
             });
             $(function () {
+                $("#status").select2({
+                    allowClear: true,
+                    placeholder: "All"
+                });
                 $("#tabelDelivery").toggleClass("hides");
                 $("#tabelDelivery").toggleClass("hide_intrn");
                 $('input[name="periode"]').daterangepicker({
@@ -298,7 +320,8 @@
                             rekap: $("#rekap").find(":selected").val(),
                             corak: $("#corak").val(),
                             order: $("#order").find(":selected").val(),
-                            marketing: $("#marketing").find(":selected").val()
+                            marketing: $("#marketing").find(":selected").val(),
+                            status: $("#status").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
