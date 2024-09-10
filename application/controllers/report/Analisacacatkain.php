@@ -153,10 +153,10 @@ class Analisacacatkain extends MY_Controller {
             }
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
-            $wheres = ["mrpp.dept_id" => 'GJD', "mrppfghs.create_date >=" => $tanggalAwal, 'mrppfghs.create_date <=' => $tanggalAkhir];
+            $wheres = ["mrpp.dept_id" => 'GJD', "mrppfghs.create_date >=" => $tanggalAwal, 'mrppfghs.create_date <=' => $tanggalAkhir, "mrppfghs.lokasi LIKE" => "%Stock"];
             $dataAwal = $this->m_analisa_kain_cacat->setWheres($wheres)
-                            ->setGroup("mrpp.nama_produk")
-                            ->setSelect("mrpp.nama_produk,mrpp.kode_produk,sum(mrppfghs.qty) as total_qty,GROUP_CONCAT(DISTINCT(mrpp.kode)) as kodes")
+                            ->setGroup("mp.id_sub_parent")
+                            ->setSelect("mpsp.nama_sub_parent as nama_produk,mrpp.kode_produk,sum(mrppfghs.qty) as total_qty,GROUP_CONCAT(DISTINCT(mrpp.kode)) as kodes")
                             ->setWhereIn(['id_jenis_kain' => $jenis_kain])->getData();
 
             $queryDetail = [];
@@ -230,37 +230,39 @@ class Analisacacatkain extends MY_Controller {
             $querydataKeduas = '(' . implode(" ) UNION ALL ( ", $querysDetails) . ')';
             $dataKeduas = $this->m_analisa_kain_cacat->getQuery($querydataKeduas);
 //            $dataDetails = $this->load->view("report/v_analisa_kain_cacat_detail_2", ["data" => $datas, 'dataKedua' => $dataKeduas, 'totalhph' => $totalHphGjd], true);
-
+//            $pool = new ApcuCachePool();
+//            $sCache = new SimpleCacheBridge($pool);
+//            Settings::setCache($sCache);
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $start_row = 2;
-            $sheet->setCellValue('A' . $start_row, 'Produk');
-            $sheet->setCellValue('B' . $start_row, 'Total HPH GJD');
-            $sheet->setCellValue('C' . $start_row, 'Total Kain Grade A');
-            $sheet->setCellValue('D' . $start_row, '');
-            $sheet->setCellValue('E' . $start_row, 'Total Kain Grade Tidak ada cacat DYE dan FIN');
-            $sheet->setCellValue('F' . $start_row, 'persen :- Σ A PRODUKSI thd Σ');
-            $sheet->setCellValue('G' . $start_row, 'total :
-- grade A kain jadi
-- tidak ada cacat produksi (T)
-- tidak ada cacat finishing (F) ');
-            $sheet->setCellValue('H' . $start_row, 'persen :
-- Σ A DYEING thd Σ');
-            $sheet->setCellValue('I' . $start_row, 'total :
-- grade A kain jadi
-- tidak ada cacat produksi (T)
-- tidak ada cacat dyeing (D)');
-            $sheet->setCellValue('J' . $start_row, 'persen :
-- Σ A FINISHING thd Σ');
-
-            $sheet->setCellValue("L" . $start_row, "Master Cacat");
-            $sheet->setCellValue("M" . $start_row, "jumlah point cacat keseluruhan kain = 1 point cacat = 1 mtr, grade B");
-            $sheet->setCellValue("P" . $start_row, "persen total defect thd total hph gjd b22");
-            $sheet->setCellValue("Q" . $start_row, "jumlah point cacat keseluruhan kain = 1 point cacat = 1 mtr, grade C, BS & Potongan");
-            $sheet->setCellValue("R" . $start_row, "BS POT");
-            $sheet->setCellValue("S" . $start_row, "BS POT");
-            $sheet->setCellValue("T" . $start_row, "Tali bubuk, tali");
-            $sheet->setCellValue("U" . $start_row, "Persen Tali");
+//            $sheet->setCellValue('A' . $start_row, 'Produk');
+//            $sheet->setCellValue('B' . $start_row, 'Total HPH GJD');
+//            $sheet->setCellValue('C' . $start_row, 'Total Kain Grade A');
+//            $sheet->setCellValue('D' . $start_row, '');
+//            $sheet->setCellValue('E' . $start_row, 'Total Kain Grade Tidak ada cacat DYE dan FIN');
+//            $sheet->setCellValue('F' . $start_row, 'persen :- Σ A PRODUKSI thd Σ');
+//            $sheet->setCellValue('G' . $start_row, 'total :
+//- grade A kain jadi
+//- tidak ada cacat produksi (T)
+//- tidak ada cacat finishing (F) ');
+//            $sheet->setCellValue('H' . $start_row, 'persen :
+//- Σ A DYEING thd Σ');
+//            $sheet->setCellValue('I' . $start_row, 'total :
+//- grade A kain jadi
+//- tidak ada cacat produksi (T)
+//- tidak ada cacat dyeing (D)');
+//            $sheet->setCellValue('J' . $start_row, 'persen :
+//- Σ A FINISHING thd Σ');
+//
+//            $sheet->setCellValue("L" . $start_row, "Master Cacat");
+//            $sheet->setCellValue("M" . $start_row, "jumlah point cacat keseluruhan kain = 1 point cacat = 1 mtr, grade B");
+//            $sheet->setCellValue("P" . $start_row, "persen total defect thd total hph gjd b22");
+//            $sheet->setCellValue("Q" . $start_row, "jumlah point cacat keseluruhan kain = 1 point cacat = 1 mtr, grade C, BS & Potongan");
+//            $sheet->setCellValue("R" . $start_row, "BS POT");
+//            $sheet->setCellValue("S" . $start_row, "BS POT");
+//            $sheet->setCellValue("T" . $start_row, "Tali bubuk, tali");
+//            $sheet->setCellValue("U" . $start_row, "Persen Tali");
 
             $start_row += 1;
 
@@ -291,7 +293,7 @@ class Analisacacatkain extends MY_Controller {
             $sheet->mergeCells("C{$start_row}:D{$start_row}");
             $sheet->setCellValue("E{$start_row}", "Produksi");
             $sheet->mergeCells("E{$start_row}:F{$start_row}");
-            $sheet->setCellValue("E{$start_row}", "DYEING");
+            $sheet->setCellValue("G{$start_row}", "DYEING");
             $sheet->mergeCells("G{$start_row}:H{$start_row}");
             $sheet->setCellValue("I{$start_row}", "FINISHING");
             $sheet->mergeCells("I{$start_row}:J{$start_row}");
@@ -314,9 +316,9 @@ class Analisacacatkain extends MY_Controller {
             $totalGradeATF = 0;
             $totalGradeADT = 0;
             foreach ($dataAwal as $key => $value) {
-                $gradeADF = $dataKedua[$key]["qty_cacat_grade_a_DF"] + ($dataKedua[$key]["qty_total_grade_a_GJD"] ?? 0);
-                $gradeATF = $dataKedua[$key]["qty_cacat_grade_a_TF"] + ($dataKedua[$key]["qty_total_grade_a_GJD"] ?? 0);
-                $gradeATD = $dataKedua[$key]["qty_cacat_grade_a_TD"] + ($dataKedua[$key]["qty_total_grade_a_GJD"] ?? 0);
+                $gradeADF = $dataKedua[$key]["qty_cacat_grade_a_DF"];
+                $gradeATF = $dataKedua[$key]["qty_cacat_grade_a_TF"];
+                $gradeATD = $dataKedua[$key]["qty_cacat_grade_a_TD"];
                 $persenProd = ($gradeADF / ($value->total_qty ?? 0)) * 100;
                 $persenDye = ($gradeATF / ($value->total_qty ?? 0)) * 100;
                 $persenFin = ($gradeATD / ($value->total_qty ?? 0)) * 100;
@@ -339,7 +341,7 @@ class Analisacacatkain extends MY_Controller {
                 $sheet->setCellValue('J' . $start_row, round($persenFin, 2));
                 $start_row++;
             }
-            $start_row += 2;
+            $start_row += 1;
             $sheet->setCellValue("A" . $start_row, "Σ");
             $sheet->setCellValue("B" . $start_row, $totalHphGjd);
             $sheet->setCellValue("C" . $start_row, $totalGradeA);
@@ -380,7 +382,7 @@ class Analisacacatkain extends MY_Controller {
                 $sheet->setCellValue("U" . $start_row_2, round(($totalC / $totalHphGjd) * 100, 2));
                 $start_row_2++;
             }
-            $start_row_2 += 2;
+            $start_row_2 += 1;
             $sheet->setCellValue("L" . $start_row_2, "Σ");
             $sheet->setCellValue("M" . $start_row_2, $totalBAll);
             $sheet->setCellValue("p" . $start_row_2, round(($totalBAll / $totalHphGjd) * 100, 2));
@@ -391,7 +393,7 @@ class Analisacacatkain extends MY_Controller {
             $sheet->mergeCells("A1:U1");
             $sheet->getStyle('A1:U1')->getAlignment()->setHorizontal('center');
             $writer = new Xlsx($spreadsheet);
-            $filename = "Lap_kain_cacat_periode" . $period[0] . ' - ' . $period[1];
+            $filename = "Lap_kain_cacat_periode_" . $period[0] . ' - ' . $period[1];
             $url = "dist/storages/report/cacat kain";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);

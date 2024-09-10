@@ -50,14 +50,23 @@ class Deliverymutasi extends MY_Controller {
             $summary = $this->input->post("summary");
             $rekap = $this->input->post("rekap");
             $customer = $this->input->post("customer");
+            $status = $this->input->post("status");
             $period = explode(" - ", $periode);
-            if (count($period) < 2) {
-                throw new \Exception("Tentukan dahulu periodenya", 500);
-            }
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
             $condition = ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir];
+
+            if (count($period) < 2) {
+                throw new \Exception("Tentukan dahulu periodenya", 500);
+            }
+            if (count($status) > 0) {
+                $in = [];
+                foreach ($status as $value) {
+                    $in[] = $value;
+                }
+                $condition = array_merge($condition, ["dod.status in ('" . implode("','", $in) . "')" => null]);
+            }
             if ($customer !== null || $customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
