@@ -27,7 +27,7 @@ class M_analisa_kain_cacat extends CI_Model {
         $this->db->from("mrp_production mrpp");
         $this->db->join("mrp_production_fg_hasil mrppfghs", "(mrppfghs.kode = mrpp.kode and mrppfghs.lokasi LIKE '%Stock')");
         $this->db->join("mst_produk mp", "mp.kode_produk = mrpp.kode_produk");
-        $this->db->join("mst_produk_sub_parent mpsp","mpsp.id = mp.id_sub_parent");
+        $this->db->join("mst_produk_parent mpsp","mpsp.id = mp.id_parent");
     }
 
     public function setWheres(array $where) {
