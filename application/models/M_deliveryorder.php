@@ -302,4 +302,11 @@ class M_deliveryorder extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+    public function listNoSJ(array $condition) {
+        $this->db->from("delivery_order_sj");
+        $this->db->where($condition);
+        $query = $this->db->get();
+        return $query->result();
+    }
 }

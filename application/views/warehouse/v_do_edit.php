@@ -3,11 +3,24 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
         <style>
-<?php if ($do->status === 'cancel') { ?>
+            #btn-cancel-draft{
+                display: none;
+            }
+            <?php if ($do->status === "cancel") { ?>
                 #btn-cancel{
                     display: none;
                 }
-<?php } ?>
+
+            <?php } else if ($do->status === "draft") {
+                ?>
+                #btn-cancel{
+                    display: none;
+                }
+                #btn-cancel-draft{
+                    display: block;
+                }
+            <?php }
+            ?>
 
             .hide {
                 display: none;
@@ -15,15 +28,15 @@
             .btn-data-table{
                 font-family: "inherit"
             }
-            
+
             <?php
-            if((int)$picklist->type_bulk_id !== 1){
+            if ((int) $picklist->type_bulk_id !== 1) {
                 ?>
-            .item-on-bulk{
-                visibility: hidden;
-            }
+                .item-on-bulk{
+                    visibility: hidden;
+                }
             <?php }
-            ?> 
+            ?>
         </style>
         <?php $this->load->view("admin/_partials/js.php") ?>
     </head>
@@ -153,15 +166,24 @@
                                             <div class="col-xs-4">
                                                 <label class="form-label required">No Surat Jalan</label>
                                             </div>
-                                            <div class="col-xs-8 col-md-8">
+                                            <div class="col-xs-4 col-md-4">
                                                 <strong><?= $do->no_sj ?></strong>
+                                            </div>
+                                            <div class="col-xs-4 col-md-4">
+                                                <div style="padding-top: 0px; display: flex;justify-content:space-evenly ">
+                                                    <button id="btn-cancel-draft" class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="top" title="Batalkan SJ">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                    <button class="btn btn-default btn-xs check-antrian" data-toggle="tooltip" data-placement="top" title="Antrian SJ">
+                                                        <i class="fa fa-list"></i>
+                                                    </button>
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
-
                                     <?php if ($picklist->type_bulk_id === "1" && $do->status === 'draft') { ?>
-                                        <div class="form-group">
+                                        <div class="form-group" >
                                             <form class="form-horizontal" method="POST" name="form-check-bal" id="form-check-bal" action="<?= base_url('warehouse/deliveryorder/check_bal') ?>">
                                                 <div class="col-xs-12">
                                                     <div class="form-group">
@@ -192,7 +214,7 @@
                                             <div class="form-group">
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4">
-                                                        <label class="form-label">Tanggal dibuat</label>
+                                                        <label class="form-label">Tanggal Sistem</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
                                                         <strong><?= date("Y-m-d H:i:s", strtotime($do->tanggal_buat)) ?></strong>
@@ -373,7 +395,7 @@
                     //                    $("#btn-cancel").hide();
                     $("#btn-print").hide();
 
-                    $("#btn-cancel").unbind("click").off("click").on("click", function () {
+                    $("#btn-cancel-draft").unbind("click").off("click").on("click", function () {
                         confirmRequest("Delivery", "Batalkan Draft Delivery Order ?", function () {
                             please_wait(function () {});
                             $.ajax({
@@ -396,6 +418,26 @@
                             });
                         });
                     });
+
+                    $(".check-antrian").on("click", function (e) {
+                        var sj = "<?= $do->tipe_no_sj ?>";
+                        e.preventDefault();
+                        $("#print_data").modal({
+                            show: true,
+                            backdrop: 'static'
+                        });
+                        $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                        $('.modal-title').text('List Antring ' + sj);
+                        $.post("<?= base_url('warehouse/deliveryorder/antrian_sj/') ?>",
+                                {
+                                    sj: sj,
+                                    tanggal_dokumen: $("#tanggal_dokumen").val()
+                                }, function (response) {
+                            $(".print_data").html(response.data);
+                        }
+                        );
+                    });
+
                     $("#btn-kirim").unbind("click").off("click").on("click", function () {
                         confirmRequest("Delivery", "Kirim delivery order ?", function () {
                             please_wait(function () {});
