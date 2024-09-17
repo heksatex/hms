@@ -155,8 +155,8 @@ class Analisacacatkain extends MY_Controller {
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $wheres = ["mrpp.dept_id" => 'GJD', "mrppfghs.create_date >=" => $tanggalAwal, 'mrppfghs.create_date <=' => $tanggalAkhir, "mrppfghs.lokasi LIKE" => "%Stock"];
             $dataAwal = $this->m_analisa_kain_cacat->setWheres($wheres)
-                            ->setGroup("mp.id_sub_parent")
-                            ->setSelect("mpsp.nama_sub_parent as nama_produk,mrpp.kode_produk,sum(mrppfghs.qty) as total_qty,GROUP_CONCAT(DISTINCT(mrpp.kode)) as kodes")
+                            ->setGroup("mp.id_parent")
+                            ->setSelect("mpsp.nama as nama_produk,mrpp.kode_produk,sum(mrppfghs.qty) as total_qty,GROUP_CONCAT(DISTINCT(mrpp.kode)) as kodes")
                             ->setWhereIn(['id_jenis_kain' => $jenis_kain])->getData();
 
             $queryDetail = [];
