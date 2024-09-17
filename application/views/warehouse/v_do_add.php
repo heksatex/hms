@@ -112,28 +112,32 @@
                                                         <label class="form-label required">No SJ</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8">
-                                                        <select class="form-control" name="no_sj_jenis" required>
-                                                            <?php
-                                                            if ($picklist->jenis_jual === 'lokal') {
-                                                                ?>
-                                                                <option value="SJ/HI/07">SJ/HI/07</option>
-                                                                <option value="SAMPLE/HI">SAMPLE/HI</option>
-                                                                <option value="SJM/HI/07">SJM/HI/07</option>
-                                                                <option value="MAKLOON/HI">MAKLOON/HI</option>
+                                                        <div class="input-group">
+                                                            <select class="form-control" name="no_sj_jenis" id="no_sj_jenis" required>
+                                                                <?php
+                                                                if ($picklist->jenis_jual === 'lokal') {
+                                                                    ?>
+                                                                    <option value="SJ/HI/07">SJ/HI/07</option>
+                                                                    <option value="SAMPLE/HI">SAMPLE/HI</option>
+                                                                    <option value="SJM/HI/07">SJM/HI/07</option>
+                                                                    <option value="MAKLOON/HI">MAKLOON/HI</option>
 
-                                                                <?php
-                                                            } else if ($picklist->jenis_jual === 'export') {
+                                                                    <?php
+                                                                } else if ($picklist->jenis_jual === 'export') {
+                                                                    ?>
+                                                                    <option value="SJ/HI/03">SJ/HI/03</option>
+                                                                    <?php
+                                                                } else {
+                                                                    ?>
+                                                                    <option value="SJ/HI/P/00">SJ/HI/P/00</option>
+                                                                    <?php
+                                                                }
                                                                 ?>
-                                                                <option value="SJ/HI/03">SJ/HI/03</option>
-                                                                <?php
-                                                            } else {
-                                                                ?>
-                                                                <option value="SJ/HI/P/00">SJ/HI/P/00</option>
-                                                                <?php
-                                                            }
-                                                            ?>
 
-                                                        </select>
+                                                            </select>
+                                                            <span class="input-group-addon"><a href="#" class="check-antrian">Antrian No SJ</a></span>
+                                                        </div>
+
                                                         <input type="hidden" name="pl" id="picklist" value="<?= $picklist->no ?>">
                                                         <input type='hidden' name="bal" id="bal"/>
                                                         <input type="hidden" name="tipe" id="tipe" value="<?= $picklist->type_bulk_id ?>">
@@ -185,7 +189,13 @@
                 </section>
             </div>
         </div>
+        <footer class="main-footer">
+            <?php $this->load->view("admin/_partials/modal.php") ?>
 
+            <?php
+            $this->load->view("admin/_partials/footer.php");
+            ?>
+        </footer>
     </body>
 </html>
 
@@ -198,6 +208,24 @@
         });
         $("#btn-simpan").unbind("click").off("click").on("click", function () {
             $("#form-do-submit").trigger('click');
+        });
+        $(".check-antrian").on("click", function (e) {
+            var sj = $("#no_sj_jenis").val();
+            e.preventDefault();
+            $("#print_data").modal({
+                show: true,
+                backdrop: 'static'
+            });
+            $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+            $('.modal-title').text('List Antring ' + sj);
+            $.post("<?= base_url('warehouse/deliveryorder/antrian_sj/') ?>",
+                    {
+                        sj: sj,
+                        tanggal_dokumen: $("#tanggal_dokumen").val()
+                    }, function (response) {
+                        $(".print_data").html(response.data);
+            }
+            );
         });
         const formdo = document.forms.namedItem("form-do");
         formdo.addEventListener(
