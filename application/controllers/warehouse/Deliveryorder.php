@@ -1295,6 +1295,34 @@ class Deliveryorder extends MY_Controller {
         return $status;
     }
 
+    public function antrian_sj() {
+        try {
+            $sj = $this->input->post("sj");
+            $tanggal_dokumen = $this->input->post("tanggal_dokumen");
+            $time_dokumen = strtotime($tanggal_dokumen);
+            $nosjs = $this->m_deliveryorder->listNoSJ(['no_sj LIKE' => $sj . '/' . date('y', $time_dokumen) . '/' . getRomawi(date('m', $time_dokumen)) . '/%']);
+            $strings = "<table class='table'>";
+            $strings .= "<thead>";
+            $strings .= "<th>No SJ</th>";
+            $strings .= "</thead>";
+            $strings .= "<tbody>";
+            foreach ($nosjs as $key => $value) {
+                $strings .= "<tr>";
+                $strings .= "<td>{$value->no_sj}</td>";
+                $strings .= "</tr>";
+            }
+            $strings .= "</tbody>";
+            $strings .= "</table>";
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $strings)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => "")));
+        }
+    }
+
 //    public function add_item() {
 //        try {
 //            $username = $this->session->userdata('username');
