@@ -95,6 +95,10 @@
                                             </div>
                                         </div>
                                         <?php
+                                    } else {
+                                        ?>
+                                        <input type="hidden" name="tgl_buat" id="tgl_buat" value="0">
+                                        <?php
                                     }
                                     ?>
                                     <div class="form-group">
