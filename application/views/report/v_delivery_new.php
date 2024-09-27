@@ -89,7 +89,7 @@
                                                 <div class="col-xs-8 col-md-8">
                                                     <select name="tgl_buat" class="form-control" id="tgl_buat">
                                                         <option value="0">Filter Terhadap Tanggal Kirim / Dokumen</option>
-                                                        <option value="1">Filter Terhadap Tanggal Sistem</option>
+                                                        <!--<option value="1">Filter Terhadap Tanggal Sistem</option>-->
                                                     </select>
                                                 </div>
                                             </div>
