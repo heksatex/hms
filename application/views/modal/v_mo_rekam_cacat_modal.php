@@ -48,7 +48,7 @@
 		    <div class="col-md-12 col-xs-12">
           <div class="col-sm-3"><label>Kode Cacat</label></div>
           <div class="col-sm-4">
-              <select type="text"  class="form-control cacat" id="inpt_kode" name="inpt_kode"   style="width:100%;">
+              <select type="text"  class="form-control" id="inpt_kode" name="inpt_kode"   style="width:100%;">
                 <?php 
                   echo "<option></option>";
                   foreach($list_cacat as $val){
