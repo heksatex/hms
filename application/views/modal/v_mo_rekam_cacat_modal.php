@@ -18,15 +18,57 @@
   }
 </style>
 
+
 <form class="form-horizontal" id="form_cacat" name="form_cacat">
   <input type="hidden" name="deptid" id="deptid" class="form-control input-sm " value="<?php echo $deptid;?>" />
   <input type="hidden" name="quant_id" id="quant_id" class="form-control input-sm " value="<?php echo $quant_id;?>" />
+ 
+  <div class="form-group">
+		<div class="col-md-12">
+			<div class="col-md-12 col-xs-12">
+	        <label>Input Cacat Batch</label>
+		  </div>
+		</div>
+	</div>
+
+	<div class="form-group ">
+		<div class="col-md-8">
+			<div class="col-md-12 col-xs-12">
+	        <div class="col-sm-3"><label>Dari</label></div>
+	        <div class="col-sm-3">
+				    <input type="number" name="inpt_dari" id="inpt_dari" class="form-control input-sm" onkeyup="validAngka(this)" />
+	        </div>  
+          <div class="col-sm-3"><label>Sampai</label></div>
+	        <div class="col-sm-3">
+				    <input type="number" name="inpt_sampai" id="inpt_sampai" class="form-control input-sm" onkeyup="validAngka(this)" />
+	        </div>  
+		  </div>
+		</div>
+		<div class="col-md-8">
+		    <div class="col-md-12 col-xs-12">
+          <div class="col-sm-3"><label>Kode Cacat</label></div>
+          <div class="col-sm-4">
+              <select type="text"  class="form-control cacat" id="inpt_kode" name="inpt_kode"   style="width:100%;">
+                <?php 
+                  echo "<option></option>";
+                  foreach($list_cacat as $val){
+                    echo '<option value='.$val['kode_cacat'].'>'.$val['kode_nama'].'</option>';
+                  }
+                ?>
+              </select>
+          </div>  
+          <div class="col-sm-4">
+					  <button type="button" id="btn-terapkan" class="btn btn-primary btn-sm">Terapkan</button>
+          </div>
+		    </div>
+		</div>
+	</div>
+
   <table class="table table-condesed table-hover table-responsive rlstable" id="tabel_cacat"> 
-    <label>Lot : <?php echo $lot;?></label>
     <thead>
         <tr>
         <th class="style no">No.</th>
-          <th class="style" style="width: 200px;">Point Cacat</th>
+        <th class="style" style="width: 200px;">Point Cacat</th>
         <th class="style" style="width: 300px;">Kode Cacat</th>
         <th class="style" style="width: 40px;"></th>
         <th class="style no"></th>
@@ -79,12 +121,21 @@
 
 <script type="text/javascript">
 
+    // validasi only angka
+    function validAngka(a){   
+        if(!/^[0-9.]+$/.test(a.value)){
+            //a.value = a.value.substring(0,a.value.length-1);
+            a.value = a.value.replace(/[^0-9.-]/, '')
+            return true;
+       }
+    }
+
     //disable btn-tambah jika status mo == done
     var status_mo = '<?php echo $status_mo;?>';
     if(status_mo == 'done'){
       $('#btn-tambah').attr("disabled", true);
     }
-
+    $('#inpt_kode').select2({});
     // Edit row on edit button click
     $(document).on('click', '.edit_cacat', function(){
         $(this).parents("tr").find("td[data-content='edit']").each(function(){
@@ -229,7 +280,7 @@
                 }
 
                 empty = false;
-                tr    = '<tr>'
+                tr    = '<tr class="num">'
                       + '<td>'+no+'</td>'
                       + '<td data-content="edit" data-id="point_cacat" data-isi="'+value.point_cacat+'" >'+value.point_cacat+'</td>'
                       + '<td data-content="edit" data-id="cacat" data-isi="'+value.kode_nama+'" >'+value.kode_nama+'</td>'
@@ -265,6 +316,40 @@
             tambah_cacat(); //panggil fungsi tambah cacat
         }
     }
+    
+    $("#btn-terapkan").off("click").on("click",function(e) {  
+
+        var inpt_dari   = $('#inpt_dari').val() == "" ?  0 : parseInt($('#inpt_dari').val());
+        var inpt_sampai = $('#inpt_sampai').val() == "" ?  0 : parseInt($('#inpt_sampai').val());
+        var inpt_kode   = $('#inpt_kode').val();
+        
+        var point_cacat = document.getElementsByName('point_cacat');
+        var inx_point   = point_cacat.length;
+        
+        if((inpt_dari > 0 || inpt_sampai > 0 ) && inpt_kode != '' ){
+          for ( i = inpt_dari; i <= inpt_sampai; i++) {
+            var row = ' ';
+            row  = '<tr class="num">'
+                + '<td ></td>'
+                +  '<td><input type="text" name="point_cacat" id="point_cacat" class="form-control input-sm point_cacat" autocomplete="off" onkeypress="enter(event);" value="'+i+'"/></td>'
+                +  '<td><select type="text" class="form-control input-sm cacat" name="cacat" id="cacat" style="width:100%;"><?php foreach($list_cacat as $row){ echo '<option value='.$row['kode_cacat'].'>'.$row['kode_nama'].'</option>';}?></select></td>'
+                +  '<td><a class="hapus_baris"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red" data-toggle="tooltip" title="Hapus"></i> </a></td>'
+                + '<td></td>'
+                +  '</tr>'
+            $('#tabel_cacat tbody').append(row);       
+            $('[data-toggle="tooltip"]').tooltip();
+            //select2 kode_cacat 
+            $('#tabel_cacat tbody .cacat').eq(inx_point).val(inpt_kode);
+            inx_point++;
+            $('.cacat').select2({});
+          }
+        }else if(inpt_kode.length == 0){
+          alert('Silahkan Pilih Kode Cacat !');
+        }else{
+          alert('Silahkan inputkan point Cacat Dari dan Sampai !');
+        }
+
+    });
 
     //tambah baris cacat
     function tambah_cacat(){
@@ -273,8 +358,9 @@
       var point_cacat = document.getElementsByName('point_cacat');
       var inx_point = point_cacat.length-1;
 
+      //alert(inx_point);
       //cek point cacat apa ada yang kosong
-        $('.point_cacat').each(function(index,value){
+      $('.point_cacat').each(function(index,value){
           if($(value).val()==''){
               alert('Point Cacat tidak boleh kosong');
               $(value).addClass('error'); 
@@ -282,10 +368,10 @@
           }else{
             $(value).removeClass('error'); 
           }
-        });
+      });
 
       //cek kode cacat apa ada yang kosong
-        $('.cacat').each(function(index,value){
+      $('.cacat').each(function(index,value){
           if($(value).val()==''){
               alert('Kode Cacat tidak boleh kosong');
               $(value).addClass('error'); 
@@ -293,11 +379,19 @@
           }else{
             $(value).removeClass('error'); 
           }
-        });
+      });
+
+      var last_kode = "";
+      var last_text = "";
+      if(inx_point >= 0){
+        last_kode = $( ".cacat option:selected" ).eq(inx_point).val();
+        last_text = $( ".cacat option:selected" ).eq(inx_point).text();
+        // alert(last_kode);
+      }
 
       if(tambah == true){
-        var row = ' ';
-          row  = '<tr>'
+          var row = ' ';
+          row  = '<tr class="num">'
                + '<td ></td>'
                +  '<td><input type="text" name="point_cacat" id="point_cacat" class="form-control input-sm point_cacat" autocomplete="off" onkeypress="enter(event);"/></td>'
                +  '<td><select type="text" class="form-control input-sm cacat" name="cacat" id="cacat" style="width:100%;"><?php foreach($list_cacat as $row){ echo '<option value='.$row['kode_cacat'].'>'.$row['kode_nama'].'</option>';}?></select></td>'
@@ -307,8 +401,15 @@
           $('#tabel_cacat tbody').append(row);       
           $('[data-toggle="tooltip"]').tooltip();
           //select2 kode_cacat 
-          $('.cacat').select2({});
           point_cacat[inx_point+1].focus();
+          if(inx_point >= 0){
+            // var $newOptionuom = $("<option></option>").val(last_kode).text(last_text);
+            // alert(last_text)
+            // $( ".cacat" ).eq(inx_point + 1).append(newOptionuom).trigger('change');  
+            $('#tabel_cacat tbody .cacat').eq(inx_point + 1).val(last_kode);
+          }
+          $('.cacat').select2({});
+
       }
 
     }

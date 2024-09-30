@@ -1468,7 +1468,7 @@
     });
     $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
     $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-    $('.modal-title').text('Rekam Cacat Lot');
+    $('.modal-title').html('Rekam Cacat Lot : <b>'+lot+'</b>');
     $.post('<?php echo site_url()?>manufacturing/mO/rekam_cacat_modal',
           {deptid : deptid, lot : lot, quant_id : quant_id, kode : kode, status : status },
           function(html){
