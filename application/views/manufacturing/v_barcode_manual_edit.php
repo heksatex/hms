@@ -436,7 +436,7 @@
     });
 
     function tambah_batch(){
-        var status = 'draft';
+        var status = "<?php echo $mrpm->status; ?>";
         var kode   = "<?php echo $mrpm->kode; ?>";
         let acces = "<?php echo $access->status ?? ''; ?>";
 
@@ -566,6 +566,7 @@
 
         var kode        = "<?php echo $mrpm->kode; ?>";
         var row         = row;
+        var status      =  "<?php echo $mrpm->status; ?>";
         let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
