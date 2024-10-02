@@ -42,7 +42,36 @@ class M_inlet extends CI_Model
 		if($this->input->post('checkTgl') == 1){
 			$this->db->where('in.tanggal >=', date("Y-m-d H:i:s", strtotime($this->input->post('tgldari')) ));
 			$this->db->where('in.tanggal <=', date("Y-m-d H:i:s", strtotime($this->input->post('tglsampai')) ));
+		}if($this->input->post('lot')){
+    		$this->db->like('in.lot',$this->input->post('lot'));
+        }
+		if($this->input->post('sales_group')){
+			$this->db->where('in.sales_group',$this->input->post('sales_group'));
+		}
+		if($this->input->post('mg')){
+			$this->db->like('in.kode_mrp',$this->input->post('mg'));
+		}
+		if($this->input->post('nama_produk')){
+    		$this->db->like('in.nama_produk',$this->input->post('nama_produk'));
+        }
+		if($this->input->post('corak_remark')){
+    		$this->db->like('in.corak_remark',$this->input->post('corak_remark'));
+        }
+		if($this->input->post('warna_remark')){
+    		$this->db->like('in.warna_remark',$this->input->post('warna_remark'));
+        }
+		if($this->input->post('status')){
+    		$this->db->where('in.status',$this->input->post('status'));
+        }
 
+		if($this->input->post('lot_gjd')){
+    		$this->db->like('fg.lot',$this->input->post('lot_gjd'));
+			$this->db->JOIN("mrp_production_fg_hasil fg","fg.id_inlet = in.id", "LEFT");
+        }
+
+		if($this->input->post('checkTgl') == 1){
+			$this->db->where('in.tanggal >=', date("Y-m-d H:i:s", strtotime($this->input->post('tgldari')) ));
+			$this->db->where('in.tanggal <=', date("Y-m-d H:i:s", strtotime($this->input->post('tglsampai')) ));
 		}
 
 		// $this->db->from($this->table);
@@ -507,6 +536,86 @@ class M_inlet extends CI_Model
 									FROM mrp_production_fg_hasil 
 									WHERE id_inlet = '$id'
 									GROUP BY nama_grade");
+		return $query->result();
+	}
+
+
+
+	function get_data_inlet_excel($checkTgl,$tgldari,$tglsampai,$nama_produk,$mg,$lot,$sales_group,$corak_remark,$warna_remark,$lot_gjd,$status)
+	{
+
+		if($lot){
+    		$this->db->like('in.lot',$lot);
+        }
+		if($sales_group){
+			$this->db->where('in.sales_group',$sales_group);
+		}
+		if($mg){
+			$this->db->like('in.kode_mrp',$mg);
+		}
+		if($nama_produk){
+    		$this->db->like('in.nama_produk',$nama_produk);
+        }
+		if($corak_remark){
+    		$this->db->like('in.corak_remark',$corak_remark);
+        }
+		if($warna_remark){
+    		$this->db->like('in.warna_remark',$warna_remark);
+        }
+		if($status){
+    		$this->db->where('in.status',$status);
+        }
+
+		if($lot_gjd){
+    		$this->db->like('fg.lot',$lot_gjd);
+			$this->db->JOIN("mrp_production_fg_hasil fg","fg.id_inlet = in.id", "LEFT");
+        }
+
+		if($checkTgl == 1){
+			$this->db->where('in.tanggal >=', date("Y-m-d H:i:s", strtotime($tgldari) ));
+			$this->db->where('in.tanggal <=', date("Y-m-d H:i:s", strtotime($tglsampai) ));
+		}
+
+
+		$this->db->SELECT("in.id, in.lot, in.tanggal, in.kode_mrp, in.sales_group, in.nama_produk, in.corak_remark, in.warna_remark, in.lebar_jadi,in.uom_lebar_jadi, in.desain_barcode, ms.nama_status, msg.nama_sales_group, in.status, in.qty, in.qty2,  
+				(SELECT IFNULL(sum(fg.qty),0) as total_qty FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND in.id = fg.id_inlet) as hasil_qty,
+				(SELECT IFNULL(sum(fg2.qty2),0) as total_qty2 FROM mrp_production_fg_hasil fg2 WHERE in.kode_mrp =  fg2.kode AND in.id = fg2.id_inlet) as hasil_qty2,
+				(SELECT IFNULL(sum(smi2.qty),0) as total_qty FROM mrp_production_rm_target rm2
+					INNER JOIN stock_move_items smi2 ON smi2.move_id = rm2.move_id AND smi2.status = 'ready'
+					WHERE smi2.quant_id = in.quant_id AND in.kode_mrp = rm2.kode AND in.status != 'cancel') as qty_ready,
+				(SELECT IFNULL(sum(smi3.qty2),0) as total_qty FROM mrp_production_rm_target rm3 
+					INNER JOIN stock_move_items smi3 ON smi3.move_id = rm3.move_id AND smi3.status = 'ready'
+					WHERE smi3.quant_id = in.quant_id AND in.kode_mrp = rm3.kode AND in.status != 'cancel' ) as qty2_ready,			
+				(SELECT IFNULL(sum(fg.qty),0) as total_qty 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'A' AND in.id = fg.id_inlet) as qty_gradeA,
+				(SELECT IFNULL(sum(fg.qty2),0) as total_qty2 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'A' AND in.id = fg.id_inlet) as qty2_gradeA,
+				(SELECT IFNULL(count(fg.kode),0) as total_pcs_A 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'A' AND in.id = fg.id_inlet) as pcs_gradeA,
+				(SELECT IFNULL(sum(fg.qty),0) as total_qty 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'B' AND in.id = fg.id_inlet) as qty_gradeB,
+				(SELECT IFNULL(sum(fg.qty2),0) as total_qty2 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'B' AND in.id = fg.id_inlet) as qty2_gradeB,
+				(SELECT IFNULL(count(fg.kode),0) as total_pcs_B 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'B' AND in.id = fg.id_inlet) as pcs_gradeB,
+				(SELECT IFNULL(sum(fg.qty),0) as total_qty
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'C' AND in.id = fg.id_inlet) as qty_gradeC,
+			  	(SELECT IFNULL(sum(fg.qty2),0) as total_qty2 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'C' AND in.id = fg.id_inlet) as qty2_gradeC,
+				(SELECT IFNULL(count(fg.kode),0) as total_pcs_C 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'C' AND in.id = fg.id_inlet) as pcs_gradeC,
+				(SELECT IFNULL(sum(fg.qty),0) as total_qty 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'F' AND in.id = fg.id_inlet) as qty_gradeF,
+				(SELECT IFNULL(sum(fg.qty2),0) as total_qty2 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'F' AND in.id = fg.id_inlet) as qty2_gradeF,
+				(SELECT IFNULL(count(fg.kode),0) as total_pcs_F 
+								FROM mrp_production_fg_hasil fg WHERE in.kode_mrp =  fg.kode AND fg.nama_grade = 'F' AND in.id = fg.id_inlet) as pcs_gradeF");
+				
+		$this->db->FROM("mrp_inlet in");
+		$this->db->JOIN("mst_status ms","ms.kode = in.status", "LEFT");
+		$this->db->JOIN("mst_sales_group msg","msg.kode_sales_group = in.sales_group", "LEFT");
+		$this->db->order_by("in.id","desc");
+		$query = $this->db->get();
 		return $query->result();
 	}
 
