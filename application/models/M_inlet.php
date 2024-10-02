@@ -42,36 +42,6 @@ class M_inlet extends CI_Model
 		if($this->input->post('checkTgl') == 1){
 			$this->db->where('in.tanggal >=', date("Y-m-d H:i:s", strtotime($this->input->post('tgldari')) ));
 			$this->db->where('in.tanggal <=', date("Y-m-d H:i:s", strtotime($this->input->post('tglsampai')) ));
-		}if($this->input->post('lot')){
-    		$this->db->like('in.lot',$this->input->post('lot'));
-        }
-		if($this->input->post('sales_group')){
-			$this->db->where('in.sales_group',$this->input->post('sales_group'));
-		}
-		if($this->input->post('mg')){
-			$this->db->like('in.kode_mrp',$this->input->post('mg'));
-		}
-		if($this->input->post('nama_produk')){
-    		$this->db->like('in.nama_produk',$this->input->post('nama_produk'));
-        }
-		if($this->input->post('corak_remark')){
-    		$this->db->like('in.corak_remark',$this->input->post('corak_remark'));
-        }
-		if($this->input->post('warna_remark')){
-    		$this->db->like('in.warna_remark',$this->input->post('warna_remark'));
-        }
-		if($this->input->post('status')){
-    		$this->db->where('in.status',$this->input->post('status'));
-        }
-
-		if($this->input->post('lot_gjd')){
-    		$this->db->like('fg.lot',$this->input->post('lot_gjd'));
-			$this->db->JOIN("mrp_production_fg_hasil fg","fg.id_inlet = in.id", "LEFT");
-        }
-
-		if($this->input->post('checkTgl') == 1){
-			$this->db->where('in.tanggal >=', date("Y-m-d H:i:s", strtotime($this->input->post('tgldari')) ));
-			$this->db->where('in.tanggal <=', date("Y-m-d H:i:s", strtotime($this->input->post('tglsampai')) ));
 		}
 
 		// $this->db->from($this->table);
