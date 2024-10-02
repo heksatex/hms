@@ -133,7 +133,8 @@
                                 <div class="form-group" >
                                     <div class="col-xs-8" style="padding-top:0px">
                                         <button type="button" id="btn-filter" name="submit" class="btn btn-primary btn-sm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Proses</button>
-                                    </div>                                    
+                                        <button type="button" id="btn-excel" name="excel" class="btn btn-success btn-sm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Excel</button>
+                                    </div> 
                                 </div>
                               </div>
                           </div>
@@ -354,6 +355,53 @@
 
               }
             }
+          });
+
+      });
+
+      // button excel
+      $('#btn-excel').click(function(){
+
+          var check = 0;
+          if($("#checkTgl").is(":checked") == true){
+            check = 1;
+          }
+          var sales_group = $('#marketing').val();
+          var lot         = $('#lot').val();
+          var lot_gjd     = $('#lot_gjd').val();
+          var nama_produk = $('#nama_produk').val();
+          var mg          = $('#mg').val();
+          var corak_remark= $('#corak_remark').val();
+          var warna_remark= $('#warna_remark').val();
+          var status      = $('#status').val();
+          var checkTgl    = check;
+          var tgldari     = $('#tgldari').val();
+          var tglsampai   = $('#tglsampai').val();
+   
+
+          $.ajax({
+              "type":'POST',
+              "url": "<?php echo site_url('manufacturing/inlet/export_excel')?>",
+              "data": {sales_group:sales_group, lot:lot,lot_gjd:lot_gjd, nama_produk:nama_produk, mg:mg, corak_remark:corak_remark, warna_remark:warna_remark, tgldari:tgldari, tglsampai:tglsampai,status:status, checkTgl:checkTgl },
+              "dataType":'json',
+              beforeSend: function() {
+                $('#btn-excel').button('loading');
+              },error: function(){
+                alert('Error Export Excel');
+                $('#btn-excel').button('reset');
+              }
+          }).done(function(data){
+              if(data.status =="failed"){
+                alert_modal_warning(data.message);
+              }else{
+                var $a = $("<a>");
+                $a.attr("href",data.file);
+                $("body").append($a);
+                $a.attr("download",data.filename);
+                $a[0].click();
+                $a.remove();
+              }
+              $('#btn-excel').button('reset');
           });
 
       });

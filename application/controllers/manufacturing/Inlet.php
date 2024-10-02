@@ -1032,4 +1032,246 @@ class Inlet extends MY_Controller
         return $this->prints->generate();
     }
 
+    function cek_column_excel($index)
+    {
+        $max    = 1000; 
+        $result = 'A';
+        for ($l = 'A', $i = 1; $i < $max; $l++, $i++) {
+            if($i == $index){
+                $result = $l;
+                break;
+            }
+        }
+        return $result;
+    }
+
+
+    public function export_excel()
+	{
+		
+		$this->load->library('excel');
+		ob_start();
+		$tgldari        = $this->input->post('tgldari');
+		$tglsampai      = $this->input->post('tglsampai');
+		$nama_produk    = $this->input->post('nama_produk');
+		$mg             = $this->input->post('mg');
+		$lot            = $this->input->post('lot');
+		$sales_group    = $this->input->post('sales_group');
+		$corak_remark   = $this->input->post('corak_remark');
+		$warna_remark   = $this->input->post('warna_remark');
+		$lot_gjd        = $this->input->post('lot_gjd');
+		$status         = $this->input->post('status');
+		$checkTgl       = $this->input->post('checkTgl');
+
+		$tgldari_capt  = $this->input->post('tgldari');
+		$tglsampai_capt = $this->input->post('tglsampai');
+
+		// get location by jenis (HPH=stock, Waste)
+
+		$object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Laporan Inlet');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+		//$object->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+	
+ 		//bold huruf
+		$object->getActiveSheet()->getStyle("A1:AC4")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+		$styleArrayColor = array(
+			'font'  => array(
+				'bold'  => true,
+				'color' => array('rgb' => 'FF0000'),
+			),
+			'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			)
+	  	);	
+
+
+		// header table
+    	$table_head_columns  = array('No', 'KP','Tgl Inlet','MG','Marketing','Nama Produk','Corak Remark','Warna Remark','Lebar Jadi','Satuan Lbr Jadi','Status','Target','Belum Proses','Sudah Proses','Grade A','Grade B','Grade C','Grade F');
+        $table_head_columns2 = array("Mtr","Kg","Pcs");
+
+    	$column = 0;
+        $column_index = 1;
+    	$merge  = TRUE;
+    	foreach ($table_head_columns as $field) {
+            
+            if($column <= 10){
+                $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $field);  
+                $object->getActiveSheet()->mergeCellsByColumnAndRow($column, 3, $column, 4);
+                $column++;
+            	$column_index++;
+            }else if($column > 10){
+                if($column > 15){
+                    $column_index_plus = 2;
+                }else{
+                    $column_index_plus = 1;
+                }
+                $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $field);  
+                $object->getActiveSheet()->mergeCells($this->cek_column_excel($column_index).'3:'.$this->cek_column_excel($column_index+$column_index_plus).'3');// merge cell 
+                $object->getActiveSheet()->getStyle($this->cek_column_excel($column_index).'3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+                $column2 = $column;
+                $loop    = 1;
+                foreach ($table_head_columns2 as $field2){
+                    $object->getActiveSheet()->setCellValueByColumnAndRow($column2, 4, $field2);  
+                    $object->getActiveSheet()->getStyle($this->cek_column_excel($column2).'4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+                    $object->getActiveSheet()->getStyle($this->cek_column_excel($column2).'4')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
+                    $column2 = $column2+1;
+                    $loop ++;
+                    if($loop ==  3 AND $column2 < 18){
+                        break;
+                    }
+                }
+        		$column=$column2;
+            	$column_index = $column2 + 1;
+                
+            }else{
+                $column++;
+                $column_index++;
+            }
+
+            $object->getActiveSheet()->getStyle($this->cek_column_excel($column).'3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+            $object->getActiveSheet()->getStyle($this->cek_column_excel($column).'3')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
+
+    	}
+
+    	// set lebar column header
+		$object->getSheet(0)->getColumnDimension('A')->SetWidth(3);
+		$object->getSheet(0)->getColumnDimension('B')->SetWidth(20);
+		$object->getSheet(0)->getColumnDimension('C')->SetWidth(20);
+		$object->getSheet(0)->getColumnDimension('D')->SetWidth(15);
+		$object->getSheet(0)->getColumnDimension('E')->SetWidth(15);
+		$object->getSheet(0)->getColumnDimension('F')->SetWidth(40);
+		$object->getSheet(0)->getColumnDimension('G')->SetWidth(30);
+		$object->getSheet(0)->getColumnDimension('H')->SetWidth(15);
+		$object->getSheet(0)->getColumnDimension('I')->SetWidth(8);
+		$object->getSheet(0)->getColumnDimension('J')->SetWidth(8);
+        //TARGET
+		$object->getSheet(0)->getColumnDimension('K')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('L')->SetWidth(10);
+        //BELUM PROSES
+		$object->getSheet(0)->getColumnDimension('M')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('N')->SetWidth(10);
+        // SUDAH PROSES
+		$object->getSheet(0)->getColumnDimension('O')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('P')->SetWidth(10);
+        // GRADE A
+		$object->getSheet(0)->getColumnDimension('Q')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('R')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('S')->SetWidth(10);
+        // GRADE B
+		$object->getSheet(0)->getColumnDimension('T')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('U')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('V')->SetWidth(10);
+        // GRADE C
+		$object->getSheet(0)->getColumnDimension('W')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('X')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('Y')->SetWidth(10);
+        // GRADE F
+		$object->getSheet(0)->getColumnDimension('Z')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('AA')->SetWidth(10);
+		$object->getSheet(0)->getColumnDimension('AB')->SetWidth(10);
+
+        $checkTgl       = $this->input->post('checkTgl');
+        	$tgldari        = $this->input->post('tgldari');
+		$tglsampai      = $this->input->post('tglsampai');
+		$nama_produk    = $this->input->post('nama_produk');
+		$mg             = $this->input->post('mg');
+		$lot            = $this->input->post('lot');
+		$sales_group    = $this->input->post('sales_group');
+		$corak_remark   = $this->input->post('corak_remark');
+		$warna_remark   = $this->input->post('warna_remark');
+		$lot_gjd        = $this->input->post('lot_gjd');
+		$status         = $this->input->post('status');
+
+    	// tbody
+		$items = $this->m_inlet->get_data_inlet_excel($checkTgl,$tgldari,$tglsampai,$nama_produk,$mg,$lot,$sales_group,$corak_remark,$warna_remark,$lot_gjd,$status);
+		$no    = 1;
+		$rowCount = 5;
+    	foreach ($items as $row) {
+
+                $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($no++));
+                $object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->lot);
+                $object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal);
+                $object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->kode_mrp);
+                $object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->nama_sales_group);
+                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->nama_produk);
+                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->corak_remark);
+                $object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->warna_remark);
+                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->lebar_jadi);
+                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom_lebar_jadi);
+                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->nama_status);
+                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->qty);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->qty2);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->qty_ready);
+                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $row->qty2_ready);
+                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $row->hasil_qty);
+                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $row->hasil_qty2);
+
+                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $row->qty_gradeA);
+                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $row->qty2_gradeA);
+                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $row->pcs_gradeA);
+                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $row->qty_gradeB);
+                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $row->qty2_gradeB);
+                $object->getActiveSheet()->SetCellValue('W'.$rowCount, $row->pcs_gradeB);
+                $object->getActiveSheet()->SetCellValue('X'.$rowCount, $row->qty_gradeC);
+                $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $row->qty2_gradeC);
+                $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $row->pcs_gradeC);
+                $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $row->qty_gradeF);
+                $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $row->qty2_gradeF);
+                $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $row->pcs_gradeF);
+		
+			//set border true
+			// $object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleCell);
+			// $object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleCell);
+
+			
+			$rowCount++;
+
+    	}
+
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Laporan Inlet.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+			
+	}
+
 }
