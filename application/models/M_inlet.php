@@ -589,5 +589,61 @@ class M_inlet extends CI_Model
 		return $query->result();
 	}
 
+	function get_data_inlet_excel_group($checkTgl,$tgldari,$tglsampai,$nama_produk,$mg,$lot,$sales_group,$corak_remark,$warna_remark,$lot_gjd,$status)
+	{
+		if($lot){
+    		$this->db->like('in.lot',$lot);
+        }
+		if($sales_group){
+			$this->db->where('in.sales_group',$sales_group);
+		}
+		if($mg){
+			$this->db->like('in.kode_mrp',$mg);
+		}
+		if($nama_produk){
+    		$this->db->like('in.nama_produk',$nama_produk);
+        }
+		if($corak_remark){
+    		$this->db->like('in.corak_remark',$corak_remark);
+        }
+		if($warna_remark){
+    		$this->db->like('in.warna_remark',$warna_remark);
+        }
+		if($status){
+    		$this->db->where('in.status',$status);
+        }
+
+		if($lot_gjd){
+    		$this->db->like('fg.lot',$lot_gjd);
+			$this->db->JOIN("mrp_production_fg_hasil fg","fg.id_inlet = in.id", "LEFT");
+        }
+
+		if($checkTgl == 1){
+			$this->db->where('in.tanggal >=', date("Y-m-d H:i:s", strtotime($tgldari) ));
+			$this->db->where('in.tanggal <=', date("Y-m-d H:i:s", strtotime($tglsampai) ));
+		}
+
+		$this->db->where('in.status != "cancel" ');
+		$this->db->SELECT("in.kode_mrp, count(*) as total_lot_inlet, go.no_go, go.total_lot_go, (total_lot_go - count(*) ) as selisih");
+		$this->db->FROM("mrp_inlet in");
+		$this->db->JOIN("(
+				SELECT mrp.kode, pb.kode as no_go,  count(smi.lot) as total_lot_go 
+				FROM mrp_production mrp
+				INNER JOIN (SELECT kode, origin, dept_id, move_id 
+										FROM pengiriman_barang WHERE dept_id = 'GRG' AND status = 'done') 
+										as pb ON pb.origin = mrp.origin
+				INNER JOIN stock_move_items smi ON smi.move_id = pb.move_id
+				GROUP BY mrp.kode) as go","go.kode = in.kode_mrp", "INNER");
+		$this->db->group_by("in.kode_mrp");
+		$this->db->order_by("in.kode_mrp");
+		$query = $this->db->get();
+		return $query->result();
+
+	}
+
+
+
+
+
 
 }
