@@ -799,16 +799,18 @@ class Koreksimundur extends MY_Controller
 								$loop_items = true;
 								// cek_stock_quant
 								$cek_sq = $this->_module->get_stock_quant_by_id($val->quant_id)->row();
+								$tglnow = date("Y-m-d", strtotime($tgl));
+								$tgl_buat = date("Y-m-d", strtotime($cek_sq->create_date));
 
 								// acc stock move items
 								$cek_acc = $this->m_koreksi->cek_acc_stock_move_items($dept_id,$type,$val->quant_id,$val->lot,$kode_transaksi);
-								if(empty($cek_acc)){
+								if(empty($cek_acc) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val->nama_produk." ".$val->lot;
 									throw new \Exception('Data Mutasi Stock Move tidak ditemukan ! <br> '.$data_sm, 200);
-								}else if(round($cek_acc->qty,2) != round($val->qty,2)){
+								}else if((round($cek_acc->qty ?? 0,2) != round($val->qty ?? 0,2)) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val->nama_produk." ".$val->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
-								}else if(round($cek_acc->qty2,2) != round($val->qty2,2)){
+								}else if((round($cek_acc->qty2 ?? 0,2) != round($val->qty2 ?? 0,2)) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val->nama_produk." ".$val->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty2 Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
 								}else if(empty($cek_sq)){
@@ -1017,46 +1019,47 @@ class Koreksimundur extends MY_Controller
 									// 	}
 										
 									// }
+									if(!empty($cek_acc->periode_th) AND !empty($cek_acc->periode_bln)){
+										$date_db 	  = $cek_acc->periode_th.'-'.$cek_acc->periode_bln;
+										$date_db_str  = strtotime($date_db);
+										$date_now 	  = strtotime(date("Y-m", strtotime("-1 month")));
+										
+										while($date_now >= $date_db_str){
 
-									$date_db 	  = $cek_acc->periode_th.'-'.$cek_acc->periode_bln;
-									$date_db_str  = strtotime($date_db);
-									$date_now 	  = strtotime(date("Y-m", strtotime("-1 month")));
+											$tahun = date("Y", $date_db_str);
+											$bln = date("n", $date_db_str);
+											$cek_b_km2 = $this->m_koreksi->cek_koreksi_mutasi_by_batch($kode,$dept_id,$tahun,$bln,'draft');
+											$date_same = false;
+											// cek tgl di array saat looping
+											foreach($cek_arr_tmp as $cek_arr){
+													if($cek_arr['dept_id'] == $dept_id AND $cek_arr['tahun'] == $tahun AND $cek_arr['bln'] == $bln){
+															$date_same = true;
+													}
+											}
 
-									while($date_now >= $date_db_str){
+											$cek_arr_tmp[]        = array("dept_id"=>$dept_id, "tahun" => $tahun, "bln"	=> $bln);
 
-										$tahun = date("Y", $date_db_str);
-										$bln = date("n", $date_db_str);
-										$cek_b_km2 = $this->m_koreksi->cek_koreksi_mutasi_by_batch($kode,$dept_id,$tahun,$bln,'draft');
-										$date_same = false;
-										// cek tgl di array saat looping
-										foreach($cek_arr_tmp as $cek_arr){
-												if($cek_arr['dept_id'] == $dept_id AND $cek_arr['tahun'] == $tahun AND $cek_arr['bln'] == $bln){
-														$date_same = true;
-												}
+													
+											if(!empty($cek_b_km2)){// update
+												$new_no_batch = $cek_b_km2->no_batch.",".$val->no_batch."(".$cek_batch->koreksi.")";
+												$data_update_koreksi_mutasi[] = array(
+																						"id"=>$cek_b_km2->id,
+																						"no_batch" => $new_no_batch,
+														);
+											}else if($date_same == false){
+															
+												$data_insert_mutasi[] = array(
+																						"kode_koreksi" 		=> $kode,
+																						"tanggal_dibuat" 	=> $tgl,																					"dept_id"			=> $dept_id,
+																						"tahun"				=> $tahun,
+																						"bln"				=> $bln,
+																						"no_batch"			=> $val->no_batch."(".$cek_batch->koreksi.")",
+																						"status"			=> 'draft'
+												);
+											}
+											$date_db_str = date("Y-m", strtotime("+1 month", $date_db_str));
+											$date_db_str = strtotime($date_db_str);
 										}
-
-										$cek_arr_tmp[]        = array("dept_id"=>$dept_id, "tahun" => $tahun, "bln"	=> $bln);
-
-												
-										if(!empty($cek_b_km2)){// update
-											$new_no_batch = $cek_b_km2->no_batch.",".$val->no_batch."(".$cek_batch->koreksi.")";
-											$data_update_koreksi_mutasi[] = array(
-																					"id"=>$cek_b_km2->id,
-																					"no_batch" => $new_no_batch,
-													);
-										}else if($date_same == false){
-														
-											$data_insert_mutasi[] = array(
-																					"kode_koreksi" 		=> $kode,
-																					"tanggal_dibuat" 	=> $tgl,																					"dept_id"			=> $dept_id,
-																					"tahun"				=> $tahun,
-																					"bln"				=> $bln,
-																					"no_batch"			=> $val->no_batch."(".$cek_batch->koreksi.")",
-																					"status"			=> 'draft'
-											);
-										}
-										$date_db_str = date("Y-m", strtotime("+1 month", $date_db_str));
-										$date_db_str = strtotime($date_db_str);
 									}
 
 									if(empty((float)$cek_batch->koreksi_qty1)){
@@ -1084,16 +1087,18 @@ class Koreksimundur extends MY_Controller
 								$loop_items = true;
 								// cek_stock_quant
 								$cek_sq = $this->_module->get_stock_quant_by_id($val2->quant_id)->row();
+								$tglnow = date("Y-m-d", strtotime($tgl));
+								$tgl_buat = date("Y-m-d", strtotime($cek_sq->create_date));
 
 								// acc stock move items
 								$cek_acc = $this->m_koreksi->cek_acc_stock_move_items($dept_id,$type,$val2->quant_id,$val2->lot,$kode_transaksi);
-								if(empty($cek_acc)){
+								if(empty($cek_acc) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot;
 									throw new \Exception('Data Mutasi Stock Move tidak ditemukan ! <br> '.$data_sm, 200);
-								}else if(round($cek_acc->qty,2) != round($val2->qty,2)){
+								}else if((round($cek_acc->qty ?? 0,2) != round($val->qty ?? 0,2)) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
-								}else if(round($cek_acc->qty2,2) != round($val2->qty2,2)){
+								}else if((round($cek_acc->qty2 ?? 0,2) != round($val->qty2 ?? 0,2)) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty2 Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
 								}else if(empty($cek_sq)){
@@ -1162,45 +1167,47 @@ class Koreksimundur extends MY_Controller
 										$qty_move   = 0;
 										$qty2_move  = 0;
 
-										$date_db 	  = $cek_acc->periode_th.'-'.$cek_acc->periode_bln;
-										$date_db_str  = strtotime($date_db);
-										$date_now 	  = strtotime(date("Y-m", strtotime("-1 month")));
+										if(!empty($cek_acc->periode_th) AND !empty($cek_acc->periode_bln)){
+											$date_db 	  = $cek_acc->periode_th.'-'.$cek_acc->periode_bln;
+											$date_db_str  = strtotime($date_db);
+											$date_now 	  = strtotime(date("Y-m", strtotime("-1 month")));
 
-										while($date_now >= $date_db_str){
+											while($date_now >= $date_db_str){
 
-											$tahun = date("Y", $date_db_str);
-											$bln = date("n", $date_db_str);
-											$cek_b_km2 = $this->m_koreksi->cek_koreksi_mutasi_by_batch($kode,$dept_id,$tahun,$bln,'draft');
-											$date_same = false;
-											// cek tgl di array saat looping
-											foreach($cek_arr_tmp as $cek_arr){
-													if($cek_arr['dept_id'] == $dept_id AND $cek_arr['tahun'] == $tahun AND $cek_arr['bln'] == $bln){
-															$date_same = true;
-													}
+												$tahun = date("Y", $date_db_str);
+												$bln = date("n", $date_db_str);
+												$cek_b_km2 = $this->m_koreksi->cek_koreksi_mutasi_by_batch($kode,$dept_id,$tahun,$bln,'draft');
+												$date_same = false;
+												// cek tgl di array saat looping
+												foreach($cek_arr_tmp as $cek_arr){
+														if($cek_arr['dept_id'] == $dept_id AND $cek_arr['tahun'] == $tahun AND $cek_arr['bln'] == $bln){
+																$date_same = true;
+														}
+												}
+
+												$cek_arr_tmp[]        = array("dept_id"=>$dept_id, "tahun" => $tahun, "bln"	=> $bln);
+
+														
+												if(!empty($cek_b_km2)){// update
+													$new_no_batch = $cek_b_km2->no_batch.",".$val2->no_batch."(".$cek_batch->koreksi.")";
+													$data_update_koreksi_mutasi[] = array(
+																							"id"=>$cek_b_km2->id,
+																							"no_batch" => $new_no_batch,
+															);
+												}else if($date_same == false){
+																
+													$data_insert_mutasi[] = array(
+																							"kode_koreksi" 		=> $kode,
+																							"tanggal_dibuat" 	=> $tgl,																					"dept_id"			=> $dept_id,
+																							"tahun"				=> $tahun,
+																							"bln"				=> $bln,
+																							"no_batch"			=> $val2->no_batch."(".$cek_batch->koreksi.")",
+																							"status"			=> 'draft'
+													);
+												}
+												$date_db_str = date("Y-m", strtotime("+1 month", $date_db_str));
+												$date_db_str = strtotime($date_db_str);
 											}
-
-											$cek_arr_tmp[]        = array("dept_id"=>$dept_id, "tahun" => $tahun, "bln"	=> $bln);
-
-													
-											if(!empty($cek_b_km2)){// update
-												$new_no_batch = $cek_b_km2->no_batch.",".$val2->no_batch."(".$cek_batch->koreksi.")";
-												$data_update_koreksi_mutasi[] = array(
-																						"id"=>$cek_b_km2->id,
-																						"no_batch" => $new_no_batch,
-														);
-											}else if($date_same == false){
-															
-												$data_insert_mutasi[] = array(
-																						"kode_koreksi" 		=> $kode,
-																						"tanggal_dibuat" 	=> $tgl,																					"dept_id"			=> $dept_id,
-																						"tahun"				=> $tahun,
-																						"bln"				=> $bln,
-																						"no_batch"			=> $val2->no_batch."(".$cek_batch->koreksi.")",
-																						"status"			=> 'draft'
-												);
-											}
-											$date_db_str = date("Y-m", strtotime("+1 month", $date_db_str));
-											$date_db_str = strtotime($date_db_str);
 										}
 
 										if(empty((float)$cek_batch->koreksi_qty1)){
