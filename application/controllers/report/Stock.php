@@ -506,7 +506,7 @@ class Stock extends MY_Controller
                             $isi        = "> '".addslashes($row['value'])."' ";
                         }
 
-                        $nama_field = " (datediff(now(), sq.move_date) ) ";
+                        $nama_field = " (datediff(now(), sq.create_date) ) ";
                     
                     }else if($row['nama_field'] == 'move_date' OR $row['nama_field'] == 'create_date' ){
                         $date_format = date('Y-m-d H:i:s', strtotime($row['value']));
