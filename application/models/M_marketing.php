@@ -1017,4 +1017,355 @@ class m_marketing extends CI_Model
 		$query = $this->db->get();
 		return $query->result();
 	}
+
+
+	var $column_order10 = array(null, 'sq.corak_remark','gl');
+	var $column_search10= array('sq.corak_remark');
+	var $order10  	  = array('sq.corak_remark' => 'asc');
+	var $f_jenis_kain  = array(1,2,3,4);
+	var $f_nama_grade = array('A');
+	var $f_corak_remark = array('B GRADE','B-','B GRIDE','BIGRET','BS','B BRADE','B GBRADE','BGRADE','G-GRADE','GRADE','POTONGAN','MIX','TANPA CORAK','PROOF','SAMPLE');
+	var $f_lokasi_fisik = array('XPD','PORT','6Z.01.Z');
+
+    private function get_query_10()
+    {
+		$this->db->SELECT("sq.corak_remark, count(sq.lot) as gl");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi);
+		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
+		$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
+
+		foreach ($this->f_corak_remark as $value) {
+			$this->db->not_like("sq.corak_remark", $value);
+        }
+		$this->db->group_by('sq.corak_remark');
+
+        return;
+    }
+
+    private function _get_datatables_query10()
+	{
+		
+        $this->get_query_10();
+
+        $i = 0;
+		foreach ($this->column_search10 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search10) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order10[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order10))
+		{
+			$order = $this->order10;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables10()
+	{
+		$this->_get_datatables_query10();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered10()
+	{
+		$this->_get_datatables_query10();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all10()
+	{
+		$this->get_query_10();
+		return $this->db->count_all_results();
+	} 
+
+
+	 public function count_all_no_group10()
+	{
+
+		$this->db->SELECT("sq.corak_remark, count(sq.lot) as gl");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi);
+		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
+		$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
+		foreach ($this->f_corak_remark as $value) {
+			$this->db->not_like("sq.corak_remark", $value);
+        }
+
+		return $this->db->count_all_results();
+	} 
+
+	var $column_order11 = array(null, 'sq.corak_remark','sq.warna_remark','gl');
+	var $column_search11= array('sq.corak_remark','sq.warna_remark');
+	var $order11  	  = array('sq.corak_remark' => 'asc','sq.warna_remark' => 'asc');
+
+	private function get_query_11()
+    {	
+		if($this->input->post('product')){
+    		$this->db->where('sq.corak_remark',$this->input->post('product'));
+        }
+
+		$this->db->SELECT("sq.corak_remark, sq.warna_remark, count(sq.lot) as gl");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi);
+		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
+		$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
+
+		foreach ($this->f_corak_remark as $value) {
+			$this->db->not_like("sq.corak_remark", $value);
+        }
+		$this->db->group_by('sq.corak_remark');
+		$this->db->group_by('sq.warna_remark');
+
+        return;
+    }
+
+    private function _get_datatables_query11()
+	{
+		
+        $this->get_query_11();
+
+        $i = 0;
+		foreach ($this->column_search11 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search11) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order11[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order11))
+		{
+			$order = $this->order11;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables11()
+	{
+		$this->_get_datatables_query11();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered11()
+	{
+		$this->_get_datatables_query11();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all11()
+	{
+		$this->get_query_11();
+		return $this->db->count_all_results();
+	} 
+
+
+	public function count_all_no_group11()
+	{
+
+		if($this->input->post('product')){
+    		$this->db->where('sq.corak_remark',$this->input->post('product'));
+        }
+
+		$this->db->SELECT("sq.corak_remark, sq.warna_remark, count(sq.lot) as gl");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi);
+		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
+		$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
+
+		foreach ($this->f_corak_remark as $value) {
+			$this->db->not_like("sq.corak_remark", $value);
+        }
+
+		return $this->db->count_all_results();
+	} 
+
+
+	var $column_order12 = array(null,'sq.create_date', 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','umur');
+	var $column_search12= array('sq.create_date','sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','umur');
+	var $order12  	  = array('sq.corak_remark' => 'asc','sq.warna_remark' => 'asc');
+
+	private function get_query_12()
+    {	
+		if($this->input->post('product')){
+    		$this->db->where('sq.corak_remark',$this->input->post('product'));
+        }
+
+		if($this->input->post('color')){
+    		$this->db->where('sq.warna_remark',$this->input->post('color'));
+        }
+
+		$this->db->SELECT("sq.create_date, sq.lot, sq.corak_remark, sq.warna_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, (datediff(now(), sq.create_date) ) as umur ");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi);
+		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
+		$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
+
+		foreach ($this->f_corak_remark as $value) {
+			$this->db->not_like("sq.corak_remark", $value);
+        }
+
+        return;
+    }
+
+    private function _get_datatables_query12()
+	{
+		
+        $this->get_query_12();
+
+        $i = 0;
+		foreach ($this->column_search12 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search12) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order12[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order12))
+		{
+			$order = $this->order12;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables12()
+	{
+		$this->_get_datatables_query12();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered12()
+	{
+		$this->_get_datatables_query12();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all12()
+	{
+		$this->get_query_12();
+		return $this->db->count_all_results();
+	} 
+
+
+	public function count_all_no_group12()
+	{
+
+		if($this->input->post('product')){
+    		$this->db->where('sq.corak_remark',$this->input->post('product'));
+        }
+
+		if($this->input->post('color')){
+    		$this->db->where('sq.warna_remark',$this->input->post('color'));
+        }
+
+		$this->db->SELECT("sq.lot, sq.corak_remark, sq.warna_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, (datediff(now(), sq.create_date) ) as umur ");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi);
+		$this->db->WHERE('mp.id_category',$this->category);
+		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
+		$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
+
+		foreach ($this->f_corak_remark as $value) {
+			$this->db->not_like("sq.corak_remark", $value);
+        }
+
+		return $this->db->count_all_results();
+	} 
+
+	function get_datatables12_excel()
+	{
+		$this->get_query_12();
+		$query = $this->db->get();
+		return $query->result();
+	}
 }
