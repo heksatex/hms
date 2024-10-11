@@ -393,7 +393,7 @@ class Adjustment extends MY_Controller
 
          if($quant_id == 0){
 
-              $this->m_adjustment->update_adjustment_items2($kode_adjustment,$kode_produk, $lot, $uom,$qty_adjustment,$uom2,$qty_adjustment2,$row);
+              $this->m_adjustment->update_adjustment_items2($kode_adjustment,$kode_produk, trim($lot), $uom,$qty_adjustment,$uom2,$qty_adjustment2,$row);
               // produk before
               $note_      = $get['kode_produk'].' |'.$get['nama_produk'].' | '.$get['lot'].' | '.$get['qty_adjustment'].' '.$get['uom'].' | '.$get['qty_adjustment2'].' '.$get['uom2'].'  -> '.$kode_produk.' | '.$produk." | ".$lot." |  ".$qty_adjustment."  | ".$uom." |  ".$qty_adjustment2."  | ".$uom2;;
               $note_log   = "Edit data Details | ".$kode_adjustment." Baris Ke ".$row." <br> ".$note_;
@@ -416,7 +416,7 @@ class Adjustment extends MY_Controller
 
           $ro          = $this->m_adjustment->get_row_order_adjustment_items($kode_adjustment)->row_array();
           $row_order   = $ro['row_order']+1;
-          $this->m_adjustment->save_adjustment_items($kode_adjustment,$kode_produk,$lot,$uom,$qty_data,$qty_adjustment,$uom2,$qty_data2,$qty_adjustment2,$row_order);
+          $this->m_adjustment->save_adjustment_items($kode_adjustment,$kode_produk,trim($lot),$uom,$qty_data,$qty_adjustment,$uom2,$qty_data2,$qty_adjustment2,$row_order);
 
            // unlock table
            $this->_module->unlock_tabel();
@@ -608,7 +608,7 @@ class Adjustment extends MY_Controller
               $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin."','".$method."','".$la['adjustment_location']."','".$kode_lokasi."','".$status_done."','".$sm_row."',''), ";
 
               // simpan stock_move_items
-              $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$row->qty_adjustment."','".($row->uom)."','".$row->qty_adjustment2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+              $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(($row->lot))."','".$row->qty_adjustment."','".($row->uom)."','".$row->qty_adjustment2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
 
               // simpan stock_move_produk
               $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty_adjustment."','".$row->uom."','".$status_done."','1',''), ";
@@ -780,7 +780,7 @@ class Adjustment extends MY_Controller
                       }
 
                       // simpan stock_move_items
-                      $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($row->lokasi_fisik)."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+                      $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(($row->lot))."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($row->lokasi_fisik)."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
 
                       // simpan stock_move_produk
                       $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_adj."','".$row->uom."','".$status_done."','1',''), ";
