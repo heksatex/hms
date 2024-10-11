@@ -1151,4 +1151,245 @@ class Marketing extends MY_Controller
 		die(json_encode($response));
     }
 
+
+    function readygoodsgroup()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $this->load->view('report/v_marketing_view_ready_goods_group', $data);
+    }
+
+
+    function get_data_ready_goods_group()
+    {
+
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables10();
+            // $get_data_current = '&product='.urlencode($product).'&color='.urlencode($color).'&cmbMarketing='.urlencode($mkt);
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = '<a href="'.base_url('report/marketing/readygoodsgroupcolour?id='.urlencode($field->corak_remark)).'">'.$field->corak_remark.'</a>';
+                $row[] = $field->gl;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all10(),
+                "recordsFiltered" => $this->m_marketing->count_filtered10(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group10()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+        
+    }
+
+
+    function readygoodsgroupcolour()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['product']= $this->input->get('id');
+        $this->load->view('report/v_marketing_view_ready_goods_group_colour', $data);
+    }
+    
+    function get_data_ready_goods_group_colour()
+    {
+
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables11();
+            // $get_data_current = '&product='.urlencode($product).'&color='.urlencode($color).'&cmbMarketing='.urlencode($mkt);
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = '<a href="'.base_url('report/marketing/readygoodsitems?id='.urlencode($field->corak_remark)).'&warna_remark='.urlencode($field->warna_remark).'">'.$field->corak_remark.'</a>';
+                $row[] = $field->warna_remark;
+                $row[] = $field->gl;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all11(),
+                "recordsFiltered" => $this->m_marketing->count_filtered11(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group11()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+    }
+
+
+    function readygoodsitems()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['product']= $this->input->get('id');
+        $data['color']= $this->input->get('warna_remark');
+        $this->load->view('report/v_marketing_view_ready_goods_items', $data);
+    }
+
+
+    function get_data_ready_goods_items()
+    {
+
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables12();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->create_date;
+                $row[] = $field->lot;
+                $row[] = $field->corak_remark;
+                $row[] = $field->warna_remark;
+                $row[] = $field->lebar_jadi." ".$field->uom_lebar_jadi;
+                $row[] = $field->qty_jual." ".$field->uom_jual;
+                $row[] = $field->qty2_jual." ".$field->uom2_jual;
+                $row[] = $field->lokasi_fisik;
+                $row[] = $field->umur;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all12(),
+                "recordsFiltered" => $this->m_marketing->count_filtered12(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group12()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+    }
+
+
+     function export_excel_ready_goods()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables12_excel();
+
+        $product    = $this->input->post('product');
+        $color      = $this->input->post('color');
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Report Ready Goods');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET Filter
+ 		$object->getActiveSheet()->SetCellValue('A3', 'Product / Corak');
+ 		$object->getActiveSheet()->SetCellValue('B3', ': '.$product);
+		$object->getActiveSheet()->mergeCells('B3:D3');
+
+        $object->getActiveSheet()->SetCellValue('A4', 'Warna');
+ 		$object->getActiveSheet()->SetCellValue('B4', ': '.$color);
+		$object->getActiveSheet()->mergeCells('B4:D4');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:Q6")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Umur (Hari)');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 6, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+            $object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
+        }
+        $rowCount  = 7;
+        $num       = 1;
+        foreach ($get_data as $val) {
+
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->create_date);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->lot);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->warna_remark);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lokasi_fisik);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->umur);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Report Ready Goods.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
+    }
+
+
 }
