@@ -1025,6 +1025,7 @@ class m_marketing extends CI_Model
 	var $f_jenis_kain  = array(1,2,3,4);
 	var $f_nama_grade = array('A');
 	var $f_corak_remark = array('B GRADE','TALI','B-','B GRIDE','BIGRET','BS','B BRADE','B GBRADE','BGRADE','G-GRADE','GRADE','POTONGAN','MIX','TANPA CORAK','PROOF','SAMPLE');
+	var $f_corak_remark_af = array('P');
 	var $f_lokasi_fisik = array('XPD','PORT','6Z.01.Z','GJD 4');
 
     private function get_query_10()
@@ -1041,6 +1042,10 @@ class m_marketing extends CI_Model
 
 		foreach ($this->f_corak_remark as $value) {
 			$this->db->not_like("sq.corak_remark", $value);
+        }
+
+		foreach ($this->f_corak_remark_af as $value) {
+			$this->db->not_like("sq.corak_remark", $value, "after");
         }
 		$this->db->group_by('sq.corak_remark');
 
@@ -1123,6 +1128,9 @@ class m_marketing extends CI_Model
 		foreach ($this->f_corak_remark as $value) {
 			$this->db->not_like("sq.corak_remark", $value);
         }
+		foreach ($this->f_corak_remark_af as $value) {
+			$this->db->not_like("sq.corak_remark", $value, "after");
+        }
 
 		return $this->db->count_all_results();
 	} 
@@ -1149,6 +1157,9 @@ class m_marketing extends CI_Model
 
 		foreach ($this->f_corak_remark as $value) {
 			$this->db->not_like("sq.corak_remark", $value);
+        }
+		foreach ($this->f_corak_remark_af as $value) {
+			$this->db->not_like("sq.corak_remark", $value, "after");
         }
 		$this->db->group_by('sq.corak_remark');
 		$this->db->group_by('sq.warna_remark');
@@ -1237,6 +1248,9 @@ class m_marketing extends CI_Model
 		foreach ($this->f_corak_remark as $value) {
 			$this->db->not_like("sq.corak_remark", $value);
         }
+		foreach ($this->f_corak_remark_af as $value) {
+			$this->db->not_like("sq.corak_remark", $value, "after");
+        }
 
 		return $this->db->count_all_results();
 	} 
@@ -1268,6 +1282,9 @@ class m_marketing extends CI_Model
 
 		foreach ($this->f_corak_remark as $value) {
 			$this->db->not_like("sq.corak_remark", $value);
+        }
+		foreach ($this->f_corak_remark_af as $value) {
+			$this->db->not_like("sq.corak_remark", $value, "after");
         }
 
         return;
@@ -1357,6 +1374,9 @@ class m_marketing extends CI_Model
 
 		foreach ($this->f_corak_remark as $value) {
 			$this->db->not_like("sq.corak_remark", $value);
+        }
+		foreach ($this->f_corak_remark_af as $value) {
+			$this->db->not_like("sq.corak_remark", $value, "after");
         }
 
 		return $this->db->count_all_results();
