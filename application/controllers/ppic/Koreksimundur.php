@@ -1260,18 +1260,21 @@ class Koreksimundur extends MY_Controller
 								if(!empty($case_sq) or !empty($case2_sq)){
 
 									if(!empty($case_sq)){
-										$qty_sq_query = " qty = (case ".$case_sq." end) ";
+										$qty_sq_query = " qty = (case ".$case_sq." end), ";
 									}else{
 										$qty_sq_query = "";
 									}
 
 									if(!empty($case2_sq)){
-										$qty2_sq_query = " , qty2 = (case ".$case2_sq." end) ";
+										$qty2_sq_query = " qty2 = (case ".$case2_sq." end) ";
 									}else{
 										$qty2_sq_query = "";
 									}
 
 									if(!empty($qty_sq_query) || !empty($qty2_sq_query)){
+										if(empty($qty2_sq_query)){
+											$qty_sq_query = rtrim($qty_sq_query, ', ');
+										}
 										$sql_update_qty_stock_quant = "UPDATE stock_quant SET ".$qty_sq_query." ".$qty2_sq_query." WHERE  quant_id in (".$where.")" ;
 										$this->_module->update_perbatch($sql_update_qty_stock_quant);
 									}
