@@ -1095,10 +1095,10 @@ class Koreksimundur extends MY_Controller
 								if(empty($cek_acc) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot;
 									throw new \Exception('Data Mutasi Stock Move tidak ditemukan ! <br> '.$data_sm, 200);
-								}else if((round($cek_acc->qty ?? 0,2) != round($val->qty ?? 0,2)) AND ($tglnow != $tgl_buat) ){
+								}else if((round($cek_acc->qty ?? 0,2) != round($val2->qty ?? 0,2)) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
-								}else if((round($cek_acc->qty2 ?? 0,2) != round($val->qty2 ?? 0,2)) AND ($tglnow != $tgl_buat) ){
+								}else if((round($cek_acc->qty2 ?? 0,2) != round($val2->qty2 ?? 0,2)) AND ($tglnow != $tgl_buat) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty2 Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
 								}else if(empty($cek_sq)){
