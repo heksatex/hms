@@ -800,17 +800,17 @@ class Koreksimundur extends MY_Controller
 								// cek_stock_quant
 								$cek_sq = $this->_module->get_stock_quant_by_id($val->quant_id)->row();
 								$tglnow = date("Y-m-d", strtotime($tgl));
-								$tgl_buat = date("Y-m-d", strtotime($cek_sq->create_date));
+								$tgl_move = date("Y-m-d", strtotime($cek_sq->move_date));
 
 								// acc stock move items
 								$cek_acc = $this->m_koreksi->cek_acc_stock_move_items($dept_id,$type,$val->quant_id,$val->lot,$kode_transaksi);
-								if(empty($cek_acc) AND ($tglnow != $tgl_buat) ){
+								if(empty($cek_acc) AND ($tglnow != $tgl_move) ){
 									$data_sm = $val->nama_produk." ".$val->lot;
 									throw new \Exception('Data Mutasi Stock Move tidak ditemukan ! <br> '.$data_sm, 200);
-								}else if((round($cek_acc->qty ?? 0,2) != round($val->qty ?? 0,2)) AND ($tglnow != $tgl_buat) ){
+								}else if((round($cek_acc->qty ?? 0,2) != round($val->qty ?? 0,2)) AND ($tglnow != $tgl_move) ){
 									$data_sm = $val->nama_produk." ".$val->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
-								}else if((round($cek_acc->qty2 ?? 0,2) != round($val->qty2 ?? 0,2)) AND ($tglnow != $tgl_buat) ){
+								}else if((round($cek_acc->qty2 ?? 0,2) != round($val->qty2 ?? 0,2)) AND ($tglnow != $tgl_move) ){
 									$data_sm = $val->nama_produk." ".$val->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty2 Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
 								}else if(empty($cek_sq)){
@@ -1088,17 +1088,17 @@ class Koreksimundur extends MY_Controller
 								// cek_stock_quant
 								$cek_sq = $this->_module->get_stock_quant_by_id($val2->quant_id)->row();
 								$tglnow = date("Y-m-d", strtotime($tgl));
-								$tgl_buat = date("Y-m-d", strtotime($cek_sq->create_date));
+								$tgl_move = date("Y-m-d", strtotime($cek_sq->move_date));
 
 								// acc stock move items
 								$cek_acc = $this->m_koreksi->cek_acc_stock_move_items($dept_id,$type,$val2->quant_id,$val2->lot,$kode_transaksi);
-								if(empty($cek_acc) AND ($tglnow != $tgl_buat) ){
+								if(empty($cek_acc) AND ($tglnow != $tgl_move) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot;
 									throw new \Exception('Data Mutasi Stock Move tidak ditemukan ! <br> '.$data_sm, 200);
-								}else if((round($cek_acc->qty ?? 0,2) != round($val2->qty ?? 0,2)) AND ($tglnow != $tgl_buat) ){
+								}else if((round($cek_acc->qty ?? 0,2) != round($val2->qty ?? 0,2)) AND ($tglnow != $tgl_move) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
-								}else if((round($cek_acc->qty2 ?? 0,2) != round($val2->qty2 ?? 0,2)) AND ($tglnow != $tgl_buat) ){
+								}else if((round($cek_acc->qty2 ?? 0,2) != round($val2->qty2 ?? 0,2)) AND ($tglnow != $tgl_move) ){
 									$data_sm = $val2->nama_produk." ".$val2->lot." ".$cek_acc->qty." ".$cek_acc->uom." ".$cek_acc->qty2." ".$cek_acc->uom2;
 									throw new \Exception('Data Qty2 Mutasi Stock Move tidak Sama  ! <br> '.$data_sm, 200);
 								}else if(empty($cek_sq)){
