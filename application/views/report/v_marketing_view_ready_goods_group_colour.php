@@ -163,7 +163,7 @@
                 "orderable": false, 
               },
               { 
-                "targets": [3,6], 
+                "targets": [3,4,5,6], 
                 "className":"text-right nowrap",
               },
               { 

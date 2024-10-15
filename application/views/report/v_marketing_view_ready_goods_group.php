@@ -134,7 +134,7 @@
                 "orderable": false, 
               },
               { 
-                "targets": [2,5], 
+                "targets": [2,3,4,5], 
                 "className":"text-right nowrap",
               },
               { 
