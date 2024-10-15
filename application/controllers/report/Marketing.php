@@ -1172,7 +1172,10 @@ class Marketing extends MY_Controller
                 $no++;
                 $row = array();
                 $row[] = $no;
-                $row[] = '<a href="'.base_url('report/marketing/readygoodsgroupcolour?id='.urlencode($field->corak_remark)).'">'.$field->corak_remark.'</a>';
+                $row[] = '<a href="'.base_url('report/marketing/readygoodsgroupcolour?id='.urlencode($field->corak_remark)).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
+                $row[] = $field->lebar_jadi_merge;
+                $row[] = $field->uom_jual;
+                $row[] = $field->uom2_jual;
                 $row[] = $field->gl;
                 $data[] = $row;
             }
@@ -1199,6 +1202,10 @@ class Marketing extends MY_Controller
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
         $data['product']= $this->input->get('id');
+        $data['lebar_jadi']= $this->input->get('lebar_jadi');
+        $data['uom_lebar_jadi']= $this->input->get('uom_lebar_jadi');
+        $data['uom_jual']= $this->input->get('uom_jual');
+        $data['uom2_jual']= $this->input->get('uom2_jual');
         $this->load->view('report/v_marketing_view_ready_goods_group_colour', $data);
     }
     
@@ -1214,8 +1221,11 @@ class Marketing extends MY_Controller
                 $no++;
                 $row = array();
                 $row[] = $no;
-                $row[] = '<a href="'.base_url('report/marketing/readygoodsitems?id='.urlencode($field->corak_remark)).'&warna_remark='.urlencode($field->warna_remark).'">'.$field->corak_remark.'</a>';
+                $row[] = '<a href="'.base_url('report/marketing/readygoodsitems?id='.urlencode($field->corak_remark)).'&warna_remark='.urlencode($field->warna_remark).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
                 $row[] = $field->warna_remark;
+                $row[] = $field->lebar_jadi_merge;
+                $row[] = $field->uom_jual;
+                $row[] = $field->uom2_jual;
                 $row[] = $field->gl;
                 $data[] = $row;
             }
@@ -1241,7 +1251,11 @@ class Marketing extends MY_Controller
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
         $data['product']= $this->input->get('id');
-        $data['color']= $this->input->get('warna_remark');
+        $data['color']  = $this->input->get('warna_remark');
+        $data['lebar_jadi']   = $this->input->get('lebar_jadi');
+        $data['uom_lebar_jadi']   = $this->input->get('uom_lebar_jadi');
+        $data['uom_jual']    = $this->input->get('uom_jual');
+        $data['uom2_jual']   = $this->input->get('uom2_jual');
         $this->load->view('report/v_marketing_view_ready_goods_items', $data);
     }
 
@@ -1294,6 +1308,7 @@ class Marketing extends MY_Controller
 
         $product    = $this->input->post('product');
         $color      = $this->input->post('color');
+        $uom      = $this->input->post('uom');
 
         $object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
@@ -1312,8 +1327,12 @@ class Marketing extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('B4', ': '.$color);
 		$object->getActiveSheet()->mergeCells('B4:D4');
 
+        $object->getActiveSheet()->SetCellValue('A5', 'Uom');
+ 		$object->getActiveSheet()->SetCellValue('B5', ': '.$uom);
+		$object->getActiveSheet()->mergeCells('B5:D5');
+
        //bold huruf
-		$object->getActiveSheet()->getStyle("A1:Q6")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:Q7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -1330,7 +1349,7 @@ class Marketing extends MY_Controller
         $column = 0;
         foreach ($table_head_columns as $judul) {
             # code...
-            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 6, $judul);  
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 7, $judul);  
             $column++;
         }
 
@@ -1338,9 +1357,9 @@ class Marketing extends MY_Controller
     	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
     	$loop = 0;
     	foreach ($index_header as $val) {
-            $object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
+            $object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
         }
-        $rowCount  = 7;
+        $rowCount  = 8;
         $num       = 1;
         foreach ($get_data as $val) {
 

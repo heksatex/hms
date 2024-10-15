@@ -57,19 +57,36 @@
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
-                    <div class="col-md-12">
-                      <div class="row col-md-6">
-                        <div class="form-group empty_mb"> 
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Product / Corak</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $product; ?></div>
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Warna</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $color; ?></div>
-                            </div>
-                        </div> 
-                      </div>
+                      <div class="col-md-12">
+                        <div class="row col-md-6">
+                          <div class="form-group empty_mb"> 
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Product / Corak</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $product; ?></div>
+                              </div>
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Warna</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $color; ?></div>
+                              </div>
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Lebar Jadi</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $lebar_jadi." ".$uom_lebar_jadi; ?></div>
+                              </div>
+                            
+                          </div> 
+                        </div>
+                        <div class="row col-md-6">
+                          <div class="form-group empty_mb">
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Uom 1</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $uom_jual; ?></div>
+                              </div>
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Uom 2</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $uom2_jual; ?></div>
+                              </div>
+                          </div>
+                        </div>
                       </div>
                       <div class="col-md-12">
                         <div class=" row col-md-6">
@@ -152,7 +169,7 @@
             "ajax": {
                 "url": "<?php echo site_url('report/marketing/get_data_ready_goods_items')?>",
                 "type": "POST",
-                "data": {"product":"<?php echo $product;?>", "color" : "<?php echo $color?>"}
+                "data": {"product":"<?php echo $product;?>", "color" : "<?php echo $color?>","lebar_jadi":"<?php echo $lebar_jadi; ?>", "uom_lebar_jadi":"<?php echo $uom_lebar_jadi; ?>", "uom_jual":"<?php echo $uom_jual; ?>", "uom2_jual":"<?php echo $uom2_jual; ?>"}
             },
            
             "columnDefs": [
@@ -188,7 +205,7 @@
         $.ajax({
             "type":'POST',
             "url": "<?php echo site_url('report/Marketing/export_excel_ready_goods')?>",
-            "data": {"product": "<?php echo $product;?>", "color":"<?php echo $color; ?>"},
+            "data": {"product": "<?php echo $product;?>", "color":"<?php echo $color?>", "lebar_jadi":"<?php echo $lebar_jadi; ?>", "uom_lebar_jadi":"<?php echo $uom_lebar_jadi; ?>", "uom_jual":"<?php echo $uom_jual; ?>", "uom2_jual":"<?php echo $uom2_jual; ?>"},
             "dataType":'json',
             beforeSend: function() {
               $('#btn-excel').button('loading');

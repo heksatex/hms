@@ -561,7 +561,7 @@ class Adjustment extends MY_Controller
       }else{
 
         // lock table
-        $this->_module->lock_tabel('stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, mst_produk WRITE, departemen WRITE, adjustment_items ai WRITE, mst_produk mp WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, picklist_detail WRITE');
+        $this->_module->lock_tabel('stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, mst_produk WRITE, departemen WRITE, adjustment_items ai WRITE, mst_produk mp WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, picklist_detail WRITE, mst_category as cat WRITE, mst_status as sat WRITE');
 
         // get move_id
         $last_move   = $this->_module->get_kode_stock_move();
@@ -584,6 +584,8 @@ class Adjustment extends MY_Controller
         $list_quant          = '';
         $lokasi_produk_valid = true;
         $quant               = true;
+        $stock_lot_same = false;
+        $lokasi_same_lot = "";
  
         $item =  $this->m_adjustment->get_adjustment_detail_by_code($kode_adjustment);
         foreach($item as $row){
@@ -632,6 +634,17 @@ class Adjustment extends MY_Controller
               $sm_row++; //row order stock_move
               $move_id++;
               $jml_adj++;
+
+              // Cek apakah terdapat lot yang sama di lokasi stock untuk kategori Kain Hasil
+              $cek_nm_cat = $this->_module->get_prod($row->kode_produk)->row_array();
+              if(stripos(strtolower($cek_nm_cat['nama_category']), 'kain') !== FALSE){
+                  // cek stock terdpat produk yang menggunakan lot yg sama 
+                  $cek_same_lot = $this->m_adjustment->get_stock_quant_by_lot($row->lot)->row_array();
+                  if(!empty($cek_same_lot)){
+                    $lokasi_same_lot .= $row->lot." Lokasi di ".$cek_same_lot['lokasi'].'<br>';
+                    $stock_lot_same  = true;
+                  }
+              }
   
           }else{
 
@@ -896,7 +909,7 @@ class Adjustment extends MY_Controller
         }// end foreach adjusment details
 
 
-        if($loop_adj == true AND $qty_data_adj_same == false AND $qty_adj_null == false AND $reserve_move_empty == true AND $lokasi_produk_valid == true AND $quant == true AND $reserve_pl_empty == true){
+        if($loop_adj == true AND $qty_data_adj_same == false AND $qty_adj_null == false AND $reserve_move_empty == true AND $lokasi_produk_valid == true AND $quant == true AND $reserve_pl_empty == true AND $stock_lot_same == false){
 
   
           // simpan stock move
@@ -1014,6 +1027,8 @@ class Adjustment extends MY_Controller
             $callback = array('status' => 'failed','message' => 'Produk atau Lot <b> sudah Masuk PL </b> !!<br> '.$list_produk3, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if($quant == false){
             $callback = array('status' => 'failed','message' => 'Produk atau Lot di <b>Stock tidak ditemukan / sudah di hapus </b> !!<br> '.$list_quant, 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if($stock_lot_same == true){
+            $callback = array('status' => 'failed','message' => 'Lot ini masih terpakai di Lokasi Stock / Transit Location </b> !!<br> '.$lokasi_same_lot, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if(empty($item)){
             $callback = array('status' => 'failed','message' => 'Produk atau Lot yang akan di Adjustment masih  Kosong !!<br> '.$list_quant, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
