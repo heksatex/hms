@@ -76,6 +76,9 @@
                                     <tr>
                                         <th class="style width-50">No.</th>
                                         <th class="style ">Corak</th>
+                                        <th class="style ">Lebar Jadi</th>
+                                        <th class="style ">Uom1</th>
+                                        <th class="style ">Uom2</th>
                                         <th class="style ws">Gl / Lot</th>
                                     </tr>
                                 </thead>
@@ -131,7 +134,7 @@
                 "orderable": false, 
               },
               { 
-                "targets": [2], 
+                "targets": [2,5], 
                 "className":"text-right nowrap",
               },
               { 

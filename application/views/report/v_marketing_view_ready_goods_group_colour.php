@@ -57,19 +57,41 @@
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
+                      <div class="row col-md-6">
                         <div class="form-group"> 
                             <div class="col-md-12 col-xs-12">
                                 <div class="col-xs-4"><label>Product / Corak</label></div>
                                 <div class="col-xs-8"><label>:</label> <?php echo $product; ?></div>
                             </div>
-                        </div> 
-                        <div class="form-group">
                             <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Total Lot</label></div>
-                                <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
+                                <div class="col-xs-4"><label>Lebar Jadi</label></div>
+                                <div class="col-xs-8"><label>:</label> <?php echo $lebar_jadi." ".$uom_lebar_jadi; ?></div>
                             </div>
+                        </div> 
+                      </div>
+                      <div class="row col-md-6">
+                        <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Uom 1 </label></div>
+                                <div class="col-xs-8"><label>:</label> <?php echo $uom_jual; ?></div>
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Uom 2</label></div>
+                                <div class="col-xs-8"><label>:</label> <?php echo $uom2_jual; ?></div>
+                            </div>
+                        </div> 
+                      </div> 
+                    </div>
+                    <div class="col-md-12">
+                      <div class=" row col-md-6">
+                        <div class="form-group">
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Total Lot</label></div>
+                                  <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
+                              </div>
                         </div>
+                      </div>
                     </div>
                 </form>
 
@@ -83,6 +105,9 @@
                                         <th class="style width-50">No.</th>
                                         <th class="style ">Corak</th>
                                         <th class="style ">Warna</th>
+                                        <th class="style ">Lebar Jadi </th>
+                                        <th class="style ">Uom 1 </th>
+                                        <th class="style ">Uom 2 </th>
                                         <th class="style ws">Gl / Lot</th>
                                     </tr>
                                 </thead>
@@ -129,7 +154,7 @@
             "ajax": {
                 "url": "<?php echo site_url('report/marketing/get_data_ready_goods_group_colour')?>",
                 "type": "POST",
-                "data": {"product":"<?php echo $product;?>",}
+                "data": {"product":"<?php echo $product;?>", "lebar_jadi":"<?php echo $lebar_jadi; ?>", "uom_lebar_jadi":"<?php echo $uom_lebar_jadi; ?>", "uom_jual":"<?php echo $uom_jual; ?>", "uom2_jual":"<?php echo $uom2_jual; ?>"}
             },
            
             "columnDefs": [
@@ -138,7 +163,7 @@
                 "orderable": false, 
               },
               { 
-                "targets": [3], 
+                "targets": [3,5], 
                 "className":"text-right nowrap",
               },
               { 
