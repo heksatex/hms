@@ -1019,7 +1019,7 @@ class m_marketing extends CI_Model
 	}
 
 
-	var $column_order10 = array(null, 'sq.corak_remark','sq.lebar_jadi','sq.uom_jual','sq.uom2_jual','gl');
+	var $column_order10 = array(null, 'sq.corak_remark','sq.lebar_jadi','total_qty_jual','total_qty2_jual','gl');
 	var $column_search10= array('sq.corak_remark','sq.lebar_jadi','sq.uom_jual','sq.uom2_jual');
 	var $order10  	  = array('sq.corak_remark' => 'asc');
 	var $f_jenis_kain  = array(1,2,3,4);
@@ -1030,7 +1030,7 @@ class m_marketing extends CI_Model
 
     private function get_query_10()
     {
-		$this->db->SELECT("sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, CONCAT(sq.lebar_jadi,' ',sq.uom_lebar_jadi) as lebar_jadi_merge, sq.uom_jual, sq.uom2_jual, count(sq.lot) as gl");
+		$this->db->SELECT("sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, CONCAT(sq.lebar_jadi,' ',sq.uom_lebar_jadi) as lebar_jadi_merge, sum(qty_jual) as total_qty_jual, sq.uom_jual, sum(qty2_jual) as total_qty2_jual, sq.uom2_jual, count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
@@ -1139,7 +1139,7 @@ class m_marketing extends CI_Model
 		return $this->db->count_all_results();
 	} 
 
-	var $column_order11 = array(null, 'sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.uom_jual','sq.uom2_jual','gl');
+	var $column_order11 = array(null, 'sq.corak_remark','sq.warna_remark','sq.lebar_jadi','total_qty_jual','total_qty2_jual','gl');
 	var $column_search11= array('sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.uom_jual','sq.uom2_jual');
 	var $order11  	  = array('sq.corak_remark' => 'asc','sq.warna_remark' => 'asc');
 
@@ -1165,7 +1165,7 @@ class m_marketing extends CI_Model
     		$this->db->where('sq.uom2_jual',$this->input->post('uom2_jual'));
         }
 
-		$this->db->SELECT("sq.corak_remark, sq.warna_remark,  sq.lebar_jadi, sq.uom_lebar_jadi, CONCAT(sq.lebar_jadi,' ',sq.uom_lebar_jadi) as lebar_jadi_merge, sq.uom_jual, sq.uom2_jual,  count(sq.lot) as gl");
+		$this->db->SELECT("sq.corak_remark, sq.warna_remark,  sq.lebar_jadi, sq.uom_lebar_jadi, CONCAT(sq.lebar_jadi,' ',sq.uom_lebar_jadi) as lebar_jadi_merge,  sum(qty_jual) as total_qty_jual, sq.uom_jual, sum(qty2_jual) as total_qty2_jual, sq.uom2_jual,  count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);

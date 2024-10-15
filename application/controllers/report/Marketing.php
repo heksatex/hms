@@ -1174,8 +1174,8 @@ class Marketing extends MY_Controller
                 $row[] = $no;
                 $row[] = '<a href="'.base_url('report/marketing/readygoodsgroupcolour?id='.urlencode($field->corak_remark)).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
                 $row[] = $field->lebar_jadi_merge;
-                $row[] = $field->uom_jual;
-                $row[] = $field->uom2_jual;
+                $row[] = $field->total_qty_jual.' '.$field->uom_jual;
+                $row[] = $field->total_qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->gl;
                 $data[] = $row;
             }
@@ -1224,8 +1224,8 @@ class Marketing extends MY_Controller
                 $row[] = '<a href="'.base_url('report/marketing/readygoodsitems?id='.urlencode($field->corak_remark)).'&warna_remark='.urlencode($field->warna_remark).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
                 $row[] = $field->warna_remark;
                 $row[] = $field->lebar_jadi_merge;
-                $row[] = $field->uom_jual;
-                $row[] = $field->uom2_jual;
+                $row[] = $field->total_qty_jual.' '.$field->uom_jual;
+                $row[] = $field->total_qty2_jual.' '.$field->uom2_jual;
                 $row[] = $field->gl;
                 $data[] = $row;
             }
@@ -1308,7 +1308,10 @@ class Marketing extends MY_Controller
 
         $product    = $this->input->post('product');
         $color      = $this->input->post('color');
-        $uom      = $this->input->post('uom');
+        $lebar_jadi = $this->input->post('lebar_jadi');
+        $uom_lebar_jadi      = $this->input->post('uom_lebar_jadi');
+        $uom_jual      = $this->input->post('uom_jual');
+        $uom2_jual      = $this->input->post('uom2_jual');
 
         $object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
@@ -1327,9 +1330,9 @@ class Marketing extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('B4', ': '.$color);
 		$object->getActiveSheet()->mergeCells('B4:D4');
 
-        $object->getActiveSheet()->SetCellValue('A5', 'Uom');
- 		$object->getActiveSheet()->SetCellValue('B5', ': '.$uom);
-		$object->getActiveSheet()->mergeCells('B5:D5');
+        // $object->getActiveSheet()->SetCellValue('A5', 'Lebar Jadi');
+ 		// $object->getActiveSheet()->SetCellValue('B5', ': '.$uom);
+		// $object->getActiveSheet()->mergeCells('B5:D5');
 
        //bold huruf
 		$object->getActiveSheet()->getStyle("A1:Q7")->getFont()->setBold(true);
