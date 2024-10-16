@@ -355,4 +355,14 @@ class M_adjustment extends CI_Model
 		return $result->row();
 	}
 
+	public function get_stock_quant_by_lot($lot)
+	{
+		$this->db->where('lot', $lot);
+		$this->db->group_start();
+		$this->db->like('lokasi', 'stock');
+		$this->db->or_like('lokasi', 'transit');
+		$this->db->group_end();
+		return $this->db->get("stock_quant");
+	}
+
 }
