@@ -1173,6 +1173,7 @@ class Marketing extends MY_Controller
                 $row = array();
                 $row[] = $no;
                 $row[] = '<a href="'.base_url('report/marketing/readygoodsgroupcolour?id='.urlencode($field->corak_remark)).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
+                $row[] = $field->total_warna;
                 $row[] = $field->lebar_jadi_merge;
                 $row[] = $field->total_qty_jual.' '.$field->uom_jual;
                 $row[] = $field->total_qty2_jual.' '.$field->uom2_jual;
@@ -1299,7 +1300,96 @@ class Marketing extends MY_Controller
     }
 
 
-     function export_excel_ready_goods()
+    function export_excel_ready_goods_group()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_datatables10_excel();
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Report Ready Goods');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:Q3")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Corak' , 'Total Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]',  'Gl/Lot');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+            $object->getActiveSheet()->getStyle($val.'3')->applyFromArray($styleArray);
+        }
+        $rowCount  = 4;
+        $num       = 1;
+        foreach ($get_data as $val) {
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->corak_remark);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->total_warna);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->total_qty_jual);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->total_qty2_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->gl);
+
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+		}
+        
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Report Ready Goods Group.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
+    }
+
+
+    function export_excel_ready_goods()
     {
 
         $this->load->library('excel');
@@ -1347,7 +1437,7 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
