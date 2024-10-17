@@ -1328,7 +1328,7 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Corak' , 'Total Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]',  'Gl/Lot');
+        $table_head_columns  = array('No', 'Corak' , 'Jml Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]',  'Gl/Lot');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
