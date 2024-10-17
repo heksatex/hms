@@ -11,6 +11,7 @@ class Rekapcacat extends MY_Controller
 		$this->is_loggedin();//cek apakah user sudah login
         $this->load->model('m_rekapCacat');
 		$this->load->model('_module');
+		$this->load->library('pagination');
 	}
 
 	public function index()
@@ -28,8 +29,14 @@ class Rekapcacat extends MY_Controller
 	}
 
 
-	function loadData()
+	function loadData($record=0)
 	{
+		
+        $recordPerPage = 100;
+        if($record != 0){
+           $record = ($record-1) * $recordPerPage;
+        }
+		
 		$tgldari   = date('Y-m-d 00:00:00',strtotime($this->input->post('tgldari')));
 		$tglsampai = date('Y-m-d 23:59:59',strtotime($this->input->post('tglsampai')));
 		$id_dept   = $this->input->post('id_dept');
@@ -38,10 +45,10 @@ class Rekapcacat extends MY_Controller
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$grade     = $this->input->post('grade');
+		$show_hph  = $this->input->post('show_hph');
 
 		$dataRecord = [];
 		$sc         = '';
-
 
 		if(!empty($mc)){
 			$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
@@ -67,16 +74,25 @@ class Rekapcacat extends MY_Controller
 			$where_user  = '';
 		}
 
-		if($grade == 'All'){
+		if(!empty($grade)){
 			$where_grade  = '';
+			$list_grade  = '';
+            foreach($grade as $gd){
+                $list_grade .= "'$gd', ";
+            }
+            $list_grade = rtrim($list_grade, ', ');
 
+            if(!empty($list_grade)){
+                   
+				$where_grade  = "AND mpfg.nama_grade IN (".$list_grade.") ";
+            }
 		}else{
-			$where_grade  = "AND mpfg.nama_grade = '".addslashes($grade)."' ";
+			$where_grade  = '';
 		}
 
 		$where     = "WHERE mp.dept_id = '".$id_dept."' AND mpfg.create_date >='".$tgldari."' AND mpfg.create_date <='".$tglsampai."' ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_grade." ";
 
-		$items    = $this->m_rekapCacat->get_list_rekap_cacat_by_dept($where);
+		$items    = $this->m_rekapCacat->get_list_rekap_cacat_by_dept($where,$record,$recordPerPage,$show_hph);
 		foreach ($items as $row) {
 					
 				// explode origin
@@ -107,7 +123,6 @@ class Rekapcacat extends MY_Controller
 				$list_cacat = $this->m_rekapCacat->get_list_cacat_by_kode($row->kode,$row->lot,$row->quant_id);
 				$loop =1;
 				foreach ($list_cacat as $val) {
-
 					# code...
 					if($loop > 1){
 						$kode       = '';
@@ -141,12 +156,44 @@ class Rekapcacat extends MY_Controller
 										   'nama_user'  => $val->nama_user
 										   );
 					$loop++;
+				}
 
+				if(empty($list_cacat) AND $show_hph == 'true'){
+					$dataRecord[] =  array('kode' => $kode,
+										   'nama_mesin' => $nama_mesin,
+										   'sc'   		=> $sc,
+										   'tgl_hph'    => $create_date,
+										   'kode_produk'=> $kode_produk,
+										   'nama_produk'=> $nama_produk,
+										   'lot'        => $lot,
+										   'qty1'       => $qty,
+										   'uom1'       => $uom,
+										   'qty2'       => $qty2,
+										   'uom2'       => $uom2,
+										   'grade'      => $nama_grade,
+										   'point_cacat'=> "",
+										   'kode_cacat' => "",
+										   'nama_cacat' => "",
+										   'nama_user'  => "",
+										   );
 				}
 
 		}
 
-		$callback = array('record' => $dataRecord);
+		$allcount           = $this->m_rekapCacat->get_count_list_rekap_cacat_by_dept($where,$show_hph);
+        $total_record       = 'Total Data : '. number_format($allcount);
+
+		$config['base_url']         = base_url().'report/rekapcacat/loadData';
+        $config['use_page_numbers'] = TRUE;
+        $config['total_rows']       = $allcount;
+        $config['per_page']         = $recordPerPage;
+        $config['num_links']        = 1;
+        $config['next_link']        = '>';
+        $config['prev_link']        = '<';
+        $this->pagination->initialize($config);
+        $pagination         = $this->pagination->create_links();
+
+		$callback = array('record' => $dataRecord,'pagination'=>$pagination, 'total_record'=>$total_record);
 
 		echo json_encode($callback);
 	}
@@ -167,7 +214,7 @@ class Rekapcacat extends MY_Controller
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$grade     = $this->input->post('grade');
-
+		$show_hph  = $this->input->post('show_hph');
 
 		if(!empty($mc)){
 			$where_mc  = "AND ms.nama_mesin LIKE '%".addslashes($mc)."%' ";
@@ -193,10 +240,20 @@ class Rekapcacat extends MY_Controller
 			$where_user  = '';
 		}
 
-		if($grade == 'All'){
+		if(!empty($grade)){
 			$where_grade  = '';
+			$list_grade  = '';
+            foreach($grade as $gd){
+                $list_grade .= "'$gd', ";
+            }
+            $list_grade = rtrim($list_grade, ', ');
+
+            if(!empty($list_grade)){
+                   
+				$where_grade  = "AND mpfg.nama_grade IN (".$list_grade.") ";
+            }
 		}else{
-			$where_grade  = "AND mpfg.nama_grade = '".addslashes($grade)."' ";
+			$where_grade  = '';
 		}
 
 		$where     = "WHERE mp.dept_id = '".$id_dept."' AND mpfg.create_date >='".$tgldari."' AND mpfg.create_date <='".$tglsampai."' ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_grade ." ";
@@ -304,7 +361,7 @@ class Rekapcacat extends MY_Controller
 
 
     	// tbody
-		$items    = $this->m_rekapCacat->get_list_rekap_cacat_by_dept($where);
+		$items    = $this->m_rekapCacat->get_list_rekap_cacat_by_dept_no_limit($where,$show_hph);
 		$number   = 1;
 		$rowCount = 6;
     	foreach ($items as $row) {
@@ -397,6 +454,45 @@ class Rekapcacat extends MY_Controller
 					$loop2++;
 
 				}// end looping cacat
+
+				if(empty($list_cacat)){ // lot yang tidak ada cacat
+
+					$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($number++));
+	    			$object->getActiveSheet()->SetCellValue('B'.$rowCount, ($kode));
+	    			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $nama_mesin);
+	    			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $sc);
+	    			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $create_date);
+	    			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $kode_produk);
+	    			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $nama_produk);
+	    			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $lot);
+	    			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $qty);
+	    			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $uom);
+	    			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $qty2);
+	    			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $uom2);
+	    			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $nama_grade);
+	    			$object->getActiveSheet()->SetCellValue('N'.$rowCount, "");
+	    			$object->getActiveSheet()->SetCellValue('O'.$rowCount, "");
+	    			$object->getActiveSheet()->SetCellValue('P'.$rowCount, "");
+	    			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, "");
+
+	    			// wrap text
+        			$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+        			$object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+        			$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+					$object->getActiveSheet()->getStyle('P'.$rowCount.':P'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+					
+					// set align 
+					$object->getActiveSheet()->getStyle('N'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+
+        			// set border left
+        			foreach ($index_column as $field) {
+		                $object->getActiveSheet()->getStyle($field.$rowCount)->applyFromArray($styleArray_left);
+        			}
+	             	$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray_left);
+	                	
+	    			$rowCount++;
+				}
 				
 				if($cacat == true){
 					$number = $number + 1;
@@ -407,8 +503,6 @@ class Rekapcacat extends MY_Controller
 	                $object->getActiveSheet()->getStyle($field.$rowCount)->applyFromArray($styleArray_top);
                 }
 
-
-
     	}// end looping mrp_cacat
 
 		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
@@ -416,7 +510,7 @@ class Rekapcacat extends MY_Controller
 		$xlsData = ob_get_contents();
 		ob_end_clean();
 		$departemen = $dept['nama'];
-		$name_file = "Rekap Caca ".$departemen.".xlsx";
+		$name_file = "Rekap Cacat ".$departemen.".xlsx";
 		$response =  array(
 			'op'        => 'ok',
 			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
