@@ -82,7 +82,7 @@
                             </select>
                           </div>
                           <div class="col-md-3">
-                            <input type="number" class="form-control input-sm" id="search_field" name="search_field" placeholder="Day" onkeypress="return isNumberKey(event)" onkeydown=" event_input(event)" >
+                            <input type="number" class="form-control input-sm" id="search_field" name="search_field" onkeypress="return isNumberKey(event)" onkeydown=" event_input(event)" >
                           </div>
                         </div>
                         <div class="col-md-3">
