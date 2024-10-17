@@ -68,27 +68,27 @@
                       </div>
                     </div>
                     <div class="col-md-12">
-                      <div class="col-md-8">
-                        <div class="col-md-3">
+                      <div class="col-md-6 col-lg-6">
+                        <div class="col-md-2 col-lg-2">
                           <select class="form-control input-sm" name="cmbSearch" id="cmbSearch">
                             <option value="uom_jual">Uom1</option>
                           </select>
                         </div>
                         <div id='f_search'>
-                          <div class="col-md-2" >
+                          <div class="col-md-2 col-lg-3 " >
                             <select class="form-control input-sm" name="cmbOperator" id="cmbOperator">
                               <option value=">">Greather  than</option>
                               <option value="<">Less than</option>
                             </select>
                           </div>
-                          <div class="col-md-3">
+                          <div class="col-md-2 col-lg-3">
                             <input type="number" class="form-control input-sm" id="search_field" name="search_field" onkeypress="return isNumberKey(event)" onkeydown=" event_input(event)" >
                           </div>
                         </div>
-                        <div class="col-md-3">
-                          <button type="button" class="btn btn-sm btn-default btn-flat" id="btn-search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <span class="fa fa-search" ></span> Proses</button>
-                          <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
-                        </div>
+                          <div class="col-md-2 col-lg-4">
+                            <button type="button" class="btn btn-sm btn-default btn-flat" id="btn-search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <span class="fa fa-search" ></span> Proses</button>
+                            <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                          </div>
                       </div>   
                     </div>
                 </form>
@@ -102,7 +102,7 @@
                                     <tr>
                                         <th class="style width-50">No.</th>
                                         <th class="style ">Corak</th>
-                                        <th class="style ">Total Warna</th>
+                                        <th class="style ">Jml Warna</th>
                                         <th class="style ">Lebar Jadi</th>
                                         <th class="style ">Uom1</th>
                                         <th class="style ">Uom2</th>
