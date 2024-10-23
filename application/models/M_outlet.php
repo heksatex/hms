@@ -199,8 +199,8 @@ class M_outlet extends CI_Model
 
     function get_list_detail_hph($id)
     {   
+        $this->db->WHERE("id_inlet",$id);
         $this->get_list_hph();
-        $this->db->WHERE("id",$id);
         if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
         $query =  $this->db->get();
