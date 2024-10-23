@@ -945,6 +945,8 @@ class Outlet extends MY_Controller
                                                                     'move_id'  => $move_id_rm,
                                                                     'status'   => 'ready',
                                                 );
+
+                                                $hph_mtr     = $qty_1_rm;
                                               
                                                 // simpan rm hasil
                                                 $data_array_mrp_rm_hasil[] = array(
