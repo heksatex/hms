@@ -220,7 +220,11 @@
         var departemen  = $('#departemen').val();
         var koreksi_apa = $('#koreksi_apa').val();
         var kode        = $('#kode').val();
-        var tipe        = $('#tipe').val();
+        if(koreksi_apa == 'mo'){
+          var tipe        = $('#tipe').val();
+        }else{
+          var tipe        = "";
+        }
 
         if(departemen == null){
             alert_notify('fa fa-warning','Departemen Harus Diisi !','danger',function(){});
@@ -231,6 +235,7 @@
         }else{
           // $('#btn-search').button('loading');
           $('#example2').DataTable().destroy();
+          f_filter = [];
           f_filter.push({departemen:departemen, koreksi_apa:koreksi_apa, tipe:tipe, kode:kode});
           // dTable.search("").draw();
           fetch_data();
