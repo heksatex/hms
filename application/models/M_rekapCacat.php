@@ -14,10 +14,12 @@ class M_rekapCacat extends CI_Model
 		}else{
 			$join_cacat	= "INNER JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}
-		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.kode_produk, mp.nama_produk, mpfg.quant_id, ms.nama_mesin, mpfg.create_date, mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.nama_grade
+		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.kode_produk, mp.nama_produk, mpfg.quant_id, ms.nama_mesin, mpfg.create_date, mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.nama_grade, mjk.nama_jenis_kain
 								 FROM mrp_production mp 
 								 LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
 								 INNER JOIN mrp_production_fg_hasil mpfg ON mp.kode = mpfg.kode
+								 INNER JOIN mst_produk mst ON mst.kode_produk = mpfg.kode_produk
+								 INNER JOIN mst_jenis_kain mjk ON mjk.id = mst.id_jenis_kain
 								 $join_cacat
 								 $where
 								 order by mpfg.create_date asc
@@ -33,10 +35,12 @@ class M_rekapCacat extends CI_Model
 		}else{
 			$join_cacat	= "INNER JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}
-		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.kode_produk, mp.nama_produk, mpfg.quant_id, ms.nama_mesin, mpfg.create_date, mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.nama_grade
+		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.kode_produk, mp.nama_produk, mpfg.quant_id, ms.nama_mesin, mpfg.create_date, mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.nama_grade,  mjk.nama_jenis_kain
 								 FROM mrp_production mp 
 								 LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
 								 INNER JOIN mrp_production_fg_hasil mpfg ON mp.kode = mpfg.kode
+								 INNER JOIN mst_produk mst ON mst.kode_produk = mpfg.kode_produk
+								 INNER JOIN mst_jenis_kain mjk ON mjk.id = mst.id_jenis_kain
 								 $join_cacat 
 								 $where
 								 order by mpfg.create_date asc
@@ -64,6 +68,8 @@ class M_rekapCacat extends CI_Model
 								 FROM mrp_production mp 
 								 LEFT JOIN mesin ms ON mp.mc_id = ms.mc_id
 								 INNER JOIN mrp_production_fg_hasil mpfg ON mp.kode = mpfg.kode
+								 INNER JOIN mst_produk mst ON mst.kode_produk = mpfg.kode_produk
+								 INNER JOIN mst_jenis_kain mjk ON mjk.id = mst.id_jenis_kain
 								 $join_cacat
 								 $where
 								 order by mpfg.create_date asc

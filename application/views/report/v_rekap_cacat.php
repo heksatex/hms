@@ -156,6 +156,19 @@
                                 <input type="text" class="form-control input-sm" name="corak" id="corak" >
                             </div>
                           </div>
+                          <div class="form-group">
+                            <div class="col-md-5">
+                              <label>Jenis Kain</label>
+                            </div>
+                            <div class="col-md-7">
+                                <select name="jenis_kain[]" class="form-control select2" id="jenis_kain" style="width:100% !important" multiple="">
+                                  <?php foreach ($jenis_kain as $key => $row) { ?>
+                                          <option value='<?= $row->id; ?>'><?= $row->nama_jenis_kain; ?></option>
+                                  <?php }
+                                  ?>
+                                </select>
+                            </div>
+                          </div>
                         </div>
                         <div class="col-md-4">
                           <div class="form-group">
@@ -228,6 +241,7 @@
                                 <th  class='style bb ws' style="min-width: 80px">Tgl HPH</th>
                                 <th  class='style bb ws' >kode Produk</th>
                                 <th  class='style bb ws'  style="min-width: 150px">Nama Produk</th>
+                                <th  class='style bb ws'  style="min-width: 80px">Jenis Kain</th>
                                 <th  class='style bb ws' >Lot</th>
                                 <th  class='style bb ws' >Qty1</th>
                                 <th  class='style bb ws' >Uom1</th>
@@ -242,7 +256,7 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td colspan="16" >Tidak ada Data</td>
+                                <td colspan="17" >Tidak ada Data</td>
                               </tr>
                             </tbody>
                         </table>
@@ -341,6 +355,7 @@
       user      = $('#user').val();
       jenis     = $('#jenis').val();      
       grade     = $('#grade').val();      
+      jenis_kain= $('#jenis_kain').val();      
       show_hph  = $('input[name="show"]').is(":checked");
 
       if(tgldari == '' || tglsampai == ''){
@@ -358,7 +373,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/rekapcacat/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade, show_hph:show_hph },
+                data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade, show_hph:show_hph,jenis_kain:jenis_kain },
                 success: function(data){
                   $('#total_record').html(data.total_record);
                   $('#pagination').html(data.pagination);
@@ -382,6 +397,7 @@
                                $("<td>").text(value.tgl_hph),
                                $("<td>").text(value.kode_produk),
                                $("<td>").text(value.nama_produk),
+                               $("<td>").text(value.nama_jenis_kain),
                                $("<td>").text(value.lot),
                                $("<td>").text(value.qty1),
                                $("<td>").text(value.uom1),
@@ -396,7 +412,7 @@
                       tbody.append(tr);
                   });
                 if(empty == true){
-                  var tr = $("<tr>").append($("<td colspan='16'>").text('Tidak ada Data'));
+                  var tr = $("<tr>").append($("<td colspan='17'>").text('Tidak ada Data'));
                   tbody.append(tr);
                 }
                 $("#example1").append(tbody);
@@ -436,13 +452,14 @@
       user      = $('#user').val();
       jenis     = $('#jenis').val();      
       grade     = $('#grade').val();    
+      jenis_kain= $('#jenis_kain').val();      
       show_hph  = $('input[name="show"]').is(":checked");
 
       $.ajax({
         type : 'POST',
         dataType: 'json',
         url  : '<?=base_url()?>report/rekapcacat/loadData/'+pageNum,
-        data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade,show_hph:show_hph },
+        data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade,show_hph:show_hph, jenis_kain:jenis_kain },
         success: function(data){
           $('#pagination').html(data.pagination);
           $('#total_record').html(data.total_record);
@@ -465,6 +482,7 @@
                                $("<td>").text(value.tgl_hph),
                                $("<td>").text(value.kode_produk),
                                $("<td>").text(value.nama_produk),
+                               $("<td>").text(value.nama_jenis_kain),
                                $("<td>").text(value.lot),
                                $("<td>").text(value.qty1),
                                $("<td>").text(value.uom1),
@@ -481,7 +499,7 @@
           });
 
           if(empty == true){
-              var tr = $("<tr>").append($("<td colspan='16'>").text('Tidak ada Data'));
+              var tr = $("<tr>").append($("<td colspan='17'>").text('Tidak ada Data'));
               tbody.append(tr);
           }
           $("#example1").append(tbody);
@@ -509,7 +527,8 @@
       lot       = $('#lot').val();
       user      = $('#user').val();
       jenis     = $('#jenis').val();      
-      grade     = $('#grade').val();      
+      grade     = $('#grade').val();    
+      jenis_kain= $('#jenis_kain').val();    
       show_hph  = $('input[name="show"]').is(":checked");
 
       if(tgldari == '' || tglsampai == ''){
@@ -522,7 +541,7 @@
         $.ajax({
           "type":'POST',
           "url" : "<?php echo site_url('report/rekapcacat/export_excel')?>",
-          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade, show_hph:show_hph },
+          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade, show_hph:show_hph,jenis_kain:jenis_kain },
           "dataType":'json',
           beforeSend: function() {
             $('#btn-excel').button('loading');
