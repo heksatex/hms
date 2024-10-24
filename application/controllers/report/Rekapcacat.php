@@ -12,12 +12,14 @@ class Rekapcacat extends MY_Controller
         $this->load->model('m_rekapCacat');
 		$this->load->model('_module');
 		$this->load->library('pagination');
+		$this->load->model('m_produk');
 	}
 
 	public function index()
     {
     	$data['id_dept']    = 'RCCT';
         $data['list_grade'] = $this->_module->get_list_grade();
+		$data['jenis_kain'] = $this->m_produk->get_list_jenis_kain();
     	$this->load->view('report/v_rekap_cacat', $data);
     }
 
@@ -45,6 +47,7 @@ class Rekapcacat extends MY_Controller
 		$lot       = $this->input->post('lot');
 		$user      = $this->input->post('user');
 		$grade     = $this->input->post('grade');
+		$jenis_kain     = $this->input->post('jenis_kain');
 		$show_hph  = $this->input->post('show_hph');
 
 		$dataRecord = [];
@@ -90,7 +93,22 @@ class Rekapcacat extends MY_Controller
 			$where_grade  = '';
 		}
 
-		$where     = "WHERE mp.dept_id = '".$id_dept."' AND mpfg.create_date >='".$tgldari."' AND mpfg.create_date <='".$tglsampai."' ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_grade." ";
+		if(!empty($jenis_kain)){
+			$where_jenis_kain = '';
+			$list_jenis_kain  = '';
+			foreach($jenis_kain as $jk){
+				$list_jenis_kain .= "'$jk', ";
+			}
+			$list_jenis_kain = rtrim($list_jenis_kain, ', ');
+
+			if(!empty($list_jenis_kain)){
+				$where_jenis_kain = "AND mst.id_jenis_kain IN (".$list_jenis_kain.") ";
+			}
+		}else{
+			$where_jenis_kain ='';
+		}
+
+		$where     = "WHERE mp.dept_id = '".$id_dept."' AND mpfg.create_date >='".$tgldari."' AND mpfg.create_date <='".$tglsampai."' ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_grade." ".$where_jenis_kain;
 
 		$items    = $this->m_rekapCacat->get_list_rekap_cacat_by_dept($where,$record,$recordPerPage,$show_hph);
 		foreach ($items as $row) {
@@ -112,6 +130,7 @@ class Rekapcacat extends MY_Controller
 				$create_date = $row->create_date;
 				$kode_produk = $row->kode_produk;
 				$nama_produk = $row->nama_produk;
+				$nama_jenis_kain = $row->nama_jenis_kain;
 				$lot         = $row->lot;
 				$qty         = $row->qty;
 				$uom         = $row->uom;
@@ -131,6 +150,7 @@ class Rekapcacat extends MY_Controller
 						$create_date = '';
 						$kode_produk = '';
 						$nama_produk = '';
+						$nama_jenis_kain = '';
 						$lot         = '';
 						$qty         = '';
 						$uom         = '';
@@ -144,6 +164,7 @@ class Rekapcacat extends MY_Controller
 										   'tgl_hph'    => $create_date,
 										   'kode_produk'=> $kode_produk,
 										   'nama_produk'=> $nama_produk,
+										   'nama_jenis_kain'=> $nama_jenis_kain,
 										   'lot'        => $lot,
 										   'qty1'       => $qty,
 										   'uom1'       => $uom,
@@ -165,6 +186,7 @@ class Rekapcacat extends MY_Controller
 										   'tgl_hph'    => $create_date,
 										   'kode_produk'=> $kode_produk,
 										   'nama_produk'=> $nama_produk,
+										   'nama_jenis_kain'=> $nama_jenis_kain,
 										   'lot'        => $lot,
 										   'qty1'       => $qty,
 										   'uom1'       => $uom,
@@ -256,7 +278,22 @@ class Rekapcacat extends MY_Controller
 			$where_grade  = '';
 		}
 
-		$where     = "WHERE mp.dept_id = '".$id_dept."' AND mpfg.create_date >='".$tgldari."' AND mpfg.create_date <='".$tglsampai."' ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_grade ." ";
+		if(!empty($jenis_kain)){
+			$where_jenis_kain = '';
+			$list_jenis_kain  = '';
+			foreach($jenis_kain as $jk){
+				$list_jenis_kain .= "'$jk', ";
+			}
+			$list_jenis_kain = rtrim($list_jenis_kain, ', ');
+
+			if(!empty($list_jenis_kain)){
+				$where_jenis_kain = "AND mst.id_jenis_kain IN (".$list_jenis_kain.") ";
+			}
+		}else{
+			$where_jenis_kain ='';
+		}
+
+		$where     = "WHERE mp.dept_id = '".$id_dept."' AND mpfg.create_date >='".$tgldari."' AND mpfg.create_date <='".$tglsampai."' ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_grade ." ".$where_jenis_kain;
 
 
 		$object = new PHPExcel();
@@ -314,7 +351,7 @@ class Rekapcacat extends MY_Controller
 
     
 		// header table
-    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2', 'Grade', 'Point Cacat', 'Kode Cacat', 'Nama Cacat', 'Nama User');
+    	$table_head_columns  = array('No', 'MO', 'No Mesin', 'SC', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Jenis Kain', 'Lot', 'Qty1', 'Uom1','Qty2', 'Uom2', 'Grade', 'Point Cacat', 'Kode Cacat', 'Nama Cacat', 'Nama User');
 		
 		$column = 0;
     	$merge  = TRUE;
@@ -325,7 +362,7 @@ class Rekapcacat extends MY_Controller
     	}
 
     	// index column
-    	$index_column = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q');
+    	$index_column = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R');
     	$indexKe  = 1;
 
     	foreach ($index_column as $val) {
@@ -383,6 +420,7 @@ class Rekapcacat extends MY_Controller
 				$create_date = $row->create_date;
 				$kode_produk = $row->kode_produk;
 				$nama_produk = $row->nama_produk;
+				$nama_jenis_kain = $row->nama_jenis_kain;
 				$lot         = $row->lot;
 				$qty         = $row->qty;
 				$uom         = $row->uom;
@@ -407,6 +445,7 @@ class Rekapcacat extends MY_Controller
 						$create_date = '';
 						$kode_produk = '';
 						$nama_produk = '';
+						$nama_jenis_kain = '';
 						$lot         = '';
 						$qty         = '';
 						$uom         = '';
@@ -422,32 +461,33 @@ class Rekapcacat extends MY_Controller
 	    			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $create_date);
 	    			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $kode_produk);
 	    			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $nama_produk);
-	    			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $lot);
-	    			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $qty);
-	    			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $uom);
-	    			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $qty2);
-	    			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $uom2);
-	    			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $nama_grade);
-	    			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->point_cacat);
-	    			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->kode_cacat);
-	    			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->nama_cacat);
-	    			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->nama_user);
+	    			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $nama_jenis_kain);
+	    			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $lot);
+	    			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $qty);
+	    			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $uom);
+	    			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $qty2);
+	    			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $uom2);
+	    			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $nama_grade);
+	    			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->point_cacat);
+	    			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->kode_cacat);
+	    			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->nama_cacat);
+	    			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->nama_user);
 
 	    			// wrap text
         			$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
         			$object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
         			$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
-					$object->getActiveSheet()->getStyle('P'.$rowCount.':P'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+					$object->getActiveSheet()->getStyle('Q'.$rowCount.':Q'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
 					
 					// set align 
-					$object->getActiveSheet()->getStyle('N'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+					$object->getActiveSheet()->getStyle('O'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
 
         			// set border left
         			foreach ($index_column as $field) {
 		                $object->getActiveSheet()->getStyle($field.$rowCount)->applyFromArray($styleArray_left);
         			}
-	             	$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray_left);
+	             	$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray_left);
 	                	
 
 	    			$rowCount++;
@@ -464,32 +504,33 @@ class Rekapcacat extends MY_Controller
 	    			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $create_date);
 	    			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $kode_produk);
 	    			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $nama_produk);
-	    			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $lot);
-	    			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $qty);
-	    			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $uom);
-	    			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $qty2);
-	    			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $uom2);
-	    			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $nama_grade);
-	    			$object->getActiveSheet()->SetCellValue('N'.$rowCount, "");
+	    			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $nama_jenis_kain);
+	    			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $lot);
+	    			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $qty);
+	    			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $uom);
+	    			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $qty2);
+	    			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $uom2);
+	    			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $nama_grade);
 	    			$object->getActiveSheet()->SetCellValue('O'.$rowCount, "");
 	    			$object->getActiveSheet()->SetCellValue('P'.$rowCount, "");
 	    			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, "");
+	    			$object->getActiveSheet()->SetCellValue('R'.$rowCount, "");
 
 	    			// wrap text
         			$object->getActiveSheet()->getStyle('C'.$rowCount.':C'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
         			$object->getActiveSheet()->getStyle('E'.$rowCount.':E'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
         			$object->getActiveSheet()->getStyle('G'.$rowCount.':G'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
-					$object->getActiveSheet()->getStyle('P'.$rowCount.':P'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
+					$object->getActiveSheet()->getStyle('Q'.$rowCount.':Q'.$object->getActiveSheet()->getHighestRow())->getAlignment()->setWrapText(true);
 					
 					// set align 
-					$object->getActiveSheet()->getStyle('N'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+					$object->getActiveSheet()->getStyle('O'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
 
         			// set border left
         			foreach ($index_column as $field) {
 		                $object->getActiveSheet()->getStyle($field.$rowCount)->applyFromArray($styleArray_left);
         			}
-	             	$object->getActiveSheet()->getStyle('R'.$rowCount)->applyFromArray($styleArray_left);
+	             	$object->getActiveSheet()->getStyle('S'.$rowCount)->applyFromArray($styleArray_left);
 	                	
 	    			$rowCount++;
 				}
