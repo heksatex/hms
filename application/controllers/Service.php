@@ -20,9 +20,9 @@ class Service extends CI_Controller {
     //put your code here
     public function __construct() {
         parent::__construct();
-        $this->load->library('dompdflib');
         $this->load->model("m_gtp");
         $this->load->library("wa_message");
+        $this->config->load('additional');
     }
 
     public function generate_gtp() {
@@ -67,27 +67,31 @@ class Service extends CI_Controller {
                     ],
                     "group" => ["corak", "customer_name", "lebar_jadi"]]
             ];
+            $now = date("Y-m-d");
             $model = new $this->m_gtp;
             $sales = $model->setSelects(["nama_sales_group,report_date"])->setOrder(["report_date" => "desc"])
+                    ->setWhereRaw("nama_sales_group not in ('','RONALD')")
+                    ->setWheres(["DATE(report_date)" => $now])
                     ->setGroups(["nama_sales_group"])
                     ->getData();
             $datas = [];
-            $_POST['length'] = 50;
-            $_POST['start'] = 0;
+//            $_POST['length'] = 50;
+//            $_POST['start'] = 0;
             $url = "dist/storages/report/gtp";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
             }
+            $groups = $this->config->item('additional_gtp_bc_group') ?? [];
             ini_set("pcre.backtrack_limit", "50000000");
             foreach ($sales as $keys => $values) {
                 $datas = [];
-                $date = date("Y-m-d", strtotime($values->report_date));
+//                $date = date("Y-m-d", strtotime($values->report_date));
                 $dateSave = date("Ymd", strtotime($values->report_date));
                 $datas[$values->nama_sales_group] = [];
                 foreach ($query as $key => $value) {
                     $qr = new $this->m_gtp;
                     $datas[$values->nama_sales_group][$key] = $qr->setOrder(["lokasi,corak,category"])->setWheres($value["where"])
-                            ->setWheres(["nama_sales_group" => $values->nama_sales_group])->setWhereRaw("DATE(report_date) = '{$date}'")
+                            ->setWheres(["nama_sales_group" => $values->nama_sales_group])->setWhereRaw("DATE(report_date) = '{$now}'")
                             ->setSelects(["corak,uom,uom2,qty as total_qty,qty2 as total_qty2,lot as total_data,jml_warna as total_warna,customer_name,lebar_jadi"])
                             ->getData();
                 }
@@ -100,7 +104,7 @@ class Service extends CI_Controller {
          </table>";
                 $dates = date("Y-M-d H:i:s", strtotime($values->report_date));
                 $html = $this->load->view('service/v_gtp', ['data' => $datas, 'date' => $dates], true);
-                $mpdf = new Mpdf(['tempDir' => __DIR__ . '/tmp']);
+                $mpdf = new Mpdf(['tempDir' => FCPATH . '/tmp']);
 
                 $mpdf->WriteHTML($html);
                 $mpdf->SetHTMLFooter($footer);
@@ -109,9 +113,13 @@ class Service extends CI_Controller {
 
                 $wa = new $this->wa_message;
                 if (is_file(FCPATH . $pathFile)) {
-                    $wa->sendMessageToGroup('service_gtp', ["{message}" => "Laporan GTP {$values->nama_sales_group} Tanggal/Waktu : {$dates}"], ['IT WDT'])->setFile(getIpPubic("hms_staging_2/" . $pathFile))->setMentions([])->setFooter('footer_hms')->send();
+                    $nm = date("Y-M-d", strtotime($values->report_date));
+                    $wa->sendMessageToGroup('service_gtp', ["{message}" => "GOODS To PUSH *{$values->nama_sales_group}* \n {$nm}"], $groups)
+                            ->setFile(getIpPubic("hms_staging_2/" . $pathFile))
+                            ->setMentions([])->setFooter('footer_hms')->send();
                 } else {
-                    $wa->sendMessageToGroup('error', ["{message}" => "File GTP sales *{$key}* Tidak terbuat."], ['IT WDT'])->setMentions([])->setFooter('footer_hms')->send();
+                    $wa->sendMessageToGroup('error', ["{message}" => "File GTP sales *{$values->nama_sales_group}* Tidak terbuat."], ['IT WDT'])
+                            ->setMentions([])->setFooter('footer_hms')->send();
                 }
             }
 
