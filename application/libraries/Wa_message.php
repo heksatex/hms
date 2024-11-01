@@ -18,6 +18,7 @@ class Wa_message {
     protected $status = true;
     protected $footer = "";
     protected $pesan = "";
+    protected $fileUrl = "";
 
     public function __construct() {
         $this->model = & get_instance();
@@ -202,6 +203,12 @@ class Wa_message {
         return $this;
     }
 
+    public function setFile(string $linkFile) {
+        $this->fileUrl = $linkFile;
+
+        return $this;
+    }
+
     /**
      * KSave Database
      */
@@ -250,6 +257,6 @@ class Wa_message {
     }
 
     protected function save($value, $touser = 'touser') {
-        $this->model->m_WaSendMessage->save($this->setToTemplate(), [$touser => $value, 'has_mention' => $this->has_mention, 'footer' => $this->footer]);
+        $this->model->m_WaSendMessage->save($this->setToTemplate(), [$touser => $value, 'has_mention' => $this->has_mention, 'footer' => $this->footer, 'file' => $this->fileUrl]);
     }
 }

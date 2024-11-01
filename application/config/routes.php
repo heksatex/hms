@@ -58,6 +58,7 @@ $route['admin'] = 'admin/overview';
 $route['manufacturing'] = 'manufacturing/manufacturing';
 $route['warehouse'] = 'warehouse/warehouse';
 $route['ppic'] = 'ppic/ppic';
+$route['purchase'] = 'purchase/purchase';
 $route['lab'] = 'lab/lab';
 $route['sales'] = 'sales/sales';
 $route['setting'] = 'setting/setting';

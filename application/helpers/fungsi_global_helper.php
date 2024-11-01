@@ -95,10 +95,10 @@ function bln_indo($tanggal) {
     return $bulan[(int) $pecahkan[1]] . ' ' . $pecahkan[2];
 }
 
-function logArrayToString(string $seperator, array $data) {
+function logArrayToString(string $seperator, array $data, string $indikatorVal = "=") {
     return implode($seperator, array_map(
-                    function ($v, $k) {
-                        return sprintf("%s=%s", $k, $v);
+                    function ($v, $k) use ($indikatorVal) {
+                        return sprintf("%s{$indikatorVal}%s", $k, $v);
                     },
                     $data,
                     array_keys($data)
@@ -200,6 +200,10 @@ function getRomawi($bln) {
 
             break;
     }
+}
+
+function getIpPubic(string $param) {
+    return "http://202.150.151.163:8880/" . $param;
 }
 
 ?>
