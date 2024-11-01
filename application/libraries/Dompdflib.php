@@ -30,4 +30,17 @@ class Dompdflib {
         $dompdf->stream("testse.pdf", array("Attachment" => 0));
 //        exit();
     }
+
+    public function save(string $html, string $path) {
+        $options = new Options();
+        $options->set('defaultFont', 'Courier');
+        $options->set(
+                'isRemoteEnabled', true
+        );
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper("a4");
+        $dompdf->render();
+        file_put_contents($path, $dompdf->output());
+    }
 }
