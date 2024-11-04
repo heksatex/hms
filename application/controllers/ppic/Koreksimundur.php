@@ -99,8 +99,7 @@ class Koreksimundur extends MY_Controller
 
 				if(isset($kode_koreksi)){//update
 
-					$kode_decrypt  = decrypt_url($kode_koreksi);
-					$km = $this->m_koreksi->get_data_koreksi_by_kode($kode_decrypt);
+					$km = $this->m_koreksi->get_data_koreksi_by_kode($kode_koreksi);
 					if(empty($km)){
 						throw new \Exception('Data Koreksi tidak ditemukan !', 200);
 					}
@@ -108,7 +107,7 @@ class Koreksimundur extends MY_Controller
 					if($km->status == 'cancel'){
  						$callback = array('status' => 'failed', 'message' => 'Data tidak bisa Disimpan, status sudah Cancel', 'icon' =>'fa fa-warning', 'type' => 'danger');
 					}else if($km->status == 'done'){
-						$callback = array('status' => 'failed', 'message' => 'Data tidak bisa Disimpan, status sudah Done', 'icon' =>'fa fa-warning', 'type' => 'danger');
+						$callback = array('status' => 'failed', 'message' => 'Data tidak bisa Disimpan, status sudah Done ', 'icon' =>'fa fa-warning', 'type' => 'danger');
 					}else{
 
 						$data_koreksi = array('note' => $note);
@@ -1445,11 +1444,11 @@ class Koreksimundur extends MY_Controller
 
 				$tgl           = date('Y-m-d H:i:s'); 
 
-				// start transaction
-                $this->_module->startTransaction();
+				// // start transaction
+                // $this->_module->startTransaction();
 
-				// lock table
-                $this->_module->lock_tabel("stock_quant WRITE,koreksi_mundur WRITE, stock_move_items WRITE, acc_stock_move_items WRITE, acc_stock_quant_eom WRITE, koreksi_mundur_batch as kmb WRITE, koreksi_mundur_batch_items as a WRITE, koreksi_mundur_batch_items as b WRITE,  koreksi_mundur_batch_items WRITE, koreksi_mutasi WRITE, user WRITE ,main_menu_sub WRITE,log_history WRITE, departemen as d WRITE, koreksi_mundur_batch as km WRITE, koreksi_mundur_batch_items as kmbs WRITE, koreksi_mundur_batch as kmbc WRITE, koreksi_mundur_batch_items as kmbic WRITE, koreksi_mutasi as kmc WRITE ");
+				// // lock table
+                // $this->_module->lock_tabel("stock_quant WRITE,koreksi_mundur WRITE, stock_move_items WRITE, acc_stock_move_items WRITE, acc_stock_quant_eom WRITE, koreksi_mundur_batch as kmb WRITE, koreksi_mundur_batch_items as a WRITE, koreksi_mundur_batch_items as b WRITE,  koreksi_mundur_batch_items WRITE, koreksi_mutasi WRITE, user WRITE ,main_menu_sub WRITE,log_history WRITE, departemen as d WRITE, koreksi_mundur_batch as km WRITE, koreksi_mundur_batch_items as kmbs WRITE, koreksi_mundur_batch as kmbc WRITE, koreksi_mundur_batch_items as kmbic WRITE, koreksi_mutasi as kmc WRITE ");
 
 				$koreksi = $this->m_koreksi->get_data_koreksi_by_kode($kode);
 				if(empty($koreksi)){
@@ -1615,7 +1614,7 @@ class Koreksimundur extends MY_Controller
 
 						}
 
-			            $this->_module->unlock_tabel();
+			            // $this->_module->unlock_tabel();
 
 						for($loop=0;$loop<=4;$loop++){	
 
@@ -1715,9 +1714,9 @@ class Koreksimundur extends MY_Controller
 
 				}
 
-				if (!$this->_module->finishTransaction()) {
-                    throw new \Exception('Gagal Menyimpan Data', 500);
-                }
+				// if (!$this->_module->finishTransaction()) {
+                //     throw new \Exception('Gagal Menyimpan Data', 500);
+                // }
 
 				$this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 			}
