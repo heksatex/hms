@@ -305,20 +305,19 @@
                 alert_modal_warning(data.message);
                 window.location.replace('index');
               }else if(data.status == "failed"){
+                  $('#btn-simpan').button('reset');
                   //jika ada form belum keiisi
                   unblockUI( function() {
                     setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                   });
-                  document.getElementById(data.field).focus();
+                  // document.getElementById(data.field).focus();
               }else{
+                $('#btn-simpan').button('reset');
                 //jika berhasil disimpan/diubah
                 unblockUI( function() {
                     setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
                   });
-                $('#btn-simpan').button('reset');
               }
-              $('#btn-simpan').button('reset');
-
             },error: function (xhr, ajaxOptions, thrownError) {
               $('#btn-simpan').button('reset');
               alert(xhr.responseText);
