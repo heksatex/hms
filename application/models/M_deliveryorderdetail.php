@@ -34,11 +34,13 @@ class M_deliveryorderdetail extends CI_Model {
         return $query->result();
     }
 
+    
     protected function _getData() {
         $this->column_search = array_merge($this->column_search, ["pd.warna_remark", "pd.corak_remark"]);
         $this->db->from($this->table . ' a');
         $this->db->join("delivery_order do", 'do.id = a.do_id');
-        $this->db->join("picklist_detail pd", "(pd.barcode_id = a.barcode_id and pd.valid <> 'cancel')");
+        $this->db->join("picklist_detail pd", "(pd.id = a.picklist_detail_id)");
+//        $this->db->join("picklist_detail pd", "(pd.barcode_id = a.barcode_id and pd.valid <> 'cancel')");
 //        $this->db->join("(select * from picklist_detail group by barcode_id) pd", "pd.barcode_id = a.barcode_id");
         foreach ($this->join as $value) {
             switch ($value) {
@@ -46,7 +48,8 @@ class M_deliveryorderdetail extends CI_Model {
                     $this->column_search = array_merge($this->column_search, ["bulk_no_bulk"]);
                     $this->db->select("bulk_no_bulk");
                     $this->column_order = [null, "bulk_no_bulk", "corak_remark", "warna_remark", "total_qty", "jumlah_qty", "uom"];
-                    $this->db->join('bulk_detail bd', '(bd.barcode = pd.barcode_id and pd.valid <> "cancel")', 'left');
+//                    $this->db->join('bulk_detail bd', '(bd.barcode = pd.barcode_id and pd.valid <> "cancel")', 'left');
+                    $this->db->join('bulk_detail bd', '(bd.picklist_detail_id = pd.id)', 'left');
                     $this->db->group_by('bulk_no_bulk');
 //                    $this->db->order_by("bulk_no_bulk");
                     break;
@@ -85,7 +88,8 @@ class M_deliveryorderdetail extends CI_Model {
         $this->column_order = [null, "pd.barcode_id", "pd.nama_produk", "pd.warna_remark", "pd.corak_remark", "pd.no_pl", "pd.kode_produk", null];
         $this->order = ["nodo" => "DESC"];
         $this->db->from($this->table . ' dod');
-        $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
+//        $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
+        $this->db->join("picklist_detail pd", "pd.id = dod.picklist_detail_id");
         $this->db->select("pd.*,dod.do_id as nodo");
         $this->db->group_by("dod.barcode_id");
         foreach ($this->column_search as $key => $value) {
@@ -116,7 +120,8 @@ class M_deliveryorderdetail extends CI_Model {
         foreach ($join as $value) {
             switch ($value) {
                 case "BULK":
-                    $this->db->join('bulk_detail bd', 'pd.barcode_id = bd.barcode', 'left');
+//                    $this->db->join('bulk_detail bd', 'pd.barcode_id = bd.barcode', 'left');
+                     $this->db->join('bulk_detail bd', 'pd.id = bd.picklist_detail_id', 'left');
                     $this->db->select("bd.bulk_no_bulk");
                     $this->db->order_by("bd.bulk_no_bulk", "ASC");
                     break;
@@ -136,7 +141,8 @@ class M_deliveryorderdetail extends CI_Model {
         foreach ($join as $value) {
             switch ($value) {
                 case "BULK":
-                    $this->db->join('bulk_detail bd', 'pd.barcode_id = bd.barcode', 'left');
+//                    $this->db->join('bulk_detail bd', 'pd.barcode_id = bd.barcode', 'left');
+                    $this->db->join('bulk_detail bd', 'pd.id = bd.picklist_detail_id', 'left');
                     $this->db->select("bd.bulk_no_bulk");
 
                     break;
