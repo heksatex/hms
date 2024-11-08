@@ -147,6 +147,11 @@ class M_gtp extends CI_Model {
         if (count($this->groups) > 0) {
             $this->db->group_by($this->groups);
         }
+        if (count($this->wheresRaw) > 0) {
+            foreach ($this->wheresRaw as $key => $value) {
+                $this->db->where($value, null, false);
+            }
+        }
         return $this->db->count_all_results();
     }
 
