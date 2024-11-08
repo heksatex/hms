@@ -142,7 +142,7 @@ class M_deliveryorder extends CI_Model {
 
         $this->db->select("ddo.`no`,ddo.no_sj,ddo.tanggal_buat,ddo.tanggal_dokumen,p.jenis_jual,ddo.no_picklist,pr.nama,concat(pr.delivery_street,' , ',pr.delivery_city) as alamat,alamat_kirim,"
                 . "pd.corak_remark,pd.warna_remark,pd.uom_hph as uom,pd.uom2_hph as uom2,pd.uom as uom_jual,pd.uom2 as uom2_jual,pd.lebar_jadi,pd.uom_lebar_jadi,pd.nama_produk,dod.status as dod_status,"
-                . "msg.nama_sales_group as marketing,ddo.user,ddo.note");
+                . "msg.nama_sales_group as marketing,ddo.user,ddo.note,,ddo.tanggal_batal,dod.tanggal_retur");
     }
 
     public function getDataReport(array $condition, $order = "", $rekap = "global", $returbatal = "0", $raw = false) {

@@ -46,10 +46,13 @@
                 border: 1px solid #ddd;
             }
 
-            #tabelDelivery.hides tr > *:nth-child(14),#tabelDelivery.hides tr > *:nth-child(15){
+            #tabelDelivery.hides tr > *:nth-child(15),#tabelDelivery.hides tr > *:nth-child(16){
                 display: none;
             }
-            #tabelDelivery.hide_intrn tr > *:nth-child(13){
+            #tabelDelivery.hide_intrn tr > *:nth-child(14){
+                display: none;
+            }
+            #tabelDelivery.hide_retur tr > *:nth-child(6){
                 display: none;
             }
 
@@ -244,6 +247,28 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">DO</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <input type="text" name="no_do" id="no_do" value="" class="form-control"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">No SJ</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <input type="text" name="no_sj" id="no_sj" value="" class="form-control"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -259,6 +284,7 @@
                                                 <th class="style bb ws">No SJ</th>
                                                 <th class="style bb ws">Tanggal Sistem</th>
                                                 <th class="style bb ws">Tanggal Dokumen</th>
+                                                <th class="style bb ws">Tanggal Retur/Cancel</th>
                                                 <th class="style bb ws">Type</th>
                                                 <th class="style bb ws">No Picklist</th>
                                                 <th class="style bb ws">Buyer</th>
@@ -310,6 +336,7 @@
             $(function () {
                 $("#tabelDelivery").toggleClass("hides");
                 $("#tabelDelivery").toggleClass("hide_intrn");
+                $("#tabelDelivery").toggleClass("hide_retur");
                 $('input[name="periode"]').daterangepicker({
                     endDate: moment().startOf('day'),
                     startDate: moment().startOf('day').add(-1, 'week'),
@@ -323,6 +350,9 @@
                 });
                 $("#cintern").on("change", function () {
                     $("#tabelDelivery").toggleClass("hide_intrn");
+                });
+                $("#returbatal").on("change", function () {
+                    $("#tabelDelivery").toggleClass("hide_retur");
                 });
 
                 $("#tgl_buat").on("change", function () {
@@ -346,7 +376,9 @@
                             order: $("#order").find(":selected").val(),
                             marketing: $("#marketing").find(":selected").val(),
                             tgl_buat: $("#tgl_buat").val(),
-                            returbatal: $("#returbatal").is(":checked") ? 1 : 0
+                            returbatal: $("#returbatal").is(":checked") ? 1 : 0,
+                            nodo: $("#no_do").val(),
+                            nosj: $("#no_sj").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {

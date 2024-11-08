@@ -37,6 +37,7 @@ foreach ($list as $key => $value) {
         <td><?= $value->no_sj ?></td>
         <td><?= $value->tanggal_buat ?></td>
         <td><?= $value->tanggal_dokumen ?></td>
+        <td><?= ($value->dod_status === "retur") ? $value->tanggal_retur : ($value->tanggal_batal ?? "") ?></td>
         <td><?= strtoupper($value->jenis_jual) ?></td>
         <td><?= $value->no_picklist ?></td>
         <td><?= $value->nama ?></td>
@@ -60,6 +61,7 @@ foreach ($list as $key => $value) {
             if ($value->no_sj . "_" . $value->dod_status !== $list[$key + 1]->no_sj . "_" . $list[$key + 1]->dod_status) {
                 ?>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -104,6 +106,7 @@ foreach ($list as $key => $value) {
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                 </tr>
                 <?php
                 $sum = $sumDef;
@@ -115,6 +118,7 @@ foreach ($list as $key => $value) {
         } else {
             ?>
             <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
