@@ -115,7 +115,7 @@ class Service extends CI_Controller {
                 if (is_file(FCPATH . $pathFile)) {
                     $nm = date("Y-M-d", strtotime($values->report_date));
                     $wa->sendMessageToGroup('service_gtp', ["{message}" => "GOODS To PUSH *{$values->nama_sales_group}* \n {$nm}"], $groups)
-                            ->setFile(getIpPubic("hms_staging_2/" . $pathFile))
+                            ->setFile(getIpPubic("hms/" . $pathFile))
                             ->setMentions([])->setFooter('footer_hms')->send();
                 } else {
                     $wa->sendMessageToGroup('error', ["{message}" => "File GTP sales *{$values->nama_sales_group}* Tidak terbuat."], ['IT WDT'])

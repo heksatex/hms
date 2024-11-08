@@ -213,7 +213,8 @@ class Deliveryorder extends MY_Controller {
                 if ($type === "1") {
                     $join = ["BULK"];
                 }
-                $condition = array_merge($condition, ['pd.valid !=' => 'cancel']);
+//                $condition = array_merge($condition, ['pd.valid !=' => 'cancel']);
+                 $condition = array_merge($condition);
                 $list = $this->m_deliveryorderdetail->getDataDetail($condition, $join);
                 $recordsTotal = $this->m_deliveryorderdetail->getDataDetailCountAll($condition, $join);
                 $recordsFiltered = $this->m_deliveryorderdetail->getDataDetailCountFiltered($condition);
