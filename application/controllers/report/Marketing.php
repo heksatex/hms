@@ -1655,6 +1655,8 @@ class Marketing extends MY_Controller
                 "recordsTotal" => $this->m_marketing->count_all14(),
                 "recordsFiltered" => $this->m_marketing->count_filtered14(),
                 "data" => $data,
+                "past_date" => $past_date,
+                "last_date" => $last_date,
             );
             //output dalam format JSON
             echo json_encode($output);
