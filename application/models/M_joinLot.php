@@ -5,8 +5,8 @@
  */
 class M_joinLot extends CI_Model
 {
-    var $column_order = array(null, 'a.kode_join','a.tanggal_buat','a.tanggal_transaksi','d.nama', 'jml_join', 'a.note', 'a.status' );
-	var $column_search= array( 'a.kode_join','a.tanggal_buat','a.tanggal_transaksi','d.nama', 'a.note', 'a.status' );
+    var $column_order = array(null, 'a.kode_join','a.tanggal_buat','a.tanggal_transaksi','d.nama', 'jml_join','a.nama_produk','a.corak_remark','a.warna_remark', 'a.lot', 'a.note', 'a.status' );
+	var $column_search= array( 'a.kode_join','a.tanggal_buat','a.tanggal_transaksi','d.nama','a.nama_produk','a.corak_remark','a.warna_remark', 'a.lot','a.note', 'a.status', );
 	var $order  	  = array('a.tanggal_buat' => 'desc');
 
 	private function _get_datatables_query()
@@ -20,8 +20,24 @@ class M_joinLot extends CI_Model
         {
             $this->db->like('note', $this->input->post('note'));
         }
+		if($this->input->post('corak_remark'))
+        {
+            $this->db->like('corak_remark', $this->input->post('corak_remark'));
+        }
+		 if($this->input->post('warna_remark'))
+        {
+            $this->db->like('warna_remark', $this->input->post('warna_remark'));
+        }
+		if($this->input->post('nama_produk'))
+        {
+            $this->db->like('nama_produk', $this->input->post('nama_produk'));
+        }
+		if($this->input->post('lot'))
+        {
+            $this->db->where('lot', $this->input->post('lot'));
+        }
 
-		$this->db->select("a.kode_join, a.tanggal_buat, a.tanggal_transaksi, a.dept_id,note, a.nama_user,  d.nama as departemen, a.status, b.nama_status, (SELECT count(kode_join) as total FROM join_lot_items WHERE kode_join = a.kode_join ) as jml_join" );
+		$this->db->select("a.kode_join, a.tanggal_buat, a.tanggal_transaksi, a.dept_id,note, a.nama_user,  d.nama as departemen, a.status, b.nama_status, (SELECT count(kode_join) as total FROM join_lot_items WHERE kode_join = a.kode_join ) as jml_join, a.nama_produk, a.corak_remark, a.warna_remark, a.lot, a.quant_id" );
 		$this->db->from("join_lot a");		
 		$this->db->JOIN("mst_status b","a.status = b.kode","INNER");
 		$this->db->JOIN("departemen d","a.dept_id=d.kode","INNER");
@@ -163,17 +179,16 @@ class M_joinLot extends CI_Model
     }
 
 	// var $table2  	    = 'stock_quant';
-	var $column_order2    = array(null, 'sq.kode_produk', 'sq.nama_produk', 'corark_remark', 'warna_remark', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual','sq.nama_grade', 'sq.lebar_jadi', 'nama_sales_group',  'sq.reserve_move');
-	var $column_search2   = array('sq.kode_produk','sq.nama_produk', 'corak_remark','warna_remark','sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual', 'sq.nama_grade','sq.lebar_jadi', 'nama_sales_group', 'sq.reserve_move');
+	var $column_order2    = array(null, 'sq.kode_produk', 'sq.nama_produk', 'sq.corak_remark', 'sq.warna_remark', 'sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual','sq.nama_grade', 'sq.lebar_jadi', 'nama_sales_group', 'sq.lokasi_fisik','sq.reserve_move');
+	var $column_search2   = array('sq.kode_produk','sq.nama_produk', 'sq.corak_remark','sq.warna_remark','sq.lot', 'sq.qty', 'sq.qty2', 'sq.qty_jual', 'sq.qty2_jual', 'sq.nama_grade','sq.lebar_jadi', 'nama_sales_group', 'sq.lokasi_fisik','sq.reserve_move');
 	var $order2  	    = array('sq.move_date' => 'desc');
 	
 
     private function _get_datatables2_query()
 	{
 		$this->db->SELECT("sq.quant_id, sq.kode_produk, sq.nama_produk, sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.reff_note, sq.reserve_move, sq.lokasi_fisik, sq.nama_grade, msg.nama_sales_group, sq.lebar_jadi, sq.uom_lebar_jadi, sq.corak_remark, sq.warna_remark");
-		$this->db->FROM("mrp_production_fg_hasil fg");
-		$this->db->JOIN("mrp_production mrp","fg.kode = mrp.kode","INNER");
-		$this->db->JOIN("stock_quant sq","fg.quant_id = sq.quant_id","INNER");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk", "INNER");
 		$this->db->JOIN("mst_sales_group msg","sq.sales_group = msg.kode_sales_group","LEFT");
 		
 		$i = 0;
@@ -214,8 +229,9 @@ class M_joinLot extends CI_Model
 	{
 		$this->_get_datatables2_query();		
 		$this->db->where('sq.lokasi', $kode_lokasi);
-		$this->db->where_not_in('fg.lokasi', "GJD/Waste");
-		$this->db->where('mrp.dept_id',"GJD");
+		$this->db->WHERE('mp.id_category',21);
+		// $this->db->where_not_in('fg.lokasi', "GJD/Waste");
+		// $this->db->where('mrp.dept_id',"GJD");
 		
 		if(isset($_POST["length"]) && $_POST["length"] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
@@ -226,8 +242,9 @@ class M_joinLot extends CI_Model
 	function count_filtered2($kode_lokasi)
 	{
 		$this->db->where('sq.lokasi', $kode_lokasi);
-		$this->db->where_not_in('fg.lokasi', "GJD/Waste");
-		$this->db->where('mrp.dept_id',"GJD");
+		$this->db->WHERE('mp.id_category',21);
+		// $this->db->where_not_in('fg.lokasi', "GJD/Waste");
+		// $this->db->where('mrp.dept_id',"GJD");
 		$this->_get_datatables2_query();
 		$query = $this->db->get();
 		return $query->num_rows();
@@ -237,8 +254,9 @@ class M_joinLot extends CI_Model
 	{
 		$this->_get_datatables2_query();
 		$this->db->where('sq.lokasi', $kode_lokasi);
-		$this->db->where_not_in('fg.lokasi', "GJD/Waste");
-		$this->db->where('mrp.dept_id',"GJD");
+		$this->db->WHERE('mp.id_category',21);
+		// $this->db->where_not_in('fg.lokasi', "GJD/Waste");
+		// $this->db->where('mrp.dept_id',"GJD");
 		return $this->db->count_all_results();
 	}
 
@@ -324,4 +342,14 @@ class M_joinLot extends CI_Model
 		$query = $this->db->get('mrp_inlet');
 		return $query->row();
 	}
+
+	function update_data_stock_quant(array $data_update, $quant_id, $lot)
+	{
+		$this->db->where('quant_id', $quant_id);
+		$this->db->where('lot', $lot);
+		$query = $this->db->update('stock_quant', $data_update);
+        return $this->db->affected_rows();
+	}
+
+	
 }

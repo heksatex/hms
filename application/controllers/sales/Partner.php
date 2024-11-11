@@ -84,11 +84,11 @@ class Partner extends MY_Controller
 
         // >> delivery
         //get nama country by id country
-        $data['dv_id_country'] = $partner->invoice_country;
+        $data['dv_id_country'] = $partner->delivery_country;
         $nama_country           = $this->m_partner->get_name_country_by_id($partner->delivery_country)->row_array();
         $data['dv_nm_country'] = $nama_country['name'];
 
-        $data['dv_id_state']   = $partner->invoice_state;
+        $data['dv_id_state']   = $partner->delivery_state;
         $nama_state             = $this->m_partner->get_name_state_by_id($partner->delivery_state)->row_array();
         $data['dv_nm_state']   = $nama_state['name'];
         // << delivery 
@@ -165,8 +165,8 @@ class Partner extends MY_Controller
 				$callback = array('status' => 'failed', 'field' => 'invoice_street', 'message' => 'Invoice Street Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($invoice_country)){
 	        	$callback = array('status' => 'failed', 'field' => 'invoice_country', 'message' => 'Invoice Country Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
-	        }else if(empty($invoice_state)){
-	        	$callback = array('status' => 'failed', 'field' => 'invoice_state', 'message' => 'Invoice State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+	        // }else if(empty($invoice_state)){
+	        // 	$callback = array('status' => 'failed', 'field' => 'invoice_state', 'message' => 'Invoice State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($invoice_city)){
 	        	$callback = array('status' => 'failed', 'field' => 'invoice_city', 'message' => 'Invoice City Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 
@@ -177,8 +177,8 @@ class Partner extends MY_Controller
 	        	$callback = array('status' => 'failed', 'field' => 'delivery_street', 'message' => 'Delivery Street Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($delivery_country)){
 	        	$callback = array('status' => 'failed', 'field' => 'delivery_country', 'message' => 'Delivery Country Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
-	        }else if(empty($delivery_state)){
-	        	$callback = array('status' => 'failed', 'field' => 'delivery_state', 'message' => 'Delivery State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+	        // }else if(empty($delivery_state)){
+	        // 	$callback = array('status' => 'failed', 'field' => 'delivery_state', 'message' => 'Delivery State Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else if(empty($delivery_city)){
 	        	$callback = array('status' => 'failed', 'field' => 'delivery_city', 'message' => 'Delivery Street Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	        }else{
@@ -207,7 +207,7 @@ class Partner extends MY_Controller
 
 	        	if(empty($id)){ // jika id kosong maka simpan data
 
-	        		$this->m_partner->save_partner($name,$tanggal,$invoice_street,$invoice_city,$invoice_state,$invoice_country,$invoice_zip,$buyer_code,$website,$tax_name,$tax_address,$tax_city,$npwp,$contact_person,$phone,$mobile,$fax,$email,$delivery_street,$delivery_city,$invoice_state,$delivery_country,$delivery_zip,$check_customer,$check_supplier);
+	        		$this->m_partner->save_partner($name,$tanggal,$invoice_street,$invoice_city,$invoice_state,$invoice_country,$invoice_zip,$buyer_code,$website,$tax_name,$tax_address,$tax_city,$npwp,$contact_person,$phone,$mobile,$fax,$email,$delivery_street,$delivery_city,$delivery_state,$delivery_country,$delivery_zip,$check_customer,$check_supplier);
 
 	        		//get max id partner
 	        		$last_id = $this->m_partner->get_last_id_partner();

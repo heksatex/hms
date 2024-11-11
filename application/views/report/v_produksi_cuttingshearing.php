@@ -89,9 +89,9 @@
                               <span class="fa fa-download"></span> <label>Export</label>
                             </div>
                             <div class="col-12 col-sm-8 col-md-8">
-                              <form id="frm_excel" action="<?=base_url()?>report/produksicuttingshearing/export_excel" method="POST">
+                              <form id="frm_excel"  method="POST">
                                 <input type="hidden" name="query" id="query">
-                                <button type="submit" class="btn btn-default btn-sm" id="btn-excel" name="btn-excel"data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                <button type="button" class="btn btn-default btn-sm" id="btn-excel" name="btn-excel"data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                   <i class="fa fa-file-excel-o"  style="color:green"></i>  Excel
                                 </button>
                               </form>
@@ -581,6 +581,39 @@
   }
 
   // < Tabel Filter
+
+  $('#btn-excel').click(function(){
+    let query = $('#query').val();
+    if(query.length == 0){ 
+      alert_modal_warning('Generate terlebih dahulu !');
+    }else{
+      $.ajax({
+          "type":'POST',
+          "url": "<?php echo site_url('report/produksicuttingshearing/export_excel')?>",
+          "data": {query:query},
+          "dataType":'json',
+          beforeSend: function() {
+            $('#btn-excel').button('loading');
+          },error: function(){
+            alert('Error Export Excel');
+            $('#btn-excel').button('reset');
+          }
+      }).done(function(data){
+          if(data.status =="failed"){
+            alert_modal_warning(data.message);
+          }else{
+            var $a = $("<a>");
+            $a.attr("href",data.file);
+            $("body").append($a);
+            $a.attr("download",data.filename);
+            $a[0].click();
+            $a.remove();
+          }
+          $('#btn-excel').button('reset');
+      });
+    }
+
+  });
      
 </script>
 

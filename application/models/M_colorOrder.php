@@ -729,5 +729,14 @@ class M_colorOrder extends CI_Model
 		return $this->db->query("SELECT id,nama_category FROM mst_category WHERE id = '$id'");
 	}
 
+	public function cek_mrp_production_rm_target($kode,$status)
+	{
+		$this->db->where('kode',$kode);
+		$this->db->where('status',$status);
+		$query = $this->db->get('mrp_production_rm_target');
+		return $query;
+		
+	}
+
 
 }

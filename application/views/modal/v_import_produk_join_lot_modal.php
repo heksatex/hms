@@ -21,6 +21,7 @@
               <th>Grade</th>
               <th>Lbr.Jadi</th>
               <th>MKT</th>
+              <th>Lokasi Fisik</th>
               <th>Reserve Move</th>
               <th></th>
             </tr>
@@ -55,13 +56,13 @@
             },
             "columnDefs": [
               {
-                "targets" : 14,
+                "targets" : 15,
                 
                 'checkboxes': {
                     'selectRow': true
                  },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[13];
+                   var rowId = rowData[14];
                    if(rowId.includes('SM') == true || rowId != ''){  
                       this.api().cell(td).checkboxes.disable();
                    }
@@ -77,7 +78,7 @@
             },
             'rowCallback': function(row, data, dataIndex){
                // Get row ID
-               var rowId = data[14];
+               var rowId = data[15];
                 if (rowId.includes('SM') == true){     
                   $(row).find('input[type="checkbox"]').prop('disabled', true);
                }
@@ -85,7 +86,7 @@
         });
 
         $("#btn-tambah").off("click").on("click",function(e) {
-              var rows_selected = table.column(14).checkboxes.selected();
+              var rows_selected = table.column(15).checkboxes.selected();
               var rows_selected_arr = new Array();
               var message     = 'Silahkan pilih data terlebih dahulu !';
               var kode_join   = "<?php echo $kode_join; ?>";

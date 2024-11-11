@@ -206,6 +206,8 @@ class Colororder extends MY_Controller
             $nama_prod_rm_target  = '';
             $qty_rm_target        = '';
             $uom_rm_target        = '';
+            $sql_insert_log_history = array();
+            $ip                   = $this->input->ip_address();
 
             // lock tabel
             $this->m_colorOrder->lock_tabel('mst_produk WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE, color_order_detail as cod WRITE,color_order_detail WRITE, color_order co WRITE, bom WRITE, bom_items WRITE, stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, Warna WRITE, warna_items WRITE, color_order_detail as b WRITE, color_order as a WRITE, color_order WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, mst_category WRITE, mst_produk_sub_parent WRITE, mst_produk_parent WRITE, mst_jenis_kain WRITE');
@@ -435,7 +437,17 @@ class Colororder extends MY_Controller
                           //create log history mst produk
                           $note_log = "Update Sub Parent -> ".$cek_sp['nama_sub_parent'];
                           $date_log = date('Y-m-d H:i:s');
-                          $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod_rm."','edit','".addslashes($note_log)."','".$nama_user."'), ";
+                          // $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod_rm."','edit','".addslashes($note_log)."','".$nama_user."'), ";
+
+                          $sql_insert_log_history[] = array(
+                                      'datelog'   => $date_log,
+                                      'main_menu_sub_kode'    => 'mms56',
+                                      'kode'                  => $kode_prod_rm,
+                                      'jenis_log'             => 'edit',
+                                      'note'                  => $note_log,
+                                      'nama_user'             => $nama_user ?? '',
+                                      'ip_address'            => $ip);
+
 
                         }
                                                
@@ -523,7 +535,15 @@ class Colororder extends MY_Controller
 
                             $note_log = "Produk dibuat dari Generate Color Order No. ".$kode_co." -> ".$kode_prod.' '.$product_fullname.' '.$uom.' '.$uom_2.' '.$cat_nm['nama_category'].' '.$get_pp['nama'].' '.$get_spp['nama_sub_parent'].' '.$get_jk['nama_jenis_kain'];
                             $date_log = date('Y-m-d H:i:s');
-                            $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod."','create','".addslashes($note_log)."','".$nama_user."'), ";
+                            // $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod."','create','".addslashes($note_log)."','".$nama_user."'), ";
+                            $sql_insert_log_history[] = array(
+                                        'datelog'   => $date_log,
+                                        'main_menu_sub_kode'    => 'mms56',
+                                        'kode'                  => $kode_prod,
+                                        'jenis_log'             => 'create',
+                                        'note'                  => $note_log,
+                                        'nama_user'             => $nama_user ?? '',
+                                        'ip_address'            => $ip);
 
                           }else{
                             $kode_prod = $cek_prod2['kode_produk'];
@@ -578,7 +598,16 @@ class Colororder extends MY_Controller
                               //create log history mst produk
                               $note_log = "Update Sub Parent -> ".$cek_sp_nm['nama_sub_parent'];
                               $date_log = date('Y-m-d H:i:s');
-                              $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod."','edit','".addslashes($note_log)."','".$nama_user."'), ";
+                              // $sql_log_history_batch .= "('".$date_log."','mms56','".$kode_prod."','edit','".addslashes($note_log)."','".$nama_user."'), ";
+
+                              $sql_insert_log_history[] = array(
+                                              'datelog'   => $date_log,
+                                              'main_menu_sub_kode'    => 'mms56',
+                                              'kode'                  => $kode_prod,
+                                              'jenis_log'             => 'edit',
+                                              'note'                  => $note_log,
+                                              'nama_user'             => $nama_user ?? '',
+                                              'ip_address'            => $ip);
                               
                             }else{
                               if($route_spp != $id_sub_parent ){
@@ -621,7 +650,16 @@ class Colororder extends MY_Controller
                             //create log history bom
                             $note_log = "BoM dibuat dari Generate Color Order No. ".$kode_co."  -> <br> ".$kode_bom." ".$product_fullname." 1000 ".$uom;
                             $date_log = date('Y-m-d H:i:s');
-                            $sql_log_history_batch .= "('".$date_log."','mms73','".$kode_bom."','create','".addslashes($note_log)."','".$nama_user."'), ";
+                            // $sql_log_history_batch .= "('".$date_log."','mms73','".$kode_bom."','create','".addslashes($note_log)."','".$nama_user."'), ";
+
+                            $sql_insert_log_history[] = array(
+                                        'datelog'   => $date_log,
+                                        'main_menu_sub_kode'    => 'mms73',
+                                        'kode'                  => $kode_bom,
+                                        'jenis_log'             => 'create',
+                                        'note'                  => $note_log,
+                                        'nama_user'             => $nama_user ?? '',
+                                        'ip_address'            => $ip);
 
                           }else{
                             // ambil kode bom
@@ -681,7 +719,16 @@ class Colororder extends MY_Controller
                           //create log history pengiriman_barang
                           $note_log = $kode_out.' | '.$origin;
                           $date_log = date('Y-m-d H:i:s');
-                          $sql_log_history_out .= "('".$date_log."','".$mms_kode."','".$kode_out."','create','".$note_log."','".$nama_user."'), ";
+                          // $sql_log_history_out .= "('".$date_log."','".$mms_kode."','".$kode_out."','create','".$note_log."','".$nama_user."'), ";
+
+                          $sql_insert_log_history[] = array(
+                                      'datelog'   => $date_log,
+                                      'main_menu_sub_kode'    => $mms_kode,
+                                      'kode'                  => $kode_out,
+                                      'jenis_log'             => 'create',
+                                      'note'                  => $note_log,
+                                      'nama_user'             => $nama_user ?? '',
+                                      'ip_address'            => $ip);
                          
                         }elseif($method_action == 'IN'){//Generete Penerimaan
 
@@ -716,7 +763,16 @@ class Colororder extends MY_Controller
                           //create log history pengiriman_barang
                           $note_log = $kode_in.' | '.$origin;
                           $date_log = date('Y-m-d H:i:s');
-                          $sql_log_history_in .= "('".$date_log."','".$mms_kode."','".$kode_in."','create','".$note_log."','".$nama_user."'), ";
+                          // $sql_log_history_in .= "('".$date_log."','".$mms_kode."','".$kode_in."','create','".$note_log."','".$nama_user."'), ";
+
+                          $sql_insert_log_history[] = array(
+                                        'datelog'   => $date_log,
+                                        'main_menu_sub_kode'    => $mms_kode,
+                                        'kode'                  => $kode_in,
+                                        'jenis_log'             => 'create',
+                                        'note'                  => $note_log,
+                                        'nama_user'             => $nama_user ?? '',
+                                        'ip_address'            => $ip);
                          
                         }elseif($method_action == 'CON'){
                           $source_move = "";
@@ -766,9 +822,18 @@ class Colororder extends MY_Controller
                           }
 
                            //create log history mrp_prodction
-                          $note_log = $kode_mo.' | '.addslashes($nama_prod_rm).' | '.$qty.' '.$uom;
+                          $note_log = $kode_mo.' | '.($nama_prod_rm).' | '.$qty.' '.$uom;
                           $date_log = date('Y-m-d H:i:s');
-                          $sql_log_history_mrp .= "('".$date_log."','".$mms_kode."','".$kode_mo."','create','".$note_log."','".$nama_user."'), ";
+                          // $sql_log_history_mrp .= "('".$date_log."','".$mms_kode."','".$kode_mo."','create','".$note_log."','".$nama_user."'), ";
+
+                          $sql_insert_log_history[] = array(
+                                    'datelog'   => $date_log,
+                                    'main_menu_sub_kode'    => $mms_kode,
+                                    'kode'                  => $kode_mo,
+                                    'jenis_log'             => 'create',
+                                    'note'                  => $note_log,
+                                    'nama_user'             => $nama_user ?? '',
+                                    'ip_address'            => $ip);
                                                    
                           $last_mo   = $last_mo + 1;
 
@@ -810,11 +875,11 @@ class Colororder extends MY_Controller
                         $this->m_colorOrder->create_stock_move_produk_batch($sql_stock_move_produk_batch);
                       }
 
-                      if(!empty($sql_log_history_batch)){
-                        $sql_log_history_batch = rtrim($sql_log_history_batch, ', ');
-                        $this->_module->simpan_log_history_batch($sql_log_history_batch);
+                      // if(!empty($sql_log_history_batch)){
+                      //   $sql_log_history_batch = rtrim($sql_log_history_batch, ', ');
+                      //   $this->_module->simpan_log_history_batch($sql_log_history_batch);
                         
-                      }
+                      // }
 
                       if(!empty($sql_out_batch)){
                         $sql_out_batch = rtrim($sql_out_batch, ', ');
@@ -823,8 +888,8 @@ class Colororder extends MY_Controller
                         $sql_out_items_batch = rtrim($sql_out_items_batch, ', ');
                         $this->_module->simpan_pengiriman_items_batch($sql_out_items_batch);
     
-                        $sql_log_history_out = rtrim($sql_log_history_out, ', ');
-                        $this->_module->simpan_log_history_batch($sql_log_history_out);
+                        // $sql_log_history_out = rtrim($sql_log_history_out, ', ');
+                        // $this->_module->simpan_log_history_batch($sql_log_history_out);
                       }
 
                       if(!empty($sql_in_batch)){
@@ -838,8 +903,8 @@ class Colororder extends MY_Controller
                         $sql_update_reff_out_batch  = "UPDATE pengiriman_barang SET reff_picking =(case ".$case." end) WHERE  kode in (".$where.") ";
                         $this->m_colorOrder->update_reff_picking_pengiriman_batch($sql_update_reff_out_batch);
                         
-                        $sql_log_history_in = rtrim($sql_log_history_in, ', ');
-                        $this->_module->simpan_log_history_batch($sql_log_history_in);
+                        // $sql_log_history_in = rtrim($sql_log_history_in, ', ');
+                        // $this->_module->simpan_log_history_batch($sql_log_history_in);
                         
                       }
 
@@ -853,8 +918,8 @@ class Colororder extends MY_Controller
                         $sql_mrp_prod_fg_batch = rtrim($sql_mrp_prod_fg_batch, ', ');
                         $this->m_colorOrder->simpan_mrp_production_fg_target_batch($sql_mrp_prod_fg_batch);
                         
-                        $sql_log_history_mrp = rtrim($sql_log_history_mrp, ', ');
-                        $this->_module->simpan_log_history_batch($sql_log_history_mrp);
+                        // $sql_log_history_mrp = rtrim($sql_log_history_mrp, ', ');
+                        // $this->_module->simpan_log_history_batch($sql_log_history_mrp);
                         
                       }
 
@@ -870,6 +935,12 @@ class Colororder extends MY_Controller
                         $sql_update_sub_parent_produk = "UPDATE mst_produk SET id_sub_parent = (case ".$case3." end) WHERE  kode_produk in (".$where3.") ";
                         $this->_module->update_reff_batch($sql_update_sub_parent_produk);
 
+                      }
+
+
+                      //create log history All
+                      if(!empty($sql_insert_log_history)){
+                          $this->_module->simpan_log_history_batch_2($sql_insert_log_history);
                       }
 
                     
@@ -981,7 +1052,7 @@ class Colororder extends MY_Controller
             $row_co    = $row;
 
             // lock tabel
-            $this->_module->lock_tabel('color_order WRITE, color_order_detail WRITE, color_order_detail as a WRITE, route_co as b WRITE, warna as c WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE');
+            $this->_module->lock_tabel('color_order WRITE, color_order_detail WRITE, color_order_detail as a WRITE, route_co as b WRITE, warna as c WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, departemen d WRITE');
 
             // cek status color_order_details
             $cek_status = $this->m_colorOrder->cek_status_color_order_details_by_row($kode_co,$row)->row_array();
@@ -1017,8 +1088,10 @@ class Colororder extends MY_Controller
                   $where4 = "";
                   $date_log         = date('Y-m-d H:i:s');
                   $sql_log_history  = "";
+                  $insert_log       = array();
+                  $ip         = $this->input->ip_address();
 
-                    // get OW by row
+                  // get OW by row
                   $get_ow = $this->m_colorOrder->cek_status_color_order_details_by_row($kode_co,$row)->row_array();
                   $ow     = $get_ow['ow'];
 
@@ -1027,9 +1100,12 @@ class Colororder extends MY_Controller
                   $so     = $get_so->kode_sc;
 
                     // origin SO|CO|ROW|OW
-                  $origin = $so.'|'.$kode_co.'|'.$row.'|'.$ow;
-
-                  $list_sm    = $this->_module->get_list_stock_move_by_origin($origin);
+                  $origin           = $so.'|'.$kode_co.'|'.$row.'|'.$ow;
+                  $status_in_valid  = false;
+                  $dokumen          = '';
+                  $list_sm          = $this->_module->get_list_stock_move_by_origin($origin);
+                  $status_done_all  = true;
+                  $kode_mrp_tmp     = '';
                   foreach ($list_sm as $row) {
                     # code...
 
@@ -1048,7 +1124,7 @@ class Colororder extends MY_Controller
                             $status = "AND status NOT IN ('done','cancel')";
                             $cek_mrp = $this->_module->cek_status_mrp_productin_by_origin($origin,$method_dept,$status)->result_array();
                             foreach($cek_mrp as $mrp){
-
+                                $status_done_all = false;
                                 if(!empty($mrp['kode'])){//bearti status MO = ready/draft
         
                                     //update status = cancel mrp_production, mrp_production_rm_target, mrp_production_fg_target
@@ -1057,7 +1133,30 @@ class Colororder extends MY_Controller
 
                                     $log_mrp = true;
                                     $update_stock_move = true;
-                                    $kode_mrp = $mrp['kode'];
+                                    $kode_mrp = $mrp['kode'] ?? ''; 
+
+                                    if($mrp['status'] == 'draft'){
+                                      // cek mrp rm target
+                                      $cek_status_rm = $this->m_colorOrder->cek_mrp_production_rm_target($kode_mrp,'ready')->num_rows();
+                                      if($cek_status_rm > 0){
+                                        $status_in_valid  = true;
+                                        $nm_dept          = $this->_module->get_nama_dept_by_kode($mrp['dept_id'])->row_array();
+                                        if($kode_mrp != $kode_mrp_tmp){
+                                          $dokumen         .= $kode_mrp.' - '.$nm_dept['nama'] ?? '';
+                                          $dokumen         .= '<br>';
+                                        }
+                                        $kode_mrp_tmp     = $kode_mrp;
+                                      }
+                                    }else if($mrp['status'] == 'ready'){
+                                      $status_in_valid  = true;
+                                      $nm_dept          = $this->_module->get_nama_dept_by_kode($mrp['dept_id'])->row_array();
+                                      if($kode_mrp != $kode_mrp_tmp){
+                                        $dokumen         .= $kode_mrp.' - '.$nm_dept['nama'] ?? '';
+                                        $dokumen         .= '<br>';
+                                      }
+                                      $kode_mrp_tmp     = $kode_mrp;
+
+                                    }
                                 }
                             }
                                 if($log_mrp == true){
@@ -1071,7 +1170,16 @@ class Colororder extends MY_Controller
 
                                     // create log history mrp_production
                                     $note_log         = 'Batal MO '.$method_action.' | '.$kode_mrp;
-                                    $sql_log_history .= "('".$date_log."','".$mms_kode."','".$kode_mrp."','cancel','".$note_log."','".$nama_user."'), ";
+                                    // $sql_log_history .= "('".$date_log."','".$mms_kode."','".$kode_mrp."','cancel','".$note_log."','".$nama_user."'), ";
+
+                                    $insert_log[] = array(
+                                                  'datelog'   => $date_log,
+                                                  'main_menu_sub_kode'    => $mms_kode,
+                                                  'kode'                  => $kode_mrp,
+                                                  'jenis_log'             => 'cancel',
+                                                  'note'                  => $note_log,
+                                                  'nama_user'             => $nama_user ?? '',
+                                                  'ip_address'            => $ip);
                                 }
 
                         }elseif($method_action == 'OUT'){
@@ -1081,7 +1189,7 @@ class Colororder extends MY_Controller
                             $cek_out = $this->_module->cek_status_pengiriman_barang_by_move_id($origin,$move_id,$status)->row_array();
                             
                             if(!empty($cek_out['kode'])){//bearti pengiriman_barang = ready/draft
-
+                                $status_done_all = false;
                                 //update status = cancel pengiriman_barang, pengiriman_barang_items
                                 $case2  .= " when kode = '".$cek_out['kode']."' then '".$status_cancel."'";
                                 $where2 .= "'".$cek_out['kode']."',";             
@@ -1095,10 +1203,27 @@ class Colororder extends MY_Controller
                                 }    
                                 
                                 // create log history pengiriman_barang
-                                $note_log         = 'Batal Pengiriman Barang | '.$cek_out['kode'];
-                                $sql_log_history .= "('".$date_log."','".$mms_kode."','".$cek_out['kode']."','cancel','".$note_log."','".$nama_user."'), ";
+                                $note_log         = 'Batal Pengiriman Barang | '.$cek_out['kode'] ?? '';
+                                // $sql_log_history .= "('".$date_log."','".$mms_kode."','".$cek_out['kode']."','cancel','".$note_log."','".$nama_user."'), ";
+
+                                $insert_log[] = array(
+                                              'datelog'   => $date_log,
+                                              'main_menu_sub_kode'    => $mms_kode,
+                                              'kode'                  => $cek_out['kode'] ?? '',
+                                              'jenis_log'             => 'cancel',
+                                              'note'                  => $note_log,
+                                              'nama_user'             => $nama_user ?? '',
+                                              'ip_address'            => $ip);
 
                                 $update_stock_move = true;
+
+                                if($cek_out['status'] == 'ready'){
+                                    $kode_out       = $cek_out['kode'] ?? ' ';
+                                    $status_in_valid = true;
+                                    $nm_dept         = $this->_module->get_nama_dept_by_kode($cek_out['dept_id'])->row_array();
+                                    $dokumen        .= $kode_out.'  - '.$nm_dept['nama'] ?? '';
+                                    $dokumen        .= '<br>';
+                                }
                             }
 
                         }elseif($method_action == 'IN'){
@@ -1108,7 +1233,7 @@ class Colororder extends MY_Controller
                             $cek_in  = $this->_module->cek_status_penerimaan_barang_by_move_id($origin,$move_id,$status)->row_array();
                             
                             if(!empty($cek_in['kode'])){//bearti penerimaan_barang = ready/draft
-
+                               $status_done_all = false;
                                 //update status = cancel penerimaan_barang, penerimaan_barang_items
                                 $case3  .= " when kode = '".$cek_in['kode']."' then '".$status_cancel."'";
                                 $where3 .= "'".$cek_in['kode']."',";     
@@ -1122,10 +1247,27 @@ class Colororder extends MY_Controller
                                 }       
                                 
                                 // create log history penerimaan barang
-                                $note_log         = 'Batal Penerimaan Barang | '.$cek_in['kode'];
-                                $sql_log_history .= "('".$date_log."','".$mms_kode."','".$cek_in['kode']."','cancel','".$note_log."','".$nama_user."'), ";
+                                $note_log         = 'Batal Penerimaan Barang | '.$cek_in['kode'] ?? ''; 
+                                // $sql_log_history .= "('".$date_log."','".$mms_kode."','".$cek_in['kode']."','cancel','".$note_log."','".$nama_user."'), ";
+
+                                $insert_log[] = array(
+                                            'datelog'   => $date_log,
+                                            'main_menu_sub_kode'    => $mms_kode,
+                                            'kode'                  => $cek_in['kode'] ?? '',
+                                            'jenis_log'             => 'cancel',
+                                            'note'                  => $note_log,
+                                            'nama_user'             => $nama_user ?? '',
+                                            'ip_address'            => $ip);
 
                                 $update_stock_move = true;
+
+                                if($cek_in['status'] == 'ready'){
+                                    $status_in_valid = true;
+                                    $kode_in         = $cek_in['kode'] ?? '';
+                                    $nm_dept         = $this->_module->get_nama_dept_by_kode($cek_in['dept_id'])->row_array();
+                                    $dokumen        .= $kode_in.' - '.$nm_dept['nama'] ?? '';
+                                    $dokumen        .= '<br>';
+                                }
                             }
                         }
 
@@ -1141,7 +1283,7 @@ class Colororder extends MY_Controller
                   }// end foreach stock_move origin
 
 
-                  if($batal_item == true){
+                  if($batal_item == true AND $status_in_valid == false &&  $status_done_all == false){
                    
 
                        //update mrp_production, mrp_production_rm_target, mrp_production_fg_target
@@ -1216,11 +1358,11 @@ class Colororder extends MY_Controller
                         $note_log    = "Batal Items | ".$row_co;
                         $this->_module->gen_history($sub_menu, $kode_co, $jenis_log, addslashes($note_log), $username);
 
-                       //create log history setiap yg batal
-                       if(!empty($sql_log_history)){
-                          $sql_log_history = rtrim($sql_log_history, ', ');
-                          $this->_module->simpan_log_history_batch($sql_log_history);
-                       }
+                        //create log history setiap yg batal
+                        if(!empty($insert_log)){
+                            // $sql_log_history = rtrim($sql_log_history, ', ');
+                            $this->_module->simpan_log_history_batch_2($insert_log);
+                        }
 
                         // update detail items jadi cancel
                         $this->m_colorOrder->update_status_color_order_items($kode_co,$row_co,$status_cancel);
@@ -1248,6 +1390,10 @@ class Colororder extends MY_Controller
 
                   if($batal_item == false){
                         $callback = array('status' => 'failed', 'message' => 'Color Order Items Gagal Dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                  }else if($status_done_all == true){
+                        $callback = array('status' => 'failed', 'message' => 'Color Order Items Gagal Dibatalkan !<br> Semua status di Rantai Color Order sudah <b>Done</b>', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                  }else if($status_in_valid == true){
+                        $callback = array('status' => 'failed', 'message' => 'Color Order Items Gagal Dibatalkan ! <br> Rantai Color Order Terdapat Status <b>Ready</b> <br>'.$dokumen , 'icon' =>'fa fa-warning', 'type' => 'danger');
                   }else{
                         $callback = array('status' => 'success', 'message' => 'Color Order Items Berhasil Dibatalkan !', 'icon' =>'fa fa-check', 'type' => 'success');
                   }

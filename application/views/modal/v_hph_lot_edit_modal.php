@@ -325,8 +325,8 @@
         }
     });
 
-	$("#btn-print").unbind( "click" );
-    $("#btn-print").off("click").on("click",function(e) {
+	$("#btn-print-modal").unbind( "click" );
+    $("#btn-print-modal").off("click").on("click",function(e) {
        
         let kode            = "<?php echo $data_hph_lot->id; ?>";
         let quant_id        = "<?php echo $data_hph_lot->quant_id; ?>";

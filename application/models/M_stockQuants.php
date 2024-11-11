@@ -109,12 +109,12 @@ class M_stockQuants extends CI_Model {
     }
 
     public function get_stock_quant_by_kode($quant_id) {
-        $query = $this->db->query("SELECT quant_id, create_date, move_date, kode_produk, nama_produk, lot, nama_grade, qty, uom, qty2, uom2, lokasi, lokasi_fisik, lebar_greige, uom_lebar_greige, lebar_jadi,uom_lebar_jadi, reff_note, reserve_move, reserve_origin, (datediff(now(), move_date) ) as umur, qty_opname, uom_opname FROM stock_quant WHERE quant_id = '$quant_id'");
+        $query = $this->db->query("SELECT quant_id, create_date, move_date, kode_produk, nama_produk, lot, nama_grade, qty, uom, qty2, uom2, lokasi, lokasi_fisik, lebar_greige, uom_lebar_greige, lebar_jadi,uom_lebar_jadi, reff_note, reserve_move, reserve_origin, (datediff(now(), move_date) ) as umur, qty_opname, uom_opname, corak_remark, warna_remark, qty_jual, uom_jual, qty2_jual, uom2_jual FROM stock_quant WHERE quant_id = '$quant_id'");
         return $query->row();
     }
 
-    public function update_stockquants($quant_id, $nama_grade, $reff_note, $lebar_greige, $uom_lebar_greige, $lebar_jadi, $uom_lebar_jadi) {
-        $this->db->query("UPDATE stock_quant SET  nama_grade = '$nama_grade', reff_note = '$reff_note', lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi' WHERE quant_id = '$quant_id' ");
+    public function update_stockquants($quant_id, $nama_grade, $reff_note, $lebar_greige, $uom_lebar_greige, $lebar_jadi, $uom_lebar_jadi, $corak_remark,$warna_remark, $qty_jual, $uom_jual, $qty2_jual, $uom2_jual) {
+        $this->db->query("UPDATE stock_quant SET  nama_grade = '$nama_grade', reff_note = '$reff_note', lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi', corak_remark = '$corak_remark', warna_remark = '$warna_remark', qty_jual = '$qty_jual', uom_jual = '$uom_jual', qty2_jual = '$qty2_jual', uom2_jual = '$uom2_jual' WHERE quant_id = '$quant_id' ");
 
         $this->db->query("UPDATE mrp_production_fg_hasil SET  nama_grade = '$nama_grade',lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige', lebar_jadi = '$lebar_jadi', uom_lebar_jadi = '$uom_lebar_jadi'  WHERE quant_id = '$quant_id' ");
 

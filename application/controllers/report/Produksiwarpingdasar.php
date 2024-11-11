@@ -425,6 +425,7 @@ class Produksiwarpingdasar extends MY_Controller
     function export_excel()
     {	
 
+        ob_start();
     	$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
 
@@ -641,12 +642,18 @@ class Produksiwarpingdasar extends MY_Controller
     	}
 
 
-        $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="Jadwal Produksi Warping Dasar.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Jadwal Produksi Warping Dasar.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
     	
 
 

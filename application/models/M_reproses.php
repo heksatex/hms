@@ -135,10 +135,15 @@ class M_reproses extends CI_Model
 		}
 	}
 
+	function dept_reproses()
+	{
+		$dept = array("DYE/Stock","FIN/Stock","INS2/Stock","GJD/Stock");
+		return $dept;
+	}
 
     function get_datatables2()
 	{
-        $lokasi = array("DYE/Stock","FIN/Stock");
+        $lokasi = $this->dept_reproses();
         $this->db->like("cat.nama_category","Kain Hasil");
 		$this->db->where_in('sq.lokasi', $lokasi);
 		$this->_get_datatables2_query();		
@@ -150,7 +155,7 @@ class M_reproses extends CI_Model
 
 	function count_filtered2()
 	{ 
-        $lokasi = array("DYE/Stock","FIN/Stock");
+		$lokasi = $this->dept_reproses();
         $this->db->like("cat.nama_category","Kain Hasil");
 		$this->db->where_in('sq.lokasi', $lokasi);
 		$this->_get_datatables2_query();
@@ -160,7 +165,7 @@ class M_reproses extends CI_Model
 
 	public function count_all2()
 	{
-        $lokasi = array("DYE/Stock","FIN/Stock");
+        $lokasi = $this->dept_reproses();
         $this->db->select("sq.quant_id, sq.create_date, sq.kode_produk, sq.nama_produk, sq.lot, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.lokasi, sq.reserve_move, sq.reff_note");
         $this->db->from("stock_quant sq");
         $this->db->join("mst_produk mp","sq.kode_produk = mp.kode_produk");

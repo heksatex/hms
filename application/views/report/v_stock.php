@@ -164,6 +164,15 @@
       white-space: nowrap;
     }
 
+    table.columnHide tr > *:nth-child(13),
+    table.columnHide tr > *:nth-child(14) {
+        display : none
+    }
+
+    .columnHide{
+      display : none
+    }
+
   </style>
 </head>
 
@@ -201,16 +210,23 @@
                   <div class="col-md-3">
                     <select class="form-control input-sm" name="cmbSearch" id="cmbSearch">
                       <option value="umur">Umur</option>
+                      <option value="create_date">Tgl dibuat</option>
+                      <option value="move_date">Tgl diterima</option>
                       <option value="kode_produk">Kode Produk</option>
                       <option value="nama_produk">Nama Produk</option>
+                      <option value="corak_remark">Corak Remark</option>
+                      <option value="warna_remark">Warna Remark</option>
                       <option value="category">Kategori</option>
                       <option value="lot">Lot</option>
+                      <option value="kp_lot">KP/Lot Asal</option>
                       <option value="nama_grade">Grade</option>
                       <option value="lokasi">Lokasi</option>
                       <option value="lokasi_fisik">Lokasi Fisik</option>
                       <option value="sales_order">Sales Contract [SC]</option>
                       <option value="sales_group">Marketing</option>
+                      <option value="no_pl">Picklist (PL)</option>
                       <option value="opname">Status Opname</option>
+                      <option value="ket_exp">Expired</option>
                     </select>
                   </div>
                   <div id='f_search'>
@@ -278,6 +294,8 @@
                                   <li onclick="groupBy('lokasi','Lokasi',2)" class="li-adv" data-index="2">Lokasi</li>
                                   <li onclick="groupBy('lokasi_fisik','Lokasi Fisik',3)" class="li-adv" data-index="3">Lokasi Fisik</li>
                                   <li onclick="groupBy('nama_grade','Grade',4)" class="li-adv" data-index="4">Grade</li>
+                                  <li onclick="groupBy('corak_remark','Corak Remark',5)" class="li-adv" data-index="5">Corak Remark</li>
+                                  <li onclick="groupBy('warna_remark','Warna Remark',6)" class="li-adv" data-index="6">Warna Remark</li>
                                 </div>
                               </div>
                               <div class="form-group" style="margin-bottom: 0px;">
@@ -299,6 +317,17 @@
                                   <?php
                                       }
                                   ?>
+                                </div>
+                              </div>
+                              <div class="form-group" style="margin-bottom: 0px;">
+                                <div class="col-12 col-sm-3 col-md-3">
+                                  <label><i class="fa fa-eye"></i> Hide </label>
+                                </div>
+                                <div class="col-12 col-sm-8 col-md-8" id="hide_column">
+                                    <div class="col-xs-12">
+                                        <label><input type="checkbox" name="columnHide[]" value="13"> Qty1 [HPH] </label>
+                                        <label><input type="checkbox" name="columnHide[]" value="14"> Qty2 [HPH] </label>
+                                    </div>
                                 </div>
                               </div>
 
@@ -355,19 +384,29 @@
                               <th  class="style bb no"  >No. </th>
                               <th  class='style bb nowrap' ><a class="column_sort" id="lot" data-order="desc" href="javascript:void(0)">Lot</a></th>
                               <th  class='style bb min-width-80 nowrap' ><a class="column_sort" id="nama_grade" data-order="desc" href="javascript:void(0)"> Grade</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="create_date" data-order="desc" href="javascript:void(0)">Tgl dibuat</a></th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="move_date" data-order="desc" href="javascript:void(0)">Tgl diterima</a></th>
                               <th  class='style bb nowrap' ><a class="column_sort" id="lokasi" data-order="desc" href="javascript:void(0)">Lokasi</a></th>
                               <th  class='style bb min-width-120 nowrap' ><a class="column_sort" id="lokasi_fisik" data-order="desc" href="javascript:void(0)">Lokasi Fisik</a></th>
                               <th  class='style bb min-width-80 nowrap'  ><a class="column_sort" id="kode_produk" data-order="desc" href="javascript:void(0)">kode Produk</a></th>
                               <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="nama_produk" data-order="desc" href="javascript:void(0)">Nama Produk</a></th>
+                              <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="corak_remark" data-order="desc" href="javascript:void(0)">Corak Remark</a></th>
+                              <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="warna_remark" data-order="desc" href="javascript:void(0)">Warna Remark</a></th>
                               <th  class='style bb min-width-140 nowrap' ><a class="column_sort" id="category" data-order="desc" href="javascript:void(0)">Kategori</a></th>
-                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1</a></th>
-                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty" data-order="desc" href="javascript:void(0)">Qty1 [HPH]</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty2" data-order="desc" href="javascript:void(0)">Qty2 [HPH]</a></th>
+                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty_jual" data-order="desc" href="javascript:void(0)">Qty1 [JUAL]</a></th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty2_jual" data-order="desc" href="javascript:void(0)">Qty2 [JUAL]</a></th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="lebar_greige" data-order="desc" href="javascript:void(0)">Lbr Greige</a></th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="lebar_jadi" data-order="desc" href="javascript:void(0)">Lbr Jadi</th>
                               <th  class='style bb min-width-80 nowrap' ><a class="column_sort" id="sales_order" data-order="desc" href="javascript:void(0)">SC</th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="sales_group" data-order="desc" href="javascript:void(0)">Marketing</th>
                               <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="qty_opname" data-order="desc" href="javascript:void(0)">Qty Opname</th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="no_pl" data-order="desc" href="javascript:void(0)">Picklist (PL)</th>
+                              <!-- <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="kp_lot" data-order="desc" href="javascript:void(0)">KP/Lot</th>
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="ket_exp" data-order="desc" href="javascript:void(0)">Ket Expired</th> -->
+                              <th  class='style bb min-width-100 nowrap' ><a class="column_sort" id="kp_lot" data-order="desc" href="javascript:void(0)">KP/Lot Asal</a></th>
+                              <th  class='style bb min-width-100 nowrap' >Ket Expired</th>
                               <th  class='style bb' >Umur (Hari)</th>
                             </tr>
                           </thead>
@@ -401,6 +440,7 @@
 <script type="text/javascript">
 
   $(document).ready(function() {
+    $("#example1").toggleClass('tess');
     $('#sql').val('');
   });
 
@@ -740,6 +780,8 @@
       field = 'Umur';
     }else if(field == 'lot'){
       field = 'Lot';
+     }else if(field == 'kp_lot'){
+      field = 'KP/Lot Asal';
     }else if(field == 'sales_order'){
       field = 'Sales Contract';
     }else if(field == 'sales_group'){
@@ -748,9 +790,19 @@
       field  = 'Status Opname';
     }else if(field == 'category'){
       field  = 'Kategori';
+    }else if(field == 'corak_remark'){
+      field  = 'Corak Remark';
+    }else if(field == 'warna_remark'){
+      field  = 'Warna Remark';
+    }else if(field == 'no_pl'){
+      field  = 'Picklist (PL)';
+    }else if(field == 'ket_exp'){
+      field  = 'Expired';
     }
     return field;
   }
+
+  
 
   // change combobx filter
   $('#cmbSearch').on('change', function(e){
@@ -797,6 +849,15 @@
           value += "</select>";
           value += '</div>';
           $('#f_search').html(value);
+    }else if(value == 'ket_exp'){
+      var value = '<div class="col-md-6"> ';
+          value += "<select class='form-control input-sm value width-input' name='search' id='search'  >";
+          value += "<option value='kosong'>-- Pilih --</option>";
+          value += "<option value='Yes'>Yes</option>";
+          value += "<option value='No'>No</option>";
+          value += "</select>";
+          value += '</div>';
+          $('#f_search').html(value);
     }else if( value == 'umur'){
       var value = '<div class="col-md-3"> ';
           value +=  '<select class="form-control input-sm" name="cmbOperator" id="cmbOperator">';
@@ -808,6 +869,36 @@
           value += '<input type="number" class="form-control input-sm" id="search" name="search" placeholder="Day" onkeypress="return isNumberKey(event)" onkeydown="event_input(event)" >';
           value += '</div>';
           $('#f_search').html(value);
+    }else if( value == 'create_date' || value == 'move_date'){
+      var value = '<div class="col-md-2"> ';
+          value +=  '<select class="form-control input-sm" name="cmbOperator" id="cmbOperator">';
+          value +=  '<option value="<"> < </option>'
+          value +=  '<option value="<="> <= </option>'
+          value +=  '<option value=">"> > </option>'
+          value +=  '<option value=">="> >= </option>'
+          value += "</select>";
+          value += '</div>';
+          value += '<div class="col-md-4">';
+          value += '<div class="input-group">';
+          value += '<input type="text" class="form-control input-sm txt_tanggal" id="search" name="search" >';
+          value += '<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>';
+          value += '</div>';
+          value += '</div>';
+          $('#f_search').html(value);
+
+          var d     = new Date();
+          var month = d.getMonth();
+          var day   = d.getDate();
+          var year  = d.getFullYear();
+
+          // set date tgldari
+          $('.txt_tanggal').datetimepicker({
+              defaultDate : new Date(),
+              format : 'D-MMMM-YYYY HH:mm:ss',
+              ignoreReadonly: true,
+              maxDate: new Date(),
+          });
+           
     }else{
       var value = '<div class="col-md-3"> ';
           value +=  '<select class="form-control input-sm" name="cmbOperator" id="cmbOperator">';
@@ -824,6 +915,8 @@
     }
 
   }); 
+
+  
 
   // klik btn search
   $('#btn-simpan-filter').on('click', function(e){
@@ -898,6 +991,7 @@
     var cmbSearch   = $('#cmbSearch').val();
     var cmbOperator = $('#cmbOperator').val();
 
+   
     var id      = 'id-'+search;
     var caption_field = translate_cmb(cmbSearch);// translate cmbsearch
 
@@ -916,7 +1010,10 @@
           }else if(cmbOperator == '>'){
             caption_sparate ='Older Than';
           }
-        }else if(cmbSearch == 'lokasi' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname' || cmbSearch == 'category'){
+        }else if(cmbSearch == 'move_date' || cmbSearch == 'create_date'){
+          caption_sparate =cmbOperator;
+          
+        }else if(cmbSearch == 'lokasi' || cmbSearch == 'nama_grade' || cmbSearch == 'sales_group' || cmbSearch == 'opname' || cmbSearch == 'category' || cmbSearch == 'ket_exp'){
           caption_sparate = '=';
           cmbOperator     = '=';
         }else{
@@ -1001,13 +1098,40 @@
 
   });
 
+  function hideColumn()
+  {
+
+    // var check_column    = false;
+    var checkboxes_arr =  new Array(); 
+    var checkboxes_arr = $('input[name="columnHide[]"]').map(function(e, i) {
+            if(this.checked == true){
+              // check_column = true;
+              return i.value;
+            }
+    }).get();
+
+    var arr_index   = [13,14];
+
+    $.each(arr_index, function(row,val){
+        $("#example1 tr > *:nth-child("+val+")").removeClass('columnHide');
+    });
+
+    $.each(checkboxes_arr, function(index,isi){
+        //alert(isi);
+        $("#example1 tr > *:nth-child("+isi+")").toggleClass('columnHide');
+    });
+
+    return;
+  }
+
   function loadSearchData(pageNum=null){
 
-     $("#example1_processing").css('display','');// show loading processing in table
+    $("#example1_processing").css('display','');// show loading processing in table
 
-     if(pageNum == null){
-        pageNum = 0;
-     }
+    if(pageNum == null){
+       pageNum = 0;
+    }
+
 
     // var check_transit  = false;
     // var checkboxes_arr =  new Array(); 
@@ -1019,10 +1143,10 @@
     //         }
     // }).get();
 
-     $("#example1 tbody").remove();
-     please_wait(function(){});
+    $("#example1 tbody").remove();
+    please_wait(function(){});
 
-     $.ajax({
+    $.ajax({
                 type: "POST",
                 dataType : "JSON",
                 url : '<?=base_url()?>report/stock/loadData/'+pageNum,
@@ -1048,8 +1172,8 @@
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
                         $row += "<td colspan='4'>"+value.grouping+"</td>";
-                        $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                        $row += "<td align='right'  colspan='2'>"+value.qty2+"</td>";
+                        $row += "<td align='right' class='nowrap' colspan='2'>"+value.qty+"</td>";
+                        $row += "<td align='right' class='nowrap'  colspan='2'>"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "</tr>";
                         $row += "</tbody>";
@@ -1077,6 +1201,7 @@
                       $('#search').val('');// kosongkan search
                   }
                   $("#example1_processing").css('display','none'); // hidden loading
+                  hideColumn();
                   unblockUI( function() {});
                 },error : function(jqXHR, textStatus, errorThrown){
                   //alert(jqXHR.responseText);
@@ -1085,13 +1210,24 @@
                   $('#btn-search').button('reset');
                   unblockUI( function() {});
                 }
-     });
+    });
+
+   
   }
 
     
 
     // cek sql saat klik btn excel
     $('#btn-excel').click(function(){
+
+        // var check_column    = false;
+        var checkboxes_arr =  new Array(); 
+        var checkboxes_arr = $('input[name="columnHide[]"]').map(function(e, i) {
+                if(this.checked == true){
+                  // check_column = true;
+                  return i.value;
+                }
+        }).get();
 
         var sql = $('#sql').val();
         if(event.keyCode == 13){
@@ -1104,7 +1240,7 @@
           $.ajax({
           "type":'POST',
           "url" : "<?php echo site_url('report/stock/export_excel_stock')?>",
-          "data": {sql:sql},
+          "data": {sql:sql, checkboxes_hide:checkboxes_arr},
           "dataType":'json',
           beforeSend: function() {
             $('#btn-excel').button('loading');
@@ -1208,7 +1344,7 @@
     var page_next = '';
     var page_prev = '';
     var this_icon = '';
-
+  
     // ambil data berdasarkan data-content='edit'
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
         kode     = $(this).attr('data-isi');
@@ -1289,8 +1425,8 @@
                       $row  += "<td></td>";
                       $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$group+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
                       $row  += "<td colspan='4' style='min-width:120px'>"+value.grouping+"</td>";
-                      $row  += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                      $row  += "<td align='right' colspan='2' style='min-width:100px'>"+value.qty2+"</td>";
+                      $row  += "<td align='right' colspan='2' class='nowrap' >"+value.qty+"</td>";
+                      $row  += "<td align='right' colspan='2' class='nowrap'  style='min-width:100px'>"+value.qty2+"</td>";
                       $row  += "<td class='list_pagination' colspan='3' style='min-width:80px'></td>";
                       $row  += "</tr>";
                       $row  += "</tbody>";
@@ -1309,19 +1445,27 @@
                                 $("<td>").text(no),
                                 $("<td >").text(value.lot),
                                 $("<td>").text(value.grade),
+                                $("<td>").text(value.tgl_dibuat),
                                 $("<td>").text(value.tgl_diterima),
                                 $("<td>").text(value.lokasi),
                                 $("<td>").text(value.lokasi_fisik),
                                 $("<td>").text(value.kode_produk),
                                 $("<td>").text(value.nama_produk),
+                                $("<td>").text(value.corak_remark),
+                                $("<td>").text(value.warna_remark),
                                 $("<td>").text(value.kategori),
                                 $("<td align='right'>").text(value.qty),
                                 $("<td align='right'>").text(value.qty2),
+                                $("<td align='right'>").text(value.qty_jual),
+                                $("<td align='right'>").text(value.qty2_jual),
                                 $("<td align='right'>").text(value.lebar_greige),
                                 $("<td align='right'>").text(value.lebar_jadi),
                                 $("<td>").text(value.sales_order),
                                 $("<td>").text(value.sales_group),
                                 $("<td>").text(value.qty_opname),
+                                $("<td>").text(value.no_pl),
+                                $("<td>").text(value.lot_asal),
+                                $("<td>").text(value.ket_exp),
                                 $("<td>").text(value.umur_produk),
                       );
                       tbody.append(tr);
@@ -1347,7 +1491,7 @@
               // kembalikan icon ke awal
               this_icon.css('pointer-events','');
               this_icon.html('<i class="glyphicon glyphicon-minus "></i>');
-             
+              hideColumn()
             },error: function (jqXHR, textStatus, errorThrown){
               alert('Error Load Child Root');
               // kembalikan icon ke awal
@@ -1357,12 +1501,12 @@
       });
 
     }
-    
+     
   });
 
   // klik button previous
   $(document).on("click", "button[data-pager-action='previous']", function(e){
-    
+       
     $(this).parents("tr").find("td[data-content='edit']").each(function(){
         kode     = $(this).attr('data-isi');
         group_by = $(this).attr('data-group');
@@ -1381,14 +1525,15 @@
     loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
     this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
     this_icon.css('pointer-events','none');
+   
   });
 
 
 
  // klik button next
   $(document).on("click", "button[data-pager-action='next']", function(e){
-    
-    $(this).parents("tr").find("td[data-content='edit']").each(function(){
+
+       $(this).parents("tr").find("td[data-content='edit']").each(function(){
         kode     = $(this).attr('data-isi');
         group_by = $(this).attr('data-group');
         tbody_id = $(this).attr('data-tbody');
@@ -1405,6 +1550,7 @@
     loadPageChild(this_icon,kode,group_by,group_ke,tbody_id,page,action,root);
     this_icon.html('<i class="fa fa-spinner fa-spin"></i>');
     this_icon.css('pointer-events','none');
+   
   });
 
 
@@ -1422,7 +1568,9 @@
 
             // }).get();
 
-           $.ajax({
+        
+
+          $.ajax({
             type : 'POST',
             dataType: 'json',
             url  : '<?=base_url()?>report/stock/loadChild',
@@ -1447,8 +1595,8 @@
                           $row  += "<td></td>";
                           $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+data.group_by+"' data-tbody='"+$id+"'data-root='"+$group+"' node-root='No' group-ke='"+$group_ke_next+"'><i class='glyphicon glyphicon-plus' ></i></td>";
                           $row  += "<td colspan='4' style='min-width:120px'>"+value.grouping+"</td>";
-                          $row  += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                          $row  += "<td align='right' colspan='2' style='min-width:100px'>"+value.qty2+"</td>";
+                          $row  += "<td align='right' colspan='2' class='nowrap' >"+value.qty+"</td>";
+                          $row  += "<td align='right' colspan='2' class='nowrap'  style='min-width:100px'>"+value.qty2+"</td>";
                           $row  += "<td class='list_pagination' colspan='3' style='min-width:80px'></td>";
                           $row  += "</tr>";
                           $row  += "</tbody>";
@@ -1466,19 +1614,27 @@
                                     $("<td>").text(no),
                                     $("<td >").text(value.lot),
                                     $("<td>").text(value.grade),
+                                    $("<td>").text(value.tgl_dibuat),
                                     $("<td>").text(value.tgl_diterima),
                                     $("<td>").text(value.lokasi),
                                     $("<td>").text(value.lokasi_fisik),
                                     $("<td>").text(value.kode_produk),
                                     $("<td>").text(value.nama_produk),
+                                    $("<td>").text(value.corak_remark),
+                                    $("<td>").text(value.warna_remark),
                                     $("<td>").text(value.kategori),
                                     $("<td align='right'>").text(value.qty),
                                     $("<td align='right'>").text(value.qty2),
+                                    $("<td align='right'>").text(value.qty_jual),
+                                    $("<td align='right'>").text(value.qty2_jual),
                                     $("<td align='right'>").text(value.lebar_greige),
                                     $("<td align='right'>").text(value.lebar_jadi),
                                     $("<td>").text(value.sales_order),
                                     $("<td>").text(value.sales_group),
                                     $("<td>").text(value.qty_opname),
+                                    $("<td>").text(value.no_pl),
+                                    $("<td>").text(value.lot_asal),
+                                    $("<td>").text(value.ket_exp),
                                     $("<td>").text(value.umur_produk),
                          );
                         tbody.append(tr);
@@ -1528,6 +1684,7 @@
                 }
                 this_icon.html(icon);
                 this_icon.css('pointer-events','');   
+                hideColumn()
 
             },error: function (jqXHR, textStatus, errorThrown){
               //alert(jqXHR.responseText);
@@ -1541,8 +1698,9 @@
               this_icon.html(icon);
               this_icon.css('pointer-events','');   
             }
-      });
+          });
 
+        
     return;
   }
 
@@ -1635,8 +1793,8 @@
                         $row  += "<tr  class='oe_group_header'>";
                         $row  += "<td class='show collapsed group1' href='#' style='cursor:pointer;'  data-content='edit' data-isi='"+value.nama_field+"' data-group='"+value.by+"' data-tbody='"+$group+"'data-root='"+$group+"' node-root='Yes' group-ke='1'><i class='glyphicon glyphicon-plus' ></i></td>";
                         $row += "<td colspan='4'>"+value.grouping+"</td>";
-                        $row += "<td align='right' colspan='2'>"+value.qty+"</td>";
-                        $row += "<td align='right' >"+value.qty2+"</td>";
+                        $row += "<td align='right' class='nowrap' colspan='2'>"+value.qty+"</td>";
+                        $row += "<td align='right'class='nowrap' >"+value.qty2+"</td>";
                         $row += "<td colspan='3' class='list_pagination'></td>";
                         $row += "<td colspan='2' ></td>";
                         $row += "</tr>";
@@ -1652,6 +1810,7 @@
               tbody = loadRecord(data.record);
             
               $("#example1").append(tbody);
+              hideColumn()
             }
 
             $("#example1_processing").css('display','none');// hidden loading processing in table
@@ -1663,7 +1822,9 @@
             $("#example1_processing").css('display','none');// hidden loading processing in table
             unblockUI( function() {});
           }
-      })
+      });
+
+     
       
   }); 
 
@@ -1679,19 +1840,27 @@
                       $("<td>").text(no++),
                       $("<td >").text(value.lot),
                       $("<td>").text(value.grade),
+                      $("<td>").text(value.tgl_dibuat),
                       $("<td>").text(value.tgl_diterima),
                       $("<td>").text(value.lokasi),
                       $("<td>").text(value.lokasi_fisik),
                       $("<td>").text(value.kode_produk),
                       $("<td>").text(value.nama_produk),
+                      $("<td>").text(value.corak_remark),
+                      $("<td>").text(value.warna_remark),
                       $("<td>").text(value.kategori),
                       $("<td align='right'>").text(value.qty),
                       $("<td align='right'>").text(value.qty2),
+                      $("<td align='right'>").text(value.qty_jual),
+                      $("<td align='right'>").text(value.qty2_jual),
                       $("<td align='right'>").text(value.lebar_greige),
                       $("<td align='right'>").text(value.lebar_jadi),
                       $("<td>").text(value.sales_order),
                       $("<td>").text(value.sales_group),
                       $("<td>").text(value.qty_opname),
+                      $("<td>").text(value.no_pl),
+                      $("<td>").text(value.lot_asal),
+                      $("<td>").text(value.ket_exp),
                       $("<td>").text(value.umur_produk),
             );    
             tbody.append(tr);
@@ -1700,6 +1869,8 @@
       return tbody;
 
   }
+
+ 
 
 </script>
 

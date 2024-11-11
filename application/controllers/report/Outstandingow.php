@@ -75,6 +75,7 @@ class Outstandingow extends MY_Controller
 		$warna          = $this->input->post('warna');
 
         $this->load->library('excel');
+		ob_start();
         $object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
 
@@ -123,10 +124,16 @@ class Outstandingow extends MY_Controller
 
       
         $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="Outstanding OW.xlsx"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Outstanding OW.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
     }
 }

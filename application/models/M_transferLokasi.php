@@ -99,6 +99,78 @@ class M_transferLokasi extends CI_Model
 		return $this->db->count_all_results();
 	}
 
+	var $column_order2 = array(null, 'kode_produk','nama_produk','corak_remark','warna_remark','lokasi_asal','lot','qty','qty2','qty_jual','qty2_jual',null);
+	var $column_search2= array('kode_produk','nama_produk','lokasi_asal','lot','qty','uom','qty2','uom2','qty_jual','qty2_jual','corak_remark','warna_remark');
+	var $order2  	  = array('row_order' => 'desc');
+	var $table2       = 'transfer_lokasi_items';
+
+	private function _get_datatables_query2()
+	{
+
+		$this->db->SELECT("tl.status, tli.*");
+		$this->db->FROM('transfer_lokasi tl');
+		$this->db->JOIN('transfer_lokasi_items tli', 'tl.kode_tl = tli.kode_tl', "INNER");
+
+        $i = 0;
+		foreach ($this->column_search2 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search2) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order2[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order2))
+		{
+			$order = $this->order2;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables2($kode)
+	{
+		$this->db->where("tl.kode_tl", $kode);
+		$this->_get_datatables_query2();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered2($kode)
+	{
+		$this->_get_datatables_query2();
+		$this->db->where("tl.kode_tl", $kode);
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all2($kode)
+	{
+		$this->db->where("tl.kode_tl", $kode);
+		$this->db->SELECT("tl.status, tli.*");
+		$this->db->FROM('transfer_lokasi tl');
+		$this->db->JOIN('transfer_lokasi_items tli', 'tl.kode_tl = tli.kode_tl', "INNER");
+		return $this->db->count_all_results();
+	}
+
 	public function cek_status_aktif_lokasi_by_kode($dept_id,$lokasi)
 	{	
 		$this->db->where('dept_id',$dept_id);
@@ -215,7 +287,7 @@ class M_transferLokasi extends CI_Model
 	}
 
 
-	public function save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$ro)
+	public function save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$ro,$corak_remark,$warna_remark)
 	{
 		$data = array(
 						'kode_tl' 		=> $kode_tl,
@@ -223,11 +295,17 @@ class M_transferLokasi extends CI_Model
 						'kode_produk'	=> $kode_produk,
 						'nama_produk'	=> $nama_produk,
 						'lokasi_asal'   => $lokasi_asal,
+						'corak_remark'   => $corak_remark,
+						'warna_remark'   => $warna_remark,
 						'lot'			=> $lot,
 						'qty'           => $qty,
 						'uom'           => $uom,
                         'qty2'          => $qty2,
 						'uom2'          => $uom2,
+						'qty_jual'      => $qty_jual,
+						'uom_jual'      => $uom_jual,
+						'qty2_jual'     => $qty2_jual,
+						'uom2_jual'     => $uom2_jual,
 						'row_order'     => $ro
 
 
@@ -235,21 +313,21 @@ class M_transferLokasi extends CI_Model
 		return $this->db->insert('transfer_lokasi_items',$data);
 	}
 
-	public function delete_transfer_lokasi_items($kode_tl,$barcode_id,$row_order)
+	public function delete_transfer_lokasi_items($kode_tl,$quant_id,$row_order)
 	{
 		$data = array(
 						'kode_tl'   => $kode_tl,
-						'lot'		=> $barcode_id,
+						'quant_id'		=> $quant_id,
 						'row_order' => $row_order,
 					);
 		return $this->db->delete('transfer_lokasi_items',$data);
 
 	}
 
-	public function cek_barcode_transfer_lokasi_items_by_kode($kode_tl,$barcode_id,$row_order)
+	public function cek_barcode_transfer_lokasi_items_by_kode($kode_tl,$quant_id,$row_order)
 	{
 		$this->db->where('kode_tl',$kode_tl);
-		$this->db->where('lot',$barcode_id);
+		$this->db->where('quant_id',$quant_id);
 		$this->db->where('row_order', $row_order);
 		return $this->db->get('transfer_lokasi_items');
 

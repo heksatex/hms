@@ -573,7 +573,9 @@
                                                         </div> -->
                                                     </div>
                                                     <div class="col-md-12 col-xs-12 pad_left_empty" style="padding-top:10px">
+                                                    <?php if($akses_menu > 0 ){?>
                                                         <button type="button" name="btn-simpan" id="btn-simpan" class="btn btn-sm btn-primary" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Simpan</button>
+                                                    <?php } ?>
                                                     </div>
                                                   </div>
                                                 </div>
@@ -905,6 +907,12 @@
                 alert_notify("fa fa-warning","Data Inlet Kosong !","danger",function(){});
             }else if(grade_radio == ''){
                 alert_notify("fa fa-warning","Grade Harus dipilih !","danger",function(){});
+            }else if( ( parseFloat(hph_mtr) <= 0 || hph_mtr.length === 0 ) && grade_radio != 'F'){
+                alert_notify("fa fa-warning","Qty Mtr HPH  harus diisi  !","danger",function(){});
+                $('#qty_mtr_hph').focus();
+            }else if( (parseFloat(hph_kg) <= 0 ||  hph_kg.length === 0 ) && grade_radio != 'F'){
+                alert_notify("fa fa-warning","Qty Kg HPH  harus diisi  !","danger",function(){});
+                $('#qty_kg_hph').focus();
             }else{
                 // alert("tes");
                 $.ajax({
@@ -1006,7 +1014,6 @@
                     }
                 });
             }
-
 
         });
 

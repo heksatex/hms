@@ -20,6 +20,17 @@
                     <input type="text" class="form-control input-sm" name="warna_remark" id="warna_remark"/>
 				</div>
 			</div>
+            <div class="col-md-12 col-xs-12">
+				<div class="col-12 col-md-12 col-lg-4"><label>Grade </label></div>
+				<div class="col-12 col-md-12 col-lg-8">
+					<select type="text" class="form-control input-sm select2 " name="grade" id="grade" style="width:100% !important;" >
+                        <option value=""></option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+				</div>
+			</div>
 			<div class="col-md-12 col-xs-12">
 				<div class="col-12 col-md-12 col-lg-4"><label>Quality </label></div>
 				<div class="col-12 col-md-12 col-lg-8">
@@ -38,7 +49,8 @@
 					<input type="text" class="form-control input-sm text-right" name="qty" id="qty" data-decimal="2" oninput="enforceNumberValidation(this)"/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<select type="text" class="form-control input-sm select2 uom" name="uom_qty" id="uom_qty"  style="width:100% !important;" ></select>
+					<!-- <select type="text" class="form-control input-sm select2 uom" name="uom_qty" id="uom_qty"  style="width:100% !important;" ></select> -->
+                    <input type="text" class="form-control input-sm" name="uom_qty" id="uom_qty" readonly>
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
@@ -47,7 +59,8 @@
 					<input type="text" class="form-control input-sm text-right" name="qty2" id="qty2" data-decimal="2" oninput="enforceNumberValidation(this)"/>
 				</div>
 				<div class="col-12 col-md-12 col-lg-4">
-					<select type="text" class="form-control input-sm select2 uom" name="uom_qty2" id="uom_qty2" style="width:100% !important;" ></select>
+					<!-- <select type="text" class="form-control input-sm select2 uom" name="uom_qty2" id="uom_qty2" style="width:100% !important;" ></select> -->
+                    <input type="text" class="form-control input-sm" name="uom_qty2" id="uom_qty2" readonly>
 				</div>
 			</div>
 			<div class="col-md-12 col-xs-12">
@@ -99,6 +112,11 @@
         allowClear: true,
         placeholder: '',
     });
+
+    $('#grade').select2({
+        allowClear: true,
+        placeholder: '',
+    });
 	
 	
 	// validasi decimal/ onlynumber
@@ -126,6 +144,45 @@
 					ele.value = numbers;
                 }
             }
+    }
+
+
+    $(document).on("keyup", "#qty_jual", function(){
+        let qty_jual = $('#qty_jual').val();
+        let uom_jual = $('#uom_qty_jual').val();
+        if(uom_jual == 'Yrd'){
+            result = konversi_uom('Yrd','Mtr',qty_jual);
+            if(result == 0){
+                result = '';
+            }
+            $('#qty').val(result);
+            
+        }
+
+    });
+
+	function konversi_uom(uom1From,uom2To,valueUom){
+
+            let arr_konversi = new Array();
+            list_konversi = <?php echo $uom_konversi?>
+            // alert(JSON.stringify(list_konversi));
+            result_convert = 0;
+            $.each(list_konversi, function(key, val) {
+                if(val.uom1 == uom1From && val.uom2 == uom2To){
+                    // alert(val.faktor);
+                    result_convert = valueUom*val.faktor;
+                }
+            });
+
+            fixed = roundNum(result_convert)
+            return fixed;
+
+    }
+
+    
+    //validasi round decimal 
+    function roundNum(number){
+        return +(Math.round(number + "e+2") + "e-2");
     }
 
 	//select 2 product
@@ -169,14 +226,18 @@
 		var uom = $("#kode_produk :selected").data().data.uom;
 		var uom2 = $("#kode_produk :selected").data().data.uom2;
 		var $newOption = $("<option></option>").val(uom).text(uom);
-        $("#uom_qty").empty().append($newOption).trigger('change');
-		var $newOption2 = $("<option></option>").val(uom2).text(uom2);
-        $("#uom_qty2").empty().append($newOption2).trigger('change');
+        // $("#uom_qty").empty().append($newOption).trigger('change');
+		// var $newOption2 = $("<option></option>").val(uom2).text(uom2);
+        // $("#uom_qty2").empty().append($newOption2).trigger('change');
+        $("#uom_qty").val(uom);
+        $("#uom_qty2").val(uom2);
     });
 
     $("#kode_produk").on('select2:unselect', function (e) {
-        $("#uom_qty").empty().append('<option></option>').trigger('change');
-        $("#uom_qty2").empty().append('<option></option>').trigger('change');
+        // $("#uom_qty").empty().append('<option></option>').trigger('change');
+        // $("#uom_qty2").empty().append('<option></option>').trigger('change');
+        $("#uom_qty").val('');
+        $("#uom_qty2").val('');
     });
 
 	//select 2 product
@@ -254,7 +315,7 @@
         let warna_remark  	= $('#warna_remark').val();
         let quality  		= $('#quality').val();
         let jml_pcs		    = $('#jml_pcs').val();
-        let qty		    	= $('#qty').val();
+        let qty		    	= parseFloat($('#qty').val());
         let uom		    	= $('#uom_qty').val();
         let qty2	    	= $('#qty2').val();
         let uom2	    	= $('#uom_qty2').val();
@@ -265,6 +326,7 @@
 		let lebar_jadi		= $('#lebar_jadi').val();
 		let uom_lebar_jadi	= $('#uom_lebar_jadi').val();
 		let k3l				= $('#k3l').val();
+		let grade		    = $('#grade').val();
 
         if (kode_produk == null) {
             alert_notify('fa fa-warning', 'Kode Produk Harus dipilih !', 'danger', function() {});
@@ -275,32 +337,35 @@
         } else if (warna_remark.length === 0) {
             alert_notify('fa fa-warning', 'Warna Remark Harus diisi !', 'danger', function() {});
             $('#warna_remark').focus();
-		} else if (jml_pcs.length === 0) {
+		} else if (jml_pcs.length <= 0) {
             alert_notify('fa fa-warning', 'Jml Pcs Minimal 1 !', 'danger', function() {});
             $('#jml_pcs').focus();
-		} else if (qty.length === 0) {
-            alert_notify('fa fa-warning', 'Qty Harus diisi !', 'danger', function() {});
-            $('#qty').focus();
+        } else if (grade.length === 0) {
+            alert_notify('fa fa-warning', 'Grade Harus diisi !', 'danger', function() {});
+            $('#grade').focus();
+		// } else if (qty.length === 0) {
+        //     alert_notify('fa fa-warning', 'Qty Harus diisi !', 'danger', function() {});
+        //     $('#qty').focus();
 		} else if (uom == null) {
             alert_notify('fa fa-warning', 'Uom Harus dpilih !', 'danger', function() {});
 			$('#uom_qty').select2('focus');
-		} else if (qty2.length === 0) {
+		} else if (parseFloat(qty2) <= 0) {
             alert_notify('fa fa-warning', 'Qty2 Harus diisi !', 'danger', function() {});
             $('#qty2').focus();
 		} else if (uom2 == null) {
-            alert_notify('fa fa-warning', 'Uom2 Harus dpilih !', 'danger', function() {});
+            alert_notify('fa fa-warning', 'Uom2 Harus dipilih !', 'danger', function() {});
 			$('#uom_qty2').select2('focus');
-		} else if (qty_jual.length === 0) {
+		} else if (parseFloat(qty_jual) <= 0 ) {
             alert_notify('fa fa-warning', 'Qty Jual Harus diisi !', 'danger', function() {});
 			$('#qty_jual').focus();
-		} else if (qty_jual.length > 0 && uom_qty_jual == null) {
-            alert_notify('fa fa-warning', 'Uom Qty Jual Harus dpilih !', 'danger', function() {});
+		} else if (parseFloat(qty_jual) > 0 && uom_qty_jual == null) {
+            alert_notify('fa fa-warning', 'Uom Qty Jual Harus dipilih !', 'danger', function() {});
 			$('#uom_qty_jual').select2('focus');
-		} else if (qty2_jual.length > 0 && uom_qty2_jual == null) {
-            alert_notify('fa fa-warning', 'Uom Qty2 Jual Harus dpilih !', 'danger', function() {});
+		} else if (parseFloat(qty2_jual) > 0 && uom_qty2_jual == null) {
+            alert_notify('fa fa-warning', 'Uom Qty2 Jual Harus dipilih !', 'danger', function() {});
 			$('#uom_qty2_jual').select2('focus');
 		} else if (lebar_jadi.length === 0) {
-            alert_notify('fa fa-warning', 'Lebar_jadi Harus diisi !', 'danger', function() {});
+            alert_notify('fa fa-warning', 'Lebar jadi Harus diisi !', 'danger', function() {});
 			$('#lebar_jadi').focus();
 		} else if (uom_lebar_jadi == null) {
             alert_notify('fa fa-warning', 'Uom Lebar Jadi Harus dpilih !', 'danger', function() {});
@@ -323,6 +388,7 @@
                     corak_remark: corak_remark,
                     warna_remark: warna_remark,
 					jml_pcs     : jml_pcs,
+					grade		: grade,
 					quality		: quality,
 					qty			: qty,
 					uom			: uom,

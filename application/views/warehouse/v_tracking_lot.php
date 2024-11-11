@@ -117,6 +117,22 @@
                         </div> 
                         <div class="form-group"> 
                             <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Corak remark </label></div>
+                                <div class="col-xs-1 limit_capt"><label>:</label></div>
+                                <div class="col-xs-8" id="corak_remark">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Warna remark </label></div>
+                                <div class="col-xs-1 limit_capt"><label>:</label></div>
+                                <div class="col-xs-8" id="warna_remark">
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
                                 <div class="col-xs-4"><label>Grade </label></div>
                                 <div class="col-xs-1 limit_capt"><label>:</label></div>
                                 <div class="col-xs-8" id="grade">
@@ -127,7 +143,7 @@
                     <div class="col-md-6">
                         <div class="form-group"> 
                             <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Qty1 </label></div>
+                                <div class="col-xs-4"><label>Qty1 [HPH]</label></div>
                                 <div class="col-xs-1 limit_capt"><label>:</label></div>
                                 <div class="col-xs-8" id="qty">
                                 </div>
@@ -135,9 +151,25 @@
                         </div> 
                         <div class="form-group"> 
                             <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Qty2 </label></div>
+                                <div class="col-xs-4"><label>Qty2 [HPH]</label></div>
                                 <div class="col-xs-1 limit_capt"><label>:</label></div>
                                 <div class="col-xs-8" id="qty2">
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Qty1 [JUAL] </label></div>
+                                <div class="col-xs-1 limit_capt"><label>:</label></div>
+                                <div class="col-xs-8" id="qty_jual">
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Qty2 [JUAL]</label></div>
+                                <div class="col-xs-1 limit_capt"><label>:</label></div>
+                                <div class="col-xs-8" id="qty2_jual">
                                 </div>
                             </div>
                         </div> 
@@ -162,6 +194,14 @@
                                 <div class="col-xs-4"><label>Reff Note </label></div>
                                 <div class="col-xs-1 limit_capt"><label>:</label></div>
                                 <div class="col-xs-8" id="reff_note">
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="form-group"> 
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Barcode / Lot / KP Asal </label></div>
+                                <div class="col-xs-1 limit_capt"><label>:</label></div>
+                                <div class="col-xs-8" id="lot_asal">
                                 </div>
                             </div>
                         </div> 
@@ -243,6 +283,7 @@
         proses();
     });
 
+    $('#txtlot').focus();
 
     $('#txtlot').keydown(function(event){
         if(event.keyCode == 13) {
@@ -259,13 +300,18 @@
         $('#tgl_dibuat').text('');
         $('#kode_produk').text('');
         $('#nama_produk').text('');
+        $('#corak_remark').text('');
+        $('#warna_remark').text('');
         $('#grade').text('');
         $('#qty').text('');
         $('#qty2').text('');
+        $('#qty_jual').text('');
+        $('#qty2_jual').text('');
         $('#lokasi').text('');
         $('#lokasi_fisik').text('');
         $('#reff_note').text('');
         $('#jml').text('');
+        $('#lot_asal').text('');
         
         if(txtlot == ''){
             alert_notify('fa fa-warning','Barcode / Lot tidak boleh kosong !','danger',function(){});
@@ -301,13 +347,18 @@
                         $('#tgl_dibuat').text(value.tgl_dibuat);
                         $('#kode_produk').text(value.kode_produk);
                         $('#nama_produk').text(value.nama_produk);
+                        $('#corak_remark').text(value.corak_remark);
+                        $('#warna_remark').text(value.warna_remark);
                         $('#grade').text(value.grade);
                         $('#qty').text(value.qty);
                         $('#qty2').text(value.qty2);
+                        $('#qty_jual').text(value.qty_jual);
+                        $('#qty2_jual').text(value.qty2_jual);
                         $('#lokasi').text(value.lokasi);
                         $('#lokasi_fisik').text(value.lokasi_fisik);
                         $('#reff_note').text(value.reff_note);
                         $('#jml').text(value.jml);
+                        $('#lot_asal').text(value.lot_asal);
                         //alert(value.lot)
                     });
 
@@ -317,10 +368,14 @@
                     var empty = true;
                     $.each(data.record, function(key, value) {
                         empty = false;
+                        link = value.kode;
+                        if(value.link != ''){
+                            link = '<a href="<?=base_url()?>'+value.link+'" target="_blank" data-togle="tooltip" title="Cek Details">'+value.kode+'</a>';
+                        }
                         var tr = $("<tr>").append(
                           $("<td>").text(no++),
                           $("<td>").text(value.tanggal),
-                          $("<td>").html('<a href="<?=base_url()?>'+value.link+'" target="_blank" data-togle="tooltip" title="Cek Details">'+value.kode+'</a>'),
+                          $("<td>").html(link),
                           $("<td>").text(value.keterangan),
                           $("<td>").text(value.status),
                           $("<td>").text(value.user),

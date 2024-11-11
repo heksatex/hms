@@ -195,7 +195,7 @@ class M_produk extends CI_Model
 
 	public function get_qty_onhand($kodeproduk)
 	{
-		return $this->db->query("SELECT SUM(qty) AS 'qty_onhand' FROM stock_quant WHERE kode_produk = '$kodeproduk' and lokasi NOT LIKE '%Virtual%'")->row();
+		return $this->db->query("SELECT SUM(qty) AS 'qty_onhand' FROM stock_quant WHERE kode_produk = '$kodeproduk' and lokasi LIKE '%Stock%'")->row();
 	}
 
 	public function get_jml_moves($kodeproduk)

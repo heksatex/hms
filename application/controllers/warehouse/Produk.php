@@ -186,8 +186,9 @@ class Produk extends MY_Controller
         $callback = array('status' => 'failed', 'field' => 'product_parent', 'message' => 'Product Parent Harus Diisi !', 'icon' =>'fa fa-warning', 
               'type' => 'danger'  );
       }else if(empty($jenis_kain) AND (strpos($nmKategori['nama_category'], 'Kain') !== FALSE) ){
-        $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain Harus disini jika Kategori Barangnya Kain !', 'icon' =>'fa fa-warning', 
+        $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain Harus diisi jika Kategori Barangnya Kain !', 'icon' =>'fa fa-warning', 
                     'type' => 'danger'  );
+      
       // }else if(empty($jenis_kain) AND (strpos($nmKategori['nama_category'], 'Dyeing') !== FALSE or strpos($nmKategori['nama_category'], 'Setting') !== FALSE OR strpos($nmKategori['nama_category'], 'Padding') !== FALSE OR strpos($nmKategori['nama_category'], 'Brushing') !== FALSE OR strpos($nmKategori['nama_category'], 'Finishing') !== FALSE  OR strpos($nmKategori['nama_category'], 'Finbrushing') !== FALSE) ){
                     // $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain Harus disini jika Kategori Barangnya Kain !', 'icon' =>'fa fa-warning', 
                                 // 'type' => 'danger'  );
@@ -225,6 +226,8 @@ class Produk extends MY_Controller
         // get last id mst_sub_parent
         $id_sub_parent_new = $this->m_produk->get_last_id_mst_sub_parent();  
         
+        $nama_produk_valid = TRUE;
+        
         if(!empty($jenis_kain) AND (strpos($nmKategori['nama_category'], 'Kain') !== FALSE) ){
 
           if(empty($sub_parent) or $sub_parent == "0"){
@@ -252,6 +255,11 @@ class Produk extends MY_Controller
             $sub_parent = $sb['id'];
             $nama_sub_parent = $sb['nama_sub_parent'];
           }
+
+         
+          if((strpos($nama_produk, 'TRC-') === FALSE) AND (strpos($nama_produk, 'J-') === FALSE)){
+            $nama_produk_valid = FALSE;
+          }
           
         }
 
@@ -259,10 +267,12 @@ class Produk extends MY_Controller
             $callback = array('status' => 'failed', 'field' => 'kodeproduk', 'message' => 'Kode Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
         }elseif($nama_double == TRUE){
             $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Nama Produk ini Sudah Pernah Diinput !', 'icon' =>'fa fa-warning', 'type' => 'danger' );   
+        }elseif($nama_produk_valid == FALSE){
+            $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Nama Produk untuk <b> Kategori Kain Hasil  TIDAK  VALID </b> !', 'icon' =>'fa fa-warning', 'type' => 'danger' );   
         }else if(!empty($cek['kode_produk']) AND $status == 'edit'){
 
           //update/edit produk
-          $this->m_produk->update_produk($id,$namaproduk,$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
+          $this->m_produk->update_produk($id,trim($namaproduk),$uomproduk,$uomproduk2,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
 
           if(!empty($sql_insert_mst_sub_parent)){
             $sql_insert_mst_sub_parent = rtrim($sql_insert_mst_sub_parent, ', ');
@@ -277,7 +287,7 @@ class Produk extends MY_Controller
           //insert/add produk
           $id_new = $this->m_produk->get_last_id_mst_produk();
           
-          $this->m_produk->save_produk($kodeproduk,$namaproduk,$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
+          $this->m_produk->save_produk($kodeproduk,trim($namaproduk),$uomproduk,$uomproduk2,$tanggaldibuat,$routeproduksi,$typeproduk,$dapatdibeli,$dapatdijual,$kategoribarang,$note,$bom,$lebargreige,$uom_lebargreige,$lebarjadi,$uom_lebarjadi,$statusproduk,$product_parent,$sub_parent,$jenis_kain);
           $kodeproduk_encr = encrypt_url($id_new);
 
           if(!empty($sql_insert_mst_sub_parent)){

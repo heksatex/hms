@@ -58,6 +58,51 @@ class Transferlokasi extends MY_Controller
         echo json_encode($output);
 	}
 
+	function get_data_item()
+    {
+
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $kode = $this->input->post('kode');
+            $list = $this->m_transferLokasi->get_datatables2($kode);
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->kode_produk;
+                $row[] = $field->nama_produk;
+                $row[] = $field->corak_remark;
+                $row[] = $field->warna_remark;
+                $row[] = $field->lokasi_asal;
+                $row[] = $field->lot;
+                $row[] = $field->qty.' '.$field->uom;
+                $row[] = $field->qty2.' '.$field->uom2;
+				$row[] = $field->qty_jual.' '.$field->uom_jual;
+                $row[] = $field->qty2_jual.' '.$field->uom2_jual;
+                if($field->status == 'draft' OR $field->status == 'ready' ){
+                    $row[] = '<button type="button" class="btn btn-danger btn-xs delete_item_transfer" data-row="' . $field->row_order . '" data-quant="' .$field->quant_id. '" data-title="Hapus"><i class="fa fa-trash"></></button>';
+                }else{
+                    $row[] = '';
+                }
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_transferLokasi->count_all2($kode),
+                "recordsFiltered" => $this->m_transferLokasi->count_filtered2($kode),
+                "data" => $data,
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+        
+    }
+
 
 	public function add()
 	{ 
@@ -75,7 +120,7 @@ class Transferlokasi extends MY_Controller
 	    $data['id_dept']   = $id_dept;
         $data['mms']       = $this->_module->get_data_mms_for_log_history($id_dept);// get mms by dept untuk menu yg beda-beda
 	    $data['tl']        = $this->m_transferLokasi->get_transfer_lokasi_by_kode($kode_decrypt);
-	    $data['tli']       = $this->m_transferLokasi->get_transfer_lokasi_items_by_kode($kode_decrypt);
+	    // $data['tli']       = $this->m_transferLokasi->get_transfer_lokasi_items_by_kode($kode_decrypt);
 
 	    if(empty($data["tl"])){
             show_404();
@@ -305,14 +350,20 @@ class Transferlokasi extends MY_Controller
 		      				$kode_produk  = $val->kode_produk;
 		      				$nama_produk  = $val->nama_produk;
 		      				$lokasi_asal  = $val->lokasi_fisik;
+		      				$corak_remark  = $val->corak_remark;
+		      				$warna_remark  = $val->warna_remark;
 		      				$lot          = $val->lot;
 		      				$qty          = $val->qty;
 		      				$uom          = $val->uom;
 		      				$qty2         = $val->qty2;
 		      				$uom2         = $val->uom2;
+							$qty_jual     = $val->qty_jual;
+		      				$uom_jual     = $val->uom_jual;
+		      				$qty2_jual    = $val->qty2_jual;
+		      				$uom2_jual    = $val->uom2_jual;
 
 		      				//insert into transfer_lokasi_items
-		      				$this->m_transferLokasi->save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$ro);
+		      				$this->m_transferLokasi->save_transfer_lokasi_items($kode_tl,$quant_id,$kode_produk,$nama_produk,$lokasi_asal,$lot,$qty,$uom,$qty2,$uom2,$qty_jual,$uom_jual,$qty2_jual,$uom2_jual,$ro,$corak_remark,$warna_remark);
 		      				$ro++;
 		      				$count++;
 		      			}
@@ -334,10 +385,10 @@ class Transferlokasi extends MY_Controller
 					    $this->_module->gen_history($sub_menu, $kode_tl, $jenis_log, $note_log, $username);
 
 		      			$callback = array('status' => 'success', 'message' => 'Scan Barcode Berhasil', 'icon' =>'fa fa-check', 'type' => 'success'  ); 
-                        // unlock table
-	                    $this->_module->unlock_tabel();
-
-	      			}
+						  
+					}
+					// unlock table
+					$this->_module->unlock_tabel();
 
 	      		}
 
@@ -363,14 +414,14 @@ class Transferlokasi extends MY_Controller
 
 	    	$kode_tl  = addslashes($this->input->post('kode'));
 	    	$dept_id  = addslashes($this->input->post('dept_id'));
-	      	$barcode_id    = addslashes($this->input->post('barcode_id'));
-	      	$nama_produk   = addslashes($this->input->post('nama_produk'));
+	      	// $barcode_id    = addslashes($this->input->post('barcode_id'));
+	      	// $nama_produk   = addslashes($this->input->post('nama_produk'));
 	      	$quant_id = $this->input->post('quant_id');
 	      	$row_order = $this->input->post('row_order');
 
 
 	      	// cek barcode di transfer_lokasi_items
-	      	$cek_ = $this->m_transferLokasi->cek_barcode_transfer_lokasi_items_by_kode($kode_tl,$barcode_id,$row_order)->row_array();
+	      	$cek_ = $this->m_transferLokasi->cek_barcode_transfer_lokasi_items_by_kode($kode_tl,$quant_id,$row_order)->row_array();
 
 	      	// cek status 
 	    	$tl  = $this->m_transferLokasi->get_transfer_lokasi_by_kode($kode_tl);
@@ -389,7 +440,7 @@ class Transferlokasi extends MY_Controller
             }else{
 
             	// delete items  transfer lokasi items
-            	$this->m_transferLokasi->delete_transfer_lokasi_items($kode_tl,$barcode_id,$row_order);
+            	$this->m_transferLokasi->delete_transfer_lokasi_items($kode_tl,$quant_id,$row_order);
 
             	// cek transfer_lokasi_items
 	   			$tli       = $this->m_transferLokasi->cek_transfer_lokasi_items_by_kode($kode_tl);
@@ -402,9 +453,10 @@ class Transferlokasi extends MY_Controller
 				//update jml lot di header
 				$total_lot = $this->m_transferLokasi->get_jml_items_transfer_lokasi_by_kode($kode_tl);
 				$this->m_transferLokasi->update_jml_items_transfer_lokasi_by_kode($kode_tl,$total_lot);
-
+				$nama_produk = $cek_['nama_produk'] ?? '';
+				$barcode_id = $cek_['lot'] ?? '';
             	$jenis_log   = "cancel";
-				$note_log    = "Hapus Items ". $nama_produk." | ".$barcode_id." | ".$quant_id;
+				$note_log    = "Hapus Items ". $nama_produk." | ".$barcode_id;
 				$this->_module->gen_history($sub_menu, $kode_tl, $jenis_log, $note_log, $username);
 
 	      		$callback = array('status' => 'success', 'message' => 'Data Berhasil Dihapus !', 'icon' =>'fa fa-check', 'type' => 'success'  ); 
@@ -447,6 +499,9 @@ class Transferlokasi extends MY_Controller
             $case          = '';
             $where         = '';
 
+			//lock table
+	        $this->_module->lock_tabel('transfer_lokasi WRITE, transfer_lokasi_items WRITE, stock_quant WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE, departemen as d WRITE, transfer_lokasi as a write');
+
 	    	$tl       = $this->m_transferLokasi->get_transfer_lokasi_by_kode($kode_tl);
 	    	$lokasi_tujuan = addslashes($tl->lokasi_tujuan);
 
@@ -470,8 +525,7 @@ class Transferlokasi extends MY_Controller
 				$callback = array('status' => 'failed','message' => 'Maaf, Transfer Lokasi hanya bisa di Transfer Lokasi kan oleh User yang membuat Transfer Lokasi Tersebut !', 'icon' =>'fa fa-check', 'type' => 'danger');
 	   		}else{
 
-		    	//lock table
-	            $this->_module->lock_tabel('transfer_lokasi WRITE, transfer_lokasi_items WRITE, stock_quant WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE');
+		    	
 
 		    	// foreach list transfer lokasi items
 		    	$tli = $this->m_transferLokasi->get_transfer_lokasi_items_by_kode($kode_tl);
@@ -545,10 +599,12 @@ class Transferlokasi extends MY_Controller
 		    		$callback = array('status' => 'success', 'message' => 'Transfer Lokasi Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success'  ); 
 		    	}
 
-		    	// unlock tabel
-	            $this->_module->unlock_tabel();
+		    	
 
            	}
+
+			// unlock tabel
+	        $this->_module->unlock_tabel();
 
 	   	}
 

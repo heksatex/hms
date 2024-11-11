@@ -182,8 +182,8 @@ class Inlet extends MY_Controller
                     $callback = array('status' => 'failed', 'message' => 'Lot <b>'.$lot.'</b> sudah di Inlet !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if($data->id_category == 21){
                     $callback = array('status' => 'failed', 'message' => 'Kategori Kain tidak Boleh Kain Hasil Gudang Jadi !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-                }else if($data->lokasi_fisik != ''){
-                    $callback = array('status' => 'failed', 'message' => 'Lokasi Fisik / Rak harus Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                // }else if($data->lokasi_fisik != ''){
+                //     $callback = array('status' => 'failed', 'message' => 'Lokasi Fisik / Rak harus Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else{
 
                     $data_lot   = [];
@@ -244,8 +244,8 @@ class Inlet extends MY_Controller
                 $mesin          = ($this->input->post('mesin'));
                 $operator       = ($this->input->post('operator'));
 
-                // start transaction
-                $this->_module->startTransaction();
+                // // start transaction
+                // $this->_module->startTransaction();
 
                 // get nama_jenis_kain_by_id, ket
                 $get_njk = $this->m_produk->get_mst_jenis_kain_by_id($jenis_kain)->row();
@@ -303,6 +303,8 @@ class Inlet extends MY_Controller
                     $callback = array('status' => 'failed', 'field' => 'k3l', 'message' => 'Kode K3L tidak boleh kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
                 }else{
+
+                    // $this->_module->startTransaction();
 
                     // lock table
                     $this->_module->lock_tabel('mrp_inlet WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, mst_produk as mp WRITE, mst_jenis_kain as mjk WRITE, stock_move as sm WRITE, warna as w WRITE, mrp_production as mrp WRITE, mrp_production_rm_target as rmt WRITE, sales_contract as sc WRITE, mst_sales_group as msg WRITE, stock_quant WRITE, stock_move_items WRITE');
@@ -438,19 +440,23 @@ class Inlet extends MY_Controller
                         }
                     }
                     // unlock table
-                    $this->_module->unlock_tabel();
+                    // $this->_module->unlock_tabel();
                 }
-
+                // if (!$this->_module->finishTransaction()) {
+                //     throw new \Exception('Data  Gagal diubah', 500);
+                // }
                 $this->output->set_status_header(200)
                         ->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
             }
         } catch(Exception $ex){
-            $this->_module->finishTransaction();
+            // $this->_module->finishRollBack();
+            // $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
         }
         // echo json_encode($callback);
         
@@ -471,7 +477,7 @@ class Inlet extends MY_Controller
             $username  = addslashes($this->session->userdata('username'));
 
             // start transaction
-            $this->_module->startTransaction();
+            // $this->_module->startTransaction();
 
             //lock table 
             $this->_module->lock_tabel('mrp_inlet WRITE,log_history WRITE, user WRITE, main_menu_sub WRITE, mrp_production_rm_hasil WRITE,stock_quant WRITE, stock_quant as sq WRITE, mrp_production_rm_target as rm WRITE, stock_move_items as smi WRITE, stock_move_items WRITE');
@@ -525,7 +531,7 @@ class Inlet extends MY_Controller
             $this->_module->unlock_tabel();
 
             // finish transaction
-            $this->_module->finishTransaction();
+            // $this->_module->finishTransaction();
             
         }
 
@@ -545,7 +551,7 @@ class Inlet extends MY_Controller
                 $row[] = $no;
                 $row[] = $field->create_date;
                 $row[] = $field->kode_produk;
-                if($field->nama_grade == 'F'){
+                if($field->nama_grade == 'F' || $field->kode_split == 'hsplit'){
                     $row[] = $field->nama_produk;
                 }else{
                     $row[] = ' <a href="javascript:void(0)" class="edit_lot" title="Edit" data-toggle="tooltip" data-quant="'.$field->quant_id.'">'.$field->nama_produk.'</a>';
@@ -562,6 +568,7 @@ class Inlet extends MY_Controller
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->lokasi;
                 $row[] = $field->nama_user;
+                $row[] = $field->quant_id;
                 $row[] = $field->kode_split ?? '';
                 $data[] = $row;
             }
@@ -635,7 +642,7 @@ class Inlet extends MY_Controller
                 $username  = addslashes($this->session->userdata('username'));
 
                 // start transaction
-                $this->_module->startTransaction();
+                // $this->_module->startTransaction();
 
                 $tgl            = date('Y-m-d H:i:s');
                 $inlet = $this->m_inlet->get_data_inlet_by_id($id_inlet);
@@ -653,6 +660,8 @@ class Inlet extends MY_Controller
                     throw new \Exception('Data Lot'.$lot.' tidak ditemukan di Stock !', 200);
                 }else if($get->lokasi != 'GJD/Stock'){
                     throw new \Exception('Lokasi tidak valid, Data Lot'.$lot.' berada dilokasi '.$get->lokasi ?? '' .' !', 200);
+                }else if($get->lokasi_fisik == 'XPD'){
+                    throw new \Exception('Lokasi Fisik sudah <b> XPD </b> !', 200);
                 }else{
                     if($get->nama_grade == 'F'){
                         $callback = array('status' => 'failed', 'message' => 'Grade F tidak bisa Edit HPH !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
@@ -675,7 +684,7 @@ class Inlet extends MY_Controller
                         // cek apakah barcode masuk PL
                         $cek_pl = $this->m_inlet->cek_barcode_in_picklist($quant_id,$lot)->row();
                         if(!empty($cek_pl)){
-                            throw new \Exception('Tidak Bisi disimpan, Data Lot '.$lot.' Sudah Masuk PL !', 200);
+                            throw new \Exception('Data Lot '.$lot.' Sudah Masuk PL !', 200);
                         }
                         $kode_mrp           = $inlet->kode_mrp;
                         $kode_produk_fg     = $get->kode_produk;
@@ -821,28 +830,31 @@ class Inlet extends MY_Controller
 
                     }
                     
-                    // unlock table
-                    $this->_module->unlock_tabel();
-                    $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-
-                    if (!$this->_module->finishTransaction()) {
-                        throw new \Exception('Gagal Simpan data ', 500);
-                    }
+                    
+                   
                 }
 
-                // finish transaction
-                $this->_module->finishTransaction();
+                // if (!$this->_module->finishTransaction()) {
+                //     throw new \Exception('Gagal Simpan data ', 500);
+                // }
+                // unlock table
+                // $this->_module->unlock_tabel();
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 
             }
         
         }catch(Exception $ex){
             // unlock table
-            $this->_module->unlock_tabel();
+            // $this->_module->unlock_tabel();
             // finish transaction
-            $this->_module->finishTransaction();
+            // $this->_module->finishRollBack();
+            // $this->_module->rollbackTransaction();;
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -928,5 +940,376 @@ class Inlet extends MY_Controller
      
         return $this->prints->generate();
     }
+
+
+    public function print_modal()
+    {
+        $data['data_print'] = ($this->input->post('data'));
+        $data['id_inlet'] = ($this->input->post('id'));
+        $data['desain_barcode']   = $this->_module->get_list_desain_barcode_by_type('LBK');    
+        return $this->load->view('modal/v_hph_print_modal', $data);
+    }
+
+
+    function print_barcode_modal()
+    {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+                $id_inlet   = $this->input->post('id_inlet');
+                $data       = $this->input->post('data');
+                $desain_barcode  = $this->input->post('desain_barcode');
+
+                if(empty($desain_barcode)){
+                    throw new \Exception('Desain Barcode Harus dipilih !', 200);                
+                }else{
+
+                    if(empty($data)){
+                        throw new \Exception('Data Lot tidak ditemukan !', 200);
+                    }else{
+
+                        $inlet = $this->m_inlet->get_data_inlet_by_id($id_inlet);
+                        if(empty($inlet)){
+                            throw new \Exception('Data Inlet tidak ditemukan !', 200);
+                        }
+                        
+                        $data_print = $this->print_barcode2($desain_barcode,$data,$inlet);
+                        if(empty($data_print)){
+                            throw new \Exception('Data Print tidak ditemukan !', 500);
+                        }
+                        $callback = array('status' => 'success', 'message' => 'Print Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success', 'data_print' =>$data_print);
+                    }
+                }
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+
+    function print_barcode2($desain_barcode,$data_stock,$inlet)
+    {
+        $kode_mrp = $inlet->kode_mrp; 
+        $kode_k3l = $inlet->kode_k3l;
+        $desain_barcode = strtolower($desain_barcode);
+        $code = new Code\Code128New();
+        $this->prints->setView('print/'.$desain_barcode);
+        $data_print_array = array();
+        $data_qty2_jual = array();
+        for($a=0; $a<count($data_stock); $a++){
+            $get = $this->_module->get_stock_quant_by_id($data_stock[$a])->result();
+            foreach($get as $row){
+                $gen_code = $code->generate($row->lot, "", 60, "vertical");
+                $tanggal = date('Ymd', strtotime($row->create_date));
+                $data_print_array = array(
+                            'pattern' => $row->corak_remark,
+                            'isi_color' => !empty($row->warna_remark)? $row->warna_remark : '&nbsp' ,
+                            'isi_satuan_lebar' => 'WIDTH ('.$row->uom_lebar_jadi.')',
+                            'isi_lebar' => !empty($row->lebar_jadi)? $row->lebar_jadi : '&nbsp',
+                            'isi_satuan_qty1' => 'QTY ['.$row->uom_jual.']',
+                            'isi_qty1' => round($row->qty_jual,2),
+                            'barcode_id' => $row->lot,
+                            'tanggal_buat' => $tanggal,
+                            'no_pack_brc' => $kode_mrp,
+                            'barcode' => $gen_code,
+                            'k3l' => $kode_k3l
+                );
+                if(!empty((double)$row->qty2_jual)){
+                    $data_qty2_jual = array('isi_satuan_qty2' => 'QTY2 ['.$row->uom2_jual.']', 'isi_qty2' => round($row->qty2_jual,2));
+                    $data_print_array = array_merge($data_print_array,$data_qty2_jual);
+                }
+                // break;
+                $this->prints->addDatas($data_print_array);
+            }
+        }
+     
+        return $this->prints->generate();
+    }
+
+    function cek_column_excel($index)
+    {
+        $max    = 1000; 
+        $result = 'A';
+        for ($l = 'A', $i = 1; $i < $max; $l++, $i++) {
+            if($i == $index){
+                $result = $l;
+                break;
+            }
+        }
+        return $result;
+    }
+
+
+    public function export_excel()
+	{
+		
+		$this->load->library('excel');
+		ob_start();
+		$tgldari        = $this->input->post('tgldari');
+		$tglsampai      = $this->input->post('tglsampai');
+		$nama_produk    = $this->input->post('nama_produk');
+		$mg             = $this->input->post('mg');
+		$lot            = $this->input->post('lot');
+		$sales_group    = $this->input->post('sales_group');
+		$corak_remark   = $this->input->post('corak_remark');
+		$warna_remark   = $this->input->post('warna_remark');
+		$lot_gjd        = $this->input->post('lot_gjd');
+		$status         = $this->input->post('status');
+		$checkTgl       = $this->input->post('checkTgl');
+
+		$tgldari_capt  = $this->input->post('tgldari');
+		$tglsampai_capt = $this->input->post('tglsampai');
+
+		// get location by jenis (HPH=stock, Waste)
+
+		$object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+
+        $object->createSheet();
+		$sheet1 = $object->setActiveSheetIndex(0);
+		$sheet1->setTitle('LIST KP');
+		
+		// $sheet2 = $object->setActiveSheetIndex(1);
+		// $sheet2->setTitle('LIST MG');
+
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Laporan Inlet');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+		//$object->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+	
+ 		//bold huruf
+		$object->getActiveSheet()->getStyle("A1:AC4")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+		$styleArrayColor = array(
+			'font'  => array(
+				'bold'  => true,
+				'color' => array('rgb' => 'FF0000'),
+			),
+			'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			)
+	  	);	
+
+
+		// header table
+    	$table_head_columns  = array('No', 'KP','Tgl Inlet','MG','Marketing','Nama Produk','Corak Remark','Warna Remark','Lebar Jadi','Satuan Lbr Jadi','Status','Target','Belum Proses','Sudah Proses','Grade A','Grade B','Grade C','Grade F');
+        $table_head_columns2 = array("Mtr","Kg","Pcs");
+
+    	$column = 0;
+        $column_index = 1;
+    	$merge  = TRUE;
+    	foreach ($table_head_columns as $field) {
+            
+            if($column <= 10){
+                $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $field);  
+                $object->getActiveSheet()->mergeCellsByColumnAndRow($column, 3, $column, 4);
+                $column++;
+            	$column_index++;
+            }else if($column > 10){
+                if($column > 15){
+                    $column_index_plus = 2;
+                }else{
+                    $column_index_plus = 1;
+                }
+                $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $field);  
+                $object->getActiveSheet()->mergeCells($this->cek_column_excel($column_index).'3:'.$this->cek_column_excel($column_index+$column_index_plus).'3');// merge cell 
+                $object->getActiveSheet()->getStyle($this->cek_column_excel($column_index).'3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+                $column2 = $column;
+                $loop    = 1;
+                foreach ($table_head_columns2 as $field2){
+                    $object->getActiveSheet()->setCellValueByColumnAndRow($column2, 4, $field2);  
+                    $object->getActiveSheet()->getStyle($this->cek_column_excel($column2).'4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+                    $object->getActiveSheet()->getStyle($this->cek_column_excel($column2).'4')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
+                    $column2 = $column2+1;
+                    $loop ++;
+                    if($loop ==  3 AND $column2 < 18){
+                        break;
+                    }
+                }
+        		$column=$column2;
+            	$column_index = $column2 + 1;
+                
+            }else{
+                $column++;
+                $column_index++;
+            }
+
+            $object->getActiveSheet()->getStyle($this->cek_column_excel($column).'3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+            $object->getActiveSheet()->getStyle($this->cek_column_excel($column).'3')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
+
+    	}
+
+    	// set lebar column header
+		$object->getActiveSheet()->getColumnDimension('A')->SetWidth(3);
+		$object->getActiveSheet()->getColumnDimension('B')->SetWidth(20);
+		$object->getActiveSheet()->getColumnDimension('C')->SetWidth(20);
+		$object->getActiveSheet()->getColumnDimension('D')->SetWidth(15);
+		$object->getActiveSheet()->getColumnDimension('E')->SetWidth(15);
+		$object->getActiveSheet()->getColumnDimension('F')->SetWidth(40);
+		$object->getActiveSheet()->getColumnDimension('G')->SetWidth(30);
+		$object->getActiveSheet()->getColumnDimension('H')->SetWidth(15);
+		$object->getActiveSheet()->getColumnDimension('I')->SetWidth(8);
+		$object->getActiveSheet()->getColumnDimension('J')->SetWidth(8);
+        //TARGET
+		$object->getActiveSheet()->getColumnDimension('K')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('L')->SetWidth(10);
+        //BELUM PROSES
+		$object->getActiveSheet()->getColumnDimension('M')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('N')->SetWidth(10);
+        // SUDAH PROSES
+		$object->getActiveSheet()->getColumnDimension('O')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('P')->SetWidth(10);
+        // GRADE A
+		$object->getActiveSheet()->getColumnDimension('Q')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('R')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('S')->SetWidth(10);
+        // GRADE B
+		$object->getActiveSheet()->getColumnDimension('T')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('U')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('V')->SetWidth(10);
+        // GRADE C
+		$object->getActiveSheet()->getColumnDimension('W')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('X')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('Y')->SetWidth(10);
+        // GRADE F
+		$object->getActiveSheet()->getColumnDimension('Z')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('AA')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('AB')->SetWidth(10);
+
+        $checkTgl       = $this->input->post('checkTgl');
+        $tgldari        = $this->input->post('tgldari');
+		$tglsampai      = $this->input->post('tglsampai');
+		$nama_produk    = $this->input->post('nama_produk');
+		$mg             = $this->input->post('mg');
+		$lot            = $this->input->post('lot');
+		$sales_group    = $this->input->post('sales_group');
+		$corak_remark   = $this->input->post('corak_remark');
+		$warna_remark   = $this->input->post('warna_remark');
+		$lot_gjd        = $this->input->post('lot_gjd');
+		$status         = $this->input->post('status');
+
+    	// tbody
+		$items = $this->m_inlet->get_data_inlet_excel($checkTgl,$tgldari,$tglsampai,$nama_produk,$mg,$lot,$sales_group,$corak_remark,$warna_remark,$lot_gjd,$status);
+		$no    = 1;
+		$rowCount = 5;
+    	foreach ($items as $row) {
+
+                $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($no++));
+                $object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->lot);
+                $object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->tanggal);
+                $object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->kode_mrp);
+                $object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->nama_sales_group);
+                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->nama_produk);
+                $object->getActiveSheet()->SetCellValue('G'.$rowCount, $row->corak_remark);
+                $object->getActiveSheet()->SetCellValue('H'.$rowCount, $row->warna_remark);
+                $object->getActiveSheet()->SetCellValue('I'.$rowCount, $row->lebar_jadi);
+                $object->getActiveSheet()->SetCellValue('J'.$rowCount, $row->uom_lebar_jadi);
+                $object->getActiveSheet()->SetCellValue('K'.$rowCount, $row->nama_status);
+                $object->getActiveSheet()->SetCellValue('L'.$rowCount, $row->qty);
+                $object->getActiveSheet()->SetCellValue('M'.$rowCount, $row->qty2);
+                $object->getActiveSheet()->SetCellValue('N'.$rowCount, $row->qty_ready);
+                $object->getActiveSheet()->SetCellValue('O'.$rowCount, $row->qty2_ready);
+                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $row->hasil_qty);
+                $object->getActiveSheet()->SetCellValue('Q'.$rowCount, $row->hasil_qty2);
+
+                $object->getActiveSheet()->SetCellValue('R'.$rowCount, $row->qty_gradeA);
+                $object->getActiveSheet()->SetCellValue('S'.$rowCount, $row->qty2_gradeA);
+                $object->getActiveSheet()->SetCellValue('T'.$rowCount, $row->pcs_gradeA);
+                $object->getActiveSheet()->SetCellValue('U'.$rowCount, $row->qty_gradeB);
+                $object->getActiveSheet()->SetCellValue('V'.$rowCount, $row->qty2_gradeB);
+                $object->getActiveSheet()->SetCellValue('W'.$rowCount, $row->pcs_gradeB);
+                $object->getActiveSheet()->SetCellValue('X'.$rowCount, $row->qty_gradeC);
+                $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $row->qty2_gradeC);
+                $object->getActiveSheet()->SetCellValue('Z'.$rowCount, $row->pcs_gradeC);
+                $object->getActiveSheet()->SetCellValue('AA'.$rowCount, $row->qty_gradeF);
+                $object->getActiveSheet()->SetCellValue('AB'.$rowCount, $row->qty2_gradeF);
+                $object->getActiveSheet()->SetCellValue('AC'.$rowCount, $row->pcs_gradeF);
+						
+			    $rowCount++;
+
+    	}
+
+
+        $sheet2 = $object->setActiveSheetIndex(1);
+		$sheet2->setTitle('LIST MG');
+
+        // SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1', 'Laporan Inlet');
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+	
+ 		//bold huruf
+		$object->getActiveSheet()->getStyle("A1:AC3")->getFont()->setBold(true);
+
+        $table_head_columns  = array('No', 'No Greige Out', 'JML Lot GO', 'MG Gudang Jadi','JML Lot INLET', 'Selisih');
+    	$column = 0;
+        $column_index = 1;
+    	$merge  = TRUE;
+    	foreach ($table_head_columns as $field) {
+            
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 3, $field);  
+
+            $object->getActiveSheet()->getStyle($this->cek_column_excel($column).'3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER );
+            $object->getActiveSheet()->getStyle($this->cek_column_excel($column).'3')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER );
+
+            $column++;
+    	}
+
+        $object->getActiveSheet()->getColumnDimension('A')->SetWidth(3);
+		$object->getActiveSheet()->getColumnDimension('B')->SetWidth(15);
+		$object->getActiveSheet()->getColumnDimension('C')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('D')->SetWidth(15);
+		$object->getActiveSheet()->getColumnDimension('E')->SetWidth(10);
+		$object->getActiveSheet()->getColumnDimension('F')->SetWidth(10);
+
+        // tbody
+		$items = $this->m_inlet->get_data_inlet_excel_group($checkTgl,$tgldari,$tglsampai,$nama_produk,$mg,$lot,$sales_group,$corak_remark,$warna_remark,$lot_gjd,$status);
+		$no    = 1;
+		$rowCount = 4;
+    	foreach ($items as $row) {
+
+                $object->getActiveSheet()->SetCellValue('A'.$rowCount, ($no++));
+                $object->getActiveSheet()->SetCellValue('B'.$rowCount, $row->no_go);
+                $object->getActiveSheet()->SetCellValue('C'.$rowCount, $row->total_lot_go);
+                $object->getActiveSheet()->SetCellValue('D'.$rowCount, $row->kode_mrp);
+                $object->getActiveSheet()->SetCellValue('E'.$rowCount, $row->total_lot_inlet);
+                $object->getActiveSheet()->SetCellValue('F'.$rowCount, $row->selisih);
+			    $rowCount++;
+
+    	}
+
+
+		$object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Laporan Inlet.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+			
+	}
 
 }

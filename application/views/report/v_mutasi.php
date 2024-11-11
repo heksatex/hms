@@ -135,7 +135,7 @@
                       <input type="radio" id="view" name="view[]" value="DetailProduk">
                       <label for="detail">Detail Produk</label>
                     </div>
-                    <div class="col-xs-6 col-sm-3 col-md-3">
+                    <div class="col-xs-6 col-sm-3 col-md-3" style="display: none;"  id="dd_show">
                       <input type="radio" id="view" name="view[]" value="DetailLotDatar">
                       <label for="detail">Detail Datar</label>
                     </div>
@@ -461,6 +461,18 @@
       }
   });
 
+  $("#departemen").on('select2:unselect', function (e) {
+      $("#dd_show").hide();
+  });
+
+  $("#departemen").on('change', function (e) {
+      if($(this).val() == 'GRG'){
+        $("#dd_show").show();
+      }else{
+        $("#dd_show").hide();
+      }
+  });
+
   $('#btn-excel').click(function(){
 
     tanggal    = $('#tanggal').val();
@@ -683,7 +695,7 @@
                           $('#pagination2').html(value.pagination);
                         }
                       });
-                    }else if(data.format == '2'){
+                    }else if(data.format == '2' || data.format == '3'){
                       $.each(data.result,function(key,value){
 
                         create_table_format2('example1',data.view,value.head_table1,value.record,value.field_view,departemen);
@@ -955,7 +967,8 @@
                               no_in++;
 
                               // info total++ in
-                              value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              // value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              value_in_lot = value[in_lot] !== null ? parseInt(value[in_lot]) : 0;
                               value_in_qty1 = value[in_qty1] !== null ? parseFloat(value[in_qty1])  : 0;
                               value_in_qty2 = value[in_qty2] !== null ? parseFloat(value[in_qty2])  : 0 ;
                               value_in_opname = value[in_opname] !== null ? parseFloat(value[in_opname])  : 0 ;
@@ -1054,7 +1067,8 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
                               no_out++;
 
-                              value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              // value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              value_out_lot = value[out_lot] !== null   ? parseInt(value[out_lot]) : 0;
                               value_out_qty1 = value[out_qty1] !== null ? parseFloat(value[out_qty1])  : 0;
                               value_out_qty2 = value[out_qty2] !== null ? parseFloat(value[out_qty2])  : 0 ;
                               value_out_opname = value[out_opname] !== null ? parseFloat(value[out_opname])  : 0 ;
@@ -1511,7 +1525,8 @@
                               no_in++;
 
                               // info total++ in
-                              value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              // value_in_lot = Number.isInteger(value[in_lot]) ? parseInt(value[in_lot]) : 0;
+                              value_in_lot  = value[in_lot] !== null ? parseInt(value[in_lot]) : 0;
                               value_in_qty1 = value[in_qty1] !== null ? parseFloat(value[in_qty1])  : 0;
                               value_in_qty2 = value[in_qty2] !== null ? parseFloat(value[in_qty2])  : 0 ;
                               value_in_opname = value[in_opname] !== null ? parseFloat(value[in_opname])  : 0 ;
@@ -1644,7 +1659,8 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
                               no_out++;
 
-                              value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              // value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
+                              value_out_lot = value[out_lot] !== null ? parseInt(value[out_lot]) : 0;
                               value_out_qty1 = value[out_qty1] !== null ? parseFloat(value[out_qty1])  : 0;
                               value_out_qty2 = value[out_qty2] !== null ? parseFloat(value[out_qty2])  : 0 ;
                               value_out_opname = value[out_opname] !== null ? parseFloat(value[out_opname])  : 0 ;
@@ -2125,13 +2141,15 @@
             });
 
             // consume
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_proses)+"</td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
-            // if(view == "Global" || view == "DetailProduk" ){
-            // }
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty1)+" "+value.con_qty1_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty2)+" "+value.con_qty2_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
+            if(departement != 'DF2'){
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_proses)+"</td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_lot)+"</td>";
+              // if(view == "Global" || view == "DetailProduk" ){
+              // }
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty1)+" "+value.con_qty1_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty2)+" "+value.con_qty2_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.con_qty_opname)+" "+value.con_qty_opname_uom+" </td>";
+            }
 
             // ADJ IN 
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_proses)+"</td>";
@@ -2142,16 +2160,18 @@
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty2)+" "+value.adj_in_qty2_uom+" </td>";
             row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+" </td>";
 
-            // produce
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_proses)+"</td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
-            // if(view == "Global" || view == "DetailProduk" ){
-            // }
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty1)+" "+value.prod_qty1_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty2)+" "+value.prod_qty2_uom+" </td>";
-            row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
+            if(departement != 'DF2'){
+              // produce
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_proses)+"</td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_lot)+"</td>";
+              // if(view == "Global" || view == "DetailProduk" ){
+              // }
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty1)+" "+value.prod_qty1_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty2)+" "+value.prod_qty2_uom+" </td>";
+              row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
+            }
 
-            if(view == "DetailLot" && (departement == 'FIN' || departemen == 'DF'))
+            if(view == "DetailLot" && (departement == 'FIN' || departemen == 'DF' || departement == 'DF2'))
             // process
             $.each(field_view, function(a,b){
                   for (var i = 0, l = b.in.length; i<l; i++){
