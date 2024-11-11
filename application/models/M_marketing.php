@@ -1425,4 +1425,327 @@ class m_marketing extends CI_Model
 		$query = $this->db->get();
 		return $query->result();
 	}
+
+
+	var $column_order13 = array(null,'cat_id','corak','warna','lebar_Jadi','qty_jual','qty2_jual','jumlah_lot');
+	var $column_search13= array('cat_id','corak','warna','lebar_Jadi','qty_jual','qty2_jual','jumlah_lot');
+	var $order13  	  = array('cat_id' => 'asc','corak' => 'asc','warna' => 'asc');
+	var $table13      = "ready_goods_history";
+
+	function get_last_date_history()
+	{
+		// get last tgl
+		$this->db->SELECT('tanggal');
+		$this->db->from('ready_goods_history');
+		$this->db->group_by('date_format(tanggal, "%Y-%m-%d")');
+		$this->db->order_by('date_format(tanggal, "%Y-%m-%d") desc');
+		$this->db->limit(1);
+		$query = $this->db->get();
+		$resultq = $query->row();
+		return	$resultq->tanggal ?? '';
+
+	}
+
+	private function get_query_13()
+    {	
+		
+		$tanggal_history = $this->get_last_date_history();
+		
+		$this->db->SELECT('*');
+		$this->db->from($this->table13);
+		$this->db->where('tanggal',$tanggal_history);
+        return;
+    }
+
+    private function _get_datatables_query13()
+	{
+		
+        $this->get_query_13();
+
+        $i = 0;
+		foreach ($this->column_search13 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search13) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order13[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order13))
+		{
+			$order = $this->order13;
+			foreach($order as $key => $value){
+				$this->db->order_by($key, $value);
+			}
+		}
+	}
+
+	function get_datatables13()
+	{
+		$this->_get_datatables_query13();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered13()
+	{
+		$this->_get_datatables_query13();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all13()
+	{
+		$this->get_query_13();
+		return $this->db->count_all_results();
+	} 
+
+	public function count_all_no_group13()
+	{
+		$this->get_query_13();
+		return $this->db->count_all_results();
+	} 
+
+
+	public function get_data_ready_goods_category()
+	{
+		$this->get_query_13();
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	public function get_query_13_print($category)
+    {	
+		
+		$tanggal_history = $this->get_query_13();
+		$this->db->where('cat_id',$category);
+		$query = $this->db->get();
+		return $query->result();
+    }
+
+
+	function get_last_date_history_2()
+	{
+		// get last tgl
+		$this->db->SELECT('tanggal');
+		$this->db->from('ready_goods_history');
+		$this->db->group_by('date_format(tanggal, "%Y-%m-%d")');
+		$this->db->order_by('date_format(tanggal, "%Y-%m-%d") desc');
+		$this->db->limit(2,1);
+		$query = $this->db->get();
+		$resultq = $query->row();
+		return	$resultq->tanggal ?? '';
+	}
+
+	function get_data_all_13($tanggal)
+	{
+		$this->db->SELECT('*');
+		$this->db->from($this->table13);
+		$this->db->where('tanggal',$tanggal);
+		$this->db->order_by('cat_id','asc');
+		$this->db->order_by('corak','asc');
+		$this->db->order_by('warna','asc');
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+
+	
+    function insert_data_last_date($data)
+    {
+        try{
+            $this->db->insert_batch('ready_goods_history_changed', $data);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        }catch (Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
+
+	function delete_table()
+	{
+ 		$this->db->from('ready_goods_history_changed');
+		$this->db->truncate();
+	}
+
+	function cek_data_in_table($corak,$warna,$lebar_jadi,$uom_lebar_jadi)
+	{
+		$this->db->where('corak',$corak);
+		$this->db->where('warna',$warna);
+		$this->db->where('lebar_Jadi',$lebar_jadi);
+		$this->db->where('uom_lebar_jadi',$uom_lebar_jadi);
+ 		$this->db->from('ready_goods_history_changed');
+		$query = $this->db->get();
+		return $query->row();
+
+	}
+
+	function update_table_changed($data,$corak,$warna,$lebar_jadi,$uom_lebar_jadi)
+	{
+		$this->db->where('corak',$corak);
+		$this->db->where('warna',$warna);
+		$this->db->where('lebar_Jadi',$lebar_jadi);
+		$this->db->where('uom_lebar_jadi',$uom_lebar_jadi);
+		$this->db->update('ready_goods_history_changed',$data);
+	}
+
+	function insert_table_changed($data) 
+	{
+        $this->db->insert('ready_goods_history_changed', $data);
+	}
+
+
+	function get_data_table_changed_all($where)
+	{
+		foreach($where as $key => $value){
+			if (is_array($value)) {
+                $this->db->where($key, [$value]);
+            } else {
+                $this->db->where($key, $value);
+            }
+		}
+		$this->db->select('*');
+		$this->db->from('ready_goods_history_changed');
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function update_table_changed2($id,$data)
+	{	
+		$this->db->where('id',$id);
+		$this->db->update('ready_goods_history_changed',$data);
+	}
+
+
+	
+	var $column_order14 = array(null,'cat_id','corak','warna','lebar_Jadi');
+	var $column_search14= array('cat_id','corak','warna','lebar_Jadi');
+	var $order14  	  = array('cat_id' => 'asc','corak' => 'asc','warna' => 'asc');
+	var $table14      = "ready_goods_history_changed";
+
+
+	private function get_query_14()
+    {	
+		// remove
+		$this->db->select('id,cat_id,corak, warna, lebar_Jadi, uom_lebar_jadi, action');
+		$this->db->from($this->table14);
+		$this->db->where('action','REMOVE');
+		$query1 = $this->db->get_compiled_select();
+
+		$this->db->select('id, cat_id_last as cat_id, corak_last as corak, warna_last as warna, lebar_Jadi_last as lebar_Jadi, uom_lebar_jadi_last as uom_lebar_jadi, action');
+		$this->db->from($this->table14);
+		$this->db->where('action','ADD');
+		$query2 = $this->db->get_compiled_select();
+		
+		$this->db->SELECT('*');
+		$this->db->FROM('('.$query1 . ' UNION ' . $query2 .' ) as unionTable');
+		
+        return;
+    }
+
+    private function _get_datatables_query14()
+	{
+		
+        $this->get_query_14();
+
+        $i = 0;
+		foreach ($this->column_search14 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search14) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order14[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order14))
+		{
+			$order = $this->order14;
+			foreach($order as $key => $value){
+				$this->db->order_by($key, $value);
+			}
+		}
+	}
+
+	function get_datatables14()
+	{
+		$this->_get_datatables_query14();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered14()
+	{
+		$this->_get_datatables_query14();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all14()
+	{
+		$this->get_query_14();
+		return $this->db->count_all_results();
+	} 
+
+	public function get_data_changed_all($id)
+	{
+		$this->get_query_14();
+		$this->db->where('id',$id);
+		$query = $this->db->get();
+		return $query->row();
+	}
+
+	public function goods_to_push()
+	{
+		$this->db->where('date(report_date) = "2024-11-04"');
+		$this->db->where('lokasi', 'GRG/Stock');
+		$this->db->like('corak','J-','after');
+		$this->db->where('category','90d');
+		// $this->db->where('customer_name <> ""');
+		$this->db->select('corak');
+		$this->db->from('goods_to_push');
+		$this->db->order_by('corak','asc');
+		$query = $this->db->get();
+		return $query->result();
+	}
 }

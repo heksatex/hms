@@ -53,59 +53,32 @@
       <!--  box content -->
       <div class="box ">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>View Product Ready Goods</b></h3>
+          <h3 class="box-title"><b>Ready Goods Category</b></h3>
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
-                  <div class="row">
-                      <div class=" col-md-8">
-                        <div class="col-md-12">
-                          <div class="col-md-">
-                            <div class="form-group">
-                                <div class="col-md-12 col-xs-12">
-                                    <div class="col-xs-4"><label>Total Lot</label></div>
-                                    <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
-                                </div>
+                    <div class="col-md-12">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Total Lot</label></div>
+                                <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
                             </div>
+                            <div class="col-md-12 col-xs-12">
+                                <div class="col-xs-4"><label>Data Per Tanggal </label></div>
+                                <div class="col-xs-8"  id="date_history"><label>:</label> ? </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="col-md-8 col-lg-8">
+                          <div class="col-sm-4 col-md-4 col-lg-4">
+                            <button type="button" class="btn btn-sm btn-default" name="cetak-kategori" id="cetak-kategori" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-print"></i> Print</button>
+                            <button type="button" class="btn btn-sm btn-default" name="cetak-tag" id="cetak-tag" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-print"></i> Print Label</button>
                           </div>
-                        </div>
-                        <div class="col-md-12">
-                          <div class="col-md-12 col-lg-12">
-                              <div class="col-sm-3 col-md-3 col-lg-3">
-                                <select class="form-control input-sm" name="cmbSearch" id="cmbSearch">
-                                  <option value="uom_jual">Uom1</option>
-                                </select>
-                              </div>
-                              <div id='f_search'>
-                                <div class="col-sm-3 col-md-3 col-lg-3 " >
-                                  <select class="form-control input-sm" name="cmbOperator" id="cmbOperator">
-                                    <option value=">">Greather  than</option>
-                                    <option value="<">Less than</option>
-                                  </select>
-                                </div>
-                                <div class="col-sm-2 col-md-2 col-lg-2">
-                                  <input type="number" class="form-control input-sm" id="search_field" name="search_field" onkeypress="return isNumberKey(event)" onkeydown=" event_input(event)" >
-                                </div>
-                              </div>
-                              <div class="col-sm-4 col-md-4 col-lg-4">
-                                <button type="button" class="btn btn-sm btn-default btn-flat" id="btn-search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <span class="fa fa-search" ></span> Proses</button>
-                                <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
-                              </div>
-                          </div>   
-                        
-                        </div>
-                      </div>
-                      <div class="col-md-4">
-                            <div class="col-sm-12 col-md-12 col-lg-12">
-                            <small><b>*Kondisi</b>
-                                <li>Umur > 90 Hari</li>
-                                <li>Lokasi tidak di (XPD, PORT, 6Z.01.Z, GJD4)</li>
-                                <li>Kain Hasil Jacquard</li>
-                                <li>Grade A</li>
-                            </small>
-                            </div>
-                      </div>
-                  </div>
+                      </div>   
+                    </div>
                 </form>
                 &nbsp
                 <div class="row">
@@ -116,12 +89,14 @@
                                 <thead>                          
                                     <tr>
                                         <th class="style width-50">No.</th>
-                                        <th class="style ">Corak</th>
-                                        <th class="style ">Jml Warna</th>
-                                        <th class="style ">Lebar Jadi</th>
-                                        <th class="style ">Uom1</th>
-                                        <th class="style ">Uom2</th>
-                                        <th class="style ws">Gl / Lot</th>
+                                        <th class="style ">Category</th>
+                                        <th class="style ">Article</th>
+                                        <th class="style ">Color</th>
+                                        <th class="style ">Size</th>
+                                        <th class="style ">Qty</th>
+                                        <th class="style ">Qty2</th>
+                                        <th class="style ">Gl/Lot</th>
+                                        <th class="style "></th>
                                     </tr>
                                 </thead>
                             </table>
@@ -165,7 +140,7 @@
                 [10, 50, 100, 500, 'All']
             ],
             "ajax": {
-                "url": "<?php echo site_url('report/marketing/get_data_ready_goods_group')?>",
+                "url": "<?php echo site_url('report/marketing/get_data_ready_goods_category')?>",
                 "type": "POST",
                  "data": function ( data ) {
                     data.search_field = $('#search_field').val();
@@ -180,19 +155,27 @@
                 "orderable": false, 
               },
               { 
-                "targets": [2,3,4,5,6], 
+                "targets": [4,5], 
                 "className":"text-right nowrap",
               },
               { 
                 "targets": [1], 
                 // "className":"nowrap",
               },
+              {
+                  "targets" : 8,
+                  'checkboxes': {
+                        'selectRow': true
+                  },
+              },
             ],
             "drawCallback": function( settings, start, end, max, total, pre ) {  
                 // console.log(this.fnSettings().json); /* for json response you can use it also*/ 
                 // console.log(settings.json.total_lot); 
                 let total_record = settings.json.total_lot; // total glpcs
+                let date_history = settings.json.date_history; // date_history
                 $('#total_items').html('<label>:</label> '+ formatNumber(total_record) + ' Lot' )
+                $('#date_history').html('<label>:</label> '+ date_history)
             },
         });
 
@@ -224,6 +207,70 @@
         if (charCode > 31 && (charCode < 48 || charCode > 57))
             return false;
         return true;
+    }
+
+
+    $("#cetak-kategori").on("click", function () {
+      let url = "<?= base_url("report/marketing/print_category") ?>";
+      var win = window.open(url, "width=1000,height=700");
+      setTimeout(function () {
+          win.document.close();
+          // win.print();
+          // win.close();
+      }, 500);
+    });
+
+    $(document).on('click','#cetak-tag',function(e){
+            e.preventDefault();
+
+            var myCheckboxes = table.column(8).checkboxes.selected();
+            var myCheckboxes_arr = new Array();
+
+            $.each(myCheckboxes, function(index, rowId){        
+                myCheckboxes_arr.push({rowId});
+            });
+
+            if (myCheckboxes.length === 0) {
+                alert_notify('fa fa-warning', 'Pilih terlebih dahulu yang akan di print !', 'danger', function() {});
+            }else{
+                 $.ajax({
+                    type     : "POST",
+                    dataType : "json",
+                    url :'<?php echo base_url('report/marketing/print_category_tag')?>',
+                    beforeSend: function(e) {
+                        if(e && e.overrideMimeType) {
+                            e.overrideMimeType("application/json;charset=UTF-8");
+                        }                  
+                        please_wait(function(){});
+                    },
+                    data: { changed:'false',
+                          data_print:JSON.stringify(myCheckboxes_arr),
+                    },
+                    success: function(data){
+                        var divp = document.getElementById('printed');
+                        divp.innerHTML = data.data_print;
+                        unblockUI( function() {
+                                setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){ 
+                                        print_voucher();
+                                });},1000); 
+                        });
+                            
+                    },error: function (xhr, ajaxOptions, thrownError) {
+                        alert(xhr.responseText)
+                        unblockUI( function() {});
+                    }
+                });
+
+               
+            }
+    });
+
+     // load new page print
+    function print_voucher() {
+        var win = window.open();
+        win.document.write($("#printed").html());
+        win.document.close();
+        setTimeout(function(){ win.print(); win.close();}, 200);
     }
 
     $('#btn-excel').click(function(){

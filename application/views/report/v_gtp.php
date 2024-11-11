@@ -44,7 +44,12 @@
                                                 <label class="form-label required" id="label_filter_tanggal">Report Date</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
-                                                <input type="date" class="form-control" name="report_date" id="report_date" value="<?= date("Y-m-d") ?>" required>
+                                                <select class="form-control select2" name="report_date" id="report_date" required>
+                                                    <option></option>
+                                                    <?php foreach ($dates as $key => $value) {?>
+                                                    <<option value="<?=$value->dt ?>"><?=$value->dt ?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -92,7 +97,7 @@
                                 <?php
                                 foreach ($sales as $key => $value) {
                                     ?>
-                                                                                                                                            <option value="<?= $value->nama_sales_group ?>"><?= $value->nama_sales_group ?></option>
+                                                                                                                                                <option value="<?= $value->nama_sales_group ?>"><?= $value->nama_sales_group ?></option>
                                     <?php
                                 }
                                 ?>
@@ -111,15 +116,13 @@
                                         <thead>
                                             <tr>
                                                 <th></th>
-                                                <th>Sales</th>
-                                                <th>Report Date</th>
                                                 <th>Corak</th>
-                                                <th>Customer</th>
                                                 <th>Jml Warna</th>
                                                 <th>Jml LOT</th>
                                                 <th>Qty / Uom</th>
                                                 <th>Qty2 / Uom2</th>
-                                                <th>Kategori</th>
+                                                <th>Lebar</th>
+                                                <th>Buyer</th>
                                             </tr>
                                         </thead>
                                     </table>
@@ -155,7 +158,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 7, 8],
+                            "targets": [0],
                             "orderable": false
                         }
                     ],
@@ -192,7 +195,7 @@
                 });
                 $(".select2").select2({
                     allowClear: true,
-                    placeholder: "Sales"
+                    placeholder: "Pilih"
                 });
                 const formrd = document.forms.namedItem("form-gtp");
                 formrd.addEventListener(

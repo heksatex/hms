@@ -24,8 +24,11 @@ class Goodstopush extends MY_Controller {
     public function index() {
         $data['id_dept'] = 'RGTP';
         $sales = new $this->m_gtp;
+        $dates = clone $sales;
         $data['sales'] = $sales->setTables("mst_sales_group")->setOrder(["nama_sales_group" => "asc"])->setWheres(["view" => "1"])->setSelects(["nama_sales_group"])->getData();
-
+        $_POST["length"] = 10;
+        $_POST["start"] = 0;
+        $data["dates"] = $dates->setSelects(["DATE(report_date) as dt"])->setGroups(["DATE(report_date)"])->setOrder(["dt" => "DESC"])->getData();
         $this->load->view('report/v_gtp', $data);
     }
 
@@ -56,7 +59,13 @@ class Goodstopush extends MY_Controller {
             $data["date"] = $this->input->post("date");
             $data["sales"] = $this->input->post("sales");
             $data["lokasi"] = $this->input->post("lokasi");
-            $content = $this->load->view("report/v_gtp_detail_data", $data, true);
+            $data["kategori"] = $this->input->post("kategori");
+            if ($data["lokasi"] === "GRG/Stock") {
+                $content = $this->load->view("report/v_gtp_detail_data_grg", $data, true);
+            } else {
+                $content = $this->load->view("report/v_gtp_detail_data", $data, true);
+            }
+
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'success', "content" => $content)));
@@ -73,22 +82,24 @@ class Goodstopush extends MY_Controller {
             $report_date = $this->input->post("report_date");
             $data = array();
             $datas = new $this->m_gtp;
-            $list = $datas->setOrders([null, "nama_sales_group", "report_date", "corak", "customer_name", "jml_warna", "lot", null, null, "category"])
-                            ->setSearch(["corak", "customer_name"])->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $report_date]);
+            $list = $datas->setOrders([null, "corak", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name"])
+                            ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date]);
+            if ($sales !== "") {
+                $list->setWheres(["nama_sales_group" => $sales]);
+            }
             $no = $_POST['start'];
             foreach ($list->getData() as $key => $field) {
                 $no++;
                 $data [] = [
                     $no,
-                    $field->nama_sales_group,
-                    $field->report_date,
-                    "<a class='detail' href='#' data-sales='{$field->nama_sales_group}' data-date='{$field->report_date}' data-corak='{$field->corak}' data-lokasi='{$field->lokasi}'>{$field->corak}</a>",
-                    $field->customer_name,
+                    "<a class='detail' href='#' data-sales='{$field->nama_sales_group}' data-date='{$field->report_date}' "
+                    . "data-corak='{$field->corak}' data-lokasi='{$field->lokasi}' data-kategori='{$field->category}'>{$field->corak}</a>",
                     $field->jml_warna,
                     $field->lot,
                     $field->qty . ' ' . $field->uom,
                     $field->qty2 . ' ' . $field->uom2,
-                    $field->category,
+                    $field->lebar_jadi,
+                    $field->customer_name
                 ];
             }
             echo json_encode(array("draw" => $_POST['draw'],
@@ -111,35 +122,63 @@ class Goodstopush extends MY_Controller {
             $corak = $this->input->post("corak");
             $sales = $this->input->post("sales");
             $report_date = $this->input->post("report_date");
+            $date = date("Y-m-d", strtotime($report_date));
             $lokasi = $this->input->post("lokasi");
+            $kategori = $this->input->post("kategori");
             $data = array();
             $detail = new $this->m_gtp;
             $list = $detail->setTables('goods_to_push_detail')->setOrders([null, "kode_produk", "nama_produk", "lot", "nama_grade", null, null, null, null, "lokasi_fisik", "lebar_jadi"])
                     ->setSearch(["kode_produk", "nama_produk", "lot", "lokasi_fisik", "lebar_jadi"])
                     ->setOrder(['create_date' => 'desc'])
-                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $report_date,"lokasi"=>$lokasi]);
-            if ($lokasi === "GRG/Stock") {
-                $list->setWheres(["nama_produk"=>$corak]);
-            } else {
-                $list->setWheres(["corak_remark"=>$corak]);
+                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi]);
+            switch ($kategori) {
+                case "14d":
+                    $list->setWheres(["umur >=" => 14, "umur <=" => 30]);
+                    break;
+                case "30d":
+                    $list->setWheres(["umur >" => 30, "umur <=" => 90]);
+                    break;
+                case "90d":
+                    $list->setWheres(["umur >" => 90]);
+                    break;
             }
-//                    ->setWhereRaw("( nama_produk='{$corak}' or corak_remark = '{$corak}')");
             $no = $_POST['start'];
-            foreach ($list->getData() as $key => $field) {
-                $no++;
-                $data [] = [
-                    $no,
-                    $field->kode_produk,
-                    $field->nama_produk,
-                    $field->lot,
-                    $field->nama_grade,
-                    $field->qty . ' ' . $field->uom,
-                    $field->qty2 . ' ' . $field->uom2,
-                    $field->qty_jual . ' ' . $field->uom_jual,
-                    $field->qty2_jual . ' ' . $field->uom2_jual,
-                    $field->lokasi,
-                    $field->lebar_jadi,
-                ];
+            if ($lokasi === "GRG/Stock") {
+                $list->setWheres(["nama_produk" => $corak]);
+                foreach ($list->getData() as $key => $field) {
+                    $no++;
+                    $data [] = [
+                        $no,
+                        $field->nama_produk,
+                        $field->lot,
+                        $field->nama_grade,
+                        $field->qty . ' ' . $field->uom,
+                        $field->qty2 . ' ' . $field->uom2,
+                        $field->lokasi_fisik,
+                        $field->sales_order,
+                        $field->customer_name,
+                        $field->umur
+                    ];
+                }
+            } else {
+                $list->setWheres(["corak_remark" => $corak]);
+                foreach ($list->getData() as $key => $field) {
+                    $no++;
+                    $data [] = [
+                        $no,
+                        $field->corak_remark,
+                        $field->warna_remark,
+                        $field->lot,
+                        $field->nama_grade,
+                        $field->qty_jual . ' ' . $field->uom_jual,
+                        $field->qty2_jual . ' ' . $field->uom2_jual,
+                        $field->lebar_jadi . ' ' . $field->uom_lebar_jadi,
+                        $field->lokasi_fisik,
+                        $field->sales_order,
+                        $field->customer_name,
+                        $field->umur
+                    ];
+                }
             }
             echo json_encode(array("draw" => $_POST['draw'],
                 "recordsTotal" => $list->getDataCountAll(),
