@@ -12,6 +12,7 @@ class Marketing extends MY_Controller
 		$this->is_loggedin();//cek apakah user sudah login
 		$this->load->model('_module');
 		$this->load->model('m_marketing');
+        $this->load->library('hanger');
 	}
 
     protected $val_form = array(
@@ -1029,13 +1030,7 @@ class Marketing extends MY_Controller
             
         }
 
-        // $tmp_tgl = "";
-        // $tgldari   = date("Y-m-d", strtotime($this->input->post('tgl_dari')));
-        // $tglsampai = date("Y-m-d", strtotime($this->input->post('tgl_sampai')));
-        // while ($tgldari <= $tglsampai) {
-        //     $tmp_tgl .= date('d F', strtotime($tgldari)).", ";
-        //     $tgldari = date('Y-m-d', strtotime('+1 days', strtotime($tgldari)));
-        // }
+        
         $callback  = array('status'=>'success', 'result'=>$data_stock_history, 'periode'=>$tmp_tgl);
         echo json_encode($callback);
 
@@ -1500,6 +1495,464 @@ class Marketing extends MY_Controller
 		);
 		
 		die(json_encode($response));
+
+    }
+
+
+    function readygoodscategory()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $this->load->view('report/v_marketing_view_ready_goods_category', $data);
+    }
+
+
+    function get_data_ready_goods_category()
+    {
+  
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+            $list = $this->m_marketing->get_datatables13();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->cat_id;
+                $row[] = $field->corak;
+                $row[] = $field->warna;
+                $row[] = $field->lebar_Jadi." ".$field->uom_lebar_jadi;
+                $row[] = $field->qty_jual.' '.$field->uom_jual;
+                $row[] = $field->qty2_jual.' '.$field->uom2_jual;
+                $row[] = $field->jumlah_lot;
+                $row[] = $field->corak.",".$field->warna.",".$field->lebar_Jadi." ".$field->uom_lebar_jadi;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all13(),
+                "recordsFiltered" => $this->m_marketing->count_filtered13(),
+                "data" => $data,
+                "total_lot"=>$this->m_marketing->count_all_no_group13(),
+                "date_history"=>$this->m_marketing->get_last_date_history()
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        } 
+        
+    }
+
+    function get_data_ready_goods_category_changed()
+    {
+        if(isset($_POST['start']) && isset($_POST['draw'])){
+
+            // delete table
+            $this->m_marketing->delete_table();
+            // get_past 2 tanggal
+            $limit = '1,2';
+            $past_date = $this->m_marketing->get_last_date_history_2();
+            $tmp_insert = [];
+            $get_data_ = $this->m_marketing->get_data_all_13($past_date);
+            foreach($get_data_ as $val2){
+                $tmp_insert[] = array(
+                            'tanggal'       => $val2->tanggal,
+                            'cat_id'        => $val2->cat_id,
+                            'corak'         => $val2->corak,
+                            'warna'         => $val2->warna,
+                            'lebar_Jadi'    => $val2->lebar_Jadi,
+                            'uom_lebar_jadi'=> $val2->uom_lebar_jadi,
+                );
+            }
+
+            if($tmp_insert){
+                $this->m_marketing->insert_data_last_date($tmp_insert);
+            }
+
+            $tmp_update = array();
+            $tmp_insert2 = array();
+            $where_update = array();
+            // get date last
+            $last_date = $this->m_marketing->get_last_date_history();
+            $get_data2_ = $this->m_marketing->get_data_all_13($last_date);
+            foreach($get_data2_ as $pd){
+
+                // cek data in table
+                $cek_dt = $this->m_marketing->cek_data_in_table($pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+                if($cek_dt){// update
+                    $tmp_update = array(
+                                'cat_id_last'     =>$pd->cat_id,
+                                'corak_last'      =>$pd->corak,
+                                'warna_last'      =>$pd->warna,
+                                'lebar_jadi_last' =>$pd->lebar_Jadi,
+                                'uom_lebar_jadi_last' =>$pd->uom_lebar_jadi
+                    );
+                    $where_update[] = array(
+                                'corak'      =>$pd->corak,
+                                'warna'      =>$pd->warna,
+                                'lebar_jadi' =>$pd->lebar_Jadi,
+                                'uom_lebar_jadi' =>$pd->uom_lebar_jadi
+                    );
+                    $this->m_marketing->update_table_changed($tmp_update,$pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+                }else{
+                    //insert
+                    $tmp_insert2[] = array(
+                                'cat_id_last'     =>$pd->cat_id,
+                                'corak_last'      =>$pd->corak,
+                                'warna_last'      =>$pd->warna,
+                                'lebar_jadi_last' =>$pd->lebar_Jadi,
+                                'uom_lebar_jadi_last' =>$pd->uom_lebar_jadi,
+                                'action'          => 'ADD'
+                    );
+                    // $this->m_marketing->insert_table_changed($tmp_insert2);
+                    // $tmp_update = array(
+                    //                 'action' => 'REMOVE'
+                    // );
+                    // $this->m_marketing->update_table_changed($tmp_update,$pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+
+                }
+            }
+
+            if(!empty($tmp_update)) {
+                // $this->m_marketing->update_table_changed($tmp_update,$where_update);
+            }
+
+            if(!empty($tmp_insert2)) {
+                $this->m_marketing->insert_data_last_date($tmp_insert2);
+
+            }
+
+            // get data remove 
+            $where_  = array('cat_id_last'=>'');
+            $tmp_id  = array();
+            $get_dt_remove = $this->m_marketing->get_data_table_changed_all($where_);
+            foreach($get_dt_remove as $gtr){
+                $tmp_id = array('action'=>"REMOVE");
+                $this->m_marketing->update_table_changed2($gtr->id, $tmp_id);
+            }
+
+            $list = $this->m_marketing->get_datatables14();
+            $data = array();
+            $no = $_POST['start'];
+            foreach ($list as $field) {
+                $no++;
+                $row = array();
+                $row[] = $no;
+                $row[] = $field->cat_id;
+                $row[] = $field->corak;
+                $row[] = $field->warna;
+                $row[] = $field->lebar_Jadi." ".$field->uom_lebar_jadi;
+                $row[] = $field->action;
+                $row[] = $field->id;
+                $data[] = $row;
+            }
+    
+            $output = array(
+                "draw" => $_POST['draw'],
+                "recordsTotal" => $this->m_marketing->count_all14(),
+                "recordsFiltered" => $this->m_marketing->count_filtered14(),
+                "data" => $data,
+            );
+            //output dalam format JSON
+            echo json_encode($output);
+
+        }else{
+            die();
+        }
+        
+    }
+
+    public function print_category() 
+    {
+
+        $this->load->library('Pdf');//load library pdf
+        
+        $pdf       = new PDF_Pagegroup('P','mm',array(210,297));// A4
+        // $pdf       = new PDF_Code128('P','mm',array(215,330));// F4
+
+        $category  = ['Q9','Q50','Q250','Q500','Q750','Q1000','QX'];
+        $date_last = $this->m_marketing->get_last_date_history();
+
+        $cat_id    = "";
+
+        foreach($category as $cat){
+            
+            if(!empty($cat_id) AND $cat_id != $cat){
+                $pdf->StartPageGroup();
+            // $pdf->AddPage();
+            // $pdf->AliasNbPages('{totalPages}');
+
+            }
+            $cat_id = $cat;
+            $pdf->SetMargins(0,0,0);
+            $pdf->SetAutoPageBreak(False);
+            $pdf->StartPageGroup();
+            $pdf->AddPage();
+            $pdf->setTitle('Ready Goods Category');
+
+            $pdf->SetFont('Arial','B',14,'C');
+            $pdf->Cell(0,20,'Ready Goods Category',0,0,'C');
+            
+            $pdf->SetFont('Arial','',7,'C');
+
+            $pdf->setXY(5,7);
+            $pdf->AliasNbPages('{totalPages}');
+            // $pdf->Multicell(30,4, "Page " . $pdf->PageNo(2) . "/{totalPages}", 0,'L');
+            $pdf->Multicell(30,4, "Page " . $pdf->GroupPageNo() . "/".$pdf->PageGroupAlias(), 0,'L');
+
+            $pdf->setXY(160,7);
+            $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+            $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+
+            $pdf->SetFont('Arial','B',8,'C');
+        
+            $pdf->setXY(5,15);
+            $pdf->Multicell(17,4,'Category ',0,'L');
+            $pdf->setXY(32, 15);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(33,15);
+            $pdf->Multicell(40,4,$cat,0,'L');
+
+            $pdf->setXY(5,20);
+            $pdf->Multicell(30,4,'Data Per Tanggal ',0,'L');
+            $pdf->setXY(32, 20);
+            $pdf->Multicell(5, 4, ':', 0, 'L');
+            $pdf->setXY(33,20);
+            $pdf->Multicell(40,4,$date_last,0,'L');
+            
+            $no   = 1;
+            $y    = 20;   
+            $column2 = 0;
+            $loop = 0;
+
+            $pdf->SetFont('Arial','B',8,'C');
+            // get
+            $data_cat = $this->m_marketing->get_query_13_print($cat);
+            $pdf->setXY(5,$y+5);
+            $pdf->Cell(10, 5, 'No.', 1, 0, 'L');
+            $pdf->Cell(80, 5, 'Article', 1, 0, 'L');
+            $pdf->Cell(50, 5, 'Color', 1, 0, 'L');
+            $pdf->Cell(30, 5, 'Size', 1, 0, 'L');
+            $pdf->Cell(25, 5, 'Qty', 1, 1, 'R');
+            $pdf->SetFont('Arial','',7,'C');
+            foreach($data_cat as $row){
+
+                $cellWidth =80; //lebar sel
+                $cellHeight=3; //tinggi sel satu baris normal
+                $corak = $row->corak;
+                if($pdf->GetStringWidth( $corak ) <  $cellWidth  ){
+                    // jika tidak
+                    $line =1;
+                }else{
+                    //jika ya, maka hitung ketinggian yang dibutuhkan untuk sel akan dirapikan
+                    //dengan memisahkan teks agar sesuai dengan lebar sel
+                    //lalu hitung berapa banyak baris yang dibutuhkan agar teks pas dengan sel
+                    // $plus_length  = round($pdf->GetStringWidth( strtoupper($corak) )) - strlen($corak);
+                    $textLength =strlen($corak) ;	//total panjang teks
+                    $errMargin  =7;		//margin kesalahan lebar sel, untuk jaga-jaga
+                    $startChar  =0;		//posisi awal karakter untuk setiap baris
+                    $maxChar    =0;			//karakter maksimum dalam satu baris, yang akan ditambahkan nanti
+                    $textArray  =array();	//untuk menampung data untuk setiap baris
+                    $tmpString  ="";		//untuk menampung teks untuk setiap baris (sementara)
+                    $tmpString2  ="";		//untuk menampung teks untuk setiap baris (sementara)
+                        
+                    while($startChar < $textLength){ //perulangan sampai akhir teks
+                        //perulangan sampai karakter maksimum tercapai
+                        while( $pdf->GetStringWidth( $tmpString ) < ($cellWidth-$errMargin) && ($startChar+$maxChar) < $textLength ) {
+                            $maxChar++;
+                            $tmpString=substr($corak,$startChar,$maxChar);
+                        }
+                        //pindahkan ke baris berikutnya
+                        $startChar=$startChar+$maxChar;
+                        //kemudian tambahkan ke dalam array sehingga kita tahu berapa banyak baris yang dibutuhkan
+                        array_push($textArray,$tmpString);
+                        //reset variabel penampung
+                        $maxChar  =0;
+                        $tmpString='';
+                    }
+                    //dapatkan jumlah baris
+                    $line=count($textArray);
+                }
+
+                //tulis cellnya
+                $pdf->SetFillColor(255,255,255);
+                $pdf->Cell(5,($line * $cellHeight),'',0,0,'',true); //sesuaikan ketinggian dengan jumlah garis
+                $pdf->Cell(10,($line * $cellHeight),$no,'L,B',0,'L'); 
+
+                $xPos=$pdf->GetX();
+                $yPos=$pdf->GetY();
+                $pdf->Multicell($cellWidth,$cellHeight,$corak,'B','L');
+
+                $pdf->SetXY($xPos + $cellWidth , $yPos);
+                $pdf->Multicell(50,($line * $cellHeight),$row->warna,'B','L');
+
+                $pdf->SetXY($xPos + 50 + $cellWidth , $yPos);
+                $pdf->Multicell(30,($line * $cellHeight),$row->lebar_Jadi.' '.$row->uom_lebar_jadi,'B','R');
+
+                $pdf->SetXY($xPos + 80 + $cellWidth , $yPos);
+                $pdf->Multicell(25,($line * $cellHeight),number_format($row->qty_jual,2).' '.$row->uom_jual,'B,R','R');
+                
+                $no++;
+                // $gulung++;
+
+                if($pdf->GetY() > 280){
+                        $pdf->SetMargins(0,0,0);
+                        $pdf->SetAutoPageBreak(False);
+                        // $pdf->StartPageGroup();
+                        $pdf->AddPage();
+                        $pdf->setTitle('Ready Goods Category');
+
+                        $pdf->SetFont('Arial','B',14,'C');
+                        $pdf->Cell(0,20,'Ready Goods Category',0,0,'C');
+                        
+                        $pdf->SetFont('Arial','',7,'C');
+
+                        $pdf->setXY(5,7);
+                        // $pdf->AliasNbPages('{totalPages}');
+                        // $pdf->Multicell(30,4, "Page " . $pdf->PageNo() . "/{totalPages}", 0,'L');
+                        $pdf->Multicell(30,4, "Page " . $pdf->GroupPageNo() . "/".$pdf->PageGroupAlias(), 0,'L');
+
+                        $pdf->setXY(160,7);
+                        $tgl_now = tgl_indo(date('d-m-Y H:i:s'));
+                        $pdf->Multicell(50,4, 'Tgl.Cetak : '.$tgl_now, 0,'C');
+
+                        $pdf->SetFont('Arial','B',8,'C');
+                    
+                        $pdf->setXY(5,15);
+                        $pdf->Multicell(17,4,'Category ',0,'L');
+                        $pdf->setXY(32, 15);
+                        $pdf->Multicell(5, 4, ':', 0, 'L');
+                        $pdf->setXY(33,15);
+                        $pdf->Multicell(40,4,$cat,0,'L');
+
+                        $pdf->setXY(5,20);
+                        $pdf->Multicell(30,4,'Data Per Tanggal ',0,'L');
+                        $pdf->setXY(32, 20);
+                        $pdf->Multicell(5, 4, ':', 0, 'L');
+                        $pdf->setXY(33,20);
+                        $pdf->Multicell(40,4,$date_last,0,'L');
+
+                        $y    = 20;   
+                        $column2 = 0;
+
+                        $pdf->setXY(5,$y+5);
+                        $pdf->Cell(10, 5, 'No.', 1, 0, 'L');
+                        $pdf->Cell(80, 5, 'Article', 1, 0, 'L');
+                        $pdf->Cell(50, 5, 'Color', 1, 0, 'L');
+                        $pdf->Cell(30, 5, 'Size', 1, 0, 'L');
+                        $pdf->Cell(25, 5, 'Qty', 1, 1, 'R');
+                        $pdf->SetFont('Arial','',7,'C');
+                
+                }
+
+                $loop++;
+
+            }
+
+
+        }
+
+        $pdf->Output();
+    }
+
+
+    public function print_category1() {
+        try {
+            
+            // $data_print_array[] = array(
+            //                 'corak'   => 'J-JM882095FSR-NCE(AK)-126" (Inspecting)',
+                           
+            //     );
+            // $data_print_array[] = array(
+            //                 'corak'   => 'J-5P162SR-NB(NX 420 BRT)-126" (Inspecting)',
+                         
+            //     );
+            $data_print_array = $this->m_marketing->goods_to_push();
+            // var_dump($data_print_array);
+            $this->load->view('print/readygoods/printcategory', ['data' => $data_print_array]);
+            // $this->load->view('print/picklist/printpl', ['pl' => $no, 'data' => $lisdata, 'total' => $totalItem]);
+
+        } catch (Exception $ex) {
+            
+        }
+    }
+
+    function readygoodscategorychanged()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $this->load->view('report/v_marketing_view_ready_goods_category_changed', $data);
+    }
+
+    function print_category_tag() {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+
+                $changed     = $this->input->post('changed'); 
+                $data_print  = json_decode($this->input->post('data_print'),true); 
+
+                if(empty($data_print)){
+                    throw new \Exception('Data Print tidak ditemukan !', 500);
+                }else{
+                    
+                    $data_prints = $this->print_hanger($changed,$data_print);
+                    if(empty($data_prints)){
+                        throw new \Exception('Data Print tidak ditemukan !', 500);
+                    }
+                    $callback = array('status' => 'success', 'message' => 'Print Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success', 'data_print' =>$data_prints);
+                }
+                $this->output->set_status_header(200)
+                        ->set_content_type('application/json', 'utf-8')
+                        ->set_output(json_encode($callback));
+            }
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+
+    function print_hanger($changed,$data_print)
+    {
+        $data_print_array = array();
+        
+        if($changed == 'true'){
+            foreach ($data_print as $dp){
+                $id = $dp['rowId'];
+                $get = $this->m_marketing->get_data_changed_all($id);
+                $lebar_jadi  = $get->lebar_Jadi;
+                $uom_lebar_jadi  = $get->uom_lebar_jadi;
+                $data_print_array[] = array(
+                                'article'   => $get->corak ?? '',
+                                'color'     => $get->warna ?? '',
+                                'size'      => $lebar_jadi.' '.$uom_lebar_jadi,
+                );
+            }
+
+        }else{
+            foreach ($data_print as $dp){
+                foreach($dp as $val){
+                    $dp_ex = explode(",",$val);
+                    $data_print_array[] = array(
+                                'article'   => $dp_ex[0] ?? '',
+                                'color'     => $dp_ex[1] ?? '',
+                                'size'      => $dp_ex[2] ?? '',
+                    );
+                }
+            }
+        }
+        $this->hanger->addDatas($data_print_array);
+       
+        return $this->hanger->generate();
+        // return;
 
     }
 
