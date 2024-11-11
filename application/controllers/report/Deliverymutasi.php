@@ -52,6 +52,8 @@ class Deliverymutasi extends MY_Controller {
             $customer = $this->input->post("customer");
             $status = $this->input->post("status");
             $period = explode(" - ", $periode);
+            $nodo = $this->input->post("nodo");
+            $nosj = $this->input->post("nosj");
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $data = [];
@@ -78,6 +80,12 @@ class Deliverymutasi extends MY_Controller {
             }
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
+            }
+            if ($nodo !== null || $nodo !== "") {
+                $condition = array_merge($condition, ['ddo.no LIKE' => '%' . $nodo . '%']);
+            }
+            if ($nosj !== null || $nosj !== "") {
+                $condition = array_merge($condition, ['ddo.no_sj LIKE' => '%' . $nosj . '%']);
             }
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, "1");
             $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, "1");
@@ -110,6 +118,8 @@ class Deliverymutasi extends MY_Controller {
             $qtyHph = $this->input->post("qtyhph");
             $cintern = $this->input->post("cintern");
             $status = $this->input->post("status");
+            $nodo = $this->input->post("no_do");
+            $nosj = $this->input->post("no_sj");
             if (count($period) < 2) {
                 throw new \Exception("Tentukan dahulu periodenya", 500);
             }
@@ -164,8 +174,14 @@ class Deliverymutasi extends MY_Controller {
             if ($marketing !== "") {
                 $condition = array_merge($condition, ['p.sales_kode' => $marketing]);
             }
+            if ($nodo !== null || $nodo !== "") {
+                $condition = array_merge($condition, ['ddo.no LIKE' => '%' . $nodo . '%']);
+            }
+            if ($nosj !== null || $nosj !== "") {
+                $condition = array_merge($condition, ['ddo.no_sj LIKE' => '%' . $nosj . '%']);
+            }
             $list = $this->m_deliveryorder->getDataReport($condition, $order, $rekap, "1");
-            $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, "1");
+//            $countAll = $this->m_deliveryorder->getDataReportTotal($condition, $order, $rekap, "1");
             $pool = new ApcuCachePool();
             $sCache = new SimpleCacheBridge($pool);
             Settings::setCache($sCache);
