@@ -57,16 +57,18 @@
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
-                    <!-- <div class="col-md-12">
+                    <div class="col-md-12">
                       <div class="col-md-6">
                         <div class="form-group">
                             <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Total Lot</label></div>
-                                <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
+                                <!-- <div class="col-xs-4"><label>Data</label></div> -->
+                                <div class="col-xs-12"  id="date_ready_goods">
+                                    Data Ready Goods Category yang berubah
+                                </div>
                             </div>
                         </div>
                       </div>
-                    </div> -->
+                    </div>
                     <div class="col-md-12">
                       <div class="col-md-8 col-lg-8">
                           <div class="col-sm-4 col-md-4 col-lg-4">
@@ -182,8 +184,9 @@
             },
             "drawCallback": function( settings, start, end, max, total, pre ) {  
                 // console.log(settings.json.total_lot); 
-                // let total_record = settings.json.total_lot; // total glpcs
-                // $('#total_items').html('<label>:</label> '+ formatNumber(total_record) + ' Lot' )
+                let past_date = settings.json.past_date; 
+                let last_date = settings.json.last_date; 
+                $('#date_ready_goods').html('Data Ready Goods Category yang berubah <br> Tanggal <b> '+ (past_date) + '</b> sampai Tanggal <b>'+last_date+' </b>' )
             },
         });
 
