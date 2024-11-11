@@ -564,7 +564,7 @@ class Procurementorder extends MY_Controller {
                 $this->_module->unlock_tabel();
 
                 //lock table
-                $this->_module->lock_tabel('mst_produk WRITE, mst_produk mp WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE,  stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, bom WRITE, bom_items bi WRITE, bom_items  WRITE, procurement_order WRITE, procurement_order_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
+                $this->_module->lock_tabel('wa_group WRITE,wa_template WRITE,wa_send_message WRITE,mst_category WRITE,mst_produk WRITE, mst_produk mp WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE,  stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, bom WRITE, bom_items bi WRITE, bom_items  WRITE, procurement_order WRITE, procurement_order_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
 
                 /* --Get ROUTE produk by kode_produk-- */
                 $jen_route = $this->_module->get_jenis_route_product(addslashes($kode_produk))->row_array();
@@ -1527,7 +1527,7 @@ class Procurementorder extends MY_Controller {
             } else {
 
                 //lock table
-                $this->_module->lock_tabel('procurement_order WRITE, procurement_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, departemen as d WRITE');
+                $this->_module->lock_tabel('wa_group WRITE,wa_template WRITE,wa_send_message WRITE,mst_category WRITE,mst_produk WRITE,procurement_order WRITE, procurement_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE');
 
                 //select stock_move by origin row order move id
                 //$mrp = true;
@@ -1825,6 +1825,8 @@ class Procurementorder extends MY_Controller {
                     $callback = array('status' => 'failed', 'message' => 'Production Order Items Gagal Dibatalkan ! <br> Rantai Procurement Order Terdapat Status <b>Ready</b> <br>' . $dokumen, 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else {
                     $callback = array('status' => 'success', 'message' => 'Procurement Order Items Berhasil Dibatalkan !', 'icon' => 'fa fa-check', 'type' => 'success');
+                    if (count($noMo) > 0)
+                        $this->sendWa($kode, $row_order, $head->warehouse, ["{mo}" => implode(",", $noMo), "{origin}" => ($origin ?? "")]);
                 }
 
                 //unlock table
@@ -2039,8 +2041,6 @@ class Procurementorder extends MY_Controller {
                     $callback = array('status' => 'failed', 'message' => 'Batal Produk Waste Gagal Dibatalkan !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else {
                     $callback = array('status' => 'success', 'message' => 'Batal Produk Waste Berhasil Dibatalkan !', 'icon' => 'fa fa-check', 'type' => 'success');
-                    if (count($noMo) > 0)
-                        $this->sendWa($kode, $row_order, $head->warehouse, ["{mo}" => implode(",", $noMo), "{origin}" => ($origin ?? "")]);
                 }
 
 
