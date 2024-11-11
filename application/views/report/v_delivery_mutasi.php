@@ -225,8 +225,27 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">DO</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <input type="text" name="no_do" id="no_do" value="" class="form-control"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">No SJ</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <input type="text" name="no_sj" id="no_sj" value="" class="form-control"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>
@@ -321,7 +340,9 @@
                             corak: $("#corak").val(),
                             order: $("#order").find(":selected").val(),
                             marketing: $("#marketing").find(":selected").val(),
-                            status: $("#status").val()
+                            status: $("#status").val(),
+                            nodo: $("#no_do").val(),
+                            nosj: $("#no_sj").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
