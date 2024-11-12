@@ -20,7 +20,6 @@ class M_user extends CI_Model {
 
         foreach ($this->column_search as $item) { // loop column 
             if ($_POST['search']['value']) { // if datatable send POST for search
-
                 if ($i === 0) { // first loop
                     $this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
                     $this->db->like($item, $_POST['search']['value']);
@@ -125,5 +124,17 @@ class M_user extends CI_Model {
         $query = $this->db->get('mst_departemen_all');
         $result = $query->row_array();
         return $result['nama_departemen'];
+    }
+
+    public function save_masking(array $data) {
+        $this->db->insert_batch("user_masking", $data);
+    }
+
+    public function delete_masking(string $username) {
+        $this->db->query("DELETE FROM user_masking WHERE username = '{$username}'");
+    }
+
+    public function getMasking(string $username) {
+        return $this->db->query("select mst_category_id from user_masking where username ='{$username}'")->result();
     }
 }
