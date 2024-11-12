@@ -18,17 +18,15 @@ class Procurementorder extends MY_Controller {
         $this->load->model("m_gtp");
         $this->load->library("wa_message");
         $this->config->load('additional');
-	  }
+    }
 
-    public function index()
-    {	
-        $data['id_dept']='PRC';
+    public function index() {
+        $data['id_dept'] = 'PRC';
         $this->load->view('ppic/v_procurement_order', $data);
     }
 
-	  function get_data()
-    {	
-        $sub_menu  = $this->uri->segment(2);
+    function get_data() {
+        $sub_menu = $this->uri->segment(2);
         $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
         $list = $this->m_procurementOrder->get_datatables($kode['kode']);
         $data = array();
@@ -1056,7 +1054,6 @@ class Procurementorder extends MY_Controller {
                                         $sql_stock_move_produk_batch .= "('" . $move_id . "','" . addslashes($con['kode_produk']) . "','" . addslashes($con['nama_produk']) . "','" . $con['qty_bom_items'] . "','" . addslashes($con['uom']) . "','draft','" . $con_row . "','" . addslashes($origin_prod) . "'), ";
                                         $con_row = $con_row + 1;
                                     }
-
                                 } elseif ($method_action == 'PROD') {// generate mo/mg
                                     $route_empty = FALSE;
                                     $sql_stock_move_batch .= "('" . $move_id . "','" . $tgl . "','" . $origin . "','" . $rp->method . "','" . $rp->lokasi_dari . "','" . $rp->lokasi_tujuan . "','draft','" . $sm_row . "','" . $source_move . "'), ";
@@ -1410,7 +1407,6 @@ class Procurementorder extends MY_Controller {
 
                                 // $sql_log_history_in = rtrim($sql_log_history_in, ', ');
                                 // $this->_module->simpan_log_history_batch($sql_log_history_in);
-
                                 //create log history setiap yg batal
                                 if (!empty($insert_log)) {
                                     // $sql_log_history = rtrim($sql_log_history, ', ');
@@ -1531,7 +1527,7 @@ class Procurementorder extends MY_Controller {
             } else {
 
                 //lock table
-                $this->_module->lock_tabel('wa_group WRITE,wa_template WRITE,wa_send_message WRITE,mst_category WRITE,mst_produk WRITE,procurement_order WRITE, procurement_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE');
+                $this->_module->lock_tabel('departemen d WRITE, wa_group WRITE,wa_template WRITE,wa_send_message WRITE,mst_category WRITE,mst_produk WRITE,procurement_order WRITE, procurement_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE');
 
                 //select stock_move by origin row order move id
                 //$mrp = true;
@@ -1568,7 +1564,6 @@ class Procurementorder extends MY_Controller {
                     $method_action = $ex_mt[1]; //ex CON/PROD/OUT/IN
                     $origin = $row->origin;
                     $move_id = $row->move_id;
-
                     if (( $method_action == 'CON' OR $method_action == 'PROD')) {
 
                         $log_mrp = false;
@@ -1588,7 +1583,6 @@ class Procurementorder extends MY_Controller {
                                 if (!in_array($mrp['kode'], $noMo)) {
                                     $noMo[] = $mrp['kode'];
                                 }
-
                                 if ($mrp['status'] == 'draft') {
                                     // cek mrp rm target
                                     $cek_status_rm = $this->m_procurementOrder->cek_mrp_production_rm_target($kode_mrp, 'ready')->num_rows();
@@ -1645,7 +1639,7 @@ class Procurementorder extends MY_Controller {
                             //update status = cancel pengiriman_barang, pengiriman_barang_items
                             $case2 .= " when kode = '" . $cek_out['kode'] . "' then '" . $status_cancel . "'";
                             $where2 .= "'" . $cek_out['kode'] . "',";
-
+                            
                             //get mms kode berdasarkan dept_id
                             $mms = $this->_module->get_kode_sub_menu_deptid('pengirimanbarang', $method_dept)->row_array();
                             if (!empty($mms['kode'])) {
@@ -1653,7 +1647,6 @@ class Procurementorder extends MY_Controller {
                             } else {
                                 $mms_kode = '';
                             }
-
                             // create log history pengiriman_barang
                             $note_log = 'Batal Pengiriman Barang | ' . $cek_out['kode'];
                             // $sql_log_history .= "('".$date_log."','".$mms_kode."','".$cek_out['kode']."','cancel','".$note_log."','".$nama_user."'), ";
@@ -1694,7 +1687,6 @@ class Procurementorder extends MY_Controller {
                             } else {
                                 $mms_kode = '';
                             }
-
                             // create log history penerimaan barang
                             $note_log = 'Batal Penerimaan Barang | ' . $cek_in['kode'];
                             // $sql_log_history .= "('".$date_log."','".$mms_kode."','".$cek_in['kode']."','cancel','".$note_log."','".$nama_user."'), ";
@@ -1784,7 +1776,7 @@ class Procurementorder extends MY_Controller {
                         // update stock_move_items
                         $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case " . $case4 . " end) WHERE  move_id in (" . $where4 . ")  AND status NOT IN ('done') ";
                         $this->_module->update_reff_batch($sql_update_stock_move_items);
-                      
+
                         // update stock_move_produk
                         $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case " . $case4 . " end) WHERE  move_id in (" . $where4 . ") AND status NOT IN ('done') ";
                         $this->_module->update_reff_batch($sql_update_stock_move_produk);
@@ -1812,14 +1804,12 @@ class Procurementorder extends MY_Controller {
                     $where_status2 = "AND status NOT IN ('generated','cancel')";
                     $cek_details_status2 = $this->m_procurementOrder->cek_status_procurement_order_items($kode, $where_status2)->num_rows();
 
-
                     if ($cek_details > 0) {
                         if ($cek_details_status == 0) {
                             $this->m_procurementOrder->update_status_procurement_order($kode, 'cancel');
                         } else if ($cek_details_status2 > 0) {
                             $this->m_procurementOrder->update_status_procurement_order($kode, 'draft');
                         }
-
                     }
                 }//end if batal_items == true
 
@@ -1831,6 +1821,7 @@ class Procurementorder extends MY_Controller {
                     $callback = array('status' => 'failed', 'message' => 'Production Order Items Gagal Dibatalkan ! <br> Rantai Procurement Order Terdapat Status <b>Ready</b> <br>' . $dokumen, 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else {
                     $callback = array('status' => 'success', 'message' => 'Procurement Order Items Berhasil Dibatalkan !', 'icon' => 'fa fa-check', 'type' => 'success');
+                   
                     if (count($noMo) > 0)
                         $this->sendWa($kode, $row_order, $head->warehouse, ["{mo}" => implode(",", $noMo), "{origin}" => ($origin ?? "")]);
                 }
@@ -2078,7 +2069,6 @@ class Procurementorder extends MY_Controller {
                 $groups = $this->config->item('additional_wa_bc_tri') ?? [];
             }
             if (count($data) > 0) {
-
                 if ($data->status === "generated") {
                     $pesan = "*{$data_pesan["{mo}"]}* BARU (WARPING DASAR)";
                     $template = "proc_order_create";
