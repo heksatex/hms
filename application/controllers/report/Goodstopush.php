@@ -22,7 +22,7 @@ class Goodstopush extends MY_Controller {
     }
 
     public function index() {
-        $data['id_dept'] = 'RMKT';
+        $data['id_dept'] = 'RGTP';
         $sales = new $this->m_gtp;
         $dates = clone $sales;
         $data['sales'] = $sales->setTables("mst_sales_group")->setOrder(["nama_sales_group" => "asc"])->setWheres(["view" => "1"])->setSelects(["nama_sales_group"])->getData();
