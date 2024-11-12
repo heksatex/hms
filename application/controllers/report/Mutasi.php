@@ -464,7 +464,7 @@ class Mutasi extends MY_Controller
             array('kode' => 'DYE2','nama'=>'Dyeing 2'),
             array('kode' => 'FIN', 'nama'=>'Finishing'),
             array('kode' => 'DF',  'nama'=>'Dyeing Finishing'),
-            array('kode' => 'DF2',  'nama'=>'Dyeing Finishing KP Asli'),
+            // array('kode' => 'DF2',  'nama'=>'Dyeing Finishing KP Asli'),
             array('kode' => 'INS2',  'nama'=>'Inspecting 2',),
             array('kode' => 'GJD',  'nama'=>'Gudang Jadi',),
         );

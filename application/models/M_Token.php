@@ -14,6 +14,13 @@ class M_Token extends CI_Model {
     protected $format = '';
     protected $table = 'token_increment';
 
+    public function exists(array $where) {
+        $this->db->from($this->table);
+        $this->db->where($where);
+        $data = $this->db->select('*')->get()->row();
+        return $data;
+    }
+
     protected function checkExist(): int {
         $this->db->from($this->table);
         $this->db->where(['modul' => $this->modul, 'periode' => $this->periode]);

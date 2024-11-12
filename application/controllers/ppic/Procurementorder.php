@@ -590,7 +590,7 @@ class Procurementorder extends MY_Controller
                 $this->_module->unlock_tabel();
 
                 //lock table
-                $this->_module->lock_tabel('mst_produk WRITE, mst_produk mp WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE,  stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, bom WRITE, bom_items bi WRITE, bom_items  WRITE, procurement_order WRITE, procurement_order_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
+                $this->_module->lock_tabel('wa_group WRITE,wa_template WRITE,wa_send_message WRITE,mst_category WRITE,mst_produk WRITE, mst_produk mp WRITE, mrp_route WRITE, mrp_route as mr WRITE, departemen WRITE, departemen as d WRITE,  stock_move WRITE, stock_move_produk WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, mrp_production WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, bom WRITE, bom_items bi WRITE, bom_items  WRITE, procurement_order WRITE, procurement_order_items WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE');
 
               	/*--Get ROUTE produk by kode_produk--*/
             	$jen_route  = $this->_module->get_jenis_route_product(addslashes($kode_produk))->row_array();
@@ -1576,18 +1576,16 @@ class Procurementorder extends MY_Controller
                 }
             }
 
-            $cek_status = $this->m_procurementOrder->cek_status_procurement_order_items_by_row($kode,addslashes($kode_produk),$row_order)->row_array(); 
+            $cek_status = $this->m_procurementOrder->cek_status_procurement_order_items_by_row($kode, addslashes($kode_produk), $row_order)->row_array();
 
-            if($cek_status['status'] == 'cancel'){
-                $callback = array('status' => 'failed','message' => 'Maaf, Status Product Sudah Batal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+            if ($cek_status['status'] == 'cancel') {
+                $callback = array('status' => 'failed', 'message' => 'Maaf, Status Product Sudah Batal !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+            } else if (empty($cek_status['kode_produk'])) {
+                $callback = array('status' => 'failed', 'message' => 'Maaf, Data yang akan Di Batalkan Kosong !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+            } else {
 
-            }else if(empty($cek_status['kode_produk'])){
-                $callback = array('status' => 'failed','message' => 'Maaf, Data yang akan Di Batalkan Kosong !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-            }else{
-
-                 //lock table
-                $this->_module->lock_tabel('procurement_order WRITE, procurement_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, departemen as d WRITE');
-
+                //lock table
+                $this->_module->lock_tabel('wa_group WRITE,wa_template WRITE,wa_send_message WRITE,mst_category WRITE,mst_produk WRITE,procurement_order WRITE, procurement_order_items WRITE, stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, mrp_production_fg_hasil WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE');
 
                     //select stock_move by origin row order move id
                     //$mrp = true;
@@ -1898,6 +1896,20 @@ class Procurementorder extends MY_Controller
                         $callback = array('status' => 'success', 'message' => 'Procurement Order Items Berhasil Dibatalkan !', 'icon' =>'fa fa-check', 'type' => 'success');
                     }
 
+                }//end if batal_items == true
+
+                if ($batal_item == false) {
+                    $callback = array('status' => 'failed', 'message' => 'Procurement Order Items Gagal Dibatalkan !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                } else if ($status_done_all == true) {
+                    $callback = array('status' => 'failed', 'message' => 'Procurement Order Items Gagal Dibatalkan !<br> Semua status di Rantai Procurement Order sudah <b>Done</b>', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                } else if ($status_in_valid == true) {
+                    $callback = array('status' => 'failed', 'message' => 'Production Order Items Gagal Dibatalkan ! <br> Rantai Procurement Order Terdapat Status <b>Ready</b> <br>' . $dokumen, 'icon' => 'fa fa-warning', 'type' => 'danger');
+                } else {
+                    $callback = array('status' => 'success', 'message' => 'Procurement Order Items Berhasil Dibatalkan !', 'icon' => 'fa fa-check', 'type' => 'success');
+                    if (count($noMo) > 0)
+                        $this->sendWa($kode, $row_order, $head->warehouse, ["{mo}" => implode(",", $noMo), "{origin}" => ($origin ?? "")]);
+                }
+
                 //unlock table
                 $this->_module->unlock_tabel();
                
@@ -2122,10 +2134,11 @@ class Procurementorder extends MY_Controller
 
                 } // end if $batal_item = true;
 
-                if($batal_item == false){
-                    $callback = array('status' => 'failed', 'message' => 'Batal Produk Waste Gagal Dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-                }else{
-                    $callback = array('status' => 'success', 'message' => 'Batal Produk Waste Berhasil Dibatalkan !', 'icon' =>'fa fa-check', 'type' => 'success');
+
+                if ($batal_item == false) {
+                    $callback = array('status' => 'failed', 'message' => 'Batal Produk Waste Gagal Dibatalkan !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                } else {
+                    $callback = array('status' => 'success', 'message' => 'Batal Produk Waste Berhasil Dibatalkan !', 'icon' => 'fa fa-check', 'type' => 'success');
                 }
 
 

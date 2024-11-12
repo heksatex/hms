@@ -11,6 +11,7 @@ class User extends MY_Controller {
         parent::__construct();
         $this->is_loggedin(); //cek apakah user sudah login
         $this->load->model("m_user"); //load model m_user
+        $this->load->model("m_produk");
         $this->load->model("_module");
     }
 
@@ -76,6 +77,11 @@ class User extends MY_Controller {
         $data['setting'] = $this->m_user->get_list_menu_by_link_menu('setting');
         $data['count_setting'] = $this->m_user->get_jml_list_menu_by_link_menu('setting');
 
+        $data['category'] = $this->m_produk->get_list_category();
+        
+        $data['purchases'] = $this->m_user->get_list_menu_by_link_menu('purchase');
+        $data['count_purchases'] = $this->m_user->get_jml_list_menu_by_link_menu('purchase');
+
         return $this->load->view('setting/v_user_add', $data);
     }
 
@@ -89,7 +95,7 @@ class User extends MY_Controller {
         } else {
 
             //lock table
-            $this->_module->lock_tabel('user WRITE, user_priv WRITE, main_menu_rel WRITE, main_menu_sub WRITE, log_history WRITE, mst_sales_group WRITE, mst_departemen_all  WRITE');
+            $this->_module->lock_tabel('user WRITE, user_priv WRITE, main_menu_rel WRITE, main_menu_sub WRITE, log_history WRITE, mst_sales_group WRITE, mst_departemen_all  WRITE,user_masking WRITE');
 
             $namauser = addslashes($this->input->post('namauser'));
             $password = md5('123');
@@ -101,6 +107,7 @@ class User extends MY_Controller {
             $level = addslashes($this->input->post('level'));
             $sales_group = addslashes($this->input->post('sales_group'));
             $telepon_wa = addslashes($this->input->post('telepon_wa'));
+            $masking = $this->input->post("masking");
 
             if (empty($namauser)) {
                 $callback = array('status' => 'failed', 'field' => 'namauser', 'message' => 'Nama User Harus Diisi !', 'icon' => 'fa fa-warning', 'type' => 'danger');
@@ -135,6 +142,18 @@ class User extends MY_Controller {
                     foreach ($arr_chk as $value) {
                         $this->m_user->save_user_priv($login, $value, '1');
                     }
+                    $userMasking = [];
+                    foreach ($masking as $key => $value) {
+                        $userMasking[] = array(
+                            'username' => $login,
+                            'mst_category_id' => $value
+                        );
+                    }
+                    $this->m_user->delete_masking($login);
+                    if (count($userMasking) > 0) {
+                        $this->m_user->save_masking($userMasking);
+                    }
+
                     $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sales_group);
                     $login_encr = encrypt_url($login);
                     $jenis_log = "edit";
@@ -154,7 +173,16 @@ class User extends MY_Controller {
                     foreach ($arr_chk as $value) {
                         $this->m_user->save_user_priv($login, $value, '1');
                     }
-
+                    $userMasking = [];
+                    foreach ($masking as $key => $value) {
+                        $userMasking[] = array(
+                            'username' => $login,
+                            'mst_category_id' => $value
+                        );
+                    }
+                    if (count($userMasking) > 0) {
+                        $this->m_user->save_masking($userMasking);
+                    }
                     $login_encr = encrypt_url($login);
                     $jenis_log = "create";
                     $note_log = $namauser . " | " . $departemen . " | " . $level . " | " . $nama_sales_group;
@@ -192,6 +220,11 @@ class User extends MY_Controller {
 
         $data['user'] = $this->m_user->get_user_by_username($kode_decrypt);
         $data['priv'] = $list_priv;
+        $masking = [];
+        foreach ($this->m_user->getMasking($kode_decrypt) as $value) {
+            $masking[] = $value->mst_category_id;
+        }
+        $data["masking"] = $masking;
 
         $data['sales'] = $this->m_user->get_list_menu_by_link_menu('sales');
         $data['count_sales'] = $this->m_user->get_jml_list_menu_by_link_menu('sales');
@@ -213,6 +246,11 @@ class User extends MY_Controller {
 
         $data['setting'] = $this->m_user->get_list_menu_by_link_menu('setting');
         $data['count_setting'] = $this->m_user->get_jml_list_menu_by_link_menu('setting');
+
+        $data['category'] = $this->m_produk->get_list_category();
+        
+        $data['purchases'] = $this->m_user->get_list_menu_by_link_menu('purchase');
+        $data['count_purchases'] = $this->m_user->get_jml_list_menu_by_link_menu('purchase');
 
         return $this->load->view('setting/v_user_edit', $data);
     }
@@ -239,7 +277,6 @@ class User extends MY_Controller {
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
-         
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
