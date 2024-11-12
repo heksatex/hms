@@ -1639,7 +1639,7 @@ class Procurementorder extends MY_Controller {
                             //update status = cancel pengiriman_barang, pengiriman_barang_items
                             $case2 .= " when kode = '" . $cek_out['kode'] . "' then '" . $status_cancel . "'";
                             $where2 .= "'" . $cek_out['kode'] . "',";
-                            
+
                             //get mms kode berdasarkan dept_id
                             $mms = $this->_module->get_kode_sub_menu_deptid('pengirimanbarang', $method_dept)->row_array();
                             if (!empty($mms['kode'])) {
@@ -1821,7 +1821,7 @@ class Procurementorder extends MY_Controller {
                     $callback = array('status' => 'failed', 'message' => 'Production Order Items Gagal Dibatalkan ! <br> Rantai Procurement Order Terdapat Status <b>Ready</b> <br>' . $dokumen, 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else {
                     $callback = array('status' => 'success', 'message' => 'Procurement Order Items Berhasil Dibatalkan !', 'icon' => 'fa fa-check', 'type' => 'success');
-                   
+
                     if (count($noMo) > 0)
                         $this->sendWa($kode, $row_order, $head->warehouse, ["{mo}" => implode(",", $noMo), "{origin}" => ($origin ?? "")]);
                 }
@@ -2086,3 +2086,5 @@ class Procurementorder extends MY_Controller {
         }
     }
 }
+
+//new branch
