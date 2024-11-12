@@ -382,9 +382,9 @@ class Produksitwisting extends MY_Controller
     function export_excel()
     {	
 
+        ob_start();
     	$object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
-
     	$where = $this->input->post('query');
 
  		$object->getActiveSheet()->SetCellValue('A1', 'Jadwal Produksi Twisting');
@@ -519,14 +519,18 @@ class Produksitwisting extends MY_Controller
             $sales_contract = '';
     	}
 
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = "Jadwal Produksi Twisiting.xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
 
-        $object = PHPExcel_IOFactory::createWriter($object, 'Excel5');  
-
-        header('Content-Type: application/vnd.ms-excel'); //mime type
-        header('Content-Disposition: attachment;filename="Jadwal Produksi Twisiting.xls"'); //tell browser what's the file name
-        header('Cache-Control: max-age=0'); //no cache
-        $object->save('php://output');
-    	
+		die(json_encode($response));
 
 
     }

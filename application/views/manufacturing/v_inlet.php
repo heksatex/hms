@@ -52,12 +52,40 @@
                     <div class="panel panel-default" style="margin-bottom: 0px;">
                       <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
                         <div class="panel-body" style="padding: 5px">
+                          <div class="form-group">
+                            <div class="col-md-8"> 
+                              <div class="col-md-2"><label><input  type="checkbox" name="checkTgl" id="checkTgl" > Tgl. Inlet</label></div>
+                              <div class="col-md-4">
+                                <div class='input-group'>
+                                  <input type="text" class="form-control input-sm" name="tgldari" id="tgldari" required="" readonly="" >
+                                  <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                  </span>    
+                                </div>
+                              </div>
+                              <div class="col-md-1">
+                                  <label>s/d</label>
+                              </div>
+                              <div class="col-md-4">
+                                <div class='input-group'>
+                                  <input type="text" class="form-control input-sm" name="tglsampai" id='tglsampai' required="" readonly="" >
+                                  <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                  </span>    
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                           <div class="form-group col-md-12" style="margin-bottom:0px">
                               <div class="col-md-6">
                                 <div class="form-group"> 
                                   <div class="col-xs-5"><label>KP/Lot</label></div>
                                   <div class="col-xs-7">
                                     <input type="text" class="form-control input-sm" name="lot" id="lot" >
+                                  </div>  
+                                  <div class="col-xs-5"><label>Barcode GJD</label></div>
+                                  <div class="col-xs-7">
+                                    <input type="text" class="form-control input-sm" name="lot_gjd" id="lot_gjd" >
                                   </div>  
                                   <div class="col-xs-5"><label>Marketing</label></div>
                                   <div class="col-xs-7">
@@ -73,14 +101,14 @@
                                   <div class="col-xs-7">
                                     <input type="text" class="form-control input-sm" name="mg" id="mg" >
                                   </div>                                    
-                                  <div class="col-xs-5"><label>Nama Produk</label></div>
-                                  <div class="col-xs-7">
-                                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk"  >
-                                  </div>                                    
                                 </div>
                               </div>
                               <div class="col-md-6">
-                                <div class="form-group"> 
+                                <div class="form-group">
+                                  <div class="col-xs-5"><label>Nama Produk</label></div>
+                                  <div class="col-xs-7">
+                                    <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk"  >
+                                  </div> 
                                   <div class="col-xs-5"><label>Corak Remark</label></div>
                                   <div class="col-xs-7">
                                     <input type="text" class="form-control input-sm" name="corak_remark" id="corak_remark"  >
@@ -105,7 +133,8 @@
                                 <div class="form-group" >
                                     <div class="col-xs-8" style="padding-top:0px">
                                         <button type="button" id="btn-filter" name="submit" class="btn btn-primary btn-sm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Proses</button>
-                                    </div>                                    
+                                        <button type="button" id="btn-excel" name="excel" class="btn btn-success btn-sm" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Excel</button>
+                                    </div> 
                                 </div>
                               </div>
                           </div>
@@ -153,6 +182,45 @@
     var table;
     $(function () {
 
+      var d     = new Date();
+      var month = d.getMonth();
+      var day   = d.getDate();
+      var year  = d.getFullYear();
+      defaultDatesampai = new Date(year, month, day, 23, 59, 59);
+      $('#checkTgl').on('change',function(){
+        let checkTgl = document.getElementById("checkTgl");
+
+        if(checkTgl.checked == true){
+
+          // readonly tgl false
+          $('#tgldari').prop('readonly',false);
+          $('#tglsampai').prop('readonly',false);
+
+          // set date tgldari
+          $('#tgldari').datetimepicker({
+              defaultDate : new Date(year, month, day, 00, 00, 00),
+              format : 'D-MMMM-YYYY HH:mm:ss',
+              // ignoreReadonly: true,
+              maxDate: new Date(),
+          });
+    
+          // set date tglsampai
+          $('#tglsampai').datetimepicker({
+              defaultDate : new Date(year, month, day, 23, 59, 59),
+              format : 'D-MMMM-YYYY HH:mm:ss',
+              // ignoreReadonly: true,
+              maxDate: new Date(year, month, day, 23, 59, 59),
+          });
+          // $('#tglsampai').val(d);
+
+        }else{
+          // readonly tgl true
+          $('#tgldari').prop('readonly',true);
+          $('#tglsampai').prop('readonly',true);
+          
+        }
+      });
+        
       //datatables
       table = $('#example1').DataTable({
         "stateSave": true,
@@ -174,13 +242,21 @@
           "url": "<?php echo site_url('manufacturing/inlet/get_data') ?>",
           "type": "POST",
           "data": function ( data ) {
+                    var check = 0;
+                    if($("#checkTgl").is(":checked") == true){
+                      check = 1;
+                    }
                     data.sales_group = $('#marketing').val();
                     data.lot         = $('#lot').val();
+                    data.lot_gjd     = $('#lot_gjd').val();
                     data.nama_produk = $('#nama_produk').val();
                     data.mg          = $('#mg').val();
                     data.corak_remark= $('#corak_remark').val();
                     data.warna_remark= $('#warna_remark').val();
                     data.status      = $('#status').val();
+                    data.checkTgl    = check;
+                    data.tgldari     = $('#tgldari').val();
+                    data.tglsampai   = $('#tglsampai').val();
           },"error": function() {
             // Message also does not show here
             alert("error Load");
@@ -279,6 +355,53 @@
 
               }
             }
+          });
+
+      });
+
+      // button excel
+      $('#btn-excel').click(function(){
+
+          var check = 0;
+          if($("#checkTgl").is(":checked") == true){
+            check = 1;
+          }
+          var sales_group = $('#marketing').val();
+          var lot         = $('#lot').val();
+          var lot_gjd     = $('#lot_gjd').val();
+          var nama_produk = $('#nama_produk').val();
+          var mg          = $('#mg').val();
+          var corak_remark= $('#corak_remark').val();
+          var warna_remark= $('#warna_remark').val();
+          var status      = $('#status').val();
+          var checkTgl    = check;
+          var tgldari     = $('#tgldari').val();
+          var tglsampai   = $('#tglsampai').val();
+   
+
+          $.ajax({
+              "type":'POST',
+              "url": "<?php echo site_url('manufacturing/inlet/export_excel')?>",
+              "data": {sales_group:sales_group, lot:lot,lot_gjd:lot_gjd, nama_produk:nama_produk, mg:mg, corak_remark:corak_remark, warna_remark:warna_remark, tgldari:tgldari, tglsampai:tglsampai,status:status, checkTgl:checkTgl },
+              "dataType":'json',
+              beforeSend: function() {
+                $('#btn-excel').button('loading');
+              },error: function(){
+                alert('Error Export Excel');
+                $('#btn-excel').button('reset');
+              }
+          }).done(function(data){
+              if(data.status =="failed"){
+                alert_modal_warning(data.message);
+              }else{
+                var $a = $("<a>");
+                $a.attr("href",data.file);
+                $("body").append($a);
+                $a.attr("download",data.filename);
+                $a[0].click();
+                $a.remove();
+              }
+              $('#btn-excel').button('reset');
           });
 
       });

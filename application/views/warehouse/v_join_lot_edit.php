@@ -82,6 +82,12 @@
                                 <textarea class="form-control input-sm" name="note" id="note" ><?php echo htmlentities($join->note);?></textarea>
                             </div>                                    
                         </div>
+                        <div class="col-md-12 col-xs-12">
+                            <div class="col-xs-4"><label>Tanda Join</label></div>
+                            <div class="col-xs-8">
+                                <input type="checkbox" name="tanda_join" id="tanda_join" <?php echo $join->tanda_join == 'true'? 'checked' : '' ?> value="true">
+                            </div>                                    
+                        </div>
                     </div>
 
                     <div class="col-md-6" id="scan_lot" >
@@ -199,7 +205,7 @@
                                         ?>
                                             <tr class="num">
                                                 <td></td>
-                                                <td><?php echo $join->kode_produk?></td>
+                                                <td ><a href="#" class="edit_join_result" data-lot="<?php echo $join->lot; ?>"  data-title="Edit"><?php echo $join->kode_produk?></a></td>
                                                 <td><?php echo $join->nama_produk?></td>
                                                 <td><?php echo $join->corak_remark; ?></td>
                                                 <td><?php echo $join->warna_remark; ?></td>
@@ -492,6 +498,12 @@
         let dept = "<?php echo $join->dept_id;?>";
         let note = $("#note").val();
         var status = "<?php echo $join->status;?>";
+        let tanda = $("input:checked").val();
+        if(tanda == 'true'){
+            tanda_join = 'true';
+        }else{
+            tanda_join = 'false'
+        }
         if(status == 'done'){
             alert_modal_warning('Status Join Lot sudah Done ! ');
         }else if(status == 'cancel'){
@@ -514,7 +526,7 @@
                         $('#btn-simpan').button('loading');
                         please_wait(function(){});
                     },
-                    data: {kode:kode, dept:dept, note:note}, 
+                    data: {kode:kode, dept:dept, note:note, tanda_join:tanda_join}, 
                     success: function(data){
                        if(data.status == 'failed'){
                             unblockUI( function() {
@@ -549,6 +561,33 @@
 
 
     });
+
+    $(document).on("click", ".edit_join_result", function(e) {
+        let lot = $(this).attr('data-lot');
+        edit_join_result(lot);
+    });
+
+    function edit_join_result(lot){
+        let kode = "<?php echo $join->kode_join;?>";
+
+        $('#btn-tambah').button('reset');
+        $("#tambah_data").modal({
+                show: true,
+                backdrop: 'static'
+        });
+        $("#tambah_data").removeClass('modal fade lebar').addClass('modal fade lebar_mode');
+        $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+        $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Edit Hasil Join');
+        $.post('<?php echo site_url()?>warehouse/joinlot/edit_join_result_modal',
+                {kode:kode,lot:lot},
+        ).done(function(html){
+                setTimeout(function() {
+                    $(".tambah_data").html(html)  
+                },1000);
+                $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+        });
+    }
 
 
     //btn-generate 

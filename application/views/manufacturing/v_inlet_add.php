@@ -185,7 +185,7 @@
                         <div class="col-md-12 col-xs-12">
                             <div class="col-xs-4"><label>Benang</label></div>
                             <div class="col-xs-8 col-md-8">
-                                <input type='text' class="form-control input-sm " name="benang" id="benang"  />
+                                <input type='text' class="form-control input-sm " name="benang" id="benang"  autocomplete="on" />
                             </div>                                    
                         </div>
                         <div class="col-md-12 col-xs-12">
@@ -237,7 +237,7 @@
                         <div class="col-md-12 col-xs-12">
                             <div class="col-xs-4"><label>Operator</label></div>
                             <div class="col-xs-8 col-md-8">
-                                <input type='text' class="form-control input-sm " name="operator" id="operator"  />
+                                <input type='text' class="form-control input-sm " name="operator" id="operator" autocomplete="on" />
                             </div>                                    
                         </div>
                      
@@ -383,7 +383,7 @@
 
                             // $('#marketing').val(value.marketing);
                             $('#marketing').val(value.kd_marketing).trigger('change');
-                            $('#marketing').attr( "readonly", true ).attr('name', 'marketing');
+                            // $('#marketing').attr( "readonly", true ).attr('name', 'marketing');
 
                             $('#kode_produk').val(value.kode_produk);
                             $('#nama_produk').val(value.nama_produk);

@@ -11,21 +11,24 @@ class Procurementorder extends MY_Controller {
         parent:: __construct();
         $this->is_loggedin(); //cek apakah user sudah login
         $this->load->model('m_procurementOrder');
+
         $this->load->model('_module');
         $this->load->model('m_colorOrder');
 
         $this->load->model("m_gtp");
         $this->load->library("wa_message");
         $this->config->load('additional');
-    }
+	  }
 
-    public function index() {
-        $data['id_dept'] = 'PRC';
+    public function index()
+    {	
+        $data['id_dept']='PRC';
         $this->load->view('ppic/v_procurement_order', $data);
     }
 
-    function get_data() {
-        $sub_menu = $this->uri->segment(2);
+	  function get_data()
+    {	
+        $sub_menu  = $this->uri->segment(2);
         $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
         $list = $this->m_procurementOrder->get_datatables($kode['kode']);
         $data = array();
@@ -590,7 +593,6 @@ class Procurementorder extends MY_Controller {
 
                 if (empty($jen_route['route_produksi'])) {//cek route produksi apakah ada ?
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Route Produksi Produk Kosong !', 'icon' => 'fa fa-warning', 'type' => 'danger');
-
                     //unlock table
                     $this->_module->unlock_tabel();
                 } else if ($stat_produk['status_produk'] != 't') {
@@ -1054,6 +1056,7 @@ class Procurementorder extends MY_Controller {
                                         $sql_stock_move_produk_batch .= "('" . $move_id . "','" . addslashes($con['kode_produk']) . "','" . addslashes($con['nama_produk']) . "','" . $con['qty_bom_items'] . "','" . addslashes($con['uom']) . "','draft','" . $con_row . "','" . addslashes($origin_prod) . "'), ";
                                         $con_row = $con_row + 1;
                                     }
+
                                 } elseif ($method_action == 'PROD') {// generate mo/mg
                                     $route_empty = FALSE;
                                     $sql_stock_move_batch .= "('" . $move_id . "','" . $tgl . "','" . $origin . "','" . $rp->method . "','" . $rp->lokasi_dari . "','" . $rp->lokasi_tujuan . "','draft','" . $sm_row . "','" . $source_move . "'), ";
@@ -1407,6 +1410,7 @@ class Procurementorder extends MY_Controller {
 
                                 // $sql_log_history_in = rtrim($sql_log_history_in, ', ');
                                 // $this->_module->simpan_log_history_batch($sql_log_history_in);
+
                                 //create log history setiap yg batal
                                 if (!empty($insert_log)) {
                                     // $sql_log_history = rtrim($sql_log_history, ', ');
@@ -1780,7 +1784,7 @@ class Procurementorder extends MY_Controller {
                         // update stock_move_items
                         $sql_update_stock_move_items = "UPDATE stock_move_items SET status =(case " . $case4 . " end) WHERE  move_id in (" . $where4 . ")  AND status NOT IN ('done') ";
                         $this->_module->update_reff_batch($sql_update_stock_move_items);
-
+                      
                         // update stock_move_produk
                         $sql_update_stock_move_produk = "UPDATE stock_move_produk SET status =(case " . $case4 . " end) WHERE  move_id in (" . $where4 . ") AND status NOT IN ('done') ";
                         $this->_module->update_reff_batch($sql_update_stock_move_produk);
@@ -1808,12 +1812,14 @@ class Procurementorder extends MY_Controller {
                     $where_status2 = "AND status NOT IN ('generated','cancel')";
                     $cek_details_status2 = $this->m_procurementOrder->cek_status_procurement_order_items($kode, $where_status2)->num_rows();
 
+
                     if ($cek_details > 0) {
                         if ($cek_details_status == 0) {
                             $this->m_procurementOrder->update_status_procurement_order($kode, 'cancel');
                         } else if ($cek_details_status2 > 0) {
                             $this->m_procurementOrder->update_status_procurement_order($kode, 'draft');
                         }
+
                     }
                 }//end if batal_items == true
 

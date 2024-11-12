@@ -47,7 +47,7 @@
             "ajax": {
                 "url": "<?php echo site_url('warehouse/produk/get_data_list_mo_produk')?>",
                 "type": "POST",
-                "data":{"kode_produk" : "<?php echo $kode_produk;?>"}
+                "data":{"kode_produk" : "<?php echo htmlentities($kode_produk);?>"}
             },
             "columnDefs": [
               { 

@@ -11,6 +11,7 @@ class Joinlot extends MY_Controller
         $this->is_loggedin();//cek apakah user sudah login
         $this->load->model("_module");
         $this->load->model("m_joinLot");
+        $this->load->model("m_inlet");
         $this->load->library("token");
         $this->load->library('prints');
         $this->load->library('barcode');
@@ -40,8 +41,13 @@ class Joinlot extends MY_Controller
                 $row[] = $field->tanggal_transaksi;
                 $row[] = $field->departemen;
                 $row[] = $field->jml_join;
+                $row[] = $field->nama_produk;
+                $row[] = $field->corak_remark;
+                $row[] = $field->warna_remark;
+                $row[] = $field->lot;
                 $row[] = $field->note;
                 $row[] = $field->nama_status;
+                $row[] = $field->kode_join;
     
                 $data[] = $row;
             }
@@ -79,6 +85,15 @@ class Joinlot extends MY_Controller
         $this->load->view('warehouse/v_join_lot_edit', $data);
     }
 
+    function edit_join_result_modal()
+    {
+        $kode               = $this->input->post('kode');
+        $lot                = $this->input->post('lot');
+        $data['kode']       = $kode;
+        $data['data_join']         = $this->m_joinLot->get_data_join_lot_by_kode($kode);
+        return $this->load->view('modal/v_join_lot_edit_result_modal',$data);
+    }
+
     function save_join_lot()
     {
         try{
@@ -90,9 +105,13 @@ class Joinlot extends MY_Controller
                 $dept_id = $this->input->post('dept');
                 $note    = $this->input->post('note');
                 $kode    = $this->input->post('kode');// kode join lot
+                $tanda_join    = $this->input->post('tanda_join');// tanda join lot
 
                 // start transaction
                 $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel('join_lot as j WRITE, join_lot WRITE, departemen as d WRITE, mst_sales_group as msg WRITE,token_increment WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE ');
 
                 if(empty($dept_id)){
                     throw new \Exception("Departemen Harus diisi !", 200);
@@ -116,11 +135,11 @@ class Joinlot extends MY_Controller
                             $callback = array('status' => 'failed', 'message' => 'Data tidak bisa dirubah, Status sudah Cancel !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                         }else {
 
-                            $data_update = array('note'=> $note);
+                            $data_update = array('note'=> $note, 'tanda_join'=>$tanda_join);
                             $this->m_joinLot->update_join_lot_by_kode($data_update,$kode);
                             
                             $jenis_log = "edit";
-                            $note_log  = $kode." | ".$note;
+                            $note_log  = $kode." | ".$note." | ".$tanda_join;
                             $data_history = array(
                                             'datelog'   => date("Y-m-d H:i:s"),
                                             'kode'      => $kode,
@@ -140,6 +159,8 @@ class Joinlot extends MY_Controller
                                             'tanggal_transaksi'=> $tgl,
                                             'dept_id'         => $dept_id,
                                             'nama_user'       => $nama_user,
+                                            'note'            => $note,
+                                            'tanda_join'      => $tanda_join
                         );
 
                         $insert = $this->m_joinLot->insert_data_join_lot($data_insert);
@@ -148,7 +169,7 @@ class Joinlot extends MY_Controller
                         }
 
                         $jenis_log = "edit";
-                        $note_log  = $kode_join." | ".$note;
+                        $note_log  = $kode_join." | ".$note." | ".$tanda_join;
                         $data_history = array(
                                             'datelog'   => date("Y-m-d H:i:s"),
                                             'kode'      => $kode_join,
@@ -167,17 +188,147 @@ class Joinlot extends MY_Controller
                 }
 
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
 
             }
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally{
+            // unlock table
+            $this->_module->unlock_tabel();
         }
+    }
+
+    function save_join_lot_result()
+    {
+
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+
+                $kode           = $this->input->post('kode');
+                $kode_produk    = $this->input->post('kode_produk');
+                $corak_remark   = $this->input->post('corak_remark');
+                $warna_remark   = $this->input->post('warna_remark');
+                $qty_jual       = $this->input->post('qty_jual');
+                $uom_jual       = $this->input->post('uom_qty_jual');
+                $qty2_jual      = $this->input->post('qty2_jual');
+                $uom2_jual      = $this->input->post('uom_qty2_jual');
+                $lebar_jadi     = $this->input->post('lebar_jadi');
+                $uom_lebar_jadi = $this->input->post('uom_lebar_jadi');
+                $lot            = $this->input->post('lot');
+                $quant_id       = $this->input->post('quant_id');
+
+                $sub_menu  = $this->uri->segment(2);
+                $username = addslashes($this->session->userdata('username')); 
+
+                // start transaction
+                $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel('join_lot as j WRITE, join_lot WRITE, departemen as d WRITE, mst_sales_group as msg WRITE,token_increment WRITE, mst_produk WRITE, user WRITE ,main_menu_sub WRITE,log_history WRITE, picklist_detail WRITE, stock_quant WRITE ');
+
+                $join = $this->m_joinLot->get_data_join_lot_by_kode($kode);
+
+                if(empty($join)){
+                    throw new \Exception('Data Barcode tidak ditemukan !', 200);
+                }else if(empty($kode_produk)){
+                    $callback = array('status' => 'failed', 'message' => 'Produk Kosong !', 'icon' => 'fa fa-warrning' , 'type' => 'danger');
+                }else if(empty($corak_remark)){
+                    $callback = array('status' => 'failed', 'message' => 'Corak Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                }else if(empty($warna_remark)){
+                    $callback = array('status' => 'failed', 'message' => 'Warna Remark Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                }else if(empty($qty_jual)){
+                    $callback = array('status' => 'failed', 'message' => 'Qty Jual Jadi Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                }else if(empty($uom_jual)){
+                    $callback = array('status' => 'failed', 'message' => 'Uom Jual Jadi Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                }else if(empty($uom_lebar_jadi)){
+                    $callback = array('status' => 'failed', 'message' => 'Uom Lebar Jadi Harus diisi !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                }else{
+
+                    // nama_produk
+                    $nm = $this->_module->cek_produk_by_kode_produk($kode_produk)->row_array();
+                    $nama_produk = $nm['nama_produk'] ?? '';
+
+                    if(empty($nama_produk)){
+                        $callback = array('status' => 'failed', 'message' => 'Nama Produk tidak ditemukan !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                    }else{
+
+                        $cek_pl = $this->m_inlet->cek_barcode_in_picklist($quant_id,$lot)->row();
+                        //get data stock by kode
+                        $get = $this->_module->get_stock_quant_by_id($quant_id)->row();
+                        if(empty($get) or empty($quant_id)){
+                            $callback = array('status' => 'failed', 'message' => 'Data Lot'.$lot.' tidak ditemukan di Stock !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                        }else if($get->lokasi != 'GJD/Stock'){
+                            $callback = array('status' => 'failed', 'message' => 'Lokasi tidak valid, Data Lot'.$lot.' berada dilokasi '.$get->lokasi ?? '' .' !', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                        }else if($get->lokasi_fisik == 'XPD'){
+                            $callback = array('status' => 'failed', 'message' => 'Lokasi Fisik sudah <b> XPD </b> ! ', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                        }else if(!empty($cek_pl)){
+                            $callback = array('status' => 'failed', 'message' => 'Data Lot '.$lot.' Sudah Masuk PL ! ', 'icon' => 'fa fa-warning' , 'type' => 'danger');
+                        }else{
+
+                            // get_data sebelumnya
+                            $note_before = $get->kode_produk.' '.$get->nama_produk." | ".$get->corak_remark." | ".$get->warna_remark. " | ".$get->qty_jual." ".$get->uom_jual. " | ".$get->qty2_jual." ".$get->uom2_jual. " | ".$get->lebar_jadi." ".$get->uom_lebar_jadi;
+
+                            // $data_update = array('note'=> $note, 'tanda_join'=>$tanda_join);
+                            $data_update = array(
+                                                    'corak_remark'  => $corak_remark,
+                                                    'warna_remark'  => $warna_remark,
+                                                    'qty_jual'      => $qty_jual,
+                                                    'uom_jual'      => $uom_jual,
+                                                    'qty2_jual'     => $qty2_jual,
+                                                    'uom2_jual'     => $uom2_jual,
+                                                    'lebar_jadi'    => $lebar_jadi,
+                                                    'uom_lebar_jadi'=> $uom_lebar_jadi,
+                            );  
+                            $this->m_joinLot->update_join_lot_by_kode($data_update,$kode);
+                            $this->m_joinLot->update_data_stock_quant($data_update,$quant_id,$lot);
+
+                            $jenis_log = "edit";
+                            $note_after = $kode_produk.' '.$nama_produk." | ".$corak_remark." | ".$warna_remark. " | ".$qty_jual." ".$uom_jual. " | ".$qty2_jual." ".$uom2_jual. " | ".$lebar_jadi." ".$uom_lebar_jadi;
+                            $note_log  = "Edit Data Join lot ".$lot."<br> ".$note_before." <b> -> </b> <br> ".$note_after;
+                            $data_history = array(
+                                            'datelog'   => date("Y-m-d H:i:s"),
+                                            'kode'      => $kode,
+                                            'jenis_log' => $jenis_log,
+                                            'note'      => $note_log  );
+                                    
+                            // load in library
+                            $this->_module->gen_history_ip($sub_menu,$username,$data_history);
+
+                            $callback = array('status'=>'success', 'message' =>'Data Berhasil Disimpan !', 'icon'=> 'fa fa-check', 'type'=>'success');
+
+                        }
+
+                    }
+
+                }
+
+                if(!$this->_module->finishTransaction()){
+                    throw new \Exception("Data Gagal disimpan !", 500);
+                }
+
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+
+            }
+        }catch(Exception $ex){
+            // finish transaction
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally{
+            // unlock table
+            $this->_module->unlock_tabel();
+        }
+
     }
 
     function import_produk_join()
@@ -210,6 +361,7 @@ class Joinlot extends MY_Controller
                 $row[] = $field->nama_grade;
                 $row[] = $field->lebar_jadi." ".$field->uom_lebar_jadi;
                 $row[] = $field->nama_sales_group;
+                $row[] = $field->lokasi_fisik;
                 $row[] = $field->reserve_move;
                 $row[] = $field->quant_id;
                 $data[] = $row;
@@ -245,6 +397,9 @@ class Joinlot extends MY_Controller
 
                 // start transaction
                 $this->_module->startTransaction();
+
+                //lock tabel
+                $this->_module->lock_tabel('join_lot as j WRITE, departemen as d WRITE,mst_sales_group as msg WRITE, join_lot_items WRITE, stock_quant WRITE, mrp_production_fg_hasil WRITE, picklist_detail WRITE, join_lot_items as jli WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE, mrp_inlet WRITE ');
 
                 $cek_status  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
 
@@ -289,8 +444,8 @@ class Joinlot extends MY_Controller
                         }
                     }else if($cek_lot > 0){
                         throw new \Exception('Barcode / Lot sudah diinput !', 200);
-                    }else if(empty($cek_lot_hph)){
-                        throw new \Exception('Barcode / Lot sudah bukan dari HPH !', 200);
+                    // }else if(empty($cek_lot_hph)){
+                    //     throw new \Exception('Barcode / Lot sudah bukan dari HPH !', 200);
                     }else if($get_sq->lokasi_fisik == "XPD" AND $dept == 'GJD'){
                         throw new \Exception('Lokasi Barcode / Lot sudah XPD !',200);
                     }else if(!empty($cek_pl) AND $dept == 'GJD'){
@@ -372,21 +527,25 @@ class Joinlot extends MY_Controller
 
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal Simpan data ', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 
-                // if (!$this->_module->finishTransaction()) {
-                //     throw new \Exception('Gagal Simpan data ', 500);
-                // }
             }
-            // finish transaction
-            $this->_module->finishTransaction();
+            // // finish transaction
+            // $this->_module->finishTransaction();
 
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally{
+            // unlock table
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -407,12 +566,13 @@ class Joinlot extends MY_Controller
 
                 $sub_menu   = $this->uri->segment(2);
                 $username   = addslashes($this->session->userdata('username')); 
-                
-                //lock tabel
-                // $this->_module->lock_tabel('');
+               
 
                 // start transaction
                 $this->_module->startTransaction();
+
+                //lock tabel
+                $this->_module->lock_tabel('join_lot as j WRITE, departemen as d WRITE,mst_sales_group as msg WRITE, join_lot_items WRITE, stock_quant WRITE, mrp_production_fg_hasil WRITE, picklist_detail WRITE, join_lot_items as jli WRITE,user WRITE ,main_menu_sub WRITE,log_history WRITE ');
                 
                 // cek status done / cancel
                 $cek_status  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
@@ -447,9 +607,7 @@ class Joinlot extends MY_Controller
                     $lot_tmp    = "";
                     foreach($arr_data as $row){
 
-                        $get_sq = $this->m_joinLot->get_stock_quant_by_id($row,$lokasi_stock);// GJD    
-                        
-                        
+                        $get_sq = $this->m_joinLot->get_stock_quant_by_id($row,$lokasi_stock);// GJD   
                         
                         if(empty($get_sq)){
                             $get_sq2 = $this->_module->get_stock_quant_by_id($row)->row();
@@ -475,15 +633,17 @@ class Joinlot extends MY_Controller
                             $lot         = $get_sq->lot;
                             $cek_lot_hph = $this->m_joinLot->cek_lot_hph($lot);
                             $inlet       = '';
+                            $status_inlet = '';
                             if(!empty($cek_lot_hph)){
                                 $id_inlet = $cek_lot_hph->id_inlet ?? ''; 
                                 $inlet = $this->m_joinLot->cek_status_inlet_by_id($id_inlet);
+                                $status_inlet = $inlet->status ?? '';
                             }
                             // cek barcode di picklist 
                             $cek_pl = $this->m_joinLot->cek_picklist_by_lot($lot);
 
-                            if(!empty($cek_lot_hph) AND $inlet->status != 'done'){
-                                throw new \Exception('Status HPH / INLET Barcode / Lot '.$lot.' masih <b>'.$inlet->status.'<b> !',200);
+                            if(!empty($cek_lot_hph) AND $status_inlet != 'done'){
+                                throw new \Exception('Status HPH / INLET Barcode / Lot '.$lot.' masih <b>'.$status_inlet.'<b> !',200);
                             }else if(!empty($cek_pl)){
                                 throw new \Exception('Data Barcode / Lot '.$lot.' sudah masuk PL !',200);
                             }else{
@@ -617,17 +777,23 @@ class Joinlot extends MY_Controller
 
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal Mencari Data', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 
-                $this->_module->finishTransaction();
             }
 
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }finally{
+            // unlock table
+            $this->_module->unlock_tabel();
         }
 
     }
@@ -649,6 +815,9 @@ class Joinlot extends MY_Controller
                 
                 // start transaction
                 $this->_module->startTransaction();
+
+                // lock table
+                $this->_module->lock_tabel("join_lot as j WRITE, departemen as d WRITE, mst_sales_group as msg WRITE, join_lot_items WRITE, log_history WRITE, user WRITE ,main_menu_sub WRITE ");
                 
                 $cek_status  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
                 
@@ -684,15 +853,23 @@ class Joinlot extends MY_Controller
 
                 }
 
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal dihapus', 500);
+                }
+
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                $this->_module->finishTransaction();
             }
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -713,12 +890,15 @@ class Joinlot extends MY_Controller
                 //start transaction
                 $this->_module->startTransaction();
 
+                //lock table
+                $this->_module->lock_tabel("join_lot as j WRITE, departemen as d WRITE, mst_sales_group as msg WRITE, join_lot_items WRITE, join_lot_items as jli WRITE, log_history WRITE, user WRITE ,main_menu_sub WRITE, join_lot WRITE ");
+
                 $cek_status  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
                 
                 if($cek_status->status == 'done'){
-                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status Join Lot Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa batalkan, Status Join Lot Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else if($cek_status->status == 'cancel'){
-                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status Join Lot Cancel !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa batalkan, Status Join Lot Cancel !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else{
 
                     $items = $this->m_joinLot->get_data_join_lot_items_by_kode($kode_join);
@@ -742,16 +922,22 @@ class Joinlot extends MY_Controller
                     }
 
                 }
-
+                
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Data Gagal dibatalkan', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-                // finish transaction
-                $this->_module->finishTransaction();
             }
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ??  500)
                     ->set_content_type('application/json','utf-8')
                     ->set_output(json_encode(array('status'=>'failed','message'=>$ex->getMessage(), 'icon'=>'fa fa-warning', 'type'=>'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
 
     }
@@ -774,6 +960,10 @@ class Joinlot extends MY_Controller
                 //start transaction
                 $this->_module->startTransaction();
 
+                // lock table
+                $this->_module->lock_tabel("stock_quant WRITE, join_lot as j WRITE, departemen as d WRITE, mst_sales_group as msg WRITE, stock_move WRITE, adjustment WRITE, join_lot_items as jli WRITE, picklist_detail WRITE, mrp_inlet WRITE, token_increment WRITE, mrp_production_fg_hasil WRITE, stock_move_produk WRITE, stock_move_items WRITE, adjustment_items WRITE, join_lot WRITE, log_history WRITE, user WRITE ,main_menu_sub WRITE");
+
+
                 $cek  = $this->m_joinLot->get_data_join_lot_by_kode($kode_join);
                 
                 if($cek->status == 'done'){
@@ -786,6 +976,12 @@ class Joinlot extends MY_Controller
                     $lokasi_stock = $get['stock_location'] ?? '';
                     $lokasi_adj   = $get['adjustment_location'] ?? '';
                     $nama_departemen   = $get['nama'] ?? '';
+
+                    if($cek->tanda_join == 'true'){
+                        $tanda_join = '-';
+                    }else{
+                        $tanda_join = '';
+                    }
 
                     // get move_id
                     $last_move   = $this->_module->get_kode_stock_move();
@@ -939,7 +1135,7 @@ class Joinlot extends MY_Controller
                                                 'qty_adjustment2'   => 0,
                                                 'move_id'           => $move_id,
                                                 'qty_move'          => $qty1_move,
-                                                'qty2_move'         => $qty1_move,
+                                                'qty2_move'         => $qty2_move,
                                                 'row_order'         => $row_order_adj);
 
                             $sum_qty        = $sum_qty + $ij->qty;
@@ -955,7 +1151,16 @@ class Joinlot extends MY_Controller
                         // create stock
                         if($data_sm > 0){
 
-                            $lot_baru = $this->token->noUrut('stock_quant_a', date('ym'), true)->generate('', '%05d')->get();
+                            if($tmp_grade == 'A'){
+                                $lot_baru = $this->token->noUrut('stock_quant_a', date('my'), true)->generate('', '%05d')->get();
+                            }else if($tmp_grade == 'B'){
+                                $lot_baru = $this->token->noUrut('stock_quant_b', date('my'), true)->generate($tmp_grade, '%05d')->get();
+                            }else if($tmp_grade == 'C'){
+                                $lot_baru = $this->token->noUrut('stock_quant_c', date('my'), true)->generate($tmp_grade, '%05d')->get();
+                            }else{
+                                throw new \Exception('Grade tidak Valid !', 200);
+                            }
+
                             $origin   = $kode_adjustment."|".$row_order_adj;
                             // sm to adj
                             $data_sm[] = array('move_id'    => $move_id,
@@ -1003,10 +1208,10 @@ class Joinlot extends MY_Controller
                                                     'move_date'     => $tgl,
                                                     'kode_produk'   => $tmp_kode_produk,
                                                     'nama_produk'   => $tmp_nama_produk,
-                                                    'corak_remark'  => $tmp_corak_remark,
+                                                    'corak_remark'  => $tmp_corak_remark.''.$tanda_join,
                                                     'warna_remark'  => $tmp_warna_remark,
                                                     'lot'           => trim($lot_baru),
-                                                    'nama_grade'    => 'A',
+                                                    'nama_grade'    => $tmp_grade,
                                                     'qty'           => $sum_qty,
                                                     'uom'           => $tmp_uom,
                                                     'qty2'          => $sum_qty2,
@@ -1054,7 +1259,7 @@ class Joinlot extends MY_Controller
                                                     'quant_id'  => $start,
                                                     'kode_produk'   => $tmp_kode_produk,
                                                     'nama_produk'   => $tmp_nama_produk,
-                                                    'corak_remark'  => $tmp_corak_remark,
+                                                    'corak_remark'  => $tmp_corak_remark.''.$tanda_join,
                                                     'warna_remark'  => $tmp_warna_remark,
                                                     'lot'           => $lot_baru,
                                                     'qty'           => $sum_qty,
@@ -1068,13 +1273,12 @@ class Joinlot extends MY_Controller
                                                     'lebar_jadi'    => $tmp_lebar_jadi,
                                                     'uom_lebar_jadi'=> $tmp_uom_lebar_jadi,
                                                     'sales_group'   => $tmp_sales_group,
-                                                    'grade'         => 'A',
-                                                    'status'        => "done"
+                                                    'grade'         => $tmp_grade,
+                                                    'status'        => "done",
+                                                    'tanggal_transaksi' => $tgl
                             );
 
-                            if (!$this->_module->finishTransaction()) {
-                                throw new \Exception('Gagal Simpan data ', 500);
-                            }
+                           
                         
                             // simpan stock move
                             if(!empty($data_sm)){
@@ -1173,9 +1377,6 @@ class Joinlot extends MY_Controller
                             throw new \Exception('Join Lot Gagal Di Simpan !', 200);
                         }
 
-                        if (!$this->_module->finishTransaction()) {
-                            throw new \Exception('Gagal Simpan data ', 500);
-                        }
 
                     }else if(count($items_join) == 1){
                         throw new \Exception('Barcode / Lot yang akan di Join harus lebih dari 1 !', 200);
@@ -1185,14 +1386,21 @@ class Joinlot extends MY_Controller
 
                 }
                 // finish transaction
-                $this->_module->finishTransaction();
+                if (!$this->_module->finishTransaction()) {
+                    throw new \Exception('Gagal generate Data', 500);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             }
         }catch(Exception $ex){
-            $this->_module->finishTransaction();
+            $this->_module->finishRollBack();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ??  500)
                     ->set_content_type('application/json','utf-8')
                     ->set_output(json_encode(array('status'=>'failed','message'=>$ex->getMessage(), 'icon'=>'fa fa-warning', 'type'=>'danger')));
+        } finally {
+            // unlock table
+            $this->_module->unlock_tabel();
+
         }
     }
 
@@ -1203,6 +1411,16 @@ class Joinlot extends MY_Controller
         $data['desain_barcode']   = $this->_module->get_list_desain_barcode_by_type('LBK');    
         return $this->load->view('modal/v_join_lot_print_modal', $data);
     }
+
+
+    public function print_modal2()
+    {
+        $data['data_print'] = ($this->input->post('data'));
+        $data['kode_k3l']   = $this->_module->get_list_kode_k3l();    
+        $data['desain_barcode']   = $this->_module->get_list_desain_barcode_by_type('LBK');    
+        return $this->load->view('modal/v_join_lot_print2_modal', $data);
+    }
+    
 
 
     function print_barcode_join()
@@ -1251,6 +1469,80 @@ class Joinlot extends MY_Controller
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
+    }
+
+    function print_barcode_join2()
+    {
+
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+
+                $data       = $this->input->post('data');
+                $k3l        = $this->input->post('k3l');
+                $desain_barcode  = $this->input->post('desain_barcode');
+
+                if(empty($desain_barcode)){
+                    throw new \Exception('Desain Barcode Harus dipilih !', 200);                
+                }else{
+
+                    if(empty($data)){
+                        throw new \Exception('Data Join Lot tidak ditemukan !', 200);
+                    }else{
+                        
+                        $data_print = $this->print_barcode2($desain_barcode,$data,$k3l);
+                        if(empty($data_print)){
+                            throw new \Exception('Data Print tidak ditemukan !', 500);
+                        }
+                        $callback = array('status' => 'success', 'message' => 'Print Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success', 'data_print' =>$data_print);
+                    }
+                }
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+
+    }
+
+    function print_barcode2($desain_barcode,$kode,$k3l){
+
+        $desain_barcode = strtolower($desain_barcode);
+        $code = new Code\Code128New();
+        $this->prints->setView('print/'.$desain_barcode);
+        $data_print_array = array();
+        $data_qty2_jual = array();
+        for($a=0; $a<count($kode); $a++){
+            $dp     = $this->m_joinLot->get_data_join_lot_by_kode($kode[$a]);
+            $gen_code = $code->generate($dp->lot, "", 60, "vertical");
+            $tanggal = date('Ymd', strtotime($dp->tanggal_transaksi));
+            $data_print_array = array(
+                        'pattern' => $dp->corak_remark,
+                        'isi_color' => !empty($dp->warna_remark)? $dp->warna_remark : '&nbsp',
+                        'isi_satuan_lebar' => 'WIDTH ('.$dp->uom_lebar_jadi.')',
+                        'isi_lebar' => !empty($dp->lebar_jadi)? $dp->lebar_jadi : '&nbsp',
+                        'isi_satuan_qty1' => 'QTY ['.$dp->uom_jual.']',
+                        'isi_qty1' => round($dp->qty_jual,2),
+                        'barcode_id' => $dp->lot,
+                        'tanggal_buat' => $tanggal,
+                        'no_pack_brc' => $kode[$a],
+                        'barcode' => $gen_code,
+                        'k3l' => $k3l
+            );
+            if(!empty((double)$dp->qty2_jual)){
+                $data_qty2_jual = array('isi_satuan_qty2' => 'QTY2 ['.$dp->uom2_jual.']', 'isi_qty2' => round($dp->qty2_jual,2));
+                $data_print_array = array_merge($data_print_array,$data_qty2_jual);
+            }
+            // break;
+            $this->prints->addDatas($data_print_array);
+        }
+     
+        return $this->prints->generate();
     }
 
 

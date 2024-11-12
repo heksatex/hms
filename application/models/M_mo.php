@@ -8,8 +8,8 @@ class M_mo extends CI_Model
 	
 	//var $table 		  = 'mrp_production';
 	//var $table2 	  = 'mesin';
-	var $column_order = array(null, 'kode', 'tanggal', 'nama_produk', 'qty', 'uom', 'reff_note', 'responsible','nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'nama_produk', 'qty','uom', 'reff_note', 'responsible', 'nama_status');
+	var $column_order = array(null, 'kode', 'tanggal','origin', 'nama_produk', 'qty', 'uom', 'reff_note', 'responsible','nama_status');
+	var $column_search= array( 'kode', 'tanggal','origin', 'nama_produk', 'qty','uom', 'reff_note', 'responsible', 'nama_status');
 	var $order  	  = array('kode' => 'desc');
 
 	var $table2  	    = 'stock_quant';
@@ -28,7 +28,7 @@ class M_mo extends CI_Model
 		//$this->db->from('mrp_production');
 		//$this->db->JOIN('mrp_production', 'mrp_production.md_id = mesin.mc_id');
 
-		$this->db->select("mp.kode, mp.tanggal, mp.nama_produk, mp.qty, mp.uom, mp.status, mmss.nama_status, mp.reff_note, mp.responsible");
+		$this->db->select("mp.kode, mp.tanggal, mp.origin, mp.nama_produk, mp.qty, mp.uom, mp.status, mmss.nama_status, mp.reff_note, mp.responsible");
 		$this->db->from("mrp_production mp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mp.status", "inner");
 
@@ -276,9 +276,10 @@ class M_mo extends CI_Model
 		return $this->db->query("SELECT fg.kode, fg.move_id, fg.quant_id, fg.kode_produk, fg.kode_produk, fg.nama_produk, 
 										fg.lot, fg.nama_grade, fg.qty, fg.uom, fg.row_order, sq.reff_note, fg.qty2, fg.uom2, fg.lebar_greige, fg.uom_lebar_greige, fg.lebar_jadi, fg.uom_lebar_jadi,(SELECT lot FROM adjustment_items adji 
 									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
-									where adj.status = 'done' AND adji.quant_id = fg.quant_id AND adj.id_type_adjustment IN ('1','2') limit 1 ) as lot_adj
+									where adj.status = 'done' AND adji.quant_id = fg.quant_id AND adj.id_type_adjustment IN ('1','2') limit 1 ) as lot_adj, mrpin.lot as lot_asal
 								FROM mrp_production_fg_hasil fg 
 								INNER JOIN stock_quant sq ON fg.quant_id =  sq.quant_id
+								LEFT JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 								WHERE fg.kode = '".$kode."' AND fg.lokasi NOT IN ('".$lokasi_waste."') ORDER BY fg.row_order")->result();
 	}
 
@@ -1290,6 +1291,16 @@ class M_mo extends CI_Model
 		$this->db->where('quant_id',$quant_id);
 		$result = $this->db->get('mrp_inlet');
 		return $result->num_rows();
+	}
+
+	public function cek_mrp_cacat_by_quant($kode,$quant_id)
+	{
+		$this->db->select("quant_id");
+		$this->db->from("mrp_production_cacat");
+		$this->db->where('kode',$kode);
+		$this->db->where('quant_id',$quant_id);
+		$query = $this->db->get();
+		return $query->num_rows();
 	}
 
 

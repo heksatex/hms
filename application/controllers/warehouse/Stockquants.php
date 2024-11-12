@@ -12,7 +12,9 @@ class Stockquants extends MY_Controller
 		$this->load->model("_module");//load model global
 		$this->load->model("m_stockQuants");
         $this->load->library('pagination');
-
+        $this->load->library('prints');
+        $this->load->library('barcode');
+        $this->load->model('m_inlet');
 	}
 
 	public function index()
@@ -53,6 +55,9 @@ class Stockquants extends MY_Controller
                 // start transaction
                 $this->_module->startTransaction();
 
+                //lock table
+                $this->_module->lock_tabel('log_history WRITE, user WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, mst_produk as mp WRITE, mst_category as cat WRITE, picklist WRITE, stock_quant WRITE, picklist_detail WRITE, mrp_production_fg_hasil WRITE, stock_move_items WRITE');
+
                 $username    = addslashes($this->session->userdata('username'));
                 $sub_menu    = $this->uri->segment(2);
                 $quant_id    = $this->input->post('quant_id');
@@ -66,7 +71,13 @@ class Stockquants extends MY_Controller
                 $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
                 $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
                 $uom_lebar_jadi     = addslashes($this->input->post('uom_lebar_jadi'));
-                $lokasi     = addslashes($this->input->post('lokasi'));
+                $lokasi     = ($this->input->post('lokasi'));
+                $corak_remark     = ($this->input->post('corak_remark'));
+                $warna_remark     = ($this->input->post('warna_remark'));
+                $qty_jual     = ($this->input->post('qty_jual'));
+                $uom_jual     = ($this->input->post('uom_jual'));
+                $qty2_jual    = ($this->input->post('qty2_jual'));
+                $uom2_jual    = ($this->input->post('uom2_jual'));
 
                 if(empty($quant_id)){
                     throw new \Exception("Data Kosong !", 200);
@@ -80,42 +91,54 @@ class Stockquants extends MY_Controller
                     }else{
                         // cek category produk
                         $cek_cat = $this->m_stockQuants->get_kategori_produk_by_produk($sq->kode_produk);
+                        $create_date_barcode = strtotime(date('Y-m-d', strtotime($sq->create_date)));
+                        $date_migrasi        = strtotime('2024-05-01');
+
                         if((int) $cek_cat->id_category == 21){// kain hasil gudang jadi
+                             $cek_pl = $this->m_inlet->cek_barcode_in_picklist($sq->quant_id,$sq->lot)->row();
                             if($sq->nama_grade != $nama_grade){
                                 throw new \Exception(" Nama Grade tidak Boleh dirubah !", 200);
                             }else if($sq->lebar_greige != $lebar_greige){
                                 throw new \Exception(" Lebar Greige tidak Boleh dirubah !", 200);
                             }else if($sq->uom_lebar_greige != $uom_lebar_greige){
                                 throw new \Exception(" Uom Lebar Greige tidak Boleh dirubah !", 200);
-                            }else if($sq->lebar_jadi != $lebar_jadi){
-                                throw new \Exception(" Lebar Jadi tidak Boleh dirubah !", 200);
-                            }else if($sq->uom_lebar_jadi != $uom_lebar_jadi){
-                                throw new \Exception(" Uom Lebar Jadi tidak Boleh dirubah !", 200);
+                            }else if($sq->lokasi_fisik == 'XPD'){
+                                throw new \Exception(" Lokasi Fisik  sudah <b> XPD </b> !", 200);
+                            }else if(!empty($cek_pl)){
+                                throw new \Exception('Data Lot '.$lot.' Sudah Masuk PL !', 200);
+                            }else if($create_date_barcode > $date_migrasi){
+                                throw new \Exception(" Data Lot / Barcode  tidak bisa dirubah karena Lot  / Barcode ini dibuat seletelah Migrasi Stock  !", 200);
                             }
+
                         }
-                        $note_before = $sq->kode_produk.' '.$sq->nama_produk.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty.' '.$sq->uom.' '.$sq->qty2.' '.$sq->uom2.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
+                        $note_before = $sq->kode_produk.' '.$sq->nama_produk.' '.$sq->corak_remark.' '.$sq->warna_remark.' '.$sq->lot.' '.$sq->nama_grade.' '.$sq->qty_jual.' '.$sq->uom_jual.' '.$sq->qty2_jual.' '.$sq->uom2_jual.' | '.$sq->lebar_greige.' '.$sq->uom_lebar_greige.' | '.$sq->lebar_jadi.' '.$sq->uom_lebar_jadi.' | '.$sq->lokasi.' '.$sq->reff_note; 
         
-                        $this->m_stockQuants->update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi);
+                        $this->m_stockQuants->update_stockquants($quant_id,$nama_grade,$reff_note,$lebar_greige,$uom_lebar_greige,$lebar_jadi,$uom_lebar_jadi, $corak_remark,$warna_remark, $qty_jual, $uom_jual, $qty2_jual, $uom2_jual);
         
                         $jenis_log   = "edit";        
-                        $note_log    = $note_before.' <b> -> </b>'. $sq->kode_produk.' '.$nama_produk.'  '.$lot.'  '.$nama_grade.' '.$qty2.' '.$uom2.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
+                        $note_log    = $note_before.'<br> <b> -> </b>'. $sq->kode_produk.' '.$nama_produk.'  '.$corak_remark.'  '.$warna_remark.'  '.$lot.'  '.$nama_grade.' '.$qty_jual.' '.$uom_jual.' '.$qty2_jual.' '.$uom2_jual.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
                         $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
         
-                        $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
+                        $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan ! ', 'icon' =>'fa fa-check', 'type' => 'success');
                     }
     
                 }
                 // finish transaction
-                $this->_module->finishTransaction();
+                if(!$this->_module->finishTransaction()){
+                    throw new \Exception(" Data Gagal Disimpan !", 200);
+                }
                 $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
             }
         
         }catch(Exception $ex){
             // finish transaction
-            $this->_module->finishTransaction();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('status'=>'failed', 'message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            //unlock table
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -291,7 +314,14 @@ class Stockquants extends MY_Controller
                                                     'lokasi'      => $row->lokasi,
                                                     'lokasi_fisik'=> $row->lokasi_fisik,
                                                     'reff_note'   => $row->reff_note,
-                                                    'reserve_move'=> $row->reserve_move);   
+                                                    'reserve_move'=> $row->reserve_move,
+                                                    'corak_remark'=> $row->corak_remark,
+                                                    'warna_remark'=> $row->warna_remark,
+                                                    'qty_jual'=> $row->qty_jual,
+                                                    'uom_jual'=> $row->uom_jual,
+                                                    'qty2_jual'=> $row->qty2_jual,
+                                                    'uom2_jual'=> $row->uom2_jual,
+                                                );   
 
                 $no++;
             }
@@ -816,23 +846,29 @@ class Stockquants extends MY_Controller
             foreach ($item as $val) {
                  # code...
                 $list_items[] = array('kode_produk'=> $val->kode_produk,
-                                      'id_encr'    => encrypt_url($val->quant_id),
-                                      'nama_produk'=> $val->nama_produk,
-                                      'create_date'=> $val->create_date,
-                                      'move_date'  => $val->move_date,
-                                      'lot'        => $val->lot,
-                                      'nama_grade' => $val->nama_grade,
-                                      'qty'        => $val->qty,
-                                      'uom'        => $val->uom,
-                                      'qty2'       => $val->qty2,
-                                      'uom2'       => $val->uom2,
-                                      'qty_opname' => $val->qty_opname.' '.$val->uom_opname,
-                                      'lebar_greige'=> $val->lebar_greige.' '.$val->uom_lebar_greige,
-                                      'lebar_jadi'  => $val->lebar_jadi.' '.$val->uom_lebar_jadi,
-                                      'lokasi'      => $val->lokasi,
-                                      'lokasi_fisik'=> $val->lokasi_fisik,
-                                      'reff_note'   => $val->reff_note,
-                                      'reserve_move'=> $val->reserve_move
+                                        'id_encr'    => encrypt_url($val->quant_id),
+                                        'nama_produk'=> $val->nama_produk,
+                                        'create_date'=> $val->create_date,
+                                        'move_date'  => $val->move_date,
+                                        'lot'        => $val->lot,
+                                        'nama_grade' => $val->nama_grade,
+                                        'qty'        => $val->qty,
+                                        'uom'        => $val->uom,
+                                        'qty2'       => $val->qty2,
+                                        'uom2'       => $val->uom2,
+                                        'qty_opname' => $val->qty_opname.' '.$val->uom_opname,
+                                        'lebar_greige'=> $val->lebar_greige.' '.$val->uom_lebar_greige,
+                                        'lebar_jadi'  => $val->lebar_jadi.' '.$val->uom_lebar_jadi,
+                                        'lokasi'      => $val->lokasi,
+                                        'lokasi_fisik'=> $val->lokasi_fisik,
+                                        'reff_note'   => $val->reff_note,
+                                        'reserve_move'=> $val->reserve_move,
+                                        'corak_remark'=> $val->corak_remark,
+                                        'warna_remark'=> $val->warna_remark,
+                                        'qty_jual'=> $val->qty_jual,
+                                        'uom_jual'=> $val->uom_jual,
+                                        'qty2_jual'=> $val->qty2_jual,
+                                        'uom2_jual'=> $val->uom2_jual,
                                   );
             }
             $allcount = $this->m_stockQuants->getRecordCount($whereCount);// get total semua record berdasarkan WHere
@@ -893,6 +929,14 @@ class Stockquants extends MY_Controller
         return $this->load->view('modal/v_stock_quant_print_modal', $data);
     }
 
+    public function print_modal()
+    {
+    	$data['quant_id']  = $this->input->post('quant_id');
+        $data['kode_k3l']    = $this->_module->get_list_kode_k3l();        
+        $data['desain_barcode']   = $this->_module->get_list_desain_barcode_by_type('LBK');    
+        return $this->load->view('modal/v_stock_quant_print_gjd_modal', $data);
+    }
+
 
     function print_knitting()
     {
@@ -947,6 +991,80 @@ class Stockquants extends MY_Controller
         }else{
             print_r('Maaf, Lot Tidak ditemukan !');
         }
+    }
+
+
+     function print_barcode_gjd()
+    {
+        try{
+            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                throw new \Exception('Waktu Anda Telah Habis', 401);
+            }else{
+
+                $quant_id  = $this->input->post('quant_id');
+                $k3l        = $this->input->post('k3l');
+                $desain_barcode  = $this->input->post('desain_barcode');
+
+                if(empty($quant_id)){
+                    throw new \Exception('Data Print Lot Kosong !', 200);
+                }else if(empty($desain_barcode)){
+                    throw new \Exception('Desain Barcode K3l Harus dipilih !', 200);
+                }else if(empty($k3l)){
+                    throw new \Exception('K3L Harus dipilih  !', 200);
+                }else{
+                    $data_print = $this->print_barcode($desain_barcode,$quant_id,$k3l);
+                    if(empty($data_print)){
+                        throw new \Exception('Data Print tidak ditemukan !', 500);
+                    }
+                    $callback = array('status' => 'success', 'message' => 'Print Berhasil !', 'icon' =>'fa fa-check', 'type' => 'success', 'data_print' =>$data_print);
+                }
+                $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+            }
+
+        }catch(Exception $ex){
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('status'=>'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+
+    function print_barcode($desain_barcode,$quant_id,$k3l)
+    {
+        $kode_k3l  = $k3l;
+        $desain_barcode = strtolower($desain_barcode);
+        $code = new Code\Code128New();
+        $this->prints->setView('print/'.$desain_barcode);
+        $data_print_array = array();
+        $data_qty2_jual = array();
+        // foreach($data_stock as $sq){
+            $get = $this->_module->get_stock_quant_by_id($quant_id)->row();
+            // foreach($get as $row){
+                $gen_code = $code->generate($get->lot, "", 60, "vertical");
+                $tanggal = date('Ymd', strtotime($get->create_date));
+                $data_print_array = array(
+                            'pattern' => $get->corak_remark,
+                            'isi_color' => !empty($get->warna_remark)? $get->warna_remark : '&nbsp' ,
+                            'isi_satuan_lebar' => 'WIDTH ('.$get->uom_lebar_jadi.')',
+                            'isi_lebar' => !empty($get->lebar_jadi)? $get->lebar_jadi : '&nbsp',
+                            'isi_satuan_qty1' => 'QTY ['.$get->uom_jual.']',
+                            'isi_qty1' => round($get->qty_jual,2),
+                            'barcode_id' => $get->lot,
+                            'tanggal_buat' => $tanggal,
+                            'no_pack_brc' => $quant_id,
+                            'barcode' => $gen_code,
+                            'k3l' => $kode_k3l
+                );
+                if(!empty((double)$get->qty2_jual)){
+                    $data_qty2_jual = array('isi_satuan_qty2' => 'QTY2 ['.$get->uom2_jual.']', 'isi_qty2' => round($get->qty2_jual,2));
+                    $data_print_array = array_merge($data_print_array,$data_qty2_jual);
+                }
+                // break;
+                $this->prints->addDatas($data_print_array);
+            // }
+        // }
+        return $this->prints->generate();
     }
 
 

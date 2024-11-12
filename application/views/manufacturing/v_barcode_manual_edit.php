@@ -172,6 +172,9 @@
                     
 
                 </div>
+                <div class="col-md-12" id='status_txt_load'>
+                    <input type="hidden" class="form-control input-sm" name="status_txt" id="status_txt" readonly="readonly" value="<?php echo $mrpm->status; ?>"/>
+                </div>
 
             </form>
 
@@ -191,10 +194,12 @@
                                         <thead>                          
                                             <tr>
                                                 <th class="style no">No.</th>
+                                                <th class="style nowrap">No Batch</th>                            
                                                 <th class="style nowrap">Nama Produk</th>                            
                                                 <th class="style nowrap">Corak Remark</th>
                                                 <th class="style nowrap">Warna Remark</th>
                                                 <th class="style nowrap">Quality</th>
+                                                <th class="style nowrap">Grade</th>
                                                 <th class="style nowrap">Jml Pcs</th>
                                                 <th class="style nowrap">Qty</th>
                                                 <th class="style nowrap">Qty2</th>
@@ -224,15 +229,18 @@
                                         <thead>                          
                                             <tr>
                                                 <th class="style no">No.</th>
+                                                <th class="style nowrap">No Batch</th>                            
                                                 <th class="style">Nama Produk</th>                            
                                                 <th class="style">Corak Remark</th>
                                                 <th class="style">Warna Remark</th>
+                                                <th class="style">Grade</th>
                                                 <th class="style">Lot</th>
                                                 <th class="style">Qty</th>
                                                 <th class="style">Qty2</th>
                                                 <th class="style">Qty Jual</th>
                                                 <th class="style">Qty2 Jual</th>
                                                 <th class="style">Lebar Jadi</th>
+                                                <th class="style nowrap">K3L</th>
                                                 <th class="style">#</th>        
                                             </tr>
                                         </thead>
@@ -326,7 +334,7 @@
     });
 
     function refresh(){
-        // $("#tab_1").load(location.href + " #tab_1");
+        $("#status_txt_load").load(location.href + " #status_txt_load>*");
         table.ajax.reload( function(){});
         table2.ajax.reload( function(){});
         $("#foot").load(location.href + " #foot");
@@ -356,15 +364,15 @@
            
             "columnDefs": [
               { 
-                "targets": [0,12], 
+                "targets": [0,14], 
                 "orderable": false, 
               },
               { 
-                "targets": [5,6,7,8,9,10], 
+                "targets": [7,8,9,10,11,12], 
                 "className":"text-right nowrap",
               },
               { 
-                "targets": [11], 
+                "targets": [13], 
                 "className":"nowrap",
               },
             ],
@@ -399,17 +407,17 @@
                 "orderable": false, 
               },
               { 
-                "targets": [5,6,7,8,9], 
+                "targets": [7,8,9,10,11], 
                 "className":"text-right",
               },
               {
-               'targets':10,
-               'data' : 10,
+               'targets':13,
+               'data' : 13,
                'checkboxes': {
                   'selectRow': true
                 },
                 'createdCell':  function (td, cellData, rowData, row, col){
-                   var rowId = rowData[10];
+                   var rowId = rowData[13];
                 },
               },
             ],
@@ -417,7 +425,7 @@
               'style': 'multi'
             },
             'rowCallback': function(row, data, dataIndex){
-               var rowId = data[10];
+               var rowId = data[13];
             }
         });
  
@@ -428,9 +436,9 @@
     });
 
     function tambah_batch(){
-        var status = 'draft';
+        var status = "<?php echo $mrpm->status; ?>";
         var kode   = "<?php echo $mrpm->kode; ?>";
-        let acces = "<?php echo $access->status; ?>";
+        let acces = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -479,7 +487,7 @@
         let type        = $('#type').val();
         let notes       = $('#notes').val();
         let status      = "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
        
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -558,7 +566,8 @@
 
         var kode        = "<?php echo $mrpm->kode; ?>";
         var row         = row;
-        let acces       = "<?php echo $access->status; ?>";
+        var status      =  "<?php echo $mrpm->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -630,7 +639,7 @@
     function edit_batch(row){
         var kode     =  "<?php echo $mrpm->kode; ?>";
         var status   =  "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -660,13 +669,53 @@
         }
     }
 
+
+    $(document).on("click", ".edit_batch_items", function(e) {
+        let lot = $(this).attr('data-lot');
+        edit_batch_items(lot)
+    });
+
+    function edit_batch_items(lot){
+        var kode     = "<?php echo $mrpm->kode; ?>";
+        var status   = "<?php echo $mrpm->status; ?>";
+        let acces    = "<?php echo $access->status ?? ''; ?>";
+
+        if(acces == 0){
+            alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
+        }else{
+            $('#btn-tambah').button('reset');
+                $("#tambah_data").modal({
+                    show: true,
+                    backdrop: 'static'
+            })
+            if(status== 'done' || status == 'cancel'){
+                $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
+            }
+            $("#tambah_data").removeClass('modal fade lebar').addClass('modal fade lebar_mode');
+            $("#tambah_data .modal-dialog .modal-content .modal-body").addClass('add_batch');
+            $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',true);
+    
+            $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+            $('.modal-title').text('Edit Data Batch Items');
+            $.post('<?php echo site_url()?>manufacturing/barcodemanual/edit_batch_items_modal',
+                    {kode:kode,lot:lot},
+            ).done(function(html){
+                    setTimeout(function() {
+                        $(".add_batch").html(html)  
+                    },1000);
+                $("#tambah_data .modal-dialog .modal-content .modal-footer #btn-tambah").attr('disabled',false);
+                $("#tambah_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-tambah" class="btn btn-primary btn-sm"> Simpan</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button></div>');
+            });
+        }
+    }
+
     // btn generate
     $(document).on("click", "#btn-generate", function(e) {
         e.preventDefault();
 
         let kode        = $('#kode').val();
         let status      = "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -736,7 +785,7 @@
 
         let kode        = "<?php echo $mrpm->kode; ?>";
         let status      = "<?php echo $mrpm->status; ?>";
-        let acces       = "<?php echo $access->status; ?>";
+        let acces       = "<?php echo $access->status ?? ''; ?>";
 
         if(acces == 0){
             alert_notify('fa fa-warning', 'PC ini tidak diizinkan membuat Barcode Manual  !', 'danger', function() {});
@@ -789,7 +838,7 @@
                                     var err = JSON.parse(xhr.responseText);
                                     alert(err.message);
                                 }else{
-                                    alert("Error cancel Data!")
+                                    alert(xhr.responseText)
                                 }   
                             }
                         });
@@ -806,7 +855,7 @@
     // print
     function print_lot(btn){
 
-        var myCheckboxes = table2.column(10).checkboxes.selected();
+        var myCheckboxes = table2.column(13).checkboxes.selected();
         var myCheckboxes_arr = new Array();
 
         $.each(myCheckboxes, function(index, rowId){        
@@ -814,7 +863,8 @@
         });
         let kode            = "<?php echo $mrpm->kode; ?>";
         let desain_barcode  = $('#desain_barcode').val();
-        let status          = "<?php echo $mrpm->status; ?>";
+        let status          = $('#status_txt').val();
+        // let status          = "<?php echo $mrpm->status; ?>";
 
         if(status == 'draft'){
             alert_modal_warning('Maaf, Tidak Bisa di print, Status masih <b>Draft</b> !');

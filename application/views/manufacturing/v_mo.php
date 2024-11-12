@@ -50,6 +50,7 @@
                   <th class="no">No</th>
                   <th>Kode</th>
                   <th>Tanggal</th>
+                  <th>Origin</th>
                   <th>Product</th>
                   <th>qty</th>
                   <th>uom</th>
@@ -109,10 +110,10 @@
               {
                 "className" : "text-right",
                  render: $.fn.dataTable.render.number(',', '.', 2, ''),
-                "targets"   : [4]
+                "targets"   : [5]
               },
               {
-                "targets" : 6,
+                "targets" : 7,
                  render: function (data, type, full, meta) {
                         return "<div class='text-wrap width-300'>" + data + "</div>";
                 }

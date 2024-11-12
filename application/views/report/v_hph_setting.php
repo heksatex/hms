@@ -377,8 +377,8 @@
       alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
       // return false;
 
-    }else if(check_shif == true && selisih > 30 ){
-      alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
+  // }else if(check_shif == true && selisih > 30 ){
+  //   alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
       // return false;
     }else{
       $.ajax({
@@ -452,8 +452,8 @@
       }else if(tglsampai_2 < tgldari_2){ // cek validasi tgl sampai kurang dari tgl Dari
         alert_modal_warning('Maaf, Tanggal Sampai tidak boleh kurang dari Tanggal Dari !');
 
-      }else if(check_shif == true && selisih > 30){
-        alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
+      // }else if(check_shif == true && selisih > 30){
+      //   alert_modal_warning('Maaf, Jika Shift di Ceklist (v) maka Periode Tanggal tidak boleh lebih dari 30 hari !')
 
       }else{  
         

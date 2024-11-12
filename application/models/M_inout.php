@@ -16,7 +16,7 @@ class M_inout extends CI_Model
     {
         $reff_picking = '';
         if(!empty($dept_dari)){
-            $reff_picking .= " AND pb.reff_picking LIKE '%$dept_dari%' ";
+            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking,'|',1) LIKE '%$dept_dari%' ";
         }
         $status     = '';
         if(!empty($status1)){
@@ -32,11 +32,14 @@ class M_inout extends CI_Model
             $nama_produk     .= " AND smi.nama_produk LIKE '%".$corak."%' ";
         }
 
-        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note, smi.status, ms.nama_status
+        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note, smi.status, ms.nama_status, adj.lot as lot_adj
                                 FROM penerimaan_barang pb
                                 INNER JOIN stock_move_items smi ON smi.move_id = pb.move_id
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON smi.status = ms.kode
+                                LEFT JOIN (SELECT IFNULL(adji.lot,'') as lot ,adji.quant_id FROM adjustment_items adji 
+									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
+									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
                                 AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
@@ -47,7 +50,7 @@ class M_inout extends CI_Model
     {
         $reff_picking = '';
         if(!empty($dept_dari)){
-            $reff_picking .= " AND pb.reff_picking LIKE '%$dept_dari%' ";
+            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking,'|',1) LIKE '%$dept_dari%' ";
         }
         $status     = '';
         if(!empty($status1)){
@@ -79,7 +82,7 @@ class M_inout extends CI_Model
     {
         $reff_picking = '';
         if(!empty($dept_tujuan)){
-            $reff_picking .= " AND pb.reff_picking LIKE '%$dept_tujuan%' ";
+            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',-1) LIKE '%$dept_tujuan%' ";
         }
         $status     = '';
         if(!empty($status1)){
@@ -95,11 +98,14 @@ class M_inout extends CI_Model
             $nama_produk     .= " AND smi.nama_produk LIKE '%".$corak."%' ";
         }
 
-        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status, ms.nama_status
+        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status, ms.nama_status,adj.lot as lot_adj
                                 FROM pengiriman_barang pb
                                 INNER JOIN stock_move_items smi ON smi.move_id = pb.move_id
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON smi.status = ms.kode
+                                LEFT JOIN (SELECT IFNULL(adji.lot,'') as lot ,adji.quant_id FROM adjustment_items adji 
+									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
+									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
                                 AND pb.dept_id = '$dept_id' $reff_picking $status $kode $nama_produk
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
@@ -110,7 +116,7 @@ class M_inout extends CI_Model
     {
         $reff_picking = '';
         if(!empty($dept_tujuan)){
-            $reff_picking .= " AND pb.reff_picking LIKE '%$dept_tujuan%' ";
+            $reff_picking .= " AND SUBSTRING_INDEX(pb.reff_picking, '|',-1) LIKE '%$dept_tujuan%' ";
         }
         $status     = '';
         if(!empty($status1)){
@@ -255,11 +261,14 @@ class M_inout extends CI_Model
             $nama_produk     .= " AND smi.nama_produk LIKE '%".$corak."%' ";
         }
 
-        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status, ms.nama_status
+        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status, ms.nama_status, adj.lot as lot_adj
                                 FROM pengiriman_barang pb
                                 INNER JOIN stock_move_items smi ON smi.move_id = pb.move_id
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON smi.status = ms.kode
+                                LEFT JOIN (SELECT IFNULL(adji.lot,'') as lot ,adji.quant_id FROM adjustment_items adji 
+									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
+									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
                                 AND SUBSTRING_INDEX(pb.reff_picking,'|',-1) = '$dept_id'  $where_dept  $status $kode $nama_produk
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();
@@ -320,11 +329,14 @@ class M_inout extends CI_Model
             $nama_produk     .= " AND smi.nama_produk LIKE '%".$corak."%' ";
         }
 
-        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status, ms.nama_status
+        return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, sq.reff_note,  smi.status, ms.nama_status, adj.lot as lot_adj
                                 FROM penerimaan_barang pb
                                 INNER JOIN stock_move_items smi ON smi.move_id = pb.move_id
                                 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
                                 INNER JOIN mst_status ms ON smi.status = ms.kode
+                                LEFT JOIN (SELECT IFNULL(adji.lot,'') as lot ,adji.quant_id FROM adjustment_items adji 
+									INNER JOIN adjustment adj ON adji.kode_adjustment = adj.kode_adjustment
+									where adj.status = 'done'  AND adj.id_type_adjustment IN ('1','2') ) as adj ON adj.quant_id = sq.quant_id 
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
                                 AND SUBSTRING_INDEX(pb.reff_picking,'|',1) = '$dept_id'  $where_dept  $status $kode $nama_produk
                                 ORDER BY pb.kode,smi.kode_produk, smi.row_order")->result();

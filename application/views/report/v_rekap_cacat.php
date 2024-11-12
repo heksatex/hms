@@ -5,6 +5,37 @@
   <?php $this->load->view("admin/_partials/head.php") ?>
   <link rel="stylesheet" type="text/css" href="<?php echo base_url('dist/css/tableScroll.css') ?>">
   <style type="text/css">
+
+    #pagination {
+      display: inline-block;
+      padding-left: 0;
+      border-radius: 4px;
+      padding-top: 5px;
+
+    } 
+    #pagination>a, #pagination>strong {
+      position: relative;
+      float: left;
+      padding: 4px 8px;
+      margin-left: -1px;
+      line-height: 1.42857143;
+      color: #337ab7;
+      text-decoration: none;
+      background-color: #fff;
+      border: 1px solid #ddd;
+    }
+
+    #pagination2>a, #pagination2>strong {
+      position: relative;
+      float: left;
+      padding: 4px 8px;
+      margin-left: -1px;
+      line-height: 1.42857143;
+      color: #337ab7;
+      text-decoration: none;
+      background-color: #fff;
+      border: 1px solid #ddd;
+    }
     
     h3{
       display: block !important;
@@ -95,9 +126,10 @@
                           </label>
                       </div>
                   </div>
-                </div>
+                </div>               
          
               </div>
+           
               <div class="col-md-4">
                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="btn-generate" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Generate</button>
                 <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..." > <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
@@ -118,10 +150,23 @@
                           </div> 
                           <div class="form-group">
                             <div class="col-md-5">
-                              <label>Corak </label>
+                              <label>Produk / Corak </label>
                             </div>
                             <div class="col-md-7">
                                 <input type="text" class="form-control input-sm" name="corak" id="corak" >
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <div class="col-md-5">
+                              <label>Jenis Kain</label>
+                            </div>
+                            <div class="col-md-7">
+                                <select name="jenis_kain[]" class="form-control select2" id="jenis_kain" style="width:100% !important" multiple="">
+                                  <?php foreach ($jenis_kain as $key => $row) { ?>
+                                          <option value='<?= $row->id; ?>'><?= $row->nama_jenis_kain; ?></option>
+                                  <?php }
+                                  ?>
+                                </select>
                             </div>
                           </div>
                         </div>
@@ -149,7 +194,18 @@
                               <label>Grade </label>
                             </div>
                             <div class="col-md-7">
-                                <select class="form-control input-sm grade" name="grade" id="grade"><option value="All">All</option><?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";}?></select>  
+                                  <select type="text" class="form-control input-sm select2" name="grade" id="grade" style="width:100% !important" multiple="">
+                                    <!-- <option>All</option> -->
+                                    <option>A</option>
+                                    <option>B</option>
+                                    <option>C</option>
+                                    <option>F</option>
+                                  </select>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                             <div class="col-md-12">
+                              <label><input type="checkbox" name="show" value="show_all"> Tampilkan Semua HPH </label>
                             </div>
                           </div>
                         </div>
@@ -157,11 +213,22 @@
                     </div>
                   </div>
               </div>
-
             </form>
 
             <!-- table -->
             <div class="box-body">
+                <div class="form-group">
+                    <div class="col-md-6">
+                        <label>
+                            <div id='total_record'>Total Data : 0</div>
+                        </label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="pull-right text-right">
+                          <div id='pagination'></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-xs-12 table-responsive example1 divListviewHead">
                   <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
                       <table id="example1" class="table table-condesed table-hover" border="0">
@@ -174,6 +241,7 @@
                                 <th  class='style bb ws' style="min-width: 80px">Tgl HPH</th>
                                 <th  class='style bb ws' >kode Produk</th>
                                 <th  class='style bb ws'  style="min-width: 150px">Nama Produk</th>
+                                <th  class='style bb ws'  style="min-width: 80px">Jenis Kain</th>
                                 <th  class='style bb ws' >Lot</th>
                                 <th  class='style bb ws' >Qty1</th>
                                 <th  class='style bb ws' >Uom1</th>
@@ -188,7 +256,7 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td colspan="16" >Tidak ada Data</td>
+                                <td colspan="17" >Tidak ada Data</td>
                               </tr>
                             </tbody>
                         </table>
@@ -224,7 +292,8 @@
     $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
   });
 
- 
+  $('.select2').select2({});
+  
   // set date tgldari
   $('#tgldari').datetimepicker({
       defaultDate : new Date(),
@@ -286,6 +355,8 @@
       user      = $('#user').val();
       jenis     = $('#jenis').val();      
       grade     = $('#grade').val();      
+      jenis_kain= $('#jenis_kain').val();      
+      show_hph  = $('input[name="show"]').is(":checked");
 
       if(tgldari == '' || tglsampai == ''){
 
@@ -302,9 +373,10 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/rekapcacat/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade },
+                data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade, show_hph:show_hph,jenis_kain:jenis_kain },
                 success: function(data){
-
+                  $('#total_record').html(data.total_record);
+                  $('#pagination').html(data.pagination);
                   let tbody = $("<tbody />");
                   let no    = 0;
                   let empty = true;
@@ -325,6 +397,7 @@
                                $("<td>").text(value.tgl_hph),
                                $("<td>").text(value.kode_produk),
                                $("<td>").text(value.nama_produk),
+                               $("<td>").text(value.nama_jenis_kain),
                                $("<td>").text(value.lot),
                                $("<td>").text(value.qty1),
                                $("<td>").text(value.uom1),
@@ -339,7 +412,7 @@
                       tbody.append(tr);
                   });
                 if(empty == true){
-                  var tr = $("<tr>").append($("<td colspan='16'>").text('Tidak ada Data'));
+                  var tr = $("<tr>").append($("<td colspan='17'>").text('Tidak ada Data'));
                   tbody.append(tr);
                 }
                 $("#example1").append(tbody);
@@ -357,9 +430,92 @@
       e.stopImmediatePropagation();
   });
 
+  //jika next page ,isi akan rubah lagi
+  $('#pagination').on('click','a',function(e){
+      
+      e.preventDefault(); 
+      var pageNum = $(this).attr('data-ci-pagination-page');
+      createBody(pageNum)
+  });
+
+  function createBody(pageNum){
+
+      please_wait(function(){});
+      $("#example1_processing").css('display',''); // show loading
+      $("#example1 tbody").remove();
+      tgldari   = $('#tgldari').val();
+      tglsampai = $('#tglsampai').val();
+      id_dept   = $('#departemen').val();
+      corak     = $('#corak').val();
+      mc        = $('#mc').val();
+      lot       = $('#lot').val();
+      user      = $('#user').val();
+      jenis     = $('#jenis').val();      
+      grade     = $('#grade').val();    
+      jenis_kain= $('#jenis_kain').val();      
+      show_hph  = $('input[name="show"]').is(":checked");
+
+      $.ajax({
+        type : 'POST',
+        dataType: 'json',
+        url  : '<?=base_url()?>report/rekapcacat/loadData/'+pageNum,
+        data: {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade,show_hph:show_hph, jenis_kain:jenis_kain },
+        success: function(data){
+          $('#pagination').html(data.pagination);
+          $('#total_record').html(data.total_record);
+
+          var tbody = $("<tbody id='0'/>");
+          var no    = 0;
+          var empty = true;
+          $.each(data.record, function(key, value) {
+            if(value.kode == ''){
+              num = '';
+            }else{
+              no=no+1;
+              num = no;
+            }
+            var tr = $("<tr>").append(
+                               $("<td>").text(num),
+                               $("<td>").text(value.kode),
+                               $("<td>").text(value.nama_mesin),
+                               $("<td>").text(value.sc),
+                               $("<td>").text(value.tgl_hph),
+                               $("<td>").text(value.kode_produk),
+                               $("<td>").text(value.nama_produk),
+                               $("<td>").text(value.nama_jenis_kain),
+                               $("<td>").text(value.lot),
+                               $("<td>").text(value.qty1),
+                               $("<td>").text(value.uom1),
+                               $("<td>").text(value.qty2),
+                               $("<td>").text(value.uom2),
+                               $("<td>").text(value.grade),
+                               $("<td>").text(value.point_cacat),
+                               $("<td>").text(value.kode_cacat),
+                               $("<td>").text(value.nama_cacat),
+                               $("<td>").text(value.nama_user),
+                      );
+              tbody.append(tr);
+
+          });
+
+          if(empty == true){
+              var tr = $("<tr>").append($("<td colspan='17'>").text('Tidak ada Data'));
+              tbody.append(tr);
+          }
+          $("#example1").append(tbody);
+          $("#example1_processing").css('display','none');
+          unblockUI( function() {});
+        },error: function (jqXHR, textStatus, errorThrown){
+          alert('error load data');
+          $("#example1_processing").css('display','none');
+          unblockUI( function() {});
+        }
+      });
+  }
+
 
    // btn generate
-   $("#btn-excel").on('click', function(e){
+  $("#btn-excel").on('click', function(e){
 
       e.preventDefault();
 
@@ -371,7 +527,9 @@
       lot       = $('#lot').val();
       user      = $('#user').val();
       jenis     = $('#jenis').val();      
-      grade     = $('#grade').val();      
+      grade     = $('#grade').val();    
+      jenis_kain= $('#jenis_kain').val();    
+      show_hph  = $('input[name="show"]').is(":checked");
 
       if(tgldari == '' || tglsampai == ''){
         alert_modal_warning('Periode Tanggal Harus diisi !');
@@ -383,7 +541,7 @@
         $.ajax({
           "type":'POST',
           "url" : "<?php echo site_url('report/rekapcacat/export_excel')?>",
-          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade },
+          "data": {tgldari:tgldari, tglsampai:tglsampai, id_dept:id_dept, corak:corak, mc:mc, lot:lot, user:user, grade:grade, show_hph:show_hph,jenis_kain:jenis_kain },
           "dataType":'json',
           beforeSend: function() {
             $('#btn-excel').button('loading');
@@ -406,7 +564,7 @@
         });
     }
 
-   });
+  });
 
 </script>
 

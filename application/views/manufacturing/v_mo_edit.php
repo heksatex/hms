@@ -465,7 +465,7 @@
                                   <td style="color:<?php echo $color;?>" align="right"><?php  if(!empty($row->sum_qty) AND $row->status == 'ready')echo number_format($row->sum_qty,2); if($row->status == 'cancel' AND $row->sum_qty_cancel > 0) echo number_format($row->sum_qty_cancel,2); ?></td>
                                   <td><?php echo $row->status;?></td>
                                   <td><?php echo $row->reff?></td>
-                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND $type_mo['type_mo'] !='colouring' AND $akses_menu > 0 ){?>
+                                  <td><?php if($row->type == 'stockable' AND ($row->status == 'ready' or $row->status == 'draft') AND ($type_mo['type_mo'] == 'knitting' or $list->dept_id == 'GJD') AND $akses_menu > 0 ){?>
                                     <a href="javascript:void(0)" onclick="tambah_quant('<?php echo $row->kode_produk ?>','<?php echo $row->move_id ?>', '<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                    <?php }?>
@@ -923,6 +923,9 @@
                           <tr>
                             <th class="style no">No.</th>
                             <th class="style">Product</th>
+                            <?php if($list->dept_id == 'GJD'){ ?>
+                              <th class="style">Lot Asal</th>
+                            <?php }?>
                             <th class="style">Lot</th>
                             <th class="style" style="text-align: right;">Qty</th>
                             <th class="style">uom</th>
@@ -950,6 +953,9 @@
                               <tr class="num" <?php echo $color ?>>
                                 <td></td>
                                 <td ><?php echo $row->nama_produk?></td>
+                                <?php if($list->dept_id == 'GJD'){ ?>
+                                  <td><?php echo $row->lot_asal?></td>
+                                <?php }?>
                                 <td><?php echo $row->lot?></td>
                                 <td align="right"><?php echo number_format($row->qty,2)?></td>
                                 <td><?php echo $row->uom?></td>
@@ -1462,7 +1468,7 @@
     });
     $("#tambah_data .modal-dialog .modal-content .modal-footer ").html('');
     $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-    $('.modal-title').text('Rekam Cacat Lot');
+    $('.modal-title').html('Rekam Cacat Lot : <b>'+lot+'</b>');
     $.post('<?php echo site_url()?>manufacturing/mO/rekam_cacat_modal',
           {deptid : deptid, lot : lot, quant_id : quant_id, kode : kode, status : status },
           function(html){
