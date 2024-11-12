@@ -117,7 +117,6 @@ class Service extends CI_Controller {
                     $wa->sendMessageToGroup('service_gtp', ["{message}" => "GOODS To PUSH *{$values->nama_sales_group}* \n {$nm}"], $groups)
                             ->setFile(getIpPubic("hms/" . $pathFile))
                             ->setMentions([])->setFooter('footer_hms')->send();
-                    sleep(3);
                 } else {
                     $wa->sendMessageToGroup('error', ["{message}" => "File GTP sales *{$values->nama_sales_group}* Tidak terbuat."], ['IT WDT'])
                             ->setMentions([])->setFooter('footer_hms')->send();
