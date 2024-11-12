@@ -104,6 +104,8 @@ class Adjustment extends MY_Controller
       }else if(empty($note)){
         $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Notes Harus Diisi / Alasan membuat Adjustment !', 'icon' =>'fa fa-warning', 
         'type' => 'danger'  );         
+      }else if($lokasi_adjustment['stock_location'] != $kode_lokasi){
+        $callback = array('status' => 'failed', 'field' => 'lokasi_adjustment', 'message' => 'Kode Lokasi Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );
       }else{
         //cek kode adjustment apa sudah ada apa belum
         $cek = $this->m_adjustment->cek_adjustment_by_kode($kode_adjustment)->row_array();
@@ -291,7 +293,7 @@ class Adjustment extends MY_Controller
 
             $item_add = true;
             //insert ke adjustment_items
-            $sql_adjustment_items_batch .= "('".$kode_adjustment."', '".$quant_id."', '".addslashes($kode_produk)."','".addslashes($lot)."', '".addslashes($uom)."','".$qty."','".$qty."', '".addslashes($uom2)."','".$qty2."','".$qty2."', '".$mo['kode']."', '".$row_order."'), ";
+            $sql_adjustment_items_batch .= "('".$kode_adjustment."', '".$quant_id."', '".addslashes($kode_produk)."','".addslashes($lot)."', '".addslashes($uom)."','".$qty."',0, '".addslashes($uom2)."','".$qty2."',0, '".$mo['kode']."', '".$row_order."'), ";
 
             $list_product .= "(".$no.") ".$kode_produk." ".$nama_produk." ".$lot." ".$qty." ".$uom." ".$qty2." ".$uom2." <br>";
             $no++;
@@ -391,7 +393,7 @@ class Adjustment extends MY_Controller
 
          if($quant_id == 0){
 
-              $this->m_adjustment->update_adjustment_items2($kode_adjustment,$kode_produk, $lot, $uom,$qty_adjustment,$uom2,$qty_adjustment2,$row);
+              $this->m_adjustment->update_adjustment_items2($kode_adjustment,$kode_produk, trim($lot), $uom,$qty_adjustment,$uom2,$qty_adjustment2,$row);
               // produk before
               $note_      = $get['kode_produk'].' |'.$get['nama_produk'].' | '.$get['lot'].' | '.$get['qty_adjustment'].' '.$get['uom'].' | '.$get['qty_adjustment2'].' '.$get['uom2'].'  -> '.$kode_produk.' | '.$produk." | ".$lot." |  ".$qty_adjustment."  | ".$uom." |  ".$qty_adjustment2."  | ".$uom2;;
               $note_log   = "Edit data Details | ".$kode_adjustment." Baris Ke ".$row." <br> ".$note_;
@@ -414,7 +416,7 @@ class Adjustment extends MY_Controller
 
           $ro          = $this->m_adjustment->get_row_order_adjustment_items($kode_adjustment)->row_array();
           $row_order   = $ro['row_order']+1;
-          $this->m_adjustment->save_adjustment_items($kode_adjustment,$kode_produk,$lot,$uom,$qty_data,$qty_adjustment,$uom2,$qty_data2,$qty_adjustment2,$row_order);
+          $this->m_adjustment->save_adjustment_items($kode_adjustment,$kode_produk,trim($lot),$uom,$qty_data,$qty_adjustment,$uom2,$qty_data2,$qty_adjustment2,$row_order);
 
            // unlock table
            $this->_module->unlock_tabel();
@@ -543,6 +545,9 @@ class Adjustment extends MY_Controller
 
       $cek_head = $this->m_adjustment->get_adjustment_by_code($kode_adjustment);
 
+      // cek lokasivalid      
+      $lokasi_adjustment  = $this->m_adjustment->get_nama_departemen_by_kode($lokasi_adj)->row_array();
+
       if(!empty($cek1['status'])){
         $callback = array('status' => 'failed', 'message'=>'Maaf, Tidak Bisa Generate, Status Adjustment Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
       }else if(!empty($cek2['status'])){
@@ -551,10 +556,12 @@ class Adjustment extends MY_Controller
         $callback = array('status' => 'failed', 'message'=>'Maaf, Lokasi Adjustment Tidak Boleh Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
       }else if(empty($cek_head->id_type_adjustment)){
           $callback = array('status' => 'failed', 'message'=>'Maaf, Type Adjustment Tidak Boleh Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+      }else if($lokasi_adjustment['stock_location'] != $kode_lokasi){
+          $callback = array('status' => 'failed', 'field' => 'lokasi_adjustment', 'message' => 'Kode Lokasi Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );
       }else{
 
         // lock table
-        $this->_module->lock_tabel('stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, mst_produk WRITE, departemen WRITE, adjustment_items ai WRITE, mst_produk mp WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, stock_quant as sq WRITE');
+        $this->_module->lock_tabel('stock_move WRITE, stock_move_items WRITE, stock_move_produk WRITE, stock_quant WRITE, adjustment WRITE, adjustment_items WRITE, mst_produk WRITE, departemen WRITE, adjustment_items ai WRITE, mst_produk mp WRITE, user WRITE, log_history WRITE, main_menu_sub WRITE, stock_quant as sq WRITE, picklist_detail WRITE, mst_category as cat WRITE, mst_status as sat WRITE');
 
         // get move_id
         $last_move   = $this->_module->get_kode_stock_move();
@@ -570,11 +577,15 @@ class Adjustment extends MY_Controller
         $qty_data_adj_same   = false;
         $qty_adj_null        = false;
         $reserve_move_empty  = true;
+        $reserve_pl_empty  = true;
         $list_produk         = '';
         $list_produk2        = '';
+        $list_produk3        = '';
         $list_quant          = '';
         $lokasi_produk_valid = true;
         $quant               = true;
+        $stock_lot_same = false;
+        $lokasi_same_lot = "";
  
         $item =  $this->m_adjustment->get_adjustment_detail_by_code($kode_adjustment);
         foreach($item as $row){
@@ -599,7 +610,7 @@ class Adjustment extends MY_Controller
               $sql_stock_move_batch .= "('".$move_id."','".$tanggal."','".$origin."','".$method."','".$la['adjustment_location']."','".$kode_lokasi."','".$status_done."','".$sm_row."',''), ";
 
               // simpan stock_move_items
-              $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$row->qty_adjustment."','".($row->uom)."','".$row->qty_adjustment2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+              $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(($row->lot))."','".$row->qty_adjustment."','".($row->uom)."','".$row->qty_adjustment2."','".$row->uom2."','".$status_done."','1','','".$tanggal."','','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
 
               // simpan stock_move_produk
               $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty_adjustment."','".$row->uom."','".$status_done."','1',''), ";
@@ -623,6 +634,17 @@ class Adjustment extends MY_Controller
               $sm_row++; //row order stock_move
               $move_id++;
               $jml_adj++;
+
+              // Cek apakah terdapat lot yang sama di lokasi stock untuk kategori Kain Hasil
+              $cek_nm_cat = $this->_module->get_prod($row->kode_produk)->row_array();
+              if(stripos(strtolower($cek_nm_cat['nama_category']), 'kain') !== FALSE){
+                  // cek stock terdpat produk yang menggunakan lot yg sama 
+                  $cek_same_lot = $this->m_adjustment->get_stock_quant_by_lot($row->lot)->row_array();
+                  if(!empty($cek_same_lot)){
+                    $lokasi_same_lot .= $row->lot." Lokasi di ".$cek_same_lot['lokasi'].'<br>';
+                    $stock_lot_same  = true;
+                  }
+              }
   
           }else{
 
@@ -633,6 +655,8 @@ class Adjustment extends MY_Controller
                 $reff_note  = $sq['reff_note'];
                 $reserve_origin = $sq['reserve_origin'];
                 $reserve_move = $sq['reserve_move'];
+                // cek quant_id / lot apa terpesan di PL atau tidak 
+                $reserve_pl = $this->m_adjustment->cek_quant_id_in_picklist_by_kode($row->quant_id,$row->lot);
 
                 if($kode_lokasi != $sq['lokasi'] ){
                   $lokasi_produk_valid = false;
@@ -640,6 +664,9 @@ class Adjustment extends MY_Controller
                 }else if($reserve_move != ''){
                   $reserve_move_empty = false;
                   $list_produk2 .= $row->nama_produk." ".$row->lot." <br>";
+                }else if(!empty($reserve_pl)){
+                  $reserve_pl_empty = false;
+                  $list_produk3 .= $row->nama_produk." ".$row->lot." <br>";
                 }else{
 
                   // >> QTY 1
@@ -766,7 +793,7 @@ class Adjustment extends MY_Controller
                       }
 
                       // simpan stock_move_items
-                      $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(trim($row->lot))."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($row->lokasi_fisik)."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
+                      $sql_stock_move_items_batch .= "('".$move_id."', '".$quant_id."','".addslashes($row->kode_produk)."', '".addslashes($row->nama_produk)."','".addslashes(($row->lot))."','".$qty_adj."','".$row->uom."','".$qty2_adj."','".$row->uom2."','".$status_done."','1','','".$tanggal."','".addslashes($row->lokasi_fisik)."','".addslashes($row->lebar_greige)."','".addslashes($row->uom_lebar_greige)."','".addslashes($row->lebar_jadi)."','".addslashes($row->uom_lebar_jadi)."'), ";
 
                       // simpan stock_move_produk
                       $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_adj."','".$row->uom."','".$status_done."','1',''), ";
@@ -882,7 +909,7 @@ class Adjustment extends MY_Controller
         }// end foreach adjusment details
 
 
-        if($loop_adj == true AND $qty_data_adj_same == false AND $qty_adj_null == false AND $reserve_move_empty == true AND $lokasi_produk_valid == true AND $quant == true){
+        if($loop_adj == true AND $qty_data_adj_same == false AND $qty_adj_null == false AND $reserve_move_empty == true AND $lokasi_produk_valid == true AND $quant == true AND $reserve_pl_empty == true AND $stock_lot_same == false){
 
   
           // simpan stock move
@@ -996,8 +1023,14 @@ class Adjustment extends MY_Controller
             $callback = array('status' => 'failed','message' => 'Produk atau Lot sudah tidak berada dilokasi <b>'.$kode_lokasi.'</b> !!<br> '.$list_produk, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if($reserve_move_empty == false){
             $callback = array('status' => 'failed','message' => 'Produk atau Lot terdapat <b>Reserve Move / Terpesan</b> oleh dokumen lain !!<br> '.$list_produk2, 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if($reserve_pl_empty == false){
+            $callback = array('status' => 'failed','message' => 'Produk atau Lot <b> sudah Masuk PL </b> !!<br> '.$list_produk3, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else if($quant == false){
             $callback = array('status' => 'failed','message' => 'Produk atau Lot di <b>Stock tidak ditemukan / sudah di hapus </b> !!<br> '.$list_quant, 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if($stock_lot_same == true){
+            $callback = array('status' => 'failed','message' => 'Lot ini masih terpakai di Lokasi Stock / Transit Location </b> !!<br> '.$lokasi_same_lot, 'icon' =>'fa fa-warning', 'type' => 'danger');
+          }else if(empty($item)){
+            $callback = array('status' => 'failed','message' => 'Produk atau Lot yang akan di Adjustment masih  Kosong !!<br> '.$list_quant, 'icon' =>'fa fa-warning', 'type' => 'danger');
           }else{
             $callback = array('status' => 'failed','message' => 'Generate Data Gagal !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           }
