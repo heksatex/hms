@@ -6,6 +6,7 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  * 
  */
 class Procurementorder extends MY_Controller {
+
     protected $depth = "";
 
     public function __construct() {
@@ -1442,8 +1443,10 @@ class Procurementorder extends MY_Controller {
                         $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
 
                         $callback = array('status' => 'success', 'message' => 'Generate Data Berhasil !', 'icon' => 'fa fa-check', 'type' => 'success');
-                        $pesan = ["{mo}" => ($kode_mo ?? ""), "{origin}" => ($origin ?? "")];
-                        $this->sendWa($kode, $row_order, $head->warehouse, $pesan);
+                        if ($kode_mo !== "") {
+                            $pesan = ["{mo}" => ($kode_mo ?? ""), "{origin}" => ($origin ?? "")];
+                            $this->sendWa($kode, $row_order, $head->warehouse, $pesan);
+                        }
                     }// end if cek produk generate
 
                     if ($produk_route_empty == TRUE OR $bom_empty == TRUE OR $generate_produk == FALSE OR $produk_bom_tidak_aktif == TRUE OR $produk_bom_item_tidak_aktif == TRUE OR $bom_aktif == FALSE OR $route_empty == TRUE) {
@@ -2057,20 +2060,22 @@ class Procurementorder extends MY_Controller {
             $data = [];
             if (in_array(strtolower($tujuan), ["jac", "wrd", "wrp", "tws"])) {
                 $data = $check->setTables("procurement_order_items")->setOrder(["procurement_order_items.row_order"])
-                                ->setJoins("mst_produk", "mst_produk.kode_produk = procurement_order_items.kode_produk")
-                                ->setJoins("mst_category", "mst_category.id = mst_produk.id_category")
-                                ->setWheres(["kode_proc" => $kode, 'row_order' => $row_order])
-                                ->setWhereRaw("mst_category.id in ('2','3','4','5','19')")->getDetail();
+                        ->setJoins("mst_produk", "mst_produk.kode_produk = procurement_order_items.kode_produk")
+                        ->setJoins("mst_category", "(mst_category.id = mst_produk.id_category and mst_category.id in ('2','3','4','5','19'))")
+                        ->setWheres(["kode_proc" => $kode, 'row_order' => $row_order])
+//                                ->setWhereRaw("mst_category.id in ('2','3','4','5','19')")
+                        ->getDetail();
                 $groups = $this->config->item('additional_wa_bc_jac') ?? [];
             } else if (in_array(strtolower($tujuan), ["tri"])) {
                 $data = $check->setTables("procurement_order_items")->setOrder(["procurement_order_items.row_order"])
-                                ->setJoins("mst_produk", "mst_produk.kode_produk = procurement_order_items.kode_produk")
-                                ->setJoins("mst_category", "mst_category.id = mst_produk.id_category")
-                                ->setWheres(["kode_proc" => $kode, 'row_order' => $row_order])
-                                ->setWhereRaw("mst_category.id in ('3')")->getDetail();
+                        ->setJoins("mst_produk", "mst_produk.kode_produk = procurement_order_items.kode_produk")
+                        ->setJoins("mst_category", "(mst_category.id = mst_produk.id_category and mst_category.id in ('3'))")
+                        ->setWheres(["kode_proc" => $kode, 'row_order' => $row_order])
+//                                ->setWhereRaw("mst_category.id in ('3')")
+                        ->getDetail();
                 $groups = $this->config->item('additional_wa_bc_tri') ?? [];
             }
-            if (count($data) > 0) {
+            if ((count($data) > 0) && $this->depth !== "") {
 
                 if ($data->status === "generated") {
                     $pesan = "*{$data_pesan["{mo}"]}* BARU ({$this->depth})";
