@@ -117,12 +117,14 @@
                                             <tr>
                                                 <th></th>
                                                 <th>Corak</th>
+                                                <th>Kategori</th>
                                                 <th>Jml Warna</th>
                                                 <th>Jml LOT</th>
                                                 <th>Qty / Uom</th>
                                                 <th>Qty2 / Uom2</th>
                                                 <th>Lebar</th>
                                                 <th>Buyer</th>
+                                                <th>Lokasi</th>
                                             </tr>
                                         </thead>
                                     </table>

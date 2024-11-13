@@ -110,8 +110,14 @@ class M_gtp extends CI_Model {
             }
         }
         if (isset($_POST['order'])) {
-            $this->db->order_by($this->orders[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($this->order)) {
+
+            if ($_POST['order']['0']['column'] !== "0") {
+                $this->db->order_by($this->orders[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            } else if (count($this->order) > 0) {
+                $order = $this->order;
+                $this->db->order_by(key($order), $order[key($order)]);
+            }
+        } else if (count($this->order) > 0) {
             $order = $this->order;
             $this->db->order_by(key($order), $order[key($order)]);
         }
