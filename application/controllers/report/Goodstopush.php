@@ -82,7 +82,7 @@ class Goodstopush extends MY_Controller {
             $report_date = $this->input->post("report_date");
             $data = array();
             $datas = new $this->m_gtp;
-            $list = $datas->setOrders([null, "corak", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name"])
+            $list = $datas->setOrders([null, "corak", "category", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name","lokasi"])->setOrder(["lokasi,category,corak,uom" => "asc"])
                             ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date]);
             if ($sales !== "") {
                 $list->setWheres(["nama_sales_group" => $sales]);
@@ -94,12 +94,14 @@ class Goodstopush extends MY_Controller {
                     $no,
                     "<a class='detail' href='#' data-sales='{$field->nama_sales_group}' data-date='{$field->report_date}' "
                     . "data-corak='{$field->corak}' data-lokasi='{$field->lokasi}' data-kategori='{$field->category}'>{$field->corak}</a>",
+                    $field->category,
                     $field->jml_warna,
                     $field->lot,
                     $field->qty . ' ' . $field->uom,
                     $field->qty2 . ' ' . $field->uom2,
                     $field->lebar_jadi,
-                    $field->customer_name
+                    $field->customer_name,
+                    $field->lokasi
                 ];
             }
             echo json_encode(array("draw" => $_POST['draw'],
@@ -128,9 +130,7 @@ class Goodstopush extends MY_Controller {
             $data = array();
             $detail = new $this->m_gtp;
             $list = $detail->setTables('goods_to_push_detail')->setOrders([null, "kode_produk", "nama_produk", "lot", "nama_grade", null, null, null, null, "lokasi_fisik", "lebar_jadi"])
-                    ->setSearch(["kode_produk", "nama_produk", "lot", "lokasi_fisik", "lebar_jadi"])
-                    ->setOrder(['create_date' => 'desc'])
-                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi]);
+                    ->setSearch(["kode_produk", "nama_produk", "lot", "lokasi_fisik", "lebar_jadi","customer_name"])->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi]);
             switch ($kategori) {
                 case "14d":
                     $list->setWheres(["umur >=" => 14, "umur <=" => 30]);
@@ -144,12 +144,11 @@ class Goodstopush extends MY_Controller {
             }
             $no = $_POST['start'];
             if ($lokasi === "GRG/Stock") {
-                $list->setWheres(["nama_produk" => $corak]);
+                $list->setOrder(['corak,uom' => 'asc'])->setWheres(["nama_produk" => $corak]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
                         $no,
-                        $field->nama_produk,
                         $field->lot,
                         $field->nama_grade,
                         $field->qty . ' ' . $field->uom,
@@ -157,16 +156,16 @@ class Goodstopush extends MY_Controller {
                         $field->lokasi_fisik,
                         $field->sales_order,
                         $field->customer_name,
+                        $kategori,
                         $field->umur
                     ];
                 }
             } else {
-                $list->setWheres(["corak_remark" => $corak]);
+                $list->setOrder(['corak_remark,warna_remark' => 'asc'])->setWheres(["corak_remark" => $corak]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
                         $no,
-                        $field->corak_remark,
                         $field->warna_remark,
                         $field->lot,
                         $field->nama_grade,
@@ -176,6 +175,7 @@ class Goodstopush extends MY_Controller {
                         $field->lokasi_fisik,
                         $field->sales_order,
                         $field->customer_name,
+                        $kategori,
                         $field->umur
                     ];
                 }
