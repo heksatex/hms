@@ -6,6 +6,7 @@ defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
  * 
  */
 class Procurementorder extends MY_Controller {
+    protected $depth = "";
 
     public function __construct() {
         parent:: __construct();
@@ -874,7 +875,7 @@ class Procurementorder extends MY_Controller {
                                     $location = $loc['stock_location'];
                                     //sql simpan mrp_production
                                     $sql_mrp_prod_batch .= "('" . $kode_mo . "','" . $tgl . "','" . $origin . "','" . addslashes($kode_prod_rm) . "','" . addslashes($nama_prod_rm) . "','" . $qty . "','" . addslashes($uom) . "','" . $tgl_jt . "','" . addslashes($reff_notes) . "','" . $kode_bom . "','" . $tgl . "','" . $tgl . "','" . $location . "','" . $location . "','" . $method_dept . "','draft','','" . $nama_user . "','','','',''), ";
-
+                                    $this->depth = $method_dept;
                                     //get mms kode berdasarkan dept_id
                                     $mms = $this->_module->get_kode_sub_menu_deptid('mO', $method_dept)->row_array();
                                     if (!empty($mms['kode'])) {
@@ -1582,6 +1583,7 @@ class Procurementorder extends MY_Controller {
                                 $kode_mrp = $mrp['kode'];
                                 if (!in_array($mrp['kode'], $noMo)) {
                                     $noMo[] = $mrp['kode'];
+                                    $this->depth = $method_dept;
                                 }
                                 if ($mrp['status'] == 'draft') {
                                     // cek mrp rm target
@@ -2069,11 +2071,12 @@ class Procurementorder extends MY_Controller {
                 $groups = $this->config->item('additional_wa_bc_tri') ?? [];
             }
             if (count($data) > 0) {
+
                 if ($data->status === "generated") {
-                    $pesan = "*{$data_pesan["{mo}"]}* BARU (WARPING DASAR)";
+                    $pesan = "*{$data_pesan["{mo}"]}* BARU ({$this->depth})";
                     $template = "proc_order_create";
                 } else if ($data->status === "cancel") {
-                    $pesan = "*{$data_pesan["{mo}"]}* BATAL (WARPING DASAR)";
+                    $pesan = "*{$data_pesan["{mo}"]}* BATAL ({$this->depth})";
                     $template = "proc_order_cancel";
                 }
                 $data_pesan = array_merge($data_pesan, ["{judul}" => $pesan, "{produk}" => $data->nama_produk, "{qty}" => (number_format($data->qty, 2, ",", ".") . " " . $data->uom), "{reff_notes}" => $data->reff_notes]);
