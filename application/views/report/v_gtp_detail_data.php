@@ -50,7 +50,6 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>Corak</th>
                     <th>Warna</th>
                     <th>Lot</th>
                     <th>Grade</th>
@@ -60,6 +59,7 @@
                     <th>Lokasi Fisik</th>
                     <th>SC</th>
                     <th>Customer</th>
+                    <th>Kategori</th>
                     <th>Umur</th>
                 </tr>
             </thead>
