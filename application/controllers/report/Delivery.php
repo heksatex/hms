@@ -154,8 +154,8 @@ class Delivery extends MY_Controller {
             $sheet->setCellValue('Q1', 'Qty 2 HPH');
             $sheet->setCellValue('R1', 'Uom 2');
             $sheet->setCellValue('S1', 'Qty Jual');
-            $sheet->setCellValue('S1', 'Uom Jual');
-            $sheet->setCellValue('Y1', 'Qty 2 Jual');
+            $sheet->setCellValue('T1', 'Uom Jual');
+            $sheet->setCellValue('U1', 'Qty 2 Jual');
             $sheet->setCellValue('V1', 'Uom 2Jual');
             $sheet->setCellValue('W1', 'Lot');
             $sheet->setCellValue('X1', 'User');
