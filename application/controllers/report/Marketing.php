@@ -1954,8 +1954,18 @@ class Marketing extends MY_Controller
         $this->hanger->addDatas($data_print_array);
        
         return $this->hanger->generate();
-        // return;
+    }
 
+    public function goodstopush() {
+        $this->load->model("m_gtp");
+        $data['id_dept'] = 'RMKT';
+        $sales = new $this->m_gtp;
+        $dates = clone $sales;
+        $data['sales'] = $sales->setTables("mst_sales_group")->setOrder(["nama_sales_group" => "asc"])->setWheres(["view" => "1"])->setSelects(["nama_sales_group"])->getData();
+        $_POST["length"] = 10;
+        $_POST["start"] = 0;
+        $data["dates"] = $dates->setSelects(["DATE(report_date) as dt"])->setGroups(["DATE(report_date)"])->setOrder(["dt" => "DESC"])->getData();
+        $this->load->view('report/v_gtp', $data);
     }
 
 

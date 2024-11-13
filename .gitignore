@@ -31,3 +31,11 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /tests/results/
 /dist/storages/*
 dist/storages/*
+/upload/*
+upload/*
+vendor/*
+/vendor/*
+application/config/config.php
+/application/config/config.php
+application/config/database.php
+/application/config/database.php

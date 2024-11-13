@@ -28,6 +28,10 @@ class Token {
         $this->model->load->model('m_Token');
     }
 
+    public function exists($array) {
+        return $this->model->m_Token->exists($array);
+    }
+
     public function noUrut(string $modul, string $periode, $increment = false) {
         $this->modul = $modul;
         $this->periode = $periode;
