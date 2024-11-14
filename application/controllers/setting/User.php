@@ -143,6 +143,8 @@ class User extends MY_Controller {
                         $this->m_user->save_user_priv($login, $value, '1');
                     }
                     $userMasking = [];
+                    if(is_string($masking))
+                        $masking = [];
                     foreach ($masking as $key => $value) {
                         $userMasking[] = array(
                             'username' => $login,
