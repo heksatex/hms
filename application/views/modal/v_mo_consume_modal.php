@@ -267,7 +267,7 @@
 						<td align="right"><?php echo number_format($row->qty,2)?></td>
 						<td><?php echo $row->uom;?></td>
 						<td>
-							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)" <?php echo $readonly?> >
+							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)" <?php echo $readonly?> data-decimal="2" oninput="enforceNumberValidation(this)">
 							<input type="hidden" name="jml_produk"  id="jml_produk" class="form-control input-sm jml_produk" value="<?php echo $row->jml_produk ?>">
 							<input type="hidden" name="qty_rm"  id="qty_rm" class="form-control input-sm qty_rm" value="<?php echo $row->qty_rm ?>">
 							<input type="hidden" name="quant_id"  id="quant_id" class="form-control input-sm quant_id" value="<?php echo $row->quant_id ?>">
@@ -293,7 +293,7 @@
 						</td>
 						<td align="right"><?php echo $row->qty2?></td>
 						<td><?php echo $row->uom2;?></td>
-						<td><input type="text" name="qty2_konsum"  id="qty2_konsum" class="form-control input-sm qty2_konsum" data-index="<?php echo $i;?>" <?php echo $readonly?> ></td>						
+						<td><input type="text" name="qty2_konsum"  id="qty2_konsum" class="form-control input-sm qty2_konsum" onkeyup="validAngka2(this)" data-index="<?php echo $i;?>" <?php echo $readonly?> data-decimal="2" oninput="enforceNumberValidation(this)"></td>						
 					</tr>
 					<?php
 					 $i++; 
@@ -353,9 +353,29 @@
 
     //validasi qty
 	function validAngka2(a){
-	    if(!/^[0-9.]+$/.test(a.value)){
-	        a.value = a.value.substring(0,a.value.length-1000);
-	    }
+	    // if(!/^[0-9.]+$/.test(a.value)){
+	    //     a.value = a.value.substring(0,a.value.length-1000);
+	    // }
+
+        let tmp_char = '';
+		let len      = a.value.length;
+		let text     = a.value;
+		for(let i = 0; i < len; i++){
+			if(len > 1){
+				var char = text.substring(i,i+1);
+			}else{
+				var char = text;
+			}
+			if(/^[0-9.]+$/.test(char)){
+				char1 = char; 
+				tmp_char += char1;
+	    	}else{
+				char.replace(/[^0-9.-]/, '')
+			}
+		}
+		// alert(tmp_char);
+		a.value = "";
+		a.value = tmp_char;
 	}
 
     function calculate_consume(){
@@ -601,6 +621,29 @@
                 $('#checkFGAll').prop("checked", true);
             }
         });
+    }
+
+    // validasi decimal
+    function enforceNumberValidation(ele) {
+            if ($(ele).data('decimal') != null) {
+                // found valid rule for decimal
+                var decimal = parseInt($(ele).data('decimal')) || 0;
+                var val = $(ele).val();
+                if (decimal > 0) {
+                    var splitVal = val.split('.');
+                    if (splitVal.length == 2 && splitVal[1].length > decimal) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0] + '.' + splitVal[1].substr(0, decimal));
+                    }
+                } else if (decimal == 0) {
+                    // do not allow decimal place
+                    var splitVal = val.split('.');
+                    if (splitVal.length > 1) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0]); // always trim everything after '.'
+                    }
+                }
+            }
     }
 
 
