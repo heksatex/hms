@@ -183,7 +183,7 @@
 						<td align="right"><?php echo number_format($row->qty,2)?></td>
 						<td><?php echo $row->uom;?></td>
 						<td>
-							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)">
+							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)" data-decimal="2" oninput="enforceNumberValidation(this)">
 							<input type="hidden" name="jml_produk"  id="jml_produk" class="form-control input-sm jml_produk" value="<?php echo $row->jml_produk ?>">
 							<input type="hidden" name="qty_rm"  id="qty_rm" class="form-control input-sm qty_rm" value="<?php echo $row->qty_rm ?>">
 							<input type="hidden" name="quant_id"  id="quant_id" class="form-control input-sm quant_id" value="<?php echo $row->quant_id ?>">
@@ -211,7 +211,7 @@
 						</td>
 						<td align="right"><?php echo $row->qty2?></td>
 						<td><?php echo $row->uom2;?></td>
-						<td><input type="text" name="qty2_konsum"  id="qty2_konsum" class="form-control input-sm qty2_konsum" data-index="<?php echo $i;?>"></td>						
+						<td><input type="text" name="qty2_konsum"  id="qty2_konsum" class="form-control input-sm qty2_konsum" data-index="<?php echo $i;?>"  onkeyup="validAngka2(this)" data-decimal="2" oninput="enforceNumberValidation(this)"></td>						
 					</tr>
 					<?php
 					 $i++; 
@@ -607,18 +607,76 @@
 
 	//validasi qty
 	function validAngka2(a){
-	    if(!/^[0-9.]+$/.test(a.value)){
-	        a.value = a.value.substring(0,a.value.length-1000);
-	    }
+	    // if(!/^[0-9.]+$/.test(a.value)){
+	    //     a.value = a.value.substring(0,a.value.length-1000);
+	    // }
+		let tmp_char = '';
+		let len      = a.value.length;
+		let text     = a.value;
+		for(let i = 0; i < len; i++){
+			if(len > 1){
+				var char = text.substring(i,i+1);
+			}else{
+				var char = text;
+			}
+			if(/^[0-9.]+$/.test(char)){
+				char1 = char; 
+				tmp_char += char1;
+	    	}else{
+				char.replace(/[^0-9.-]/, '')
+			}
+		}
+		// alert(tmp_char);
+		a.value = "";
+		a.value = tmp_char;
 	}
 
 	//validasi qty
 	function validAngka_waste(a,name){
-	    if(!/^[0-9.]+$/.test(a.value)){
-	        a.value = a.value.substring(0,a.value.length-1000);
-	    }
+		let tmp_char = '';
+		let len      = a.value.length;
+		let text     = a.value;
+		for(let i = 0; i < len; i++){
+			if(len > 1){
+				var char = text.substring(i,i+1);
+			}else{
+				var char = text;
+			}
+			if(/^[0-9.]+$/.test(char)){
+				char1 = char; 
+				tmp_char += char1;
+	    	}else{
+				char.replace(/[^0-9.-]/, '')
+			}
+		}
+		// alert(tmp_char);
+		a.value = "";
+		a.value = tmp_char;
 		total_waste(a,name);
 	}
+
+	// validasi decimal
+	function enforceNumberValidation(ele) {
+            if ($(ele).data('decimal') != null) {
+                // found valid rule for decimal
+                var decimal = parseInt($(ele).data('decimal')) || 0;
+                var val = $(ele).val();
+                if (decimal > 0) {
+                    var splitVal = val.split('.');
+                    if (splitVal.length == 2 && splitVal[1].length > decimal) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0] + '.' + splitVal[1].substr(0, decimal));
+                    }
+                } else if (decimal == 0) {
+                    // do not allow decimal place
+                    var splitVal = val.split('.');
+                    if (splitVal.length > 1) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0]); // always trim everything after '.'
+                    }
+                }
+            }
+    }
 
 	function total_waste2(kode_produk, lot){
 		var radio_waste	= get_radio_waste();
@@ -1102,12 +1160,11 @@
 		    + '<td width="150px">'
 		    +'<select type="text" class="form-control input-sm width-200 wproduk" name="wtxtproduct" id="wtxtproduct"></select>'
 		    +'<input type="hidden" name="wtxtnameproduct" id="wtxtnameproduct"  class="form-control input-sm wnameproduct"  readonly="readonly"></td>'
-
 		    + '<td style="min-width:180px !important;"><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-160 wtxtlot"  onkeypress="enter_waste(event);" ></td>'
 		    + '<td></td>'
-		    + '<td><input type="text" name="wtxtqty"  id="wtxtqty" class="form-control input-sm width-80 wtxtqty" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this,'+wtxtqty+')"></td>'
+		    + '<td><input type="text" name="wtxtqty"  id="wtxtqty" class="form-control input-sm width-80 wtxtqty" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this,'+wtxtqty+')" data-decimal="2" oninput="enforceNumberValidation(this)"></td>'
 		    + '<td><input type="text" name="wtxtuom"  id="wtxtuom" class="form-control input-sm width-80 wtxtuom"   readonly="readonly"></td>'
-		    + '<td><input type="text" name="wtxtqty2" id="wtxtqty2" class="form-control input-sm width-80 wtxtqty2" onkeypress="enter_waste(event);"  onkeyup="validAngka_waste(this,'+wtxtqty2+')"></td>'
+		    + '<td><input type="text" name="wtxtqty2" id="wtxtqty2" class="form-control input-sm width-80 wtxtqty2" onkeypress="enter_waste(event);"  onkeyup="validAngka_waste(this,'+wtxtqty2+')" data-decimal="2" oninput="enforceNumberValidation(this)"></td>'
 		    + '<td><input type="text" name="wtxtuom2"  id="wtxtuom2" class="form-control input-sm width-80 wtxtuom2"   readonly="readonly"></td>'
 		    + '<td><input type="text" name="wreff_note" id="wreff_note" class="form-control input-sm width-150 " onkeypress="enter_waste(event);"/></td>'
 		    + '<td><a onclick="delRow_waste(this);"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
@@ -1696,6 +1753,8 @@
 						produk_waste = true;
 					}
 				});
+
+				console.log(arr);
 					
 				var arr2 = new Array();
 				var input_rm = false;
@@ -1753,6 +1812,9 @@
 						konsumsi_bahan = true;
 					}
 				});		
+
+				console.log(arr2);
+
 			
 				if(produk_waste == false){
 					alert_bootbox('Maaf, Produk yang akan di Waste masih Kosong !');

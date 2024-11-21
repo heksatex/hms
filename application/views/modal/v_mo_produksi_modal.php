@@ -83,7 +83,7 @@
 			<div class="col-md-12 col-xs-12">
 				<div class="col-xs-4"><label>Qty</label></div>
 				<div class="col-xs-5">
-					<input type="text" name="txtqty" id="txtqty" class="form-control input-sm txtqty" value="<?php echo $qty1_std?>"  onkeyup="validAngka(this)" />						
+					<input type="text" name="txtqty" id="txtqty" class="form-control input-sm txtqty" value="<?php echo $qty1_std?>"  onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)"/>						
 				</div>
 				<div class="col-xs-3">
 					<input type="text" name="txtuom" id="txtuom" class="form-control input-sm" value="<?php echo $uom_1?>" readonly="readonly" />
@@ -96,7 +96,7 @@
 			<div class="col-md-12 col-xs-12">
 				<div class="col-xs-4"><label>Qty2</label></div>
 				<div class="col-xs-5">
-					<input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm" value="<?php echo $qty2_std?>"   />			
+					<input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm" value="<?php echo $qty2_std?>"   onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)"/>			
 				</div>
 				<div class="col-xs-3">
 					<input type="text" name="txtuom2" id="txtuom2" class="form-control input-sm" value="<?php echo $uom_2?>" readonly="readonly" />
@@ -184,11 +184,54 @@
 	//load modal panggil funtion total
 	//total();
 
+	// validasi decimal
+	function enforceNumberValidation(ele) {
+            if ($(ele).data('decimal') != null) {
+                // found valid rule for decimal
+                var decimal = parseInt($(ele).data('decimal')) || 0;
+                var val = $(ele).val();
+                if (decimal > 0) {
+                    var splitVal = val.split('.');
+                    if (splitVal.length == 2 && splitVal[1].length > decimal) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0] + '.' + splitVal[1].substr(0, decimal));
+                    }
+                } else if (decimal == 0) {
+                    // do not allow decimal place
+                    var splitVal = val.split('.');
+                    if (splitVal.length > 1) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0]); // always trim everything after '.'
+                    }
+                }
+            }
+    }
+
 	//validasi qty
 	function validAngka(a){
-	    if(!/^[0-9.]+$/.test(a.value)){
-	        a.value = a.value.substring(0,a.value.length-1000);
-	    }
+	    // if(!/^[0-9.]+$/.test(a.value)){
+	    //     a.value = a.value.substring(0,a.value.length-1000);
+	    // }
+
+		let tmp_char = '';
+		let len      = a.value.length;
+		let text     = a.value;
+		for(let i = 0; i < len; i++){
+			if(len > 1){
+				var char = text.substring(i,i+1);
+			}else{
+				var char = text;
+			}
+			if(/^[0-9.]+$/.test(char)){
+				char1 = char; 
+				tmp_char += char1;
+	    	}else{
+				char.replace(/[^0-9.-]/, '')
+			}
+		}
+		// alert(tmp_char);
+		a.value = "";
+		a.value = tmp_char;
 	   //total();
 	}
 

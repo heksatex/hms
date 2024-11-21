@@ -1480,7 +1480,7 @@ class Koreksimundur extends MY_Controller
                     		throw new \Exception("Departemen ".$get_dept['nama']." belum bisa melakukan Koreksi Mundur", 200);
 						}
 						
-						
+						// log_message('info', 'tes');
 
 						$periode_koreksi = $thn."-".$bln;
 						$dateKoreksi     = date('Y-m-t', strtotime($periode_koreksi));
@@ -1527,8 +1527,10 @@ class Koreksimundur extends MY_Controller
 										$status_km = $cek_status->status;
 									}
 							}
+							// log_message('info', $get_dbi);
+							// var_dump($get_dbi);
 
-							if(!empty($get_dbi)  AND (($loop == 1  AND  $tmp_lot == "") OR ($loop > 1 AND $tmp_lot != $lot )) AND (($loop == 1  AND  $tmp_koreksi_lk == "") OR ($loop > 1 AND $tmp_koreksi_lk != $koreksi_lebih_kurang )) AND $status_km == 'draft'){
+							if(!empty($get_dbi)  AND (($loop == 1  AND  $tmp_lot == "") OR ($loop > 1 AND $tmp_lot != $lot )) AND $status_km == 'draft'){
 								$get_eom   = $this->m_koreksi->get_data_eom_by_produk($thn,$bln,$kode_produk,$nama_produk,$lot,$stock_location);
 								$koreksi_qty1 = $qty;
 								$koreksi_qty2 = $qty2;
@@ -1613,7 +1615,6 @@ class Koreksimundur extends MY_Controller
 							$loop++;
 
 						}
-
 			            // $this->_module->unlock_tabel();
 
 						for($loop=0;$loop<=4;$loop++){	
@@ -1721,14 +1722,14 @@ class Koreksimundur extends MY_Controller
 				$this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
 			}
 		}catch(Exception $ex){
-            $this->_module->finishRollBack();
-            $this->_module->rollbackTransaction();
+            // $this->_module->finishRollBack();
+            // $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }finally {
             // unlock table
-            $this->_module->unlock_tabel();
+            // $this->_module->unlock_tabel();
         }
 	}
 
