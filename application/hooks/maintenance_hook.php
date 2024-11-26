@@ -13,7 +13,7 @@ class Maintenance_hook
         if(file_exists(APPPATH.'config/config.php')){
             include(APPPATH.'config/config.php');
 
-            $tgl_mt = strtotime('Y-m-t 23:50:00');
+            $tgl_mt = strtotime(date('Y-m-t 23:50:00'));
             $tgl_mt_ = date("Y-m-t 23:59:59");
             $tgl_mt2 = strtotime($tgl_mt_);
             
