@@ -80,6 +80,7 @@ class Goodstopush extends MY_Controller {
         try {
             $sales = $this->input->post("sales");
             $report_date = $this->input->post("report_date");
+            $lokasi = $this->input->post("lokasi");
             $data = array();
             $datas = new $this->m_gtp;
             $list = $datas->setOrders([null, "corak", "category", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name","lokasi"])
@@ -87,6 +88,9 @@ class Goodstopush extends MY_Controller {
                             ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date]);
             if ($sales !== "") {
                 $list->setWheres(["nama_sales_group" => $sales]);
+            }
+            if($lokasi !== "") {
+                $list->setWheres(["lokasi" => $lokasi]);
             }
             $no = $_POST['start'];
             foreach ($list->getData() as $key => $field) {

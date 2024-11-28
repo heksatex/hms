@@ -40,10 +40,10 @@
                                 <div class="col-md-8" style="padding-right: 0px !important;">
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
+                                            <div class="col-md-3 col-xs-6">
                                                 <label class="form-label required" id="label_filter_tanggal">Report Date</label>
                                             </div>
-                                            <div class="col-xs-8 col-md-8">
+                                            <div class="col-md-3 col-xs-6">
                                                 <select class="form-control select2" name="report_date" id="report_date" required>
                                                     <option></option>
                                                     <?php foreach ($dates as $key => $value) {?>
@@ -51,16 +51,25 @@
                                                     <?php } ?>
                                                 </select>
                                             </div>
+                                            <div class="col-md-3 col-xs-6">
+                                                <label class="form-label">Lokasi</label>
+                                            </div>
+                                            <div class="col-md-3 col-xs-6">
+                                                <select name="lokasi" id="lokasi" class="form-control select2">
+                                                    <option value=""></option>
+                                                    <option value="GJD/Stock">GJD/Stock</option>
+                                                    <option value="GRG/Stock">GRG/Stock</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
+                                            <div class="col-md-3 col-xs-6">
                                                 <label class="form-label" id="label_filter_tanggal">Sales</label>
                                             </div>
-                                            <div class="col-xs-8 col-md-8">
-
-                                                <select name="sales" id="sales" class="form-control select2" style="width: 80%">
+                                            <div class="col-md-3 col-xs-6">
+                                                <select name="sales" id="sales" class="form-control select2">
                                                     <option></option>
                                                     <?php
                                                     foreach ($sales as $key => $value) {
@@ -156,6 +165,7 @@
                         "data": function (d) {
                             d.report_date = $("#report_date").val();
                             d.sales = $("#sales").val();
+                            d.lokasi = $("#lokasi").val();
                         }
                     },
                     "columnDefs": [
