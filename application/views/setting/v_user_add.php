@@ -79,6 +79,16 @@
                                                     </select>
                                                 </div>                                                        
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label>Masking Procurement Purchase </label></div>
+                                                <div class="col-xs-6">
+                                                    <select  class="form-control input-sm select2" name="masking_propur[]" id="masking_propur"  style="width:100% !important" multiple>
+                                                        <?php foreach ($departemen as $row) { ?>
+                                                        <option value='<?php echo $row->kode; ?>'><?php echo $row->nama_departemen; ?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                            </div>
 
                                         </div>
                                         <div class="col-md-6 col-xs-12"> 
@@ -650,7 +660,8 @@
                             arrchkakses: arr_chk_akses,
                             status: 'tambah',
                             kategori: $("#kategori").val(),
-                            masking:$("#masking").val()
+                            masking:$("#masking").val(),
+                            masking_propur: $("#masking_propur").val()
 
                         }, success: function (data) {
                             if (data.sesi == "habis") {
@@ -691,7 +702,7 @@
             $(function () {
                 $(".select2").select2({
                     allowClear: true,
-                    placeholder: "Pilih Kategori"
+                    placeholder: "Pilih"
                 });
             });
 

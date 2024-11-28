@@ -12,6 +12,7 @@ class Penerimaanbarang extends MY_Controller
 		$this->load->model("_module");//load model global
         $this->load->model("m_penerimaanBarang");///load model penerimaan barang
         $this->load->model("m_mo");
+        $this->load->model('m_po');
 	}
 
 	public function index()
@@ -870,6 +871,31 @@ class Penerimaanbarang extends MY_Controller
                     if($backorder == true){
                         $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success', 'backorder' => 'yes', 'message2'=> 'Akan terbentuk Backorder dengan No '.$kode_in);
                     }else{
+                        if(!$delete) {
+                            $po = new $this->m_po;
+                            $rcvItem = clone $po;
+                            $datarcvItem = $rcvItem->setTables("penerimaan_barang pb")->setJoins("penerimaan_barang_items pbi", "pb.kode = pbi.kode")
+                                    ->setWheres(["pb.kode"=>$kode])->setOrder(["tanggal"=>"desc"])
+                                    ->setSelects(["origin","kode_produk"]);
+                            $origin = [];
+                            $kode_produk = [];
+                            $readyrcvItem = clone $datarcvItem;
+                            foreach ($datarcvItem->setWheres(["status_barang"=>"done"])->getData() as $key => $value) {
+                                $origin[] = $value->origin;
+                                $kode_produk[]=$value->kode_produk;
+                            }
+//                            if($readyrcvItem->setWheres(["status_barang"=>"ready"])->getDataCountFiltered() < 1) {
+//                                $ipo = clone $po;
+//                                $ipo->setTables("purchase_order")
+//                                    ->setWhereRaw("no_po in ('". implode("','", $origin)."') and status = 'purchase_confirmed'")
+//                                    ->update(["status"=>"done"]);
+//                            }
+                            $po->setTables("purchase_order_detail")
+                                    ->setWhereRaw("po_no_po in ('". implode("','", $origin)."') and kode_produk in ('". implode("','", $kode_produk)."') and status <> 'cancel'")
+                                    ->update(["status"=>"done"]);
+                            
+//                            log_message('error', "po_no_po in ('". implode("','", $origin)."') and kode_produk in ('". implode("','", $kode_produk)."') and status <> 'cancel'");
+                        }
                         $callback = array('status' => 'success', 'message'=>'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type'=>'success');
 
                     }
@@ -878,8 +904,10 @@ class Penerimaanbarang extends MY_Controller
             }//else cek-cek
 
         }//else session
-
+           
         echo json_encode($callback);
+            
+        
     }
 
 

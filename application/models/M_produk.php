@@ -17,6 +17,7 @@ class M_produk extends CI_Model {
     var $column_order3 = array(null, 'mp.kode', 'tanggal', 'nama', 'nama_produk', 'qty', 'uom', 'reff_note', 'nama_status');
     var $column_search3 = array('mp.kode', 'tanggal', 'nama', 'nama_produk', 'qty', 'uom', 'reff_note', 'nama_status');
     var $order3 = array('mp.kode' => 'desc');
+    protected $wheresRaw = [];
 
     private function _get_datatables_query() {
 
@@ -62,10 +63,17 @@ class M_produk extends CI_Model {
                     $this->db->or_like($item, $_POST['search']['value']);
                 }
 
+
                 if (count($this->column_search) - 1 == $i) //last loop
                     $this->db->group_end(); //close bracket
             }
             $i++;
+        }
+
+        if (count($this->wheresRaw) > 0) {
+            foreach ($this->wheresRaw as $key => $value) {
+                $this->db->where($value, null, false);
+            }
         }
 
         if (isset($_POST['order'])) { // here order processing
@@ -357,5 +365,10 @@ class M_produk extends CI_Model {
     public function saveCatatan($data) {
         $this->db->insert('mst_produk_catatan', $data);
         return $this->db->insert_id() ?? null;
+    }
+
+    public function setWhereRaw(string $where) {
+        $this->wheresRaw [] = $where;
+        return $this;
     }
 }
