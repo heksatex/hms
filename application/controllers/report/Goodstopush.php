@@ -82,7 +82,8 @@ class Goodstopush extends MY_Controller {
             $report_date = $this->input->post("report_date");
             $data = array();
             $datas = new $this->m_gtp;
-            $list = $datas->setOrders([null, "corak", "category", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name","lokasi"])->setOrder(["qty"=>"desc","lokasi,category,corak,uom" => "asc"])
+            $list = $datas->setOrders([null, "corak", "category", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name","lokasi"])
+                    ->setOrder(["category"=>"asc","lokasi"=>"asc","qty"=>"desc","corak,uom"=>"asc"])
                             ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date]);
             if ($sales !== "") {
                 $list->setWheres(["nama_sales_group" => $sales]);
@@ -145,7 +146,7 @@ class Goodstopush extends MY_Controller {
             }
             $no = $_POST['start'];
             if ($lokasi === "GRG/Stock") {
-                $list->setOrder(["qty"=>"desc",'nama_produk,uom' => 'asc'])->setWheres(["nama_produk" => $corak]);
+                $list->setOrder(["qty"=>"desc","nama_produk,uom"=>"desc"])->setWheres(["nama_produk" => $corak]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
@@ -162,7 +163,7 @@ class Goodstopush extends MY_Controller {
                     ];
                 }
             } else {
-                $list->setOrder(["qty"=>"desc",'corak_remark,warna_remark' => 'asc'])->setWheres(["corak_remark" => $corak]);
+                $list->setOrder(["qty"=>"desc","corak_remark,warna_remark"=>"asc"])->setWheres(["corak_remark" => $corak]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
