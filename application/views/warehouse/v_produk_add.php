@@ -562,7 +562,7 @@
         var selectedSelect2OptionSource = $("#uom_beli :selected").data().data.catatan;
         $("#note_uom_beli").html(selectedSelect2OptionSource);
     });
-    $("#uomproduk").on("change",function(){
+    $("#uomproduk").on("change", function () {
         $("#uom_beli").val('').trigger('change');
         $("#note_uom_beli").html("");
     });
@@ -687,9 +687,8 @@
     });
 
     //klik button simpan
-    $('#btn-simpan').click(function () {
+    $('#btn-simpan').off("click").click(function () {
         $('#btn-simpan').button('loading');
-        $(this).off('click');
         var dapatdijual = $('#dapatdijual').is(":checked");
         if (dapatdijual == true) {
             dapatdijual_value = 1;

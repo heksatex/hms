@@ -126,15 +126,15 @@ class M_user extends CI_Model {
         return $result['nama_departemen'];
     }
 
-    public function save_masking(array $data) {
-        $this->db->insert_batch("user_masking", $data);
+    public function save_masking(array $data,string $table = "user_masking") {
+        $this->db->insert_batch($table, $data);
     }
 
-    public function delete_masking(string $username) {
-        $this->db->query("DELETE FROM user_masking WHERE username = '{$username}'");
+    public function delete_masking(string $username,string $table = "user_masking") {
+        $this->db->query("DELETE FROM {$table} WHERE username = '{$username}'");
     }
 
-    public function getMasking(string $username) {
-        return $this->db->query("select mst_category_id from user_masking where username ='{$username}'")->result();
+    public function getMasking(string $username,string $table = "user_masking") {
+        return $this->db->query("select * from {$table} where username ='{$username}'")->result();
     }
 }
