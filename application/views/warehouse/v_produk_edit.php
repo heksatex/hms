@@ -136,17 +136,17 @@
                                             <!--  <div class="col-md-12 col-xs-12">
                                                <div class="col-xs-8">
                                             <?php if ($produk->dapat_dijual == 0) { ?>
-                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdijual" id="dapatdijual" value="true">
+                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdijual" id="dapatdijual" value="true">
                                             <?php } else { ?>
-                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdijual" id="dapatdijual" checked value="true">
+                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdijual" id="dapatdijual" checked value="true">
                                             <?php } ?>
                                                  <label>Dapat Dijual</label>
                                                </div>
                                                <div class="col-xs-8">                      
                                             <?php if ($produk->dapat_dibeli == 0) { ?>
-                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdibeli" id="dapatdibeli" value="true">
+                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdibeli" id="dapatdibeli" value="true">
                                             <?php } else { ?>
-                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdibeli" id="dapatdibeli" checked value="true">
+                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdibeli" id="dapatdibeli" checked value="true">
                                             <?php } ?>                           
                                                  <label>Dapat Dibeli</label>
                                                </div>
@@ -741,8 +741,8 @@
 
 <?php
 $image = base_url("upload/product/default.jpg");
-if (is_file(FCPATH . "upload/product/{$produk->kode_produk}.jpeg")) {
-    $image = base_url("upload/product/{$produk->kode_produk}.jpeg");
+if (is_file(FCPATH . "upload/product/{$produk->kode_produk}.jpg")) {
+    $image = base_url("upload/product/{$produk->kode_produk}.jpg");
 }
 ?>
 <div class="modal fade lebar" id="view_datas" role="dialog">
@@ -905,7 +905,8 @@ if (is_file(FCPATH . "upload/product/{$produk->kode_produk}.jpeg")) {
                                                             ],
                                                             initialPreviewConfig: [
                                                                 {caption: "", width: "", url: "<?php echo base_url('warehouse/produk/delete_image') ?>", key: "<?= $produk->id ?>"}
-                                                            ]
+                                                            ],
+                                                            allowedFileExtensions: ["jpg"]
 
                                                         }).on("filebeforedelete", function () {
                                                             confirmRequest("Product", "Hapus Gambar ? ", (() => {
@@ -1002,9 +1003,8 @@ if (is_file(FCPATH . "upload/product/{$produk->kode_produk}.jpeg")) {
                                                         });
 
                                                         //klik button simpan
-                                                        $('#btn-simpan').click(function () {
+                                                        $('#btn-simpan').off("click").click(function () {
                                                             $('#btn-simpan').button('loading');
-                                                            $(this).off('click');
                                                             var dapatdijual = $('#dapatdijual').is(":checked");
                                                             if (dapatdijual === true) {
                                                                 dapatdijual_value = 1;

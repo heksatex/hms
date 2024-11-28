@@ -95,7 +95,7 @@ class User extends MY_Controller {
         } else {
 
             //lock table
-            $this->_module->lock_tabel('user WRITE, user_priv WRITE, main_menu_rel WRITE, main_menu_sub WRITE, log_history WRITE, mst_sales_group WRITE, mst_departemen_all  WRITE,user_masking WRITE');
+            $this->_module->lock_tabel('user WRITE, user_priv WRITE, main_menu_rel WRITE, main_menu_sub WRITE, log_history WRITE, mst_sales_group WRITE, mst_departemen_all  WRITE,user_masking WRITE,user_masking_procurement_purchase WRITE');
 
             $namauser = addslashes($this->input->post('namauser'));
             $password = md5('123');
@@ -108,6 +108,7 @@ class User extends MY_Controller {
             $sales_group = addslashes($this->input->post('sales_group'));
             $telepon_wa = addslashes($this->input->post('telepon_wa'));
             $masking = $this->input->post("masking");
+            $masking_propur = $this->input->post("masking_propur");
 
             if (empty($namauser)) {
                 $callback = array('status' => 'failed', 'field' => 'namauser', 'message' => 'Nama User Harus Diisi !', 'icon' => 'fa fa-warning', 'type' => 'danger');
@@ -143,6 +144,8 @@ class User extends MY_Controller {
                         $this->m_user->save_user_priv($login, $value, '1');
                     }
                     $userMasking = [];
+                    $propurMasking = [];
+                    
                     if(is_string($masking))
                         $masking = [];
                     foreach ($masking as $key => $value) {
@@ -154,6 +157,19 @@ class User extends MY_Controller {
                     $this->m_user->delete_masking($login);
                     if (count($userMasking) > 0) {
                         $this->m_user->save_masking($userMasking);
+                    }
+                    
+                    if(is_string($masking_propur))
+                        $masking_propur = [];
+                    foreach ($masking_propur as $key => $value) {
+                        $propurMasking [] = array(
+                            "username"=>$login,
+                            "departemen"=>$value
+                        );
+                    }
+                    $this->m_user->delete_masking($login,"user_masking_procurement_purchase");
+                    if (count($propurMasking) > 0) {
+                        $this->m_user->save_masking($propurMasking,"user_masking_procurement_purchase");
                     }
 
                     $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sales_group);
@@ -176,6 +192,7 @@ class User extends MY_Controller {
                         $this->m_user->save_user_priv($login, $value, '1');
                     }
                     $userMasking = [];
+                    $propurMasking = [];
                     foreach ($masking as $key => $value) {
                         $userMasking[] = array(
                             'username' => $login,
@@ -185,6 +202,18 @@ class User extends MY_Controller {
                     if (count($userMasking) > 0) {
                         $this->m_user->save_masking($userMasking);
                     }
+                    
+                    foreach ($masking_propur as $key => $value) {
+                        $propurMasking [] = array(
+                            "username"=>$login,
+                            "departemen"=>$value
+                        );
+                    }
+                    
+                     if (count($propurMasking) > 0) {
+                        $this->m_user->save_masking($propurMasking,"user_masking_procurement_purchase");
+                    }
+                    
                     $login_encr = encrypt_url($login);
                     $jenis_log = "create";
                     $note_log = $namauser . " | " . $departemen . " | " . $level . " | " . $nama_sales_group;
@@ -223,10 +252,16 @@ class User extends MY_Controller {
         $data['user'] = $this->m_user->get_user_by_username($kode_decrypt);
         $data['priv'] = $list_priv;
         $masking = [];
+        $masking_propur = [];
         foreach ($this->m_user->getMasking($kode_decrypt) as $value) {
             $masking[] = $value->mst_category_id;
         }
         $data["masking"] = $masking;
+        
+        foreach ($this->m_user->getMasking($kode_decrypt,"user_masking_procurement_purchase") as $value) {
+            $masking_propur[] = $value->departemen;
+        }
+        $data["masking_propur"] = $masking_propur;
 
         $data['sales'] = $this->m_user->get_list_menu_by_link_menu('sales');
         $data['count_sales'] = $this->m_user->get_jml_list_menu_by_link_menu('sales');

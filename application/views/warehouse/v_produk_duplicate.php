@@ -776,9 +776,8 @@
             },
                     false
                     );
-            $('#btn-simpan').click(function () {
+            $('#btn-simpan').off("click").click(function () {
                 $('#btn-simpan').button('loading');
-                $(this).off('click');
                 var dapatdijual = $('#dapatdijual').is(":checked");
                 if (dapatdijual == true) {
                     dapatdijual_value = 1;

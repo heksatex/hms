@@ -28,9 +28,16 @@ class Produk extends MY_Controller {
     }
 
     function get_data() {
+        $username = $this->session->userdata('username');
         $sub_menu = $this->uri->segment(2);
         $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
-        $list = $this->m_produk->get_datatables();
+        $level = $this->session->userdata('nama')['level'] ?? "";
+        if ($level === "Entry Data") {
+            $masking = $this->m_coa->setTables("user_masking")->setSelects(["GROUP_CONCAT(mst_category_id) as category"])->setOrder(["mst_category_id"])->setWheres(["username" => $username])->getDetail();
+            $list = $this->m_produk->setWhereRaw("id_category in ({$masking->category})")->get_datatables();
+        } else {
+            $list = $this->m_produk->get_datatables();
+        }
         $data = array();
         $no = $_POST['start'];
         foreach ($list as $field) {
@@ -199,6 +206,22 @@ class Produk extends MY_Controller {
                 $sql_insert_mst_sub_parent = '';
                 $nama_sub_parent = 0;
 
+                if ($uom_beli === null || $uom_beli === "") {
+                    $datakonversi = ["ke" => $uomproduk, "dari" => $uomproduk, "nilai" => 1];
+                    $getDataKonv = $this->m_konversiuom->wheres($datakonversi)->getDetail();
+                    if (!$getDataKonv) {
+                        $crtDataKonv = $this->m_konversiuom->save(array_merge($datakonversi, ["catatan" => "1:1"]));
+                        if ($crtDataKonv === "") {
+                            $getDataKonv = $this->m_konversiuom->wheres($datakonversi)->getDetail();
+                            $uom_beli = $getDataKonv->id;
+                        } else {
+                            $uom_beli = null;
+                        }
+                    } else {
+                        $uom_beli = $getDataKonv->id;
+                    }
+                }
+
                 $tanggaldibuat = $this->input->post('tanggaldibuat');
                 $status = addslashes($this->input->post('status'));
 
@@ -355,7 +378,7 @@ class Produk extends MY_Controller {
 
                 if ($_FILES['foto']['size'] !== 0) {
                     $config["upload_path"] = "./upload/product/";
-                    $config["allowed_types"] = "png|jpg|jpeg";
+                    $config["allowed_types"] = "jpg";
                     $config["file_name"] = $kodeproduk;
                     $this->upload->initialize($config);
 

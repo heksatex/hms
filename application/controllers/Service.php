@@ -90,7 +90,7 @@ class Service extends CI_Controller {
                 $datas[$values->nama_sales_group] = [];
                 foreach ($query as $key => $value) {
                     $qr = new $this->m_gtp;
-                    $datas[$values->nama_sales_group][$key] = $qr->setOrder(["lokasi,corak,category"])->setWheres($value["where"])
+                    $datas[$values->nama_sales_group][$key] = $qr->setOrder(["qty"=>"desc","lokasi,corak,category"=>"asc"])->setWheres($value["where"])
                             ->setWheres(["nama_sales_group" => $values->nama_sales_group])->setWhereRaw("DATE(report_date) = '{$now}'")
                             ->setSelects(["corak,uom,uom2,qty as total_qty,qty2 as total_qty2,lot as total_data,jml_warna as total_warna,customer_name,lebar_jadi"])
                             ->getData();
@@ -117,7 +117,6 @@ class Service extends CI_Controller {
                     $wa->sendMessageToGroup('service_gtp', ["{message}" => "GOODS To PUSH *{$values->nama_sales_group}* \n {$nm}"], $groups)
                             ->setFile(getIpPubic("hms/" . $pathFile))
                             ->setMentions([])->setFooter('footer_hms')->send();
-                    sleep(3);
                 } else {
                     $wa->sendMessageToGroup('error', ["{message}" => "File GTP sales *{$values->nama_sales_group}* Tidak terbuat."], ['IT WDT'])
                             ->setMentions([])->setFooter('footer_hms')->send();
