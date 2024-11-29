@@ -34,7 +34,12 @@ class Produk extends MY_Controller {
         $level = $this->session->userdata('nama')['level'] ?? "";
         if ($level === "Entry Data") {
             $masking = $this->m_coa->setTables("user_masking")->setSelects(["GROUP_CONCAT(mst_category_id) as category"])->setOrder(["mst_category_id"])->setWheres(["username" => $username])->getDetail();
+            if(!empty($masking->category)){
             $list = $this->m_produk->setWhereRaw("id_category in ({$masking->category})")->get_datatables();
+            }
+            else {
+            $list = $this->m_produk->get_datatables();
+            }
         } else {
             $list = $this->m_produk->get_datatables();
         }
