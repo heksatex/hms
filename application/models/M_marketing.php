@@ -1302,7 +1302,7 @@ class m_marketing extends CI_Model
 	} 
 
 
-	var $column_order12 = array(null,'sq.create_date', 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','umur');
+	var $column_order12 = array(null,null,null,'sq.create_date', 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','umur');
 	var $column_search12= array('sq.create_date','sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik');
 	var $order12  	  = array('sq.corak_remark' => 'asc','sq.warna_remark' => 'asc');
 
@@ -1332,7 +1332,7 @@ class m_marketing extends CI_Model
     		$this->db->where('sq.uom2_jual',$this->input->post('uom2_jual'));
         }
 
-		$this->db->SELECT("sq.create_date, sq.lot, sq.corak_remark, sq.warna_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, (datediff(now(), sq.create_date) ) as umur ");
+		$this->db->SELECT("sq.create_date, sq.kode_produk, sq.lot, sq.corak_remark, sq.warna_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, (datediff(now(), sq.create_date) ) as umur ");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
