@@ -41,3 +41,5 @@ application/config/database.php
 /application/config/database.php
 tmp/*
 /tmp/*
+application/config/additional.php
+/application/config/additional.php
