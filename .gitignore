@@ -43,3 +43,5 @@ tmp/*
 /tmp/*
 application/config/additional.php
 /application/config/additional.php
+/font/*
+font/*
