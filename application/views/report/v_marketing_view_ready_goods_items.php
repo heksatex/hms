@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <?php $this->load->view("admin/_partials/head.php") ?>
+  <link href="<?= base_url('dist/css/light-box.css') ?>" rel="stylesheet">
   <style type="text/css">
     
     h3{
@@ -115,6 +116,8 @@
                                 <thead>                          
                                     <tr>
                                         <th class="style width-50">No.</th>
+                                        <th class="style">Gambar</th>
+                                        <th class="style"></th>
                                         <th class="style ">Tgl dibuat</th>
                                         <th class="style ">Lot</th>
                                         <th class="style ">Corak</th>
@@ -146,10 +149,14 @@
 </div>
 
 <?php $this->load->view("admin/_partials/js.php") ?>
+<script src="<?= base_url('dist/js/light-box.min.js') ?>"></script>
 
 <script type="text/javascript">
     var table;
     $(document).ready(function() {
+
+        var zoom_percent = "100";
+       
         //datatables
         table = $('#table_group').DataTable({ 
             "processing": true, 
@@ -173,17 +180,28 @@
             },
            
             "columnDefs": [
+              {
+                "targets" : [2],
+                "visible" : false
+              },
               { 
-                "targets": [0], 
+                "targets": [0,1,2], 
                 "orderable": false, 
               },
               { 
-                "targets": [5,6,7], 
+                "targets": [7,8,9], 
                 "className":"text-right nowrap",
               },
               { 
                 "targets": [1], 
-                // "className":"nowrap",
+                // "data": "img",
+                "render" : function ( url, type, img) {
+                    // link = 
+                    data = '<a class="image-popup" href="'+img[1]+'" title="'+img[5]+' - '+img[6]+'" data-produk ="'+img[2]+'"><img height="50px" width="50px" src="'+img[1]+'"/></a>';
+                    // return '<img height="30%" width="30%" src="'+img[1]+'"/>';
+                    // return img[1];
+                    return data;
+                }
               },
             ],
             "drawCallback": function( settings, start, end, max, total, pre ) {  
@@ -192,13 +210,111 @@
                 let total_record = settings.json.total_lot; // total glpcs
                 $('#total_items').html('<label>:</label> '+ formatNumber(total_record) + ' Lot' )
             },
-        });
+            "fnDrawCallback": function () {
+               $('.image-popup').magnificPopup({
+                    type: 'image',
+                    removalDelay: 300,
+                    mainClass: 'mfp-fade',
+                    gallery: {
+                        enabled: true
+                    },
+                    image: {
+                        verticalFit: true,
+                        titleSrc: function(item) {
+                          
+                          var caption = item.el.attr('title');
+                          var produk  = item.el.attr('data-produk');
+                          
+                          return caption + ' &middot; <button type="button" class="btn btn-xs btn-default btn-download" id="btn-download" data-produk="'+produk+'" data-title="'+caption+'">download me</button>';
+                        },
+                       
+			              },
+                    zoom: {
+                        enabled: true,
+                        duration: 300,
+                        easing: 'ease-in-out',
+                        opener: function (openerElement) {
+                        return openerElement.is('img') ? openerElement : openerElement.find('img');
+                        }
+                    },
+                    callbacks: {
+                      open: function(item) {
+                        $(".mfp-figure figure").css("cursor", "zoom-in");
+                        zoom(zoom_percent);
+                        this.wrap.on('click.pinhandler', '.btn-download', function(e) {
+                          console.log($(this).attr('data-produk'));
+                          const produk = $(this).attr('data-produk');
+                          const title  = $(this).attr('data-title');
+
+                          $.ajax({
+                              "type":'POST',
+                              "url": "<?php echo site_url('report/Marketing/download_image')?>",
+                              //"dataType":'json',
+                              "data"  : {"produk":produk, "caption" : title},
+                              xhrFields: {
+                                  responseType: 'blob'
+                              },error: function(){
+                                alert('Error');
+                              }
+                          }).done(function(data){
+                              if(data.status =="failed"){
+                                alert_modal_warning(data.message);
+                              }else{
+
+                                  var url = window.URL.createObjectURL( data )
+                                  var anchorElem = document.createElement( "a" );
+                                  anchorElem.style.display = "none";
+                                  anchorElem.href = url;
+                                  anchorElem.download = title+".jpg";
+                                  $("body").append( anchorElem );
+                                  anchorElem.click();
+                                  // clean-up
+                                  window.URL.revokeObjectURL( url );
+                              }
+                              $('#btn-excel').button('reset');
+                          });
+                        });
+                      },
+                      beforeClose: function() {
+                        //this.wrap.off('click.pinhandler');
+                      }
+                    },
+              });
+     
+            }
  
+        });
+
+        function zoom(zoom_percent){
+            $(".mfp-figure figure").click(function(){
+                switch(zoom_percent){
+                    case "100":
+                        zoom_percent = "120";
+                        break;
+                    case "120":
+                        zoom_percent = "150";
+                        break;
+                    case "150":
+                        zoom_percent = "200";
+                        $(".mfp-figure figure").css("cursor", "zoom-out");
+                        break;
+                    case "200":
+                        zoom_percent = "100";
+                        $(".mfp-figure figure").css("cursor", "zoom-in");
+                        break;
+                }
+                $(this).css("zoom", zoom_percent+"%");
+            });
+        }
+        
+
     });
 
     function formatNumber(n) {
       return new Intl.NumberFormat('en-US').format(n);
     }
+
+    
 
     // button excel
     $('#btn-excel').click(function(){

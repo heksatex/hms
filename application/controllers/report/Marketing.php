@@ -1263,10 +1263,22 @@ class Marketing extends MY_Controller
             $list = $this->m_marketing->get_datatables12();
             $data = array();
             $no = $_POST['start'];
+            $link  = '';
+            $gmbr  = '';
             foreach ($list as $field) {
+                $image = "/upload/product/" . $field->kode_produk . ".jpg";
+                $imageThumb = "/upload/product/thumb-" . $field->kode_produk . ".jpg";
+                if (is_file(FCPATH . $image)) {
+                    // $link  = is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image);
+                    $link  = base_url($image);
+                }else{
+                    $link  = base_url("/upload/product/default.jpg");
+                }
                 $no++;
                 $row = array();
                 $row[] = $no;
+                $row[] = $link;
+                $row[] = $field->kode_produk;
                 $row[] = $field->create_date;
                 $row[] = $field->lot;
                 $row[] = $field->corak_remark;
@@ -1277,8 +1289,8 @@ class Marketing extends MY_Controller
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->umur;
                 $data[] = $row;
+
             }
-    
             $output = array(
                 "draw" => $_POST['draw'],
                 "recordsTotal" => $this->m_marketing->count_all12(),
@@ -1292,6 +1304,64 @@ class Marketing extends MY_Controller
         }else{
             die();
         }
+    }
+
+    function download_image()
+    {
+        // ob_start();
+        $data_produk = $this->input->post('produk');
+        $caption     = $this->input->post('caption');
+        $sourceImage = FCPATH.'/upload/product/'.$data_produk.'.jpg';
+
+        // $imageURL = $sourceImage;
+        // list ($width, $height) = getimagesize($imageURL);
+        // $imageProperties = imagecreatetruecolor($width, $height);
+        // $targetLayer = imagecreatefromjpeg($imageURL);
+        // imagecopyresampled($imageProperties, $targetLayer, 0, 0, 0, 0, $width, $height, $width, $height);
+        // $WaterMarkText = 'CONFIDENTIAL';
+        // $watermarkColor = imagecolorallocate($imageProperties, 250, 254, 4);
+        // imagestring($imageURL,  130, 117, $WaterMarkText, $watermarkColor);
+
+     
+        // /* 
+        // -------- If you want to save image -------
+        // */
+        // $result = imagejpeg($image, 'upload/watermark_image_save.jpg'); 
+        // echo "data:image/jpg;base64,".base64_encode($result);
+
+        
+        // $data = ob_get_clean();
+
+        // header('Content-type: image/jpg');
+        // imagejpeg($targetLayer);
+        // imagedestroy($targetLayer);
+        // imagedestroy($imageProperties);
+
+        // Create the size of image or blank image 
+        $image = $sourceImage; 
+        // Set the background color of image 
+        // $background_color = imagecolorallocate($image, 0, 153, 0); 
+        // Set the text color of image 
+        list ($width, $height) = getimagesize($image);
+        $imageProperties = imagecreatetruecolor($width, $height);
+        $targetLayer = imagecreatefromjpeg($image);
+        imagecopyresampled($imageProperties, $targetLayer, 0, 0, 0, 0, $width, $height, $width, $height);
+        $text_color = imagecolorallocate($imageProperties, 255, 255, 255); 
+        $img_w = $width;
+        $width1 = imagefontwidth(10) * strlen($caption);
+        // Function to create image which contains string. 
+        imagestring($targetLayer, 10, ($img_w/2)-($width1/2), $height/2,  $caption, $text_color); 
+        // imagestring($image, 3, 160, 120,  "A computer science portal", $text_color); 
+        
+        $data = ob_get_clean();
+        header("Content-Type: image/jpg"); 
+        
+        imagejpeg($targetLayer); 
+        imagedestroy($image); 
+        imagedestroy($image); 
+
+        
+
     }
 
 
