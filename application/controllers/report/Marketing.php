@@ -1312,6 +1312,7 @@ class Marketing extends MY_Controller
         $data_produk = $this->input->post('produk');
         $caption     = $this->input->post('caption');
         $sourceImage = FCPATH.'/upload/product/'.$data_produk.'.jpg';
+        $font        = FCPATH.'/font/arial-narrow-7.ttf';
 
         // $imageURL = $sourceImage;
         // list ($width, $height) = getimagesize($imageURL);
@@ -1340,7 +1341,7 @@ class Marketing extends MY_Controller
         // Create the size of image or blank image 
         $image = $sourceImage; 
         // Set the background color of image 
-        // $background_color = imagecolorallocate($image, 0, 153, 0); 
+        $background_color = imagecolorallocate($image, 0, 153, 0); 
         // Set the text color of image 
         list ($width, $height) = getimagesize($image);
         $imageProperties = imagecreatetruecolor($width, $height);
@@ -1348,10 +1349,24 @@ class Marketing extends MY_Controller
         imagecopyresampled($imageProperties, $targetLayer, 0, 0, 0, 0, $width, $height, $width, $height);
         $text_color = imagecolorallocate($imageProperties, 255, 255, 255); 
         $img_w = $width;
-        $width1 = imagefontwidth(10) * strlen($caption);
+        $width1 = imagefontwidth(30) * strlen($caption);
         // Function to create image which contains string. 
-        imagestring($targetLayer, 10, ($img_w/2)-($width1/2), $height/2,  $caption, $text_color); 
+        // imagestring($targetLayer, 5, ($img_w/2)-($width1/2), $height/2,  $caption, $text_color); 
+        // $font = './arial.ttf';
+        // imagettftext($targetLayer, 10, 45, $x, $y, $text_color, $font, $caption);
+
         // imagestring($image, 3, 160, 120,  "A computer science portal", $text_color); 
+        
+        $bbox = imagettfbbox(30, 0, $font, $caption);
+        $x = $bbox[0] + (imagesx($targetLayer) / 2) - ($bbox[4] / 2) + 10; 
+        $y = $bbox[1] + (imagesy($targetLayer) / 2) - ($bbox[5] / 2) - 5;
+
+        // imageline($targetLayer, $x - 10, $y - 40, $x - 10, $y, $text_color); // RIGHT
+        // imageline($targetLayer, $x - 10, $y - 40, $x - 10, $y + $width1 * 2, $text_color); // UP
+        // // imageline($targetLayer, $x + $x + 10, $y - 40, $x, $y, $text_color);
+        // imageline($targetLayer, $x + $width1 * 2 , $y - 40, $x + $width1 * 2, $y, $text_color); // LEFT
+        
+        imagettftext($targetLayer, 30, 0, $x, $y, $text_color, $font, $caption);
         
         $data = ob_get_clean();
         header("Content-Type: image/jpg"); 
@@ -1360,7 +1375,7 @@ class Marketing extends MY_Controller
         imagedestroy($image); 
         imagedestroy($image); 
 
-        
+
 
     }
 

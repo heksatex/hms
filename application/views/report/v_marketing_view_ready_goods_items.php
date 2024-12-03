@@ -204,19 +204,22 @@
                 }
               },
             ],
-            "drawCallback": function( settings, start, end, max, total, pre ) {  
-                // console.log(this.fnSettings().json); /* for json response you can use it also*/ 
-                // console.log(settings.json.total_lot); 
+            // "drawCallback": function( settings, start, end, max, total, pre ) {  
+            //     // console.log(this.fnSettings().json); /* for json response you can use it also*/ 
+            //     // console.log(settings.json.total_lot); 
+            //     let total_record = settings.json.total_lot; // total glpcs
+            //     $('#total_items').html('<label>:</label> '+ formatNumber(total_record) + ' Lot' )
+            // },
+            "fnDrawCallback": function (settings, start, end, max, total, pre ) {
                 let total_record = settings.json.total_lot; // total glpcs
                 $('#total_items').html('<label>:</label> '+ formatNumber(total_record) + ' Lot' )
-            },
-            "fnDrawCallback": function () {
-               $('.image-popup').magnificPopup({
+
+                $('.image-popup').magnificPopup({
                     type: 'image',
                     removalDelay: 300,
                     mainClass: 'mfp-fade',
                     gallery: {
-                        enabled: true
+                        enabled: false
                     },
                     image: {
                         verticalFit: true,
@@ -239,8 +242,9 @@
                     },
                     callbacks: {
                       open: function(item) {
-                        $(".mfp-figure figure").css("cursor", "zoom-in");
+                        $(".mfp-figure figure .mfp-img").css("cursor", "zoom-in");
                         zoom(zoom_percent);
+                        $(".btn-download").unbind( "click" );
                         this.wrap.on('click.pinhandler', '.btn-download', function(e) {
                           console.log($(this).attr('data-produk'));
                           const produk = $(this).attr('data-produk');
@@ -286,7 +290,7 @@
         });
 
         function zoom(zoom_percent){
-            $(".mfp-figure figure").click(function(){
+            $(".mfp-figure figure .mfp-img").click(function(){
                 switch(zoom_percent){
                     case "100":
                         zoom_percent = "120";
@@ -296,11 +300,11 @@
                         break;
                     case "150":
                         zoom_percent = "200";
-                        $(".mfp-figure figure").css("cursor", "zoom-out");
+                        $(".mfp-figure figure .mfp-img").css("cursor", "zoom-out");
                         break;
                     case "200":
                         zoom_percent = "100";
-                        $(".mfp-figure figure").css("cursor", "zoom-in");
+                        $(".mfp-figure figure .mfp-img").css("cursor", "zoom-in");
                         break;
                 }
                 $(this).css("zoom", zoom_percent+"%");
