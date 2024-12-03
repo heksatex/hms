@@ -154,6 +154,8 @@
 <script type="text/javascript">
     var table;
     $(document).ready(function() {
+
+        var zoom_percent = "100";
        
         //datatables
         table = $('#table_group').DataTable({ 
@@ -237,6 +239,8 @@
                     },
                     callbacks: {
                       open: function(item) {
+                        $(".mfp-figure figure").css("cursor", "zoom-in");
+                        zoom(zoom_percent);
                         this.wrap.on('click.pinhandler', '.btn-download', function(e) {
                           console.log($(this).attr('data-produk'));
                           const produk = $(this).attr('data-produk');
@@ -280,6 +284,29 @@
             }
  
         });
+
+        function zoom(zoom_percent){
+            $(".mfp-figure figure").click(function(){
+                switch(zoom_percent){
+                    case "100":
+                        zoom_percent = "120";
+                        break;
+                    case "120":
+                        zoom_percent = "150";
+                        break;
+                    case "150":
+                        zoom_percent = "200";
+                        $(".mfp-figure figure").css("cursor", "zoom-out");
+                        break;
+                    case "200":
+                        zoom_percent = "100";
+                        $(".mfp-figure figure").css("cursor", "zoom-in");
+                        break;
+                }
+                $(this).css("zoom", zoom_percent+"%");
+            });
+        }
+        
 
     });
 
