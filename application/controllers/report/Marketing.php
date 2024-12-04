@@ -1314,34 +1314,10 @@ class Marketing extends MY_Controller
         $sourceImage = FCPATH.'/upload/product/'.$data_produk.'.jpg';
         $font        = FCPATH.'/font/arial-narrow-7.ttf';
 
-        // $imageURL = $sourceImage;
-        // list ($width, $height) = getimagesize($imageURL);
-        // $imageProperties = imagecreatetruecolor($width, $height);
-        // $targetLayer = imagecreatefromjpeg($imageURL);
-        // imagecopyresampled($imageProperties, $targetLayer, 0, 0, 0, 0, $width, $height, $width, $height);
-        // $WaterMarkText = 'CONFIDENTIAL';
-        // $watermarkColor = imagecolorallocate($imageProperties, 250, 254, 4);
-        // imagestring($imageURL,  130, 117, $WaterMarkText, $watermarkColor);
-
-     
-        // /* 
-        // -------- If you want to save image -------
-        // */
-        // $result = imagejpeg($image, 'upload/watermark_image_save.jpg'); 
-        // echo "data:image/jpg;base64,".base64_encode($result);
-
-        
-        // $data = ob_get_clean();
-
-        // header('Content-type: image/jpg');
-        // imagejpeg($targetLayer);
-        // imagedestroy($targetLayer);
-        // imagedestroy($imageProperties);
-
         // Create the size of image or blank image 
         $image = $sourceImage; 
         // Set the background color of image 
-        $background_color = imagecolorallocate($image, 0, 153, 0); 
+        // $background_color = imagecolorallocate($image, 0, 153, 0); 
         // Set the text color of image 
         list ($width, $height) = getimagesize($image);
         $imageProperties = imagecreatetruecolor($width, $height);
@@ -1354,13 +1330,10 @@ class Marketing extends MY_Controller
         // imagestring($targetLayer, 5, ($img_w/2)-($width1/2), $height/2,  $caption, $text_color); 
         // $font = './arial.ttf';
         // imagettftext($targetLayer, 10, 45, $x, $y, $text_color, $font, $caption);
-
         // imagestring($image, 3, 160, 120,  "A computer science portal", $text_color); 
-        
         $bbox = imagettfbbox(30, 0, $font, $caption);
         $x = $bbox[0] + (imagesx($targetLayer) / 2) - ($bbox[4] / 2) + 10; 
         $y = $bbox[1] + (imagesy($targetLayer) / 2) - ($bbox[5] / 2) - 5;
-
         // imageline($targetLayer, $x - 10, $y - 40, $x - 10, $y, $text_color); // RIGHT
         // imageline($targetLayer, $x - 10, $y - 40, $x - 10, $y + $width1 * 2, $text_color); // UP
         // // imageline($targetLayer, $x + $x + 10, $y - 40, $x, $y, $text_color);
@@ -1372,11 +1345,7 @@ class Marketing extends MY_Controller
         header("Content-Type: image/jpg"); 
         
         imagejpeg($targetLayer); 
-        imagedestroy($image); 
-        imagedestroy($image); 
-
-
-
+        imagedestroy($targetLayer); 
     }
 
 

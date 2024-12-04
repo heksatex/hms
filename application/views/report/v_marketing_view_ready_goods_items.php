@@ -196,8 +196,13 @@
                 "targets": [1], 
                 // "data": "img",
                 "render" : function ( url, type, img) {
+                    var baseUrl = img[1];
+                    var default_val = 'false';
+                    if(baseUrl.includes('default') == true){
+                      default_val = 'true';
+                    }
                     // link = 
-                    data = '<a class="image-popup" href="'+img[1]+'" title="'+img[5]+' - '+img[6]+'" data-produk ="'+img[2]+'"><img height="50px" width="50px" src="'+img[1]+'"/></a>';
+                    data = '<a class="image-popup" href="'+img[1]+'" title="'+img[5]+' - '+img[6]+'" data-produk ="'+img[2]+'" default="'+default_val+'"><img height="50px" width="50px" src="'+img[1]+'"/></a>';
                     // return '<img height="30%" width="30%" src="'+img[1]+'"/>';
                     // return img[1];
                     return data;
@@ -227,8 +232,13 @@
                           
                           var caption = item.el.attr('title');
                           var produk  = item.el.attr('data-produk');
+                          var default_val = item.el.attr('default');
+                          if(default_val == 'false'){
+                            return caption + ' &middot; <button type="button" class="btn btn-xs btn-default btn-download" id="btn-download" data-produk="'+produk+'" data-title="'+caption+'">download me</button>';
+                          }else{
+                            return caption + ' &middot';
+                          }
                           
-                          return caption + ' &middot; <button type="button" class="btn btn-xs btn-default btn-download" id="btn-download" data-produk="'+produk+'" data-title="'+caption+'">download me</button>';
                         },
                        
 			              },
