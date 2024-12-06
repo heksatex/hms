@@ -1151,6 +1151,8 @@ class Marketing extends MY_Controller
     {
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
+        $data['title']  = 'View Product Ready Goods';
+        $data['proofing'] = 'no';
         $this->load->view('report/v_marketing_view_ready_goods_group', $data);
     }
 
@@ -1160,6 +1162,12 @@ class Marketing extends MY_Controller
 
         if(isset($_POST['start']) && isset($_POST['draw'])){
             $list = $this->m_marketing->get_datatables10();
+            $proofing = $this->input->post('proofing');
+            if($proofing == 'yes'){
+                $link = "readygoodsgroupcolourproofing";
+            }else{
+                $link = "readygoodsgroupcolour";
+            }
             // $get_data_current = '&product='.urlencode($product).'&color='.urlencode($color).'&cmbMarketing='.urlencode($mkt);
             $data = array();
             $no = $_POST['start'];
@@ -1167,7 +1175,7 @@ class Marketing extends MY_Controller
                 $no++;
                 $row = array();
                 $row[] = $no;
-                $row[] = '<a href="'.base_url('report/marketing/readygoodsgroupcolour?id='.urlencode($field->corak_remark)).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
+                $row[] = '<a href="'.base_url('report/marketing/'.$link.'?id='.urlencode($field->corak_remark)).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
                 $row[] = $field->total_warna;
                 $row[] = $field->lebar_jadi_merge;
                 $row[] = $field->total_qty_jual.' '.$field->uom_jual;
@@ -1202,6 +1210,22 @@ class Marketing extends MY_Controller
         $data['uom_lebar_jadi']= $this->input->get('uom_lebar_jadi');
         $data['uom_jual']= $this->input->get('uom_jual');
         $data['uom2_jual']= $this->input->get('uom2_jual');
+        $data['title']    = 'View Product Ready Goods';
+        $data['proofing'] = 'no';
+        $this->load->view('report/v_marketing_view_ready_goods_group_colour', $data);
+    }
+
+    function readygoodsgroupcolourproofing()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['product']= $this->input->get('id');
+        $data['lebar_jadi']= $this->input->get('lebar_jadi');
+        $data['uom_lebar_jadi']= $this->input->get('uom_lebar_jadi');
+        $data['uom_jual']= $this->input->get('uom_jual');
+        $data['uom2_jual']= $this->input->get('uom2_jual');
+        $data['title']    = 'View Product Ready Goods Proofing';
+        $data['proofing'] = 'yes';
         $this->load->view('report/v_marketing_view_ready_goods_group_colour', $data);
     }
     
@@ -1209,6 +1233,12 @@ class Marketing extends MY_Controller
     {
 
         if(isset($_POST['start']) && isset($_POST['draw'])){
+            $proofing = $this->input->post('proofing');
+            if($proofing == 'yes'){
+                $link = "readygoodsitemsproofing";
+            }else{
+                $link = "readygoodsitems";
+            }
             $list = $this->m_marketing->get_datatables11();
             // $get_data_current = '&product='.urlencode($product).'&color='.urlencode($color).'&cmbMarketing='.urlencode($mkt);
             $data = array();
@@ -1217,7 +1247,7 @@ class Marketing extends MY_Controller
                 $no++;
                 $row = array();
                 $row[] = $no;
-                $row[] = '<a href="'.base_url('report/marketing/readygoodsitems?id='.urlencode($field->corak_remark)).'&warna_remark='.urlencode($field->warna_remark).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
+                $row[] = '<a href="'.base_url('report/marketing/'.$link.'?id='.urlencode($field->corak_remark)).'&warna_remark='.urlencode($field->warna_remark).'&lebar_jadi='.urlencode($field->lebar_jadi).'&uom_lebar_jadi='.urlencode($field->uom_lebar_jadi).'&uom_jual='.urlencode($field->uom_jual).'&uom2_jual='.urlencode($field->uom2_jual).'">'.$field->corak_remark.'</a>';
                 $row[] = $field->warna_remark;
                 $row[] = $field->lebar_jadi_merge;
                 $row[] = $field->total_qty_jual.' '.$field->uom_jual;
@@ -1252,6 +1282,23 @@ class Marketing extends MY_Controller
         $data['uom_lebar_jadi']   = $this->input->get('uom_lebar_jadi');
         $data['uom_jual']    = $this->input->get('uom_jual');
         $data['uom2_jual']   = $this->input->get('uom2_jual');
+        $data['title']    = 'View Product Ready Goods';
+        $data['proofing'] = 'no';
+        $this->load->view('report/v_marketing_view_ready_goods_items', $data);
+    }
+
+    function readygoodsitemsproofing()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['product']= $this->input->get('id');
+        $data['color']  = $this->input->get('warna_remark');
+        $data['lebar_jadi']   = $this->input->get('lebar_jadi');
+        $data['uom_lebar_jadi']   = $this->input->get('uom_lebar_jadi');
+        $data['uom_jual']    = $this->input->get('uom_jual');
+        $data['uom2_jual']   = $this->input->get('uom2_jual');
+        $data['title']    = 'View Product Ready Goods Proofing';
+        $data['proofing'] = 'yes';
         $this->load->view('report/v_marketing_view_ready_goods_items', $data);
     }
 
@@ -1311,7 +1358,14 @@ class Marketing extends MY_Controller
         // ob_start();
         $data_produk = $this->input->post('produk');
         $caption     = $this->input->post('caption');
-        $sourceImage = FCPATH.'/upload/product/'.$data_produk.'.jpg';
+
+        if (strpos($data_produk, 'jpg') !== false) {
+            $name_image = $data_produk;
+        } else {
+            $name_image = $data_produk.".jpg";
+        }
+        
+        $sourceImage = FCPATH.'/upload/product/'.$name_image;
         $font        = FCPATH.'/font/arial-narrow-7.ttf';
 
         // Create the size of image or blank image 
@@ -1358,9 +1412,15 @@ class Marketing extends MY_Controller
 
         $object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
-
+        $proofing = $this->input->post('proofing');
+        if($proofing == 'yes') {
+            $title = 'Report Ready Goods Proofing';
+        }else{
+            $title = 'Report Ready Goods Proofing';
+        }
+        
     	// SET JUDUL
- 		$object->getActiveSheet()->SetCellValue('A1', 'Report Ready Goods');
+ 		$object->getActiveSheet()->SetCellValue('A1',$title);
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
 		$object->getActiveSheet()->mergeCells('A1:L1');
 
@@ -1426,7 +1486,7 @@ class Marketing extends MY_Controller
 		$object->save('php://output');
 		$xlsData = ob_get_contents();
 		ob_end_clean();
-		$name_file = "Report Ready Goods Group.xlsx";
+		$name_file = $title.".xlsx";
 		$response =  array(
 			'op'        => 'ok',
 			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
@@ -1455,8 +1515,15 @@ class Marketing extends MY_Controller
         $object = new PHPExcel();
     	$object->setActiveSheetIndex(0);
 
+        $proofing = $this->input->post('proofing');
+        if($proofing == 'yes') {
+            $title = 'Report Ready Goods Proofing';
+        }else{
+            $title = 'Report Ready Goods Proofing';
+        }
+
     	// SET JUDUL
- 		$object->getActiveSheet()->SetCellValue('A1', 'Report Ready Goods');
+ 		$object->getActiveSheet()->SetCellValue('A1', $title);
  		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
 		$object->getActiveSheet()->mergeCells('A1:L1');
 
@@ -1541,7 +1608,7 @@ class Marketing extends MY_Controller
 		$object->save('php://output');
 		$xlsData = ob_get_contents();
 		ob_end_clean();
-		$name_file = "Report Ready Goods.xlsx";
+		$name_file = $title.".xlsx";
 		$response =  array(
 			'op'        => 'ok',
 			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
@@ -1569,9 +1636,18 @@ class Marketing extends MY_Controller
             $data = array();
             $no = $_POST['start'];
             foreach ($list as $field) {
+                // $image = "/upload/product/" . $field->file_name;
+                // if (is_file(FCPATH . $image)) {
+                //     $link  = base_url($image);
+                // }else{
+                //     $link  = base_url("/upload/product/default.jpg");
+                // }
+
                 $no++;
                 $row = array();
                 $row[] = $no;
+                // $row[] = $link;
+                // $row[] = $field->file_name;
                 $row[] = $field->cat_id;
                 $row[] = $field->corak;
                 $row[] = $field->warna;
@@ -2021,6 +2097,17 @@ class Marketing extends MY_Controller
         $data["dates"] = $dates->setSelects(["DATE(report_date) as dt"])->setGroups(["DATE(report_date)"])->setOrder(["dt" => "DESC"])->getData();
         $this->load->view('report/v_gtp', $data);
     }
+
+    function readygoodsgroupproofing()
+    {
+        $id_dept        = 'RMKT';
+        $data['id_dept']= $id_dept;
+        $data['title']  = 'View Product Ready Goods Proofing';
+        $data['proofing'] = 'yes';
+        $this->load->view('report/v_marketing_view_ready_goods_group', $data);
+    }
+
+
 
 
 }
