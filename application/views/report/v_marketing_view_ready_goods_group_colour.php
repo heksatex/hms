@@ -53,7 +53,7 @@
       <!--  box content -->
       <div class="box ">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>View Product Ready Goods</b></h3>
+          <h3 class="box-title"><b><?php echo $title; ?></b></h3>
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
@@ -154,7 +154,7 @@
             "ajax": {
                 "url": "<?php echo site_url('report/marketing/get_data_ready_goods_group_colour')?>",
                 "type": "POST",
-                "data": {"product":"<?php echo $product;?>", "lebar_jadi":"<?php echo $lebar_jadi; ?>", "uom_lebar_jadi":"<?php echo $uom_lebar_jadi; ?>", "uom_jual":"<?php echo $uom_jual; ?>", "uom2_jual":"<?php echo $uom2_jual; ?>"}
+                "data": {"proofing":"<?php echo $proofing;?>","product":"<?php echo $product;?>", "lebar_jadi":"<?php echo $lebar_jadi; ?>", "uom_lebar_jadi":"<?php echo $uom_lebar_jadi; ?>", "uom_jual":"<?php echo $uom_jual; ?>", "uom2_jual":"<?php echo $uom2_jual; ?>"}
             },
            
             "columnDefs": [

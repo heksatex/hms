@@ -53,7 +53,7 @@
       <!--  box content -->
       <div class="box ">
         <div class="box-header with-border">
-          <h3 class="box-title"><b>View Product Ready Goods</b></h3>
+          <h3 class="box-title"><b><?php echo $title;?></b></h3>
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
@@ -98,7 +98,11 @@
                       <div class="col-md-4">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                             <small><b>*Kondisi</b>
-                                <li>Umur > 90 Hari</li>
+                                <?php if($proofing == 'yes'){ ?>
+                                    <li>Umur < 90 Hari</li>
+                                <?php } else{ ?>
+                                    <li>Umur > 90 Hari</li>
+                                <?php } ?>
                                 <li>Lokasi tidak di (XPD, PORT, 6Z.01.Z, GJD4)</li>
                                 <li>Kain Hasil Jacquard</li>
                                 <li>Grade A</li>
@@ -168,6 +172,7 @@
                 "url": "<?php echo site_url('report/marketing/get_data_ready_goods_group')?>",
                 "type": "POST",
                  "data": function ( data ) {
+                    data.proofing    = "<?php echo $proofing;?>";
                     data.search_field = $('#search_field').val();
                     data.cmbSearch = $('#cmbSearch').val();
                     data.cmbOperator = $('#cmbOperator').val();
@@ -230,7 +235,7 @@
         $.ajax({
             "type":'POST',
             "url": "<?php echo site_url('report/Marketing/export_excel_ready_goods_group')?>",
-            "data": {"search_field": $('#search_field').val(), "cmbSearch": $('#cmbSearch').val(), "cmbOperator": $('#cmbOperator').val()},
+            "data": {"proofing":"<?php echo $proofing;?>","search_field": $('#search_field').val(), "cmbSearch": $('#cmbSearch').val(), "cmbOperator": $('#cmbOperator').val()},
             "dataType":'json',
             beforeSend: function() {
               $('#btn-excel').button('loading');
