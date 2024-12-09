@@ -91,8 +91,8 @@ class Service extends CI_Controller {
                 $datas[$values->nama_sales_group] = [];
                 foreach ($query as $key => $value) {
                     $qr = new $this->m_gtp;
-                    $datas[$values->nama_sales_group][$key] = $qr->setOrder(["qty"=>"desc","corak,uom"=>"asc"])->setWheres($value["where"])
-                            ->setWheres(["nama_sales_group" => $values->nama_sales_group])->setWhereRaw("DATE(report_date) = '{$now}'")
+                    $datas[$values->nama_sales_group][$key] = $qr->setOrder(["qty" => "desc", "corak,uom" => "asc"])->setWheres($value["where"])
+                            ->setWheres(["nama_sales_group" => $values->nama_sales_group, "qty >=" => 50])->setWhereRaw("DATE(report_date) = '{$now}'")
                             ->setSelects(["corak,uom,uom2,qty as total_qty,qty2 as total_qty2,lot as total_data,jml_warna as total_warna,customer_name,lebar_jadi"])
                             ->getData();
                 }
