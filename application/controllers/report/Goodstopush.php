@@ -85,7 +85,7 @@ class Goodstopush extends MY_Controller {
             $datas = new $this->m_gtp;
             $list = $datas->setOrders([null, "corak", "category", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name","lokasi"])
                     ->setOrder(["category"=>"asc","lokasi"=>"asc","qty"=>"desc","corak,uom"=>"asc"])
-                            ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date]);
+                            ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date,"qty >=" => 50]);
             if ($sales !== "") {
                 $list->setWheres(["nama_sales_group" => $sales]);
             }
@@ -136,7 +136,7 @@ class Goodstopush extends MY_Controller {
             $detail = new $this->m_gtp;
             $list = $detail->setTables('goods_to_push_detail')->setOrders([null, "kode_produk", "nama_produk", "lot", "nama_grade", null, null, null, null, "lokasi_fisik", "lebar_jadi"])
                     ->setSearch(["kode_produk", "nama_produk", "lot", "lokasi_fisik", "lebar_jadi","customer_name"])
-                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi]);
+                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi,"qty >=" => 50]);
             switch ($kategori) {
                 case "14d":
                     $list->setWheres(["umur >=" => 14, "umur <=" => 30]);
