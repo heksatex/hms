@@ -1479,6 +1479,11 @@ class Koreksimundur extends MY_Controller
 							$get_dept  = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
                     		throw new \Exception("Departemen ".$get_dept['nama']." belum bisa melakukan Koreksi Mundur", 200);
 						}
+
+						if($dept_id == 'DYE'){
+							$get_dept  = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
+                    		throw new \Exception("Departemen ".$get_dept['nama']." belum bisa melakukan Koreksi Mundur", 200);
+						}
 						
 						// log_message('info', 'tes');
 
@@ -1767,7 +1772,7 @@ class Koreksimundur extends MY_Controller
 
 	function cek_dept_mutasi($dept)
     {
-        $list_dept_mutasi = array('WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG');
+        $list_dept_mutasi = array('WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG', 'DYE');
         $dept_status      = false;
         foreach($list_dept_mutasi as $list){
             if($list == $dept){

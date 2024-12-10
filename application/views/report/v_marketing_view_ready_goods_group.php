@@ -157,7 +157,7 @@
             "processing": true, 
             "serverSide": true, 
             "order": [], 
-          
+            "stateSave": true,
             "paging": true,
             "lengthChange": true,
             "searching": true,
