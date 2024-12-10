@@ -1379,21 +1379,24 @@ class Marketing extends MY_Controller
         imagecopyresampled($imageProperties, $targetLayer, 0, 0, 0, 0, $width, $height, $width, $height);
         $text_color = imagecolorallocate($imageProperties, 255, 255, 255); 
         $img_w = $width;
-        $width1 = imagefontwidth(30) * strlen($caption);
+        $width1 = imagefontwidth(15*($width / 600)) * strlen($caption);
         // Function to create image which contains string. 
         // imagestring($targetLayer, 5, ($img_w/2)-($width1/2), $height/2,  $caption, $text_color); 
         // $font = './arial.ttf';
         // imagettftext($targetLayer, 10, 45, $x, $y, $text_color, $font, $caption);
         // imagestring($image, 3, 160, 120,  "A computer science portal", $text_color); 
-        $bbox = imagettfbbox(30, 0, $font, $caption);
+        $bbox = imagettfbbox(15*($width / 600), 0, $font, $caption);
         $x = $bbox[0] + (imagesx($targetLayer) / 2) - ($bbox[4] / 2) + 10; 
         $y = $bbox[1] + (imagesy($targetLayer) / 2) - ($bbox[5] / 2) - 5;
+        $x2 = $bbox[2] - $bbox[0];
+        $y2 = $bbox[5] - $bbox[3];
+        $red = imagecolorallocate($targetLayer, 0, 0, 0);
         // imageline($targetLayer, $x - 10, $y - 40, $x - 10, $y, $text_color); // RIGHT
         // imageline($targetLayer, $x - 10, $y - 40, $x - 10, $y + $width1 * 2, $text_color); // UP
         // // imageline($targetLayer, $x + $x + 10, $y - 40, $x, $y, $text_color);
         // imageline($targetLayer, $x + $width1 * 2 , $y - 40, $x + $width1 * 2, $y, $text_color); // LEFT
-        
-        imagettftext($targetLayer, 30, 0, $x, $y, $text_color, $font, $caption);
+        imagefilledrectangle($targetLayer, $x, $y, $x+$x2, $y+$y2, $red);
+        imagettftext($targetLayer, 15*($width / 600), 0, $x, $y, $text_color, $font, $caption);
         
         $data = ob_get_clean();
         header("Content-Type: image/jpg"); 
@@ -1416,7 +1419,7 @@ class Marketing extends MY_Controller
         if($proofing == 'yes') {
             $title = 'Report Ready Goods Proofing';
         }else{
-            $title = 'Report Ready Goods Proofing';
+            $title = 'Report Ready Goods';
         }
         
     	// SET JUDUL
@@ -1519,7 +1522,7 @@ class Marketing extends MY_Controller
         if($proofing == 'yes') {
             $title = 'Report Ready Goods Proofing';
         }else{
-            $title = 'Report Ready Goods Proofing';
+            $title = 'Report Ready Goods';
         }
 
     	// SET JUDUL

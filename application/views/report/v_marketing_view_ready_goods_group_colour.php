@@ -140,7 +140,7 @@
             "processing": true, 
             "serverSide": true, 
             "order": [], 
-          
+            "serverSide": true,
             "paging": true,
             "lengthChange": true,
             "searching": true,
