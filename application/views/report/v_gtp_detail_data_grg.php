@@ -86,6 +86,8 @@
                     d.sales = "<?= $sales ?>";
                     d.lokasi = "<?= $lokasi ?>";
                     d.kategori = "<?= $kategori ?>";
+                    d.buyer = "<?= $buyer ?>";
+                    d.lebar = "<?= $lebar ?>";
                     d.report_date = "<?= date('Y-m-d', strtotime($date)) ?>";
                 }
             },

@@ -60,6 +60,8 @@ class Goodstopush extends MY_Controller {
             $data["sales"] = $this->input->post("sales");
             $data["lokasi"] = $this->input->post("lokasi");
             $data["kategori"] = $this->input->post("kategori");
+            $data["lebar"] = $this->input->post("lebar");
+            $data["buyer"] = $this->input->post("buyer");
             if ($data["lokasi"] === "GRG/Stock") {
                 $content = $this->load->view("report/v_gtp_detail_data_grg", $data, true);
             } else {
@@ -83,13 +85,13 @@ class Goodstopush extends MY_Controller {
             $lokasi = $this->input->post("lokasi");
             $data = array();
             $datas = new $this->m_gtp;
-            $list = $datas->setOrders([null, "corak", "category", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name","lokasi"])
-                    ->setOrder(["lokasi"=>"asc","category"=>"asc","qty"=>"desc","corak,uom"=>"asc"])
-                            ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date,"qty >=" => 50]);
+            $list = $datas->setOrders([null, "corak", "category", "jml_warna", "lot", "qty", "qty2", "lebar_jadi", "customer_name", "lokasi"])
+                            ->setOrder(["lokasi" => "asc", "category" => "asc", "qty" => "desc", "corak,uom" => "asc"])
+                            ->setSearch(["corak", "customer_name"])->setWheres(["date(report_date)" => $report_date, "qty >=" => 50]);
             if ($sales !== "") {
                 $list->setWheres(["nama_sales_group" => $sales]);
             }
-            if($lokasi !== "") {
+            if ($lokasi !== "") {
                 $list->setWheres(["lokasi" => $lokasi]);
             }
             $no = $_POST['start'];
@@ -98,7 +100,8 @@ class Goodstopush extends MY_Controller {
                 $data [] = [
                     $no,
                     "<a class='detail' href='#' data-sales='{$field->nama_sales_group}' data-date='{$field->report_date}' "
-                    . "data-corak='{$field->corak}' data-lokasi='{$field->lokasi}' data-kategori='{$field->category}'>{$field->corak}</a>",
+                    . "data-corak='{$field->corak}' data-lokasi='{$field->lokasi}' data-kategori='{$field->category}' "
+                    . "data-lebar='{$field->lebar_jadi}' data-buyer='{$field->customer_name}'>{$field->corak}</a>",
                     $field->category,
                     $field->jml_warna,
                     $field->lot,
@@ -132,11 +135,13 @@ class Goodstopush extends MY_Controller {
             $date = date("Y-m-d", strtotime($report_date));
             $lokasi = $this->input->post("lokasi");
             $kategori = $this->input->post("kategori");
+            $lebar = $this->input->post("lebar");
+            $buyer = $this->input->post("buyer");
             $data = array();
             $detail = new $this->m_gtp;
             $list = $detail->setTables('goods_to_push_detail')->setOrders([null, "kode_produk", "nama_produk", "lot", "nama_grade", null, null, null, null, "lokasi_fisik", "lebar_jadi"])
-                    ->setSearch(["kode_produk", "nama_produk", "lot", "lokasi_fisik", "lebar_jadi","customer_name"])
-                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi]);
+                    ->setSearch(["kode_produk", "nama_produk", "lot", "lokasi_fisik", "lebar_jadi", "customer_name"])
+                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi, 'customer_name' => $buyer, 'concat(lebar_jadi," ",uom_lebar_jadi) = ' => $lebar]);
             switch ($kategori) {
                 case "14d":
                     $list->setWheres(["umur >=" => 14, "umur <=" => 30]);
@@ -150,7 +155,7 @@ class Goodstopush extends MY_Controller {
             }
             $no = $_POST['start'];
             if ($lokasi === "GRG/Stock") {
-                $list->setOrder(["qty"=>"desc","nama_produk,uom"=>"desc"])->setWheres(["nama_produk" => $corak]);
+                $list->setOrder(["qty" => "desc", "nama_produk,uom" => "desc"])->setWheres(["nama_produk" => $corak]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
@@ -167,7 +172,7 @@ class Goodstopush extends MY_Controller {
                     ];
                 }
             } else {
-                $list->setOrder(["qty"=>"desc","corak_remark,warna_remark"=>"asc"])->setWheres(["corak_remark" => $corak]);
+                $list->setOrder(["qty" => "desc", "corak_remark,warna_remark" => "asc"])->setWheres(["corak_remark" => $corak]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
