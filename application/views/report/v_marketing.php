@@ -51,7 +51,7 @@
             <!--  box content -->
             <div class="box ">
                 <div class="box-header with-border">
-                <h3 class="box-title"><b>Gudang Jadi</b></h3>
+                <h3 class="box-title"><b>Marketing</b></h3>
                 </div>
                 <div class="box-body ">
                     <div class="col-md-12" style="margin-bottom:10px" >
@@ -60,6 +60,7 @@
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/gradeexpiredgjd'"><i class='fa fa-file-text-o'></i> Report Grade & Expired (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/listwarnabyproduct'"><i class='fa fa-file-text-o'></i> List Warna by Product (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/stockhistorygjd'"><i class='fa fa-file-text-o'></i> Report Stock History (GJD)</button>
+                        <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodsgroupgrg'"><i class='fa fa-file-text-o'></i> Report Ready Goods (GRG)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodsgroup'"><i class='fa fa-file-text-o'></i> Report Ready Goods (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodsgroupproofing'"><i class='fa fa-file-text-o'></i> Report Ready Goods Proofing (GJD)</button>
                         <button type='button' class='btn btn-default btn-block' onclick="location.href='<?php echo base_url();?>report/marketing/readygoodscategory'"><i class='fa fa-file-text-o'></i> Report Ready Goods Category (GJD)</button>

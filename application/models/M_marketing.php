@@ -9,6 +9,8 @@ class m_marketing extends CI_Model
 	protected $lokasi 	= 'GJD/Stock';
 	protected $category = '21';
 	protected $lokasi_fisik = '6Z.01.Z';
+	protected $lokasi2  = 'GRG/Stock';
+	protected $category2 = '10';
 
 
     var $column_order = array(null, 'sq.corak_remark','sq.lebar_jadi','gl','qty1','sq.uom_jual');
@@ -1806,4 +1808,208 @@ class m_marketing extends CI_Model
 		$query = $this->db->get();
 		return $query->result();
 	}
+
+
+	var $column_order15 = array(null, 'sq.nama_produk','total_qty','total_qty2','gl');
+	var $column_search15= array('sq.nama_produk');
+	var $order15  	    = array('sq.nama_produk' => 'asc');
+
+    private function get_query_15()
+    {
+		if($this->input->post('search_field')){
+			$cmbSearch = $this->input->post('cmbSearch');
+			$cmbOperator = $this->input->post('cmbOperator');
+			$search = $this->input->post('search_field');
+    		$this->db->having('sum(qty_jual) '.$cmbOperator.' '.$search);
+        }
+
+		$this->db->SELECT("sq.nama_produk, sum(sq.qty) as total_qty, sq.uom, sum(sq.qty2) as total_qty2, sq.uom2, count(sq.lot) as gl");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi2);
+		$this->db->WHERE('mp.id_category',$this->category2);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+		$this->db->group_by('sq.nama_produk');
+
+        return;
+    }
+
+    private function _get_datatables_query15()
+	{
+		
+        $this->get_query_15();
+
+        $i = 0;
+		foreach ($this->column_search15 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search15) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order15[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order15))
+		{
+			$order = $this->order15;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables15()
+	{
+		$this->_get_datatables_query15();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered15()
+	{
+		$this->_get_datatables_query15();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all15()
+	{
+		$this->get_query_15();
+		return $this->db->count_all_results();
+	} 
+
+
+	public function count_all_no_group15()
+	{
+
+		$this->get_query_15();
+		$result = $this->db->get_compiled_select();
+		$this->db->select('sum(gl) as total');
+		$this->db->from(' ('.$result.') as a');
+		$query = $this->db->get();
+		$result2 = $query->row();
+		return $result2->total ?? 0;
+	} 
+
+
+	function get_datatables15_excel()
+	{
+		$this->get_query_15();
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+
+	var $column_order16 = array(null,'sq.create_date', 'sq.lot','sq.nama_grade','sq.nama_produk','sq.qty','sq.qty2','sq.lebar_greige','sq.lebar_jadi','sq.lokasi_fisik','umur');
+	var $column_search16= array('sq.create_date', 'sq.lot','sq.nama_grade','sq.nama_produk','sq.qty','sq.qty2','sq.lebar_greige','sq.lebar_jadi','sq.lokasi_fisik',);
+	var $order16  	  = array('sq.create_date' => 'asc');
+
+	private function get_query_16()
+    {	
+		if($this->input->post('product')){
+    		$this->db->where('sq.nama_produk',$this->input->post('product'));
+        }
+		
+		$proofing = $this->input->post('proofing');
+		$this->db->SELECT("sq.create_date, sq.kode_produk, sq.nama_produk, sq.nama_grade, sq.lot, sq.lebar_greige, sq.uom_lebar_greige, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty, sq.uom, sq.qty2, sq.uom2, sq.lokasi_fisik, (datediff(now(), sq.move_date) ) as umur ");
+		$this->db->FROM("stock_quant sq");
+		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+        $this->db->WHERE("sq.lokasi",$this->lokasi2);
+		$this->db->WHERE('mp.id_category',$this->category2);
+		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+
+        return;
+    }
+
+    private function _get_datatables_query16()
+	{
+		
+        $this->get_query_16();
+
+        $i = 0;
+		foreach ($this->column_search16 as $item) // loop column 
+		{
+			if($_POST['search']['value']) // if datatable send POST for search
+			{
+				
+				if($i===0) // first loop
+				{
+					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+
+				if(count($this->column_search16) - 1 == $i) //last loop
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+		
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order16[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+		} 
+		else if(isset($this->order16))
+		{
+			$order = $this->order16;
+			$this->db->order_by(key($order), $order[key($order)]);
+		}
+	}
+
+	function get_datatables16()
+	{
+		$this->_get_datatables_query16();
+		if($_POST['length'] != -1)
+		$this->db->limit($_POST['length'], $_POST['start']);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	function count_filtered16()
+	{
+		$this->_get_datatables_query16();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all16()
+	{
+		$this->get_query_16();
+		return $this->db->count_all_results();
+	} 
+
+
+	public function count_all_no_group16()
+	{
+		$this->get_query_16();
+		return $this->db->count_all_results();
+	} 
+
+	function get_datatables16_excel()
+	{
+		$this->get_query_16();
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+
 }
