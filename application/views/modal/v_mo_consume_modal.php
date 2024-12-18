@@ -853,7 +853,7 @@
                                 $("#tab_2").load(location.href + " #tab_2");             
                                 $("#foot").load(location.href + " #foot");
                                 $('#btn-produksi-consume').button('reset');
-                                alert(data.message);
+                                alert_modal_warning(data.message);
                                 unblockUI( function(){});
                             }else{
                                 //jika berhasil disimpan

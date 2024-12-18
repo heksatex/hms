@@ -1164,7 +1164,7 @@ class Marketing extends MY_Controller
             $list = $this->m_marketing->get_datatables10();
             $proofing = $this->input->post('proofing');
             if($proofing == 'yes'){
-                $link = "readygoodsgroupcolourproofing";
+                $link = "groupcolourproofing";
             }else{
                 $link = "readygoodsgroupcolour";
             }
@@ -1215,7 +1215,7 @@ class Marketing extends MY_Controller
         $this->load->view('report/v_marketing_view_ready_goods_group_colour', $data);
     }
 
-    function readygoodsgroupcolourproofing()
+    function groupcolourproofing()
     {
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
@@ -1224,7 +1224,7 @@ class Marketing extends MY_Controller
         $data['uom_lebar_jadi']= $this->input->get('uom_lebar_jadi');
         $data['uom_jual']= $this->input->get('uom_jual');
         $data['uom2_jual']= $this->input->get('uom2_jual');
-        $data['title']    = 'View Product Ready Goods Proofing (GJD)';
+        $data['title']    = 'View Product Proofing (GJD)';
         $data['proofing'] = 'yes';
         $this->load->view('report/v_marketing_view_ready_goods_group_colour', $data);
     }
@@ -1235,7 +1235,7 @@ class Marketing extends MY_Controller
         if(isset($_POST['start']) && isset($_POST['draw'])){
             $proofing = $this->input->post('proofing');
             if($proofing == 'yes'){
-                $link = "readygoodsitemsproofing";
+                $link = "itemsproofing";
             }else{
                 $link = "readygoodsitems";
             }
@@ -1287,7 +1287,7 @@ class Marketing extends MY_Controller
         $this->load->view('report/v_marketing_view_ready_goods_items', $data);
     }
 
-    function readygoodsitemsproofing()
+    function itemsproofing()
     {
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
@@ -1297,7 +1297,7 @@ class Marketing extends MY_Controller
         $data['uom_lebar_jadi']   = $this->input->get('uom_lebar_jadi');
         $data['uom_jual']    = $this->input->get('uom_jual');
         $data['uom2_jual']   = $this->input->get('uom2_jual');
-        $data['title']    = 'View Product Ready Goods Proofing (GJD)';
+        $data['title']    = 'View Product Proofing (GJD)';
         $data['proofing'] = 'yes';
         $this->load->view('report/v_marketing_view_ready_goods_items', $data);
     }
@@ -1333,6 +1333,7 @@ class Marketing extends MY_Controller
                 $row[] = $field->lebar_jadi." ".$field->uom_lebar_jadi;
                 $row[] = $field->qty_jual." ".$field->uom_jual;
                 $row[] = $field->qty2_jual." ".$field->uom2_jual;
+                $row[] = $field->lokasi;
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->umur;
                 $data[] = $row;
@@ -1417,7 +1418,7 @@ class Marketing extends MY_Controller
     	$object->setActiveSheetIndex(0);
         $proofing = $this->input->post('proofing');
         if($proofing == 'yes') {
-            $title = 'Report Ready Goods Proofing (GJD)';
+            $title = 'Report Proofing (GJD)';
         }else{
             $title = 'Report Ready Goods (GJD)';
         }
@@ -1520,7 +1521,7 @@ class Marketing extends MY_Controller
 
         $proofing = $this->input->post('proofing');
         if($proofing == 'yes') {
-            $title = 'Report Ready Goods Proofing (GJD)';
+            $title = 'Report Proofing (GJD)';
         }else{
             $title = 'Report Ready Goods (GJD)';
         }
@@ -1556,7 +1557,7 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Umur (Hari)');
+        $table_head_columns  = array('No', 'Tanggal dibuat' ,'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [JUAL]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi', 'Lokasi Fisik / Rak ', 'Umur (Hari)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
@@ -1566,7 +1567,7 @@ class Marketing extends MY_Controller
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
     	$loop = 0;
     	foreach ($index_header as $val) {
             $object->getActiveSheet()->getStyle($val.'7')->applyFromArray($styleArray);
@@ -1586,8 +1587,9 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->uom_jual);
 			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->qty2_jual);
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->uom2_jual);
-			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lokasi_fisik);
-			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->umur);
+			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lokasi);
+			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->lokasi_fisik);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->umur);
 
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -1604,6 +1606,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
 		
 	        $rowCount++;
 		}
@@ -2101,11 +2104,11 @@ class Marketing extends MY_Controller
         $this->load->view('report/v_gtp', $data);
     }
 
-    function readygoodsgroupproofing()
+    function groupproofing()
     {
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
-        $data['title']  = 'View Product Ready Goods Proofing (GJD)';
+        $data['title']  = 'View Product Proofing (GJD)';
         $data['proofing'] = 'yes';
         $this->load->view('report/v_marketing_view_ready_goods_group', $data);
     }
