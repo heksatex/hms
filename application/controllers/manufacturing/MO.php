@@ -3802,26 +3802,46 @@ class MO extends MY_Controller
                     $move_id_fg     = $move_fg['move_id'];
                     $status_consume = "yes";
                     $list_kp_consume = '';
+                    $data_consume   = true;
+                    $consume_done   = false;
+                    $qty_smi_same   = TRUE;
+                    $qty_smi_empty  = FALSE;
+                    $list_product_smi = "";
 
                     if(!empty($array_fg)){
                         // looping array fg
                         foreach($array_fg as $row){
+                            $cek_cons = $this->m_mo->get_data_mrp_fg_hasil_by_quant($kode,$row['quant_id']);
+
+                            $list_kp_consume .= $row['lot'].", ";
+                            
+                            if(empty($cek_cons)){
+                                $data_consume = false;
+                                break;
+                            }else if ($cek_cons->consume == 'yes'){
+                                $consume_done = true;
+                                break;
+                            }
+
                             $case_fg  .= "when quant_id = '".$row['quant_id']."' then '".$status_consume."'";
                             $where_fg .= "'".$row['quant_id']."',"; 
-                            $list_kp_consume .= $row['lot'].", ";
+
+
+                            
                         }
                     }
 
                     $list_sm_rm = $this->m_mo->get_move_id_rm_target_by_kode($kode)->result();
 
-                    if(!empty($array_rm)){
+                    if(!empty($array_rm) AND $consume_done == false){
 
                         $konsumsi_bahan = TRUE;
+                       
 
                         //simpan rm hasil
                         $move_arr     = [];
                         $move_id_rm   = '';
-                        // get list row order by move_id;
+                        // get list row order by move_id;list_product_smi 
                         foreach($list_sm_rm as $listsm){
                             $move_id_rm  = $listsm->move_id; // get salah satu move_id
                             $row_order   = $this->_module->get_row_order_stock_move_items_by_kode($listsm->move_id); // row yang sudah + 1
@@ -3834,6 +3854,19 @@ class MO extends MY_Controller
                         $get_ro      = $this->m_mo->get_row_order_rm_hasil($kode)->row_array();
                         $row_order_rm= $get_ro['row']+1;
                         foreach ($array_rm as $row) {
+
+                            $cek_qty_smi = $this->m_mo->cek_qty_smi_by_kode($row['move_id'],$row['quant_id'],$row['lot']);
+                            $list_product_smi .= $row['nama_produk']." ".$row['lot']." <br> ";
+                            if(empty($cek_qty_smi)) {
+                                $qty_smi_empty  = TRUE;
+                                break;
+                            } else if(!empty($cek_qty_smi)) {
+                                if((round($cek_qty_smi->qty,2) !=  round($row['qty_smi'],2)) or (round($cek_qty_smi->qty2,2) !=  round($row['qty2'],2)) ) {
+                                    $qty_smi_same   = FALSE;
+                                    break;
+                                }
+                            }
+
                             if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){
 
                                 if($row['qty_konsum'] < $row['qty_smi']){//jika qty_konsum kurang dari qty stock_move_items
@@ -3991,7 +4024,7 @@ class MO extends MY_Controller
 
                     }// !empty array_rm
 
-                    if($konsumsi_bahan == TRUE){
+                    if($konsumsi_bahan == TRUE AND $consume_done == false AND  $qty_smi_same == TRUE AND $qty_smi_empty == FALSE ){
                         
                         //update consume = yes
                         if(!empty($where_fg) AND !empty($case_fg)){
@@ -4121,6 +4154,12 @@ class MO extends MY_Controller
 
                         $callback = array('status' => 'success', 'message'=>'Data Berhasil Disimpan !', 'icon' => 'fa fa-check', 'type'=>'success');
 
+                    }else if($consume_done == true){
+                        $callback = array('status' => 'failed', 'message'=>'Data Gagal Disimpan, Lot sudah di consume ! <br>' .$list_kp_consume, 'icon' => 'fa fa-check', 'type'=>'danger');
+                    }else if($qty_smi_same == FALSE){
+                        $callback = array('status' => 'failed', 'message'=>'Data Gagal Disimpan, Qty Bahan Baku tidak Valid ! <br>' .$list_product_smi, 'icon' => 'fa fa-check', 'type'=>'danger');
+                    }else if($qty_smi_empty == true){
+                        $callback = array('status' => 'failed', 'message'=>'Data Gagal Disimpan, Qty Bahan Baku tidak ditemukan / Kosong ! <br>' .$list_product_smi, 'icon' => 'fa fa-check', 'type'=>'danger');
                     }else{
                         $callback = array('status' => 'failed', 'message'=>'Data Gagal Disimpan !', 'icon' => 'fa fa-check', 'type'=>'danger');
                     }
