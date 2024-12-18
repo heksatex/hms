@@ -11,6 +11,7 @@ class m_marketing extends CI_Model
 	protected $lokasi_fisik = '6Z.01.Z';
 	protected $lokasi2  = 'GRG/Stock';
 	protected $category2 = '10';
+	protected $lokasi_cst  = 'CST/Stock';
 
 
     var $column_order = array(null, 'sq.corak_remark','sq.lebar_jadi','gl','qty1','sq.uom_jual');
@@ -1046,12 +1047,16 @@ class m_marketing extends CI_Model
 		$this->db->SELECT("sq.corak_remark, COUNT(DISTINCT(sq.warna_remark)) as total_warna, sq.lebar_jadi, sq.uom_lebar_jadi, CONCAT(sq.lebar_jadi,' ',sq.uom_lebar_jadi) as lebar_jadi_merge, sum(qty_jual) as total_qty_jual, sq.uom_jual, sum(qty2_jual) as total_qty2_jual, sq.uom2_jual, count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
-        $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
 		if($proofing == 'yes'){
-			$this->db->WHERE('datediff(now(), sq.create_date) < 90');
+			// $this->db->WHERE('datediff(now(), sq.create_date) < 90');
+			$this->db->group_start(); 
+				$this->db->or_like("sq.lokasi",$this->lokasi);
+				$this->db->or_like("sq.lokasi",$this->lokasi_cst);
+			$this->db->group_end();
 		}else{
+			$this->db->WHERE("sq.lokasi",$this->lokasi);
 			$this->db->WHERE('datediff(now(), sq.create_date) > 90');
 		}
 		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
@@ -1195,12 +1200,16 @@ class m_marketing extends CI_Model
 		$this->db->SELECT("sq.corak_remark, sq.warna_remark,  sq.lebar_jadi, sq.uom_lebar_jadi, CONCAT(sq.lebar_jadi,' ',sq.uom_lebar_jadi) as lebar_jadi_merge,  sum(qty_jual) as total_qty_jual, sq.uom_jual, sum(qty2_jual) as total_qty2_jual, sq.uom2_jual,  count(sq.lot) as gl");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
-        $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
 		if($proofing == 'yes'){
-			$this->db->WHERE('datediff(now(), sq.create_date) < 90');
+			// $this->db->WHERE('datediff(now(), sq.create_date) < 90');
+			$this->db->group_start(); 
+				$this->db->or_like("sq.lokasi",$this->lokasi);
+				$this->db->or_like("sq.lokasi",$this->lokasi_cst);
+			$this->db->group_end();
 		}else{
+			$this->db->WHERE("sq.lokasi",$this->lokasi);
 			$this->db->WHERE('datediff(now(), sq.create_date) > 90');
 		}
 		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
@@ -1292,60 +1301,73 @@ class m_marketing extends CI_Model
 	} 
 
 
+	// public function count_all_no_group11()
+	// {
+
+	// 	if($this->input->post('product')){
+    // 		$this->db->where('sq.corak_remark',$this->input->post('product'));
+    //     }
+	// 	if($this->input->post('lebar_jadi')){
+    // 		$this->db->where('sq.lebar_jadi',$this->input->post('lebar_jadi'));
+    //     }
+
+	// 	if($this->input->post('uom_lebar_jadi')){
+    // 		$this->db->where('sq.uom_lebar_jadi',$this->input->post('uom_lebar_jadi'));
+    //     }
+
+	// 	if($this->input->post('uom_jual')){
+    // 		$this->db->where('sq.uom_jual',$this->input->post('uom_jual'));
+    //     }
+
+	// 	if($this->input->post('uom2_jual')){
+    // 		$this->db->where('sq.uom2_jual',$this->input->post('uom2_jual'));
+    //     }
+
+	// 	$proofing = $this->input->post('proofing');
+	// 	$this->db->SELECT("sq.corak_remark, sq.warna_remark, sq.uom_jual, count(sq.lot) as gl");
+	// 	$this->db->FROM("stock_quant sq");
+	// 	$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
+    //     $this->db->WHERE("sq.lokasi",$this->lokasi);
+	// 	$this->db->WHERE('mp.id_category',$this->category);
+	// 	$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
+	// 	if($proofing == 'yes'){
+	// 		$this->db->WHERE('datediff(now(), sq.create_date) < 90');
+	// 	}else{
+	// 		$this->db->WHERE('datediff(now(), sq.create_date) > 90');
+	// 	}
+	// 	$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
+	// 	$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
+
+	// 	if($proofing == 'yes'){
+	// 		$this->db->group_start(); 
+	// 		foreach ($this->f_corak_remark_proof as $value) {
+				
+	// 			$this->db->or_like("sq.corak_remark", $value);
+	// 		}
+	// 		$this->db->group_end(); 
+	// 	}else{
+	// 		foreach ($this->f_corak_remark as $value) {
+	// 			$this->db->not_like("sq.corak_remark", $value);
+	// 		}
+	// 		foreach ($this->f_corak_remark_af as $value) {
+	// 			$this->db->not_like("sq.corak_remark", $value, "after");
+	// 		}
+	// 	}
+
+	// 	return $this->db->count_all_results();
+	// } 
+
 	public function count_all_no_group11()
 	{
+		$this->get_query_11();
+		$result = $this->db->get_compiled_select();
+		// $result = $this->db->get();
 
-		if($this->input->post('product')){
-    		$this->db->where('sq.corak_remark',$this->input->post('product'));
-        }
-		if($this->input->post('lebar_jadi')){
-    		$this->db->where('sq.lebar_jadi',$this->input->post('lebar_jadi'));
-        }
-
-		if($this->input->post('uom_lebar_jadi')){
-    		$this->db->where('sq.uom_lebar_jadi',$this->input->post('uom_lebar_jadi'));
-        }
-
-		if($this->input->post('uom_jual')){
-    		$this->db->where('sq.uom_jual',$this->input->post('uom_jual'));
-        }
-
-		if($this->input->post('uom2_jual')){
-    		$this->db->where('sq.uom2_jual',$this->input->post('uom2_jual'));
-        }
-
-		$proofing = $this->input->post('proofing');
-		$this->db->SELECT("sq.corak_remark, sq.warna_remark, sq.uom_jual, count(sq.lot) as gl");
-		$this->db->FROM("stock_quant sq");
-		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
-        $this->db->WHERE("sq.lokasi",$this->lokasi);
-		$this->db->WHERE('mp.id_category',$this->category);
-		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
-		if($proofing == 'yes'){
-			$this->db->WHERE('datediff(now(), sq.create_date) < 90');
-		}else{
-			$this->db->WHERE('datediff(now(), sq.create_date) > 90');
-		}
-		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);
-		$this->db->WHERE_IN('sq.nama_grade',$this->f_nama_grade);
-
-		if($proofing == 'yes'){
-			$this->db->group_start(); 
-			foreach ($this->f_corak_remark_proof as $value) {
-				
-				$this->db->or_like("sq.corak_remark", $value);
-			}
-			$this->db->group_end(); 
-		}else{
-			foreach ($this->f_corak_remark as $value) {
-				$this->db->not_like("sq.corak_remark", $value);
-			}
-			foreach ($this->f_corak_remark_af as $value) {
-				$this->db->not_like("sq.corak_remark", $value, "after");
-			}
-		}
-
-		return $this->db->count_all_results();
+		$this->db->select('sum(gl) as total');
+		$this->db->from(' ('.$result.') as a');
+		$query = $this->db->get();
+		$result2 = $query->row();
+		return $result2->total ?? 0;
 	} 
 
 
@@ -1379,15 +1401,19 @@ class m_marketing extends CI_Model
     		$this->db->where('sq.uom2_jual',$this->input->post('uom2_jual'));
         }
 		$proofing = $this->input->post('proofing');
-		$this->db->SELECT("sq.create_date, sq.kode_produk, sq.lot, sq.corak_remark, sq.warna_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, (datediff(now(), sq.create_date) ) as umur ");
+		$this->db->SELECT("sq.create_date, sq.kode_produk, sq.lot, sq.corak_remark, sq.warna_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi, sq.lokasi_fisik, (datediff(now(), sq.create_date) ) as umur ");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("mst_produk mp","sq.kode_produk = mp.kode_produk","INNER");
-        $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE('mp.id_category',$this->category);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->f_lokasi_fisik);
 		if($proofing == 'yes'){
-			$this->db->WHERE('datediff(now(), sq.create_date) < 90');
+			// $this->db->WHERE('datediff(now(), sq.create_date) < 90');
+			$this->db->group_start(); 
+				$this->db->or_like("sq.lokasi",$this->lokasi);
+				$this->db->or_like("sq.lokasi",$this->lokasi_cst);
+			$this->db->group_end();
 		}else{
+			$this->db->WHERE("sq.lokasi",$this->lokasi);
 			$this->db->WHERE('datediff(now(), sq.create_date) > 90');
 		}
 		$this->db->WHERE_IN('mp.id_jenis_kain',$this->f_jenis_kain);

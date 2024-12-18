@@ -99,7 +99,8 @@
                             <div class="col-sm-12 col-md-12 col-lg-12">
                             <small><b>*Kondisi</b>
                                 <?php if($proofing == 'yes'){ ?>
-                                    <li>Umur < 90 Hari</li>
+                                    <!-- <li>Umur < 90 Hari</li> -->
+                                    <li>Lokasi GJD/Stock atau CST/Stock</li>
                                 <?php } else{ ?>
                                     <li>Umur > 90 Hari</li>
                                 <?php } ?>

@@ -125,6 +125,7 @@
                                         <th class="style ws">Lebar Jadi</th>
                                         <th class="style text-right">Qty1</th>
                                         <th class="style text-right">Qty2</th>
+                                        <th class="style ws">Lokasi</th>
                                         <th class="style ws">Lokasi Fisik / Rak</th>
                                         <th class="style ws">Umur (Hari)</th>
                                     </tr>
