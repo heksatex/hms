@@ -65,6 +65,18 @@
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
         });
+
+        $(".show_printer").off("click").unbind("click").on("click", function () {
+            $("#modal_printer").modal({
+                show: true,
+                backdrop: 'static'
+            });
+            $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+            $.post("<?= base_url('setting/printershare/data') ?>", {}, function (data) {
+                $(".view_body").html(data.data);
+            });
+        });
+
     });
     //untuk alert notify
     function alert_notify(icon, message, type, callback) {
@@ -109,7 +121,7 @@
     }
 
     //unblock UI 
-    function unblockUI(callback,timeout = 1000) {
+    function unblockUI(callback, timeout = 1000) {
         setTimeout($.unblockUI, timeout);
         callback();
     }
@@ -146,3 +158,22 @@
     }
 
 </script>
+
+<div class="modal fade" id="modal_printer" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    Printer Share
+                </h4>
+            </div>
+            <div class="modal-body view_body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>

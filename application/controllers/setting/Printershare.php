@@ -42,7 +42,7 @@ class Printershare extends MY_Controller {
 
     public function index() {
         $user = $this->session->userdata('nama');
-        if($user["level"] !== "Super Administrator"){
+        if ($user["level"] !== "Super Administrator") {
             return redirect(base_url('setting/printershare/view'));
         }
         $data['id_dept'] = 'SPRS';
@@ -54,6 +54,21 @@ class Printershare extends MY_Controller {
         $data["printer"] = $this->m_global->setTables("share_printer")->setOrder(["id"])->getData();
         $data["priterDefault"] = $this->session->userdata('printer');
         $this->load->view('setting/v_print_view', $data);
+    }
+
+    public function data() {
+        try {
+            $data["printer"] = $this->m_global->setTables("share_printer")->setOrder(["id"])->getData();
+            $data["priterDefault"] = $this->session->userdata('printer');
+            $raw = $this->load->view('setting/v_print_view_data', $data, true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("data" => $raw)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("data" => "")));
+        }
     }
 
     public function save() {
