@@ -9,7 +9,7 @@ require FCPATH . 'vendor/autoload.php';
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 
-class Penerimaanbarang extends MY_Controller {
+class Penerimaanbarang_1 extends MY_Controller {
 
     public function __construct() {
         parent::__construct();
@@ -221,7 +221,7 @@ class Penerimaanbarang extends MY_Controller {
         if (empty($data["list"])) {
             show_404();
         } else {
-            return $this->load->view('warehouse/v_penerimaan_barang_edit', $data);
+            return $this->load->view('warehouse/v_penerimaan_barang_edit_1', $data);
         }
     }
 
@@ -1764,15 +1764,17 @@ class Penerimaanbarang extends MY_Controller {
             $printer->feed();
             $datas = $connector->getData();
             $printer->close();
-//            log_message('error', $datas);
+            $printers = json_decode($printers);
+//            log_message('error', $printers->ip_share." ".$printers->nama_printer_share);
             $client = new GuzzleHttp\Client();
 
             $resp = $client->request("POST", $this->config->item('url_web_print'), [
                 "form_params" => [
                     "data" => $datas,
-                    "printer" => "\\\\10.10.0.111\\epsonlx300"
+                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
                 ]
             ]);
+            
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
