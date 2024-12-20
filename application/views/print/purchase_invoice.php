@@ -63,15 +63,15 @@
             <div id="columnmd">
                 <div id="row" style="margin-top: -30px;font-size: 12px;" >
                     <div id="column" style="text-align: left">
-                        <p style="font-weight: 600">Description : </p>
+                        <p><strong>Description : </strong></p>
                         <p><?= $inv->no_po ?? "" ?></p>
                     </div>
                     <div id="column" style="text-align: left">
-                        <p style="font-weight: 600">Source : </p>
+                        <p><strong>Source : </strong></p>
                         <p><?= $inv->no_po ?? "" ?></p>
                     </div>
                     <div id="column" style="text-align: left">
-                        <p style="font-weight: 600">Reference : </p>
+                        <p><strong>Reference : </strong></p>
                         <p><?= $inv->no_po ?? "" ?></p>
                     </div>
                 </div>
@@ -79,23 +79,27 @@
         </div>
         <div id="row">
             <table style="width: 100%;font-size: 12px;">
-                <thead>
+                <thead >
                     <tr>
-                        <th style="text-align: left;">Description</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Taxes</th>
-                        <th style="text-align: right;">Amount</th>
+                        <th style="text-align: left;border-bottom: 1px solid black">Description</th>
+                        <th style="border-bottom: 1px solid black">Quantity</th>
+                        <th style="border-bottom: 1px solid black">Unit Price</th>
+                        <th style="border-bottom: 1px solid black">Taxes</th>
+                        <th style="text-align: right;border-bottom: 1px solid black">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     if (count($invDetail) > 0) {
+                        $dataPajak = [];
                         $jumlah = 0;
                         $subtotal1 = 0;
                         $totalDiskon = 0;
                         $totalTax = 0;
                         foreach ($invDetail as $key => $value) {
+                            if (count($dataPajak) < 1) {
+                                $dataPajak["ket"] = $value->pajak_ket;
+                            }
                             $jumlah = $value->harga_satuan * $value->qty_beli;
                             $subtotal1 += $jumlah;
                             $totalDiskon += $value->diskon;
@@ -124,35 +128,35 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td style="font-weight: 600;border-top: 1px solid black;">Subtotal</td>
+                            <td style="border-top: 1px solid black;"><strong>Subtotal</strong></td>
                             <td style="border-top: 1px solid black;text-align: right;"><?= number_format($subtotal1, 2) ?></td>
                         </tr>
                         <tr>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td style="font-weight: 600;border-bottom: 1px solid black;">Diskon</td>
+                            <td style="border-bottom: 1px solid black;"><strong>Diskon</strong></td>
                             <td style="border-bottom: 1px solid black;text-align: right;"><?= number_format($totalDiskon, 2) ?></td>
                         </tr>
                         <tr>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td style="font-weight: 600">Subtotal</td>
+                            <td><strong>Subtotal</strong></td>
                             <td style="text-align: right;"><?= number_format($subtotal2, 2) ?></td>
                         </tr>
                         <tr>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td style="border-bottom: 1px solid black;font-weight: 600">Taxes</td>
+                            <td style="border-bottom: 1px solid black">Taxes</td>
                             <td style="border-bottom: 1px solid black;text-align: right;"><?= number_format($totalTax, 2) ?></td>
                         </tr>
                         <tr>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td style="border-bottom: 1px solid black;font-weight: 600">Total</td>
+                            <td style="border-bottom: 1px solid black;font-weight: 600"><strong>Total</strong></td>
                             <td style="border-bottom: 1px solid black;text-align: right;"><?= number_format($subtotal2 + $totalTax, 2) ?></td>
                         </tr>
                         <?php
@@ -160,6 +164,30 @@
                     ?>
                 </tbody>
             </table>
+            <?php
+            if (count($invDetail) > 0) {
+                ?>
+                <div id="row">
+                    <div id="columnmd">
+                        <div id="row" style="margin-top: -30px;font-size: 12px;" >
+                            <div id="column" style="text-align: left">
+                                <p style="font-weight: 600;"><strong>Tax</strong></p>
+                                <p><?= $dataPajak["ket"] ?? "" ?></p>
+                            </div>
+                            <div id="column" style="text-align: left">
+                                <p style="font-weight: 600"><strong>Base</strong></p>
+                                <p><?= number_format($subtotal2, 2) ?></p>
+                            </div>
+                            <div id="column" style="text-align: left">
+                                <p style="font-weight: 600"><strong>Amount</strong></p>
+                                <p><?= number_format($totalTax, 2) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+            }
+            ?>
         </div>
     </body>
 </html>

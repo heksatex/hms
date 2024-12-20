@@ -218,7 +218,7 @@ class M_deliveryorderdetail extends CI_Model {
             $select .= ",bulk_no_bulk";
 //            $this->db->join("bulk_detail bd", "bd.picklist_detail_id = dod.picklist_detail_id");
 //            $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id");
-            $this->db->join("(select pd.*,bulk_no_bulk from picklist_detail pd join bulk_detail bd on bd.barcode = pd.barcode_id) as pd","pd.barcode_id = dod.barcode_id");
+            $this->db->join("(select pd.*,bulk_no_bulk from picklist_detail pd join bulk_detail bd on bd.picklist_detail_id = pd.id) as pd","pd.id = dod.picklist_detail_id");
             $this->db->order_by("bulk_no_bulk", "asc");
         } else {
             $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");

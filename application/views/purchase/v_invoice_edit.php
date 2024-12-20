@@ -170,11 +170,15 @@
                                                     <tbody>
                                                         <?php
                                                         if (count($invDetail) > 0) {
+                                                            $dataPajak = [];
                                                             $jumlah = 0;
                                                             $subtotal1 = 0;
                                                             $totalDiskon = 0;
                                                             $totalTax = 0;
                                                             foreach ($invDetail as $key => $value) {
+                                                                if (count($dataPajak) < 1) {
+                                                                    $dataPajak["ket"] = $value->pajak_ket;
+                                                                }
                                                                 $jumlah = $value->harga_satuan * $value->qty_beli;
                                                                 $subtotal1 += $jumlah;
                                                                 $totalDiskon += $value->diskon;
@@ -186,7 +190,7 @@
                                                                     <td><?= $value->kode_produk . " - " . $value->nama_produk ?></td>
                                                                     <td><?= $value->deskripsi ?></td>
                                                                     <td><?= $value->reff_note ?></td>
-                                                                    <td><?= $value->account ?></td>
+                                                                    <td><?= $value->kode_coa." ".$value->nama_coa ?></td>
                                                                     <td><?= number_format($value->qty_beli, 2) ?></td>
                                                                     <td><?= $value->uom_beli ?></td>
                                                                     <td><?= number_format($value->harga_satuan, 2) ?></td>
@@ -194,7 +198,6 @@
                                                                     <td><?= number_format($jumlah, 2) ?></td>
                                                                 </tr>
                                                                 <?php
-                                                                $totalTax += ($jumlah - $value->diskon) * $value->amount;
                                                             }
                                                             $subtotal2 = $subtotal1 - $totalDiskon;
                                                             ?>
@@ -214,17 +217,21 @@
                                                                     Tax Account
                                                                 </td>
                                                                 <td>
+                                                                    Base
+                                                                </td>
+                                                                <td>
                                                                     Jumlah
                                                                 </td>
-                                                                <td colspan="5" class="text-right">Subtotal 1</td>
+                                                                <td colspan="4" class="text-right">Subtotal 1</td>
                                                                 <td><?= number_format($subtotal1, 2) ?></td>
                                                             </tr>
                                                             <tr>
+                                                                <td>1</td>
+                                                                <td><?= $dataPajak["ket"] ?? "" ?></td>
                                                                 <td></td>
-                                                                <td></td>
-                                                                <td></td>
-                                                                <td></td>
-                                                                <td colspan="5" class="text-right">Diskon</td>
+                                                                <td><?= number_format($subtotal2, 2) ?></td>
+                                                                <td><?= number_format($totalTax, 2) ?></td>
+                                                                <td colspan="4" class="text-right">Diskon</td>
                                                                 <td><?= number_format($totalDiskon, 2) ?></td>
                                                             </tr>
                                                             <tr>
@@ -232,7 +239,8 @@
                                                                 <td></td>
                                                                 <td></td>
                                                                 <td></td>
-                                                                <td colspan="5" class="text-right">Subtotal 2</td>
+                                                                <td></td>
+                                                                <td colspan="4" class="text-right">Subtotal 2</td>
                                                                 <td><?= number_format($subtotal2, 2) ?></td>
                                                             </tr>
                                                             <tr>
@@ -240,7 +248,8 @@
                                                                 <td></td>
                                                                 <td></td>
                                                                 <td></td>
-                                                                <td colspan="5" class="text-right">Tax</td>
+                                                                <td></td>
+                                                                <td colspan="4" class="text-right">Tax</td>
                                                                 <td><?= number_format($totalTax, 2) ?></td>
                                                             </tr>
                                                             <tr>
@@ -248,7 +257,8 @@
                                                                 <td></td>
                                                                 <td></td>
                                                                 <td></td>
-                                                                <td colspan="5" class="text-right">Total</td>
+                                                                <td></td>
+                                                                <td colspan="4" class="text-right">Total</td>
                                                                 <td><?= number_format($subtotal2 + $totalTax, 2) ?></td>
                                                             </tr>
                                                         <?php }
