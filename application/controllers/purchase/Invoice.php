@@ -75,6 +75,7 @@ class Invoice extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $data['id_dept'] = 'PINV';
             $data["id"] = $id;
+            log_message("error", $kode_decrypt);
             $head = new $this->m_global;
             $detail = clone $head;
             $datas = $head->setTables("invoice")->setJoins("partner", "partner.id = id_supplier", "left")
@@ -86,7 +87,9 @@ class Invoice extends MY_Controller {
             $data["inv"] = $datas;
             $data['mms'] = $this->_module->get_data_mms_for_log_history('PINV');
             $data["invDetail"] = $detail->setTables("invoice_detail")->setWheres(["invoice_id" => $kode_decrypt])
-                            ->setJoins("tax", "tax.id = tax_id", "left")->setSelects(["invoice_detail.*", "tax.nama as pajak,tax.ket as pajak_ket,amount"])
+                            ->setJoins("tax", "tax.id = tax_id", "left")
+                            ->setJoins("coa", "coa.kode_coa = account", "left")
+                            ->setSelects(["invoice_detail.*", "tax.nama as pajak,tax.ket as pajak_ket,amount","kode_coa,coa.nama as nama_coa"])
                             ->setOrder(["id"])->getData();
             $this->load->view('purchase/v_invoice_edit', $data);
         } catch (Exception $ex) {
@@ -200,9 +203,9 @@ class Invoice extends MY_Controller {
             $mpdf = new Mpdf(['tempDir' => FCPATH . '/tmp']);
 
             $mpdf->WriteHTML($html);
-            $pathFile = $url . "/". str_replace("/", "_", $data["inv"]->no_po).".pdf";
+            $pathFile = $url . "/" . str_replace("/", "_", $data["inv"]->no_po) . ".pdf";
             $mpdf->Output(FCPATH . $pathFile, "F");
-            
+
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array("url" => base_url($pathFile))));

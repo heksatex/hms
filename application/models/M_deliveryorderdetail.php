@@ -218,7 +218,7 @@ class M_deliveryorderdetail extends CI_Model {
             $select .= ",bulk_no_bulk";
 //            $this->db->join("bulk_detail bd", "bd.picklist_detail_id = dod.picklist_detail_id");
 //            $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id");
-            $this->db->join("(select pd.*,bulk_no_bulk from picklist_detail pd join bulk_detail bd on bd.barcode = pd.barcode_id) as pd","pd.barcode_id = dod.barcode_id");
+            $this->db->join("(select pd.*,bulk_no_bulk from picklist_detail pd join bulk_detail bd on bd.picklist_detail_id = pd.id) as pd","pd.id = dod.picklist_detail_id");
             $this->db->order_by("bulk_no_bulk", "asc");
         } else {
             $this->db->join("picklist_detail pd", "pd.barcode_id = dod.barcode_id");
@@ -236,7 +236,8 @@ class M_deliveryorderdetail extends CI_Model {
         $this->db->join('delivery_order do', 'do.id = dod.do_id');
         $this->db->where($condition);
         $this->db->join("bulk_detail bd", "bd.barcode = dod.barcode_id");
-        $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode");
+//        $this->db->join("picklist_detail pd", "pd.barcode_id = bd.barcode");
+        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id");
         $this->db->group_by('bd.bulk_no_bulk');
         $query = $this->db->get();
         return $query->num_rows();
@@ -246,7 +247,8 @@ class M_deliveryorderdetail extends CI_Model {
         $this->db->from("picklist_detail pd");
         $this->db->where($condition);
         if ($joinbulk) {
-            $this->db->join("bulk_detail bd", "bd.barcode = pd.barcode_id");
+//            $this->db->join("bulk_detail bd", "bd.barcode = pd.barcode_id");
+            $this->db->join("bulk_detail bd", "bd.picklist_detail_id = pd.id");
         }
         $this->db->select('qty,uom');
         return $this->db->get()->result();
@@ -322,10 +324,12 @@ class M_deliveryorderdetail extends CI_Model {
     public function countDetail(array $condition) {
         $this->db->from($this->table . ' dod');
         $this->db->join("delivery_order do", "do.id = dod.do_id");
-        $this->db->join('stock_quant sq', '(sq.lot = dod.barcode_id)');
+//        $this->db->join('stock_quant sq', '(sq.lot = dod.barcode_id)');
+        $this->db->join('picklist_detail pd', '(pd.id = dod.picklist_detail_id)');
         $this->db->where($condition);
 //        $this->db->group_by("pd.barcode_id");
-        $query = $this->db->select('count(sq.lot) as total_item, sum(sq.qty_jual) as total_qty, count(sq.qty_jual) as jumlah_qty')->get();
+//        $query = $this->db->select('count(sq.lot) as total_item, sum(sq.qty_jual) as total_qty, count(sq.qty_jual) as jumlah_qty')->get();
+        $query = $this->db->select('count(pd.quant_id) as total_item, sum(pd.qty) as total_qty, count(pd.qty) as jumlah_qty')->get();
         return $query->row();
     }
 }
