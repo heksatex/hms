@@ -171,15 +171,15 @@
                     <div id="columnmd">
                         <div id="row" style="margin-top: -30px;font-size: 12px;" >
                             <div id="column" style="text-align: left">
-                                <p style="font-weight: 600;"><strong>Tax</strong></p>
+                                <p style="font-weight: 600; border-bottom: 1px solid black"><strong>Tax</strong></p>
                                 <p><?= $dataPajak["ket"] ?? "" ?></p>
                             </div>
-                            <div id="column" style="text-align: left">
-                                <p style="font-weight: 600"><strong>Base</strong></p>
+                            <div id="column" style="text-align: right">
+                                <p style="font-weight: 600;border-bottom: 1px solid black"><strong>Base</strong></p>
                                 <p><?= number_format($subtotal2, 2) ?></p>
                             </div>
-                            <div id="column" style="text-align: left">
-                                <p style="font-weight: 600"><strong>Amount</strong></p>
+                            <div id="column" style="text-align: right">
+                                <p style="font-weight: 600;border-bottom: 1px solid black"><strong>Amount</strong></p>
                                 <p><?= number_format($totalTax, 2) ?></p>
                             </div>
                         </div>

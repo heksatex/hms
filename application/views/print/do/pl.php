@@ -134,8 +134,9 @@
                                 $total_qty += $value->total_qty;
 //                                log_message('error', $value->jumlah_qty . " - " . $sub_jml_qty);
                                 $detailQty = $this->m_deliveryorderdetail->detailReportQty([
-                                    'uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi, 'bulk_no_bulk' => $value->bulk_no_bulk, 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $base->no_picklist
-                                    , "pd.valid <>" => "cancel"], true);
+                                    'uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi, 'bulk_no_bulk' => $value->bulk_no_bulk, 'corak_remark' => $value->corak_remark,
+                                    'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $base->no_picklist], true);
+//                                     , "pd.valid <>" => "cancel"], true);
                                 $perpage = 10;
                                 $totalData = count($detailQty);
                                 $totalPage = ceil($totalData / $perpage);
