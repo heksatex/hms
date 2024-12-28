@@ -22,6 +22,28 @@
       }
     }
 
+    .min-width-full{
+        min-width: 100%;
+    }
+
+    .min-width-200{
+        min-width: 200px;;
+    }
+
+    .min-width-100{
+        min-width: 100px;
+    }
+
+    .min-width-80{
+        min-width: 80px;;
+    }
+
+    .tbl-catatan {
+        line-height: 0.1 !important;
+        font-size: 11px
+        
+    }
+
     /*
     @media screen and (max-width: 767px) {
       .over {
@@ -99,6 +121,33 @@
                     <textarea type="text" class="form-control input-sm" name="note" id="note"><?php echo $procurementpurchase->notes?></textarea>
                   </div>                                    
                 </div>
+                &nbsp
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Sales Order </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <?php 
+                        $checked = "";
+                        if($procurementpurchase->show_sales_order == 'yes'){  
+                          $checked = "checked";
+                        }
+                      ?>
+                      <input type="radio" id="sc_true" name="sc[]" value="yes"  <?php echo $checked;?> disabled  >
+                      <label for="yes">Yes</label>
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <?php 
+                        $checked2 = "";
+                        if($procurementpurchase->show_sales_order == 'no'){  
+                          $checked2 = "checked";
+                        }
+                      ?>
+                        <input type="radio" id="sc_false" name="sc[]" value="no" <?php echo $checked2;?> disabled >
+                      <label for="no">No</label>
+                    </div>
+                  </div>                                    
+                </div>
+
               </div>
 
               <div class="col-md-6">
@@ -108,6 +157,7 @@
                     <input type='text' class="form-control input-sm" name="tgl" id="tgl" readonly="readonly" value="<?php echo $procurementpurchase->schedule_date?>" />
                   </div>                                    
                 </div>
+                <?php if($procurementpurchase->show_sales_order == 'yes'){ ?>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Production Order</label></div>
                   <div class="col-xs-8">
@@ -119,22 +169,13 @@
                   <div class="col-xs-8">
                     <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly"  value="<?php echo $procurementpurchase->sales_order?>"/>
                   </div>                                    
-                </div>        
+                </div>   
+                <?php } ?>     
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Departement Tujuan</label></div>
                   <div class="col-xs-8">
                     <select class="form-control input-sm" name="warehouse" id="warehouse" />
                       <?php
-                      /*
-                      if($cek_status > 0){
-                        foreach ($warehouse  as $row) {
-                          if($row->kode == $procurementpurchase->warehouse){
-                            echo  "<option value='".$row->kode."' selected>". $row->nama."</option>";
-                          }
-                        }
-                      }else{
-                      }
-                      */
                         echo '<option value="">Pilih Warehouse</option>';
                         foreach ($warehouse as $row) {
                           if($row->kode == $procurementpurchase->warehouse){?>
@@ -169,7 +210,7 @@
                 </div>
               </div>
             </div>
-          
+    
             <div class="row">
               <div class="col-md-12">
                 <!-- Custom Tabs -->
@@ -192,6 +233,7 @@
                               <th class="style" width="80px">Uom</th>
                               <th class="style" width="200px">Notes</th>
                               <th class="style" width="60px">Status</th>
+                              <th class="style" width="60px">kode CFB</th>
                               <th class="style" style="width: 80px; text-align: center;">
                                 <?php
                                   if($procurementpurchase->status == 'done' OR $procurementpurchase->status == 'cancel'){
@@ -210,13 +252,14 @@
                               foreach ($details as $row) {
                             ?>
                               <tr class="">
-                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"><?php echo $no++.".";?></td>
-                                <td><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
+                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"><?php echo $no.".";?></td>
+                                <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk;?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk)?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
                                 <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date;?>"><?php echo $row->schedule_date?></td>
                                 <td data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
                                 <td><?php echo $row->uom?></td>
                                 <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_notes);?>" class="text-wrap width-200"> <?php echo $row->reff_notes?></td>                               
-                                <td><?php if($row->status == 'cancel') echo 'Batal';  else echo $row->status;?></td>
+                                <td><?php  echo $row->nama_status;?></td>
+                                <td><?php echo $row->kode_cfb?></td>
                                 <td align="center">
                                   <?php if($row->status == 'draft'){?>
                                   <a href="javascript:void(0)" class="add" title="Simpan" data-toggle="tooltip" ><i class="fa fa-save"></i></a>
@@ -227,12 +270,26 @@
                                 </td>                               
                               </tr>
                             <?php 
+                                if (!empty($row->catatan)) {
+                                    $catatan = explode("#", $row->catatan);
+                                    foreach ($catatan as $keys => $catt) {
+                                        ?>
+                                        <tr>
+                                            <td class="text-right tbl-catatan"><?= $no . "." . ($keys + 1) ?></td>
+                                            <td class="tbl-catatan" colspan="8" style="vertical-align: top; color:red;">
+                                                <?= $catt ?>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                $no++;
                               }
                             ?>
                           </tbody>
                           <tfoot>
                             <?php 
-                              if($cek_status == 0 ){?>
+                              if($procurementpurchase->status == 'draft' ){?>
                                 <tr>
                                   <td colspan="8">
                                     <a href="javascript:void(0)" class="add-new"><i class="fa fa-plus"></i> Tambah Data</a>
@@ -312,11 +369,14 @@
     var index = $("#procurements tbody tr:last-child").index();
     var row   ='<tr class="">'
           + '<td></td>'
-          + '<td><select type="text" class="form-control input-sm width-150 prod" name="Product" id="product" style="min-width:100%"></select></select><input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
+          + '<td class="min-width-200">'
+            +'<select type="text" class="form-control input-sm prod min-width-full" name="Product" id="product"></select>'
+            +'<input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>'
           + '<td><div class="input-group width-150 date" id="sch_date" ><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
-          + '<td><input type="text" class="form-control input-sm width-100 qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>'
-          + '<td><select type="text" class="form-control input-sm width-80 uom" name="Uom" id="uom"><option value=""></option><?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
-          + '<td><textarea type="text" class="form-control input-sm width-150" name="reff" id="reff"></textarea></td>'
+          + '<td class="min-width-100"><input type="text" class="form-control input-sm width-100 qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>'
+          + '<td class="min-width-100"><select type="text" class="form-control input-sm width-80 uom" name="Uom" id="uom"><option value=""></option><?php foreach($uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
+          + '<td class="min-width-50"><textarea type="text" class="form-control input-sm width-150" name="reff" id="reff"></textarea></td>'
+          + '<td></td>'
           + '<td></td>'
           + '<td align="center"><button type="button" class="btn btn-primary btn-xs add width-btn" title="Simpan" data-toggle="tooltip">Simpan</button><a class="edit" title="Edit" data-toggle="tooltip"><i class="fa fa-edit"></i></a><button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip">Batal</button></td>'        
           + '</tr>';
@@ -414,8 +474,8 @@
   });
 
 
-  //simpan / edit row data ke database
-  $(document).on("click", ".add", function(){
+   //simpan / edit row data ke database
+    $(document).on("click", ".add", function(){
       var empty = false;
       var input = $(this).parents("tr").find('input[type="text"]');
 
@@ -506,8 +566,82 @@
     // Edit row on edit button click
     $(document).on("click", ".edit", function(){  
         $(this).parents("tr").find("td[data-content='edit']").each(function(){
+
           if($(this).attr('data-id')=="row_order"){
-            $(this).html('<input type="hidden"  class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
+            $(this).html('<input type="hidden"  class="form-control input-sm" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
+            row_order = $(this).attr('data-isi');
+          // }else  if($(this).attr('data-id')=="row_order"){
+          //   $(this).html('<input type="hidden"  class="form-control" value="' + $(this).attr('data-isi') + '" id="'+ $(this).attr('data-id') +'"> ');
+          }else if($(this).attr('data-id') == 'kode_produk'){
+
+            var kode_produk = $(this).attr('data-isi');
+            var nama_produk = $(this).attr('data-isi2');
+
+            class_sel2_prod = 't_sel2_prod'+row_order;
+            class_nama_produk = 'e_nama_produk'+row_order;
+
+            $(this).html('<select type="text"  class="form-control input-sm '+class_sel2_prod+' min-width-full " id="product" name="Product" ></select> ' + '<input type="hidden"  class="form-control '+class_nama_produk+' " value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="'+ $(this).attr('data-id2') +'"> ');
+
+            // append berdasarkan nama produk
+            $newOption = new Option(nama_produk, kode_produk, true, true);
+            $('.t_sel2_prod'+row_order).append($newOption).trigger('change');
+            
+             //select 2 product
+            $('.t_sel2_prod'+row_order).select2({
+              allowClear: true,
+              placeholder: "",
+              ajax:{
+                    dataType: 'JSON',
+                    type : "POST",
+                    url : "<?php echo base_url();?>ppic/procurementpurchase/get_produk_procurement_purchase_select2",
+                    //delay : 250,
+                    data : function(params){
+                      return{
+                        prod:params.term
+                      };
+                    }, 
+                    processResults:function(data){
+                      var results = [];
+
+                      $.each(data, function(index,item){
+                          results.push({
+                              id:item.kode_produk,
+                              text:'['+item.kode_produk+'] '+item.nama_produk
+                          });
+                      });
+                      return {
+                        results:results
+                      };
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                    //  alert('Error data');
+                    //  alert(xhr.responseText);
+                    }
+              }
+            });
+
+            $('.t_sel2_prod'+row_order).change(function(){
+              $.ajax({
+                    dataType: "JSON",
+                    url : '<?php echo site_url('sales/salescontract/get_prod_by_id') ?>',
+                    type: "POST",
+                    data: {kode_produk: $(this).parents("tr").find("#product").val() },
+                    success: function(data){
+                      //alert(data.nama_produk);
+                      $('.e_nama_produk'+row_order).val(data.nama_produk);
+                      $('.description'+row_order).val(data.nama_produk);
+                      //$('.uom').val(data.uom);
+
+                      var $newOptionuom = $("<option></option>").val(data.uom).text(data.uom);
+                      $(".uom"+row_order).empty().append($newOptionuom).trigger('change');
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                    //  alert('Error data');
+                    //  alert(xhr.responseText);
+                    }
+              });
+            });
+            
           }else if($(this).attr('data-id')=="schedule_date"){
             $(this).html('<div class="input-group date" id="sch_date2" ><input type="text" class="form-control input-sm" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div> ');
             var datetomorrow=new Date();
@@ -518,7 +652,7 @@
                 ignoreReadonly: true,
              });
           }else if($(this).attr('data-id')=='qty'){
-            $(this).html('<input type="text"  class="form-control" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)"> ');
+            $(this).html('<input type="text"  class="form-control input-sm" value="'+ htmlentities_script($(this).attr('data-isi')) +'" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-name') +'" onkeyup="validAngka(this)"> ');
           }else if($(this).attr('data-id')=="reff"){
             $(this).html('<textarea type="text" class="form-control input-sm" id="'+ $(this).attr('data-id') +'" name="'+ $(this).attr('data-id') +'">'+ htmlentities_script($(this).attr('data-isi')) +'</textarea>');
           }
@@ -808,6 +942,20 @@
    //klik button Batal
     $('#btn-cancel').click(function(){
        $("#ref_warehouse").load(location.href + " #ref_warehouse");
+    });
+
+    // duplicate DTI
+    $(document).on('click','#btn-duplicate',function(e){
+          e.preventDefault();
+          var kode_pp    = $('#kode_pp').val();
+          var duplicate  = 'true';
+
+          if(kode_pp == ""){
+            alert_modal_warning('Kode Procurement Purchase Kosong!');
+          }else{
+            var url = '<?php echo base_url() ?>ppic/procurementpurchase/add';
+            window.open(url+'?kode_pp='+ kode_pp+'&&duplicate='+duplicate,'_blank');
+          }
     });
 
 </script>

@@ -95,11 +95,9 @@
                                             <div class="col-xs-4"><label>Tanggal Kirim </label></div>
                                             <div class="col-xs-8 col-md-8">
                                                 <div id="tgl_btn">
-<?php
-if ($list->status == 'draft' or $list->status == 'ready') {
-    $tgl_kirim = date('Y-m-d H:i:s');
-    ?>
                                                     <?php
+                                                    if ($list->status == 'draft' or $list->status == 'ready') {
+                                                        $tgl_kirim = date('Y-m-d H:i:s');
                                                     } else {
                                                         $tgl_kirim = $list->tanggal_transaksi;
                                                     }
@@ -116,6 +114,31 @@ if ($list->status == 'draft' or $list->status == 'ready') {
 
                                             </div>                                    
                                         </div>
+                                        <?php if($list->dept_id == 'RCV'){ ?>
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4"><label>Supplier</label></div>
+                                            <div class="col-xs-8">
+                                                <input type='text' class="form-control input-sm" name="supplier" id="supplier"  readonly="readonly"   value="<?php echo $list->nama_partner; ?>"/>
+                                            </div>                                    
+                                        </div>
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4"><label>No SJ</label></div>
+                                            <div class="col-xs-8">
+                                                <input type='text' class="form-control input-sm" name="no_sj" id="no_sj"   value="<?php echo $list->no_sj; ?>"/>
+                                            </div>                                    
+                                        </div>
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4"><label>Tanggal SJ</label></div>
+                                            <div class="col-xs-8">
+                                                <div class='input-group date' id='datetimepicker3' >
+                                                    <input type='text' class="form-control input-sm" name="tgl_sj" id="tgl_sj"  value="<?php echo $list->tanggal_sj;?>"/>
+                                                    <span class="input-group-addon">
+                                                        <span class="glyphicon glyphicon-calendar"  ></span>
+                                                    </span>
+                                                </div>
+                                            </div>                                    
+                                        </div>
+                                        <?php } ?>
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label>Reff Note </label></div>
                                             <div id="ta" class="col-xs-8">
@@ -165,27 +188,28 @@ if ($list->status == 'draft' or $list->status == 'ready') {
                                                                         <td></td>
                                                                         <td><?php echo $row->kode_produk; ?></td>
                                                                         <td>
-                                                                            <?php if ($smove['method'] != "GRG|OUT" OR $row->status_barang == 'done') {
+                                                                            <?php 
+                                                                            if ($smove['method'] != "GRG|OUT" OR $row->status_barang == 'done') {
                                                                                 echo $row->nama_produk;
                                                                             } else { ?>
                                                                                 <a href="javascript:void(0)" onclick="tambah('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>', '<?php echo $list->move_id ?>')"><?php echo $row->nama_produk ?></a>
-    <?php } ?>
-    <?php if ($row->status_barang == 'done' or $row->status_barang == 'cancel' OR $akses_menu == 0) {
-        echo "";
-    } else { ?>
+                                                                            <?php } ?>
+                                                                            <?php 
+                                                                            if ($row->status_barang == 'done' or $row->status_barang == 'cancel' OR $akses_menu == 0 or $list->status == 'done') {
+                                                                                echo "";
+                                                                            } else { ?>
                                                                                 <a href="javascript:void(0)" onclick="tambah_quant('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>', '<?php echo $list->move_id ?>', '<?php echo $row->origin_prod ?>')" data-toggle="tooltip" title="Tambah Quant"> 
                                                                                     <span class="glyphicon  glyphicon-share"></span></a>
-                                                                    <?php } ?>
+                                                                            <?php } ?>
                                                                         </td>
                                                                         <td align="right"><?php echo number_format($row->qty, 2) ?></td>
                                                                         <td><?php echo $row->uom ?></td>
-                                                                        <td style="color:<?php echo $color; ?>"><?php echo $row->sum_qty ?></td>
-                                                                        <td><?php if ($row->status_barang == 'cancel') echo 'Batal';
-                                                                else echo $row->status_barang; ?></td>
+                                                                        <td style="color:<?php echo $color; ?>"><?php echo (!empty($row->sum_qty)) ? number_format($row->sum_qty,2) : ''; ?></td>
+                                                                        <td><?php if ($row->status_barang == 'cancel') echo 'Batal';else echo $row->status_barang; ?></td>
                                                                     </tr>
-    <?php
-}
-?>
+                                                                    <?php
+                                                                }
+                                                                ?>
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -210,16 +234,16 @@ if ($list->status == 'draft' or $list->status == 'ready') {
                                                                 <?php if ($show_lebar['show_lebar'] == 'true') { ?>
                                                                     <th class="style" style="text-align: right;">Lbr.Greige</th>
                                                                     <th class="style" style="text-align: right;">Lbr.Jadi</th>
-<?php } ?>
+                                                                <?php } ?>
                                                                 <th class="style">Reff Note</th>
                                                                 <th class="style">Status</th>
                                                                 <th class="style">Quant Id</th>
                                                                 <th class="style no"></th>
                                                             </tr>
                                                             <tbody>
-<?php
-foreach ($smi as $row) {
-    ?>
+                                                            <?php
+                                                            foreach ($smi as $row) {
+                                                                ?>
                                                                     <tr class="num">
                                                                         <td></td>
                                                                         <td><?php echo $row->kode_produk ?></td>
@@ -233,21 +257,21 @@ foreach ($smi as $row) {
                                                                             <?php if ($show_lebar['show_lebar'] == 'true') { ?>
                                                                             <td align="right"><?php echo $row->lebar_greige . ' ' . $row->uom_lebar_greige; ?></td>
                                                                             <td align="right"><?php echo $row->lebar_jadi . ' ' . $row->uom_lebar_jadi; ?></td>
-                                                                    <?php } ?>
+                                                                        <?php } ?>
                                                                         <td><?php echo $row->reff_note ?></td>
                                                                         <td><?php if ($row->status == 'cancel') echo 'Batal';
-                                                                else echo $row->status; ?></td>
+                                                                        else echo $row->status; ?></td>
                                                                         <td><?php echo $row->quant_id ?></td>
                                                                         <td class="no" align="center" >
-    <?php if ($akses_menu > 0 AND $show_delete == true) { ?>
-                                                                                <a onclick="hapus('<?php echo $list->kode ?>', '<?php echo $list->move_id ?>', '<?php echo $row->kode_produk ?>', '<?php echo htmlentities($row->nama_produk) ?>', '<?php echo $row->quant_id ?>', '<?php echo $row->row_order ?>', '<?php echo $row->status ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
+                                                                        <?php if ($akses_menu > 0 AND $show_delete == true) { ?>
+                                                                                <a onclick="hapus('<?php echo $list->kode ?>', '<?php echo $list->move_id ?>', '<?php echo $row->kode_produk ?>', '<?php echo htmlentities($row->nama_produk) ?>', '<?php echo $row->quant_id ?>', '<?php echo $row->row_order ?>', '<?php echo $row->status ?>', '<?php echo $row->origin_prod ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
                                                                                 </a>
-    <?php } ?>
+                                                                        <?php } ?>
                                                                         </td>
                                                                     </tr>
-    <?php
-}
-?>
+                                                                <?php
+                                                            }
+                                                            ?>
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -273,13 +297,13 @@ foreach ($smi as $row) {
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-4"><label>Origin </label></div>
                                                                 <div class="col-xs-8 col-md-8">
-<?php echo ": " . $smove['origin']; ?>
+                                                                    <?php echo ": " . $smove['origin']; ?>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-4"><label>Method</label></div>
                                                                 <div class="col-xs-8 col-md-8">
-<?php echo ": " . $smove['method']; ?>
+                                                                    <?php echo ": " . $smove['method']; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -295,7 +319,7 @@ foreach ($smi as $row) {
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-4"><label>Lokasi Tujuan </label></div>
                                                                 <div class="col-xs-8 col-md-8">
-<?php echo ": " . $smove['lokasi_tujuan']; ?>
+                                                                    <?php echo ": " . $smove['lokasi_tujuan']; ?>
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-12 col-xs-12">
@@ -327,13 +351,13 @@ foreach ($smi as $row) {
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-xs-8 col-md-8">
-<?php
-if (!empty($mo['kode'])) {
-    echo ": " . $mo['kode'];
-} else {
-    echo ": -";
-}
-?>
+                                                                    <?php
+                                                                    if (!empty($mo['kode'])) {
+                                                                        echo ": " . $mo['kode'];
+                                                                    } else {
+                                                                        echo ": -";
+                                                                    }
+                                                                    ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -361,18 +385,33 @@ if (!empty($mo['kode'])) {
 
             <footer class="main-footer">
                 <div id="foot">
-<?php $this->load->view("admin/_partials/footer.php") ?>
+                    <?php $this->load->view("admin/_partials/footer.php") ?>
                 </div>
             </footer>
             <!-- Load Partial Modal -->
-<?php $this->load->view("admin/_partials/modal.php") ?>
-
+                <?php $this->load->view("admin/_partials/modal.php") ?>
         </div>
         <!--/. Site wrapper -->
-<?php $this->load->view("admin/_partials/js.php") ?>
+        <?php $this->load->view("admin/_partials/js.php") ?>
 
 
         <script type="text/javascript">
+
+            $(document).on('click','#datetimepicker3',function (e) {
+                $('#datetimepicker3').datetimepicker({
+                        format : 'YYYY-MM-DD HH:mm:ss',
+                        ignoreReadonly: true
+                });     
+            });
+
+            $('#tgl_sj').inputmask("datetime",{
+                mask: "y-2-1 h:s:s", 
+                //placeholder: "yyyy-mm-dd hh:mm:ss", 
+                placeholder: "yyyy-mm-dd hh:mm:ss",
+                leapday: "-02-29", 
+                separator: "-", 
+                alias: "yyyy/mm/dd"
+            });
 
             //untuk merefresh data
             function refresh_div_in()
@@ -403,7 +442,7 @@ if (!empty($mo['kode'])) {
                             e.overrideMimeType("application/json;charset=UTF-8");
                         }
                     },
-                    data: {move_id: move_id, kode: $('#kode').val(), tgl_transaksi: $('#tgl_transaksi').val(), reff_note: $('#note').val(), deptid: deptid
+                    data: {move_id: move_id, kode: $('#kode').val(), tgl_transaksi: $('#tgl_transaksi').val(), reff_note: $('#note').val(), deptid: deptid, no_sj:$('#no_sj').val(), tgl_sj:$('#tgl_sj').val()
                     }, success: function (data) {
                         if (data.sesi == "habis") {
                             //alert jika session habis
@@ -416,23 +455,22 @@ if (!empty($mo['kode'])) {
                                     alert_notify(data.icon, data.message, data.type, function () {});
                                 }, 1000);
                             });
-                            document.getElementById(data.field).focus();//focus ke field yang belum keisi
                             refresh_div_in();
                             $('#btn-simpan').button('reset');
                         } else if (data.status == "ada") {
+                            $('#btn-simpan').button('reset');
                             alert_modal_warning(data.message);
                             unblockUI(function () {});
                             refresh_div_in();
-                            $('#btn-simpan').button('reset');
                         } else {
                             //jika berhasil disimpan/diubah
+                            $('#btn-simpan').button('reset');
                             unblockUI(function () {
                                 setTimeout(function () {
                                     alert_notify(data.icon, data.message, data.type, function () {});
                                 }, 1000);
                             });
                             refresh_div_in();
-                            $('#btn-simpan').button('reset');
                         }
 
                     }, error: function (xhr, ajaxOptions, thrownError) {
@@ -453,11 +491,12 @@ if (!empty($mo['kode'])) {
                     show: true,
                     backdrop: 'static'
                 })
+                var kode   = "<?php echo $list->kode; ?>";
                 var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
                 $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                 $('.modal-title').text('Tambah Details Product Qty');
                 $.post('<?php echo site_url() ?>warehouse/penerimaanbarang/tambah_data_details_quant_penerimaan',
-                        {nama_produk: nama_produk, kode_produk: kode_produk, move_id: move_id, deptid: deptid, origin: $("#origin").val(), origin_prod: origin_prod},
+                        {kode:kode, nama_produk: nama_produk, kode_produk: kode_produk, move_id: move_id, deptid: deptid, origin: $("#origin").val(), origin_prod: origin_prod},
                         function (html) {
                             setTimeout(function () {
                                 $(".tambah_data").html(html);
@@ -467,7 +506,7 @@ if (!empty($mo['kode'])) {
             }
 
             //untuk hapus details item
-            function hapus(kode, move_id, kode_produk, nama_produk, quant_id, row_order, status)
+            function hapus(kode, move_id, kode_produk, nama_produk, quant_id, row_order, status, origin_prod)
             {
                 var baseUrl = '<?php echo base_url(); ?>';
                 var deptid = "<?php echo $list->dept_id; ?>";//parsing data id dept untuk log history
@@ -489,7 +528,7 @@ if (!empty($mo['kode'])) {
                                         dataType: "json",
                                         type: 'POST',
                                         url: "<?php echo site_url('warehouse/penerimaanbarang/hapus_details_items') ?>",
-                                        data: {kode: kode, move_id: move_id, kode_produk: kode_produk, nama_produk: nama_produk, quant_id: quant_id, row_order: row_order, deptid: deptid},
+                                        data: {kode: kode, move_id: move_id, kode_produk: kode_produk, nama_produk: nama_produk, quant_id: quant_id, row_order: row_order, deptid: deptid, origin_prod:origin_prod},
                                         error: function (xhr, ajaxOptions, thrownError) {
                                             alert(xhr.responseText);
                                             unblockUI(function () {})
@@ -508,7 +547,7 @@ if (!empty($mo['kode'])) {
                                                     refresh_div_in();
                                                     unblockUI(function () {
                                                         setTimeout(function () {
-                                                            alert_notify(data.icon, data.message, data.type, function () {});
+                                                            alert_notify(response.icon, response.message, response.type, function () {});
                                                         }, 1000);
                                                     });
                                                 }
@@ -751,31 +790,36 @@ if (!empty($mo['kode'])) {
                     alert_modal_warning('Print Penerimaan Barang Hanya bisa di Print saat statusnya "Terkirim" ! ');
                 } else {
                     var url = '<?php echo base_url() ?>warehouse/penerimaanbarang/print_penerimaan_barang';
-        //          window.open(url+'?kode='+ kode+'&&departemen='+ departemen,'_blank');
-                    $.ajax({
-                        type: "get",
-                        url: url,
-                        data: {
-                            kode: kode,
-                            departemen: departemen
-                        },
-                        beforeSend:function(){
-                            please_wait(function () {});
-                        },
-                        success: function(data) {
-                            unblockUI(function () {
+                     //          window.open(url+'?kode='+ kode+'&&departemen='+ departemen,'_blank');
+                    if (departemen === "RCV") {
+                        $.ajax({
+                            type: "get",
+                            url: url+"_rcv",
+                            data: {
+                                kode: kode,
+                                departemen: departemen
+                            },
+                            beforeSend: function () {
+                                please_wait(function () {});
+                            },
+                            success: function (data) {
+                                unblockUI(function () {
                                     setTimeout(function () {
                                         alert_notify('fa fa-check', data.message, 'success', function () {});
                                     }, 500);
                                 });
-                        }, error: function (req, error) {
+                            }, error: function (req, error) {
                                 unblockUI(function () {
                                     setTimeout(function () {
                                         alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
                                     }, 500);
                                 });
                             }
-                    });
+                        });
+                    } else {
+                        window.open(url+'?kode='+ kode+'&&departemen='+ departemen,'_blank');
+                    }
+
                 }
             });
 

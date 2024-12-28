@@ -69,6 +69,20 @@
                     <textarea type="text" class="form-control input-sm" name="note" id="note"></textarea>
                   </div>                                    
                 </div>
+                &nbsp
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Sales Order </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <input type="radio" id="sc_true" name="sc[]" value="yes">
+                      <label for="yes">Yes</label>
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-md-4">
+                      <input type="radio" id="sc_false" name="sc[]" value="no">
+                      <label for="no">No</label>
+                    </div>
+                  </div>                                    
+                </div>
               </div>
 
               <div class="col-md-6">
@@ -83,23 +97,25 @@
                     </div>
                   </div>                                    
                 </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Production Order </label></div>
-                  <div class="col-xs-8">
-                    <div class='input-group'>
-                      <input type="text" class="form-control input-sm" name="kode_prod" id="kode_prod" readonly="readonly" />
-                       <span class="input-group-addon">
-                          <a href="#" class="sc"><span class="glyphicon  glyphicon-share"></span></a>
-                      </span>
-                    </div>
-                  </div>                                    
-                </div>
-                <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Sales Order </label></div>
-                  <div class="col-xs-8 col-md-8">
-                      <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly" />
-                  </div>                                    
-                </div>
+                <span id="show_sc" style="display: none;">
+                  <div class="col-md-12 col-xs-12">
+                    <div class="col-xs-4"><label>Production Order </label></div>
+                    <div class="col-xs-8">
+                      <div class='input-group'>
+                        <input type="text" class="form-control input-sm" name="kode_prod" id="kode_prod" readonly="readonly" />
+                        <span class="input-group-addon">
+                            <a href="#" class="sc"><span class="glyphicon  glyphicon-share"></span></a>
+                        </span>
+                      </div>
+                    </div>                                    
+                  </div>
+                  <div class="col-md-12 col-xs-12">
+                    <div class="col-xs-4"><label>Sales Order </label></div>
+                    <div class="col-xs-8 col-md-8">
+                        <input type="text" class="form-control input-sm" name="sales_order" id="sales_order" readonly="readonly" />
+                    </div>                                    
+                  </div>
+                </span>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Departement Tujuan</label></div>
                   <div class="col-xs-8">
@@ -176,11 +192,38 @@
       $('#view_data').modal('hide');
   });
 
+  $(document).on("change", "input[name='sc[]']", function(){
+        checkTampil('sc');
+  });
 
+  function checkTampil(show){
+    if(show == 'sc'){
+
+      var radio_type = $('input[name="sc[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+      
+      if(radio_type == 'yes'){
+        $('#show_sc').show();
+
+      }else if(radio_type == 'no'){
+        $('#show_sc').hide();
+        $('#kode_prod').val('');
+        $('#sales_order').val('');
+      }
+    }
+  }
 
   //klik button simpan
     $('#btn-simpan').click(function(){
       $('#btn-simpan').button('loading');
+      var radio_type = $('input[name="sc[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
       please_wait(function(){});
       $.ajax({
          type: "POST",
@@ -198,6 +241,7 @@
                 sales_order : $('#sales_order').val(),
                 priority    : $('#priority').val(),
                 warehouse   : $('#warehouse').val(),
+                show_sc     : radio_type,
 
           },success: function(data){
             if(data.sesi == "habis"){

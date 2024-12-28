@@ -15,6 +15,7 @@ class M_procurementPurchase extends CI_Model
 	var $column_search2= array('kode_prod', 'create_date', 'sales_order','priority');
 	var $order2    	  = array('create_date' => 'desc');
 
+	protected $wheresRaw = [];
 	public function __construct()
 	{
 		parent::__construct();
@@ -29,6 +30,10 @@ class M_procurementPurchase extends CI_Model
 		$this->db->from("procurement_purchase pp");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pp.status", "inner");
 		$this->db->join("departemen d", "d.kode=pp.warehouse", "inner");
+
+		foreach ($this->wheresRaw as $key => $value) {
+			$this->db->where($value, null, false);
+		}
 		
 
 		$i = 0;
@@ -183,14 +188,21 @@ class M_procurementPurchase extends CI_Model
 		}else{
      		$no   = (int)$result->nom + 1;
 		}
-		$kode = 'TE'.$no;
-		return $kode;
+		// $kode = 'TE'.$no;
+		return $no;
 	}
 
-	public function simpan($kode, $tgl, $schedule_date, $note, $sales_order, $kode_prod, $priority, $warehouse, $status)
+	public function simpan($kode, $tgl, $schedule_date, $note, $sales_order, $kode_prod, $priority, $warehouse, $status,$show_sc)
 	{
-		return $this->db->query("INSERT INTO procurement_purchase (kode_pp,create_date,schedule_date,sales_order,kode_prod,priority,warehouse,notes,status) values ('$kode','$tgl','$schedule_date','$sales_order','$kode_prod','$priority','$warehouse','$note','$status')");
+		return $this->db->query("INSERT INTO procurement_purchase (kode_pp,create_date,schedule_date,sales_order,kode_prod,priority,warehouse,notes,status,show_sales_order) values ('$kode','$tgl','$schedule_date','$sales_order','$kode_prod','$priority','$warehouse','$note','$status','$show_sc')");
 	}
+
+
+	public function save_procurement_purchase_items_batch($data_item)
+    {
+		$this->db->insert_batch('procurement_purchase_items', $data_item);
+        return is_array($this->db->error());
+    }
 
 	public function ubah($kode_pp, $tgl, $note, $priority, $warehouse)
 	{
@@ -207,7 +219,11 @@ class M_procurementPurchase extends CI_Model
 
 	public function get_data_detail_by_code($kode_pp)
 	{
-		$query = $this->db->query("SELECT * FROM procurement_purchase_items where kode_pp = '".$kode_pp."' ORDER BY row_order");
+		$query = $this->db->query("SELECT ppi.*, ms.nama_status, cat.catatan
+								FROM procurement_purchase_items ppi 
+								LEFT JOIN mst_status ms ON ppi.status = ms.kode
+								LEFT JOIN (select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR '#') as catatan from mst_produk_catatan where jenis_catatan = 'pembelian' group by kode_produk) as cat ON cat.kopro = ppi.kode_produk
+								where ppi.kode_pp = '".$kode_pp."' ORDER BY row_order");
 		return $query->result();
 	}
 
@@ -268,16 +284,27 @@ class M_procurementPurchase extends CI_Model
 																WHERE kode_pp = '$kode_pp' AND row_order = '$row_order'");
 	}
 
-	public function save_cfb_items_batch($sql)
-	{
-		return $this->db->query("INSERT INTO cfb_items (kode_cfb,kode_produk,nama_produk,schedule_date,qty,uom,status,reff_notes,row_order) values $sql " );
+	// public function save_cfb_items_batch($sql)
+	// {
+	// 	return $this->db->query("INSERT INTO cfb_items (kode_cfb,kode_produk,nama_produk,schedule_date,qty,uom,status,reff_notes,row_order) values $sql " );
 
-	}
+	// }
 
-	public function save_cfb_batch($sql)
-	{
-		return $this->db->query(" $sql ");
-	}
+	// public function save_cfb_batch($sql)
+	// {
+	// 	return $this->db->query(" $sql ");
+	// }
+
+	public function save_cfb_items_batch($data_item)
+    {
+		$this->db->insert_batch('cfb_items', $data_item);
+        return is_array($this->db->error());
+    }
+
+	public function save_cfb_batch($sql) {
+        $this->db->insert_batch('cfb', $sql);
+        return is_array($this->db->error());
+    }
 
 	public function cek_produk_by_kode($kode,$kode_produk)
 	{
@@ -290,14 +317,19 @@ class M_procurementPurchase extends CI_Model
 	}
 
 
+	public function setWhereRaw(string $where) {
+        $this->wheresRaw [] = $where;
+        return $this;
+    }
+
 	public function cek_warehouse_procurement_purchase_order_by_kode($kode_pp)
 	{
 		return $this->db->query("SELECT warehouse FROM procurement_purchase WHERE kode_pp ='$kode_pp'");
 	}
 
-	public function get_cfb_by_kode($kode_pp,$kode_prod,$sales_order)
+	public function get_cfb_by_kode($kode_pp)
 	{
-		return $this->db->query("SELECT * FROM cfb WHERE sales_order = '$sales_order' AND kode_prod = '$kode_prod' AND kode_pp ='$kode_pp' ");
+		return $this->db->query("SELECT * FROM cfb WHERE  kode_pp ='$kode_pp' ");
 	}
 
 	public function get_list_cfb_by_kode($kode_pp,$kode_prod,$sales_order)
@@ -314,5 +346,13 @@ class M_procurementPurchase extends CI_Model
 								FROM procurement_purchase_items 
 								where kode_pp = '$kode' AND row_order = '$row'");
 	}
+
+	
+
+    function update_pp_items($data_update)
+    {
+        $this->db->update_batch("procurement_purchase_items",$data_update,'id');
+        return $this->db->affected_rows();
+    }
 
 }
