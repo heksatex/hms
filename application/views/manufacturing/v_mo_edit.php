@@ -1269,14 +1269,14 @@
           backdrop: 'static'
       })
       var deptid = "<?php echo $list->dept_id; ?>"//parsing data id dept untuk log history
-      $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+      $("#view_data .view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
       // $("#view_data .modal-dialog .modal-content .modal-footer").html('<button type="button" id="btn-waste-data" class="btn btn-primary btn-sm"> Habis Diproduksi</button> <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>');
 
       $('.modal-title').text('View Quant');
         $.post('<?php echo site_url()?>manufacturing/mO/view_mo_quant_modal',
           {kode:kode, move_id:move_id, deptid:deptid, origin_prod:origin_prod, kode_produk:kode_produk, nama_produk:nama_produk},
           function(html){
-            setTimeout(function() {$(".view_body").html(html);  },1000);
+            setTimeout(function() {$("#view_data .modal-dialog .modal-content .modal-body").html(html);  },1000);
           }   
       );
   }

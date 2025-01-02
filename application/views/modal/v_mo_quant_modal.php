@@ -165,6 +165,8 @@
 	//checked All
 	$('#checkQAll').on("change", function(){
         $('.checkItem').prop("checked", $(this).prop("checked"));
+		var lengthClass = $(".checkItem").length;
+		// alert(lengthClass);
     });
 
 	$(".checkItem").on("change", function(){
@@ -204,7 +206,7 @@
         var move_id   	 = "<?php echo $move_id; ?>";
         var origin_prod  = "<?php echo $origin_prod; ?>";
         var kode_produk  = "<?php echo $kode_produk; ?>";
-
+		loop = 1;
         $(".checkItem:checked").each(function() {
             value2  = $(this).attr('data-valuetwo');
             value3  = $(this).attr('data-valuetree');
@@ -213,9 +215,12 @@
                             "row_order": value2,
                             "lot"      : value3
                         });
+			// alert(loop)
+			loop++;
         });
             
         countchek = myCheckboxes.length;
+		// alert(countchek)
         if(countchek == 0){
             alert_modal_warning(message);
         }else{
