@@ -57,58 +57,53 @@
         </div>
         <div class="box-body ">
               <form name="input" class="form-horizontal" role="form">
-                    <div class="col-md-12">
-                      <div class="row col-md-6">
-                        <div class="form-group"> 
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Product / Corak</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $product; ?></div>
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Lebar Jadi</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $lebar_jadi." ".$uom_lebar_jadi; ?></div>
-                            </div>
-                        </div> 
+                      <div class="col-md-12">
+                        <div class="row col-md-6">
+                          <div class="form-group empty_mb"> 
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Produk / Corak</label></div>
+                                  <div class="col-xs-8"><label>:</label> <?php echo $product; ?></div>
+                              </div>
+                          </div> 
+                        </div>
                       </div>
-                      <div class="row col-md-6">
-                        <div class="form-group"> 
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Uom 1 </label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $uom_jual; ?></div>
-                            </div>
-                            <div class="col-md-12 col-xs-12">
-                                <div class="col-xs-4"><label>Uom 2</label></div>
-                                <div class="col-xs-8"><label>:</label> <?php echo $uom2_jual; ?></div>
-                            </div>
-                        </div> 
-                      </div> 
-                    </div>
-                    <div class="col-md-12">
-                      <div class=" row col-md-6">
-                        <div class="form-group">
+                      <div class="col-md-12">
+                        <div class=" row col-md-6">
+                          <div class="form-group">
                               <div class="col-md-12 col-xs-12">
                                   <div class="col-xs-4"><label>Total Lot</label></div>
                                   <div class="col-xs-8"  id="total_items"><label>:</label> 0 Lot </div>
                               </div>
+                          </div>
+                        </div>
+                        <div class=" col-md-6">
+                          <div class="form-group">
+                              <div class="col-md-12 col-xs-12">
+                                 <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
+                              </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
                 </form>
 
                 <div class="row">
                     <div class="col-md-12">
                         <!-- Tabel  -->
                         <div class="col-md-12 table-responsive over">
-                            <table class="table table-condesed table-hover rlstable over" width="100%" id="table_group" >
+                            <table class="table table-condesed table-hover rlstable over" width="100%" id="table_items" >
                                 <thead>                          
                                     <tr>
                                         <th class="style width-50">No.</th>
-                                        <th class="style ">Corak</th>
-                                        <th class="style ">Warna</th>
-                                        <th class="style ">Lebar Jadi </th>
-                                        <th class="style ">Uom 1 </th>
-                                        <th class="style ">Uom 2 </th>
-                                        <th class="style ws">Gl / Lot</th>
+                                        <th class="style ">Tgl dibuat</th>
+                                        <th class="style ">Lot</th>
+                                        <th class="style ">Grade</th>
+                                        <th class="style ws">Nama Produk</th>
+                                        <th class="style text-right">Qty1</th>
+                                        <th class="style text-right">Qty2</th>
+                                        <th class="style ws">Lebar Greige</th>
+                                        <th class="style ws">Lebar Jadi</th>
+                                        <th class="style ws">Lokasi Fisik / Rak</th>
+                                        <th class="style ws">Umur (Hari)</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -131,16 +126,20 @@
 </div>
 
 <?php $this->load->view("admin/_partials/js.php") ?>
+<script src="<?= base_url('dist/js/light-box.min.js') ?>"></script>
 
 <script type="text/javascript">
     var table;
     $(document).ready(function() {
+
+        var zoom_percent = "100";
+       
         //datatables
-        table = $('#table_group').DataTable({ 
+        table = $('#table_items').DataTable({ 
             "processing": true, 
             "serverSide": true, 
             "order": [], 
-            "serverSide": true,
+          
             "paging": true,
             "lengthChange": true,
             "searching": true,
@@ -152,9 +151,9 @@
                 [10, 50, 100, 500, 'All']
             ],
             "ajax": {
-                "url": "<?php echo site_url('report/marketing/get_data_ready_goods_group_colour')?>",
+                "url": "<?php echo site_url('report/marketing/get_data_ready_goods_grg_items')?>",
                 "type": "POST",
-                "data": {"proofing":"<?php echo $proofing;?>","product":"<?php echo $product;?>", "lebar_jadi":"<?php echo $lebar_jadi; ?>", "uom_lebar_jadi":"<?php echo $uom_lebar_jadi; ?>", "uom_jual":"<?php echo $uom_jual; ?>", "uom2_jual":"<?php echo $uom2_jual; ?>"}
+                "data": {"product":`<?php echo $product;?>`}
             },
            
             "columnDefs": [
@@ -163,12 +162,8 @@
                 "orderable": false, 
               },
               { 
-                "targets": [3,4,5,6], 
+                "targets": [5,6,7,8,10], 
                 "className":"text-right nowrap",
-              },
-              { 
-                "targets": [1], 
-                // "className":"nowrap",
               },
             ],
             "drawCallback": function( settings, start, end, max, total, pre ) {  
@@ -177,13 +172,42 @@
                 let total_record = settings.json.total_lot; // total glpcs
                 $('#total_items').html('<label>:</label> '+ formatNumber(total_record) + ' Lot' )
             },
-        });
  
+        });
+
     });
 
     function formatNumber(n) {
       return new Intl.NumberFormat('en-US').format(n);
     }
+
+    // button excel
+    $('#btn-excel').click(function(){
+        $.ajax({
+            "type":'POST',
+            "url": "<?php echo site_url('report/Marketing/export_excel_ready_goods_grg')?>",
+            "data": {"product": `<?php echo $product;?>`},
+            "dataType":'json',
+            beforeSend: function() {
+              $('#btn-excel').button('loading');
+            },error: function(){
+              alert('Error Export Excel');
+              $('#btn-excel').button('reset');
+            }
+        }).done(function(data){
+            if(data.status =="failed"){
+              alert_modal_warning(data.message);
+            }else{
+              var $a = $("<a>");
+              $a.attr("href",data.file);
+              $("body").append($a);
+              $a.attr("download",data.filename);
+              $a[0].click();
+              $a.remove();
+            }
+            $('#btn-excel').button('reset');
+        });
+    });
 
 
 

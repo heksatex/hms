@@ -211,7 +211,7 @@ class M_penerimaanBarang extends CI_Model
 	public function get_list_penerimaan_barang($kode)
 	{
 		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,
-								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as sum_qty
+								IFNULL((SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod), (SELECT sum(qty) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' ORDER BY row_order")->result();
@@ -220,7 +220,7 @@ class M_penerimaanBarang extends CI_Model
 	public function get_list_penerimaan_barang_print($kode,$dept_id)
 	{
 		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,
-								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) as sum_qty
+								IFNULL((SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod), (SELECT sum(qty) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' AND pb.dept_id = '$dept_id' ORDER BY row_order")->result();
@@ -236,7 +236,7 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode($kode)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid, smi.lebar_greige,smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, sq.nama_grade
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note, tmp.valid, smi.lebar_greige,smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi, sq.nama_grade, smi.origin_prod
 								FROM stock_move_items smi 
 								INNER JOIN penerimaan_barang pb ON smi.move_id = pb.move_id
 								INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
@@ -261,9 +261,9 @@ class M_penerimaanBarang extends CI_Model
 		return $this->db->query("SELECT status FROM penerimaan_barang where kode = '$kode'");
 	}
 
-	public function update_penerimaan_barang($kode,$reff_note)
+	public function update_penerimaan_barang($kode,$reff_note, $no_sj,$tgl_sj)
 	{
-		return $this->db->query("UPDATE penerimaan_barang set reff_note = '$reff_note' WHERE kode = '$kode'");
+		return $this->db->query("UPDATE penerimaan_barang set reff_note = '$reff_note', no_sj = '$no_sj', tanggal_sj = '$tgl_sj' WHERE kode = '$kode'");
 	}
 
 	public function cek_status_barang_penerimaan_barang_items($kode,$status)
@@ -337,6 +337,11 @@ class M_penerimaanBarang extends CI_Model
     public function update_status_penerimaan_barang_items($kode,$kode_produk,$status)
 	{
 		return $this->db->query("UPDATE penerimaan_barang_items SET status_barang = '$status' WHERE kode = '$kode' AND kode_produk = '$kode_produk' ");
+	}
+
+	public function update_status_penerimaan_barang_items_origin_prod($kode,$kode_produk,$status,$origin_prod)
+	{
+		return $this->db->query("UPDATE penerimaan_barang_items SET status_barang = '$status' WHERE kode = '$kode' AND kode_produk = '$kode_produk' AND origin_prod = '$origin_prod'");
 	}
 	
 	public function cek_status_penerimaan_barang($kode)
@@ -468,7 +473,59 @@ class M_penerimaanBarang extends CI_Model
 		return $query['qty'];
 	}
 
- 
+
+	public function get_produk_add_quant($kode,$kode_produk,$origin_prod) 
+	{
+		$this->db->where("pbi.kode",$kode);
+		$this->db->where("pbi.kode_produk",$kode_produk);
+		$this->db->where("pbi.origin_prod",$origin_prod);
+		$this->db->SELECT('pbi.kode, pbi.nama_produk, pbi.qty, pbi.uom, pbi.origin_prod, mp.uom_2, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi');
+		$this->db->from('penerimaan_barang_items as pbi');
+		$this->db->JOIN('mst_produk mp','pbi.kode_produk = mp.kode_produk',"inner");
+		$query = $this->db->get();
+		return $query->row();
+	}
+
+
+	public function get_list_uom_select2_by_kode($name)
+	{
+		return $this->db->query("SELECT id, nama, nama, short
+								FROM  uom 
+								WHERE short LIKE '%$name%' ORDER BY id   ")->result_array();
+	}
+
+	public function save_add_quant_penerimaan_barang($data) 
+	{
+		$this->db->insert_batch('penerimaan_barang_tmpp_add_quant', $data);
+		$db_error = $this->db->error();
+        return is_array($db_error['code']);
+	}
+
+	public function delete_add_quant_penerimaan_barang($kode)
+	{
+		$this->db->where('kode', $kode);
+		$this->db->delete('penerimaan_barang_tmpp_add_quant');
+	}
+
+	public function get_last_row_order_tmp($kode)
+	{
+		$row = $this->db->query("SELECT max(row_order) row FROM penerimaan_barang_tmpp_add_quant WHERE kode = '$kode' ")->row_array();
+		return $row['row'] + 1;
+	}
+
+	public function get_list_add_quant_penerimaan_barang_tmp($kode)
+	{
+		$this->db->where('kode',$kode);
+		$this->db->order_by('row_order','asc');
+		$query = $this->db->get('penerimaan_barang_tmpp_add_quant');
+		return $query->result();
+	}
+
+
+	public function get_list_grade_select2_by_kode($name)
+	{
+		return $this->db->query("SELECT * FROM mst_grade WHERE nama_grade LIKE '%$name%' ORDER BY id   ")->result();
+	}
 
 }
 
