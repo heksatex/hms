@@ -19,7 +19,7 @@
                             <?php
                             if (json_encode($value) === $priterDefault) {
                                 ?>
-                                <button class="btn btn-success btn-xs">Default</button>
+                                <span class="lbl btn-success btn-xs">Default</span>
                                 <?php
                             } else {
                                 ?>
@@ -49,7 +49,8 @@
                         data: JSON.stringify(printer)
                     },
                     success: function (data) {
-                        location.reload();
+                        $("#modal_printer").modal("hide");
+                        unblockUI(function () {}, 500);
                     }, error: function (req, error) {
                         unblockUI(function () {
                             setTimeout(function () {

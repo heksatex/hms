@@ -3,7 +3,24 @@
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
         <link href="<?= base_url('dist/css/popup_img.css') ?>" rel="stylesheet">
+        <style>
 
+            <?php if ($jurnal->status === "posted" || $jurnal->status === "cancel") {
+                ?>
+                #btn-simpan{
+                    display: none;
+                }
+            <?php
+            }
+            if ($jurnal->status === "cancel") {
+                ?>
+                .btn-sm{
+                    display: none;
+                }
+                <?php
+            }
+            ?>
+        </style>
 
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -34,10 +51,15 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">Jurnal &nbsp;<strong> <?= $jurnal->kode ?? "" ?> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
-
+<?php if ($jurnal->status === "unposted") { ?>
+                                    <button class="btn btn-success btn-sm" id="btn-update-status" data-status="posted"  data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                        <i class="fa fa-check">&nbsp;Posted</i>
+                                    </button>
+<?php } ?>
                             </div>
                         </div>
-                        <form  class="form-horizontal" method="POST" name="form-inv" id="form-inv" action="<?= base_url('purchase/jurnal/update/' . $id) ?>">
+                        <form  class="form-horizontal" method="POST" name="form-jurnal" id="form-jurnal" action="<?= base_url('purchase/jurnalentries/update/' . $id) ?>">
+                            <button type="submit" style="display: none;" id="form-jurnal-submit"></button>
                             <div class="box-body">
                                 <div class="col-xs-12">
                                     <div class="col-md-6 col-xs-12">
@@ -132,18 +154,18 @@
                                                                     <td><?= $value->supplier ?></td>
                                                                     <td style="width: 15%">
                                                                         <div class="form-group">
-                                                                                <select class="form-control kode_coa input-xs kode_coa_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
-                                                                                        name="kode_coa[<?= $value->id ?>]"  required <?= ($jurnal->status === 'draft') ? '' : 'disabled' ?>>
-                                                                                    <option></option>
-                                                                                    <?php
-                                                                                    if (!is_null($value->kode_coa)) {
-                                                                                        ?>
-                                                                                        <option value="<?= $value->kode_coa ?>"selected><?= $value->account ?></option>   
-                                                                                        <?php
-                                                                                    }
+                                                                            <select class="form-control kode_coa input-xs kode_coa_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
+                                                                                    name="kode_coa[<?= $value->id ?>]"  required <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>>
+                                                                                <option></option>
+                                                                                <?php
+                                                                                if (!is_null($value->kode_coa)) {
                                                                                     ?>
-                                                                                </select>
-                                                                            
+                                                                                    <option value="<?= $value->kode_coa ?>"selected><?= $value->account ?></option>   
+                                                                                    <?php
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+
                                                                         </div>
                                                                     </td>
                                                                     <td><?= (strtolower($value->posisi) === "d") ? number_format($value->nominal, 2) : "" ?></td>
@@ -172,7 +194,7 @@
             $this->load->view("admin/_partials/footer.php");
             ?>
         </footer>
-        <?php $this->load->view("admin/_partials/js.php") ?>
+<?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
                 //select 2 akun coa
@@ -182,7 +204,7 @@
                     ajax: {
                         dataType: 'JSON',
                         type: "POST",
-                        url: "<?php echo base_url(); ?>purchase/jurnal/getcoa",
+                        url: "<?= base_url("purchase/jurnalentries/getcoa"); ?>",
                         delay: 250,
                         data: function (params) {
                             return{
@@ -207,7 +229,69 @@
                         }
                     }
                 });
-            })
+                const form = document.forms.namedItem("form-jurnal");
+                form.addEventListener(
+                        "submit",
+                        (event) => {
+                    please_wait(function () {});
+                    request("form-jurnal").then(
+                            response => {
+                                unblockUI(function () {
+                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+                                }, 100);
+                                if (response.status === 200)
+                                    location.reload();
+                            }
+                    ).catch(err => {
+                        unblockUI(function () {});
+                        alert_modal_warning("Hubungi Dept IT");
+                    });
+                    event.preventDefault();
+                },
+                        false
+                        );
+
+                $("#btn-simpan").off("click").unbind("click").on("click", function () {
+                    confirmRequest("Jurnal Entries", "Update Jurnal ? ", function () {
+                        $("#form-jurnal-submit").trigger("click");
+                    });
+                });
+                $("#btn-cancel").off("click").unbind("click").on("click", function () {
+                    confirmRequest("Jurnal Entries", "Cancel Jurnal ? ", function () {
+                        updateStatus();
+                    });
+                });
+                $("#btn-update-status").off("click").unbind("click").on("click", function () {
+                    confirmRequest("Jurnal Entries", "Posted Jurnal ? ", function () {
+                        updateStatus("posted");
+
+                    });
+                });
+
+                const updateStatus = ((status = "cancel") => {
+                    $.ajax({
+                        url: "<?= base_url("purchase/jurnalentries/update_status"); ?>",
+                        type: "POST",
+                        data: {
+                            ids: "<?= $id ?>",
+                            status: status
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        }, success: function (data) {
+                            location.reload();
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }
+                    });
+                });
+
+            });
         </script>
     </body>
 </html>
