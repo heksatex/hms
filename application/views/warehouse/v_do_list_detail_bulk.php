@@ -1,5 +1,5 @@
 <div class="col-md-12 table-responsive over">
-    <table class="table table-condesed table-hover rlstable  over" width="100%" id="list_detail_item" >
+    <table class="table table-condesed table-hover rlstable  over list_detail_items" width="100%" id="list_detail_items" >
         <thead>
             <tr>
                 <th class="style" width="10px">No</th>
@@ -14,7 +14,7 @@
 </div>
 <script>
     $(function () {
-        const table = $("#list_detail_item").DataTable({
+        const table = $(".list_detail_items").DataTable({
             "iDisplayLength": 25,
             "processing": true,
             "serverSide": true,
