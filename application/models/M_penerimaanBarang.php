@@ -500,8 +500,16 @@ class M_penerimaanBarang extends CI_Model
 		$db_error = $this->db->error();
         return is_array($db_error['code']);
 	}
+	
+	public function delete_add_quant_penerimaan_barang($kode,$kode_produk,$origin_prod)
+	{
+		$this->db->where('kode', $kode);
+		$this->db->where('kode_produk',$kode_produk);
+		$this->db->where('origin_prod',$origin_prod);
+		$this->db->delete('penerimaan_barang_tmpp_add_quant');
+	}
 
-	public function delete_add_quant_penerimaan_barang($kode)
+	public function delete_add_quant_penerimaan_barang_2($kode)
 	{
 		$this->db->where('kode', $kode);
 		$this->db->delete('penerimaan_barang_tmpp_add_quant');
@@ -513,7 +521,17 @@ class M_penerimaanBarang extends CI_Model
 		return $row['row'] + 1;
 	}
 
-	public function get_list_add_quant_penerimaan_barang_tmp($kode)
+	public function get_list_add_quant_penerimaan_barang_tmp($kode,$kode_produk,$origin_prod)
+	{
+		$this->db->where('kode',$kode);
+		$this->db->where('kode_produk',$kode_produk);
+		$this->db->where('origin_prod',$origin_prod);
+		$this->db->order_by('row_order','asc');
+		$query = $this->db->get('penerimaan_barang_tmpp_add_quant');
+		return $query->result();
+	}
+        
+        public function get_list_add_quant_penerimaan_barang_tmp_1($kode)
 	{
 		$this->db->where('kode',$kode);
 		$this->db->order_by('row_order','asc');

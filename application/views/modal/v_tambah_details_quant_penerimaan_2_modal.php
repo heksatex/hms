@@ -264,11 +264,13 @@
 
     // get data list item lot
     var kode = `<?php echo $kode; ?>`;
+    var kode_produk = `<?php echo $kode_produk; ?>`;
+    var origin_prod = `<?php echo $origin_prod; ?>`;
     $.ajax({
           url : '<?php echo site_url('warehouse/penerimaanbarang/get_items_lot') ?>',
           type: "POST",
           dataType : "JSON",
-          data: {kode:kode},
+          data: {kode:kode, kode_produk:kode_produk, origin_prod:origin_prod},
           beforeSend: function(e) {
               $('#items tbody').remove();
               $("#btn-duplicate").hide();
