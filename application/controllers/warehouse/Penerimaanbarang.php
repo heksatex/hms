@@ -1050,10 +1050,10 @@ class Penerimaanbarang extends MY_Controller {
                     throw new \Exception("No PO {$orig} tidak ditemukan.", 500);
                 }
 
-                if ($data[0]->no_value !== "1") {
+                if ($dataPO[0]->no_value !== "1") {
                     $orderDate = date("Y-m-d H:i:s");
-                    if (!$noinv = $this->token->noUrut('invoice', date('y') . '/' . date('m'), true)
-                                    ->generate("INV", '/%05d')->get()) {
+                    if (!$noinv = $this->token->noUrut('invoice_pembelian', date('y') . '/' . date('m'), true)
+                                    ->generate("INV/", '/%05d')->get()) {
                         throw new \Exception("No Invoice tidak terbuat", 500);
                     }
                     $inserInvoice = new m_po;

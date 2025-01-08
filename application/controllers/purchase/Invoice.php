@@ -183,7 +183,8 @@ class Invoice extends MY_Controller {
             $this->_module->lock_tabel($lock);
             if ($status === 'cancel') {
             $cekJurnal = clone $head;
-                if ($cekJurnal->setTables("jurnal_entries")->setWheres(["origin" => $inv, "status <>" => $status])->getDetail() !== null) {
+            
+                if ($cekJurnal->setTables("jurnal_entries")->setWheres(["origin" => $inv, "status <>" => $status])->getDetail() !== "null") {
                     throw new \Exception('Jurnal Tidak Ada', 500);
                 }
             } else if ($status === 'done') {

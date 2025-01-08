@@ -18,6 +18,7 @@ class Fpt extends MY_Controller {
         parent:: __construct();
         $this->is_loggedin();
         $this->load->model('m_po');
+        $this->load->model('m_global');
         $this->load->model('m_user');
         $this->load->model('m_cfb');
         $this->load->model('m_produk');
@@ -47,9 +48,14 @@ class Fpt extends MY_Controller {
             $data['id_dept'] = 'FPT';
             $model1 = new $this->m_po;
             $model2 = clone $model1;
+            $model3 = clone $model2;
+            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name"=>"dpp_lain","status"=>"1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
-                            ->setSelects(["po.*", "p.nama as supp"])->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "FPT"])->getDetail();
+                    ->setJoins("currency_kurs","currency_kurs.id = po.currency","left")
+                    ->setJoins("currency","currency.nama = currency_kurs.currency","left")
+                            ->setSelects(["po.*", "p.nama as supp","currency.symbol"])
+                    ->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "FPT"])->getDetail();
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
@@ -149,7 +155,7 @@ class Fpt extends MY_Controller {
                     . "purchase_order_detail write,purchase_order write";
             if ($listStatus[$status] === 'purchase_confirmed') {
                 $lockTable .= ",penerimaan_barang WRITE,penerimaan_barang_items WRITE,stock_move_produk WRITE,stock_move WRITE,token_increment WRITE,nilai_konversi WRITE";
-                $lockTable .= ",mst_produk_coa WRITE";
+                $lockTable .= ",mst_produk_coa WRITE,nilai_konversi nk WRITE";
             }
             $this->_module->lock_tabel($lockTable);
             $updatePO = ["status" => $listStatus[$status]];
@@ -248,10 +254,6 @@ class Fpt extends MY_Controller {
                 if ($checkInvoice->setTables("penerimaan_barang")->setWheres(["origin" => $kode_decrypt, 'dept_id' => "RCV", 'status <>' => 'cancel'])->getDataCountAll() > 0) {
                     throw new \Exception("No {$kode_decrypt} sudah terbentuk Dokumen Penerimaan", 500);
                 }
-//                $idInsert = $inserInvoice->setTables("invoice")->save($dataInvoice);
-                if ($idInsert === null) {
-                    throw new \Exception('Invoice Gagal dibuat', 500);
-                }
 
                 foreach ($dataItemOrder as $key => $value) {
                     $row = count($produk) + 1;
@@ -273,19 +275,6 @@ class Fpt extends MY_Controller {
                         $updatePP = new $this->m_po;
                         $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "po"]);
                     }
-//                    $invoiceDetail [] = [
-//                        'invoice_id' => $idInsert,
-//                        'nama_produk' => $value->nama_produk,
-//                        'kode_produk' => $value->kode_produk,
-//                        'qty_beli' => ($value->qty_beli * $value->nilai),
-//                        'uom_beli' => $value->uom,
-//                        'deskripsi' => $value->deskripsi,
-//                        'reff_note' => $value->reff_note,
-//                        'account' => $value->kode_coa,
-//                        'harga_satuan' => $value->harga_per_uom_beli,
-//                        'tax_id' => $value->tax_id,
-//                        'diskon' => $value->diskon,
-//                    ];
                 }
 
                 if (!$kodeRcv = $this->token->noUrut('receive_in', date('ym'), true)->generate('RCV/IN/', '%05d')->get())
@@ -349,8 +338,8 @@ class Fpt extends MY_Controller {
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'redirect' => $redirect)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
-            log_message('error', $ex);
-            $this->output->set_status_header($ex->getCode() ?? 500)
+            log_message('error', json_encode($ex));
+            $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {

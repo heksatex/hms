@@ -47,9 +47,14 @@ class Requestforquotation extends MY_Controller {
             $data['id_dept'] = 'RFQ';
             $model1 = new $this->m_po;
             $model2 = clone $model1;
+            $model3 = clone $model2;
+            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name"=>"dpp_lain","status"=>"1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
-                            ->setSelects(["po.*", "p.nama as supp"])->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "RFQ"])->getDetail();
+                    ->setJoins("currency_kurs","currency_kurs.id = po.currency","left")
+                    ->setJoins("currency","currency.nama = currency_kurs.currency","left")
+                            ->setSelects(["po.*", "p.nama as supp","currency.symbol"])
+                    ->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "RFQ"])->getDetail();
             if (!$data["po"]) {
                 throw new \Exception('Data tidak ditemukan', 500);
             }

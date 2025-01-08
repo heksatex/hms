@@ -51,9 +51,15 @@ class Purchaseorder extends MY_Controller {
             $data['id_dept'] = 'PO';
             $model1 = new $this->m_po;
             $model2 = new $this->m_po;
+            $model3 = clone $model2;
+            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name"=>"dpp_lain","status"=>"1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
-                            ->setSelects(["po.*", "p.nama as supp"])->setWheres(["po.no_po" => $kode_decrypt])->setWhereRaw("po.status in ('done','cancel','purchase_confirmed')")->getDetail();
+                    ->setJoins("currency_kurs","currency_kurs.id = po.currency","left")
+                    ->setJoins("currency","currency.nama = currency_kurs.currency","left")
+                            ->setSelects(["po.*", "p.nama as supp","currency.symbol"])
+                    ->setWheres(["po.no_po" => $kode_decrypt])
+                    ->setWhereRaw("po.status in ('done','cancel','purchase_confirmed')")->getDetail();
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
@@ -306,7 +312,7 @@ class Purchaseorder extends MY_Controller {
                     ->set_output(json_encode(array("url" => base_url($pathFile))));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
-            $this->output->set_status_header($ex->getCode() ?? 500)
+            $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
@@ -316,27 +322,18 @@ class Purchaseorder extends MY_Controller {
 
     public function get_rcv($id) {
         try {
-//            $sub_menu = $this->uri->segment(2);
-//            $username = $this->session->userdata('username');
             $kode_decrypt = decrypt_url($id);
             if (!$kode_decrypt) {
                 throw new \Exception('', 500);
             }
             $rcvDone = new $this->m_po;
-//            $rcv = clone $rcvDone;
-            $inshipment = 0;
-//            $inshipment = $rcv->setTables('penerimaan_barang pb')
-//                            ->setJoins("penerimaan_barang_items pbi", "pb.kode = pbi.kode")
-//                            ->setWheres(['status_barang' => 'ready'])
-//                            ->setWhereRaw("origin like '{$kode_decrypt}%'")->getDataCountAll();
-            $done = $rcvDone->setTables('penerimaan_barang pb')
-                            ->setJoins("penerimaan_barang_items pbi", "pb.kode = pbi.kode")
-                            ->setWheres(['status_barang' => 'done'])
-                            ->setWhereRaw("origin like '{$kode_decrypt}%'")->getDataCountAll();
+            $inInv = 0;
+            $inInv = $rcvDone->setTables('invoice')
+                            ->setWheres(['status <>' => 'cancel',"no_po"=>$kode_decrypt])->getDataCountAll();
 
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'in_sp' => $inshipment, 'in_done' => $done)));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'in_inv' => $inInv)));
         } catch (Exception $ex) {
             log_message('error', $ex->getMessage());
             $this->output->set_status_header($ex->getCode() ?? 500)
@@ -353,7 +350,7 @@ class Purchaseorder extends MY_Controller {
             }
             $rcv = new $this->m_po;
             $inshipment = $rcv->setTables('penerimaan_barang pb')
-                            ->setWheres(['status' => 'ready'])
+                            ->setWheres(['status <>' => 'cancel'])
                             ->setSelects(["pb.*"])->setOrder(["tanggal" => "asc"])
                             ->setWhereRaw("origin like '{$kode_decrypt}%'")->getData();
 
@@ -377,8 +374,10 @@ class Purchaseorder extends MY_Controller {
             }
             $rcv = new $this->m_po;
             $inshipment = $rcv->setTables('invoice')
-                    ->setWheres(['no_po' => $kode_decrypt])->setOrder(["tanggal" => "asc"])
-                    ->getDetail();
+                    ->setWheres(['no_po' => $kode_decrypt,"status <>"=>"cancel"])->setOrder(["order_date" => "asc"])
+                    ->setJoins("mst_status","mst_status.kode = invoice.status","left")
+                    ->setSelects(["invoice.*","coalesce(mst_status.nama_status,status) as status"])
+                    ->getData();
             $dataView = $this->load->view('purchase/v_po_inv_data', ["inv" => $inshipment], true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

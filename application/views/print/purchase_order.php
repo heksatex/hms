@@ -70,7 +70,7 @@
                     </div>
                     <div id="column" style="text-align: left">
                         <p><strong>Validated By : </strong></p>
-                        <p><?= $po->validate_by ?></p>
+                        <p><?= $po->validated_by ?></p>
                     </div>
                 </div>
             </div>

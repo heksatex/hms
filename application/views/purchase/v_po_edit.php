@@ -294,18 +294,18 @@
                                             <th class="style" width="20px">Deskripsi</th>
                                             <th class="style" width="20px">Qty</th>
                                             <th class="style" width="20px">Qty Beli</th>
-                                            <td class="style text-right" width="20px">Harga Satuan Beli</td>
-                                            <td class="style text-right" width="20px">Tax</td>
-                                            <td class="style text-right" width="20px">Diskon</td>
+                                            <th class="style text-right" width="20px">Harga Satuan Beli</th>
+                                            <th class="style text-right" width="20px">Tax</th>
+                                            <th class="style text-right" width="20px">Diskon</th>
                                             </thead>
                                             <tbody>
                                                 <?php
                                                 $no = 0;
                                                 foreach ($po_items as $key => $value) {
                                                     $no += 1;
-                                                    $total = ($value->qty_beli * ($value->harga_per_uom_beli * $po->nilai_currency));
+                                                    $total = ($value->qty_beli * $value->harga_per_uom_beli);
                                                     $totals += $total;
-                                                    $diskon = (($value->diskon ?? 0) * $po->nilai_currency);
+                                                    $diskon = (($value->diskon ?? 0));
                                                     $diskons += $diskon;
                                                     $taxes += ($total - $diskon) * $value->amount_tax;
                                                     ?>
@@ -411,33 +411,44 @@
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Total</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong>Rp. <?= number_format($totals, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($totals, 2) ?>
                                                             </strong>
                                                         </td>
                                                     </tr>
+                                                    <?php if ($setting !== null) {
+                                                        ?>
+                                                        <tr>    
+                                                            <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                            <td class="style text-center totalan"> 
+                                                                <strong><?= $po->symbol ?> <?= number_format($totals * (11 / 12), 2) ?>
+                                                                </strong>
+                                                            </td>
+                                                        </tr>
+                                                    <?php }
+                                                    ?>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Discount</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong>Rp. <?= number_format($diskons, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($diskons, 2) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Subtotal</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong>Rp. <?= number_format(($totals - $diskons), 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Taxes</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong>Rp. <?= number_format($taxes, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
                                                             </strong></td>
                                                     </tr>
 
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Total</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong>Rp. <?= number_format(($totals - $diskons) + $taxes, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 2) ?>
                                                             </strong></td>
                                                     </tr>
 
@@ -534,7 +545,7 @@
                             type: "POST",
                             url: "<?= base_url('purchase/purchaseorder/get_rcv/' . $id) ?>",
                             success: function (data) {
-                                $("#invoice").html(data.in_done);
+                                $("#invoice").html(data.in_inv);
                             }
                         });
                     });
@@ -644,8 +655,8 @@
                     $.ajax({
                         url: "<?= base_url('purchase/purchaseorder/print') ?>",
                         type: "POST",
-                        data:{
-                            id:"<?= $id ?>"
+                        data: {
+                            id: "<?= $id ?>"
                         },
                         beforeSend: function (xhr) {
                             please_wait(function () {});
