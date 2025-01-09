@@ -142,6 +142,12 @@ class Pengirimanbarang extends MY_Controller
     $this->load->view('warehouse/v_pengiriman_barang',$data);
   }
 
+  public function IT()
+  {
+    $data['id_dept']='IT';
+    $this->load->view('warehouse/v_pengiriman_barang',$data);
+  }
+
   public function add()
   {
     $data['id_dept']   = $this->input->get('departemen');
