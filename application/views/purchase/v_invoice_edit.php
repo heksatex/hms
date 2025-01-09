@@ -142,16 +142,15 @@
                                 </div>
                             </div>
                             <div class="box-footer">
-                                <div class="row">
                                     <div class="colxs-12">
                                         <ul class="nav nav-tabs">
-                                            <li class="active"><a href="#tab_1" data-toggle="tab">Invoice</a></li>
+                                            <li class="active"><a href="#tab_1" data-toggle="tab">Item</a></li>
                                             <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
                                         </ul>
                                         <div class="tab-content"><br>
                                             <div class="tab-pane active" id="tab_1">
                                                 <div class="table-responsive over">
-                                                    <table id="tbl-inv" class="table">
+                                                    <table id="tbl-inv" class="table table-condesed table-hover rlstable  over">
                                                         <thead>
                                                             <tr>
                                                                 <th class="no">#</th>
@@ -200,7 +199,7 @@
                                                                             </div>
                                                                         </td>
                                                                         <td><?= $value->pajak_ket ?></td>
-                                                                        <td><?= number_format($jumlah, 2) ?></td>
+                                                                        <td><?= $inv->symbol?> <?= number_format($jumlah, 2) ?></td>
                                                                     </tr>
                                                                     <?php
                                                                 }
@@ -228,16 +227,16 @@
                                                                         Jumlah
                                                                     </td>
                                                                     <td colspan="4" class="text-right">Subtotal 1</td>
-                                                                    <td><?= number_format($subtotal1, 2) ?></td>
+                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal1, 2) ?></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>1</td>
                                                                     <td><?= $dataPajak["ket"] ?? "" ?></td>
                                                                     <td></td>
-                                                                    <td><?= number_format($subtotal2, 2) ?></td>
-                                                                    <td><?= number_format($totalTax, 2) ?></td>
+                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal2, 2) ?></td>
+                                                                    <td><?= $inv->symbol?> <?= number_format($totalTax, 2) ?></td>
                                                                     <td colspan="4" class="text-right">Diskon</td>
-                                                                    <td><?= number_format($totalDiskon, 2) ?></td>
+                                                                    <td><?= $inv->symbol?> <?= number_format($totalDiskon, 2) ?></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td></td>
@@ -246,7 +245,7 @@
                                                                     <td></td>
                                                                     <td></td>
                                                                     <td colspan="4" class="text-right">Subtotal 2</td>
-                                                                    <td><?= number_format($subtotal2, 2) ?></td>
+                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal2, 2) ?></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td></td>
@@ -255,7 +254,7 @@
                                                                     <td></td>
                                                                     <td></td>
                                                                     <td colspan="4" class="text-right">Tax</td>
-                                                                    <td><?= number_format($totalTax, 2) ?></td>
+                                                                    <td><?= $inv->symbol?> <?= number_format($totalTax, 2) ?></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td></td>
@@ -264,7 +263,7 @@
                                                                     <td></td>
                                                                     <td></td>
                                                                     <td colspan="4" class="text-right">Total</td>
-                                                                    <td><?= number_format($subtotal2 + $totalTax, 2) ?></td>
+                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal2 + $totalTax, 2) ?></td>
                                                                 </tr>
                                                             <?php }
                                                             ?>
@@ -274,8 +273,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                </div>
                             </div>
                         </form>
                     </div>

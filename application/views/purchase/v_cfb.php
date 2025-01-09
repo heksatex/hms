@@ -107,7 +107,7 @@
                     dom: 'Bfrtip',
                     "buttons": [
                         {
-                            "text": '<i class="fa fa-plus"> <span>Add RFQ</span>',
+                            "text": 'Add RFQ',
                             "className": "btn btn-success add-rfq-btn",
                             "action": function (e, dt, node, config) {
                                 document.getElementsByClassName("add-rfq")[0].setAttribute("data-request", "rfq");
@@ -115,7 +115,7 @@
                             }
                         }
                         , {
-                            "text": '<i class="fa fa-plus"> <span>Add FPT</span>',
+                            "text": 'Add FPT',
                             "className": "btn btn-success add-fpt-btn",
                             "action": function (e, dt, node, config) {
                                 document.getElementsByClassName("add-fpt")[0].setAttribute("data-request", "fpt");
@@ -123,7 +123,7 @@
                             }
                         }
                         , {
-                            "text": '<i class="fa fa-check-square-o"> <span>Confirm Order</span>',
+                            "text": 'Confirm Order',
                             "className": "btn btn-success confirm-as",
                             "action": function (e, dt, node, config) {
                                 $(".confirm-order").trigger("click");

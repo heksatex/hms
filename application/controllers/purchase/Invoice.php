@@ -80,8 +80,10 @@ class Invoice extends MY_Controller {
             $head = new $this->m_global;
             $detail = clone $head;
             $datas = $head->setTables("invoice")->setJoins("partner", "partner.id = id_supplier", "left")
-                            ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")->setWheres(["invoice.id" => $kode_decrypt])
-                            ->setSelects(["invoice.*", "partner.nama as supplier", "currency as mata_uang"])->getDetail();
+                            ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")
+                    ->setJoins("currency","currency.nama = currency_kurs.currency","left")
+                    ->setWheres(["invoice.id" => $kode_decrypt])
+                            ->setSelects(["invoice.*", "partner.nama as supplier", "currency as mata_uang","currency.symbol"])->getDetail();
             if ($datas === null) {
                 throw new \Exception();
             }

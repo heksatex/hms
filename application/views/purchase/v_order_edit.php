@@ -257,14 +257,14 @@
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label required">Value </label>
+                                                    <label class="form-label required">idak Ada Nilai ? </label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <div class="input-group">
                                                         <!--<div class="input-group-addon"><i class="fa fa-dollar"></i></div>-->
                                                         <select class="form-control no_value"  name="no_values" id="no_values"  disabled >
-                                                            <option value="0">Value</option>
-                                                            <option value="1" <?= ($po->no_value === "1") ? 'selected' : '' ?>>No Value</option>
+                                                            <option value="0">Ada</option>
+                                                            <option value="1" <?= ($po->no_value === "1") ? 'selected' : '' ?>>Tidak Ada</option>
                                                         </select>
                                                         <input type="hidden" class="form-control"  name="no_value" id="no_value" value="<?= $po->no_value ?>">
                                                     </div>
@@ -309,7 +309,6 @@
                                 </div>
                             </div>
                             <div class="box-footer">
-                                <div class="row">
                                     <div class="col-md-12 table-responsive over">
                                         <ul class="nav nav-tabs " >
                                             <li class="active"><a href="#tab_1" data-toggle="tab">Produk</a></li>
@@ -540,7 +539,6 @@
                                         <input type="hidden" name="totals" id="totals" value="<?= ($totals - $diskons) + $taxes ?>">
 
                                     </div>
-                                </div>
                             </div>
                         </form>
                     </div>

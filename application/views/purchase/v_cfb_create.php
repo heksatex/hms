@@ -1,5 +1,4 @@
 
-<div class="row">
     <form class="form-horizontal" method="POST" name="form-po" id="form-po" action="<?= base_url('purchase/requestforquotation/save') ?>">
         <div class="col-md-6 col-xs-12">
             <div class="field-group">
@@ -24,11 +23,11 @@
                  <?php if($jenis === "RFQ"){ ?>
                               <div class="form-group">
                                     <div class="col-xs-12">
-                                        <div class="col-xs-4"><label class="form-label required">Value</label></div>
+                                        <div class="col-xs-4"><label class="form-label required">Tidak Ada Nilai ? </label></div>
                                         <div class="col-xs-8 col-md-8">
                                             <select class="form-control input-sm select2" name="no_value" id="no_value" required>
-                                                <option value="0" selected>Value</option>
-                                                <option value="1">No Value</option>
+                                                <option value="0" selected>Ada</option>
+                                                <option value="1">Tidak</option>
                                             </select>
                                         </div>
                                     </div>
@@ -138,7 +137,6 @@
 
         </div>
     </form>
-</div>
 <script>
     $(function () {
         $(".uom_beli").select2({

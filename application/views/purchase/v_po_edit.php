@@ -277,7 +277,6 @@
                                 <?php } ?>
                             </div>
                             <div class="box-footer">
-                                <div class="row">
                                     <div class="col-md-12 table-responsive over">
                                         <ul class="nav nav-tabs " >
                                             <li class="active"><a href="#tab_1" data-toggle="tab">Produk</a></li>
@@ -460,7 +459,6 @@
                                         <input type="hidden" name="totals" id="totals" value="<?= ($totals - $diskons) + $taxes ?>">
 
                                     </div>
-                                </div>
                             </div>
                         </form>
                     </div>
