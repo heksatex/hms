@@ -1253,7 +1253,7 @@ class Koreksimundur extends MY_Controller
 									$where_type = "";
 								}
 
-								$sql_update_qty_acc_smi  = "UPDATE acc_stock_move_items SET qty =(case ".$case." end)  ".$qty2_query."  WHERE  quant_id in (".$where.") AND lot IN (".$where_lot.")  AND dept_id_mutasi IN (".$where_dept.")   ".$where_type."   AND kode_transaksi IN (".$where_kode_trans.") ";
+								$sql_update_qty_acc_smi  = "UPDATE acc_stock_move_items SET qty =(case ".$case." end)  ".$qty2_query."  WHERE  quant_id in (".$where.") AND lot IN (".$where_lot.")  ".$where_type."   AND kode_transaksi IN (".$where_kode_trans.") ";
                                 $this->_module->update_perbatch($sql_update_qty_acc_smi);
 
 								if(!empty($case_sq) or !empty($case2_sq)){

@@ -130,35 +130,6 @@
             </div>
           </form>
 
-          <?php 
-
-            // $var_ex = explode(',','1000/11/42/13(in),1000/11/42/14(in),1000/11/42/15(in),1000/11/42/16(in),1000/11/42/17(in),1000/11/42/18(in)'); // example :  1000/90/42/01(mo),1000/90/42/02(out)
-            // $tmp_lot= "";
-            // $tmp_koreksi_lk= "";
-            // $loop   = 1;
-            // foreach($var_ex as $val ){
-            //     $var2 = explode('(',$val); // example :  1000/90/42/01(mo)
-            //     $no_batch_var = $var2[0] ?? '';
-            //     echo $no_batch_var."<br>";
-
-            //     $get_dbi = $this->m_koreksi->get_data_koreksi_batch_items_by_kode_group('KM/24/11/0001',$no_batch_var);
-            //     $kode_produk = "";
-            //     $nama_produk = "";
-            //     $lot    	 = "";
-            //     $qty         = 0;
-            //     $qty2        = 0;
-            //     $koreksi_lebih_kurang = "";
-            //     $status_km  = "";
-            //     foreach($get_dbi as $gd){
-            //         $kode_produk = $gd->kode_produk;
-            //         $nama_produk = $gd->nama_produk;
-            //         echo $gd->lot."<br>";
-            //     }
-            // }
-
-          ?>
-
-
           <div class="row">
             <div class="col-md-12">
               <!-- Custom Tabs -->
