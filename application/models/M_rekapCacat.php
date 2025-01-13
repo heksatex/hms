@@ -9,10 +9,15 @@ class M_rekapCacat extends CI_Model
 	public function get_list_rekap_cacat_by_dept($where,$rowno,$recordPerPage,$show_hph)
 	{
 		$join_cacat = "";
+		$where_dept = "";
+		$dept  = $this->input->post('id_dept');
+		if(!empty($dept)){
+			$where_dept = "WHERE dept_id = '".$dept."'";
+		}
 		if($show_hph == 'true'){
-			$join_cacat	= "LEFT JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
+			$join_cacat	= "LEFT JOIN (SELECT quant_id, kode, lot FROM mrp_production_cacat ".$where_dept."  GROUP BY quant_id)  mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}else{
-			$join_cacat	= "INNER JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
+			$join_cacat	= "INNER JOIN (SELECT quant_id, kode, lot FROM mrp_production_cacat  ".$where_dept."  GROUP BY quant_id)  mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}
 		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.kode_produk, mp.nama_produk, mpfg.quant_id, ms.nama_mesin, mpfg.create_date, mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.nama_grade, mjk.nama_jenis_kain
 								 FROM mrp_production mp 
@@ -30,10 +35,15 @@ class M_rekapCacat extends CI_Model
 	public function get_list_rekap_cacat_by_dept_no_limit($where,$show_hph)
 	{
 		$join_cacat = "";
+		$where_dept = "";
+		$dept  = $this->input->post('id_dept');
+		if(!empty($dept)){
+			$where_dept = "WHERE dept_id = '".$dept."'";
+		}
 		if($show_hph == 'true'){
-			$join_cacat	= "LEFT JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
+			$join_cacat	= "LEFT JOIN (SELECT quant_id, kode, lot FROM mrp_production_cacat ".$where_dept."  GROUP BY quant_id)  mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}else{
-			$join_cacat	= "INNER JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
+			$join_cacat	= "INNER JOIN (SELECT quant_id, kode, lot FROM mrp_production_cacat ".$where_dept." GROUP BY quant_id)  mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}
 		return $this->db->query("SELECT  mp.kode, mp.tanggal, mp.origin, mp.kode_produk, mp.nama_produk, mpfg.quant_id, ms.nama_mesin, mpfg.create_date, mpfg.lot, mpfg.qty, mpfg.uom, mpfg.qty2, mpfg.uom2, mpfg.nama_grade,  mjk.nama_jenis_kain
 								 FROM mrp_production mp 
@@ -59,10 +69,15 @@ class M_rekapCacat extends CI_Model
 	public function get_count_list_rekap_cacat_by_dept($where,$show_hph)
 	{
 		$join_cacat = "";
+		$where_dept = "";
+		$dept  = $this->input->post('id_dept');
+		if(!empty($dept)){
+			$where_dept = "WHERE dept_id = '".$dept."'";
+		}
 		if($show_hph == 'true'){
-			$join_cacat	= "LEFT JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
+			$join_cacat	= "LEFT JOIN (SELECT quant_id, kode, lot FROM mrp_production_cacat  ".$where_dept." GROUP BY quant_id)  mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}else{
-			$join_cacat	= "INNER JOIN mrp_production_cacat mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
+			$join_cacat	= "INNER JOIN (SELECT quant_id, kode, lot FROM mrp_production_cacat  ".$where_dept." GROUP BY quant_id)  mpc ON mpc.kode = mpfg.kode AND mpfg.quant_id = mpc.quant_id";
 		}
 		$query =  $this->db->query("SELECT  count(*) as allcount 
 								 FROM mrp_production mp 
