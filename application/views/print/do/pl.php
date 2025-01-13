@@ -130,7 +130,7 @@
                             $sub_total_qty = 0;
                             foreach ($data as $key => $value) {
 
-                                $jml_qty += $value->jumlah_qty;
+//                                $jml_qty += $value->jumlah_qty;
                                 $total_qty += $value->total_qty;
 //                                log_message('error', $value->jumlah_qty . " - " . $sub_jml_qty);
                                 $detailQty = $this->m_deliveryorderdetail->detailReportQty([
@@ -186,17 +186,17 @@
                                             ?></td>
                                         <td class=""><?= ($bulk === $tempBulk) ? '' : $value->bulk_no_bulk ?></td>
                                         <td class="" style="text-align: left;">
-            <?php
-            if ($id === $tempID) {
-                echo "";
-            } else {
-                if (empty($value->lebar_jadi) || $value->lebar_jadi === "-" || $value->lebar_jadi === "") {
-                    echo (str_replace('|', ' ', $value->corak_remark));
-                } else {
-                    echo(str_replace('|', ' ', $value->corak_remark . '/' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
-                }
-            }
-            ?>
+                                            <?php
+                                            if ($id === $tempID) {
+                                                echo "";
+                                            } else {
+                                                if (empty($value->lebar_jadi) || $value->lebar_jadi === "-" || $value->lebar_jadi === "") {
+                                                    echo (str_replace('|', ' ', $value->corak_remark));
+                                                } else {
+                                                    echo(str_replace('|', ' ', $value->corak_remark . '/' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
+                                                }
+                                            }
+                                            ?>
                                         </td>
                                         <td style="text-align: left;"><?= ($id === $tempID) ? '' : (str_replace('|', ' ', $value->warna_remark)) ?></td>
 
@@ -217,12 +217,15 @@
             <!--                                        <td class="" style=" text-align: center;"><?= $value->jumlah_qty ?></td>
                                         <td class="" style="text-align: center;"><?= number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>-->
                                     </tr>
-            <?php
-            $id = $tempID;
-            $bulk = $tempBulk;
-        }
-    }
-    ?>
+                                    <?php
+                                    if ($id !== $tempID) {
+                                        $jml_qty += $value->jumlah_qty;
+                                    }
+                                    $id = $tempID;
+                                    $bulk = $tempBulk;
+                                }
+                            }
+                            ?>
                             <tr>
                                 <td></td>
                                 <td></td>
@@ -242,45 +245,45 @@
                                 <td class="text-content"  style="text-align: right;"><?= number_format(($sub_total_qty ?? 0), 2, ".", ",") . ' ' . $satuan ?></td>
                             </tr>
                         </tbody>
-    <?php
-} else {
-    ?>
-                        <tbody>
                         <?php
-                        $no = 0;
-                        $jml_qty = 0;
-                        $total_qty = 0;
-                        $id = null;
-                        $satuan = '';
-                        foreach ($data as $key => $value) {
-                            $no++;
-                            $jml_qty += $value->jumlah_qty;
-                            $total_qty += $value->total_qty;
-                            $detailQty = $this->m_deliveryorderdetail->detailReportQty(['uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi, 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom,
-                                'no_pl' => $base->no_picklist, "pd.valid <>" => "cancel"]);
-                            $perpage = 10;
-                            $totalData = count($detailQty);
-                            $totalPage = ceil($totalData / $perpage);
+                    } else {
+                        ?>
+                        <tbody>
+                            <?php
+                            $no = 0;
+                            $jml_qty = 0;
+                            $total_qty = 0;
+                            $id = null;
+                            $satuan = '';
+                            foreach ($data as $key => $value) {
+                                $no++;
+//                            $jml_qty += $value->jumlah_qty;
+                                $total_qty += $value->total_qty;
+                                $detailQty = $this->m_deliveryorderdetail->detailReportQty(['uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi, 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark, 'uom' => $value->uom,
+                                    'no_pl' => $base->no_picklist, "pd.valid <>" => "cancel"]);
+                                $perpage = 10;
+                                $totalData = count($detailQty);
+                                $totalPage = ceil($totalData / $perpage);
 
-                            for ($nn = 0; $nn < $totalPage; $nn++) {
-                                $page = $nn * $perpage;
-                                $satuan = $detailQty[0]->uom;
-                                $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
-                                ?>
+                                for ($nn = 0; $nn < $totalPage; $nn++) {
+                                    $page = $nn * $perpage;
+                                    $satuan = $detailQty[0]->uom;
+                                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
+                                    ?>
                                     <tr style="text-align: right; font-weight: 600">
 
                                         <td class=""><?= ($id === $tempID) ? '' : $no ?></td>
                                         <td class="" style="text-align: left;"><?php
-                        if ($id === $tempID) {
-                            echo "";
-                        } else {
-                            if (empty($value->lebar_jadi) || $value->lebar_jadi === "-" || $value->lebar_jadi === "") {
-                                echo (str_replace('|', ' ', $value->corak_remark));
-                            } else {
-                                echo(str_replace('|', ' ', $value->corak_remark . '/' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
-                            }
-                        }
-                                ?></td>
+                                            if ($id === $tempID) {
+                                                echo "";
+                                            } else {
+                                                if (empty($value->lebar_jadi) || $value->lebar_jadi === "-" || $value->lebar_jadi === "") {
+                                                    echo (str_replace('|', ' ', $value->corak_remark));
+                                                } else {
+                                                    echo(str_replace('|', ' ', $value->corak_remark . '/' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
+                                                }
+                                            }
+                                            ?></td>
                                         <td class="" style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
 
                                         <td class=""><?= isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "" ?></td>
@@ -298,13 +301,16 @@
                                         <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' : $value->jumlah_qty ?></td>
                                         <td class="" style="text-align: right;"><?= ($id === $tempID) ? '' : number_format($value->total_qty, 2, ".", ",") . ' ' . $satuan ?></td>
                                     </tr>
-            <?php
-            $id = $tempID;
-        }
-    }
-    ?>
+                                    <?php
+                                    if ($id !== $tempID) {
+                                        $jml_qty += $value->jumlah_qty;
+                                    }
+                                    $id = $tempID;
+                                }
+                            }
+                            ?>
                         </tbody>
-                        <?php } ?>
+                    <?php } ?>
                 </table>
                 <div class="col-xs-4 text-content">
                     <p><strong>Sub - Total GL/PCS :</strong> <?= $jml_qty ?> </p>
