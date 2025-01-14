@@ -635,7 +635,7 @@ class Produk extends MY_Controller {
 //            if (!empty($search)) {
 //                $coa->setWhereRaw("(kode_coa like '%{$search}%' or nama like '%{$search}%')");
 //            }
-            $data = $coa->setWheres(['level' => 5])->setSearch(["kode_coa", "nama"])->setOrder(['nama'])->setSelects(['kode_coa', 'nama'])->getData();
+            $data = $coa->setWheres(['level' => 5])->setSearch(["kode_coa", "nama"])->setOrder(['kode_coa'=>"asc"])->setSelects(['kode_coa', 'nama'])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => $data)));
