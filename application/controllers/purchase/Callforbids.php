@@ -38,7 +38,7 @@ class Callforbids extends MY_Controller {
                     ->setJoins("mst_status", "mst_status.kode = ci.status", "left")
                     ->setSelects(["ci.*", "departemen.nama as nama_warehouse", "cfb.create_date", "sales_order,priority,notes", "nama_status", "cfb.kode_pp"])
                     ->setOrder(['create_date' => 'desc'])
-                    ->setWhereRaw("ci.id NOT IN (select cfb_items_id from purchase_order_detail where status != 'cancel') and cfb.status not in('cancel','done')");
+                    ->setWhereRaw("ci.id NOT IN (select cfb_items_id from purchase_order_detail where status != 'cancel') and ci.status not in('cancel','done')");
             $no = $_POST['start'];
             foreach ($list->getData() as $field) {
                 $no++;

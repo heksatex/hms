@@ -71,7 +71,7 @@
                                         </div>-->
                                         <div class="form-group">
                                             <div class="col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label" >Note</label></div>
+                                                <div class="col-xs-4"><label class="form-label">Note</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <textarea type="text" class="form-control input-sm resize-ta" id="note" name="note"></textarea>
                                                 </div>                                    

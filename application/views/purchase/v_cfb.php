@@ -106,6 +106,13 @@
                     },
                     dom: 'Bfrtip',
                     "buttons": [
+                {
+                            "text": 'Confirm Order',
+                            "className": "btn btn-success confirm-as",
+                            "action": function (e, dt, node, config) {
+                                $(".confirm-order").trigger("click");
+                            }
+                        },
                         {
                             "text": 'Add RFQ',
                             "className": "btn btn-success add-rfq-btn",
@@ -122,13 +129,7 @@
                                 $(".add-fpt").trigger("click");
                             }
                         }
-                        , {
-                            "text": 'Confirm Order',
-                            "className": "btn btn-success confirm-as",
-                            "action": function (e, dt, node, config) {
-                                $(".confirm-order").trigger("click");
-                            }
-                        }
+                        
                     ]
                 });
                 $(".confirm-order").on("click", function (e) {

@@ -26,6 +26,7 @@ class Requestforquotation extends MY_Controller {
         $this->load->model("m_konversiuom");
         $this->load->library("token");
         $this->load->model("m_global");
+//        $this->config->load('additional');
     }
 
     public function index() {
@@ -79,10 +80,11 @@ class Requestforquotation extends MY_Controller {
             $data = array();
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "create_date", "order_date", "status"])
                     ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status"])->setOrder(['create_date' => 'desc'])
-                    ->setSearch(["p.nama", "no_po", "status"])
+                    ->setSearch(["p.nama", "no_po", "status","note"])
+//                    ->setJoins("")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
-                    ->setWhereRaw("status in ('draft','rfq','waiting_approval','cancel')")
+                    ->setWhereRaw("status in ('draft','rfq','waiting_approval')")
                     ->setWheres(["jenis" => $jenis]);
 
             $no = $_POST['start'];
@@ -93,8 +95,8 @@ class Requestforquotation extends MY_Controller {
                     $no,
                     '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
-                    $field->order_date,
                     $field->create_date,
+                    $field->total,
                     $field->nama_status ?? $field->status,
                     $field->note
                 ];
@@ -254,6 +256,7 @@ class Requestforquotation extends MY_Controller {
             $note = $this->input->post("note");
             $noVal = $this->input->post("no_value");
             $deskripsi = $this->input->post("deskripsi");
+            $totals = $this->input->post("totals");
 
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
@@ -281,7 +284,7 @@ class Requestforquotation extends MY_Controller {
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note, "no_value" => $noVal]);
+            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note, "no_value" => $noVal,"total"=>$totals]);
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -297,9 +300,15 @@ class Requestforquotation extends MY_Controller {
 
     public function update_status($id) {
         try {
+//            $listStatus = [
+//                "confirm_order" => "rfq",
+//                'confirm_rfq' => "waiting_approval",
+//                'approval' => 'purchase_confirmed',
+//                "done" => "done",
+//                "cancel" => "cancel",
+//            ];
             $listStatus = [
-                "confirm_order" => "rfq",
-                'confirm_rfq' => "waiting_approval",
+                "confirm_order" => "waiting_approval",
                 'approval' => 'purchase_confirmed',
                 "done" => "done",
                 "cancel" => "cancel",
@@ -335,7 +344,6 @@ class Requestforquotation extends MY_Controller {
                 $lockTable .= ",mst_produk_coa WRITE";
             }
             $this->_module->lock_tabel($lockTable);
-            $updatePO = ["status" => $listStatus[$status]];
             switch ($status) {
                 case "confirm_order":
                     $podd = new $this->m_po;
@@ -369,8 +377,10 @@ class Requestforquotation extends MY_Controller {
                     if ($totals < 1) {
                         throw new \Exception('Harga belum ditentukan', 500);
                     }
-                    $defautTotals = $this->config->item('nominal_approve_po');
-                    if ($totals < $defautTotals) {
+                    $getSetting = new m_global;
+                    $defautTotals = $getSetting->setTables("setting")->setWheres(["setting_name"=>"limit_approve"])->setSelects(["value"])->getDetail();
+                    $defautTotal = $defautTotals->value ?? 0;
+                    if ($totals < $defautTotal) {
                         $listStatus[$status] = "purchase_confirmed";
                     }
                     break;
@@ -401,7 +411,7 @@ class Requestforquotation extends MY_Controller {
                 default:
                     break;
             }
-
+            $updatePO = ["status" => $listStatus[$status]];
             if ($listStatus[$status] === "purchase_confirmed") {
                 $orderDate = date("Y-m-d H:i:s");
                 $listCfb = new $this->m_po;
@@ -475,7 +485,7 @@ class Requestforquotation extends MY_Controller {
                     'lokasi_dari' => 'SUP/Stock',
                     'lokasi_tujuan' => 'RCV/Stock',
                     'reff_picking' => 'SUP|' . $kodeRcv,
-                    'reff_note' => '',
+                    'reff_note' => $data->note,
                     'status' => 'ready',
                     'dept_id' => 'RCV',
                     'partner_id' => $data->supplier,
@@ -584,11 +594,11 @@ class Requestforquotation extends MY_Controller {
         $search = $this->input->get("search");
         $datas = new $this->m_po;
         if ($search !== "") {
-            $datas = $datas->setWhereRaw("kode_produk LIKE '% $search %' or nama_produk LIKE '% $search %'");
+            $datas = $datas->setWhereRaw("kode_produk LIKE '%{$search}%' or nama_produk LIKE '%{$search}%'");
         }
         $_POST['length'] = 50;
         $_POST['start'] = 0;
-        $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])->setOrder(["kode_produk"])->getData();
+        $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])->setOrder(["kode_produk"=>"asc"])->getData();
         $this->output->set_status_header(200)
                 ->set_content_type('application/json', 'utf-8')
                 ->set_output(json_encode(['data' => $datas]));

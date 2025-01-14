@@ -38,6 +38,7 @@
                                             <th>Supplier</th>
                                             <th>Order Date</th>
                                             <th>Create Date</th>
+                                            <th>Total</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -75,7 +76,7 @@
                         }
                     ],
                     "createdRow": function (row, data, dataIndex) {
-                        if (data[5].toLowerCase() === "cancel") {
+                        if (data[6].toLowerCase() === "cancel") {
                             $(row).addClass('cancelPL');
                         }
                     }

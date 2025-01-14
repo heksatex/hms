@@ -35,6 +35,8 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" id="form-cfq" name="form-cfq" action="<?= base_url("purchase/requestforquotation/save") ?>">
                                 <button type="submit" id="btnSubmit" style="display: none"></button>
+                                <input type="hidden" name="jenis" value="<?= $jenis ?>">
+                                <input type="hidden" name="cfb_manual" value="1">
                                 <div class="col-md-6 col-xs-12">
                                     <div class="field-group">
                                         <div class="form-group">
@@ -62,16 +64,16 @@
                                 </div>
                                 <div class="col-md-6 col-xs-12">
                                     <div class="field-group">
-<!--                                        <div class="form-group">
-                                            <div class="col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label required">Tanggal Order</label></div>
-                                                <div class="col-xs-8 col-md-8">
-                                                    <input type="date" class="form-control input-sm" name="order_date" id="order_date" value="<?= date("Y-m-d") ?>" required>
-                                                    <input type="hidden" name="jenis" value="<?= $jenis ?>">
-                                                    <input type="hidden" name="cfb_manual" value="1">
-                                                </div>
-                                            </div>
-                                        </div>-->
+                                        <!--                                        <div class="form-group">
+                                                                                    <div class="col-xs-12">
+                                                                                        <div class="col-xs-4"><label class="form-label required">Tanggal Order</label></div>
+                                                                                        <div class="col-xs-8 col-md-8">
+                                                                                            <input type="date" class="form-control input-sm" name="order_date" id="order_date" value="<?= date("Y-m-d") ?>" required>
+                                                                                            <input type="hidden" name="jenis" value="<?= $jenis ?>">
+                                                                                            <input type="hidden" name="cfb_manual" value="1">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>-->
                                         <div class="form-group">
                                             <div class="col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label" >Note</label></div>

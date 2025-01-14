@@ -98,6 +98,7 @@ class Purchaseorder extends MY_Controller {
                     $field->nama_supplier,
                     $field->order_date,
                     $field->create_date,
+                    $field->total,
                     $field->nama_status ?? $field->status
                 ];
             }

@@ -351,11 +351,10 @@ class Penerimaanbarang extends MY_Controller {
                         . ' mrp_production WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, penerimaan_barang_tmp WRITE,'
                         . ' stock_move_items  as smi WRITE, penerimaan_barang_tmp as tmp WRITE, mrp_production as mrp WRITE,'
                         . ' departemen as dept WRITE, departemen WRITE,  user WRITE, penerimaan_barang_tmpp_add_quant WRITE,'
-                        . 'penerimaan_barang pb WRITE,penerimaan_barang_items pbi WRITE';
-                if ($deptid === "RCV") {
-                    $lockTable .= ",penerimaan_barang WRITE,penerimaan_barang_items WRITE,invoice WRITE,"
-                            . "mst_produk_coa WRITE,invoice_detail WRITE,purchase_order WRITE,purchase_order_detail WRITE,token_increment WRITE";
-                }
+                        . 'penerimaan_barang pb WRITE,penerimaan_barang_items pbi WRITE,penerimaan_barang WRITE,penerimaan_barang_items WRITE, invoice WRITE,'
+                        . 'mst_produk_coa WRITE,invoice_detail WRITE,purchase_order WRITE,purchase_order_detail WRITE,token_increment WRITE';
+                // if ($deptid === "RCV") {
+                // }
                 $this->_module->lock_tabel($lockTable);
 
                 // cek jika mode scan

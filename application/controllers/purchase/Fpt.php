@@ -88,7 +88,8 @@ class Fpt extends MY_Controller {
             $uom_jual = $this->input->post("uom_jual");
             $note = $this->input->post("note");
             $deskripsi = $this->input->post("deskripsi");
-
+            $totals = $this->input->post("totals");
+            
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
 
@@ -110,7 +111,7 @@ class Fpt extends MY_Controller {
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note]);
+            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,"total"=>$totals]);
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')

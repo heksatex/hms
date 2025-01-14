@@ -36,8 +36,8 @@
                                             <th class="no">No</th>
                                             <th>No PO</th>
                                             <th>Supplier</th>
-                                            <th>Order Date</th>
                                             <th>Create Date</th>
+                                            <th>Total</th>
                                             <th>Status</th>
                                             <th>Note</th>
                                         </tr>
@@ -75,7 +75,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 6],
+                            "targets": [0,4,6],
                             "orderable": false
                         }
                     ],
