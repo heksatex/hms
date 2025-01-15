@@ -1122,6 +1122,7 @@ class Deliveryorder extends MY_Controller {
             if ($countData != count($dataItem)) {
                 throw new Exception("Silahkan scan kembali data, ada data berubah pada database " . $countData . ' - ' . count($dataItem), 500);
             }
+//            log_message("error","masuk 1 ".json_encode(json_encode($barcode)));
             $nosm = "SM" . $this->_module->get_kode_stock_move();
             $smdata = "('" . $nosm . "','" . date("Y-m-d H:i:s") . "','" . $do . "|1','GJD|IN','CST/Stock','GJD/Stock','done','1','')";
             $this->_module->create_stock_move_batch($smdata);
@@ -1137,6 +1138,7 @@ class Deliveryorder extends MY_Controller {
             $insertStokMvProd = [];
             $updateStokQuant = [];
             foreach ($list as $key => $value) {
+//                log_message("error","masuk 2 ".json_encode(json_encode($value)));
                 $check = $this->checkLokasi(['stock_quant.quant_id' => $value->quant_id], ['stock_quant.lokasi_fisik' => '', 'stock_quant.lokasi' => 'CST/Stock', 'id_category' => 21]);
                 if (!empty($check)) {
                     throw new \Exception($check, 500);
