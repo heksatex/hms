@@ -1073,7 +1073,7 @@ class Deliveryorder extends MY_Controller {
             $barcode = $this->input->post("search");
             $do = $this->input->post("do");
 
-            $condition = ["do.no" => $do, 'dod.barcode_id' => $barcode];
+            $condition = ["do.no" => $do, 'dod.barcode_id' => $barcode,"pd.valid"=>"done"];
             $data = $this->m_deliveryorderdetail->getDetail($condition);
             if (empty($data)) {
                 throw new Exception("data item tidak ditemukan", 500);
