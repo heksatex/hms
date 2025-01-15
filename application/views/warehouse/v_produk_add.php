@@ -221,7 +221,7 @@
                                                                     <?php
                                                                     foreach ($category as $row) {
                                                                         if (in_array($row->id, $masking))
-                                                                            continue;
+                                                                            // continue;
                                                                         ?>
                                                                         <option value='<?php echo $row->id; ?>'><?php echo $row->nama_category; ?></option>
                                                                     <?php } ?>

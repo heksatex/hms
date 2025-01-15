@@ -216,6 +216,7 @@ class M_PicklistDetail extends CI_Model {
             }
             return "";
         } catch (Exception $ex) {
+            log_message("error","masuk".json_encode($ex));
             return $ex->getMessage();
         }
     }
