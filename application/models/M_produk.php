@@ -103,6 +103,11 @@ class M_produk extends CI_Model {
         $this->db->from("mst_produk p");
         $this->db->JOIN("mst_category c", "p.id_category=c.id", "LEFT");
         $this->db->JOIN("mst_status s", "p.status_produk=s.kode", "LEFT");
+        if (count($this->wheresRaw) > 0) {
+            foreach ($this->wheresRaw as $key => $value) {
+                $this->db->where($value, null, false);
+            }
+        }
         return $this->db->count_all_results();
     }
 
