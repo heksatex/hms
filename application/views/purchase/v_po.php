@@ -29,6 +29,28 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                                            <label style="cursor:pointer;">
+                                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                                                Filter
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <br>
+                                <br>
+                                <div class="col-md-12">
+                                    <div class="panel panel-default" style="margin-bottom: 0px;">
+                                        <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-xs-12 table-responsive">
                                 <table id="tbl-po" class="table">
                                     <thead>
@@ -53,6 +75,18 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
+                
+                //* Show collapse advanced search
+                $('#advancedSearch').on('shown.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+                });
+
+                //* Hide collapse advanced search
+                $('#advancedSearch').on('hidden.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+                });
+                
+                
                 const table = $("#tbl-po").DataTable({
                     "iDisplayLength": 50,
                     "processing": true,

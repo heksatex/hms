@@ -39,7 +39,7 @@
                                         <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
                                             <label style="cursor:pointer;">
                                                 <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
-                                                Advanced Filter
+                                                Filter
                                             </label>
                                         </div>
                                     </div>
@@ -265,7 +265,7 @@
                                 },
                                 success: function (data) {
                                     alert_notify(data.icon, data.message, data.type, function () {});
-                                    table.ajax.reload();
+                                    location.reload();
                                 },
                                 error: function (err) {
                                     alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});

@@ -76,6 +76,7 @@ class Requestforquotation extends MY_Controller {
 
     public function list_data() {
         try {
+            $level = $this->session->userdata('nama')['level'] ?? "";
             $jenis = $this->input->post("jenis");
             $data = array();
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "create_date", "order_date", "status"])
@@ -84,8 +85,12 @@ class Requestforquotation extends MY_Controller {
 //                    ->setJoins("")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
-                    ->setWhereRaw("status in ('draft','rfq','waiting_approval')")
                     ->setWheres(["jenis" => $jenis]);
+            if (strtolower($level) === "direksi") {
+                $list->setWhereRaw("status in ('waiting_approval')");
+            } else {
+                $list->setWhereRaw("status in ('draft','rfq','waiting_approval')");
+            }
 
             $no = $_POST['start'];
             $sub = (($jenis === "FPT") ? "fpt" : "requestforquotation");
