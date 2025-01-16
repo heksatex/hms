@@ -1720,7 +1720,7 @@ class MO extends MY_Controller
                 $consume    = "yes";              
 
                 // start transaction
-                // $this->_module->startTransaction();
+                $this->_module->startTransaction();
 
                 //lock table
                 $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
@@ -1766,6 +1766,7 @@ class MO extends MY_Controller
                     $row_order_smi  = $this->_module->get_row_order_stock_move_items_by_kode($move_id_fg);
                     $list_lot_fg    = '';
                     $list_lot_waste = '';
+                    $tmp_lot_fg     = '';
 
                     if(!empty($array_fg) ){
 
@@ -1837,10 +1838,16 @@ class MO extends MY_Controller
 
                         $cek_dl     = $this->m_mo->cek_validasi_double_lot_by_dept($deptid);
 
-                        
+                        $type_mo    = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
 
                         //simpan fg hasil
                         foreach ($array_fg as $row) {
+
+                            // cek lot yg sama di mrp fg hasil
+                            $cek_lot_input = $this->m_mo->get_data_lot_mrp_fg_hasil_by_lot($kode, trim($row['lot']));
+                            if(!empty($cek_lot_input) && $type_mo['type_mo'] == 'colouring') {
+                                $tmp_lot_fg .= $row['lot'].', ';
+                            }
 
                             //simpan fg hasil
                             $sql_mrp_production_fg_hasil .= "('".$row['kode']."','".$move_id_fg."','".$start."','".$tgl."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".$nama_user['nama']."','".$row_order."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
@@ -1954,7 +1961,14 @@ class MO extends MY_Controller
 
                         }
 
-                    }//if jika array_fg tidak kosong
+                    } else { //if jika array_fg tidak kosong
+                        throw new \Exception('Maaf, Produk Lot tidak boleh Kosong ! ', 200);
+                    }
+
+                    if(!empty($tmp_lot_fg)) {
+                        $tmp_lot_fg = rtrim($tmp_lot_fg, ', ');
+                        throw new \Exception('Lot sudah diinput ! <br> '.$tmp_lot_fg, 200);
+                    }
 
                     if(!empty($array_waste)){
                         $move_fg    = $this->m_mo->get_move_id_fg_target_by_kode($kode)->row_array();
@@ -2404,30 +2418,26 @@ class MO extends MY_Controller
                     }else{
                         $callback = array('status' => 'failed', 'message'=>'Data Gagal Disimpan, Bahan Baku tidak Valid !', 'icon' => 'fa fa-check', 'type'=>'danger');
                     }
-
-                    if (!$this->_module->finishTransaction()) {
-                        throw new \Exception('Gagal Simpan Produksi Batch ', 500);
-                    }
-
                 }
             }
 
-            // unlock table
-            $this->_module->unlock_tabel();
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Simpan Produksi Batch ', 200);
+            }
 
+            // unlock table
+            // $this->_module->unlock_tabel();
             $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-            // finish transaction
-            // $this->_module->finishTransaction();
 
             // echo json_encode($callback);
-        }catch(Exception $ex){
-            // unlock table
-            $this->_module->unlock_tabel();
-
-            // $this->_module->finishTransaction();
+        } catch(Exception $ex){
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'status'=>'failed', 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->rollbackTransaction();
+            // unlock table
+            $this->_module->unlock_tabel();
         }
     }
 
@@ -2499,7 +2509,7 @@ class MO extends MY_Controller
                 $consume    = "yes";
 
                 // start transaction
-                // $this->_module->startTransaction();
+                $this->_module->startTransaction();
 
                 //lock table
                 $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
@@ -3007,28 +3017,28 @@ class MO extends MY_Controller
                         $callback = array('status' => 'failed', 'message'=>'Data Gagal Disimpan, Bahan Baku tidak Valid !', 'icon' => 'fa fa-check', 'type'=>'danger');
                     }
 
-                    if (!$this->_module->finishTransaction()) {
-                        throw new \Exception('Gagal Simpan Produksi ', 500);
-                    }
+                   
                 }
 
             }
 
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Simpan Produksi', 500);
+            }
+
             // unlock table
-            $this->_module->unlock_tabel();
+            // $this->_module->unlock_tabel();
             $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
-            // finish transaction
-            // $this->_module->finishTransaction();
-            // echo json_encode($callback);
 
         }catch(Exception $ex){
-            // unlock table
-            $this->_module->unlock_tabel();
 
-            // $this->_module->finishTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->rollbackTransaction();
+            // unlock table
+            $this->_module->unlock_tabel();
         }
     }
 

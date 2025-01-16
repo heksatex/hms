@@ -1315,4 +1315,13 @@ class M_mo extends CI_Model
 	}
 
 
+	public function get_data_lot_mrp_fg_hasil_by_lot($kode,$lot) 
+	{
+		$this->db->where('lot',$lot);
+		$this->db->where('kode',$kode);
+		$query = $this->db->get('mrp_production_fg_hasil');
+		return $query->row();
+	}
+
+
 }
