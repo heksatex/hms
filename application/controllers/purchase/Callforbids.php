@@ -25,6 +25,8 @@ class Callforbids extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'CFB';
+        $depth = new $this->m_cfb;
+        $data["dept"]= $depth->setTables("departemen")->setSelects(["kode","nama"])->setOrder(["kode"=>"asc"])->getData();
         $this->load->view('purchase/v_cfb', $data);
     }
 
@@ -32,7 +34,7 @@ class Callforbids extends MY_Controller {
         try {
             $data = array();
             $list = $this->m_cfb->setOrders([null, "cfb.kode_cfb", "kode_produk", "nama_produk", "qty", "sales_order", "priority", "warehouse", "create_date", "status"])
-                    ->setSearch(["cfb.kode_cfb", "kode_produk", "nama_produk", "qty", "sales_order", "priority", "warehouse","kode_pp"])
+                    ->setSearch(["cfb.kode_cfb", "kode_produk", "nama_produk", "qty", "sales_order", "priority", "warehouse","kode_pp","reff_notes"])
                     ->setJoins("cfb_items ci", "ci.kode_cfb = cfb.kode_cfb")
                     ->setJoins("departemen", "departemen.kode = cfb.warehouse")
                     ->setJoins("mst_status", "mst_status.kode = ci.status", "left")
@@ -40,6 +42,15 @@ class Callforbids extends MY_Controller {
                     ->setOrder(['create_date' => 'desc'])
                     ->setWhereRaw("ci.id NOT IN (select cfb_items_id from purchase_order_detail where status != 'cancel') and ci.status not in('cancel','done')");
             $no = $_POST['start'];
+            if (($dept = $this->input->post("depth")) !== "") {
+                $list->setWheres(["warehouse"=>$dept]);
+            }
+            if (($kode = $this->input->post("kode")) !== "") {
+                $list->setWhereRaw("cfb.kode_pp LIKE '%{$kode}%' or ci.kode_cfb LIKE '%{$kode}%'");
+            }
+            if (($prio = $this->input->post("prio")) !== "") {
+                $list->setWheres(["priority"=>$prio]);
+            }
             foreach ($list->getData() as $field) {
                 $no++;
                 $kode_encrypt = encrypt_url($field->kode_cfb);

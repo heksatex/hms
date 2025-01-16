@@ -33,6 +33,82 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-body">
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                                            <label style="cursor:pointer;">
+                                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
+                                                Advanced Filter
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <br>
+                                <br>
+                                <div class="col-md-12">
+                                    <div class="panel panel-default" style="margin-bottom: 0px;">
+                                        <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                                            <div class="panel-body" style="padding: 5px">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">Departemen</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <select name="dpt" class="form-control select2" id="dpt" style="width: 100%">
+                                                                    <option></option>
+                                                                    <?php
+                                                                    foreach ($dept as $value) {
+                                                                        ?>
+                                                                        <option value="<?= $value->kode ?>"><?= $value->nama ?></option>
+                                                                        <?php
+                                                                    }
+                                                                    ?>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">Kode</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <input id="kode" class="form-control" name="kode" type="text">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">Prioritas</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <select name="prio" class="form-control select2" id="prio" style="width: 100%">
+                                                                    <option></option>
+                                                                    <option value="urgent">Urgent</option>
+                                                                    <option value="normal">Normal</option>
+                                                                    <option value="not urgent">Not Urgent</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
                             <div class="col-xs-12 table-responsive">
                                 <table id="tbl-cfb" class="table">
                                     <thead>
@@ -71,6 +147,21 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
+                //* Show collapse advanced search
+                $('#advancedSearch').on('shown.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+                });
+
+                //* Hide collapse advanced search
+                $('#advancedSearch').on('hidden.bs.collapse', function () {
+                    $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+                });
+
+                $(".select2").select2({
+                    allowClear: true,
+                    placeholder: "pilih"
+                });
+
                 const table = $('#tbl-cfb').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
@@ -85,7 +176,12 @@
                     "autoWidth": false,
                     "ajax": {
                         "url": "<?php echo site_url('purchase/callforbids/list_data') ?>",
-                        "type": "POST"
+                        "type": "POST",
+                        "data": function (d) {
+                            d.depth = $("#dpt").val();
+                            d.kode = $("#kode").val();
+                            d.prio = $("#prio").val();
+                        }
                     },
                     "columnDefs": [
                         {
@@ -106,7 +202,7 @@
                     },
                     dom: 'Bfrtip',
                     "buttons": [
-                {
+                        {
                             "text": 'Confirm Order',
                             "className": "btn btn-success confirm-as",
                             "action": function (e, dt, node, config) {
@@ -129,8 +225,12 @@
                                 $(".add-fpt").trigger("click");
                             }
                         }
-                        
+
                     ]
+                });
+
+                $("#search").on("click", function () {
+                    table.ajax.reload();
                 });
                 $(".confirm-order").on("click", function (e) {
                     e.preventDefault();
