@@ -507,6 +507,30 @@ class M_sales extends CI_Model
 		return $this->db->get();
 	}
 
+	public function get_item_color_lines_by_ow($sales_order,$ow)
+	{
+
+		$this->db->where('sc.sales_order',$sales_order);
+		$this->db->where('scl.ow',$ow);
+		$this->db->select("scl.id, sc.sales_order, sc.sales_group, msg.nama_sales_group, scl.ow, scl.tanggal_ow, scl.status, scl.kode_produk, scl.nama_produk, scl.id_warna, w.nama_warna, scl.gramasi, scl.id_handling, hdl.nama_handling, scl.route_co, rc.nama as nama_route, scl.lebar_jadi, scl.uom_lebar_jadi, w.status as status_dti, scl.reff_notes, scl.delivery_date_items as delivery_date");
+		$this->db->from("sales_color_line scl");
+		$this->db->join("sales_contract sc ","sc.sales_order = scl.sales_order", "inner");
+		$this->db->join("mst_sales_group msg","sc.sales_group = msg.kode_sales_group","inner");
+		$this->db->join("warna w","scl.id_warna = w.id","inner");
+		$this->db->join("mst_handling hdl","hdl.id = scl.id_handling","inner");
+		$this->db->join("route_co rc", "rc.kode = scl.route_co","inner");
+		$this->db->join("mst_status ms","w.status = ms.kode","inner");
+		$this->db->order_by("scl.tanggal_ow");
+		$query =  $this->db->get();
+		return $query->row();
+	}
+
+	public function save_job_list_lab_by_ow($data) 
+	{
+		$this->db->insert_batch('job_list_lab', $data);
+        return is_array($this->db->error());
+	}
+
 	public function simpan_no_ow_sales_color_line($kode,$row_order,$ow,$tgl)
 	{
 		return $this->db->query("UPDATE sales_color_line SET ow = '$ow', tanggal_ow = '$tgl' WHERE sales_order = '$kode' and row_order = '$row_order' ");

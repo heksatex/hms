@@ -234,7 +234,7 @@
                       <th>Finishing</th>
                       <th>Route</th>
                       <th>L.Jadi</th>
-                      <th>DTI</th>
+                      <th>Status Resep</th>
                       <th>Piece Info</th>
                       <th>Reff Note</th>
                       <th>Delivery Date</th>
@@ -275,12 +275,12 @@
     var d     = new Date();
     var month = d.getMonth();
     var day   = d.getDate();
-    var day_30 = d.getDate()-30;
+    var day_7 = d.getDate()-7;
     var year  = d.getFullYear();
 
     // set date tgldari
     $('#tgldari').datetimepicker({
-        defaultDate : new Date(year, month, day_30),
+        defaultDate : new Date(year, month, day_7),
         format : 'D-MMMM-YYYY',
         ignoreReadonly: true,
         maxDate: new Date
@@ -501,7 +501,7 @@
             $.ajax({
                 "type":'POST',
                 "url" : "<?php echo site_url('report/listOW/export_excel')?>",
-                "data": {tgldari:tgl_dari, tglsampai:tgl_sampai, sc:sc, ow:ow, produk:produk, sales_group:sales_group, no_ow:no_ow, status_ow:status_ow, stock_grg:check_stock},
+                "data": {tgldari:tgl_dari, tglsampai:tgl_sampai, warna:warna, sc:sc, ow:ow, produk:produk, sales_group:sales_group, no_ow:no_ow, status_ow:status_ow, stock_grg:check_stock},
                 "dataType":'json',
                 beforeSend: function() {
                   $('#btn-excel').button('loading');
