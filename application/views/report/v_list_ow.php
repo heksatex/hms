@@ -199,6 +199,18 @@
                             </div>
                           </div>
                           <div class="form-group">
+                            <div class="col-md-5">
+                              <label>Status Resep </label>
+                            </div>
+                            <div class="col-md-7">
+                                <select type="text" class="form-control inpt-sm" name="status_resep" id="status_resep"> 
+                                  <option value=''>All</option>
+                                  <option value='draft'> Draft</option>
+                                  <option value='done'> Done</option>
+                                </select>
+                            </div>
+                          </div>
+                          <div class="form-group">
                               <div class="col-md-5">
                                 <label>Tampil Stock Greige </label>
                               </div>
@@ -323,7 +335,7 @@
     });
     
  
-    function fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock){
+    function fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock,status_resep) {
         //datatables
         $('#example1').DataTable({ 
             "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
@@ -356,6 +368,7 @@
                     data.no_ow  = no_ow;
                     data.status_ow  = status_ow;
                     data.check_stock  = check_stock;
+                    data.status_resep = status_resep;
                 },beforeSend: function () {
                   //please_wait(function(){});
                 }, complete: function () {
@@ -421,6 +434,7 @@
         var sales_group = $('#sales_group').val();
         var no_ow       = $('#no_ow').val();
         var status_ow   = $('#status_ow').val();
+        var status_resep= $('#status_resep').val();
 
         var tgldari_2 = $('#tgldari').data("DateTimePicker").date();
         var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
@@ -440,7 +454,7 @@
         //   alert_modal_warning('Maaf, Periode Tanggal tidak boleh lebih dari 31 hari !')
         }else{
           $('#example1').DataTable().destroy();
-          fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock);
+          fetch_data(tgl_dari,tgl_sampai,sc,ow,produk,warna,sales_group,no_ow,status_ow,check_stock,status_resep);
         }
           //table.ajax.reload( function(){
         $('#btn-filter').button('reset');
@@ -478,6 +492,7 @@
         var sales_group = $('#sales_group').val();
         var no_ow       = $('#no_ow').val();
         var status_ow   = $('#status_ow').val();
+        var status_resep= $('#status_resep').val();
 
         var tgldari_2 = $('#tgldari').data("DateTimePicker").date();
         var tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
@@ -501,7 +516,7 @@
             $.ajax({
                 "type":'POST',
                 "url" : "<?php echo site_url('report/listOW/export_excel')?>",
-                "data": {tgldari:tgl_dari, tglsampai:tgl_sampai, warna:warna, sc:sc, ow:ow, produk:produk, sales_group:sales_group, no_ow:no_ow, status_ow:status_ow, stock_grg:check_stock},
+                "data": {tgldari:tgl_dari, tglsampai:tgl_sampai, warna:warna, sc:sc, ow:ow, produk:produk, sales_group:sales_group, no_ow:no_ow, status_ow:status_ow, stock_grg:check_stock, status_resep:status_resep},
                 "dataType":'json',
                 beforeSend: function() {
                   $('#btn-excel').button('loading');

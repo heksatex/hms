@@ -53,6 +53,11 @@ class M_listOW extends CI_Model
             }
         }
 
+        if($this->input->post('status_resep'))
+        {
+            $this->db->where('jlb.status_resep', $this->input->post('status_resep'));
+        }
+
         if($this->input->post('tgl_dari'))
         {       
             $tgl_dari  = date('Y-m-d 00:00:00',strtotime($this->input->post('tgl_dari')));
@@ -202,6 +207,11 @@ class M_listOW extends CI_Model
             }
         }
 
+        if($this->input->post('status_resep'))
+        {
+            $this->db->where('jlb.status_resep', $this->input->post('status_resep'));
+        }
+
 		return $this->db->count_all_results();
 	}
 
@@ -303,7 +313,7 @@ class M_listOW extends CI_Model
                                 where fg.kode = '$kode'")->result();
     }
 
-    public function get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow,$check_stock)
+    public function get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow,$check_stock,$status_resep)
     {
 
         
@@ -349,6 +359,12 @@ class M_listOW extends CI_Model
         {
             $this->db->like('scl.status', $this->input->post('status_ow'));
         }
+
+        if(!empty($status_resep))
+        {
+            $this->db->where('jlb.status_resep', $this->input->post('status_resep'));
+        }
+
 
         if(!empty($no_ow))
         {
