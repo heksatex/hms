@@ -565,6 +565,18 @@ class M_sales extends CI_Model
 		return $query;
 	}
 
+	public function cek_color_order_by_ow($sales_order,$ow) 
+	{
+		$this->db->where('co.kode_sc',$sales_order);
+		$this->db->where('cod.ow',$ow);
+		$this->db->select('*');
+		$this->db->from('color_order co');
+		$this->db->join('color_order_detail cod','co.kode_co = cod.kode_co','inner');
+		$query = $this->db->get();
+		return $query->num_rows();
+		
+	}
+
 	/* COLOR LINES << */
 
 }

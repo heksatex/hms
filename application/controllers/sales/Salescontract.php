@@ -1135,7 +1135,7 @@ class Salescontract extends MY_Controller
             // start transaction
             $this->_module->startTransaction();
 
-            $this->_module->lock_tabel("sales_contract_items WRITE, sales_contract WRITE, sales_color_line WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group WRITE, mst_sales_group as mst WRITE, wa_template WRITE, wa_group as  a WRITE, wa_group_departemen as b WRITE, wa_send_message WRITE");
+            $this->_module->lock_tabel("sales_contract_items WRITE, sales_contract WRITE, sales_color_line WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group WRITE, mst_sales_group as mst WRITE, wa_template WRITE, wa_group as  a WRITE, wa_group_departemen as b WRITE, wa_send_message WRITE, color_order as co WRITE, color_order_detail as cod WRITE");
 
             $items = $this->m_sales->cek_item_color_lines_by_kode($sales_order,$row_order)->row_array();
 
@@ -1167,8 +1167,12 @@ class Salescontract extends MY_Controller
                   }
               }
 
-              if($value == 'f' and $approve == 'no') {
-                throw new \Exception('Sales Contract OW ini sudah terbentuk Color Order !', 200);
+              if($value == 'f' and $approve == 'no' and !empty($ow) ) {
+                // cek ow sudah terbentuk color order atau belum
+                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow);
+                if($cek_cod > 0){
+                  throw new \Exception('Sales Contract OW ini sudah terbentuk Color Order !', 200);
+                }
               }
 
               $lebih_target = false;
