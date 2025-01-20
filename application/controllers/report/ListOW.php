@@ -151,6 +151,7 @@ class ListOW extends MY_Controller
 		$status_ow      = $this->input->post('status_ow');
 		$no_ow          = $this->input->post('no_ow');
 		$check_stock    = $this->input->post('stock_grg');
+		$status_resep   = $this->input->post('status_resep');
 
         $this->load->library('excel');
         ob_start();
@@ -196,7 +197,7 @@ class ListOW extends MY_Controller
 
         $num   = 1;
         $rowCount = 6;
-        $list = $this->m_listOW->get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow,$check_stock);
+        $list = $this->m_listOW->get_list_ow_by_kode($tgldari,$tglsampai,$sc,$sales_group,$ow,$produk,$warna,$status_ow,$no_ow,$check_stock,$status_resep);
         foreach($list as $val){
 
             if($val->status_scl == 't'){
