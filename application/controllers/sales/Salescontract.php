@@ -937,99 +937,160 @@ class Salescontract extends MY_Controller
     public function create_OW()
     {
 
-        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
-              // session habis
-              $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
-        }else{
-            $this->load->library('wa_message');
+        try {
+          //code...
+          if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+                // session habis
+                // $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+                throw new \Exception('Waktu Anda Telah Habis ', 200);
+          }else{
+              $this->load->library('wa_message');
 
-            $sub_menu  = $this->uri->segment(2);
-            $username  = addslashes($this->session->userdata('username')); 
+              $sub_menu  = $this->uri->segment(2);
+              $username  = addslashes($this->session->userdata('username')); 
 
-            $kode = addslashes($this->input->post('kode'));
-            $row  = $this->input->post('row_order');
-            $tgl  = date('Y-m-d H:i:s');
+              $kode = addslashes($this->input->post('kode'));
+              $row  = $this->input->post('row_order');
+              $tgl  = date('Y-m-d H:i:s');
 
-            // lock tabel
-            $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE, sales_contract WRITE, wa_template WRITE, wa_group WRITE, wa_send_message WRITE, sales_contract as sc WRITE, mst_sales_group as mst WRITE, mst_sales_group WRITE, wa_group as a WRITE, wa_group_departemen as b WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE');
+              // start transaction
+              $this->_module->startTransaction();
 
-            //cek status sales contract
-            $status     = "status IN ('done')";
-            $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
+              // lock tabel
+              $this->_module->lock_tabel('sales_color_line WRITE,  log_history WRITE, main_menu_sub WRITE, user WRITE, sales_contract WRITE, wa_template WRITE, wa_group WRITE, wa_send_message WRITE, sales_contract as sc WRITE, mst_sales_group as mst WRITE, mst_sales_group WRITE, wa_group as a WRITE, wa_group_departemen as b WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, mst_sales_group as msg WRITE, warna as w WRITE, mst_handling as hdl WRITE, route_co as rc WRITE, mst_status as ms WRITE, job_list_lab WRITE');
+
+              //cek status sales contract
+              $status     = "status IN ('done')";
+              $cek_status = $this->m_sales->cek_status_sales_contract($kode,$status)->row_array();
+            
+              $status2     = "status IN ('cancel')";
+              $cek_status2 = $this->m_sales->cek_status_sales_contract($kode,$status2)->row_array();
+
+              // cek validasi item apakah ada atau tidak
+              // cek validasi apakah items tersebut sudah terbuat OW atau belum
+              $items = $this->m_sales->cek_item_color_lines_by_kode($kode,$row)->row_array();
+
+              if(!empty($cek_status['sales_order'])){
+                $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Create OW tidak Bisa dilakukan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
           
-            $status2     = "status IN ('cancel')";
-            $cek_status2 = $this->m_sales->cek_status_sales_contract($kode,$status2)->row_array();
+              }elseif(!empty($cek_status2['sales_order'])){
+                $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Create OW tidak Bisa dilakukan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-            // cek validasi item apakah ada atau tidak
-            // cek validasi apakah items tersebut sudah terbuat OW atau belum
-            $items = $this->m_sales->cek_item_color_lines_by_kode($kode,$row)->row_array();
+              }else  if(empty($items['sales_order'])){
+                $callback = array('status' => 'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-            if(!empty($cek_status['sales_order'])){
-              $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Create OW tidak Bisa dilakukan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-        
-            }elseif(!empty($cek_status2['sales_order'])){
-              $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Create OW tidak Bisa dilakukan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+              }else if(!empty($items['ow'])){
+                $callback = array('status' => 'failed','message' => 'Data Color Lines ini sudah dibuat OW !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
-            }else  if(empty($items['sales_order'])){
-              $callback = array('status' => 'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+              }else{
 
-            }else if(!empty($items['ow'])){
-              $callback = array('status' => 'failed','message' => 'Data Color Lines ini sudah dibuat OW !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                // get last no ow
+                $no_ow = $this->m_sales->no_OW();
+          
+                // update tangal ow dan no ow
+                $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
 
-            }else{
+                $jenis_log   = "edit";
+                $note_log    = "Membuat OW | ".$no_ow." | ". $row;
+                $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
 
-              // get last no ow
-              $no_ow = $this->m_sales->no_OW();
-         
-              // update tangal ow dan no ow
-              $this->m_sales->simpan_no_ow_sales_color_line($kode,$row,$no_ow,$tgl);
+                // insert into job list Lab
+                $items_2 = $this->m_sales->get_item_color_lines_by_ow($kode,$no_ow);
 
-              $jenis_log   = "edit";
-              $note_log    = "Membuat OW | ".$no_ow." | ". $row;
-              $this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
+                
+                if($items_2){
 
-              // SEND WA MESSAGE  -->>
-              $data_head = $this->m_sales->get_data_by_kode($kode);
-              $kode_mkt  = $data_head->sales_group ?? '';
-              $reff_note = addslashes($items['reff_notes']);
-              $status_ow = $items['nama_status'];// Aktif, Tidak Aktif, Not Good, Reproses
-              $nama_mkt  = $this->_module->get_nama_sales_Group_by_kode($kode_mkt);
-              $template_name = 'create_ow';
-              $list_value = array(
-                            '{no_sc}'     => $kode,
-                            '{mkt}'       => $nama_mkt,
-                            '{no_ow}'     => $no_ow,
-                            '{reff_note}' => $reff_note,
-                            '{status_ow}' => $status_ow
-                            );
-              $list_dept = array('GRG','LAB','PPIC-DF');
+                  $data_array[] = array(
+                                  "id_sales_color_line"=> $items_2->id,
+                                  "sales_order"       => $items_2->sales_order,
+                                  "tanggal_buat"      => $tgl,
+                                  "kode_sales_group"  => $items_2->sales_group,
+                                  "nama_sales_group"  => $items_2->nama_sales_group,
+                                  "no_ow"             => $items_2->ow,
+                                  "tgl_ow"            => $items_2->tanggal_ow,
+                                  // "status_ow"         => $status_ow,
+                                  "kode_produk"       => $items_2->kode_produk,
+                                  "nama_produk"       => $items_2->nama_produk,
+                                  "warna_id"          => $items_2->id_warna,
+                                  "nama_warna"        => $items_2->nama_warna,
+                                  "gramasi"           => $items_2->gramasi,
+                                  "id_handling"       => $items_2->id_handling,
+                                  "nama_handling"     => $items_2->nama_handling,
+                                  "route"             => $items_2->route_co,
+                                  "nama_route"        => $items_2->nama_route,
+                                  "lebar_jadi"        => $items_2->lebar_jadi,
+                                  "uom_lebar_jadi"    => $items_2->uom_lebar_jadi,
+                                  // "status_dti"        => $status_dti,                                
+                                  "reff_note"         => $items_2->reff_notes,
+                                  "delivery_date"     => $items_2->delivery_date,
+                                  "status_resep"      => 'draft',
+                                  "tgl_selesai_resep" => '',
+                  );
+                } else {
+                  throw new \Exception('Data OW tidak ditemukan ', 200);
+                }
 
-              $wa_send = $this->wa_message->sendMessageToGroupByDepth($template_name,$list_value,$list_dept);
 
-              // mention
-              $list_number  = $this->_module->get_list_number_user_by_dept($list_dept);
-              $list_numbers = array_column($list_number,'telepon_wa');
-              $telp_me      = $this->_module->cek_telepon_wa_by_user($username);
-              $telp_mes     = array_column($telp_me,'telepon_wa');
-              $list_number_group = array_merge($list_numbers,$telp_mes);
-              $this->wa_message->setMentions($list_number_group);
-              
-              //footer
-              $default_footer_wa = 'footer_hms';
-              $wa_send->setFooter($default_footer_wa);;
-              
-              $wa_send->send();
-              // SEND WA MESSAGE  <<--              
+                $this->m_sales->save_job_list_lab_by_ow($data_array);
 
-              $callback = array('status' => 'success','message' => ' OW telah berhasil dibuat !', 'icon' =>'fa fa-check', 'type' => 'success');
-            }
+                // SEND WA MESSAGE  -->>
+                $data_head = $this->m_sales->get_data_by_kode($kode);
+                $kode_mkt  = $data_head->sales_group ?? '';
+                $reff_note = addslashes($items['reff_notes']);
+                $status_ow = $items['nama_status'];// Aktif, Tidak Aktif, Not Good, Reproses
+                $nama_mkt  = $this->_module->get_nama_sales_Group_by_kode($kode_mkt);
+                $template_name = 'create_ow';
+                $list_value = array(
+                              '{no_sc}'     => $kode,
+                              '{mkt}'       => $nama_mkt,
+                              '{no_ow}'     => $no_ow,
+                              '{reff_note}' => $reff_note,
+                              '{status_ow}' => $status_ow
+                              );
+                $list_dept = array('GRG','LAB','PPIC-DF');
 
-            // unlock tabel
-            $this->_module->unlock_tabel();
+                $wa_send = $this->wa_message->sendMessageToGroupByDepth($template_name,$list_value,$list_dept);
 
+                // mention
+                $list_number  = $this->_module->get_list_number_user_by_dept($list_dept);
+                $list_numbers = array_column($list_number,'telepon_wa');
+                $telp_me      = $this->_module->cek_telepon_wa_by_user($username);
+                $telp_mes     = array_column($telp_me,'telepon_wa');
+                $list_number_group = array_merge($list_numbers,$telp_mes);
+                $this->wa_message->setMentions($list_number_group);
+                
+                //footer
+                $default_footer_wa = 'footer_hms';
+                $wa_send->setFooter($default_footer_wa);;
+                
+                $wa_send->send();
+                // SEND WA MESSAGE  <<--              
+
+                $callback = array('status' => 'success','message' => ' OW telah berhasil dibuat !', 'icon' =>'fa fa-check', 'type' => 'success');
+              }
+
+              // unlock tabel
+              $this->_module->unlock_tabel();
+
+          }
+
+          if (!$this->_module->finishTransaction()) {
+            throw new \Exception('Create OW Gagal', 500);
+          }
+
+          $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+
+        } catch (Exception $ex) {
+          //throw $th;
+
+          $this->output->set_status_header($ex->getCode() ?? 500)
+          ->set_content_type('application/json', 'utf-8')
+          ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+          $this->_module->rollbackTransaction();
+          // unlock table
+          $this->_module->unlock_tabel();
         }
-
-        echo json_encode($callback);
 
     }
 
@@ -1049,9 +1110,12 @@ class Salescontract extends MY_Controller
 
     public function update_status_color_lines()
     {
+
+      try {
+
         if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
-          // session habis
-          $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
+            // session habis
+            $callback = array('message' => 'Waktu Anda Telah Habis',  'sesi' => 'habis' );
         }else{
 
             $this->load->library('wa_message');
@@ -1065,7 +1129,13 @@ class Salescontract extends MY_Controller
             $ow           = $this->input->post('ow');
             $kode_produk  = $this->input->post('kode_produk');
             $qty          = $this->input->post('qty');
+            $approve      = $this->input->post('approve');
             $tgl          = date('Y-m-d H:i:s');
+
+            // start transaction
+            $this->_module->startTransaction();
+
+            $this->_module->lock_tabel("sales_contract_items WRITE, sales_contract WRITE, sales_color_line WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group WRITE, mst_sales_group as mst WRITE, wa_template WRITE, wa_group as  a WRITE, wa_group_departemen as b WRITE, wa_send_message WRITE, color_order as co WRITE, color_order_detail as cod WRITE");
 
             $items = $this->m_sales->cek_item_color_lines_by_kode($sales_order,$row_order)->row_array();
 
@@ -1077,13 +1147,13 @@ class Salescontract extends MY_Controller
             $cek_status2 = $this->m_sales->cek_status_sales_contract($sales_order,$status2)->row_array();
 
             if(!empty($cek_status['sales_order'])){
-              $callback = array('status' => 'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa Disimpan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+              $callback = array('status' => 'failed','status2'=>'failed','alert2' => 'yes','message' => 'Maaf, Data tidak bisa Disimpan !, Status Sales Contract Sudah Selesai !', 'icon' =>'fa fa-warning', 'type' => 'danger');
         
             }elseif(!empty($cek_status2['sales_order'])){
-              $callback = array('status' => 'failed' ,'alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa Disimpan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+              $callback = array('status' => 'failed' ,'status2'=>'failed','alert2' => 'yes', 'message' => 'Maaf, Data tidak bisa Disimpan !, Status Sales Contract dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }elseif(empty($items['sales_order'])){
-              $callback = array('status' => 'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+              $callback = array('status' => 'failed','status2'=>'failed','message' => 'Data Items Color Line tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
 
             }else{
 
@@ -1097,6 +1167,14 @@ class Salescontract extends MY_Controller
                   }
               }
 
+              if($value == 'f' and $approve == 'no' and !empty($ow) ) {
+                // cek ow sudah terbentuk color order atau belum
+                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow);
+                if($cek_cod > 0){
+                  throw new \Exception('Sales Contract OW ini sudah terbentuk Color Order !', 200);
+                }
+              }
+
               $lebih_target = false;
               if($value == 't' or $value =='ng' ){
                 // cek qty by produk qty contract line
@@ -1107,7 +1185,7 @@ class Salescontract extends MY_Controller
   
                 if($cq_color_lines > $cq_contract_lines){
                   $lebih_target = true;  
-                  $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                  $callback = array('status' => 'failed', 'status2'=>'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }
 
                 // tambah qty yg akan di aktifkan
@@ -1168,10 +1246,24 @@ class Salescontract extends MY_Controller
               }
             }
 
-
         }
 
-        echo json_encode($callback);
+        if (!$this->_module->finishTransaction()) {
+          throw new \Exception('Create OW Gagal', 500);
+        }
+
+        $this->output->set_status_header(200)->set_content_type('application/json', 'utf-8')->set_output(json_encode($callback));
+
+      } catch (Exception $ex) {
+        $this->output->set_status_header($ex->getCode() ?? 500)->set_content_type('application/json', 'utf-8')->set_output(json_encode(array('status'=>'failed','status2'=>'','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+      } finally {
+        $this->_module->rollbackTransaction();
+        // unlock table
+        $this->_module->unlock_tabel();
+      }
+
+
+       
     }
 
     /* Finish COLOR LINES */

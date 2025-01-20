@@ -264,27 +264,80 @@ class Trackinglot extends MY_Controller
                 //PICKLIST
                 $picklist = $this->m_trackingLot->get_picklist_by_Lot($txtlot);
                 foreach($picklist as $picklists){
-
+                  $get_p = $this->m_trackingLot->cek_log_history($picklists->no_pl, ['menambahkan',$txtlot]);
                   $result_record[] = array('tanggal' => $picklists->tanggal_masuk, 
                                     'kode'        => $picklists->no_pl,
                                     'link'        => '',
                                     'keterangan'  => 'Barcode ini Masuk Picklist ',
-                                    'status'      => $picklists->nama_status,
-                                    'user'        => '',
+                                    'status'      => '-',
+                                    'user'        => $get_p->nama_user ?? '',
                                   );
                 }
 
-                // Delivery
+                foreach($picklist as $picklists){
+                    if(!empty($picklists->valid_date)) {
+                    $get_p = $this->m_trackingLot->cek_log_history($picklists->no_pl, ['validasi',$txtlot]);
+                    $result_record[] = array('tanggal' => $picklists->valid_date ??  $get_p->datelog, 
+                                    'kode'        => $picklists->no_pl,
+                                    'link'        => '',
+                                    'keterangan'  => 'Barcode ini di validasi ',
+                                    'status'      => '-',
+                                    'user'        => $get_p->nama_user ?? '',
+                                  );
+                    }
+                }
+
+                foreach($picklist as $picklists){
+                  if($picklists->valid == 'cancel') {
+                  $get_p = $this->m_trackingLot->cek_log_history($picklists->no_pl, ['menghapus',$txtlot]);
+                  $result_record[] = array('tanggal' => $picklists->valid_date ?? $get_p->datelog, 
+                                  'kode'        => $picklists->no_pl,
+                                  'link'        => '',
+                                  'keterangan'  => 'Barcode ini keluar dari Picklist / dihapus ',
+                                  'status'      => '-',
+                                  'user'        => $get_p->nama_user ?? '',
+                                );
+                  }
+              }
+
+
+                // Delivery terkirim
                 $delivery = $this->m_trackingLot->get_delivery_by_Lot($txtlot);
                 foreach($delivery as $deliv){
-
-                  $result_record[] = array('tanggal' => $deliv->tanggal_buat, 
+               
+                  $result_record[] = array('tanggal' => $deliv->tanggal_dokumen, 
                                     'kode'        => $deliv->no,
                                     'link'        => '',
-                                    'keterangan'  => 'Delivery Order : '.$deliv->no,
-                                    'status'      => $deliv->nama_status,
+                                    'keterangan'  => 'Barcode ini Dikirim /  Delivery Order',
+                                    'status'      => '-',
                                     'user'        => $deliv->nama_user,
                                   );
+                }
+
+                // Delivery dibatalkan
+                foreach($delivery as $deliv){
+                  if($deliv->status == 'cancel'){
+                        $result_record[] = array('tanggal' => $deliv->tanggal_batal, 
+                                                  'kode'        => $deliv->no,
+                                                  'link'        => '',
+                                                  'keterangan'  => 'Barcode ini batal Kirim / Delivery Order Dibatalkan',
+                                                  'status'      => '-',
+                                                  'user'        => $deliv->nama_user,
+                                  );
+                  }
+                }
+
+                // delivery retur
+                foreach($delivery as $deliv){
+                  if($deliv->status == 'retur'){
+                        $result_record[] = array('tanggal' => $deliv->tanggal_retur, 
+                                                  'kode'        => $deliv->no,
+                                                  'link'        => '',
+                                                  'keterangan'  => 'Barcode ini diretur',
+                                                  'status'      => '-',
+                                                  'user'        => $deliv->nama_user,
+                                  );
+                  }
                 }
 
                 // arsort($result_record);

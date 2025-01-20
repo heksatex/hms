@@ -82,7 +82,8 @@ class M_listOW extends CI_Model
         $this->db->join("warna w", "scl.id_warna = w.id", "inner");
         $this->db->join("mst_handling hdl", "hdl.id = scl.id_handling", "inner");
         $this->db->join("route_co rc", "rc.kode = scl.route_co", "inner");
-        $this->db->join("mst_status ms", "w.status  = ms.kode", "inner");
+        $this->db->join('job_list_lab jlb',"jlb.no_ow = scl.ow","left");
+        $this->db->join("mst_status ms", "jlb.status_resep  = ms.kode", "left");
         $this->db->join("(SELECT co.kode_co, co.kode_sc, cod.ow FROM color_order co 
              INNER JOIN color_order_detail as cod ON cod.kode_co = co.kode_co GROUP BY cod.ow)  co", "scl.sales_order = co.kode_sc AND co.ow = scl.ow", "left");
 
@@ -147,7 +148,8 @@ class M_listOW extends CI_Model
         $this->db->join("warna w", "scl.id_warna = w.id", "inner");
         $this->db->join("mst_handling hdl", "hdl.id = scl.id_handling", "inner");
         $this->db->join("route_co rc", "rc.kode = scl.route_co", "inner");
-        $this->db->join("mst_status ms", "w.status  = ms.kode", "inner");
+        $this->db->join('job_list_lab jlb',"jlb.no_ow = scl.ow","left");
+        $this->db->join("mst_status ms", "jlb.status_resep  = ms.kode", "left");
         $this->db->join("(SELECT co.kode_co, co.kode_sc, cod.ow FROM color_order co 
              INNER JOIN color_order_detail as cod ON cod.kode_co = co.kode_co GROUP BY cod.ow)  co", "scl.sales_order = co.kode_sc AND co.ow = scl.ow", "left");
 
@@ -216,7 +218,7 @@ class M_listOW extends CI_Model
         return $this->db->query("SELECT cod.qty, cod.uom, cod.nama_produk, cod.status, ms.nama_status, cod.row_order, b.nama as route_co,
                                     (SELECT method 
                                     FROM stock_move 
-                                    where origin = CONCAT('$sales_order','|',cod.kode_co,'|',cod.row_order,'|','$ow')  AND status = 'done' AND method not LIKE '%CON%'
+                                    where origin = CONCAT('$sales_order','|',cod.kode_co,'|',cod.row_order,'|','$ow')  AND status IN ('done','ready') 
                                     GROUP by method
                                     order by row_order desc
                                     LIMIT 1 ) as last_method
@@ -357,7 +359,7 @@ class M_listOW extends CI_Model
             }
         }
         $ip         = $this->input->ip_address();
-        if($check_stock == 'show'){
+        if($check_stock == 'true'){
             $this->db->select(" '$ip' as ip, scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
             (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
             co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date");
@@ -372,7 +374,8 @@ class M_listOW extends CI_Model
         $this->db->join("warna w", "scl.id_warna = w.id", "inner");
         $this->db->join("mst_handling hdl", "hdl.id = scl.id_handling", "inner");
         $this->db->join("route_co rc", "rc.kode = scl.route_co", "inner");
-        $this->db->join("mst_status ms", "w.status  = ms.kode", "inner");
+        $this->db->join('job_list_lab jlb',"jlb.no_ow = scl.ow","left");
+        $this->db->join("mst_status ms", "jlb.status_resep  = ms.kode", "left");
         $this->db->join("(SELECT co.kode_co, co.kode_sc, cod.ow FROM color_order co 
              INNER JOIN color_order_detail as cod ON cod.kode_co = co.kode_co GROUP BY cod.ow)  co", "scl.sales_order = co.kode_sc AND co.ow = scl.ow", "left");
 

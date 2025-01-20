@@ -184,7 +184,7 @@ class ListOW extends MY_Controller
 		);	
 
         // header table
-    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'Gramasi','Finishing', 'Route', 'L.Jadi','DTI','Piece Info','Reff Notes','Delivery Date','CO');
+    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'Gramasi','Finishing', 'Route', 'L.Jadi','Status Resep','Piece Info','Reff Notes','Delivery Date','CO');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);  
@@ -209,7 +209,7 @@ class ListOW extends MY_Controller
                 $status_scl = 'Tidak Aktif';
             }
 
-            if($check_stock == 'show'){
+            if($check_stock == 'true'){
                 $stock_grg = $val->tot_qty1;
             }else{
                 $stock_grg = 'NA';
@@ -225,7 +225,7 @@ class ListOW extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->nama_warna);
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
 			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
-			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $stock_grg);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $check_stock);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->gramasi);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_handling);
 			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->nama_route);
