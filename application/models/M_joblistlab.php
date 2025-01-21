@@ -5,8 +5,8 @@
 class M_joblistlab extends CI_Model
 {
 	
-    var $column_order = array(null, 'jb.nama_sales_group', 'jb.no_ow',  'jb.tanggal_ow', 'scl.status','jb.nama_produk','jb.nama_warna',  'tot_qty1', 'jb.gramasi', 'jb.nama_handling', 'jb.nama', 'jb.lebar_jadi','w.status', 'jb.reff_note','jb.delivery_date ','jb.status_resep','jb.tanggal_selesai_resep',null);
-	var $column_search= array('');
+    var $column_order = array(null, 'jb.sales_order', 'jb.nama_sales_group', 'jb.no_ow',  'jb.tgl_ow', 'scl.status','jb.nama_produk','jb.nama_warna',  'tot_qty1', 'jb.gramasi', 'jb.nama_handling', 'jb.nama_route', 'jb.lebar_jadi','w.status', 'jb.reff_note','jb.delivery_date ','jb.status_resep','jb.tgl_selesai_resep',null);
+	var $column_search= array('jb.sales_order', 'jb.nama_sales_group', 'jb.no_ow',  'jb.tgl_ow', 'scl.status','jb.nama_produk','jb.nama_warna', 'jb.gramasi', 'jb.nama_handling', 'jb.nama_route', 'jb.lebar_jadi','w.status', 'jb.reff_note','jb.delivery_date ','jb.status_resep','jb.tgl_selesai_resep');
 	var $order  	  = array('jb.tanggal_buat' => 'asc');
 
     function _query()
