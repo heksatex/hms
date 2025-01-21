@@ -67,6 +67,7 @@ class ListOW extends MY_Controller
                 $row[] = $field->nama_route;
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->nama_status;
+                $row[] = ucfirst($field->status_resep);
                 $row[] = $field->piece_info;
                 $row[] = $field->reff_notes;
                 $row[] = $field->delivery_date;
@@ -173,7 +174,7 @@ class ListOW extends MY_Controller
         $object->getActiveSheet()->mergeCells('C3:F3');
 
         //bold huruf
-		$object->getActiveSheet()->getStyle("A1:T5")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:U5")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -185,7 +186,7 @@ class ListOW extends MY_Controller
 		);	
 
         // header table
-    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'Gramasi','Finishing', 'Route', 'L.Jadi','Status Resep','Piece Info','Reff Notes','Delivery Date','CO');
+    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'Gramasi','Finishing', 'Route', 'L.Jadi','DTI','Status Resep','Piece Info','Reff Notes','Delivery Date','CO');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);  
@@ -226,16 +227,17 @@ class ListOW extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->nama_warna);
 			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty);
 			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom);
-			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $check_stock);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $stock_grg);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->gramasi);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_handling);
 			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->nama_route);
 			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_jadi.' '.$val->uom_lebar_jadi);
 			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->nama_status);
-			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->piece_info);
-			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->reff_notes);
-			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->delivery_date);
-			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->kode_co);
+			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, ucfirst($val->status_resep));
+			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->piece_info);
+			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->reff_notes);
+			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->delivery_date);
+			$object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->kode_co);
             $rowCount++;
         }
 

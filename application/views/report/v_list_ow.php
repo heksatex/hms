@@ -246,6 +246,7 @@
                       <th>Finishing</th>
                       <th>Route</th>
                       <th>L.Jadi</th>
+                      <th>DTI</th>
                       <th>Status Resep</th>
                       <th>Piece Info</th>
                       <th>Reff Note</th>
@@ -323,11 +324,11 @@
             "autoWidth": false,
             "columnDefs": [
                 { 
-                  "targets": [19], 
+                  "targets": [20], 
                   "orderable": false, 
                 },
                 { 
-                  "targets": [20], 
+                  "targets": [21], 
                   "visible": false, 
                 },
               ]
@@ -390,7 +391,7 @@
                   "orderable": false, 
                 },
                 { 
-                  "targets": [20], 
+                  "targets": [21], 
                   "visible": false, 
                 },
                 { 
@@ -409,11 +410,11 @@
              
             ],
             "createdRow": function( row, data, dataIndex ) {
-              if (data[20] == 'f' ){          
+              if (data[21] == 'f' ){          
                 $(row).css("color","red");
-              }else if(data[20]=='ng'){
+              }else if(data[21]=='ng'){
                 $(row).css("color","blue");
-              }else if(data[20]=='r'){
+              }else if(data[21]=='r'){
                 $(row).css("color","purple");
               }
             },
