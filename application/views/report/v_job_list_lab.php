@@ -260,17 +260,15 @@
  
         //datatables
         table = $('#example1').DataTable({ 
-
+          "aLengthMenu": [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, "All"]],
            "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-5'><'col-sm-7'p>>",
-            "stateSave": true,
+            "stateSave": false,
             "processing": true, 
             "serverSide": true, 
             // "order": [2, "asc"], 
-            "aLengthMenu": [[10,20], [10,20]],
-            "iDisplayLength": 10, 
-
+            "iDisplayLength": 50, 
             "paging": true,
             "lengthChange": true,
             "searching": true,
