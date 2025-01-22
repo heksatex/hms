@@ -18,6 +18,11 @@
             .cancelPL{
                 color: red;
             }
+            
+            #btn-cancel {
+                display: none;
+            }
+                
             @media screen and (min-width: 768px) {
                 .over {
                     overflow-x: visible !important;
@@ -31,6 +36,18 @@
               }
             }
             */
+            
+            
+            
+            <?php 
+            if ($datas->status === "confirm"){
+                ?>
+                #btn-cancel {
+                display: inline-block;
+                }
+            <?php
+            }
+            ?>
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini" id="block-page">
@@ -184,6 +201,11 @@
                         null
                     ]
                 });
+                
+                $("#btn-cancel").off("click").on("click",function(){
+                confirmRequest("Call For Bids", "Batalkan status Confirm ? ", function () {
+                    });
+                })
             });
         </script>
     </body>

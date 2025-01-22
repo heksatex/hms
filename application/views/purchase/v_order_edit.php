@@ -189,7 +189,7 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">No PO &nbsp;<strong> <?= $po->no_po ?> </strong></h3>
+                            <h3 class="box-title">&nbsp;<strong> <?= $po->no_po ?> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
                                 <?php if (!in_array($po->status, ["cancel", "done", "purchase_confirmed"])) { ?>
                                     <?php
@@ -358,7 +358,6 @@
                                                 if ($value->amount_tax > 0) {
                                                     $amountTaxes = $value->amount_tax;
                                                 }
-                                                
                                                 ?>
                                                 <tr>
                                                     <td>
@@ -373,7 +372,7 @@
                                                         $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
                                                         if (is_file(FCPATH . $image)) {
                                                             ?>
-                                                            <a class="zoom" data-image="<?= $image ?>">
+                                                            <a href="<?= base_url($image) ?>" class="pop-image">
                                                                 <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
                                                             </a>
                                                         <?php } ?>
@@ -396,6 +395,7 @@
                                                         <div class="form-group">
                                                             <div class="input-group">
                                                                 <div class="input-group-addon"><?= $value->qty_beli ?></div>
+                                                                <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                 <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
                                                                 <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
                                                                         name="id_konversiuom[<?= $value->id ?>]"  required <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
@@ -425,12 +425,14 @@
                                                     </td>
                                                     <td>
                                                         <div class="form-group text-right">
-                                                            <select style="width: 70%" class="form-control tax input-xs"  name="tax[<?= $value->id ?>]"  <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
+                                                            <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                            <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                    name="tax[<?= $value->id ?>]"  <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
                                                                 <option></option>
                                                                 <?php
                                                                 foreach ($tax as $key => $taxs) {
                                                                     ?>
-                                                                    <option value='<?= $taxs->id ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                    <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                     <?php
                                                                 }
                                                                 ?>
@@ -472,7 +474,7 @@
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($totals * (11 / 12), 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format(($totals * 11) / 12, 2) ?>
                                                             </strong>
                                                         </td>
                                                     </tr>
@@ -490,27 +492,12 @@
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
                                                         </strong></td>
                                                 </tr>
-                                                <?php if ($setting !== null) {
-                                                        ?>
-                                                        <tr>    
-                                                            <td colspan="8" class="style text-right">Taxes</td>
-                                                            <td class="style text-center totalan"> 
-                                                                <strong><?= $po->symbol ?> <?= number_format(($totals * (11 / 12)) * $amountTaxes, 2) ?>
-                                                                </strong>
-                                                            </td>
-                                                        </tr>
-                                                        <?php
-                                                    } else {
-                                                        ?>
-                                                        <tr>    
-                                                            <td colspan="8" class="style text-right">Taxes</td>
-                                                            <td class="style text-center totalan"> 
-                                                                <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
-                                                                </strong></td>
-                                                        </tr>
-                                                        <?php
-                                                    }
-                                                    ?>
+                                                <tr>    
+                                                    <td colspan="8" class="style text-right">Taxes</td>
+                                                    <td class="style text-center totalan"> 
+                                                        <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
+                                                        </strong></td>
+                                                </tr>
 
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Total</td>
@@ -534,7 +521,7 @@
                                                         <tr>    
                                                             <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                             <td class="style text-center totalan"> 
-                                                                <strong><?= $po->symbol ?> <?= number_format($totals * (11 / 12), 2) ?>
+                                                                <strong><?= $po->symbol ?> <?= number_format(($totals * 11) / 12, 2) ?>
                                                                 </strong>
                                                             </td>
                                                         </tr>
@@ -552,27 +539,12 @@
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
                                                             </strong></td>
                                                     </tr>
-                                                    <?php if ($setting !== null) {
-                                                        ?>
-                                                        <tr>    
-                                                            <td colspan="8" class="style text-right">Taxes</td>
-                                                            <td class="style text-center totalan"> 
-                                                                <strong><?= $po->symbol ?> <?= number_format(($totals * (11 / 12)) * $amountTaxes, 2) ?>
-                                                                </strong>
-                                                            </td>
-                                                        </tr>
-                                                        <?php
-                                                    } else {
-                                                        ?>
-                                                        <tr>    
-                                                            <td colspan="8" class="style text-right">Taxes</td>
-                                                            <td class="style text-center totalan"> 
-                                                                <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
-                                                                </strong></td>
-                                                        </tr>
-                                                        <?php
-                                                    }
-                                                    ?>
+                                                    <tr>    
+                                                        <td colspan="8" class="style text-right">Taxes</td>
+                                                        <td class="style text-center totalan"> 
+                                                            <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
+                                                            </strong></td>
+                                                    </tr>
 
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Total</td>
@@ -599,43 +571,8 @@
                 $this->load->view("admin/_partials/modal.php");
                 $this->load->view("admin/_partials/footer.php");
                 ?>
-                <script src="<?= base_url("dist/js/draggable.js") ?>"></script>
+                <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
             </footer>
-        </div>
-        <?php
-        $image = base_url("upload/product/default.jpg");
-        $image_prod = $produk->kode_produk ?? "";
-        if (is_file(FCPATH . "upload/product/{$image_prod}.jpg")) {
-            $image = base_url("upload/product/{$image_prod}.jpg");
-        }
-        ?>
-        <div class="modal fade" id="view_datas" role="dialog">
-            <div class="modal-dialog" >
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <form class="form-horizontal">
-                        <div class="range-wrapper">
-                            <div class="select-none">10%</div>
-                            <div class="range-container">
-                                <div class="left"></div>
-                                <div class="knob" id="knob"></div>
-                                <div class="right"></div></div>
-                            <div class="select-none">200%</div>
-                        </div>
-                        <div class="modal-body">
-                            <div class=image-container>
-                                <img id="img-plus" class="img-plus" src="<?= $image ?>">
-                            </div>
-
-                        </div>
-                    </form>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Tutup</button>
-                    </div>
-                </div>
-            </div>
         </div>
         <script>
 
@@ -646,7 +583,9 @@
                         return false;
                     }
                 });
-
+                $(".pop-image").magnificPopup({
+                    type: 'image'
+                });
 
             });
             $(function () {
@@ -686,6 +625,20 @@
                     }
                 });
 
+
+                $(".tax").on("select2:select", function () {
+                    var row = $(this).attr("data-row");
+                    var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
+                    $(".amount_tax_" + row).val(selectedSelect2OptionSource);
+                });
+
+                $(".tax").on("change", function () {
+                    var row = $(this).attr("data-row");
+                    $(".amount_tax_" + row).val("0");
+                });
+
+
+
                 $(".uom_beli").on("select2:select", function () {
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".uom_beli_data_" + row + " :selected").data().data.catatan;
@@ -711,8 +664,8 @@
                     placeholder: "Kurs"
 
                 });
-                
-                $(".currency").on("select2:select",function(){
+
+                $(".currency").on("select2:select", function () {
                     var selectedSelect2OptionSource = $(this).find(':selected').data('kurs');
                     $("#nilaiKurs").html(selectedSelect2OptionSource);
                 });
@@ -738,7 +691,7 @@
                                     alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                                 }, 100);
                                 if (response.status === 200) {
-//                                    location.reload();
+                                    location.reload();
                                 }
                             }).catch(err => {
                         unblockUI(function () {});
@@ -787,91 +740,6 @@
                         updateStatus(status);
                     });
                 });
-
-                $(".zoom").on("click", function () {
-                    var images = "<?= base_url() ?>" + $(this).data("image");
-                    $(".img-plus").attr("src", images);
-                    //                        $("figure.zoom").attr("style", "background-image: url(" + image + " ); background-position: 7.8% 40.2135%;")
-                    $("#view_datas").modal({
-                        show: true,
-                        backdrop: 'static'
-                    });
-                    const image = document.getElementById('img-plus');
-                    const knob = document.getElementById('knob');
-                    const leftSide = knob.previousElementSibling;
-                    const rightSide = knob.nextElementSibling;
-
-                    // The current position of mouse
-                    let x = 0;
-                    let y = 0;
-                    let leftWidth = 0;
-
-                    const minScale = 0.1;
-                    const maxScale = 2;
-                    const step = (maxScale - minScale) / 100;
-
-                    // Create new image element
-                    const cloneImage = new Image();
-                    cloneImage.addEventListener('load', function (e) {
-                        // Get the natural size
-                        const width = e.target.naturalWidth;
-                        const height = e.target.naturalHeight;
-
-                        // Set the size for image
-                        image.style.width = `${width}px`;
-                        image.style.height = `${height}px`;
-                        const scale = image.parentNode.getBoundingClientRect().width / width;
-                        image.style.transform = `scale(${scale}, ${scale})`;
-
-                        leftSide.style.width = `${(scale - minScale) / step}%`;
-                    });
-                    cloneImage.src = image.src;
-                    const mouseDownHandler = function (e) {
-                        x = e.clientX;
-                        y = e.clientY;
-                        leftWidth = leftSide.getBoundingClientRect().width;
-                        document.addEventListener('mousemove', mouseMoveHandler);
-                        document.addEventListener('mouseup', mouseUpHandler);
-                    };
-
-//                        cloneImage.style.transform = "scale(0.2425, 0.2425)";
-                    const mouseMoveHandler = function (e) {
-                        const dx = e.clientX - x;
-                        const dy = e.clientY - y;
-                        const containerWidth = knob.parentNode.getBoundingClientRect().width;
-                        let newLeftWidth = (leftWidth + dx) * 100 / containerWidth;
-                        newLeftWidth = Math.max(newLeftWidth, 0);
-                        newLeftWidth = Math.min(newLeftWidth, 100);
-
-                        leftSide.style.width = `${newLeftWidth}%`;
-
-                        leftSide.style.userSelect = 'none';
-                        leftSide.style.pointerEvents = 'none';
-
-                        rightSide.style.userSelect = 'none';
-                        rightSide.style.pointerEvents = 'none';
-
-                        const scale = minScale + (newLeftWidth * step);
-                        image.style.transform = `scale(${scale}, ${scale})`;
-                    };
-
-                    // Triggered when user drops the knob
-                    const mouseUpHandler = function () {
-                        leftSide.style.removeProperty('user-select');
-                        leftSide.style.removeProperty('pointer-events');
-
-                        rightSide.style.removeProperty('user-select');
-                        rightSide.style.removeProperty('pointer-events');
-
-                        // Remove the handlers of `mousemove` and `mouseup`
-                        document.removeEventListener('mousemove', mouseMoveHandler);
-                        document.removeEventListener('mouseup', mouseUpHandler);
-                    };
-                    knob.addEventListener('mousedown', mouseDownHandler);
-                    $("#img-plus").draggable();
-                });
-
-
             });
 
         </script>

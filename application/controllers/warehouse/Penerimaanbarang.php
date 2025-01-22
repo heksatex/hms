@@ -6,6 +6,7 @@ defined('BASEPATH') OR exit('No Direct Script Acces Allowed');
  */
 require FCPATH . 'vendor/autoload.php';
 
+use Mpdf\Mpdf;
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\DummyPrintConnector;
 
@@ -1914,8 +1915,7 @@ class Penerimaanbarang extends MY_Controller {
             $tanggal_transaksi = '';
             $tanggal_jt = '';
 
-            $dept = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
-
+//            $dept = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
 //            $head = $this->m_penerimaanBarang->get_data_by_code_print($kode, $dept_id);
             $modelHead = new $this->m_po;
             $head = $modelHead->setTables("penerimaan_barang")->setWheres(["kode" => $kode, "dept_id" => $dept_id])
@@ -1930,8 +1930,7 @@ class Penerimaanbarang extends MY_Controller {
                 $tanggal_transaksi = $head->tanggal_transaksi;
                 $tanggal_jt = $head->tanggal_jt;
             }
-            $nama_dept = strtoupper($dept['nama']);
-
+//            $nama_dept = strtoupper($dept['nama']);
 //            $printer->setTextSize(2, 2);
             $printer->setJustification(Printer::JUSTIFY_CENTER);
             $printer->text("BUKTI TERIMA BARANG (BTB)\n");
@@ -1962,27 +1961,27 @@ class Penerimaanbarang extends MY_Controller {
             }
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 12, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 20, " ", STR_PAD_BOTH) . str_pad("LOT", 10, " ", STR_PAD_BOTH)
-                    . str_pad("Qty", 8, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 20));
+            $printer->text(str_pad("NO", 2) . str_pad("Kode Produk", 11, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 18, " ", STR_PAD_BOTH) . str_pad("LOT", 20, " ", STR_PAD_BOTH)
+                    . str_pad("Qty", 8, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 15));
             $printer->setUnderline(Printer::UNDERLINE_NONE);
 
             $printer->feed();
             // products
             $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
             foreach ($items as $keyss => $item) {
-                $kodeProduk = str_split($item->kode_produk, 12);
+                $kodeProduk = str_split($item->kode_produk, 11);
                 foreach ($kodeProduk as $key => $value) {
                     $value = trim($value);
                     $kodeProduk[$key] = $value;
                 }
 
-                $namaProduk = str_split($item->nama_produk, 20);
+                $namaProduk = str_split(substr($item->nama_produk, 18), 18);
                 foreach ($namaProduk as $key => $value) {
                     $value = trim($value);
                     $namaProduk[$key] = $value;
                 }
 
-                $lot = str_split($item->lot, 10);
+                $lot = str_split($item->lot, 20);
                 foreach ($lot as $key => $value) {
                     $value = trim($value);
                     $lot[$key] = $value;
@@ -2000,14 +1999,21 @@ class Penerimaanbarang extends MY_Controller {
                     $uom[$key] = $value;
                 }
 
-                $reff = str_split($item->reff_note, 20);
+                $reff = str_split(substr($item->reff_note, 15), 15);
                 foreach ($reff as $key => $value) {
                     $value = trim($value);
                     $reff[$key] = $value;
                 }
 
+                $noo = str_split(($keyss + 1), 2);
+                foreach ($noo as $key => $value) {
+                    $value = trim($value);
+                    $noo[$key] = $value;
+                }
+
                 $counter = 0;
                 $temp = [];
+                $temp[] = count($noo);
                 $temp[] = count($kodeProduk);
                 $temp[] = count($namaProduk);
                 $temp[] = count($lot);
@@ -2017,14 +2023,14 @@ class Penerimaanbarang extends MY_Controller {
                 $counter = max($temp);
 
                 for ($i = 0; $i < $counter; $i++) {
-                    $line = str_pad(($keyss + 1), 3);
+                    $line = (isset($noo[$i])) ? str_pad($noo[$i], 2) : str_pad("", 2);
 
-                    $line .= (isset($kodeProduk[$i])) ? str_pad($kodeProduk[$i], 12, " ", STR_PAD_BOTH) : str_pad("", 12, " ", STR_PAD_BOTH);
-                    $line .= (isset($namaProduk[$i])) ? str_pad($namaProduk[$i], 20, " ", STR_PAD_BOTH) : str_pad("", 20, " ", STR_PAD_BOTH);
-                    $line .= (isset($lot[$i])) ? str_pad($lot[$i], 10, " ", STR_PAD_BOTH) : str_pad("", 10, " ", STR_PAD_BOTH);
+                    $line .= (isset($kodeProduk[$i])) ? str_pad($kodeProduk[$i], 11, " ", STR_PAD_BOTH) : str_pad("", 11, " ", STR_PAD_BOTH);
+                    $line .= (isset($namaProduk[$i])) ? str_pad($namaProduk[$i], 18, " ", STR_PAD_BOTH) : str_pad("", 18, " ", STR_PAD_BOTH);
+                    $line .= (isset($lot[$i])) ? str_pad($lot[$i], 20, " ", STR_PAD_BOTH) : str_pad("", 20, " ", STR_PAD_BOTH);
                     $line .= (isset($qty[$i])) ? str_pad($qty[$i], 8, " ", STR_PAD_RIGHT) : str_pad("", 8, " ", STR_PAD_RIGHT);
                     $line .= (isset($uom[$i])) ? str_pad($uom[$i], 5) : str_pad("", 5);
-                    $line .= (isset($reff[$i])) ? str_pad($reff[$i], 20, " ", STR_PAD_BOTH) : str_pad("", 20, " ", STR_PAD_BOTH);
+                    $line .= (isset($reff[$i])) ? str_pad($reff[$i], 15, " ", STR_PAD_BOTH) : str_pad("", 15, " ", STR_PAD_BOTH);
 
                     $printer->text($line . "\n");
                 }
@@ -2407,6 +2413,59 @@ class Penerimaanbarang extends MY_Controller {
         $kode = addslashes($this->input->post('params'));
         $callback = $this->m_penerimaanBarang->get_list_grade_select2_by_kode($kode);
         echo json_encode($callback);
+    }
+
+    public function print_rcv_pdf() {
+        try {
+            $users = $this->session->userdata('nama');
+
+            $dept_id = $this->input->post('departemen');
+            $kode = $this->input->post('id');
+
+            $origin = '';
+            $tanggal = '';
+            $reff_picking = '';
+            $tanggal_transaksi = '';
+            $tanggal_jt = '';
+
+            $modelHead = new $this->m_po;
+            $head = $modelHead->setTables("penerimaan_barang")->setWheres(["kode" => $kode, "dept_id" => $dept_id])
+                            ->setJoins('partner', "partner_id = partner.id", "left")->setOrder(["kode"])
+                            ->setSelects(["penerimaan_barang.*", "concat(partner.delivery_street,' ',partner.delivery_city) as alamat"])->getDetail();
+            log_message('error', "{$kode} ".json_encode($head));
+
+            if (!empty($head)) {
+                $kode = $head->kode;
+                $origin = $head->origin;
+                $tanggal = $head->tanggal;
+                $reff_picking = $head->reff_picking;
+                $tanggal_transaksi = $head->tanggal_transaksi;
+                $tanggal_jt = $head->tanggal_jt;
+            }
+            $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
+
+            $url = "dist/storages/print/rcv";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            ini_set("pcre.backtrack_limit", "50000000");
+            $html = $this->load->view("print/penerimaan_rcv", ["head" => $head, "item" => $items], true);
+            $mpdf = new Mpdf(['tempDir' => FCPATH . '/tmp']);
+
+            $mpdf->WriteHTML($html);
+            $pathFile = $url . "/" . str_replace("/", "_", $kode) . ".pdf";
+            $mpdf->Output(FCPATH . $pathFile, "F");
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("url" => base_url($pathFile))));
+        } catch (Exception $ex) {
+            log_message('error', $ex->getMessage());
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            ini_set("pcre.backtrack_limit", "1000000");
+        }
     }
 }
 

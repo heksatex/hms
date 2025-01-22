@@ -82,20 +82,25 @@ class Fpt extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $harga = $this->input->post("harga");
             $uom_beli = $this->input->post("uom_beli");
+            $qty_beli = $this->input->post("qty_beli");
             $tax = $this->input->post("tax");
-            $diskon = $this->input->post("diskon");
+            $dsk = $this->input->post("diskon");
             $id_konversiuom = $this->input->post("id_konversiuom");
             $uom_jual = $this->input->post("uom_jual");
             $note = $this->input->post("note");
             $deskripsi = $this->input->post("deskripsi");
-            $totals = $this->input->post("totals");
-            
+//            $totals = $this->input->post("totals");
+            $amount_tax = $this->input->post("amount_tax");
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
 
             $data = [];
             $log_update = [];
             $no = 0;
+            
+            $totals = 0.00;
+            $diskons = 0.00;
+            $taxes = 0.00;
             foreach ($harga as $key => $value) {
                 $no++;
                 $checkKonversi = $this->m_konversiuom->wheres(["id" => $id_konversiuom[$key], "ke" => $uom_jual[$key], "dari" => $uom_beli[$key]])->getDetail();
@@ -103,15 +108,22 @@ class Fpt extends MY_Controller {
                     throw new \Exception("<strong>Data No {$no}, Uom dan Uom Beli Tidak ada dalam data konversi</strong>", 500);
                 }
 
-                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $diskon[$key], 'deskripsi' => $deskripsi[$key],]);
+                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => $deskripsi[$key],]);
                 $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => $deskripsi[$key],
-                    'tax_id' => $tax[$key], 'diskon' => $diskon[$key], 'id_konversiuom' => $id_konversiuom[$key]];
+                    'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key]];
+                
+                $total = ($qty_beli[$key] * $value);
+                $totals += $total;
+                $diskon = ($dsk[$key] ?? 0);
+                $diskons += $diskon;
+                $taxes += ($total - $diskon) * $amount_tax[$key];
             }
+            $grandTotal = ($totals - $diskons) + $taxes;
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,"total"=>$totals]);
+            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,"total"=>$grandTotal]);
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -136,6 +148,7 @@ class Fpt extends MY_Controller {
             $username = $this->session->userdata('username');
             $users = $this->session->userdata('nama');
             
+            $totalItem = $this->input->post("item");
             $kode_decrypt = decrypt_url($id);
             $status = $this->input->post("status");
             $redirect = "";
@@ -153,9 +166,9 @@ class Fpt extends MY_Controller {
 
             $this->_module->startTransaction();
             $lockTable = "user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
-                    . "purchase_order_detail write,purchase_order write";
+                    . "purchase_order_detail write,purchase_order write, penerimaan_barang WRITE, penerimaan_barang_items WRITE";
             if ($listStatus[$status] === 'purchase_confirmed') {
-                $lockTable .= ",penerimaan_barang WRITE,penerimaan_barang_items WRITE,stock_move_produk WRITE,stock_move WRITE,token_increment WRITE,nilai_konversi WRITE";
+                $lockTable .= ",penerimaan_barang WRITE,penerimaan_barang_items WRITE,stock_move_produk WRITE,stock_move WRITE,nilai_konversi WRITE";
                 $lockTable .= ",mst_produk_coa WRITE,nilai_konversi nk WRITE";
             }
             $this->_module->lock_tabel($lockTable);
@@ -193,31 +206,31 @@ class Fpt extends MY_Controller {
                     break;
 
                 case "done":
-//                    $listCfb = new $this->m_po;
-//                    $dataItemOrder = $listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt])->getData();
-//                    $produk = [];
-//                    foreach ($dataItemOrder as $key => $value) {
-//                        if (!isset($produk[$value->kode_produk])) {
-//                            $produk[$value->kode_produk] = [
-//                                'nama_produk' => $value->nama_produk,
-//                                'kode_produk' => $value->kode_produk,
-//                                'qty' => $value->qty,
-//                                'uom' => $value->uom,
-//                                'status' => 'ready',
-//                                'origin_prod' => '',
-//                                'row_order' => count($produk) + 1
-//                            ];
-//                        } else {
-//                            $produk[$value->kode_produk][qty] += $value->qty;
-//                        }
-//                        $updatePP = new $this->m_po;
-//                        $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "po"]);
-//                    }
-//                    $redirect = base_url('purchase/purchaseorder/edit/' . $id);
+//                    
+                    $rcv = new $this->m_po;
+                    $listCfb = clone $rcv;
+                    $inshipment = $rcv->setTables('penerimaan_barang')
+                                    ->setJoins("penerimaan_barang_items", "penerimaan_barang.kode = penerimaan_barang_items.kode")
+                                    ->setWheres(['status_barang' => 'done'])
+                                    ->setWhereRaw("origin like '{$kode_decrypt}%'")->getDataCountAll();
+                    if ((int) $inshipment !== (int) $totalItem) {
+                        throw new \Exception("Produk Pada RCV In dengan Origin {$kode_decrypt} Tidak dalam status <strong>DONE</strong> semua.", 500);
+                    }
+                    
                     break;
                 case "cancel":
 
                     $podd = new $this->m_po;
+                    $rcv = clone $podd;
+                    $inshipment = $rcv->setTables('penerimaan_barang')
+                                    ->setJoins("penerimaan_barang_items", "penerimaan_barang.kode = penerimaan_barang_items.kode")
+                                    ->setWheres(['status_barang <>' => 'cancel'])
+                                    ->setWhereRaw("origin like '{$kode_decrypt}%'")->getDataCountAll();
+                    if ((int) $inshipment > 0) {
+                        throw new \Exception("Produk Pada RCV In dengan Origin {$kode_decrypt} Tidak dalam status <strong>CANCEL</strong> semua.", 500);
+                    }
+                    
+                    
                     $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])
                                     ->setSelects(['group_CONCAT("\'",cfb_items_id,"\'") as items', 'group_CONCAT("\'",kode_cfb,"\'") cfb'])->getDetail();
                     if ($podd && $podd->cfb !== null) {
@@ -267,7 +280,8 @@ class Fpt extends MY_Controller {
                             'uom' => $value->uom,
                             'status' => 'ready',
                             'origin_prod' => $value->kode_produk . "_" . $row,
-                            'row_order' => $row
+                            'row_order' => $row,
+                            'kode_pp'=>$value->kode_pp
                         ];
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
@@ -278,8 +292,12 @@ class Fpt extends MY_Controller {
                     }
                 }
 
-                if (!$kodeRcv = $this->token->noUrut('receive_in', date('ym'), true)->generate('RCV/IN/', '%05d')->get())
-                    throw new \Exception("No Receive IN tidak terbuat", 500);
+                $method_dept = "RCV";
+                $kode_ = $this->_module->get_kode_penerimaan($method_dept);
+                $get_kode_in = $kode_;
+
+                $dgt = substr("00000" . $get_kode_in, -5);
+                $kodeRcv = $method_dept . "/" . "IN" . "/" . date("y") . date("m") . $dgt;
 
 
                 $sm = "SM" . $this->_module->get_kode_stock_move();
@@ -306,7 +324,9 @@ class Fpt extends MY_Controller {
                 $smProduk = [];
                 $detailProduk = [];
                 foreach ($produk as $keys => $values) {
-                    $smProduk[] = array_merge($values, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
+                    $clone = $values;
+                    unset($clone["kode_pp"]);
+                    $smProduk[] = array_merge($clone, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
                     unset($values["status"]);
                     $detailProduk[] = array_merge($values, ['kode' => $kodeRcv, 'lot' => '', 'status_barang' => 'ready']);
                 }

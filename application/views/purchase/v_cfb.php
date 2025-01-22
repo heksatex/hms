@@ -35,11 +35,11 @@
                         <div class="box-body">
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
+                                    <div class="col-md-12 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;cursor:pointer;">
                                         <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
-                                            <label style="cursor:pointer;">
-                                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
-                                                Filter
+                                            <label>
+                                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom">Filter</i>
+
                                             </label>
                                         </div>
                                     </div>
@@ -94,6 +94,20 @@
                                                                     <option value="urgent">Urgent</option>
                                                                     <option value="normal">Normal</option>
                                                                     <option value="not urgent">Not Urgent</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-12 col-xs-12">
+                                                            <div class="col-xs-4">
+                                                                <label class="form-label">Status</label>
+                                                            </div>
+                                                            <div class="col-xs-8 col-md-8">
+                                                                <select name="status" class="form-control select2" id="status" style="width: 100%">
+                                                                    <option></option>
+                                                                    <option value="draft">Draft</option>
+                                                                    <option value="confirm">Confirm</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -181,6 +195,7 @@
                             d.depth = $("#dpt").val();
                             d.kode = $("#kode").val();
                             d.prio = $("#prio").val();
+                            d.status = $("#status").val();
                         }
                     },
                     "columnDefs": [
@@ -216,8 +231,8 @@
                                 document.getElementsByClassName("add-rfq")[0].setAttribute("data-request", "rfq");
                                 $(".add-rfq").trigger("click");
                             }
-                        }
-                        , {
+                        },
+                        {
                             "text": 'Add FPT',
                             "className": "btn btn-success add-fpt-btn",
                             "action": function (e, dt, node, config) {

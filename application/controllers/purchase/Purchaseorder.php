@@ -87,7 +87,7 @@ class Purchaseorder extends MY_Controller {
                     ->setSearch(["p.nama", "no_po", "prioritas", "status"])
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
-                    ->setWhereRaw("status in ('done','cancel','purchase_confirmed')");
+                    ->setWhereRaw("status in ('done','cancel','purchase_confirmed') and jenis <>'FPT'");
 
             $no = $_POST['start'];
             foreach ($list->getData() as $field) {
@@ -147,7 +147,6 @@ class Purchaseorder extends MY_Controller {
                 case "cancel":
                     $podd = new $this->m_po;
                     $rcv = clone $podd;
-                    $rcvDetail = clone $podd;
                     $inshipment = $rcv->setTables('penerimaan_barang')
                                     ->setJoins("penerimaan_barang_items", "penerimaan_barang.kode = penerimaan_barang_items.kode")
                                     ->setWheres(['status_barang <>' => 'cancel'])
