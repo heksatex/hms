@@ -18,11 +18,11 @@
             .cancelPL{
                 color: red;
             }
-            
+
             #btn-cancel {
                 display: none;
             }
-                
+
             @media screen and (min-width: 768px) {
                 .over {
                     overflow-x: visible !important;
@@ -36,16 +36,16 @@
               }
             }
             */
-            
-            
-            
-            <?php 
-            if ($datas->status === "confirm"){
+
+
+
+            <?php
+            if ($datas->status === "confirm") {
                 ?>
                 #btn-cancel {
-                display: inline-block;
+                    display: inline-block;
                 }
-            <?php
+                <?php
             }
             ?>
         </style>
@@ -201,9 +201,32 @@
                         null
                     ]
                 });
-                
-                $("#btn-cancel").off("click").on("click",function(){
-                confirmRequest("Call For Bids", "Batalkan status Confirm ? ", function () {
+
+                $("#btn-cancel").off("click").on("click", function () {
+                    confirmRequest("Call For Bids", "Batalkan status Confirm ? ", function () {
+                        $.ajax({
+                            url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
+                            type: "POST",
+                            data: {
+                                ids: "<?= $datas->ids ?>",
+                                status: "draft",
+                                before_status: "confirm"
+                            },
+                            beforeSend: function (xhr) {
+                                please_wait(function () {});
+                            },
+                            success: function (data) {
+                                alert_notify(data.icon, data.message, data.type, function () {});
+                                location.reload();
+                            },
+                            error: function (err) {
+                                unblockUI(function () {}, 100);
+                                alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                            },
+                            complete: function (jqXHR, textStatus) {
+                                unblockUI(function () {}, 100);
+                            }
+                        });
                     });
                 })
             });

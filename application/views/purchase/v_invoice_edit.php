@@ -142,137 +142,141 @@
                                 </div>
                             </div>
                             <div class="box-footer">
-                                    <div class="colxs-12">
-                                        <ul class="nav nav-tabs">
-                                            <li class="active"><a href="#tab_1" data-toggle="tab">Item</a></li>
-                                            <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
-                                        </ul>
-                                        <div class="tab-content"><br>
-                                            <div class="tab-pane active" id="tab_1">
-                                                <div class="table-responsive over">
-                                                    <table id="tbl-inv" class="table table-condesed table-hover rlstable  over">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="no">#</th>
-                                                                <th>Produk</th>
-                                                                <th>Deskripsi</th>
-                                                                <th>Reff Note</th>
-                                                                <th>Account</th>
-                                                                <th>Qty Beli</th>
-                                                                <th>UOM</th>
-                                                                <th>Harga Satuan</th>
-                                                                <th>Tax</th>
-                                                                <th>Jumlah</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php
-                                                            if (count($invDetail) > 0) {
-                                                                $dataPajak = [];
-                                                                $jumlah = 0;
-                                                                $subtotal1 = 0;
-                                                                $totalDiskon = 0;
-                                                                $totalTax = 0;
-                                                                foreach ($invDetail as $key => $value) {
-                                                                    if (count($dataPajak) < 1) {
-                                                                        $dataPajak["ket"] = $value->pajak_ket;
-                                                                    }
-                                                                    $jumlah = $value->harga_satuan * $value->qty_beli;
-                                                                    $subtotal1 += $jumlah;
-                                                                    $totalDiskon += $value->diskon;
-                                                                    $tax = ($jumlah - $value->diskon) * $value->amount;
-                                                                    $totalTax += $tax;
-                                                                    ?>
-                                                                    <tr>
-                                                                        <td><?= $key + 1 ?></td>
-                                                                        <td><?= $value->kode_produk . " - " . $value->nama_produk ?></td>
-                                                                        <td><?= $value->deskripsi ?></td>
-                                                                        <td><?= $value->reff_note ?></td>
-                                                                        <td><?= $value->kode_coa . " " . $value->nama_coa ?></td>
-                                                                        <td><?= number_format($value->qty_beli, 2) ?></td>
-                                                                        <td><?= $value->uom_beli ?></td>
-                                                                        <td>
-                                                                            <div class="form-group">
-                                                                                <input class="form-control pull-right input-sm" name="harga_satuan[<?= $value->id ?>]" <?= ($inv->status === 'draft') ? '' : 'disabled' ?>
-                                                                                       style="width: 70%" value="<?= $value->harga_satuan > 0 ? (float) $value->harga_satuan : 0 ?>" required>
-
-                                                                            </div>
-                                                                        </td>
-                                                                        <td><?= $value->pajak_ket ?></td>
-                                                                        <td><?= $inv->symbol?> <?= number_format($jumlah, 2) ?></td>
-                                                                    </tr>
-                                                                    <?php
+                                <div class="col-xs-12">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active"><a href="#tab_1" data-toggle="tab">Item</a></li>
+                                        <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
+                                    </ul>
+                                    <div class="tab-content"><br>
+                                        <div class="tab-pane active" id="tab_1">
+                                            <div class="table-responsive over">
+                                                <table id="tbl-inv" class="table table-condesed table-hover rlstable  over">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="no">#</th>
+                                                            <th>Produk</th>
+                                                            <th>Deskripsi</th>
+                                                            <th>Reff Note</th>
+                                                            <th>Account</th>
+                                                            <th>Qty Beli</th>
+                                                            <th>UOM</th>
+                                                            <th>Harga Satuan</th>
+                                                            <th>Tax</th>
+                                                            <th>Jumlah</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        if (count($invDetail) > 0) {
+                                                            $dataPajak = [];
+                                                            $jumlah = 0;
+                                                            $subtotal1 = 0;
+                                                            $totalDiskon = 0;
+                                                            $totalTax = 0;
+                                                            foreach ($invDetail as $key => $value) {
+                                                                if (count($dataPajak) < 1) {
+                                                                    $dataPajak["ket"] = $value->pajak_ket;
                                                                 }
-                                                                $subtotal2 = $subtotal1 - $totalDiskon;
+                                                                $jumlah = $value->harga_satuan * $value->qty_beli;
+                                                                $subtotal1 += $jumlah;
+                                                                $totalDiskon += $value->diskon;
+                                                                $tax = ($jumlah - $value->diskon) * $value->amount;
+                                                                $totalTax += $tax;
                                                                 ?>
                                                                 <tr>
-                                                                    <td style="font-weight: 600;">
-                                                                        Tax
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
+                                                                    <td><?= $key + 1 ?></td>
+                                                                    <td><?= $value->kode_produk . " - " . $value->nama_produk ?></td>
+                                                                    <td><?= $value->deskripsi ?></td>
+                                                                    <td><?= $value->reff_note ?></td>
+                                                                    <td><?= $value->kode_coa . " " . $value->nama_coa ?></td>
+                                                                    <td><?= number_format($value->qty_beli, 2) ?></td>
+                                                                    <td><?= $value->uom_beli ?></td>
                                                                     <td>
-                                                                        No
+                                                                        <div class="form-group">
+                                                                            <input class="form-control pull-right input-sm" name="harga_satuan[<?= $value->id ?>]" <?= ($inv->status === 'draft') ? '' : 'disabled' ?>
+                                                                                   style="width: 70%" value="<?= $value->harga_satuan > 0 ? (float) $value->harga_satuan : 0 ?>" required>
+
+                                                                        </div>
                                                                     </td>
-                                                                    <td>
-                                                                        Keterangan
-                                                                    </td>
-                                                                    <td>
-                                                                        Tax Account
-                                                                    </td>
-                                                                    <td>
-                                                                        Base
-                                                                    </td>
-                                                                    <td>
-                                                                        Jumlah
-                                                                    </td>
-                                                                    <td colspan="4" class="text-right">Subtotal 1</td>
-                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal1, 2) ?></td>
+                                                                    <td><?= $value->pajak_ket ?></td>
+                                                                    <td><?= $inv->symbol ?> <?= number_format($jumlah, 2) ?></td>
                                                                 </tr>
-                                                                <tr>
-                                                                    <td>1</td>
-                                                                    <td><?= $dataPajak["ket"] ?? "" ?></td>
-                                                                    <td></td>
-                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal2, 2) ?></td>
-                                                                    <td><?= $inv->symbol?> <?= number_format($totalTax, 2) ?></td>
-                                                                    <td colspan="4" class="text-right">Diskon</td>
-                                                                    <td><?= $inv->symbol?> <?= number_format($totalDiskon, 2) ?></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td colspan="4" class="text-right">Subtotal 2</td>
-                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal2, 2) ?></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td colspan="4" class="text-right">Tax</td>
-                                                                    <td><?= $inv->symbol?> <?= number_format($totalTax, 2) ?></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td colspan="4" class="text-right">Total</td>
-                                                                    <td><?= $inv->symbol?> <?= number_format($subtotal2 + $totalTax, 2) ?></td>
-                                                                </tr>
-                                                            <?php }
+                                                                <?php
+                                                            }
+                                                            $subtotal2 = $subtotal1 - $totalDiskon;
                                                             ?>
+
                                                         </tbody>
                                                     </table>
+                                                    <div class="table-responsive over">
+                                                        <div class="col-xs-12 col-md-8">
+                                                            <table class="table table-condesed table-hover rlstable over">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td style="font-weight: 600;">
+                                                                            Tax
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>
+                                                                            No
+                                                                        </td>
+                                                                        <td>
+                                                                            Keterangan
+                                                                        </td>
+                                                                        <td>
+                                                                            Tax Account
+                                                                        </td>
+                                                                        <td>
+                                                                            Base
+                                                                        </td>
+                                                                        <td>
+                                                                            Jumlah
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>1</td>
+                                                                        <td><?= $dataPajak["ket"] ?? "" ?></td>
+                                                                        <td></td>
+                                                                        <td><?= $inv->symbol ?> <?= number_format($subtotal2, 2) ?></td>
+                                                                        <td><?= $inv->symbol ?> <?= number_format($totalTax, 2) ?></td>
+                                                                    </tr>
+                                                                <?php }
+                                                                ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="col-xs-12 col-md-4">
+                                                        <table class="table table-condesed table-hover rlstable  over">
+                                                            <tr>
+                                                                <td class="text-right"><strong>Subtotal 1</strong></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal1, 2) ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-right">Diskon</td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($totalDiskon, 2) ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-right"><strong>Subtotal 2</strong></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2, 2) ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-right">Tax</td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($totalTax, 2) ?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-right"><strong>Total</strong></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2 + $totalTax, 2) ?></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
+                                </div>
                             </div>
                         </form>
                     </div>

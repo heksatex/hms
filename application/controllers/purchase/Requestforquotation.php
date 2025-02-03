@@ -80,9 +80,9 @@ class Requestforquotation extends MY_Controller {
             $jenis = $this->input->post("jenis");
             $data = array();
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "create_date", "order_date", "status"])
-                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status"])->setOrder(['create_date' => 'desc'])
+                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status","ck.currency as curr_kode"])->setOrder(['create_date' => 'desc'])
                     ->setSearch(["p.nama", "no_po", "status", "note"])
-//                    ->setJoins("")
+                    ->setJoins("currency_kurs ck", "ck.id = po.currency", "left")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
                     ->setWheres(["jenis" => $jenis]);
@@ -102,7 +102,7 @@ class Requestforquotation extends MY_Controller {
                     '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->create_date,
-                    $field->total,
+                    number_format($field->total,2) . " " .( ($field->total === null) ? "" : $field->curr_kode),
                     $field->nama_status ?? $field->status,
                     $field->note
                 ];
@@ -201,8 +201,8 @@ class Requestforquotation extends MY_Controller {
                     "po_no_po" => $nopo,
                     "cfb_items_id" => $id_cfb[$key] ?? 0,
                     "kode_cfb" => $v[0] ?? 0,
-                    "kode_produk" => $kod_pro[$key],
-                    "nama_produk" => $nm_pro[$key],
+                    "kode_produk" => html_entity_decode($kod_pro[$key]),
+                    "nama_produk" => html_entity_decode($nm_pro[$key]),
                     "qty" => $qty[$key],
                     "uom" => $uom[$key],
                     "qty_beli" => $qty_beli[$key],
@@ -213,8 +213,8 @@ class Requestforquotation extends MY_Controller {
                     "kode_pp" => $v[1] ?? 0,
                     'harga_per_uom_beli' => ($novalue === "0") ? ($harga[$key] ?? 0) : 0,
                     "created_at" => $createDokumen,
-                    "deskripsi" => $nm_pro[$key],
-                    "reff_note" => $reffNotes[$key]
+                    "deskripsi" => html_entity_decode($nm_pro[$key]),
+                    "reff_note" => html_entity_decode($reffNotes[$key])
                 );
                 $updatePP = new $this->m_po;
                 $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => ($v[1] ?? 0), "kode_produk" => $kod_pro[$key]])->update(["status" => "cfb"]);
@@ -287,8 +287,8 @@ class Requestforquotation extends MY_Controller {
                     $diskon[$key] = 0;
                     $tax[$key] = null;
                 }
-                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => $deskripsi[$key]]);
-                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => $deskripsi[$key],
+                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key])]);
+                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
                     'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key]];
 
                 $total = ($qty_beli[$key] * $value);
@@ -394,7 +394,7 @@ class Requestforquotation extends MY_Controller {
                         throw new \Exception('Harga belum ditentukan', 500);
                     }
                     $getSetting = new m_global;
-                    $defautTotals = $getSetting->setTables("setting")->setWheres(["setting_name" => "limit_approve"])->setSelects(["value"])->getDetail();
+                    $defautTotals = $getSetting->setTables("setting")->setWheres(["setting_name" => "limit_approve","status"=>1])->setSelects(["value"])->getDetail();
                     $defautTotal = (int) ($defautTotals->value ?? 0);
 
                     if ($totals < $defautTotal) {

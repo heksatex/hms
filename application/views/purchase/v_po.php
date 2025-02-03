@@ -29,7 +29,7 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-body">
-                            <div class="form-group">
+<!--                            <div class="form-group">
                                 <div class="col-md-12">
                                     <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
                                         <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
@@ -50,7 +50,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
                             <div class="col-xs-12 table-responsive">
                                 <table id="tbl-po" class="table">
                                     <thead>

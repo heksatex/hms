@@ -124,14 +124,14 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label>No SJ</label></div>
                                                 <div class="col-xs-8">
-                                                    <input type='text' class="form-control input-sm" name="no_sj" id="no_sj"   value="<?php echo $list->no_sj; ?>"/>
+                                                    <input type='text' class="form-control input-sm" name="no_sj" id="no_sj"   value="<?php echo $list->no_sj; ?>" <?php echo ($list->status == 'done' || $list->status == 'cancel')? 'readonly' : ''; ?> />
                                                 </div>                                    
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label>Tanggal SJ</label></div>
                                                 <div class="col-xs-8">
                                                     <div class='input-group date' id='datetimepicker3' >
-                                                        <input type='text' class="form-control input-sm" name="tgl_sj" id="tgl_sj"  value="<?php echo $list->tanggal_sj; ?>"/>
+                                                        <input type='text' class="form-control input-sm" name="tgl_sj" id="tgl_sj"  value="<?php echo $list->tanggal_sj; ?>" <?php echo ($list->status == 'done' || $list->status == 'cancel')? 'disabled' : ''; ?>/>
                                                         <span class="input-group-addon">
                                                             <span class="glyphicon glyphicon-calendar"  ></span>
                                                         </span>
@@ -176,7 +176,10 @@
                                                                 <th class="style">Product</th>
                                                                 <th class="style" style="text-align: right;">Qty</th>
                                                                 <th class="style">uom</th>
-                                                                <th class="style">Tersedia</th>
+                                                                <th class="style" style="text-align: right;">Tersedia</th>
+                                                                <?php if($list->dept_id == 'RCV') { ?>
+                                                                <th class="style">Kode PP</th>
+                                                                <?php } ?>
                                                                 <th class="style">Status</th>
                                                             </tr>
                                                             <tbody>
@@ -208,17 +211,25 @@
                                                                                 ?>
                                                                                 <a href="javascript:void(0)" onclick="tambah_quant('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>', '<?php echo $list->move_id ?>', '<?php echo $row->origin_prod ?>')" data-toggle="tooltip" title="Tambah Quant"> 
                                                                                     <span class="glyphicon  glyphicon-share"></span></a>
-    <?php } ?>
+                                                                            <?php 
+                                                                            } 
+                                                                            ?>
                                                                         </td>
                                                                         <td align="right"><?php echo number_format($row->qty, 2) ?></td>
                                                                         <td><?php echo $row->uom ?></td>
-                                                                        <td style="color:<?php echo $color; ?>"><?php echo (!empty($row->sum_qty)) ? number_format($row->sum_qty, 2) : ''; ?></td>
-                                                                        <td><?php if ($row->status_barang == 'cancel') echo 'Batal';
-    else echo $row->status_barang; ?></td>
+                                                                        <td  align="right" style="color:<?php echo $color; ?>"><?php echo (!empty($row->sum_qty)) ? number_format($row->sum_qty, 2) : ''; ?></td>
+                                                                        <?php if($list->dept_id == 'RCV') { ?>
+                                                                        <td><?= $row->kode_pp ?></td>
+                                                                        <?php } ?>
+                                                                        <td><?php 
+                                                                            if ($row->status_barang == 'cancel') echo 'Batal';
+                                                                            else echo $row->status_barang; 
+                                                                            ?>
+                                                                        </td>
                                                                     </tr>
-    <?php
-}
-?>
+                                                                    <?php
+                                                                }
+                                                                ?>
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -243,16 +254,16 @@
                                                                 <?php if ($show_lebar['show_lebar'] == 'true') { ?>
                                                                     <th class="style" style="text-align: right;">Lbr.Greige</th>
                                                                     <th class="style" style="text-align: right;">Lbr.Jadi</th>
-<?php } ?>
+                                                                <?php } ?>
                                                                 <th class="style">Reff Note</th>
                                                                 <th class="style">Status</th>
                                                                 <th class="style">Quant Id</th>
                                                                 <th class="style no"></th>
                                                             </tr>
                                                             <tbody>
-<?php
-foreach ($smi as $row) {
-    ?>
+                                                                <?php
+                                                                foreach ($smi as $row) {
+                                                                    ?>
                                                                     <tr class="num">
                                                                         <td></td>
                                                                         <td><?php echo $row->kode_produk ?></td>
@@ -275,15 +286,15 @@ foreach ($smi as $row) {
                                                                         ?></td>
                                                                         <td><?php echo $row->quant_id ?></td>
                                                                         <td class="no" align="center" >
-                                                                    <?php if ($akses_menu > 0 AND $show_delete == true) { ?>
+                                                                        <?php if ($akses_menu > 0 AND $show_delete == true) { ?>
                                                                                 <a onclick="hapus('<?php echo $list->kode ?>', '<?php echo $list->move_id ?>', '<?php echo $row->kode_produk ?>', '<?php echo htmlentities($row->nama_produk) ?>', '<?php echo $row->quant_id ?>', '<?php echo $row->row_order ?>', '<?php echo $row->status ?>', '<?php echo $row->origin_prod ?>')"  href="javascript:void(0)"><i class="fa fa-trash" style="color: red"></i> 
                                                                                 </a>
-    <?php } ?>
+                                                                        <?php } ?>
                                                                         </td>
                                                                     </tr>
-    <?php
-}
-?>
+                                                                    <?php
+                                                                }
+                                                                ?>
                                                             </tbody>
                                                         </table>
                                                     </div>
@@ -315,7 +326,7 @@ foreach ($smi as $row) {
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-4"><label>Method</label></div>
                                                                 <div class="col-xs-8 col-md-8">
-<?php echo ": " . $smove['method']; ?>
+                                                                <?php echo ": " . $smove['method']; ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -337,11 +348,11 @@ foreach ($smi as $row) {
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-4"><label>Status </label></div>
                                                                 <div class="col-xs-8 col-md-8">
-<?php if ($smove['status'] == 'cancel')
-    echo ': Batal';
-else
-    echo ': ' . $smove['status'];
-?>
+                                                                <?php if ($smove['status'] == 'cancel')
+                                                                    echo ': Batal';
+                                                                else
+                                                                    echo ': ' . $smove['status'];
+                                                                ?>
                                                                     <input type="hidden" name="status" id="status" value="<?php echo $smove['status'] ?>">
                                                                 </div>
                                                             </div>
@@ -366,13 +377,13 @@ else
                                                                     </label>
                                                                 </div>
                                                                 <div class="col-xs-8 col-md-8">
-<?php
-if (!empty($mo['kode'])) {
-    echo ": " . $mo['kode'];
-} else {
-    echo ": -";
-}
-?>
+                                                                <?php
+                                                                if (!empty($mo['kode'])) {
+                                                                    echo ": " . $mo['kode'];
+                                                                } else {
+                                                                    echo ": -";
+                                                                }
+                                                                ?>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -683,7 +694,7 @@ if (!empty($mo['kode'])) {
                                                 if (response.sesi == 'habis') {//jika session habis
                                                     alert_modal_warning(response.message);
                                                     window.location.replace('../index');
-                                                } else if (response.status == 'draft' || response.status == 'ada' || response.status == 'not_valid') {
+                                                } else if (response.status == 'draft' || response.status == 'ada' || response.status == 'not_valid' || response.status == 'failed') {
                                                     //jika ada item masih draft/status sudah terkirim/lokasi lot tidak valid
                                                     unblockUI(function () {});
                                                     alert_modal_warning(response.message);

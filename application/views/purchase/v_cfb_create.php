@@ -91,8 +91,8 @@
                             <tr>
                                 <td><input type="hidden" name="cfb[]" value="<?= $datas[1] ?>"><?= $kodecfb[0] ?></td>
                                 <td><input type="hidden" name="kod_pro[]" value="<?= $datas[2] ?>"><?= $datas[2] ?></td>
-                                <td><input type="hidden" name="nm_pro[]" value="<?= $datas[3] ?>"><?= $datas[3] ?>
-                                     <input type="hidden" name="reff_note[]" value="<?= $datas[13] ?>">
+                                <td><input type="hidden" name="nm_pro[]" value="<?= htmlentities($datas[3]) ?>"><?= $datas[3] ?>
+                                     <input type="hidden" name="reff_note[]" value="<?= htmlentities($datas[13]) ?>">
                                 </td>
                                 <td>
                                     <input type="hidden" name="qty[]" value="<?= $datas[4] ?>">

@@ -132,10 +132,8 @@
                   <div class="col-xs-8">
                     <select class="form-control input-sm" name="priority" id="priority" />
                     <option value="">Pilih Priority</option>
-                    <option>Not Urgent</option>
                     <option>Normal</option>
                     <option>Urgent</option>
-                    <option>Very Urgent</option>
                     </select>
                   </div>                                    
                 </div>

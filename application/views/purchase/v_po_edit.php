@@ -138,13 +138,13 @@
 
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
-            <header class="main-header">
+            <div class="main-header">
                 <?php $this->load->view("admin/_partials/main-menu.php") ?>
                 <?php
                 $data['deptid'] = $id_dept;
                 $this->load->view("admin/_partials/topbar.php", $data)
                 ?>
-            </header>
+            </div>
             <aside class="main-sidebar">
                 <?php
                 $this->load->view("admin/_partials/sidebar.php");
@@ -310,7 +310,11 @@
                                                 $totals += $total;
                                                 $diskon = (($value->diskon ?? 0));
                                                 $diskons += $diskon;
-                                                $taxes += ($total - $diskon) * $value->amount_tax;
+                                                if ($setting !== null) {
+                                                    $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                } else {
+                                                    $taxes += ($total - $diskon) * $value->amount_tax;
+                                                }
                                                 if ($value->amount_tax > 0) {
                                                     $amountTaxes = $value->amount_tax;
                                                 }
@@ -415,23 +419,12 @@
                                             if (strtolower($po->status) !== "draft") {
                                                 ?>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Total</td>
+                                                    <td colspan="8" class="style text-right">Subtotal 1</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($totals, 2) ?>
                                                         </strong>
                                                     </td>
                                                 </tr>
-                                                <?php if ($setting !== null) {
-                                                    ?>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
-                                                        <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($totals * (11 / 12), 2) ?>
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                <?php }
-                                                ?>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Discount</td>
                                                     <td class="style text-center totalan"> 
@@ -439,11 +432,22 @@
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal</td>
+                                                    <td colspan="8" class="style text-right">Subtotal 2</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
                                                         </strong></td>
                                                 </tr>
+                                                <?php if ($setting !== null) {
+                                                    ?>
+                                                    <tr>    
+                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                        <td class="style text-center totalan"> 
+                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) * (11 / 12), 2) ?>
+                                                            </strong>
+                                                        </td>
+                                                    </tr>
+                                                <?php }
+                                                ?>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Taxes</td>
                                                     <td class="style text-center totalan"> 

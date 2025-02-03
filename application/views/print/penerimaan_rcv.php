@@ -13,6 +13,7 @@
                 width: 33.33%;
                 padding-top: 10px;
                 text-align: center;
+                font-size: 12px;
                 /* Should be removed. Only for demonstration */
             }
             #columnmd {
@@ -20,6 +21,7 @@
                 width: 50%;
                 padding-top: 10px;
                 text-align: center;
+                font-size: 12px;
                 /* Should be removed. Only for demonstration */
             }
             .text-left{
@@ -112,7 +114,7 @@
             </div>
         </div>
         <div id="row">
-            <table style="width: 100%; padding-top: 10px">
+            <table style="width: 100%; padding-top: 10px;font-size: 12px;">
                 <thead>
                     <tr>
                         <th>
@@ -147,13 +149,13 @@
                                 <?= ($key + 1) ?>
                             </td>
                             <td>
-                                <?= $value->kode_produk ?>
+                                <?= substr($value->kode_produk,0,11) ?>
                             </td>
                             <td>
-                                <?= $value->nama_produk ?>
+                                <?= substr($value->nama_produk,0,18) ?>
                             </td>
                             <td>
-                                <?= $value->lot ?>
+                                <?= substr($value->lot,0,20) ?>
                             </td>
                             <td>
                                 <?= $value->qty ?>
@@ -162,7 +164,7 @@
                                 <?= $value->uom ?>
                             </td>
                             <td>
-                                <?= $value->reff_note ?? "" ?>
+                                <?= substr($value->reff_note,0,15) ?>
                             </td>
                         </tr>
                         <?php
@@ -177,7 +179,9 @@
 
             </div>
             <div id="columnmd">
-                <div style="text-align: right">Tgl.Cetak&nbsp;:<?= date("Y-m-d H:i:s") ?></div>
+                <div style="text-align: right">
+                    <p>Tgl.Cetak&nbsp;:<?= date("Y-m-d H:i:s") ?></p>
+                </div>
                 <div id="row">
                     <div id="column">
                         <p>Pembelian</p>
@@ -187,6 +191,18 @@
                     </div>
                     <div id="column">
                         <p>Receiving</p>
+                    </div>
+                </div>
+                <br>
+                <div id="row" style="font-size: 12px">
+                    <div id="column">
+                        <p>_________</p>
+                    </div>
+                    <div id="column">
+                        <p>_________</p>
+                    </div>
+                    <div id="column">
+                        <p>(<?= $users["nama"] ?? "" ?>)</p>
                     </div>
                 </div>
             </div>

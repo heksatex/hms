@@ -104,7 +104,7 @@
                         ?>
                         <tr>
                             <td>
-                                [<?= $value->kode_produk ?>] <?= $value->nama_produk ?>
+                               <?= $value->deskripsi ?>
                             </td>
                             <td><?= $value->tax_name ?></td>
                             <td><?= $po->order_date ?></td>

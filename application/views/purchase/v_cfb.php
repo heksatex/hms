@@ -276,7 +276,8 @@
                                 type: "POST",
                                 data: {
                                     ids: rsp,
-                                    status: "confirm"
+                                    status: "confirm",
+                                    before_status: "draft"
                                 },
                                 success: function (data) {
                                     alert_notify(data.icon, data.message, data.type, function () {});

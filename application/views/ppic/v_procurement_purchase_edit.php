@@ -174,20 +174,8 @@
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Departement Tujuan</label></div>
                   <div class="col-xs-8">
-                    <select class="form-control input-sm" name="warehouse" id="warehouse" />
-                      <?php
-                        echo '<option value="">Pilih Warehouse</option>';
-                        foreach ($warehouse as $row) {
-                          if($row->kode == $procurementpurchase->warehouse){?>
-                           <option value='<?php echo $row->kode; ?>' selected><?php echo $row->nama;?></option>
-                        <?php
-                          }else{?>
-                          <option value='<?php echo $row->kode; ?>'><?php echo $row->nama;?></option>
-                        <?php  
-                          }
-                        }
-                      ?>
-                    </select>
+                    <input type="hidden" class="form-control input-sm" name="warehouse" id="warehouse" readonly="readonly"  value="<?php echo $procurementpurchase->warehouse?>"/>
+                    <input type="text" class="form-control input-sm" name="nama_dept" id="nama_dept" readonly="readonly"  value="<?php echo $procurementpurchase->nama_departemen?>"/>
                   </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
@@ -196,7 +184,7 @@
                     <select class="form-control input-sm" name="priority" id="priority" />
                     <option value="">Pilih Priority</option>
                     <?php 
-                    $val = array('Not Urgent','Normal','Urgent','Very Urgent');
+                    $val = array('Normal','Urgent', 'Not Urgent', 'Very Urgent');
                      for($i=0;$i<=3;$i++) {
                       if($val[$i] == $procurementpurchase->priority){?>
                          <option selected><?php echo $val[$i];?></option>
@@ -251,8 +239,8 @@
                               $no = 1;
                               foreach ($details as $row) {
                             ?>
-                              <tr class="">
-                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"><?php echo $no.".";?></td>
+                              <tr class="num">
+                                <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"></td>
                                 <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk;?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk)?>"><?php echo '['.$row->kode_produk.'] '.$row->nama_produk;?></a></td>
                                 <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date;?>"><?php echo $row->schedule_date?></td>
                                 <td data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>" align="right"><?php echo number_format($row->qty,2)?></td>
@@ -418,9 +406,12 @@
                           text:'['+item.kode_produk+'] '+item.nama_produk
                       });
                   });
+                  results.push({id:"add_search", text:"search.." })
                   return {
                     results:results
                   };
+                  // text:"<a href='#' onclick='test()' >Search More ..</a>"
+
                 },
                 error: function (xhr, ajaxOptions, thrownError){
                   //alert(xhr.responseText);
@@ -823,59 +814,59 @@
       if(status == 'cancel'){
         var message = 'Maaf, Procurement Purchase Sudah dibatalkan !';
         alert_modal_warning(message);
-      }else if(status == 'draft'){
-         var message = 'Maaf, Status Procurement Purchase Masih draft !';
-        alert_modal_warning(message);
+      // }else if(status == 'draft'){
+      //    var message = 'Maaf, Status Procurement Purchase Masih draft !';
+      //   alert_modal_warning(message);
       }else{
         bootbox.dialog({
-        message: "Apakah Anda ingin membatalkan Procurement Purchase ini ?",
-        title: "<i class='fa fa-warning'></i> Batal Procurements Purchase !",
-        buttons: {
-          danger: {
-              label    : "Yes ",
-              className: "btn-primary btn-sm",
-              callback : function() {
-                please_wait(function(){});
-                $.ajax({
-                  dataType: "JSON",
-                  url : '<?php echo site_url('ppic/procurementpurchase/batal_procurement_purchase') ?>',
-                  type: "POST",
-                  data: {kode : kode, kode_prod:kode_prod, sales_order:sales_order},
-                  success: function(data){
-                    if(data.sesi=='habis'){
-                        //alert jika session habis
-                        alert_modal_warning(data.message);
-                        window.location.replace('../index');
-                    }else if(data.status == 'failed'){
-                        unblockUI( function(){});
-                        //alert(data.message);
-                        alert_modal_warning(data.message);
-                        refresh_procurement();
-                    }else{
-                        refresh_procurement();
-                        unblockUI( function() {
-                          setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
-                        });
-                     }
-                  },
-                  error: function (xhr, ajaxOptions, thrownError){
-                    alert('Error data');
-                    alert(xhr.responseText);
-                    refresh_procurement();
-                    unblockUI( function(){});
-                  }
-                });
-              }
-          },
-          success: {
-                label    : "No",
-                className: "btn-default  btn-sm",
+          message: "Apakah Anda ingin membatalkan Procurement Purchase ini ?",
+          title: "<i class='fa fa-warning'></i> Batal Procurements Purchase !",
+          buttons: {
+            danger: {
+                label    : "Yes ",
+                className: "btn-primary btn-sm",
                 callback : function() {
-                  $('.bootbox').modal('hide');
-                  refresh_procurement();
+                  please_wait(function(){});
+                  $.ajax({
+                    dataType: "JSON",
+                    url : '<?php echo site_url('ppic/procurementpurchase/batal_procurement_purchase') ?>',
+                    type: "POST",
+                    data: {kode : kode, kode_prod:kode_prod, sales_order:sales_order},
+                    success: function(data){
+                      if(data.sesi=='habis'){
+                          //alert jika session habis
+                          alert_modal_warning(data.message);
+                          window.location.replace('../index');
+                      }else if(data.status == 'failed'){
+                          unblockUI( function(){});
+                          //alert(data.message);
+                          alert_modal_warning(data.message);
+                          refresh_procurement();
+                      }else{
+                          refresh_procurement();
+                          unblockUI( function() {
+                            setTimeout(function() { alert_notify(data.icon,data.message,data.type,function(){}); }, 1000);
+                          });
+                      }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError){
+                      alert('Error data');
+                      alert(xhr.responseText);
+                      refresh_procurement();
+                      unblockUI( function(){});
+                    }
+                  });
                 }
+            },
+            success: {
+                  label    : "No",
+                  className: "btn-default  btn-sm",
+                  callback : function() {
+                    $('.bootbox').modal('hide');
+                    refresh_procurement();
+                  }
+            }
           }
-        }
         });
 
       }

@@ -369,9 +369,9 @@ class Penerimaanbarang extends MY_Controller {
                 //cek status terkirim ?
                 $cek_kirim = $this->m_penerimaanBarang->cek_status_barang($kode)->row_array();
                 if ($cek_kirim['status'] == 'draft') {
-                    $callback = array('status' => 'ada', 'message' => 'Maaf, Product Belum ready !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                    $callback = array('status' => 'failed', 'message' => 'Maaf, Product Belum ready !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } elseif ($cek_kirim['status'] == 'done') {
-                    $callback = array('status' => 'ada', 'message' => 'Maaf, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                    $callback = array('status' => 'failed', 'message' => 'Maaf, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else if ($cek_kirim['status'] == 'cancel') {
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak Bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                     //}else if(($cek_tmp == 0 AND $deptid =='GRG' ) OR ($mode == 'scan' AND $cek_tmp == 0)){
@@ -387,7 +387,9 @@ class Penerimaanbarang extends MY_Controller {
                     $lokasi = $this->m_penerimaanBarang->get_location_by_move_id($move_id)->row_array();
 
                     // insert stock_move_items 
-                    $row_order_add = 1;
+                    // $row_order_add = 1;
+                    $row_order_add = $this->_module->get_row_order_stock_move_items_by_kode($move_id);
+
                     foreach ($add_quant as $add_smi) {
                         // smi to adj
                         $data_smi[] = array('move_id' => $move_id,
@@ -450,6 +452,34 @@ class Penerimaanbarang extends MY_Controller {
                         $result_sq2 = $this->_module->simpan_stock_quant_batch_2($data_stock_quant);
                         if ($result_sq2['message'] != null) {
                             throw new \Exception('Simpan Data Gagal !', 200);
+                        }
+                    }
+
+                    //cek qty yg akan dikirim                     
+                    if($deptid == 'RCV'){ 
+                        $produk_lebih = '';
+                        $qty_produk_lebih = false;
+                        $in_items =  $this->m_penerimaanBarang->get_list_penerimaan_barang_items($kode);
+        
+                        foreach($in_items as $ins ){
+                          // qty target
+                          $kebutuh_qty_in = $ins->qty;
+                          $origin_prod_in = $ins->origin_prod;
+                          $kode_produk_in = $ins->kode_produk;
+                          $nama_produk_in = $ins->nama_produk;
+        
+                          //cek_qty_smi by  origin produk;
+                          $qty_smi = $this->_module->get_qty_stock_move_items_by_kode_origin($move_id,addslashes($kode_produk_in),$origin_prod_in)->row_array();
+                          
+                          if($qty_smi['sum_qty'] > $kebutuh_qty_in){
+                            $produk_lebih   .= $nama_produk_in.'<br> ';
+                            $qty_produk_lebih      = true;
+                          }
+        
+                        }
+                        if($qty_produk_lebih == true){
+                            // $produk_lebih = rtrim($produk_lebih, ', ');
+                            throw new \Exception('Qty Produk Melebihi target ! <br>'.$produk_lebih, 200);
                         }
                     }
 
@@ -750,29 +780,31 @@ class Penerimaanbarang extends MY_Controller {
                                 $qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id_in, addslashes($kode_produk))->row_array();
                             }
 
-                            if ($qty_smi['sum_qty'] < $qty and !empty($qty_smi['sum_qty'])) {//jika qty di stock_move_items kurang dari qty di penerimaan barang items
+                            if ($qty_smi['sum_qty'] <= $qty and !empty($qty_smi['sum_qty'])) {//jika qty di stock_move_items kurang dari qty di penerimaan barang items
                                 //update status done, in items & sm produk
                                 $this->m_penerimaanBarang->update_status_penerimaan_barang_items_origin_prod($kode, addslashes($kode_produk), 'done', $origin_prod);
                                 $this->_module->update_status_stock_move_produk_origin_prod($move_id_in, addslashes($kode_produk), 'done', $origin_prod);
 
-                                $backorder = true;
-                                $qty_back = $qty - $qty_smi['sum_qty'];
-                                //simpan ke penermaan_barang_items
-                                // $sql_in_items_batch .= "('" . $kode_in . "','" . addslashes($row->kode_produk) . "','" . addslashes($row->nama_produk) . "','" . $qty_back . "','" . addslashes($row->uom) . "','draft','" . $in_row . "','" . addslashes($origin_prod) . "'), ";
-
-                                $sql_in_items_batch_2[] = array(
-                                    "kode" => $kode_in,
-                                    "kode_produk" => $row->kode_produk,
-                                    "nama_produk" => $row->nama_produk,
-                                    "qty" => $qty_back,
-                                    "uom" => $row->uom,
-                                    "status_barang" => $status_back_order,
-                                    "origin_prod" => $origin_prod,
-                                    "row_order" => $in_row
-                                );
-
-                                //simpan ke stock move produk 
-                                $sql_stock_move_produk_batch .= "('" . $move_id . "','" . addslashes($row->kode_produk) . "','" . addslashes($row->nama_produk) . "','" . $qty_back . "','" . addslashes($row->uom) . "','" . $status_back_order . "','" . $in_row . "','" . addslashes($origin_prod) . "'), ";
+                                if($qty_smi['sum_qty'] < $qty) {
+                                    $backorder = true;
+                                    $qty_back = $qty - $qty_smi['sum_qty'];
+                                    //simpan ke penermaan_barang_items
+                                    // $sql_in_items_batch .= "('" . $kode_in . "','" . addslashes($row->kode_produk) . "','" . addslashes($row->nama_produk) . "','" . $qty_back . "','" . addslashes($row->uom) . "','draft','" . $in_row . "','" . addslashes($origin_prod) . "'), ";
+    
+                                    $sql_in_items_batch_2[] = array(
+                                        "kode" => $kode_in,
+                                        "kode_produk" => $row->kode_produk,
+                                        "nama_produk" => $row->nama_produk,
+                                        "qty" => $qty_back,
+                                        "uom" => $row->uom,
+                                        "status_barang" => $status_back_order,
+                                        "origin_prod" => $origin_prod,
+                                        "row_order" => $in_row
+                                    );
+    
+                                    //simpan ke stock move produk 
+                                    $sql_stock_move_produk_batch .= "('" . $move_id . "','" . addslashes($row->kode_produk) . "','" . addslashes($row->nama_produk) . "','" . $qty_back . "','" . addslashes($row->uom) . "','" . $status_back_order . "','" . $in_row . "','" . addslashes($origin_prod) . "'), ";
+                                }
                                 $in_row++;
                             } else if (round($qty_smi['sum_qty'], 2) == 0.00 or empty($qty_smi['sum_qty'])) {
 
@@ -1102,7 +1134,7 @@ class Penerimaanbarang extends MY_Controller {
             // $this->_module->unlock_tabel();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                    ->set_output(json_encode(array('status'=> 'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->rollbackTransaction();
             // unlock table
@@ -1131,7 +1163,7 @@ class Penerimaanbarang extends MY_Controller {
             // cek item penerimaan_barang by move id
             $smi_out = $this->m_penerimaanBarang->cek_stock_move_items_penerimaan_barang_by_move_id($move_id);
             // tmp add quant
-            $add_quant = $this->m_penerimaanBarang->get_list_add_quant_penerimaan_barang_tmp($kode);
+            $add_quant = $this->m_penerimaanBarang->get_list_add_quant_penerimaan_barang_tmp_1($kode);
 
             //cek status terkirim ?
             $cek_kirim = $this->m_penerimaanBarang->cek_status_barang($kode)->row_array();
@@ -1615,6 +1647,7 @@ class Penerimaanbarang extends MY_Controller {
                 $lokasi = $this->m_penerimaanBarang->get_location_by_move_id($move_id)->row_array();
 
                 $list = $this->m_penerimaanBarang->get_list_penerimaan_barang_items($kode);
+                // log_message('error',json_encode($list));
                 foreach ($list as $val) {
                     $kode_produk = $val->kode_produk;
                     $nama_produk = $val->nama_produk;
@@ -1641,6 +1674,8 @@ class Penerimaanbarang extends MY_Controller {
 
                     if ($kebutuhan_qty > 0) {//jika kebutuhan_qty > 0
                         $ceK_quant = $this->_module->get_cek_stok_quant_by_prod(addslashes($kode_produk), $lokasi['lokasi_dari'], $origin, $deptid)->result_array();
+                        log_message('error',json_encode($ceK_quant));
+
                         foreach ($ceK_quant as $stock) {
                             $kosong = false;
                             $history = true;
@@ -1719,6 +1754,8 @@ class Penerimaanbarang extends MY_Controller {
                             if ($kebutuhan_qty == 0) {
                                 break;
                             }
+                    // log_message('error',$sql_stock_move_items_batch);
+
                         }//end foreach cek_quant
 
                         if ($kebutuhan_qty > 0) {
@@ -1734,6 +1771,7 @@ class Penerimaanbarang extends MY_Controller {
                     }
 
 
+
                     if (!empty($sql_stock_quant_batch)) {
                         $sql_stock_quant_batch = rtrim($sql_stock_quant_batch, ', ');
                         $this->_module->simpan_stock_quant_batch($sql_stock_quant_batch);
@@ -1745,7 +1783,7 @@ class Penerimaanbarang extends MY_Controller {
                         $sql_stock_move_items_batch = rtrim($sql_stock_move_items_batch, ', ');
                         $this->_module->simpan_stock_move_items_batch($sql_stock_move_items_batch);
 
-                        $sql_stock_move_batch = "";
+                        $sql_stock_move_items_batch = "";
                     }
 
                     //update reserve_move di stock_quant
@@ -1903,8 +1941,9 @@ class Penerimaanbarang extends MY_Controller {
 
             $printers = $this->session->userdata('printer');
             if ($printers === null) {
-                throw new \exception("Printer Direct belum ditentukan, silakan pilih dimenu setting", 500);
+                throw new \exception("Printer Direct belum ditentukan, silakan pilih pada tab atas", 500);
             }
+            $printers = json_decode($printers);
 
             $dept_id = $this->input->get('departemen');
             $kode = $this->input->get('kode');
@@ -1961,7 +2000,7 @@ class Penerimaanbarang extends MY_Controller {
             }
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-            $printer->text(str_pad("NO", 2) . str_pad("Kode Produk", 11, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 18, " ", STR_PAD_BOTH) . str_pad("LOT", 20, " ", STR_PAD_BOTH)
+            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 11, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 18, " ", STR_PAD_BOTH) . str_pad("LOT", 20, " ", STR_PAD_BOTH)
                     . str_pad("Qty", 8, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 15));
             $printer->setUnderline(Printer::UNDERLINE_NONE);
 
@@ -1975,7 +2014,7 @@ class Penerimaanbarang extends MY_Controller {
                     $kodeProduk[$key] = $value;
                 }
 
-                $namaProduk = str_split(substr($item->nama_produk, 18), 18);
+                $namaProduk = str_split(substr($item->nama_produk, 0,18), 18);
                 foreach ($namaProduk as $key => $value) {
                     $value = trim($value);
                     $namaProduk[$key] = $value;
@@ -1999,13 +2038,13 @@ class Penerimaanbarang extends MY_Controller {
                     $uom[$key] = $value;
                 }
 
-                $reff = str_split(substr($item->reff_note, 15), 15);
+                $reff = str_split(substr($item->reff_note, 0,15), 15);
                 foreach ($reff as $key => $value) {
                     $value = trim($value);
                     $reff[$key] = $value;
                 }
 
-                $noo = str_split(($keyss + 1), 2);
+                $noo = str_split(($keyss + 1), 3);
                 foreach ($noo as $key => $value) {
                     $value = trim($value);
                     $noo[$key] = $value;
@@ -2023,7 +2062,7 @@ class Penerimaanbarang extends MY_Controller {
                 $counter = max($temp);
 
                 for ($i = 0; $i < $counter; $i++) {
-                    $line = (isset($noo[$i])) ? str_pad($noo[$i], 2) : str_pad("", 2);
+                    $line = (isset($noo[$i])) ? str_pad($noo[$i], 3) : str_pad("", 3);
 
                     $line .= (isset($kodeProduk[$i])) ? str_pad($kodeProduk[$i], 11, " ", STR_PAD_BOTH) : str_pad("", 11, " ", STR_PAD_BOTH);
                     $line .= (isset($namaProduk[$i])) ? str_pad($namaProduk[$i], 18, " ", STR_PAD_BOTH) : str_pad("", 18, " ", STR_PAD_BOTH);
@@ -2052,13 +2091,12 @@ class Penerimaanbarang extends MY_Controller {
             $printer->feed();
             $datas = $connector->getData();
             $printer->close();
-//            log_message('error', $datas);
             $client = new GuzzleHttp\Client();
 
             $resp = $client->request("POST", $this->config->item('url_web_print'), [
                 "form_params" => [
                     "data" => $datas,
-                    "printer" => "\\\\10.10.0.111\\epsonlx300"
+                    "printer" => "\\\\{$printers->ip_share}\\{$printers->nama_printer_share}"
                 ]
             ]);
             $this->output->set_status_header(200)
@@ -2332,9 +2370,12 @@ class Penerimaanbarang extends MY_Controller {
                     // delete table tmp 
                     $this->m_penerimaanBarang->delete_add_quant_penerimaan_barang($kode, $kode_produk, $origin_prod);
 
+                    $cek_target_qty = $this->m_penerimaanBarang->get_qty_produk_penerimaan_by_kode_origin($kode,$kode_produk,$origin_prod);
+
                     $tmp_data_insert = array();
                     $row_order = $this->m_penerimaanBarang->get_last_row_order_tmp($kode);
                     $list_product = "";
+                    $tmp_jml_qty  = 0;
                     $loop = 1;
                     foreach ($data_lot as $dl) {
                         $tmp_data_insert[] = array(
@@ -2355,10 +2396,16 @@ class Penerimaanbarang extends MY_Controller {
                             'origin_prod' => $origin_prod,
                             'row_order' => $row_order
                         );
+                        $tmp_jml_qty = $tmp_jml_qty + $dl['qty'];
                         $list_product .= "(" . $loop . ") " . $dl['nama_produk'] . " " . $dl['lot'] . " " . $dl['qty'] . " " . $dl['uom'] . " " . $dl['qty2'] . " " . $dl['uom2'] . " " . $dl['grade'] . " " . $dl['lebar_greige'] . " " . $dl['uom_lebar_greige'] . " " . $dl['lebar_jadi'] . " " . $dl['uom_lebar_jadi'] . " " . $dl['reff_note'] . " <br>";
                         $row_order++;
                         $loop++;
+                    }   
+
+                    if(floatval($tmp_jml_qty) > floatval($cek_target_qty)){
+                        throw new \Exception('Qty Melebih Target', 200);
                     }
+
                     if ($tmp_data_insert) {
                         $this->m_penerimaanBarang->save_add_quant_penerimaan_barang($tmp_data_insert);
 
@@ -2383,7 +2430,7 @@ class Penerimaanbarang extends MY_Controller {
         } catch (\Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                    ->set_output(json_encode(array('status'=>'failed','message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             // unlock table
             $this->_module->unlock_tabel();
@@ -2432,7 +2479,6 @@ class Penerimaanbarang extends MY_Controller {
             $head = $modelHead->setTables("penerimaan_barang")->setWheres(["kode" => $kode, "dept_id" => $dept_id])
                             ->setJoins('partner', "partner_id = partner.id", "left")->setOrder(["kode"])
                             ->setSelects(["penerimaan_barang.*", "concat(partner.delivery_street,' ',partner.delivery_city) as alamat"])->getDetail();
-            log_message('error', "{$kode} ".json_encode($head));
 
             if (!empty($head)) {
                 $kode = $head->kode;
@@ -2449,7 +2495,7 @@ class Penerimaanbarang extends MY_Controller {
                 mkdir(FCPATH . $url, 0775, TRUE);
             }
             ini_set("pcre.backtrack_limit", "50000000");
-            $html = $this->load->view("print/penerimaan_rcv", ["head" => $head, "item" => $items], true);
+            $html = $this->load->view("print/penerimaan_rcv", ["head" => $head, "item" => $items,'users'=>$users], true);
             $mpdf = new Mpdf(['tempDir' => FCPATH . '/tmp']);
 
             $mpdf->WriteHTML($html);

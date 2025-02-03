@@ -13,6 +13,9 @@
         Lokasi Tujuan
     </th>
     <th>
+        Status
+    </th>
+    <th>
         Reff Note
     </th>
 </thead>
@@ -32,6 +35,9 @@
             </td>
             <td>
                 <?= $value->lokasi_tujuan ?>
+            </td>
+            <td>
+                <?= $value->status ?>
             </td>
             <td>
                 <?= $value->reff_note ?>

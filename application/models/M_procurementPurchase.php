@@ -204,16 +204,19 @@ class M_procurementPurchase extends CI_Model
         return is_array($this->db->error());
     }
 
-	public function ubah($kode_pp, $tgl, $note, $priority, $warehouse)
+	public function ubah($kode_pp, $tgl, $note, $priority)
 	{
 		return $this->db->query("UPDATE procurement_purchase SET schedule_date = '$tgl', notes = '$note', 
-															 priority = '$priority', warehouse ='$warehouse'
+															 priority = '$priority'
 														 WHERE kode_pp =  '$kode_pp' ");
 	}
 
 	public function get_data_by_code($kode_pp)
 	{
-		$query = $this->db->query("SELECT * FROM procurement_purchase where kode_pp = '".$kode_pp."' ");
+		$query = $this->db->query("SELECT pp.*, d.nama as nama_departemen
+								 FROM procurement_purchase pp
+								 LEFT JOIN departemen as d ON pp.warehouse = d.kode
+								 where pp.kode_pp = '".$kode_pp."' ");
 		return $query->row();
 	}
 
@@ -278,9 +281,9 @@ class M_procurementPurchase extends CI_Model
 		return $this->db->query("DELETE FROM procurement_purchase_items WHERE kode_pp = '$kode_pp' AND row_order = '$row_order'");
 	}
 
-	public function update_procurement_purchase_items($kode_pp,$tgl,$qty,$reff,$row_order)
+	public function update_procurement_purchase_items($kode_pp,$kode_produk,$nama_produk,$tgl,$qty,$reff,$row_order)
 	{
-		return $this->db->query("UPDATE procurement_purchase_items SET schedule_date = '$tgl', qty = '$qty', reff_notes = '$reff' 
+		return $this->db->query("UPDATE procurement_purchase_items SET kode_produk = '$kode_produk', nama_produk = '$nama_produk', schedule_date = '$tgl', qty = '$qty', reff_notes = '$reff' 
 																WHERE kode_pp = '$kode_pp' AND row_order = '$row_order'");
 	}
 
@@ -355,4 +358,12 @@ class M_procurementPurchase extends CI_Model
         return $this->db->affected_rows();
     }
 
+
+	function cek_cfb_by_kode($kode,$status)
+	{
+		$this->db->where('status',$status);
+		$this->db->where('kode_cfb', $status);
+		$query = $this->db->get('cfb');
+		return $query;
+	}
 }

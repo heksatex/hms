@@ -52,14 +52,14 @@ class Purchaseorder extends MY_Controller {
             $model1 = new $this->m_po;
             $model2 = new $this->m_po;
             $model3 = clone $model2;
-            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name"=>"dpp_lain","status"=>"1"])->setSelects(["value"])->getDetail();
+            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
-                    ->setJoins("currency_kurs","currency_kurs.id = po.currency","left")
-                    ->setJoins("currency","currency.nama = currency_kurs.currency","left")
-                            ->setSelects(["po.*", "p.nama as supp","currency.symbol"])
-                    ->setWheres(["po.no_po" => $kode_decrypt])
-                    ->setWhereRaw("po.status in ('done','cancel','purchase_confirmed')")->getDetail();
+                            ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
+                            ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
+                            ->setSelects(["po.*", "p.nama as supp", "currency.symbol"])
+                            ->setWheres(["po.no_po" => $kode_decrypt])
+                            ->setWhereRaw("po.status in ('done','cancel','purchase_confirmed')")->getDetail();
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
@@ -83,8 +83,9 @@ class Purchaseorder extends MY_Controller {
         try {
             $data = array();
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "order_date", "create_date", "status"])
-                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status"])->setOrder(['create_date' => 'desc'])
+                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode"])->setOrder(['create_date' => 'desc'])
                     ->setSearch(["p.nama", "no_po", "prioritas", "status"])
+                    ->setJoins("currency_kurs ck", "ck.id = po.currency", "left")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
                     ->setWhereRaw("status in ('done','cancel','purchase_confirmed') and jenis <>'FPT'");
@@ -98,7 +99,7 @@ class Purchaseorder extends MY_Controller {
                     $field->nama_supplier,
                     $field->order_date,
                     $field->create_date,
-                    $field->total,
+                    number_format($field->total,2) . " " .( ($field->total === null) ? "" : $field->curr_kode),
                     $field->nama_status ?? $field->status
                 ];
             }
@@ -329,7 +330,7 @@ class Purchaseorder extends MY_Controller {
             $rcvDone = new $this->m_po;
             $inInv = 0;
             $inInv = $rcvDone->setTables('invoice')
-                            ->setWheres(['status <>' => 'cancel',"no_po"=>$kode_decrypt])->getDataCountAll();
+                            ->setWheres(['status <>' => 'cancel', "no_po" => $kode_decrypt])->getDataCountAll();
 
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -374,9 +375,9 @@ class Purchaseorder extends MY_Controller {
             }
             $rcv = new $this->m_po;
             $inshipment = $rcv->setTables('invoice')
-                    ->setWheres(['no_po' => $kode_decrypt,"status <>"=>"cancel"])->setOrder(["order_date" => "asc"])
-                    ->setJoins("mst_status","mst_status.kode = invoice.status","left")
-                    ->setSelects(["invoice.*","coalesce(mst_status.nama_status,status) as status"])
+                    ->setWheres(['no_po' => $kode_decrypt, "status <>" => "cancel"])->setOrder(["order_date" => "asc"])
+                    ->setJoins("mst_status", "mst_status.kode = invoice.status", "left")
+                    ->setSelects(["invoice.*", "coalesce(mst_status.nama_status,status) as status"])
                     ->getData();
             $dataView = $this->load->view('purchase/v_po_inv_data', ["inv" => $inshipment], true);
             $this->output->set_status_header(200)

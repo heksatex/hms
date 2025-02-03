@@ -210,8 +210,9 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_list_penerimaan_barang($kode)
 	{
-		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,
-								IFNULL((SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod), (SELECT sum(qty) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
+		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,kode_pp,
+									((SELECT IFNULL(sum(smi.qty),0) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) +
+									(SELECT IFNULL(sum(tmp.qty),0) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' ORDER BY row_order")->result();
@@ -219,8 +220,9 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_list_penerimaan_barang_print($kode,$dept_id)
 	{
-		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,
-								IFNULL((SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod), (SELECT sum(qty) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
+		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,								
+									((SELECT IFNULL(sum(smi.qty),0) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) +
+									(SELECT IFNULL(sum(tmp.qty),0) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' AND pb.dept_id = '$dept_id' ORDER BY row_order")->result();

@@ -333,7 +333,7 @@
             if ($(element).val()!=="") {
                 arr.push({
                     kode_produk :$(element).val(),
-                    nama_produk :$(element).parents("tr").find("#nama_produk").val(),
+                    // nama_produk :$(element).parents("tr").find("#nama_produk").val(),
                     schedule_date:$(element).parents("tr").find("#schedule_date").val(),
                     qty 		:$(element).parents("tr").find("#qty").val(),
                     uom 		:$(element).parents("tr").find("#uom").val(),
@@ -379,7 +379,7 @@
                     unblockUI( function() {
                     setTimeout(function() { alert_notify(data.icon,data.message,data.type); }, 1000);
                     });
-                    document.getElementById(data.field).focus();
+                    //document.getElementById(data.field).focus();
                 }else{
                   //jika berhasil disimpan/diubah
                   $('#kode_pp').val(data.isi);
@@ -546,7 +546,7 @@
                         + '<td><input type="hidden"  name="row" class="row" value="'+ro+'">'+ro+'.</td>'
                         + '<td  class="min-width-200">'
                             + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+' min-width-full" name="Product" id="kode_produk"></select>'
-                            + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
+                            // + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
                         + '<td><div class="input-group min-width-full date sch_date" id="sch_date" min-width-full><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly" /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
                         + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" onkeypress="'+event+'" value="'+qty+'"></td>'
                         + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'

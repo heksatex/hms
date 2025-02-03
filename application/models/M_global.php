@@ -1,4 +1,5 @@
 <?php
+
 defined('BASEPATH') OR EXIT('No Direct Script Acces Allowed');
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -192,20 +193,25 @@ class M_global extends CI_Model {
     }
 
     public function update(array $data) {
-        $this->db->set($data);
-        if (count($this->wheres) > 0) {
-            $this->db->where($this->wheres);
-        }
-        if (count($this->wheresRaw) > 0) {
-            foreach ($this->wheresRaw as $key => $value) {
-                $this->db->where($value, null, false);
+        try {
+            if (count($this->wheres) > 0) {
+                $this->db->where($this->wheres);
             }
-        }
-        if (count($this->whereIn) > 0) {
-            foreach ($this->whereIn as $key => $value) {
-                $this->db->where_in($key, $value);
+            if (count($this->wheresRaw) > 0) {
+                foreach ($this->wheresRaw as $key => $value) {
+                    $this->db->where($value, null, false);
+                }
             }
+            if (count($this->whereIn) > 0) {
+                foreach ($this->whereIn as $key => $value) {
+                    $this->db->where_in($key, $value);
+                }
+            }
+            $this->db->set($data);
+            $this->db->update($this->table);
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
         }
-        $this->db->update($this->table);
     }
 }

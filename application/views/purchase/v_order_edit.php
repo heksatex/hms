@@ -261,11 +261,18 @@
                                                             }
                                                             ?>
                                                         </select>
-                                                        <input type="hidden" id="nilai_currency" name="nilai_currency" value="<?= $po->nilai_currency ?>" required>
+
                                                     </div>
                                                 </div>
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Kurs</label> <span id="nilaiKurs"><?= $po->nilai_currency ?? 1.00 ?></span>
+                                                    <div class="col-md-4 col-xs-4">
+                                                        <label class="form-label">Kurs</label>
+                                                    </div>
+                                                    <div class="col-md-8 col-xs-8">
+                                                        <input type="text" class="form-control" id="nilai_currency" name="nilai_currency" value="<?= ( $po->nilai_currency < 1) ? 1.00 : $po->nilai_currency ?>" 
+                                                               required <?= ($po->status === 'draft') ? '' : 'readonly' ?>>
+                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -354,7 +361,11 @@
                                                 $totals += $total;
                                                 $diskon = ($value->diskon ?? 0);
                                                 $diskons += $diskon;
-                                                $taxes += ($total - $diskon) * $value->amount_tax;
+                                                if ($setting !== null) {
+                                                    $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                } else {
+                                                    $taxes += ($total - $diskon) * $value->amount_tax;
+                                                }
                                                 if ($value->amount_tax > 0) {
                                                     $amountTaxes = $value->amount_tax;
                                                 }
@@ -384,7 +395,7 @@
                                                     <td>
                                                         <div class="form-group">
                                                             <input class="form-control pull-right input-sm" name="deskripsi[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                   value="<?= $value->deskripsi ?>">
+                                                                   value="<?= htmlentities($value->deskripsi) ?>">
 
                                                         </div>
                                                     </td>
@@ -418,31 +429,48 @@
                                                     </td>
                                                     <td>
                                                         <div class="form-group">
+                                                            <?php if ($po->no_value === "1") { ?>
+                                                            <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" readonly
+                                                                   style="width: 70%" value="0">
+                                                            <?php } else { ?>
                                                             <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
                                                                    style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
-
+                                                            <?php } ?>
+                                                            
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="form-group text-right">
                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
-                                                            <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
-                                                                    name="tax[<?= $value->id ?>]"  <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
-                                                                <option></option>
-                                                                <?php
-                                                                foreach ($tax as $key => $taxs) {
-                                                                    ?>
-                                                                    <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                            <?php if ($po->no_value === "1") { ?>
+                                                                <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                        name="tax[<?= $value->id ?>]"  disabled>
+                                                                    <option></option>
+                                                                </select>
+                                                            <?php } else { ?>
+
+                                                                <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                        name="tax[<?= $value->id ?>]"  <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
+                                                                    <option></option>
                                                                     <?php
-                                                                }
-                                                                ?>
-                                                            </select>
+                                                                    foreach ($tax as $key => $taxs) {
+                                                                        ?>
+                                                                        <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                        <?php
+                                                                    }
+                                                                    ?>
+                                                                </select>
+                                                            <?php } ?>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="form-group">
-                                                            <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                   style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" required>
+                                                            <?php if ($po->no_value === "1") { ?>
+                                                                <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
+                                                            <?php } else { ?>
+                                                                <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                       style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
+                                                                   <?php } ?>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -464,22 +492,11 @@
                                             if (strtolower($po->status) !== "draft") {
                                                 ?>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Total</td>
+                                                    <td colspan="8" class="style text-right">Subtotal 1</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($totals, 2) ?>
                                                         </strong></td>
                                                 </tr>
-                                                <?php if ($setting !== null) {
-                                                    ?>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
-                                                        <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format(($totals * 11) / 12, 2) ?>
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                <?php }
-                                                ?>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Discount</td>
                                                     <td class="style text-center totalan"> 
@@ -487,11 +504,23 @@
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal</td>
+                                                    <td colspan="8" class="style text-right">Subtotal 2</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
                                                         </strong></td>
                                                 </tr>
+
+                                                <?php if ($setting !== null) {
+                                                    ?>
+                                                    <tr>    
+                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                        <td class="style text-center totalan"> 
+                                                            <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 2) ?>
+                                                            </strong>
+                                                        </td>
+                                                    </tr>
+                                                <?php }
+                                                ?>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Taxes</td>
                                                     <td class="style text-center totalan"> 
@@ -511,9 +540,22 @@
                                                 if ($po->nilai_currency !== null) {
                                                     ?> 
                                                     <tr>    
-                                                        <td colspan="8" class="style text-right">Total</td>
+                                                        <td colspan="8" class="style text-right">Subtotal 1</td>
                                                         <td class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format($totals, 2) ?>
+                                                            </strong></td>
+                                                    </tr>
+                                                    <tr>    
+                                                        <td colspan="8" class="style text-right">Discount</td>
+                                                        <td class="style text-center totalan"> 
+                                                            <strong><?= $po->symbol ?> <?= number_format($diskons, 2) ?>
+                                                            </strong></td>
+                                                    </tr>
+
+                                                    <tr>    
+                                                        <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                        <td class="style text-center totalan"> 
+                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <?php if ($setting !== null) {
@@ -521,24 +563,12 @@
                                                         <tr>    
                                                             <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                             <td class="style text-center totalan"> 
-                                                                <strong><?= $po->symbol ?> <?= number_format(($totals * 11) / 12, 2) ?>
+                                                                <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 2) ?>
                                                                 </strong>
                                                             </td>
                                                         </tr>
                                                     <?php }
                                                     ?>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">Discount</td>
-                                                        <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($diskons, 2) ?>
-                                                            </strong></td>
-                                                    </tr>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">Subtotal</td>
-                                                        <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
-                                                            </strong></td>
-                                                    </tr>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Taxes</td>
                                                         <td class="style text-center totalan"> 

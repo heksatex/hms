@@ -363,15 +363,14 @@
             // uom1_default = `<?php echo $data_produk->uom; ?>`;
             // uom2_default = `<?php echo $data_produk->uom_2; ?>`;
             // uomlbrjadi  = `<?php echo  $data_produk->uom_lebar_jadi; ?>`;
-		
 		    html='<tr class="num">'
 		    + '<td></td>'
 		    //+ '<td></td>'
 		    +  '<td class="min-width-150"><input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot min-width-150" onkeypress="enter(event);" value="'+lot+'"></td>'		   
             + '<td class="min-width-100"><select class="form-control input-sm grade min-width-100" name="grade" id="grade" style="width:100% !important;"></select></td>'
-		    + '<td class="min-width-80"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm min-width-80 text-right txtqty"   onkeypress="enter(event);"  onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)" value="'+qty+'" ></td>'
+		    + '<td class="min-width-80"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm min-width-80 text-right txtqty"   onkeypress="enter(event);"  onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)" value="'+Math.round(qty,2)+'" ></td>'
             + '<td class="min-width-80"><input type="text" name="txtuom"  id="txtuom" class="form-control input-sm min-width-80 txtuom" value="" readonly style="width:100% !important;"></td>'
-		    + '<td class="min-width-80"><input type="text" name="txtqty2[]" id="txtqty2" class="form-control input-sm min-width-80 text-right txtqty2"  onkeypress="enter(event);"   onkeyup="validAngka(this)"  data-decimal="2" oninput="enforceNumberValidation(this)" value="'+qty2+'" ></td>'
+		    + '<td class="min-width-80"><input type="text" name="txtqty2[]" id="txtqty2" class="form-control input-sm min-width-80 text-right txtqty2"  onkeypress="enter(event);"   onkeyup="validAngka(this)"  data-decimal="2" oninput="enforceNumberValidation(this)" value="'+Math.round(qty2,2)+'" ></td>'
             + '<td class="min-width-80"><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm min-width-80 txtuom2"  readonly style="width:100% !important;"></td>'
             + '<td class="min-width-100"><input type="text" name="txt_lebar_greige"  id="txt_lebar_greige" class="form-control input-sm min-width-100 txt_lebar_greige" style="width:100% !important;" onkeypress="enter(event);" value="'+lebar_greige+'" ></td>'
             + '<td class="min-width-100"><select type="text" name="txt_uom_lebar_greige"  id="txt_uom_lebar_greige" class="form-control input-sm min-width-80 txt_uom_lebar_greige" style="width:100% !important;"></select></td>'
@@ -574,7 +573,7 @@
                             window.location.replace('../index');
                             $('#btn-tambah').button('reset');
                             unblockUI( function(){});
-                        }else if(data.status == 'kosong'){
+                        }else if(data.status == 'failed'){
                             //var pesan = "Lot "+data.lot+ " Sudah diinput !"       
                             alert_modal_warning(data.message);
                             unblockUI( function(){});

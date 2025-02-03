@@ -108,8 +108,8 @@ class Fpt extends MY_Controller {
                     throw new \Exception("<strong>Data No {$no}, Uom dan Uom Beli Tidak ada dalam data konversi</strong>", 500);
                 }
 
-                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => $deskripsi[$key],]);
-                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => $deskripsi[$key],
+                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),]);
+                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
                     'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key]];
                 
                 $total = ($qty_beli[$key] * $value);
@@ -168,7 +168,7 @@ class Fpt extends MY_Controller {
             $lockTable = "user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
                     . "purchase_order_detail write,purchase_order write, penerimaan_barang WRITE, penerimaan_barang_items WRITE";
             if ($listStatus[$status] === 'purchase_confirmed') {
-                $lockTable .= ",penerimaan_barang WRITE,penerimaan_barang_items WRITE,stock_move_produk WRITE,stock_move WRITE,nilai_konversi WRITE";
+                $lockTable .= ",stock_move_produk WRITE,stock_move WRITE,nilai_konversi WRITE";
                 $lockTable .= ",mst_produk_coa WRITE,nilai_konversi nk WRITE";
             }
             $this->_module->lock_tabel($lockTable);
