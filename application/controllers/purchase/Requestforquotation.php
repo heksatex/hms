@@ -482,8 +482,8 @@ class Requestforquotation extends MY_Controller {
                 $dataItemOrder = $listCfb->setTables('purchase_order_detail')
                                 ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
                                 ->setJoins('mst_produk', "purchase_order_detail.kode_produk = mst_produk.kode_produk", "left")
-//                                ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")
-                                ->setJoins('nilai_konversi nk', "id_konversiuom = mst_produk.uom_beli", "left")
+                                ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")
+//                                ->setJoins('nilai_konversi nk', "id_konversiuom = mst_produk.uom_beli", "left")
                                 ->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                                 ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa","mst_produk.uom as uom_stock"])->getData();
                 $produk = [];
