@@ -11,6 +11,15 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
  *
  * @author RONI
  */
+require_once APPPATH . '/third_party/vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Settings;
+use Cache\Adapter\Apcu\ApcuCachePool;
+use Cache\Bridge\SimpleCache\SimpleCacheBridge;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class Goodstopush extends MY_Controller {
 
     //put your code here
@@ -49,7 +58,7 @@ class Goodstopush extends MY_Controller {
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'danger', "content" => [])));
+                    ->set_output(json_encode(array('message' => 'Data Tidak ditemukan', 'icon' => 'fa fa-check', 'type' => 'danger', "content" => [])));
         }
     }
 
@@ -74,7 +83,7 @@ class Goodstopush extends MY_Controller {
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'danger', "content" => [])));
+                    ->set_output(json_encode(array('message' => 'Data Tidak ditemukan', 'icon' => 'fa fa-check', 'type' => 'danger', "content" => [])));
         }
     }
 
@@ -141,7 +150,7 @@ class Goodstopush extends MY_Controller {
             $detail = new $this->m_gtp;
             $list = $detail->setTables('goods_to_push_detail')->setOrders([null, "kode_produk", "nama_produk", "lot", "nama_grade", null, null, null, null, "lokasi_fisik", "lebar_jadi"])
                     ->setSearch(["kode_produk", "nama_produk", "lot", "lokasi_fisik", "lebar_jadi", "customer_name"])
-                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi, 'customer_name' => $buyer, 'concat(lebar_jadi," ",uom_lebar_jadi) = ' => $lebar]);
+                    ->setWheres(["nama_sales_group" => $sales, "date(report_date)" => $date, "lokasi" => $lokasi, 'customer_name' => $buyer]);
             switch ($kategori) {
                 case "14d":
                     $list->setWheres(["umur >=" => 14, "umur <=" => 30]);
@@ -172,7 +181,7 @@ class Goodstopush extends MY_Controller {
                     ];
                 }
             } else {
-                $list->setOrder(["qty" => "desc", "corak_remark,warna_remark" => "asc"])->setWheres(["corak_remark" => $corak]);
+                $list->setOrder(["qty" => "desc", "corak_remark,warna_remark" => "asc"])->setWheres(["corak_remark" => $corak,'concat(lebar_jadi," ",uom_lebar_jadi) = ' => $lebar]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
@@ -203,6 +212,88 @@ class Goodstopush extends MY_Controller {
                 "recordsFiltered" => 0,
                 "data" => [],
             ));
+        }
+    }
+    
+    public function excel() {
+        try {
+            $sales = $this->input->post("sales");
+            $report_date = $this->input->post("report_date");
+            $lokasi = $this->input->post("lokasi");
+            $model = new $this->m_gtp;
+            
+           $model->setTables("goods_to_push_detail")->setOrder(["qty" => "desc", "corak_remark,uom" => "asc"])
+                            ->setWheres(["qty >=" => 50,"DATE(report_date)" => $report_date]);
+            
+            if ($sales !== "") {
+                $model->setWheres(["nama_sales_group" => $sales]);
+            }
+            if ($lokasi !== "") {
+                $model->setWheres(["lokasi" => $lokasi]);
+            }
+            $list = $model->getData();
+            if(count($list) > 1) {
+                throw new \Exception("Data Tidak ditemukan",500);
+            }
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setCellValue('A1', 'No');
+            $sheet->setCellValue('B1', 'Kode Produk');
+            $sheet->setCellValue('C1', 'Nama Produk');
+            $sheet->setCellValue('D1', 'Corak Remark');
+            $sheet->setCellValue('E1', 'Warna Remark');
+            $sheet->setCellValue('F1', 'LOT');
+            $sheet->setCellValue('G1', 'Grade');
+            $sheet->setCellValue('H1', 'QTY Jual');
+            $sheet->setCellValue('I1', 'Satuan');
+            $sheet->setCellValue('J1', 'QTY Jual 2');
+            $sheet->setCellValue('K1', 'Satuan 2');
+            $sheet->setCellValue('L1', 'Lebar Jadi');
+            $sheet->setCellValue('M1', 'Uom Lebar Jadi');
+            $sheet->setCellValue('N1', 'Lokasi');
+            $sheet->setCellValue('O1', 'Lokasi Fisik');
+            $sheet->setCellValue('P1', 'SC');
+            $sheet->setCellValue('Q1', 'Customer');
+            $sheet->setCellValue('R1', 'Sales');
+            $rowStartData = 1;
+            $no = 0;
+            foreach ($list as $key => $value) {
+                $rowStartData ++;$no++;
+                $sheet->setCellValue("A" . $rowStartData, $no++);
+                $sheet->setCellValue("B" . $rowStartData, $value->kode_produk);
+                $sheet->setCellValue("C" . $rowStartData, $value->nama_produk);
+                $sheet->setCellValue('D' . $rowStartData, $value->corak_remark);
+                $sheet->setCellValue('E' . $rowStartData, $value->warna_remark);
+                $sheet->setCellValue('F' . $rowStartData, $value->lot);
+                $sheet->setCellValue('G' . $rowStartData, $value->nama_grade);
+                $sheet->setCellValue('H' . $rowStartData,$value->qty_jual);
+                $sheet->setCellValue('I' . $rowStartData, $value->uom_jual);
+                $sheet->setCellValue('J' . $rowStartData, $value->qty2_jual);
+                $sheet->setCellValue('K' . $rowStartData, $value->uom2_jual);
+                $sheet->setCellValue('L' . $rowStartData, $value->lebar_jadi);
+                $sheet->setCellValue('M' . $rowStartData, $value->uom_lebar_jadi);
+                $sheet->setCellValue('N' . $rowStartData, $value->lokasi);
+                $sheet->setCellValue('O' . $rowStartData, $value->lokasi_fisik);
+                $sheet->setCellValue('P' . $rowStartData, $value->sales_order);
+                $sheet->setCellValue('Q' . $rowStartData, $value->customer_name);
+                $sheet->setCellValue('R' . $rowStartData, $value->nama_sales_group);
+            }
+            $writer = new Xlsx($spreadsheet);
+            $filename = "gtp_report_date_{$report_date}";
+            $url = "dist/storages/report/gtp/excel";
+            if (!is_dir(FCPATH . $url)) {
+                mkdir(FCPATH . $url, 0775, TRUE);
+            }
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
+                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 }

@@ -15,6 +15,7 @@ class Produk extends MY_Controller {
         $this->load->model("m_user");
         $this->load->model("m_konversiuom");
         $this->load->model("m_coa");
+        $this->load->model("m_global");
         $this->load->library("upload");
         $this->load->library("token");
         $this->load->helper('file');
@@ -169,22 +170,27 @@ class Produk extends MY_Controller {
                 //cek auto generate kode produk atau input sendiri
                 $autogenerate = $this->input->post('autogenerate');
                 $kategoribarang = $this->input->post('kategoribarang');
-
+                $autogenerate_gudang = $this->input->post('autogenerate_gudang');
                 //get id kategori barang
-                $nmKategori = $this->m_produk->get_nama_category_by_id($kategoribarang)->row_array();
+//                $nmKategori = $this->m_produk->get_nama_category_by_id($kategoribarang)->row_array();
+                $model = new $this->m_global;
                 $this->_module->startTransaction();
-                if ($autogenerate == 0) {
+                if ($autogenerate === 0) {
                     $kodeproduk = addslashes($this->input->post('kodeproduk'));
-                } else {
-                    $kategoriPrefix = str_replace(" ", "_", $nmKategori["nama_category"]);
-                    $check = $this->token->exists(["modul" => strtolower($kategoriPrefix), "periode" => "-"]);
-                    if (!$check) {
-                        $kodeproduk = $this->_module->get_kode_product();
-                        $kodeproduk = 'MF' . $kodeproduk;
-                    } else {
-                        $kodeproduk = $this->token->noUrut(strtolower($kategoriPrefix), "-", true)->prefixAdd("")->generate($check->prefix, $check->format)->get();
-                    }
+                    $kodeproduk = $this->_module->get_kode_product();
                 }
+//                if ($autogenerate == 0) {
+//                    $kodeproduk = addslashes($this->input->post('kodeproduk'));
+//                } else {
+//                    $kategoriPrefix = str_replace(" ", "_", $nmKategori["nama_category"]);
+//                    $check = $this->token->exists(["modul" => strtolower($kategoriPrefix), "periode" => "-"]);
+//                    if (!$check) {
+//                        $kodeproduk = $this->_module->get_kode_product();
+//                        $kodeproduk = 'MF' . $kodeproduk;
+//                    } else {
+//                        $kodeproduk = $this->token->noUrut(strtolower($kategoriPrefix), "-", true)->prefixAdd("")->generate($check->prefix, $check->format)->get();
+//                    }
+//                }
 
                 $id = $this->input->post('id'); //id produk auto increment
                 $nama_produk = ($this->input->post('namaproduk'));
