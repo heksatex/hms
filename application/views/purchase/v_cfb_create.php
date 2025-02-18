@@ -1,144 +1,146 @@
 
-    <form class="form-horizontal" method="POST" name="form-po" id="form-po" action="<?= base_url('purchase/requestforquotation/save') ?>">
-        <div class="col-md-6 col-xs-12">
-            <div class="field-group">
+<form class="form-horizontal" method="POST" name="form-po" id="form-po" action="<?= base_url('purchase/requestforquotation/save') ?>">
+    <div class="col-md-6 col-xs-12">
+        <div class="field-group">
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="col-xs-4"><label class="form-label required">Supplier</label></div>
+                    <div class="col-xs-8 col-md-8">
+                        <select class="form-control input-sm select2" name="supplier" id="supplier" required>
+
+                            <?php
+                            $s = explode(":", $supp);
+                            if (isset($s[1]) && $s[0] !== "null") {
+                                echo "<option value='{$s[0]}' selected>{$s[1]}</option>";
+                            } else {
+                                echo " <option></option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <?php if ($jenis === "RFQ") { ?>
                 <div class="form-group">
                     <div class="col-xs-12">
-                        <div class="col-xs-4"><label class="form-label required">Supplier</label></div>
+                        <div class="col-xs-4"><label class="form-label required">Tipe</label></div>
                         <div class="col-xs-8 col-md-8">
-                            <select class="form-control input-sm select2" name="supplier" id="supplier" required>
-
-                                <?php
-                                $s = explode(":", $supp);
-                                if (isset($s[1]) && $s[0] !== "null") {
-                                    echo "<option value='{$s[0]}' selected>{$s[1]}</option>";
-                                } else {
-                                    echo " <option></option>";
-                                }
-                                ?>
+                            <select class="form-control input-sm select2" name="no_value" id="no_value" required>
+                                <option value="0" selected>Value</option>
+                                <option value="1">No Value</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                 <?php if($jenis === "RFQ"){ ?>
-                              <div class="form-group">
-                                    <div class="col-xs-12">
-                                        <div class="col-xs-4"><label class="form-label required">Tidak Ada Nilai ? </label></div>
-                                        <div class="col-xs-8 col-md-8">
-                                            <select class="form-control input-sm select2" name="no_value" id="no_value" required>
-                                                <option value="0" selected>Ada</option>
-                                                <option value="1">Tidak</option>
-                                            </select>
-                                        </div>
+            <?php } ?>
+        </div>
+    </div>
+    <div class="col-md-6 col-xs-12">
+        <div class="field-group">
+            <!--                <div class="form-group">
+                                <div class="col-xs-12">
+                                    <div class="col-xs-4"><label class="form-label required">Tanggal Order</label></div>
+                                    <div class="col-xs-8 col-md-8">
+                                        <input type="date" class="form-control input-sm" name="order_date" value="<?= ($tanggal === "") ? date("Y-m-d") : $tanggal ?>" required>
                                     </div>
                                 </div>
-                <?php }?>
-            </div>
-        </div>
-        <div class="col-md-6 col-xs-12">
-            <div class="field-group">
-<!--                <div class="form-group">
-                    <div class="col-xs-12">
-                        <div class="col-xs-4"><label class="form-label required">Tanggal Order</label></div>
-                        <div class="col-xs-8 col-md-8">
-                            <input type="date" class="form-control input-sm" name="order_date" value="<?= ($tanggal === "") ? date("Y-m-d") : $tanggal ?>" required>
-                        </div>
-                    </div>
-                </div>-->
-                <div class="form-group">
-                    <div class="col-xs-12">
-                        <div class="col-xs-4"><label class="form-label" >Note</label></div>
-                        <div class="col-xs-8 col-md-8">
-                            <textarea type="text" class="form-control input-sm resize-ta" id="note" name="note"><?= $note ?? "" ?></textarea>
-                        </div>                                    
-                    </div>
-                    <input type="hidden" id="jenis" name="jenis" value="RFQ">
-                    <button type="submit" id="btn_form_simpan" style="display: none"></button>
+                            </div>-->
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="col-xs-4"><label class="form-label" >Note</label></div>
+                    <div class="col-xs-8 col-md-8">
+                        <textarea type="text" class="form-control input-sm resize-ta" id="note" name="note"><?= $note ?? "" ?></textarea>
+                    </div>                                    
                 </div>
+                <input type="hidden" id="jenis" name="jenis" value="RFQ">
+                <button type="submit" id="btn_form_simpan" style="display: none"></button>
             </div>
-
         </div>
-        <div class="row">
-            <div class="col-xs-12">
-                <table class="table">
-                    <thead>
-                    <th>
-                        Kode CFB 
-                    </th>
-                    <th>
-                        Kode Produk
-                    </th>
-                    <th>
-                        Nama Produk
-                    </th>
-                    <th>
-                        Qty
-                    </th>
-                    <th>
-                        Qty Beli
-                    </th>
-                    <th>
-                        Satuan Beli
-                    </th>
-                    </thead>
-                    <tbody>
-                        <?php
-                        foreach ($item as $key => $datas) {
+
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <table class="table">
+                <thead>
+                <th>
+                    Kode CFB 
+                </th>
+                <th>
+                    Kode Produk
+                </th>
+                <th>
+                    Nama Produk
+                </th>
+                <th>
+                    Qty
+                </th>
+                <th>
+                    Qty Beli
+                </th>
+                <th>
+                    Satuan Beli
+                </th>
+                </thead>
+                <tbody>
+                    <?php
+                    foreach ($item as $key => $datas) {
 //                            $datas = explode("#", $value);
 //                            if (count($datas) > 1) {
-                            $kodecfb = explode(".", $datas[1]);
-                            ?>
-                            <tr>
-                                <td><input type="hidden" name="cfb[]" value="<?= $datas[1] ?>"><?= $kodecfb[0] ?></td>
-                                <td><input type="hidden" name="kod_pro[]" value="<?= $datas[2] ?>"><?= $datas[2] ?></td>
-                                <td><input type="hidden" name="nm_pro[]" value="<?= htmlentities($datas[3]) ?>"><?= $datas[3] ?>
-                                     <input type="hidden" name="reff_note[]" value="<?= htmlentities($datas[13]) ?>">
-                                </td>
-                                <td>
-                                    <input type="hidden" name="qty[]" value="<?= $datas[4] ?>">
-                                    <input type="hidden" name="uom[]" value="<?= $datas[5] ?>">
-                                    <input type="hidden" name="id_cfb[]" value="<?= $datas[0] ?>">
-                                    <input type="hidden" name="prio[]" value="<?= $datas[7] ?>">
-                                    <input type="hidden" name="harga[]" value="<?= $datas[8] ?>">
-                                    <?= $datas[4] . " " . $datas[5] ?>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        <input class="form-control input-sm" name="qty_beli[]" value="<?= $datas[12] ?? 0 ?>" required>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="form-group">
-                                        <select class="form-control uom_beli uom_beli_data_<?= $key ?>" style="width: 80%" data-row="<?= $key ?>" name="id_konversiuom[]" required>
-                                            <option></option>
-                                            <?php
-                                            if ($datas[9] !== null) {
-                                                ?>
-                                                <option value="<?= $datas[6] ?>" selected> <?= $datas[9] ?></option>
-                                                <?php
-                                            }
-                                            ?>
-                                        </select>
-                                        <input type="hidden" name="uom_beli[]" class="nama_uom_<?= $key ?>" value="">
-                                        <br>
-                                        <small class="form-text text-muted note_uom_beli_<?= $key ?>">
-                                            <?= $datas[11] ?? "" ?>
-                                        </small>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php
-//                            }
-                        }
+                        $kodecfb = explode(".", $datas[1]);
                         ?>
-                    </tbody>
-                </table>
-            </div>
-
+                        <tr>
+                            <td><input type="hidden" name="cfb[]" value="<?= $datas[1] ?>"><?= $kodecfb[0] ?></td>
+                            <td><input type="hidden" name="kod_pro[]" value="<?= $datas[2] ?>"><?= $datas[2] ?></td>
+                            <td><input type="hidden" name="nm_pro[]" value="<?= htmlentities($datas[3]) ?>"><?= $datas[3] ?>
+                                <input type="hidden" name="reff_note[]" value="<?= htmlentities($datas[13]) ?>">
+                            </td>
+                            <td>
+                                <input type="hidden" name="qty[]" value="<?= $datas[4] ?>">
+                                <input type="hidden" class="uom_list_<?= $key ?>" name="uom[]" value="<?= $datas[5] ?>">
+                                <input type="hidden" name="id_cfb[]" value="<?= $datas[0] ?>">
+                                <input type="hidden" name="prio[]" value="<?= $datas[7] ?>">
+                                <input type="hidden" name="harga[]" value="<?= $datas[8] ?>">
+                                <input type="hidden" name="warehouse[]" value="<?= $datas[14] ?? "" ?>">
+                                <?= $datas[4] . " " . $datas[5] ?>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <input class="form-control input-sm" name="qty_beli[]" value="<?= $datas[12] ?? 0 ?>" required>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    <select class="form-control uom_beli uom_beli_data_<?= $key ?>" style="width: 80%" data-uom="<?= $datas[5] ?>" data-row="<?= $key ?>" name="id_konversiuom[]" required>
+                                        <option></option>
+                                        <?php
+                                        if ($datas[9] !== null) {
+                                            ?>
+                                            <option value="<?= $datas[6] ?>" selected> <?= $datas[9] ?></option>
+                                            <?php
+                                        }
+                                        ?>
+                                    </select>
+                                    <input type="hidden" name="uom_beli[]" class="nama_uom_<?= $key ?>" value="">
+                                    <br>
+                                    <small class="form-text text-muted note_uom_beli_<?= $key ?>">
+                                        <?= $datas[11] ?? "" ?>
+                                    </small>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+//                            }
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
-    </form>
+
+    </div>
+</form>
 <script>
     $(function () {
+        var uomStock = "0";
         $(".uom_beli").select2({
             allowClear: true,
             placeholder: "Satuan Beli",
@@ -150,7 +152,7 @@
                 data: function (params) {
                     return{
                         nama: params.term,
-                        ke: 0
+                        ke: uomStock
                     };
                 },
                 processResults: function (data) {
@@ -170,6 +172,11 @@
                 }
             }
         });
+
+        $(".uom_beli").on("select2:open", function () {
+            var row = $(this).attr("data-uom");
+            uomStock = row;
+        })
 
         $(".uom_beli").on("select2:select", function () {
             var row = $(this).attr("data-row");

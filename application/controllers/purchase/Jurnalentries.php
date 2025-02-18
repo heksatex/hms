@@ -33,10 +33,10 @@ class Jurnalentries extends MY_Controller {
             $list = new $this->m_global;
             $no = $_POST['start'];
 
-            $list->setTables("jurnal_entries")->setOrder(["tanggal_dibuat"])
+            $list->setTables("jurnal_entries")->setOrder(["tanggal_dibuat"=>"desc"])
                     ->setJoins("mst_status", "mst_status.kode = jurnal_entries.status", "left")
-                    ->setSearch(["kode", "periode", "origin"])
-                    ->setOrders([null, "kode", "tanggal_dibuat", "tanggal_posting", "periode", "origin", "reff_note", "status"])
+                    ->setSearch(["jurnal_entries.kode", "periode", "origin","reff_note"])
+                    ->setOrders([null, "jurnal_entries.kode", "tanggal_dibuat", "tanggal_posting", "periode", "origin", "reff_note", "status"])
                     ->setSelects(["jurnal_entries.*", "nama_status"]);
             foreach ($list->getData() as $key => $field) {
                 $kode_encrypt = encrypt_url($field->kode);
@@ -48,6 +48,7 @@ class Jurnalentries extends MY_Controller {
                     $field->tanggal_posting,
                     $field->periode,
                     $field->origin,
+                    $field->reff_note,
                     $field->nama_status ?? $field->status,
                 );
             }
@@ -81,8 +82,10 @@ class Jurnalentries extends MY_Controller {
             $data["detail"] = $detail->setTables("jurnal_entries_items jei")->setOrder(["jei.row_order"])
                             ->setJoins("partner", "partner.id = jei.partner", "left")
                             ->setJoins("coa", "coa.kode_coa = jei.kode_coa", "left")
+                            ->setJoins("jurnal_entries je","je.kode = jei.kode")
                             ->setSelects(["jei.*", "partner.nama as supplier", "coa.nama as account"])
-                            ->setWheres(["kode" => $kode_decrypt])->getData();
+                            ->setSelects(["je.tipe"])
+                            ->setWheres(["je.kode" => $kode_decrypt])->getData();
             $this->load->view('purchase/v_jurnal_entries_edit', $data);
         } catch (Exception $ex) {
             return show_404();
@@ -155,10 +158,10 @@ class Jurnalentries extends MY_Controller {
             $_POST['search'] = array(
                 'value' => $search
             );
-            $_POST['length'] = 20;
+            $_POST['length'] = 50;
             $_POST['start'] = 0;
 
-            $data = $coa->setTables("coa")->setSearch(["kode_coa", "nama"])->setOrder(['nama'])->setSelects(['kode_coa', 'nama'])->getData();
+            $data = $coa->setTables("coa")->setSearch(["kode_coa", "nama"])->setWheres(["level"=>5])->setOrder(['nama'])->setSelects(['kode_coa', 'nama'])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => $data)));

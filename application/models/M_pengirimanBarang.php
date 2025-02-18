@@ -135,7 +135,7 @@ class M_pengirimanBarang extends CI_Model
 	public function get_list_pengiriman_barang($kode)
 	{
 		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod, pbi.row_order,
-								(SELECT sum(smi.qty) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod ) as sum_qty
+								(SELECT IFNULL(sum(smi.qty),'') FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod ) as sum_qty
 								FROM pengiriman_barang_items pbi
 							    INNER JOIN pengiriman_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' ORDER BY row_order")->result();
@@ -734,6 +734,14 @@ class M_pengirimanBarang extends CI_Model
 		$this->db->query("DELETE FROM pengiriman_barang_tmp WHERE kode = '$kode' AND move_id = '$move_id' AND quant_id = '$quant_id' ");
 	}
 	
+
+	public function get_lokasi_tujuan_out_by_dept($dept_id,$params)
+	{
+		return $this->db->query("SELECT stock_location as lokasi FROM departemen where kode = '$dept_id' AND stock_location lIKE '%$params%'
+						UNION
+						SELECT stock2_location as lokasi FROM departemen where kode = '$dept_id' AND stock2_location lIKE '%$params%'
+						ORDER BY lokasi")->result_array();
+	}
 
   
 }

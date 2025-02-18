@@ -157,7 +157,7 @@
             </div>
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
-
+                <?php $this->load->view("admin/_partials/footer.php") ?>
             </footer>
         </div>
         <?php $this->load->view("admin/_partials/js.php") ?>

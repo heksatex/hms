@@ -12,9 +12,6 @@
                 font-size: 14px;
             }
 
-            #btn-simpan {
-                display: none;
-            }
             <?php if ($po->status !== 'purchase_confirmed') { ?>
 
                 #btn-simpan {
@@ -167,11 +164,34 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">&nbsp;<strong> <?= $po->no_po ?> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
+                                <?php
+                                if (in_array($po->status, ["purchase_confirmed", "done", "exception"])) {
+                                    if ($po->edited_status === null) {
+                                        ?>
+                                        <button class="btn btn-default btn-sm request_edit" data-status="request"> Request Edit </button>
+                                        <?php
+                                    } else {
+                                        ?>
+                                        <span class="label label-warning text-black text-uppercase"><?= str_replace("_", " ", $po->edited_status) ?> Edit Harga</span>
+                                        <!--<button class="btn btn-primary btn-sm request_edit" data-status="cancel"> Cancel Request </button>-->
+                                        <style>
+                                            #btn-print {
+                                                display:none;
+                                            }
+                                            #btn-approve,#btn-simpan {
+                                                display:inline-block
+                                            }
+                                        </style>
+                                        <?php
+                                    }
+                                    ?>
 
+                                <?php } ?>
                             </div>
 
                         </div>
                         <form  class="form-horizontal" method="POST" name="form-cfq" id="form-cfq" action="<?= base_url('purchase/purchaseorder/update/' . $id) ?>">
+                            <input type="hidden" name="default_total" value="<?= $default_total ?>" >
                             <div class="box-body">
                                 <div class="col-md-8 col-xs-12">
                                     <div class="col-md-6 col-xs-12">
@@ -206,9 +226,9 @@
                                                             <input type="hidden" id="nilai_currency" name="nilai_currency" value="<?= $po->nilai_currency ?>" required>
                                                         </div>
                                                     </div>
-                                                    <div class="col-xs-4">
-                                                        <label class="form-label">Kurs</label> <span id="nilaiKurs"><?= $po->nilai_currency ?? 1.00 ?></span>
-                                                    </div>
+                                                    <!--                                                    <div class="col-xs-4">
+                                                                                                            <label class="form-label">Kurs</label> <span id="nilaiKurs"><?= $po->nilai_currency ?? 1.00 ?></span>
+                                                                                                        </div>-->
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -227,6 +247,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -264,213 +285,245 @@
                                         </div>
                                     </div>
                                 </div>
-                                <?php if ($po->no_value === "0") { ?>
-                                    <div class="col-md-4 col-xs-12">
-                                        <ul class="bs-glyphicons">
-                                            <li class="pointer shipment">
-                                                <span class="glyphicon glyphicon-transfer"></span>            
-                                                <span class="glyphicon-class"></strong> In Shipment</span>
-                                            </li>                        
+
+                                <div class="col-md-4 col-xs-12">
+                                    <ul class="bs-glyphicons">
+                                        <li class="pointer shipment">
+                                            <span class="glyphicon glyphicon-transfer"></span>            
+                                            <span class="glyphicon-class"></strong> In Shipment</span>
+                                        </li>      
+                                        <?php if ($po->no_value === "0") { ?>
                                             <li class="pointer invoice">
                                                 <span class="glyphicon glyphicon-list-alt"></span>
                                                 <span class="glyphicon-class"><strong id="invoice"></strong> Invoice</span>
                                             </li>
-                                        </ul>
-                                    </div>
-                                <?php } ?>
+                                        <?php } ?>
+                                    </ul>
+                                </div>
+
                             </div>
                             <div class="box-footer">
+                                <button type="submit" id="form-cfq-submit" style="display: none"></button>
                                 <div class="col-md-12 table-responsive over">
                                     <ul class="nav nav-tabs " >
                                         <li class="active"><a href="#tab_1" data-toggle="tab">Produk</a></li>
-                                        <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
+                                        <li><a href="#tab_2" data-toggle="tab">Retur</a></li>
                                     </ul>
-
-                                    <button type="submit" id="form-cfq-submit" style="display: none"></button>
-                                    <table class="table table-condesed table-hover rlstable  over" width="100%">
-                                        <thead>
-                                        <th class="style" width="10px">No</th>
-                                        <th class="style" width="20px">Kode CFB</th>
-                                        <th class="style" width="20px">Kode Produk</th>
-                                        <th class="style" width="20px">Nama Produk</th>
-                                        <th class="style" width="20px">Deskripsi</th>
-                                        <th class="style" width="20px">Qty</th>
-                                        <th class="style" width="20px">Qty Beli</th>
-                                        <th class="style text-right" width="20px">Harga Satuan Beli</th>
-                                        <th class="style text-right" width="20px">Tax</th>
-                                        <th class="style text-right" width="20px">Diskon</th>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $no = 0;
-                                            $amountTaxes = 0;
-                                            foreach ($po_items as $key => $value) {
-                                                $no += 1;
-                                                $total = ($value->qty_beli * $value->harga_per_uom_beli);
-                                                $totals += $total;
-                                                $diskon = (($value->diskon ?? 0));
-                                                $diskons += $diskon;
-                                                if ($setting !== null) {
-                                                    $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
-                                                } else {
-                                                    $taxes += ($total - $diskon) * $value->amount_tax;
-                                                }
-                                                if ($value->amount_tax > 0) {
-                                                    $amountTaxes = $value->amount_tax;
-                                                }
-                                                ?>
-                                                <tr>
-                                                    <td>
-                                                        <?= $no ?>
-                                                    </td>
-                                                    <td>
-                                                        <?= ($value->kode_cfb === "") ? "" : ($value->kode_pp . " - " . $value->kode_cfb) ?>
-                                                    </td>
-                                                    <td>
+                                    <div class="tab-content"><br>
+                                        <div class="tab-pane active" id="tab_1">
+                                            <div class="col-md-3 col-xs-12">
+                                                <div class="pull-left">
+                                                    <button class="btn btn-danger btn-sm btn-retur" type="button">Retur</button></div>
+                                            </div>
+                                            <br>
+                                            <div class="col-md-12">
+                                                <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                                    <thead>
+                                                    <th class="style" width="5px">
+                                                        <input type="checkbox" class="check-all-retur" id="checkall">
+                                                    </th>
+                                                    <th class="style" width="10px">No</th>
+                                                    <th class="style" width="20px">Kode CFB</th>
+                                                    <th class="style" width="20px">Kode Produk</th>
+                                                    <th class="style" width="20px">Nama Produk</th>
+                                                    <th class="style" width="20px">Deskripsi</th>
+                                                    <th class="style" width="20px">Qty</th>
+                                                    <th class="style" width="20px">Qty Beli</th>
+                                                    <th class="style text-right" width="20px">Harga Satuan Beli</th>
+                                                    <th class="style text-right" width="20px">Tax</th>
+                                                    <th class="style text-right" width="20px">Diskon</th>
+                                                    </thead>
+                                                    <tbody>
                                                         <?php
-                                                        $image = "/upload/product/" . $value->kode_produk . ".jpg";
-                                                        $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
-                                                        if (is_file(FCPATH . $image)) {
+                                                        $no = 0;
+                                                        $amountTaxes = 0;
+                                                        foreach ($po_items as $key => $value) {
+                                                            $no += 1;
+                                                            $total = ($value->qty_beli * $value->harga_per_uom_beli);
+                                                            $totals += $total;
+                                                            $diskon = (($value->diskon ?? 0));
+                                                            $diskons += $diskon;
+                                                            if ($setting !== null) {
+                                                                $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                            } else {
+                                                                $taxes += ($total - $diskon) * $value->amount_tax;
+                                                            }
+                                                            if ($value->amount_tax > 0) {
+                                                                $amountTaxes = $value->amount_tax;
+                                                            }
                                                             ?>
-                                                            <a href="<?= base_url($image) ?>" class="pop-image">
-                                                                <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
-                                                            </a>
-                                                        <?php } ?>
-                                                        <?= $value->kode_produk ?>
-                                                    </td>
-                                                    <td>
-                                                        <?= $value->nama_produk ?>
-                                                    </td>
-                                                    <td>
-                                                        <?= $value->deskripsi ?>
-                                                    </td>
-                                                    <td>
-                                                        <?= $value->qty . " " . $value->uom ?>
-                                                    </td>
-                                                    <td style="width: 15%">
-                                                        <div class="form-group">
-                                                            <div class="input-group">
-                                                                <div class="input-group-addon"><?= $value->qty_beli ?></div>
-                                                                <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
-                                                                <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
-                                                                <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
-                                                                        name="id_konversiuom[<?= $value->id ?>]"  required <?= ($po->status === 'purchase_confirmed') ? 'disabled' : 'disabled' ?>>
-                                                                    <option></option>
+                                                            <tr>
+                                                                <td>
+                                                                    <input type="checkbox" class="check-retur" name="checklist[]" value="<?= $value->id?>">
+
+                                                                </td>
+                                                                <td>
+                                                                    <?= $no ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
+                                                                </td>
+                                                                <td>
                                                                     <?php
-                                                                    if (!is_null($value->id_konversiuom)) {
+                                                                    $image = "/upload/product/" . $value->kode_produk . ".jpg";
+                                                                    $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
+                                                                    if (is_file(FCPATH . $image)) {
                                                                         ?>
-                                                                        <option value="<?= $value->id_konversiuom ?>" data-catatan="<?= $value->catatan_nk ?>" selected><?= $value->dari ?></option>   
-                                                                        <?php
-                                                                    }
-                                                                    ?>
-                                                                </select>
-                                                                <input type="hidden" class="" name="uom_beli[<?= $value->id ?>]" value="<?= $value->dari ?>">
-                                                            </div>
-                                                            <small class="form-text text-muted note_uom_beli_<?= $key ?>">
-                                                                <?= $value->catatan_nk ?? "" ?>
-                                                            </small>
-                                                        </div>
+                                                                        <a href="<?= base_url($image) ?>" class="pop-image">
+                                                                            <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
+                                                                        </a>
+                                                                    <?php } ?>
+                                                                    <?= $value->kode_produk ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $value->nama_produk ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $value->deskripsi ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $value->qty . " " . $value->uom ?>
+                                                                </td>
+                                                                <td style="width: 15%">
+                                                                    <div class="form-group">
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-addon"><?= $value->qty_beli ?></div>
+                                                                            <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
+                                                                            <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
+                                                                            <input type="hidden" name="id_konversiuom[<?= $value->id ?>]"  value="<?= $value->id_konversiuom ?>">
+                                                                            <input type="hidden" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                                            <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>" disabled>
+                                                                                <option></option>
+                                                                                <?php
+                                                                                if (!is_null($value->id_konversiuom)) {
+                                                                                    ?>
+                                                                                    <option value="<?= $value->id_konversiuom ?>" data-catatan="<?= $value->catatan_nk ?>" selected><?= $value->dari ?></option>   
+                                                                                    <?php
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                            <input type="hidden" class="" name="uom_beli[<?= $value->id ?>]" value="<?= $value->dari ?>">
+                                                                        </div>
+                                                                        <small class="form-text text-muted note_uom_beli_<?= $key ?>">
+                                                                            <?= $value->catatan_nk ?? "" ?>
+                                                                        </small>
+                                                                    </div>
 
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group">
-                                                            <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'purchase_confirmed') ? 'readonly' : 'readonly' ?>
-                                                                   style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group">
+                                                                        <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception') ? '' : 'readonly' ?>
+                                                                               style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group text-right">
+                                                                        <input type="hidden" name="tax[<?= $value->id ?>]"  value="<?= $value->tax_id ?>">
+                                                                        <select style="width: 70%" class="form-control tax input-xs"  disabled>
+                                                                            <option></option>
+                                                                            <?php
+                                                                            foreach ($tax as $key => $taxs) {
+                                                                                ?>
+                                                                                <option value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                <?php
+                                                                            }
+                                                                            ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group">
+                                                                        <input type="hidden" name="diskon[<?= $value->id ?>]"  value="<?= $value->diskon ?>">
+                                                                        <input class="form-control pull-right input-sm" readonly
+                                                                               style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" >
 
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group text-right">
-                                                            <select style="width: 70%" class="form-control tax input-xs"  name="tax[<?= $value->id ?>]"  <?= ($po->status === 'purchase_confirmed') ? 'disabled' : 'disabled' ?>>
-                                                                <option></option>
-                                                                <?php
-                                                                foreach ($tax as $key => $taxs) {
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <?php
+                                                            if (!empty($value->catatan)) {
+                                                                $catatan = explode("#", $value->catatan);
+                                                                foreach ($catatan as $keys => $catt) {
                                                                     ?>
-                                                                    <option value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                    <tr>
+                                                                        <td class="text-right tbl-catatan"><?= $no . "." . ($keys + 1) ?></td>
+                                                                        <td class="tbl-catatan" colspan="8" style="vertical-align: top; color:red;">
+                                                                            <?= $catt ?>
+                                                                        </td>
+                                                                    </tr>
                                                                     <?php
                                                                 }
+                                                            }
+                                                        }
+                                                        if (strtolower($po->status) !== "draft") {
+                                                            ?>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Subtotal 1</td>
+                                                                <td class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
+                                                                    </strong>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Discount</td>
+                                                                <td class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                                <td class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+                                                            <?php if ($setting !== null) {
                                                                 ?>
-                                                            </select>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group">
-                                                            <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'purchase_confirmed') ? 'readonly' : 'readonly' ?>
-                                                                   style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" required>
+                                                                <tr>    
+                                                                    <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                                    <td class="style text-center totalan"> 
+                                                                        <input name="dpplain" type="hidden" value="1">
+                                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) * (11 / 12), 4) ?>
+                                                                        </strong>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php }
+                                                            ?>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Taxes</td>
+                                                                <td class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
 
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <?php
-                                                if (!empty($value->catatan)) {
-                                                    $catatan = explode("#", $value->catatan);
-                                                    foreach ($catatan as $keys => $catt) {
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Total</td>
+                                                                <td class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+
+                                                            <?php
+                                                        }
                                                         ?>
-                                                        <tr>
-                                                            <td class="text-right tbl-catatan"><?= $no . "." . ($keys + 1) ?></td>
-                                                            <td class="tbl-catatan" colspan="8" style="vertical-align: top; color:red;">
-                                                                <?= $catt ?>
-                                                            </td>
-                                                        </tr>
-                                                        <?php
-                                                    }
-                                                }
-                                            }
-                                            if (strtolower($po->status) !== "draft") {
-                                                ?>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal 1</td>
-                                                    <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($totals, 2) ?>
-                                                        </strong>
-                                                    </td>
-                                                </tr>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Discount</td>
-                                                    <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($diskons, 2) ?>
-                                                        </strong></td>
-                                                </tr>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal 2</td>
-                                                    <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
-                                                        </strong></td>
-                                                </tr>
-                                                <?php if ($setting !== null) {
-                                                    ?>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
-                                                        <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) * (11 / 12), 2) ?>
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                <?php }
-                                                ?>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Taxes</td>
-                                                    <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
-                                                        </strong></td>
-                                                </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
 
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Total</td>
-                                                    <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 2) ?>
-                                                        </strong></td>
-                                                </tr>
+                                        <input type="hidden" name="totals" id="totals" value="<?= ($totals - $diskons) + $taxes ?>">
 
-                                                <?php
-                                            }
-                                            ?>
-                                        </tbody>
-                                    </table>
-                                    <input type="hidden" name="totals" id="totals" value="<?= ($totals - $diskons) + $taxes ?>">
-
+                                    </div>
                                 </div>
-                            </div>
+                                <div class="form-group">
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="col-xs-4">
+                                            <label class="form-label">Foot Note (Print)</label>
+                                        </div>
+                                        <div class="col-xs-8 col-md-8 text-uppercase">
+                                            <textarea class="form-control" id="foot_note" name="foot_note"><?= $po->foot_note ?></textarea>
+                                        </div>
+                                    </div>
+                                </div>
                         </form>
                     </div>
                 </section>
@@ -489,6 +542,49 @@
             ?>
             <script>
                 $(function () {
+
+                    $(".check-all-retur").click(function () {
+                        $('.check-retur').not(this).prop('checked', this.checked);
+                    });
+                    
+                    $(".btn-retur").click(function(){
+                       var getlist = $(".check-retur:checked").map(function(){
+                           return $(this).val();
+                       });
+                       var list = getlist.get();
+                       if(list.length < 1) {
+                             alert_notify('fa fa-close',"Pilih item yang akan di retur", 'danger', function () {});
+                             return;
+                       }
+                    });
+
+                    $(".request_edit").off("click").unbind("click").on("click", function () {
+                        var datastatus = $(this).data("status");
+                        confirmRequest("Purchase Order", datastatus.toUpperCase() + " Edit PO ? ", function () {
+                            $.ajax({
+                                type: "POST",
+                                url: "<?= base_url('purchase/purchaseorder/request_edit/') ?>",
+                                data: {
+                                    ids: "<?= $id ?>",
+                                    status: datastatus
+                                },
+                                beforeSend: function (xhr) {
+                                    please_wait(function () {});
+                                },
+                                success: function (data) {
+                                    location.reload();
+                                },
+                                error: function (req, error) {
+                                    unblockUI(function () {
+                                        setTimeout(function () {
+                                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                        }, 500);
+                                    });
+                                }
+                            });
+                        });
+                    });
+
                     $(".shipment").off("click").unbind("click").on("click", function () {
                         $("#view_data").modal({
                             show: true,
@@ -688,7 +784,7 @@
                     });
                 });
                 $("#btn-approve").off("click").unbind("click").on("click", function () {
-                    var status = "done";
+                    var status = "<?= ($po->status === 'exception') ? 'purchase_confirmed' : 'done' ?>";
 
                     confirmRequest("Purchase Order", "Done Purchase Order ? ", function () {
                         please_wait(function () {});
@@ -702,8 +798,6 @@
                         updateStatus(status);
                     });
                 });
-
-
 
             });
 

@@ -6,12 +6,25 @@
             .cancelPL{
                 color: red;
             }
-            .donePL{
-                color: green;
-            }
             .confirm-as{
+                color: white !important;
                 background-color: green !important;
+                display: none !important;
             }
+            .dt-buttons .as-done{
+                color: white !important;
+                background-color: blue !important;
+                margin-left: 30px !important;
+            }
+            <?php 
+            if (in_array($user->level, ["Super Administrator", "Administrator", "Supervisor"])) {
+                ?>
+            .confirm-as{
+                display: inline-block !important;
+            }
+            <?php
+            }
+            ?>
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -38,8 +51,7 @@
                                     <div class="col-md-12 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;cursor:pointer;">
                                         <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
                                             <label>
-                                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom">Filter</i>
-
+                                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom">&nbsp;</i>Filter
                                             </label>
                                         </div>
                                     </div>
@@ -93,7 +105,6 @@
                                                                     <option></option>
                                                                     <option value="urgent">Urgent</option>
                                                                     <option value="normal">Normal</option>
-                                                                    <option value="not urgent">Not Urgent</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -132,7 +143,7 @@
                                             <th>Kode Produk</th>
                                             <th>Nama Produk</th>
                                             <th>QTY</th>
-                                            <th>SO</th>
+                                            <th>SC</th>
                                             <th>Priority</th>
                                             <th>Departement Tujuan</th>
                                             <th>Create Date</th>
@@ -146,6 +157,7 @@
                                                 <a class="add-rfq" data-request=""><i class="fa fa-plus"></i></a>
                                                 <a class="add-fpt" data-request=""><i class="fa fa-plus"></i></a>
                                                 <a class="confirm-order"></a>
+                                                <!--<a class="done-as"></a>-->
                                             </td>
                                         </tr>
                                     </tfoot>
@@ -239,7 +251,15 @@
                                 document.getElementsByClassName("add-fpt")[0].setAttribute("data-request", "fpt");
                                 $(".add-fpt").trigger("click");
                             }
-                        }
+                        },
+
+//                        {
+//                            "text": 'Mark As Done',
+//                            "className": "btn btn-success as-done",
+//                            "action": function (e, dt, node, config) {
+//                                $(".done-as").trigger("click");
+//                            }
+//                        }
 
                     ]
                 });
@@ -247,6 +267,49 @@
                 $("#search").on("click", function () {
                     table.ajax.reload();
                 });
+                $(".done-as").on("click", function (e) {
+                    e.preventDefault();
+                    var rows_selected = table.column(0).checkboxes.selected();
+                    if (rows_selected.length < 1) {
+                        alert_notify("fa fa-warning", "Pilihan Item masih kosong", "danger", function () {});
+                        return;
+                    }
+                    confirmRequest("Call For Bid", "Tandai CFB telah selesai ? ", function () {
+                        const dataStatus = new Promise((resolve, reject) => {
+                            let dt = [];
+                            $.each(rows_selected, function (index, rowId) {
+                                var splt = rowId.split("#");
+                                if ("draft" !== splt[splt.length - 1]) {
+                                    throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status Draft");
+                                }
+                                dt.push(splt[0]);
+                            });
+                            resolve(dt);
+                        });
+                        dataStatus.then((rsp) => {
+                            $.ajax({
+                                url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
+                                type: "POST",
+                                data: {
+                                    ids: rsp,
+                                    status: "done",
+                                    before_status: "draft"
+                                },
+                                success: function (data) {
+                                    alert_notify(data.icon, data.message, data.type, function () {});
+                                    location.reload();
+                                },
+                                error: function (err) {
+                                    alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                                }
+                            });
+                        }).catch(e => {
+                            alert_notify("fa fa-warning", e.message, "danger", function () {});
+                        });
+
+                    });
+                });
+
                 $(".confirm-order").on("click", function (e) {
                     e.preventDefault();
                     var rows_selected = table.column(0).checkboxes.selected();

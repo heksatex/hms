@@ -36,19 +36,28 @@ class Invoice extends MY_Controller {
         try {
             $data = array();
             $list = new $this->m_global;
+            $status = $this->input->post("status");
+            $supplier = $this->input->post("supplier");
             $list->setTables("invoice")
-                    ->setOrders([null, "partner.nama", "no_invoice_supp", "tanggal_invoice_supp", "no_sj_supp", "no_po", "order_date", "status"])
-                    ->setSearch(["partner.nama", "no_invoice_supp", "no_sj_supp", "no_po", "status"])
+                    ->setOrders([null, "no_invoice", "partner.nama", "no_invoice_supp", "tanggal_invoice_supp", "no_sj_supp", "no_po", "order_date", "status"])
+                    ->setSearch(["partner.nama", "no_invoice_supp", "no_sj_supp", "no_po", "status", "no_invoice"])
                     ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
-                    ->setSelects(["invoice.*", "partner.nama as supplier"])->setOrder(['create_date' => 'desc']);
+                    ->setSelects(["invoice.*", "partner.nama as supplier"])->setOrder(['created_at' => 'desc']);
 
             $no = $_POST['start'];
+            if ($status !== "")
+                $list->setWheres(["status" => $status]);
+
+            if (is_array($supplier))
+                $list->setWhereIn("id_supplier", $supplier);
+
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->id);
                 $no++;
                 $data [] = array(
                     $no,
-                    '<a href="' . base_url('purchase/invoice/edit/' . $kode_encrypt) . '">' . $field->supplier . '</a>',
+                    '<a href="' . base_url('purchase/invoice/edit/' . $kode_encrypt) . '">' . $field->no_invoice . '</a>',
+                    $field->supplier,
                     $field->no_invoice_supp,
                     $field->tanggal_invoice_supp,
                     $field->no_sj_supp,
@@ -79,14 +88,18 @@ class Invoice extends MY_Controller {
             $data["id"] = $id;
             $head = new $this->m_global;
             $detail = clone $head;
+            $tax = clone $head;
+            $model3 = clone $head;
+            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $datas = $head->setTables("invoice")->setJoins("partner", "partner.id = id_supplier", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")
-                    ->setJoins("currency","currency.nama = currency_kurs.currency","left")
-                    ->setWheres(["invoice.id" => $kode_decrypt])
-                            ->setSelects(["invoice.*", "partner.nama as supplier", "currency as mata_uang","currency.symbol"])->getDetail();
+                            ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
+                            ->setWheres(["invoice.id" => $kode_decrypt])
+                            ->setSelects(["invoice.*", "partner.nama as supplier", "currency as mata_uang", "currency.symbol"])->getDetail();
             if ($datas === null) {
                 throw new \Exception();
             }
+            $data["taxss"] = $tax->setTables("tax")->setOrder(["id" => "asc"])->getData();
             $data["inv"] = $datas;
             $data['mms'] = $this->_module->get_data_mms_for_log_history('PINV');
             $data["invDetail"] = $detail->setTables("invoice_detail")->setWheres(["invoice_id" => $kode_decrypt])
@@ -147,17 +160,44 @@ class Invoice extends MY_Controller {
             $noSjSupp = $this->input->post("no_sj_supp");
 
             $harga = $this->input->post("harga_satuan");
+            $coa = $this->input->post("kode_coa");
+            $amount_tax = $this->input->post("amount_tax");
+            $tax = $this->input->post("tax");
+            $dpplain = $this->input->post("dpplain");
+            $qty_beli = $this->input->post("qty_beli");
+            $dsk = $this->input->post("diskon");
+            $matauang = $this->input->post("nilai_matauang");
+
             $item = [];
+            $totals = 0.00;
+            $diskons = 0.00;
+            $taxes = 0.00;
+            $nilaiDppLain = 0;
+
             foreach ($harga as $key => $value) {
-                $item[] = ["id" => $key, "harga_satuan" => $value];
+                $item[] = ["id" => $key, "harga_satuan" => $value, "account" => $coa[$key], "tax_id" => $tax[$key], 'amount_tax' => $amount_tax[$key], "diskon" => $dsk[$key]];
+                $total = ($qty_beli[$key] * $value);
+                $totals += $total;
+                $diskon = ($dsk[$key] ?? 0);
+                $diskons += $diskon;
+
+                if ($dpplain === "1") {
+                    $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                } else {
+                    $taxes += ($total - $diskon) * $amount_tax[$key];
+                }
             }
+            if ($dpplain === "1") {
+                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
+            }
+            $grandTotal = ($totals - $diskons) + $taxes;
             $head = new $this->m_global;
             $bd = clone $head;
-            $dataUpdate = ["no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp];
+            $dataUpdate = ["no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain, 'total' => $grandTotal,'nilai_matauang'=>$matauang];
             $head->setTables('invoice')->setWheres(["id" => $kode_decrypt])
                     ->update($dataUpdate);
             $bd->setTables("invoice_detail")->updateBatch($item, 'id');
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'update', logArrayToString('; ', $dataUpdate), $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $dataUpdate), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -177,16 +217,17 @@ class Invoice extends MY_Controller {
             $status = $this->input->post("status");
             $id = $this->input->post("id");
             $inv = $this->input->post("inv");
+            $origin = $this->input->post("origin");
             $kode_decrypt = decrypt_url($id);
             $head = new $this->m_global;
             $this->_module->startTransaction();
-            $lock = "invoice WRITE,jurnal_entries WRITE,jurnal_entries_items WRITE,token_increment WRITE,"
+            $lock = "invoice WRITE,jurnal_entries WRITE,jurnal_entries_items WRITE,token_increment WRITE,partner WRITE,"
                     . "currency_kurs WRITE,currency WRITE,tax WRITE,invoice_detail WRITE,user WRITE, main_menu_sub WRITE, log_history WRITE";
             $this->_module->lock_tabel($lock);
             if ($status === 'cancel') {
-            $cekJurnal = clone $head;
-            
-                if ($cekJurnal->setTables("jurnal_entries")->setWheres(["origin" => $inv, "status <>" => $status])->getDetail() !== "null") {
+                $cekJurnal = clone $head;
+
+                if ($cekJurnal->setTables("jurnal_entries")->setWheres(["origin" => "{$inv}|{$origin}", "status <>" => $status])->getDetail() !== "null") {
                     throw new \Exception('Jurnal Tidak Ada', 500);
                 }
             } else if ($status === 'done') {
@@ -201,51 +242,77 @@ class Invoice extends MY_Controller {
                                 ->generate("{$kodeJurnal}/", '/%05d')->get()) {
                     throw new \Exception("No jurnal tidak terbuat", 500);
                 }
-                $jurnalData = ["kode" => $jurnal, "periode" => date('y', strtotime($now)) . '/' . date('m', strtotime($now)),
-                    "origin" => $inv, "status" => "draft", "tanggal_dibuat" => date("Y-m-d H:i:s")];
-                $jurnalDB->setTables("jurnal_entries")->save($jurnalData);
                 $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $kode_decrypt])
                                 ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
                                 ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
+                                ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
 //                                ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = invoice_detail.kode_produk", "left")
                                 ->setJoins("currency_kurs", "currency_kurs.id = invoice.matauang", "left")
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
-                                ->setSelects(["invoice_detail.*", "invoice.id_supplier", "currency_kurs.currency,currency_kurs.kurs,currency.symbol", "COALESCE(tax.amount,0) as tax_amount"])
+                                ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
+                                    "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "partner.nama as nama_supp"])
                                 ->setOrder(["invoice_id"])->getData();
+
+                $jurnalData = ["kode" => $jurnal, "periode" => date('y', strtotime($now)) . '/' . date('m', strtotime($now)),
+                "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => date("Y-m-d H:i:s"), "tipe" => ($dataItems[0]->jurnal ?? ""),
+                "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
+                $jurnalDB->setTables("jurnal_entries")->save($jurnalData);
+
                 $jurnalItems = [];
                 $tax = 0;
+                $totalNominal = 0;
                 foreach ($dataItems as $key => $value) {
-                    $nominal = $value->harga_satuan * $value->qty_beli;
+                    if($value->account === null) {
+                        throw new \Exception("Jurnal Account Belum diisi", 500);
+                    }
+                    $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
-                        "nama" => $value->kode_produk . " " . $value->nama_produk,
+                        "nama" => "[{$value->kode_produk}] {$value->nama_produk} (". number_format($value->qty_beli,2)." {$value->uom_beli})",
                         "reff_note" => $value->reff_note,
                         "partner" => $value->id_supplier,
                         "kode_coa" => $value->account,
                         "posisi" => "D",
-                        "nominal_curr" => $value->kurs,
-                        "kurs" => $value->currency,
-                        "kode_mua" => $value->symbol,
-                        "nominal" => $nominal * $value->kurs,
+                        "nominal_curr" => $nominal,
+                        "kurs" => $value->kurs,
+                        "kode_mua" => $value->name_curr,
+                        "nominal" => ($nominal * $value->nilai_matauang),
                         "row_order" => ($key + 1)
                     );
                     $tax += $nominal * $value->tax_amount;
+                    $totalNominal += $nominal;
                 }
                 if ($tax > 0) {
+                    if($dataItems[0]->dpp_lain > 0) {
+                        $tax = $dataItems[0]->dpp_lain * $dataItems[0]->tax_amount;
+                    }
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
-                        "nama" => "",
+                        "nama" => "{$dataItems[0]->tax_nama}",
                         "reff_note" => "",
                         "partner" => $dataItems[0]->id_supplier,
-                        "kode_coa" => "2112.01",
-                        "posisi" => "K",
-                        "nominal_curr" => $dataItems[0]->kurs,
-                        "kurs" => $dataItems[0]->currency,
-                        "kode_mua" => $dataItems[0]->symbol,
-                        "nominal" => $tax,
+                        "kode_coa" => "1193.05",
+                        "posisi" => "D",
+                        "nominal_curr" => $tax,
+                        "kurs" => $dataItems[0]->kurs,
+                        "kode_mua" => $dataItems[0]->name_curr,
+                        "nominal" => ($tax * $dataItems[0]->nilai_matauang),
                         "row_order" => count($dataItems) + 1
                     );
                 }
+                $jurnalItems[] = array(
+                    "kode" => $jurnal,
+                    "nama" => "",
+                    "reff_note" => "",
+                    "partner" => $dataItems[0]->id_supplier,
+                    "kode_coa" => "2112.01",
+                    "posisi" => "C",
+                    "nominal_curr" =>$totalNominal + $tax,
+                    "kurs" => $dataItems[0]->kurs,
+                    "kode_mua" => $dataItems[0]->name_curr,
+                    "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
+                    "row_order" => count($jurnalItems) + 1
+                );
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("jurnal_entries_items")->saveBatch($jurnalItems);
             }
@@ -266,6 +333,28 @@ class Invoice extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
+        }
+    }
+    
+    public function duplicate() {
+        try {
+            $ids = $this->input->post("ids");
+            $model = new $this->m_global;
+            $detail = $model->setTables("invoice_detail")->setWheres(["invoice_detail.id"=>$ids])
+                    ->setJoins("coa", "coa.kode_coa = account", "left")
+                    ->setJoins("tax", "tax.id = tax_id", "left")
+                    ->setSelects(["invoice_detail.*","coa.nama as acc_nama","tax.nama as tax_nama"])->getDetail();
+            if($detail === null) {
+                throw new Exception('Data Tidak ditemukan', 500);
+            }
+            $data["data"] = $detail;
+            $data["ids"] = $ids;
+            $html = $this->load->view('purchase/v_invoice_split_item', $data,true);
+             $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success',"data"=>$html)));
+        } catch (Exception $ex) {
+            
         }
     }
 

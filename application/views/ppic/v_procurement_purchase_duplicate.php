@@ -103,7 +103,19 @@
                     <textarea type="text" class="form-control input-sm" name="note" id="note"><?php echo  $procurementpurchase->notes?></textarea>
                   </div>                                    
                 </div>
-                &nbsp
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Type </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <input type="radio" id="mto" name="type[]" value="mto">
+                      <label for="mto">Make to Order</label>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <input type="radio" id="pengiriman" name="type[]" value="pengiriman">
+                      <label for="pengiriman">Pengiriman</label>
+                    </div>
+                  </div>                                    
+                </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Sales Order </label></div>
                   <div class="col-xs-8">
@@ -175,8 +187,8 @@
                     <select class="form-control input-sm" name="priority" id="priority" />
                     <option value="">Pilih Priority</option>
                     <?php 
-                    $val = array('Not Urgent','Normal','Urgent','Very Urgent');
-                    for($i=0;$i<=3;$i++) {
+                    $val = array('Normal','Urgent');
+                    for($i=0;$i<=2;$i++) {
                       if($val[$i] == $procurementpurchase->priority){?>
                          <option selected><?php echo $val[$i];?></option>
                       <?php
@@ -342,12 +354,18 @@
             }
         }); 
 
-        $('#btn-simpan').button('loading');
-        var radio_type = $('input[name="sc[]"]').map(function(e, i) {
+    $('#btn-simpan').button('loading');
+        var radio_type = $('input[name="type[]"]').map(function(e, i) {
                 if(this.checked == true){
                     return i.value;
                 }
-        }).get();
+          }).get();
+
+          var radio_type_2 = $('input[name="sc[]"]').map(function(e, i) {
+                if(this.checked == true){
+                    return i.value;
+                }
+          }).get();
         please_wait(function(){});
         $.ajax({
             type: "POST",
@@ -366,7 +384,8 @@
                     sales_order : $('#sales_order').val(),
                     priority    : $('#priority').val(),
                     warehouse   : $('#warehouse').val(),
-                    show_sc     : radio_type,
+                    type        : radio_type,
+                    show_sc     : radio_type_2,
                     arr_items    : JSON.stringify(arr),
 
             },success: function(data){
@@ -643,18 +662,19 @@
                 ajax:{
                         dataType: 'JSON',
                         type : "POST",
-                        url : "<?php echo base_url();?>lab/dti/get_uom_select2",
+                        url : "<?php echo base_url();?>ppic/procurementpurchase/get_list_uom_select2",
                         data : function(params){
                             return{
                                 prod:params.term,
+                                kode_produk: $(this).parents("tr").find("#kode_produk").val() 
                             };
                         }, 
                         processResults:function(data){
                             var results = [];
                             $.each(data, function(index,item){
                                 results.push({
-                                    id:item.short,
-                                    text:item.short
+                                    id:item.uom,
+                                    text:item.uom
                                 });
                             });
                             return {

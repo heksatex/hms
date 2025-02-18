@@ -247,7 +247,7 @@
                             <th class="style">Product</th>
                             <th class="style" style="text-align: right;width: 100px;">Qty</th>
                             <th class="style">uom</th>
-                            <th class="style">Tersedia</th>
+                            <th class="style"  style="text-align: right">Tersedia</th>
                             <th class="style">Status</th>
                             <th class="style" style="width: 80px"></th>
 
@@ -268,7 +268,7 @@
                                 </td>
                                 <td data-content="edit" data-id="qty" data-isi="<?php echo $row->qty;?>"  align="right"><?php echo number_format($row->qty,2)?></td>
                                 <td><?php echo $row->uom?></td>
-                                <td style="color:<?php echo $color;?>"><?php if($row->sum_qty) echo number_format($row->sum_qty,2)?></td>
+                                <td  align="right" style="color:<?php echo $color;?>"><?php echo (!empty($row->sum_qty)) ? number_format($row->sum_qty, 2) : ''; ?></td>
                                 <td><?php if($row->status_barang == 'cancel') echo 'Batal';  else echo $row->status_barang;?></td>
                                 <td align="center">
                                   <?php if(($row->status_barang == 'draft' OR $row->status_barang == 'ready') AND $list->type_created == 1) {?>

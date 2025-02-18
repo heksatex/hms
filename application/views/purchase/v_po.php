@@ -29,93 +29,135 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-body">
-<!--                            <div class="form-group">
-                                <div class="col-md-12">
-                                    <div class="col-md-4 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;  ">
-                                        <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
-                                            <label style="cursor:pointer;">
-                                                <i class="showAdvanced glyphicon glyphicon-triangle-bottom"></i>
-                                                Filter
-                                            </label>
-                                        </div>
+                            <div class="col-md-12">
+                                <div class="col-md-12 panel-heading" role="tab" id="advanced" style="padding:0px 0px 0px 15px;cursor:pointer;">
+                                    <div data-toggle="collapse" href="#advancedSearch" aria-expanded="false" aria-controls="advancedSearch" class='collapsed'>
+                                        <label>
+                                            <i class="showAdvanced glyphicon glyphicon-triangle-bottom">&nbsp;</i>Filter
+                                        </label>
                                     </div>
+                                </div>
 
-                                </div>
-                                <br>
-                                <br>
-                                <div class="col-md-12">
-                                    <div class="panel panel-default" style="margin-bottom: 0px;">
-                                        <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
-                                            
+                            </div>
+                            <br>
+                            <br>
+                            <div class="col-md-12">
+                                <div class="panel panel-default" style="margin-bottom: 0px;">
+                                    <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
+                                        <div class="panel-body" style="padding: 5px">
+                                            <div class="col-md-6 col-xs-12">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <label class="form-label">Nama Produk</label>
+                                                        </div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <input class="form-control input-sm" name="nama_produk" id="nama_produk" value="">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4">
+                                                            <label class="form-label">Status</label>
+                                                        </div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <select name="status" class="form-control select2" id="status" style="width: 100%">
+                                                                <option></option>
+                                                                <option value="purchase_confirmed">Purchase Confirmed</option>
+                                                                <option value="cancel">Cancel</option>
+                                                                <option value="exception">Exception</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <div class="col-md-2 col-xs-12">
+                                            <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>-->
-                            <div class="col-xs-12 table-responsive">
-                                <table id="tbl-po" class="table">
-                                    <thead>
-                                        <tr>
-                                            <th class="no">No</th>
-                                            <th>No PO</th>
-                                            <th>Supplier</th>
-                                            <th>Order Date</th>
-                                            <th>Create Date</th>
-                                            <th>Total</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                </table>
                             </div>
                         </div>
-                        <!-- /.box-body -->
+                        <div class="col-xs-12 table-responsive">
+                            <table id="tbl-po" class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="no">No</th>
+                                        <th>No PO</th>
+                                        <th>Supplier</th>
+                                        <th>Tanggal Order</th>
+                                        <th>Tanggal Dokumen</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
                     </div>
-                </section>
+                    <!-- /.box-body -->
             </div>
-        </div>
-        <?php $this->load->view("admin/_partials/js.php") ?>
-        <script>
-            $(function () {
-                
-                //* Show collapse advanced search
-                $('#advancedSearch').on('shown.bs.collapse', function () {
-                    $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
-                });
+        </section>
+    </div>
+</div>
+<?php $this->load->view("admin/_partials/js.php") ?>
+<script>
+    $(function () {
 
-                //* Hide collapse advanced search
-                $('#advancedSearch').on('hidden.bs.collapse', function () {
-                    $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
-                });
-                
-                
-                const table = $("#tbl-po").DataTable({
-                    "iDisplayLength": 50,
-                    "processing": true,
-                    "serverSide": true,
-                    "order": [],
+        //* Show collapse advanced search
+        $('#advancedSearch').on('shown.bs.collapse', function () {
+            $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
+        });
 
-                    "paging": true,
-                    "lengthChange": true,
-                    "searching": true,
-                    "ordering": true,
-                    "info": true,
-                    "autoWidth": false,
-                    "ajax": {
-                        "url": "<?php echo site_url('purchase/purchaseorder/list_data') ?>",
-                        "type": "POST"
-                    },
-                    "columnDefs": [
-                        {
-                            "targets": [0],
-                            "orderable": false
-                        }
-                    ],
-                    "createdRow": function (row, data, dataIndex) {
-                        if (data[6].toLowerCase() === "cancel") {
-                            $(row).addClass('cancelPL');
-                        }
-                    }
-                });
-            });
-        </script>
-    </body>
+        //* Hide collapse advanced search
+        $('#advancedSearch').on('hidden.bs.collapse', function () {
+            $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
+        });
+
+        $(".select2").select2({
+            allowClear: true,
+            placeholder: "Pilih"
+        });
+
+
+        const table = $("#tbl-po").DataTable({
+            "iDisplayLength": 50,
+            "processing": true,
+            "serverSide": true,
+            "order": [],
+
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "ajax": {
+                "url": "<?php echo site_url('purchase/purchaseorder/list_data') ?>",
+                "type": "POST",
+                "data": function (d) {
+                    d.nama_produk = $("#nama_produk").val();
+                    d.status = $("#status").val();
+                }
+            },
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "orderable": false
+                }
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                if (data[6].toLowerCase() === "cancel") {
+                    $(row).addClass('cancelPL');
+                }
+            }
+        });
+        $("#search").on("click", function () {
+            table.ajax.reload();
+        });
+
+    });
+</script>
+</body>
 </html>

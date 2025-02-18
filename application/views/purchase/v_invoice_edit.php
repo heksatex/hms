@@ -27,6 +27,46 @@
                 <?php
             }
             ?>
+            #btn-cancel{
+                display : none
+            }
+
+
+            .no{
+                width: 0.5% !important;
+            }
+            .td-produk {
+                width: 3% !important;
+            }
+            .td-note{
+                width: 3% !important;
+            }
+            .td-coa {
+                width: 3% !important;
+            }
+            .td-beli{
+                width: 2% !important;
+            }
+            .td-uom {
+                width: 1% !important;
+            }
+            .td-harga{
+                width: 2% !important;
+            }
+            .td-tax{
+                width: 2% !important;
+            }
+            .td-aksi{
+                width: 1% !important;
+            }
+            .td-diskon {
+                width: 2% !important;
+            }
+            /*            .td-deskripsi{
+                            width: 7% !important;
+                        }*/
+
+
         </style>
 
     </head>
@@ -56,7 +96,7 @@
                 <section class="content">
                     <div class="box">
                         <div class="box-header with-border">
-                            <h3 class="box-title">PO Supplier &nbsp;<strong> <?= $inv->no_invoice ?? "" ?> </strong></h3>
+                            <h3 class="box-title"><strong> <?= $inv->no_invoice ?? "" ?> </strong></h3>
                             <div class="pull-right text-right" id="btn-header">
 
                             </div>
@@ -75,16 +115,16 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">No PO</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $inv->no_po ?></span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <!--                                        <div class="form-group">
+                                                                                    <div class="col-md-12 col-xs-12">
+                                                                                        <div class="col-xs-4">
+                                                                                            <label class="form-label">No PO</label>
+                                                                                        </div>
+                                                                                        <div class="col-xs-8 col-md-8 text-uppercase">
+                                                                                            <span><?= $inv->no_po ?></span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>-->
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
@@ -105,12 +145,32 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label required">Kurs</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang,0,'','') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?> required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">No PO</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <span><?= $inv->no_po ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">PO Supplier</label>
+                                                    <label class="form-label">Invoice Supplier</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <input type="text" class="form-control pull-right input-sm" name="no_invoice_supp" value="<?= $inv->no_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
@@ -138,6 +198,16 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Origin</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <input type="text" class="form-control pull-right input-sm" name="origin" value="<?= $inv->origin ?>" readonly> 
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -145,31 +215,32 @@
                                 <div class="col-xs-12">
                                     <ul class="nav nav-tabs">
                                         <li class="active"><a href="#tab_1" data-toggle="tab">Item</a></li>
-                                        <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
+                                        <!--<li><a href="#tab_2" data-toggle="tab">Origin</a></li>-->
                                     </ul>
                                     <div class="tab-content"><br>
+                                        <!--<div class="tab-pane" id="tab_2"></div>-->
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="table-responsive over">
-                                                <table id="tbl-inv" class="table table-condesed table-hover rlstable  over">
+                                                <table id="tbl-inv" class="table table-condesed table-hover rlstable  over" style="min-width: 150%">
                                                     <thead>
                                                         <tr>
                                                             <th class="no">#</th>
                                                             <th>Produk</th>
-                                                            <th>Deskripsi</th>
+                                                            <!--<th>Deskripsi</th>-->
                                                             <th>Reff Note</th>
                                                             <th>Account</th>
                                                             <th>Qty Beli</th>
                                                             <th>UOM</th>
                                                             <th>Harga Satuan</th>
                                                             <th>Tax</th>
-                                                            <th>Jumlah</th>
+                                                            <th>Diskon</th>
+                                                            <!--<th>#</th>-->
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <?php
                                                         if (count($invDetail) > 0) {
                                                             $dataPajak = [];
-                                                            $jumlah = 0;
                                                             $subtotal1 = 0;
                                                             $totalDiskon = 0;
                                                             $totalTax = 0;
@@ -180,26 +251,72 @@
                                                                 $jumlah = $value->harga_satuan * $value->qty_beli;
                                                                 $subtotal1 += $jumlah;
                                                                 $totalDiskon += $value->diskon;
-                                                                $tax = ($jumlah - $value->diskon) * $value->amount;
-                                                                $totalTax += $tax;
+                                                                if ($setting !== null) {
+                                                                    $totalTax += ((($jumlah - $value->diskon) * 11) / 12) * $value->amount_tax;
+                                                                } else {
+                                                                    $totalTax += ($jumlah - $value->diskon) * $value->amount_tax;
+                                                                }
                                                                 ?>
                                                                 <tr>
-                                                                    <td><?= $key + 1 ?></td>
-                                                                    <td><?= $value->kode_produk . " - " . $value->nama_produk ?></td>
-                                                                    <td><?= $value->deskripsi ?></td>
-                                                                    <td><?= $value->reff_note ?></td>
-                                                                    <td><?= $value->kode_coa . " " . $value->nama_coa ?></td>
-                                                                    <td><?= number_format($value->qty_beli, 2) ?></td>
-                                                                    <td><?= $value->uom_beli ?></td>
-                                                                    <td>
+                                                                    <td class="no"><?= $key + 1 ?></td>
+                                                                    <td class="td-produk"><?= $value->kode_produk . " - " . $value->nama_produk ?></td>
+                                                                    <!--<td class="td-deskripsi" ><?= $value->deskripsi ?></td>-->
+                                                                    <td class="td-note"><?= $value->reff_note ?></td>
+                                                                    <td class="td-coa">
                                                                         <div class="form-group">
-                                                                            <input class="form-control pull-right input-sm" name="harga_satuan[<?= $value->id ?>]" <?= ($inv->status === 'draft') ? '' : 'disabled' ?>
-                                                                                   style="width: 70%" value="<?= $value->harga_satuan > 0 ? (float) $value->harga_satuan : 0 ?>" required>
+                                                                            <select class="form-control kode_coa input-xs kode_coa_data_<?= $key ?>" style="width: 100% !important;" data-row="<?= $key ?>"
+                                                                                    name="kode_coa[<?= $value->id ?>]" <?= ($inv->status === 'draft') ? '' : 'disabled' ?> required>
+                                                                                <option></option>
+                                                                                <?php
+                                                                                if (!is_null($value->kode_coa)) {
+                                                                                    ?>
+                                                                                    <option value="<?= $value->kode_coa ?>" selected ><?= $value->kode_coa . " - " . $value->nama_coa ?></option>   
+                                                                                    <?php
+                                                                                }
+                                                                                ?>
+                                                                            </select>
 
                                                                         </div>
                                                                     </td>
-                                                                    <td><?= $value->pajak_ket ?></td>
-                                                                    <td><?= $inv->symbol ?> <?= number_format($jumlah, 2) ?></td>
+                                                                    <td class="td-beli" >
+                                                                        <input type="hidden"  class="form-control input-sm qty_<?= $value->id ?>" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>" readonly>
+                                                                        <input type="text"  class="form-control input-sm" value="<?= number_format($value->qty_beli, 2) ?>" disabled>
+                                                                    </td>
+                                                                    <td class="td-uom"><?= $value->uom_beli ?></td>
+                                                                    <td class="td-harga">
+                                                                        <div class="form-group">
+                                                                            <input class="form-control input-sm" name="harga_satuan[<?= $value->id ?>]" type="hidden"
+                                                                                   value="<?= $value->harga_satuan > 0 ? (float) $value->harga_satuan : 0 ?>">
+
+                                                                            <input class="form-control input-sm"  type="text"
+                                                                                   value="<?= $value->harga_satuan > 0 ? number_format((float) $value->harga_satuan, 4) : 0 ?>" disabled>
+
+                                                                        </div>
+                                                                    </td>
+                                                                    <td class="td-tax">
+                                                                        <div class="form-group ">
+                                                                            <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                                            <input type="hidden" class="form-control" name="tax[<?= $value->id ?>]" value="<?= $value->tax_id ?>">
+                                                                            <select style="width: 90%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                                    name="tax_[<?= $value->id ?>]"  disabled>
+                                                                                <option></option>
+                                                                                <?php
+                                                                                foreach ($taxss as $key => $taxs) {
+                                                                                    ?>
+                                                                                    <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                    <?php
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td class="td-diskon">
+                                                                        <input type="hidden" class="form-control" name="diskon[<?= $value->id ?>]" value="<?= $value->diskon ?>">
+                                                                        <input type="text" class="form-control" value="<?= $value->diskon ?>" disabled>
+                                                                    </td>
+<!--                                                                    <td class="td-aksi">
+                                                                        <a class="add_duplicate" data-id="<?= $value->id ?>" data-toggle="tooltip" data-placement="top" title="Split"><i class="fa fa-copy"></i></a>
+                                                                    </td>-->
                                                                 </tr>
                                                                 <?php
                                                             }
@@ -234,13 +351,23 @@
                                                                             Jumlah
                                                                         </td>
                                                                     </tr>
-                                                                    <tr>
-                                                                        <td>1</td>
-                                                                        <td><?= $dataPajak["ket"] ?? "" ?></td>
-                                                                        <td></td>
-                                                                        <td><?= $inv->symbol ?> <?= number_format($subtotal2, 2) ?></td>
-                                                                        <td><?= $inv->symbol ?> <?= number_format($totalTax, 2) ?></td>
-                                                                    </tr>
+                                                                    <?php if ($totalTax > 0) { ?>
+                                                                        <tr>
+                                                                            <td>1</td>
+                                                                            <td><?= $dataPajak["ket"] ?? "" ?></td>
+                                                                            <td>1193.05 - Pajak Dibayar Muka PPN</td>
+                                                                            <td><?= $inv->symbol ?> <?php
+                                                                                if ($setting !== null) {
+                                                                                    print( number_format((($subtotal1 - $totalDiskon) * 11) / 12, 4));
+                                                                                } else {
+                                                                                    print(number_format($subtotal2, 4));
+                                                                                }
+                                                                                ?>
+                                                                            </td>
+                                                                            <td><?= $inv->symbol ?> <?= number_format($totalTax, 4) ?></td>
+                                                                        </tr>
+                                                                    <?php } ?>
+
                                                                 <?php }
                                                                 ?>
                                                             </tbody>
@@ -250,23 +377,35 @@
                                                         <table class="table table-condesed table-hover rlstable  over">
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 1</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal1, 2) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal1, 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right">Diskon</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($totalDiskon, 2) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($totalDiskon, 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2, 2) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2, 4) ?></td>
                                                             </tr>
+                                                            <?php if ($setting !== null) {
+                                                                ?>
+                                                                <tr>    
+                                                                    <td class="style text-right">DPP Nilai Lain</td>
+                                                                    <td class="style totalan"> 
+                                                                        <input name="dpplain" type="hidden" value="1">
+                                                                        <strong><?= $inv->symbol ?> <?= number_format((($subtotal1 - $totalDiskon) * 11) / 12, 4) ?>
+                                                                        </strong>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php }
+                                                            ?>
                                                             <tr>
                                                                 <td class="text-right">Tax</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($totalTax, 2) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($totalTax, 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2 + $totalTax, 2) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2 + $totalTax, 4) ?></td>
                                                             </tr>
                                                         </table>
                                                     </div>
@@ -306,6 +445,70 @@
             });
 
             $(function () {
+                var editable = false;
+
+                $(".add_duplicate").off("click").on("click", function () {
+                    if (editable) {
+                        return;
+                    }
+                    var ids = $(this).data("id");
+                    $(".qty_" + ids).removeAttr("readonly");
+                    editable = true;
+                    $.post("<?= site_url("purchase/invoice/duplicate"); ?>", {"ids": ids}, function () {
+
+                    });
+                });
+
+                $(".tax").select2({
+                    allowClear: true,
+                    placeholder: "Pajak",
+
+                });
+
+                $(".tax").on("select2:select", function () {
+                    var row = $(this).attr("data-row");
+                    var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
+                    console.log(selectedSelect2OptionSource);
+                    $(".amount_tax_" + row).val(selectedSelect2OptionSource);
+                });
+
+                $(".tax").on("change", function () {
+                    var row = $(this).attr("data-row");
+                    $(".amount_tax_" + row).val("0");
+                });
+
+
+                $('.kode_coa').select2({
+                    allowClear: true,
+                    placeholder: "PIlih Coa",
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "POST",
+                        url: "<?= base_url("purchase/jurnalentries/getcoa"); ?>",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    id: item.kode_coa,
+                                    text: item.kode_coa + " - " + item.nama
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            //alert('Error data');
+                            //alert(xhr.responseText);
+                        }
+                    }
+                });
 
                 const form = document.forms.namedItem("form-inv");
                 form.addEventListener(
@@ -346,7 +549,8 @@
                                 id: "<?= $id ?>",
                                 status: "done",
                                 jurnal: "<?= $inv->journal ?>",
-                                inv: "<?= $inv->no_invoice ?>"
+                                inv: "<?= $inv->no_invoice ?>",
+                                origin: "<?= $inv->origin ?>"
                             },
                             error: function (req, error) {
                                 unblockUI(function () {

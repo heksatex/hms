@@ -25,7 +25,7 @@
         ?>
         <tr>
             <td>
-                <?= $value->kode ?>
+                <a target="_blank" href="<?= base_url('warehouse/penerimaanbarang/edit/' . encrypt_url($value->kode)) ?>"><?= $value->kode ?></a> 
             </td>
             <td>
                 <?= $value->tanggal ?>

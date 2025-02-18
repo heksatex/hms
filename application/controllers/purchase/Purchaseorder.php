@@ -29,6 +29,7 @@ class Purchaseorder extends MY_Controller {
         $this->load->model('m_konversiuom');
         $this->load->library("token");
         $this->config->load('additional');
+        $this->load->model("m_global");
     }
 
 //4833 2650
@@ -57,9 +58,10 @@ class Purchaseorder extends MY_Controller {
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
                             ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
                             ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
-                            ->setSelects(["po.*", "p.nama as supp", "currency.symbol"])
+                            ->setJoins("purchase_order_edited poe", "(po.no_po = poe.po_id and poe.status not in ('done','cancel') )", "left")
+                            ->setSelects(["po.*", "p.nama as supp", "currency.symbol,currency.nama as curr_name", "poe.status as edited_status"])
                             ->setWheres(["po.no_po" => $kode_decrypt])
-                            ->setWhereRaw("po.status in ('done','cancel','purchase_confirmed')")->getDetail();
+                            ->setWhereRaw("po.status in ('done','cancel','purchase_confirmed','exception')")->getDetail();
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
@@ -73,6 +75,9 @@ class Purchaseorder extends MY_Controller {
             $data["tax"] = $this->m_po->setTables("tax")->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
             $data["status"] = $this->status;
+            $getSetting = new m_global;
+            $defautTotals = $getSetting->setTables("setting")->setWheres(["setting_name" => "limit_approve_{$data["po"]->curr_name}", "status" => 1])->setSelects(["value"])->getDetail();
+            $data["default_total"] = (int) ($defautTotals->value ?? 0);
             $this->load->view('purchase/v_po_edit', $data);
         } catch (Exception $ex) {
             show_404();
@@ -82,15 +87,26 @@ class Purchaseorder extends MY_Controller {
     public function list_data() {
         try {
             $data = array();
+            $status = $this->input->post("status");
+            $nama_produk = $this->input->post("nama_produk");
+
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "order_date", "create_date", "status"])
                     ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode"])->setOrder(['create_date' => 'desc'])
                     ->setSearch(["p.nama", "no_po", "prioritas", "status"])
                     ->setJoins("currency_kurs ck", "ck.id = po.currency", "left")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
-                    ->setWhereRaw("status in ('done','cancel','purchase_confirmed') and jenis <>'FPT'");
+                    ->setWhereRaw("status in ('done','cancel','purchase_confirmed','exception') and jenis <>'FPT'");
 
             $no = $_POST['start'];
+
+            if ($status !== "")
+                $list->setWheres(["po.status" => $status]);
+
+            if ($nama_produk !== "")
+                $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
+
+
             foreach ($list->getData() as $field) {
                 $no++;
                 $data [] = [
@@ -99,7 +115,7 @@ class Purchaseorder extends MY_Controller {
                     $field->nama_supplier,
                     $field->order_date,
                     $field->create_date,
-                    number_format($field->total,2) . " " .( ($field->total === null) ? "" : $field->curr_kode),
+                    number_format($field->total, 2) . " " . ( ($field->total === null) ? "" : $field->curr_kode),
                     $field->nama_status ?? $field->status
                 ];
             }
@@ -123,14 +139,20 @@ class Purchaseorder extends MY_Controller {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
+            $users = $this->session->userdata('nama');
             $kode_decrypt = decrypt_url($id);
             $status = $this->input->post("status");
             $totalItem = $this->input->post("item");
             $checkData = new $this->m_po;
-            $data = $checkData->setWheres(["no_po" => $kode_decrypt])->getDetail();
+            $listLog = [];
+            $data = $checkData->setWheres(["no_po" => $kode_decrypt])->setJoins("purchase_order_edited poe", "(poe.po_id = no_po and poe.status not in ('cancel','done'))","left")
+                    ->setSelects(["purchase_order.*","poe.status as poe_status"])->getDetail();
             if (!$data) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
+            if($data->poe_status === "waiting_approve")
+                throw new \Exception('PO dalam status WAITING APPROVE', 500);
+            
             if ($status !== "cancel") {
                 if ($data->currency === null) {
                     throw new \Exception('Mata Uang Belum diperbaharui ', 500);
@@ -139,8 +161,9 @@ class Purchaseorder extends MY_Controller {
             $this->_module->startTransaction();
             $lockTable = "user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
                     . "purchase_order_detail write,purchase_order write,penerimaan_barang WRITE,penerimaan_barang_items WRITE";
-            if ($status === 'done') {
-                $lockTable .= ",stock_move_produk WRITE,stock_move WRITE,token_increment WRITE,nilai_konversi nk WRITE";
+            if ($status === 'done' || $status === "purchase_confirmed") {
+                $lockTable .= ",stock_move_produk WRITE,stock_move WRITE,token_increment WRITE,nilai_konversi nk WRITE,invoice WRITE,invoice_detail write,jurnal_entries WRITE"
+                        . ",jurnal_entries_items WRITE,currency write,currency_kurs write,tax write,partner write,purchase_order_edited WRITE";
             }
             $this->_module->lock_tabel($lockTable);
             $updateDataDetail = [];
@@ -181,6 +204,83 @@ class Purchaseorder extends MY_Controller {
                     if ((int) $inshipment !== (int) $totalItem) {
                         throw new \Exception("Produk Pada RCV In dengan Origin {$kode_decrypt} Tidak dalam status <strong>DONE</strong> semua.", 500);
                     }
+                    break;
+                case "purchase_confirmed" :
+                    $modelInv = new $this->m_global;
+                    $cekInv = $modelInv->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "status <>" => "cancel"])->getDetail();
+                    if ($cekInv) {
+                        $modelPO = new $this->m_global;
+                        $modelJurnal = clone $modelPO;
+                        $dataDetail = $modelPO->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["po_no_po"])->getData();
+                        $query = [];
+                        foreach ($dataDetail as $key => $value) {
+                            $query [] = "update invoice_detail set harga_satuan='{$value->harga_per_uom_beli}' where invoice_id={$cekInv->id} and kode_produk='{$value->kode_produk}'";
+                            $logInvDetail [] = "kode produk {$value->kode_produk}, harga satuan ". number_format($value->harga_per_uom_beli,4);
+                        }
+                        if (count($query) > 0) {
+                            $cekUpdateIn = $modelPO->query($query);
+                            if ($cekUpdateIn !== "") {
+                                throw new \Exception("Update pada data invoice gagal.", 500);
+                            }
+                            $modelInv->update(["total" => $data->total, "dpp_lain" => $data->dpp_lain]);
+                            $this->_module->gen_history("invoice", $cekInv->id, 'edit',
+                                    "update dpp lain ". number_format($data->dpp_lain,4).", total ". number_format($data->total,4).", " . logArrayToString(";", $logInvDetail),
+                                            $username);
+                        }
+                        $cekJurnal = $modelJurnal->setTables("jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
+                        if ($cekJurnal !== null) {
+                            $items = new $this->m_global;
+                            $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $cekInv->id])
+                                            ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
+                                            ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
+                                            ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
+                                            ->setJoins("currency_kurs", "currency_kurs.id = invoice.matauang", "left")
+                                            ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
+                                            ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
+                                                "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "partner.nama as nama_supp"])
+                                            ->setOrder(["invoice_id"])->getData();
+                            $updateQueryJurnal = [];
+                            $tax = 0;
+                            $totalNominal = 0;
+                            foreach ($dataItems as $key => $value) {
+                                $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
+                                $ttls = ($nominal * $value->nilai_matauang);
+                                $nm = "[{$value->kode_produk}] {$value->nama_produk} (%";
+                                $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$nominal}',nominal='{$ttls}' where kode = '{$cekJurnal->kode}' and nama LIKE '{$nm}'";
+                                $tax += $nominal * $value->tax_amount;
+                                $totalNominal += $nominal;
+
+                                $logJurnal [] = "nominal Kurs {$nominal} nominal {$ttls} untuk produk {$value->kode_produk} {$value->nama_produk}";
+                            }
+                            if ($tax > 0) {
+                                if ($dataItems[0]->dpp_lain > 0) {
+                                    $tax = $dataItems[0]->dpp_lain * $dataItems[0]->tax_amount;
+                                }
+                                $ttx = ($tax * $dataItems[0]->nilai_matauang);
+                                $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$tax}',nominal='{$ttx}' where kode = '{$cekJurnal->kode}' and kode_coa = '1193.05'";
+                                $logJurnal [] = "nominal Kurs {$tax} nominal {$ttx} Untuk Tax";
+                            }
+
+                            if (count($updateQueryJurnal) > 0) {
+                                $ttmax = $totalNominal + $tax;
+                                $nttmax = $ttmax * $dataItems[0]->nilai_matauang;
+                                $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$ttmax}',nominal='{$nttmax}' where kode = '{$cekJurnal->kode}' and kode_coa = '2112.01'";
+                                $logJurnal [] = "nominal Kurs {$ttmax} nominal {$nttmax} Untuk Hutang Dagang";
+
+                                $cekUpdateIn = $modelPO->query($updateQueryJurnal);
+                                if ($cekUpdateIn !== "") {
+                                    throw new \Exception("Update pada data Jurnal gagal.", 500);
+                                }
+                                $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode,
+                                    "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
+                            }
+                        }
+                    }
+                    $model = new $this->m_global;
+                    $model->setTables("purchase_order_edited")->setWheres(["po_id" => $kode_decrypt, 'status <>' => 'cancel'])->update(["status" => 'done']);
+                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
+                                    "jenis_log" => "edit", "note" =>"Permintaan Untuk Edit PO Selesai", "nama_user" => $users["nama"], "ip_address" => ""];
+                    break;
             }
             $po = new $this->m_po;
             $pod = clone $po;
@@ -192,13 +292,16 @@ class Purchaseorder extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
+            if (count($listLog) > 0) {
+                $this->m_global->setTables("log_history")->saveBatch($listLog);
+            }
             $this->_module->gen_history($sub_menu, $data->no_po, 'edit', "update status ke " . $status, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
-            $this->output->set_status_header($ex->getCode() ?? 500)
+            $this->output->set_status_header(($ex->getCode() ?? 500))
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
@@ -213,63 +316,121 @@ class Purchaseorder extends MY_Controller {
 
             $kode_decrypt = decrypt_url($id);
             $harga = $this->input->post("harga");
-            $uom_beli = $this->input->post("uom_beli");
-            $tax = $this->input->post("tax");
-            $diskon = $this->input->post("diskon");
-            $id_konversiuom = $this->input->post("id_konversiuom");
-            $uom_jual = $this->input->post("uom_jual");
             $qty_beli = $this->input->post("qty_beli");
-            $oldTotal = $this->input->post("totals");
-            $currency = $this->input->post("currency");
-            $nilai_currency = $this->input->post("nilai_currency");
-            $status = "purchase_confirmed";
+            $amount_tax = $this->input->post("amount_tax");
+            $dsk = $this->input->post("diskon");
+            $dpplain = $this->input->post("dpplain");
+            $foot_note = $this->input->post("foot_note");
+            $default_total = $this->input->post("default_total");
             $data = [];
             $log_update = [];
             $no = 0;
-            $totals = 0;
-            $diskons = 0;
-            $taxes = 0;
-            $idDetail = [];
-//            $newTotal = 0;
+
+            $totals = 0.00;
+            $diskons = 0.00;
+            $taxes = 0.00;
+            $nilaiDppLain = 0;
+            $log_update["Foot Note "] = $foot_note;
             foreach ($harga as $key => $value) {
                 $no++;
-                $taxs = explode("|", $tax[$key]);
-                $checkKonversi = $this->m_konversiuom->wheres(["id" => $id_konversiuom[$key], "ke" => $uom_jual[$key], "dari" => $uom_beli[$key]])->getDetail();
-                if (!$checkKonversi) {
-                    throw new \Exception("<strong>Data No {$no}, Uom dan Uom Beli Tidak ada dalam tabel konversi</strong>", 500);
-                }
-                $idDetail[] = $key;
-                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $diskon[$key]]);
-                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'tax_id' => $taxs[0] ?? null, 'diskon' => $diskon[$key], 'id_konversiuom' => $id_konversiuom[$key]];
-                $total = ($qty_beli[$key] * ($value * $nilai_currency));
-                $totals += $total;
-                $diskons += (($diskon[$key] ?? 0) * $nilai_currency);
-                $taxes += $total * $taxs[1] ?? 0;
-            }
-            $newTotal = ($totals - $diskons) + $taxes;
-            if ($oldTotal !== $newTotal) {
-                if ($newTotal > 10000000) {
-                    $status = "waiting_approval";
-                }
-            }
+                $log_update ["item ke " . $no] = logArrayToString(";", ['harga' => $value]);
+                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value];
 
+                $total = ($qty_beli[$key] * $value);
+                $totals += $total;
+                $diskon = ($dsk[$key] ?? 0);
+                $diskons += $diskon;
+                if ($dpplain === "1") {
+                    $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                } else {
+                    $taxes += ($total - $diskon) * $amount_tax[$key];
+                }
+            }
+            if ($dpplain === "1") {
+                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
+            }
+            $grandTotal = ($totals - $diskons) + $taxes;
+            $this->_module->startTransaction();
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
-                    . "purchase_order_detail write,purchase_order write");
+                    . "purchase_order_detail write,purchase_order write,purchase_order_edited WRITE");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $po2 = clone $po;
-            $po2->setTables('purchase_order_detail')->setWhereIn("id", $idDetail)->update(['status' => $status]);
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'status' => $status]);
+            $po->setWheres(["no_po" => $kode_decrypt])->update(["total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "foot_note" => $foot_note]);
+            if($grandTotal >= $default_total) {
+                $poe = new $this->m_po;
+                $poe->setTables("purchase_order_edited")->setWhereRaw("po_id = '{$kode_decrypt}' and status not in ('cancel','done')")->update(['status'=>"waiting_approve"]);
+            }
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal update status', 500);
+            }
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'status' => $status)));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
+        }
+    }
+
+    public function request_edit() {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+
+            $ids = $this->input->post("ids");
+            $status = $this->input->post("status");
+            $kode_decrypt = decrypt_url($ids);
+            if (!$kode_decrypt) {
+                throw new \Exception('Tidak dapat Dilakukan', 500);
+            }
+            $this->_module->startTransaction();
+            $model = new $this->m_global;
+            $model2 = clone $model;
+            $whereStatus = "'done','cancel'";
+            $cek = $model->setTables("purchase_order_edited")
+                    ->setJoins("mst_status", "mst_status.kode = status", "LEFT")
+                    ->setSelects(["purchase_order_edited.*", "nama_status"])
+                    ->setWheres(["po_id" => $kode_decrypt])->setWhereRaw("status not in ({$whereStatus})")
+                    ->getDetail();
+            if ($cek !== null) {
+                $update = false;
+                switch ($status) {
+                    case "cancel":
+                        $update = true;
+                        $model2->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt, "status" => "exception"])->update(["status" => "purchase_confirmed"]);
+                        break;
+                }
+                if ($update) {
+                    $model->update(["status" => $status]);
+                    $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status} Edit PO", $username);
+                    if (!$this->_module->finishTransaction()) {
+                        throw new \Exception('Gagal update status', 500);
+                    }
+                    throw new \Exception("Berhasil", 200);
+                }
+                throw new \Exception("PO Sedang Dalam Status " . (($cek->nama_status === 'null') ? $cek->nama_status : $cek->status), 500);
+            }
+            $model->save(["po_id" => $kode_decrypt, "status" => "{$status}", "created_at" => date("Y-m-d H:i:s")]);
+            $model2->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt])->update(["status" => "exception"]);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status}", $username);
+
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal update status', 500);
+            }
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header(($ex->getCode() ?? 500))
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
@@ -351,7 +512,7 @@ class Purchaseorder extends MY_Controller {
             }
             $rcv = new $this->m_po;
             $inshipment = $rcv->setTables('penerimaan_barang pb')
-                            ->setWheres(['status <>' => 'cancel'])
+//                            ->setWheres(['status <>' => 'cancel'])
                             ->setSelects(["pb.*"])->setOrder(["tanggal" => "asc"])
                             ->setWhereRaw("origin like '{$kode_decrypt}%'")->getData();
 

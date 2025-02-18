@@ -19,7 +19,7 @@
             <?php
             foreach ($uom_jual as $key => $value) {
                 ?>
-                        <option value="<?= $value->short ?>"><?= $value->short ?></option>
+                                    <option value="<?= $value->short ?>"><?= $value->short ?></option>
                 <?php
             }
             ?>
@@ -48,6 +48,15 @@
             <option value="urgent">Urgent</option>
         </select>
     </td>
+    <td style="width: 100px">
+        <select class="form-control input-sm select2" name="warehouse[]" style="width: 100%" id="warehouse" required>
+            <?php foreach ($warehouse as $key => $value) {
+                ?>
+                <option value="<?= $value->kode ?>"><?= $value->nama ?></option>
+            <?php }
+            ?>
+        </select>
+    </td>
     <td style="width: 20px">
         &nbsp;
         <button type="button" class="btn btn-danger btn-xs batal width-btn" title="Batal" data-toggle="tooltip"><i class="fa fa-trash"></i></button>
@@ -59,6 +68,10 @@
     $(function () {
         $(document).unbind("click").off("click").on("click", ".batal", function () {
             $(this).closest("tr").remove();
+        });
+        $(".select2").select2({
+            allowClear: true,
+            placeholder: "Pilih"
         });
         $(".uom").select2({
             allowClear: true,

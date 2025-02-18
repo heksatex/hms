@@ -144,8 +144,28 @@ class Pengirimanbarang extends MY_Controller
 
   public function IT()
   {
-    $data['id_dept']='IT';
+    $data['id_dept']='GIT';
     $this->load->view('warehouse/v_pengiriman_barang',$data);
+  }
+
+  public function Sparepart() {
+    $data['id_dept'] = 'GSP';
+    $this->load->view('warehouse/v_pengiriman_barang',$data);
+  }
+
+  public function Packingmaterial() {
+      $data['id_dept'] = 'GPM';
+      $this->load->view('warehouse/v_pengiriman_barang',$data);
+  }
+
+  public function Umum() {
+      $data['id_dept'] = 'GUM';
+      $this->load->view('warehouse/v_pengiriman_barang',$data);
+  }
+
+  public function ATK() {
+      $data['id_dept'] = 'ATK';
+      $this->load->view('warehouse/v_pengiriman_barang',$data);
   }
 
   public function add()
@@ -239,6 +259,7 @@ class Pengirimanbarang extends MY_Controller
           if(empty($kode) AND $type == 1){// jika kode nya kosong
 
             $lok_tujuan  = $this->input->post('lokasi_tujuan');
+            $stock_pos   = $this->input->post('stock_pos');
             $tgl         = date('Y-m-d H:i:s');
             $tgl_jt      = $this->input->post('tgl_jt');
 
@@ -259,8 +280,8 @@ class Pengirimanbarang extends MY_Controller
               $stock_location_dr = $this->_module->get_nama_dept_by_kode($warehouse)->row_array(); // ex : warehouse/stock lokasi dari
               $lokasi_dari   = $stock_location_dr['stock_location'];
 
-              $stock_location_tj = $this->_module->get_nama_dept_by_kode($lok_tujuan)->row_array(); // ex : warehouse/stock lokasi tujuan
-              $lokasi_tujuan = $stock_location_tj['stock_location'];
+              // $stock_location_tj = $this->_module->get_nama_dept_by_kode($lok_tujuan)->row_array(); // ex : warehouse/stock lokasi tujuan
+              // $lokasi_tujuan = $stock_location_tj['stock_location'];
 
 
               // get  pengiriman barang
@@ -275,13 +296,13 @@ class Pengirimanbarang extends MY_Controller
               $move_id     = "SM".$last_move; //Set kode stock_move
 
               // simpan stock_move
-              $sql_stock_move_batch = "('".$move_id."','".$tgl."','','".$method."','".$lokasi_dari."','".$lokasi_tujuan."','draft','1','')";      
+              $sql_stock_move_batch = "('".$move_id."','".$tgl."','','".$method."','".$lokasi_dari."','".$stock_pos."','draft','1','')";      
               $this->_module->create_stock_move_batch($sql_stock_move_batch);    
 
               $reff_picking = $kode_out.'|'.$lok_tujuan;
 
               // simpan pengiriman barang
-              $sql_out_batch   = "('".$kode_out."','".$tgl."','".$tgl."','".$tgl_jt."','".addslashes($reff_note)."','draft','".$method_dept."','','".$move_id."','".$reff_picking."','".$lokasi_dari."','".$lokasi_tujuan."','1')"; 
+              $sql_out_batch   = "('".$kode_out."','".$tgl."','".$tgl."','".$tgl_jt."','".addslashes($reff_note)."','draft','".$method_dept."','','".$move_id."','".$reff_picking."','".$lokasi_dari."','".$stock_pos."','1')"; 
               $this->_module->simpan_pengiriman_add_manual($sql_out_batch);    
 
               //unlock table
@@ -776,9 +797,9 @@ class Pengirimanbarang extends MY_Controller
 
               $this->m_pengirimanBarang->update_status_pengiriman_barang_items($kode,addslashes($kode_produk),$status_brg);
               $this->_module->update_status_stock_move_items($move_id,addslashes($kode_produk),$status_brg);
-              $cek_status = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'draft')->row_array();
+              $cek_status = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'ready')->row_array();
 
-              if(empty($cek_status['status_barang'])){
+              if(!empty($cek_status['status_barang'])){
                 $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,$status_brg);
                 $this->_module->update_status_stock_move_produk($move_id,addslashes($kode_produk),$status_brg);
                 $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode)->row_array();
@@ -1028,9 +1049,9 @@ class Pengirimanbarang extends MY_Controller
               if(empty($get_qty['sum_qty'])){
 
                 if($cek_jml_produk_sama > 0){
-                  $this->m_pengirimanBarang->update_status_pengiriman_barang_items_origin_prod($kode,$kode_produk,$status_brg,$origin_prod);
-                  $this->_module->update_status_stock_move_produk_origin_prod($move_id,$kode_produk,$status_brg,$origin_prod);
-
+                  $this->m_pengirimanBarang->update_status_pengiriman_barang_items_origin_prod($kode,$kode_produk,'ready',$origin_prod);
+                  $this->_module->update_status_stock_move_produk_origin_prod($move_id,$kode_produk,'ready',$origin_prod);
+                  
                 }else{
                   $this->m_pengirimanBarang->update_status_pengiriman_barang_items($kode,$kode_produk,$status_brg);
                   $this->_module->update_status_stock_move_produk($move_id,$kode_produk,$status_brg);
@@ -1038,16 +1059,16 @@ class Pengirimanbarang extends MY_Controller
                 
               }
 
-              $cek_status = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'draft')->row_array();
-              if(!empty($cek_status['status_barang'])){
+              $cek_status = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'ready')->row_array();
+              if(empty($cek_status['status_barang'])){
                   $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,$status_brg);
                   $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode)->row_array();
-                  if($cek_status2['status']=='draft'){
+                  if($cek_status2['status']=='ready'){
                       $this->_module->update_status_stock_move($move_id,$status_brg);
                   }
               }
 
-              if(empty($cek_status['status_barang'])){
+              if(!empty($cek_status['status_barang'])){
                   $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,'ready');
                   $cek_status2 = $this->m_pengirimanBarang->cek_status_pengiriman_barang($kode)->row_array();
                   if($cek_status2['status']=='ready'){
@@ -1207,8 +1228,12 @@ class Pengirimanbarang extends MY_Controller
                   */
                 // break;
               }else{
+
+                    // start transaction
+                    $this->_module->startTransaction();
+
                       //lock tabel 
-                      $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE, departemen WRITE');
+                      $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE, departemen WRITE, user WRITE');
               
                       //lokasi tujuan 
                       $lokasi = $this->m_pengirimanBarang->get_location_by_move_id($move_id)->row_array();                    
@@ -1555,19 +1580,21 @@ class Pengirimanbarang extends MY_Controller
                             $qty_smi = $this->_module->get_qty_stock_move_items_by_kode($move_id_out,addslashes($kode_produk))->row_array();
                           }
 
-                          if($qty_smi['sum_qty']<$qty and !empty($qty_smi['sum_qty'])){//jika qty di stock_move_items kurang dari qty di pengiriman barang items
+                          if($qty_smi['sum_qty']<=$qty and !empty($qty_smi['sum_qty'])){//jika qty di stock_move_items kurang dari qty di pengiriman barang items
                               //$origin_prod = $kode_produk.'_'.$out_row;
 
                               $this->m_pengirimanBarang->update_status_pengiriman_barang_items_origin_prod($kode,$kode_produk,'done',$origin_prod);
                               $this->_module->update_status_stock_move_produk_origin_prod($move_id_out,$kode_produk,'done',$origin_prod);
 
-                              $backorder = true;
-                              $qty_back = $qty-$qty_smi['sum_qty'];
-                              //simpan ke pengiriman_barang_items
-                              $sql_out_items_batch   .= "('".$kode_out."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$out_row."','".addslashes($origin_prod)."'), ";
-                              //simpan ke stock move produk 
-                              $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$out_row."','".addslashes($origin_prod)."'), ";                          
-                              $out_row++;
+                              if ($qty_smi['sum_qty'] < $qty) {
+                                $backorder = true;
+                                $qty_back = $qty-$qty_smi['sum_qty'];
+                                //simpan ke pengiriman_barang_items
+                                $sql_out_items_batch   .= "('".$kode_out."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$out_row."','".addslashes($origin_prod)."'), ";
+                                //simpan ke stock move produk 
+                                $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$qty_back."','".addslashes($row->uom)."','draft','".$out_row."','".addslashes($origin_prod)."'), ";                          
+                                $out_row++;
+                              }
                           } else if(round($qty_smi['sum_qty'],2) == 0.00 or empty($qty_smi['sum_qty'])) {
 
                               $this->m_pengirimanBarang->update_status_pengiriman_barang_items_origin_prod($kode,$kode_produk,'draft',$origin_prod);
@@ -1707,7 +1734,7 @@ class Pengirimanbarang extends MY_Controller
                       // }
 
                       //unlock table
-                      $this->_module->unlock_tabel();
+                      // $this->_module->unlock_tabel();
                       
                       $jenis_log   = "done";
                       $note_log    = "Kirim Data Barang ";
@@ -2347,11 +2374,11 @@ class Pengirimanbarang extends MY_Controller
                         
                     }//end foreach penerimaan barang items                  
                     
-                      //cek apa ada items yang status nya masih draft? 
-                      $all_produk_items = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'draft')->row_array();
+                      //cek apa ada items yang status nya masih ready? 
+                      $all_produk_items = $this->m_pengirimanBarang->cek_status_barang_pengiriman_barang_items($kode,'ready')->row_array();
 
                       //jika tidak kosong maka update status di pengiriman brg
-                      if(empty($all_produk_items['status_barang'])){
+                      if(!empty($all_produk_items['status_barang'])){
                         $this->m_pengirimanBarang->update_status_pengiriman_barang($kode,$status_brg);
                       }
 
@@ -3457,7 +3484,15 @@ class Pengirimanbarang extends MY_Controller
       return substr($string, 0, $length). ' ...';
     }
     
+    public function get_list_lokasi_tujuan_out_select2()
+    {
+        $params     = addslashes($this->input->post('params'));
+        $dept       = addslashes($this->input->post('dept'));
+        $callback = $this->m_pengirimanBarang->get_lokasi_tujuan_out_by_dept($dept, $params);
+        echo json_encode($callback);
+    }
 }
+
 
 
 ?>

@@ -22,7 +22,7 @@
         ?>
         <tr>
             <td>
-                <?= $value->no_invoice ?>
+                <a href="<?= site_url("purchase/invoice/edit/").encrypt_url($value->id) ?>" target="_blank" ><?= $value->no_invoice ?></a>
             </td>
             <td>
                 <?= $value->no_invoice_supp ?>

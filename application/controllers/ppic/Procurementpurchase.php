@@ -32,8 +32,12 @@ class Procurementpurchase extends MY_Controller
                     ->setOrder(["departemen"])->setWheres(["username" => $username])->getDetail();
             $maskings = explode(",", $masking->departemen);
             $list = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->get_datatables($kode['kode']);
+            $recordsTotal = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->count_all($kode['kode']);
+            $recordFilter = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->count_filtered($kode['kode']);
         }else {
             $list = $this->m_procurementPurchase->get_datatables($kode['kode']);
+            $recordsTotal = $this->m_procurementPurchase->count_all($kode['kode']);
+            $recordFilter = $this->m_procurementPurchase->count_filtered($kode['kode']);
         }
         $data = array();
         $no = $_POST['start'];
@@ -41,9 +45,18 @@ class Procurementpurchase extends MY_Controller
             $kode_encrypt = encrypt_url($field->kode_pp);
             $no++;
             $row = array();
+            if ($field->show_sales_order == 'yes') {
+                $capt_sc = 'Yes';
+            } else if ($field->show_sales_order == 'no') {
+                $capt_sc = 'No';
+            } else {
+                $capt_sc = '';
+            }
             $row[] = $no;
             $row[] = '<a href="'.base_url('ppic/procurementpurchase/edit/'.$kode_encrypt).'">'.$field->kode_pp.'</a>';
             $row[] = $field->create_date;
+            $row[] = $field->type;
+            $row[] = $capt_sc;
             $row[] = $field->schedule_date;
             $row[] = $field->sales_order;
             $row[] = $field->priority;
@@ -55,8 +68,8 @@ class Procurementpurchase extends MY_Controller
  
         $output = array(
             "draw" => $_POST['draw'],
-            "recordsTotal" => $this->m_procurementPurchase->count_all($kode['kode']),
-            "recordsFiltered" => $this->m_procurementPurchase->count_filtered($kode['kode']),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordFilter,
             "data" => $data,
         );
         //output dalam format JSON
@@ -66,7 +79,17 @@ class Procurementpurchase extends MY_Controller
     public function add()
     {
         $data['id_dept']  ='PP';
-        $data['warehouse'] = $this->_module->get_list_departement();
+        $level = $this->session->userdata('nama')["level"];
+        if($level === "Entry Data") {
+            $username  = addslashes($this->session->userdata('username'));
+            $masking = $this->m_coa->setTables("user_masking_procurement_purchase")->setSelects(["GROUP_CONCAT(departemen) as departemen"])
+            ->setOrder(["departemen"])->setWheres(["username" => $username])->getDetail();
+            $maskings = explode(",", $masking->departemen);
+            $data['warehouse'] = $this->m_procurementPurchase->setWhereRaw("kode in ('". implode("','", $maskings)."')")->get_list_departement_masking();
+        } else {
+            $data['warehouse'] = $this->_module->get_list_departement();
+        }
+
         $kode_pp         = $this->input->get('kode_pp');
         $duplicate        = $this->input->get('duplicate');
         if($duplicate == 'true'){
@@ -110,6 +133,7 @@ class Procurementpurchase extends MY_Controller
                 $priority    = addslashes($this->input->post('priority'));
                 $warehouse   = addslashes($this->input->post('warehouse')); 
                 $show_sc_arr = $this->input->post('show_sc'); // yes or No    
+                $type_arr = $this->input->post('type');   // Makte to Order (mts), Pengiriman
     
                 $type            = '';
                 $show_sc         = '';
@@ -117,6 +141,13 @@ class Procurementpurchase extends MY_Controller
                     foreach($show_sc_arr as $val2){
                     $show_sc = $val2;
                     break;
+                    }
+                }
+
+                if (!empty($type_arr)) {
+                    foreach ($type_arr as $val) {
+                        $type = $val;
+                        break;
                     }
                 }
 
@@ -140,7 +171,9 @@ class Procurementpurchase extends MY_Controller
                         $callback = array('status' => 'failed', 'field' => 'tgl', 'message' => 'Create Date Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  );    
                     }elseif(empty($note)){
                         $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Reff Notes Harus Diisi !', 'icon' =>'fa fa-warning', 
-                          'type' => 'danger' );   
+                          'type' => 'danger' ); 
+                    }elseif(empty($type_arr)){
+                            $callback = array('status' => 'failed', 'field' => 'mto', 'message' => 'Type Procurement Harus Diisi !', 'icon' => 'fa fa-warning','type' => 'danger');
                     }elseif(empty($sales_order) AND $show_sc == 'yes'){
                         $callback = array('status' => 'failed', 'field' => 'sales_order', 'message' => 'Sales Order  Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
                     }elseif(empty($kode_prod) AND $show_sc == 'yes' ){
@@ -163,7 +196,7 @@ class Procurementpurchase extends MY_Controller
                             // $kode['kode_pp'] =  $this->m_procurementPurchase->get_kode_pp();//get no procurement order
                             $kode_encrypt    = encrypt_url($kode_pp_new);
                             $tgl_buat        = date('Y-m-d H:i:s');
-                            $this->m_procurementPurchase->simpan($kode_pp_new, $tgl_buat, $tgl, $note, $sales_order, $kode_prod, $priority, $warehouse, 'draft',$show_sc);
+                            $this->m_procurementPurchase->simpan($kode_pp_new, $tgl_buat, $tgl, $note, $sales_order, $kode_prod, $priority, $warehouse, 'draft',$show_sc,$type);
     
                             $callback = array('status' => 'success', 'field' => 'kode_pp' , 'message' => 'Data Berhasil Disimpan !', 'isi'=> $kode_pp_new, 'icon' =>'fa fa-check', 'type' => 'success', 'kode_encrypt' => $kode_encrypt);
     
@@ -174,9 +207,15 @@ class Procurementpurchase extends MY_Controller
                             }else{
                                 $capt_sc = '';
                             }
+
+                            if ($type == 'mto') {
+                                $capt_type = 'Make to Order';
+                            } else {
+                                $capt_type = 'Pengiriman';
+                            }
                           
                             $jenis_log = "create";
-                            $note_log  =$kode_pp_new." | ".$tgl." | ".$note." | ".$capt_sc." | ".$kode_prod." | ".$sales_order." | ".$priority." | ".$warehouse;
+                            $note_log  =$kode_pp_new." | ".$tgl." | ".$note." | ".$capt_type." | ".$capt_sc." | ".$kode_prod." | ".$sales_order." | ".$priority." | ".$warehouse;
                             $this->_module->gen_history($sub_menu, $kode_pp_new, $jenis_log, $note_log, $username);
                         
                         }else{//jika kode procurement purchase ada, aksinya update data
@@ -265,6 +304,7 @@ class Procurementpurchase extends MY_Controller
                 $warehouse   = addslashes($this->input->post('warehouse')); 
                 $show_sc_arr = $this->input->post('show_sc'); // yes or No    
                 $array_items    = json_decode($this->input->post('arr_items'),true); 
+                $type_arr = $this->input->post('type');   // Makte to Order (mts), Pengiriman
 
                 $type            = '';
                 $show_sc         = '';
@@ -275,11 +315,20 @@ class Procurementpurchase extends MY_Controller
                     }
                 }
 
+                if (!empty($type_arr)) {
+                    foreach ($type_arr as $val) {
+                        $type = $val;
+                        break;
+                    }
+                }
+
                 if(empty($note)){
                     $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Reff Notes Harus Diisi !', 'icon' =>'fa fa-warning',  'type' => 'danger' );   
                 }elseif(empty($show_sc_arr) AND empty($kode_pp)) {
                     $callback = array('status' => 'failed', 'field' => 'sc_true', 'message' => 'Pilih salah satu Sales Order Yes/No !', 'icon' => 'fa fa-warning',
                         'type' => 'danger');
+                }elseif(empty($type_arr)){
+                    $callback = array('status' => 'failed', 'field' => 'mto', 'message' => 'Type Procurement Harus Diisi !', 'icon' => 'fa fa-warning','type' => 'danger');
                 }elseif(empty($sales_order) AND $show_sc == 'yes'){
                     $callback = array('status' => 'failed', 'field' => 'sales_order', 'message' => 'Sales Order  Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
                 }elseif(empty($kode_prod) AND $show_sc == 'yes' ){
@@ -318,7 +367,7 @@ class Procurementpurchase extends MY_Controller
                     // $kode['kode_pp'] =  $this->m_procurementPurchase->get_kode_pp();//get no procurement order
                     $kode_encrypt    = encrypt_url($kode_pp_new);
                     $tgl_buat        = date('Y-m-d H:i:s');
-                    $this->m_procurementPurchase->simpan($kode_pp_new, $tgl_buat, $tgl, $note, $sales_order, $kode_prod, $priority, $warehouse, 'draft',$show_sc);
+                    $this->m_procurementPurchase->simpan($kode_pp_new, $tgl_buat, $tgl, $note, $sales_order, $kode_prod, $priority, $warehouse, 'draft',$show_sc,$type);
 
                     $tmp_produk = [];
                     $log_produk = "";
@@ -357,9 +406,15 @@ class Procurementpurchase extends MY_Controller
                     }else{
                         $capt_sc = '';
                     }
+
+                    if ($type == 'mto') {
+                        $capt_type = 'Make to Order';
+                    } else {
+                        $capt_type = 'Pengiriman';
+                    }
                       
                     $jenis_log = "create";
-                    $note_log  = "duplicate dari kode ".$kode_pp_asal." <br> ".$kode_pp_new." | ".$tgl." | ".$note." | ".$capt_sc." | ".$kode_prod." | ".$sales_order." | ".$priority." | ".$warehouse." <br> ".$log_produk;
+                    $note_log  = "duplicate dari kode ".$kode_pp_asal." <br> ".$kode_pp_new." | ".$tgl." | ".$note." | ".$capt_type." | ".$capt_sc." | ".$kode_prod." | ".$sales_order." | ".$priority." | ".$warehouse." <br> ".$log_produk;
                     $this->_module->gen_history($sub_menu, $kode_pp_new, $jenis_log, $note_log, $username);
 
                     $callback = array('status' => 'success', 'field' => 'kode_pp' , 'message' => 'Data Berhasil Disimpan !', 'isi'=> $kode_pp_new, 'icon' =>'fa fa-check', 'type' => 'success', 'kode_encrypt' => $kode_encrypt);
@@ -465,7 +520,7 @@ class Procurementpurchase extends MY_Controller
             // $data        = explode("^|",$row1);
             // $row         = $data[0];
             //cek apa ada produk yang sudah diinput ?
-            $cek_prod = $this->m_procurementPurchase->cek_produk_by_kode($kode,$kode_produk)->row_array();
+            $cek_prod = $this->m_procurementPurchase->cek_produk_by_kode($kode,$kode_produk,$row)->row_array();
 
             $cek_head = $this->m_procurementPurchase->get_data_by_code($kode);
 
@@ -482,7 +537,7 @@ class Procurementpurchase extends MY_Controller
                     $get  = $this->m_procurementPurchase->get_data_procurement_purchase_item_by_row($kode,$row)->row_array();
                     $kode_produk_ex_row =  $get['kode_produk'];
                     $nama_produk        =  $get['nama_produk'];
-                    $uom                =  $get['uom'];
+                    // $uom                =  $get['uom'];
 
                     //cek status produk, dan cek apa produk masih ada ?
                     $cek_status = $this->m_procurementPurchase->cek_status_procurement_purchase_items_by_row($kode,$kode_produk_ex_row,$row)->row_array(); 
@@ -495,7 +550,7 @@ class Procurementpurchase extends MY_Controller
 
                     }else{
 
-                        $this->m_procurementPurchase->update_procurement_purchase_items($kode,$kode_produk,$produk,$tgl,$qty,$reff,$row);
+                        $this->m_procurementPurchase->update_procurement_purchase_items($kode,$kode_produk,$produk,$uom,$tgl,$qty,$reff,$row);
                         
                         $jenis_log   = "edit";
                         $note_log    = "Edit data Details | ".$kode." | ".$kode_produk."  ".$produk." | ".$tgl." | ".$qty." ".$uom." | ".$reff." | ".$row;
@@ -747,10 +802,10 @@ class Procurementpurchase extends MY_Controller
                                     $num++;
                                 }else{
                                     //simpan ke pengiriman barang items
-                                    $sql_out_items_batch .= "('".$kode_out."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$out_row."','".$origin_prod."'), ";
+                                    $sql_out_items_batch .= "('".$kode_out."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom1)."','draft','".$out_row."','".$origin_prod."'), ";
                                     
                                     //simpan ke stock move produk 
-                                    $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$out_row."','".$origin_prod."'), ";
+                                    $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom1)."','draft','".$out_row."','".$origin_prod."'), ";
                                     
                                       
                                     
@@ -767,7 +822,7 @@ class Procurementpurchase extends MY_Controller
                                                 'priority'      => $head->priority,
                                                 'warehouse'     => $head->warehouse,
                                                 'notes'         => $head->notes,
-                                                'status'        => 'draft'
+                                                'status'        => ($head->type == 'pengiriman')? 'done' : 'draft',
                                     );
     
                                     $insert_cfb_items[] = array(    
@@ -777,7 +832,7 @@ class Procurementpurchase extends MY_Controller
                                                 'schedule_date' => $row->schedule_date,
                                                 'qty'           => $row->qty,
                                                 'uom'           => $row->uom,
-                                                'status'        => 'draft',
+                                                'status'        => ($head->type == 'pengiriman')? 'done' : 'draft',
                                                 'reff_notes'    => $row->reff_notes,
                                                 'row_order'     => 1
                                     );
@@ -907,20 +962,20 @@ class Procurementpurchase extends MY_Controller
                             $origin_prod = $row->kode_produk."_".$in_row;
     
                             //simpan ke penermaan_barang_items
-                            $sql_in_items_batch   .= "('".$kode_in."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$in_row."'), ";
+                            $sql_in_items_batch   .= "('".$kode_in."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom1)."','draft','".$in_row."'), ";
     
                             $sql_in_items_batch_2[] = array(
                                                         "kode"  => $kode_in,
                                                         "kode_produk"   => $row->kode_produk,
                                                         "nama_produk"   => $row->nama_produk,
                                                         "qty"           => $row->qty,
-                                                        "uom"           => $row->uom,
+                                                        "uom"           => $row->uom1,
                                                         "status_barang" => 'draft',
                                                         "origin_prod"   => $origin_prod,
                                                         "row_order"     => $in_row
                             );
                             //simpan ke stock move produk 
-                            $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom)."','draft','".$in_row."',''), ";
+                            $sql_stock_move_produk_batch .= "('".$move_id."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->qty."','".addslashes($row->uom1)."','draft','".$in_row."',''), ";
                             //sql insert tbl cfb_items
                             // $sql_cfb_items .= "('".$kode_cfb."','".addslashes($row->kode_produk)."','".addslashes($row->nama_produk)."','".$row->schedule_date."','".$row->qty."','".addslashes($row->uom)."','draft','".addslashes($row->reff_notes)."','".$in_row."'), ";
                             $in_row = $in_row + 1; 
@@ -1194,7 +1249,7 @@ class Procurementpurchase extends MY_Controller
                         //cek cfb jika statusnya tidak done , tidak cancel
                         foreach($cfb as $cfbi){
                             $cek_cfb = $this->m_procurementPurchase->cek_cfb_by_kode($cfbi->kode_cfb,'draft')->num_rows();                        
-                            if($cek_cfb > 0){
+                            if($cek_cfb > 0 or $cek_head->type == 'pengiriman' ){
                                 $batal_cfb = TRUE;
                                 $sql_update_cfb = "UPDATE cfb SET status = '".$status_cancel."' WHERE kode_cfb = '".$cfbi->kode_cfb."' ";
                                 $this->_module->update_reff_batch($sql_update_cfb);
@@ -1275,9 +1330,12 @@ class Procurementpurchase extends MY_Controller
 
                     }// end if batal_item = true
 
-                    if($batal_item == false or $batal_cfb == FALSE) {
+                    if($batal_item == false) {
 
                         $callback = array('status' => 'failed', 'message' => 'Procurement Purchase Gagal Dibatalkan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+                    } else if($batal_cfb == FALSE) {
+
+                        $callback = array('status' => 'failed', 'message' => 'Procurement Purchase Gagal Dibatalkan 2!', 'icon' =>'fa fa-warning', 'type' => 'danger');
                     } else if ($status_in_valid == true) {
                         $callback = array('status' => 'failed', 'message' => 'Procurement Purchase Gagal Dibatalkan. Terdapat Status yang Ready ! <br> '.$dokumen , 'icon' =>'fa fa-warning', 'type' => 'danger');
                     } else {
@@ -1312,5 +1370,13 @@ class Procurementpurchase extends MY_Controller
     }
 
 
+    public function get_list_uom_select2() 
+    {
+
+        $params     = addslashes($this->input->post('prod'));
+        $kode_produk= addslashes($this->input->post('kode_produk'));
+        $callback = $this->m_procurementPurchase->get_list_uom_by_kode_produk($kode_produk,$params);
+        echo json_encode($callback);
+    }
 
 }

@@ -31,6 +31,7 @@
                                             <th>Tanggal Posting</th>
                                             <th>Periode</th>
                                             <th>Origin</th>
+                                            <th>Reff Note</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>                                   

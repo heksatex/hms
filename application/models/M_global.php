@@ -17,6 +17,7 @@ class M_global extends CI_Model {
     protected $orders = [];
     protected $search = [];
     protected $order = [];
+    protected $group = [];
     protected $table = "";
     protected $wheres = [];
     protected $selects = [];
@@ -58,7 +59,11 @@ class M_global extends CI_Model {
     }
 
     public function setSelects(array $selects) {
-        $this->selects = $selects;
+        $this->selects = array_merge($this->selects, $selects);
+        return $this;
+    }
+    public function setGroups(array $groups) {
+        $this->group = array_merge($this->group, $groups);
         return $this;
     }
 
@@ -94,6 +99,10 @@ class M_global extends CI_Model {
                 $this->db->where_in($key, $value);
             }
         }
+        
+        if(count($this->group) > 0) {
+            $this->db->group_by($this->group);
+        }
 
         foreach ($this->search as $key => $value) {
             if ($_POST['search']['value']) {
@@ -111,8 +120,15 @@ class M_global extends CI_Model {
         if (isset($_POST['order'])) {
             $this->db->order_by($this->orders[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
         } else if (isset($this->order)) {
-            $order = $this->order;
-            $this->db->order_by(key($order), $order[key($order)]);
+//            $order = $this->order;
+//            $this->db->order_by(key($order), $order[key($order)]);
+            foreach ($this->order as $key => $value) {
+                if(gettype($key) === "integer"){
+                    $this->db->order_by($value,"asc");
+                } else {
+                    $this->db->order_by($key,$value);
+                }
+            }
         }
     }
 
@@ -148,6 +164,9 @@ class M_global extends CI_Model {
                 $this->db->where_in($key, $value);
             }
         }
+        if(count($this->group) > 0) {
+            $this->db->group_by($this->group);
+        }
         return $this->db->count_all_results();
     }
 
@@ -163,6 +182,9 @@ class M_global extends CI_Model {
             foreach ($this->wheresRaw as $key => $value) {
                 $this->db->where($value, null, false);
             }
+        }
+        if(count($this->group) > 0) {
+            $this->db->group_by($this->group);
         }
 
         $result = $this->db->select(implode(",", $this->selects))->get();
@@ -209,6 +231,17 @@ class M_global extends CI_Model {
             }
             $this->db->set($data);
             $this->db->update($this->table);
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
+
+    public function query(array $query) {
+        try {
+            foreach ($query as $key => $value) {
+                $this->db->query($value);
+            }
             return "";
         } catch (Exception $ex) {
             return $ex->getMessage();

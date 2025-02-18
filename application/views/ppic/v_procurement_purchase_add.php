@@ -69,7 +69,19 @@
                     <textarea type="text" class="form-control input-sm" name="note" id="note"></textarea>
                   </div>                                    
                 </div>
-                &nbsp
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-4"><label>Type </label></div>
+                  <div class="col-xs-8">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <input type="radio" id="mto" name="type[]" value="mto" checked="checked">
+                      <label for="mto">Make to Order</label>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                      <input type="radio" id="pengiriman" name="type[]" value="pengiriman">
+                      <label for="pengiriman">Pengiriman</label>
+                    </div>
+                  </div>                                    
+                </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-4"><label>Sales Order </label></div>
                   <div class="col-xs-8">
@@ -217,11 +229,18 @@
   //klik button simpan
     $('#btn-simpan').click(function(){
       $('#btn-simpan').button('loading');
-      var radio_type = $('input[name="sc[]"]').map(function(e, i) {
+      var radio_type = $('input[name="type[]"]').map(function(e, i) {
             if(this.checked == true){
                 return i.value;
             }
       }).get();
+
+      var radio_type_2 = $('input[name="sc[]"]').map(function(e, i) {
+            if(this.checked == true){
+                return i.value;
+            }
+      }).get();
+
       please_wait(function(){});
       $.ajax({
          type: "POST",
@@ -239,7 +258,8 @@
                 sales_order : $('#sales_order').val(),
                 priority    : $('#priority').val(),
                 warehouse   : $('#warehouse').val(),
-                show_sc     : radio_type,
+                type        : radio_type,
+                show_sc     : radio_type_2,
 
           },success: function(data){
             if(data.sesi == "habis"){

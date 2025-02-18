@@ -1,108 +1,100 @@
-<?php defined("BASEPATH") or exit  ('No Direct Script Acces Allowed');
+<?php defined("BASEPATH") or exit('No Direct Script Acces Allowed');
 /**
  * 
  */
 class M_penerimaanBarang extends CI_Model
 {
-	
+
 	//var $table 		  = 'penerimaan_barang';
-	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'origin', 'lokasi_tujuan','reff_picking','reff_note', 'nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'origin',  'lokasi_tujuan','reff_picking','reff_note', 'nama_status');
+	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'origin', 'lokasi_tujuan', 'reff_picking', 'nama_partner','reff_note', 'nama_status');
+	var $column_search = array('kode', 'tanggal', 'tanggal_transaksi', 'origin',  'lokasi_tujuan', 'reff_picking', 'nama_partner', 'reff_note', 'nama_status');
 	var $order  	  = array('kode' => 'desc');
 
 	var $table3  	    = 'stock_quant';
 	var $column_order3  = array(null, 'kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note');
-	var $column_search3 = array('kode_produk','nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note');
+	var $column_search3 = array('kode_produk', 'nama_produk', 'lot', 'qty', 'qty2', 'nama_grade', 'reff_note');
 	var $order3  	    = array('create_date' => 'asc');
 
 	private function _get_datatables_query()
 	{
 		//add custom filter here
-        if($this->input->post('kode'))
-        {
-            $this->db->like('kode', $this->input->post('kode'));
-        }
-        if($this->input->post('status'))
-        {
-            $this->db->like('status', $this->input->post('status'));
-        }
-        if($this->input->post('reff'))
-        {
-            $this->db->like('reff_note', $this->input->post('reff'));
-        }
-        if($this->input->post('reff_picking'))
-        {
-            $this->db->like('reff_picking', $this->input->post('reff_picking'));
-        }
+		if ($this->input->post('kode')) {
+			$this->db->like('kode', $this->input->post('kode'));
+		}
+		if ($this->input->post('status')) {
+			$this->db->like('status', $this->input->post('status'));
+		}
+		if ($this->input->post('reff')) {
+			$this->db->like('reff_note', $this->input->post('reff'));
+		}
+		if ($this->input->post('reff_picking')) {
+			$this->db->like('reff_picking', $this->input->post('reff_picking'));
+		}
 
 		//$this->db->from($this->table);
 
-		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status, pb.origin");
+		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status, pb.origin, pb.nama_partner");
 		$this->db->from("penerimaan_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
 
 		$i = 0;
-	
+
 		foreach ($this->column_search as $item) // loop column 
 		{
-			if($_POST['search']['value']) // if datatable send POST for search
+			if ($_POST['search']['value']) // if datatable send POST for search
 			{
-				
-				if($i===0) // first loop
+
+				if ($i === 0) // first loop
 				{
 					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
 					$this->db->like($item, $_POST['search']['value']);
-				}
-				else
-				{
+				} else {
 					$this->db->or_like($item, $_POST['search']['value']);
 				}
 
-				if(count($this->column_search) - 1 == $i) //last loop
+				if (count($this->column_search) - 1 == $i) //last loop
 					$this->db->group_end(); //close bracket
 			}
 			$i++;
 		}
-		
-		if(isset($_POST['order'])) // here order processing
+
+		if (isset($_POST['order'])) // here order processing
 		{
 			$this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-		} 
-		else if(isset($this->order))
-		{
+		} else if (isset($this->order)) {
 			$order = $this->order;
 			$this->db->order_by(key($order), $order[key($order)]);
 		}
 	}
 
-	function get_datatables($id_dept,$mmss)
+	function get_datatables($id_dept, $mmss)
 	{
 		$this->_get_datatables_query();
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where('dept_id', $id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		if($_POST['length'] != -1)
-		$this->db->limit($_POST['length'], $_POST['start']);
+		if ($_POST['length'] != -1)
+			$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
 		return $query->result();
 	}
 
-	function count_filtered($id_dept,$mmss)
+	function count_filtered($id_dept, $mmss)
 	{
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where('dept_id', $id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		$this->_get_datatables_query();
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all($id_dept,$mmss)
+	public function count_all($id_dept, $mmss)
 	{
 		//$this->db->from($this->table);
 		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status");
 		$this->db->from("penerimaan_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where('dept_id', $id_dept);
 		return $this->db->count_all_results();
 	}
 
@@ -112,83 +104,79 @@ class M_penerimaanBarang extends CI_Model
 		$this->db->from($this->table3);
 
 		$i = 0;
-	
+
 		foreach ($this->column_search3 as $item) // loop column 
 		{
-			if($_POST['search']['value']) // if datatable send POST for search
+			if ($_POST['search']['value']) // if datatable send POST for search
 			{
-				
-				if($i===0) // first loop
+
+				if ($i === 0) // first loop
 				{
 					$this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
 					$this->db->like($item, $_POST['search']['value']);
-				}
-				else
-				{
+				} else {
 					$this->db->or_like($item, $_POST['search']['value']);
 				}
 
-				if(count($this->column_search3) - 1 == $i) //last loop
+				if (count($this->column_search3) - 1 == $i) //last loop
 					$this->db->group_end(); //close bracket
 			}
 			$i++;
 		}
-		
-		if(isset($_POST['order'])) // here order processing
+
+		if (isset($_POST['order'])) // here order processing
 		{
 			$this->db->order_by($this->column_order3[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-		} 
-		else if(isset($this->order3))
-		{
+		} else if (isset($this->order3)) {
 			$order = $this->order3;
 			$this->db->order_by(key($order), $order[key($order)]);
 		}
 	}
 
-	function get_datatables3($kode_produk,$lokasi,$origin,$dept_id)
+	function get_datatables3($kode_produk, $lokasi, $origin, $dept_id)
 	{
 		$this->_get_datatables3_query();
-		$this->db->where('kode_produk',$kode_produk );
+		$this->db->where('kode_produk', $kode_produk);
 		$this->db->where('lokasi', $lokasi);
-		$this->db->where('reserve_move','');
-		$this->db->where_not_in('qty','0');
+		$this->db->where('reserve_move', '');
+		$this->db->where_not_in('qty', '0');
 		//cek type departement
 		$cek_dept = $this->_module->cek_departement_by_kode($dept_id)->row_array();
-		if($cek_dept['type_dept'] == 'manufaktur'){
-			$this->db->where('reserve_origin',$origin);	
+		if ($cek_dept['type_dept'] == 'manufaktur') {
+			$this->db->where('reserve_origin', $origin);
 		}
-		if($_POST['length'] != -1)
-		$this->db->limit($_POST['length'], $_POST['start']);
+		if ($_POST['length'] != -1)
+			$this->db->limit($_POST['length'], $_POST['start']);
 		$query = $this->db->get();
 		return $query->result();
 	}
 
-	function count_filtered3($kode_produk,$lokasi,$origin,$dept_id)
+	function count_filtered3($kode_produk, $lokasi, $origin, $dept_id)
 	{
-		$this->db->where('kode_produk',$kode_produk );
-		$this->db->where('reserve_move','');
+		$this->db->where('kode_produk', $kode_produk);
+		$this->db->where('reserve_move', '');
 		$this->db->where('lokasi', $lokasi);
-		$this->db->where_not_in('qty','0');
+		$this->db->where_not_in('qty', '0');
 		//cek type departement
 		$cek_dept = $this->_module->cek_departement_by_kode($dept_id)->row_array();
-		if($cek_dept['type_dept'] == 'manufaktur'){
-			$this->db->where('reserve_origin',$origin);	
+		if ($cek_dept['type_dept'] == 'manufaktur') {
+			$this->db->where('reserve_origin', $origin);
 		}
 		$this->_get_datatables3_query();
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all3($kode_produk,$lokasi,$origin,$dept_id)
+	public function count_all3($kode_produk, $lokasi, $origin, $dept_id)
 	{
-		$this->db->where('kode_produk',$kode_produk );
-		$this->db->where('reserve_move','');
+		$this->db->where('kode_produk', $kode_produk);
+		$this->db->where('reserve_move', '');
 		$this->db->where('lokasi', $lokasi);
-		$this->db->where_not_in('qty','0');
+		$this->db->where_not_in('qty', '0');
 		//cek type departement
 		$cek_dept = $this->_module->cek_departement_by_kode($dept_id)->row_array();
-		if($cek_dept['type_dept'] == 'manufaktur'){
-			$this->db->where('reserve_origin',$origin);	
+		if ($cek_dept['type_dept'] == 'manufaktur') {
+			$this->db->where('reserve_origin', $origin);
 		}
 		$this->db->from($this->table3);
 		return $this->db->count_all_results();
@@ -197,32 +185,32 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_data_by_code($kode)
 	{
-		$query = $this->db->query("SELECT * FROM penerimaan_barang where kode = '".$kode."' ");
+		$query = $this->db->query("SELECT * FROM penerimaan_barang where kode = '" . $kode . "' ");
 		return $query->row();
 	}
 
-	public function get_data_by_code_print($kode,$dept_id)
+	public function get_data_by_code_print($kode, $dept_id)
 	{
-		$query = $this->db->query("SELECT * FROM penerimaan_barang where kode = '".$kode."' AND dept_id  = '".$dept_id."' ");
+		$query = $this->db->query("SELECT * FROM penerimaan_barang where kode = '" . $kode . "' AND dept_id  = '" . $dept_id . "' ");
 		return $query->row();
 	}
 
 
 	public function get_list_penerimaan_barang($kode)
 	{
-		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,kode_pp,
-									((SELECT IFNULL(sum(smi.qty),0) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) +
-									(SELECT IFNULL(sum(tmp.qty),0) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
+		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,pbi.kode_pp, pbi.qty_beli, pbi.uom_beli,
+									((SELECT IFNULL(sum(smi.qty),'') FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) +
+									(SELECT IFNULL(sum(tmp.qty),'') FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' ORDER BY row_order")->result();
 	}
 
-	public function get_list_penerimaan_barang_print($kode,$dept_id)
+	public function get_list_penerimaan_barang_print($kode, $dept_id)
 	{
 		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,								
-									((SELECT IFNULL(sum(smi.qty),0) FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) +
-									(SELECT IFNULL(sum(tmp.qty),0) FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
+									((SELECT IFNULL(sum(smi.qty),'') FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) +
+									(SELECT IFNULL(sum(tmp.qty),'') FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
 								FROM penerimaan_barang_items pbi
 							    INNER JOIN penerimaan_barang pb ON pbi.kode = pb.kode
 								WHERE pbi.kode = '$kode' AND pb.dept_id = '$dept_id' ORDER BY row_order")->result();
@@ -248,9 +236,10 @@ class M_penerimaanBarang extends CI_Model
 	}
 
 
-	public function get_stock_move_items_by_kode_print($kode,$dept_id)
+	public function get_stock_move_items_by_kode_print($kode, $dept_id)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note,
+								(select GROUP_CONCAT(DISTINCT kode_pp)  FROM penerimaan_barang_items where kode = pb.kode)  as kode_pp
 								 FROM stock_move_items smi 
 								 INNER JOIN penerimaan_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
@@ -263,12 +252,12 @@ class M_penerimaanBarang extends CI_Model
 		return $this->db->query("SELECT status FROM penerimaan_barang where kode = '$kode'");
 	}
 
-	public function update_penerimaan_barang($kode,$reff_note, $no_sj,$tgl_sj)
+	public function update_penerimaan_barang($kode, $reff_note, $no_sj, $tgl_sj)
 	{
 		return $this->db->query("UPDATE penerimaan_barang set reff_note = '$reff_note', no_sj = '$no_sj', tanggal_sj = '$tgl_sj' WHERE kode = '$kode'");
 	}
 
-	public function cek_status_barang_penerimaan_barang_items($kode,$status)
+	public function cek_status_barang_penerimaan_barang_items($kode, $status)
 	{
 		return $this->db->query("SELECT status_barang FROm penerimaan_barang_items where kode = '$kode' AND status_barang = '$status'");
 	}
@@ -278,24 +267,24 @@ class M_penerimaanBarang extends CI_Model
 		return $this->db->query("SELECT lokasi_dari, lokasi_tujuan From stock_move where move_id = '$move_id'");
 	}
 
-	public function update_status_penerimaan_barang($kode,$status)
+	public function update_status_penerimaan_barang($kode, $status)
 	{
 		return $this->db->query("UPDATE penerimaan_barang SET status = '$status' WHERE kode = '$kode'");
 	}
 
-	public function update_tgl_kirim_penerimaan_barang($kode,$tgl)
+	public function update_tgl_kirim_penerimaan_barang($kode, $tgl)
 	{
 		return $this->db->query("UPDATE penerimaan_barang SET tanggal_transaksi = '$tgl' WHERE kode = '$kode'");
 	}
 
-	public function update_status_penerimaan_barang_items_full($kode,$status)
+	public function update_status_penerimaan_barang_items_full($kode, $status)
 	{
 		return $this->db->query("UPDATE penerimaan_barang_items SET status_barang = '$status' WHERE kode = '$kode' ");
 	}
 
 	public function update_perbatch($sql)
 	{
-	 	return $this->db->query(" $sql ");
+		return $this->db->query(" $sql ");
 	}
 
 	public function get_move_id_by_kode($kode)
@@ -304,7 +293,6 @@ class M_penerimaanBarang extends CI_Model
 								 FROM stock_move sm
 								 INNER JOIN penerimaan_barang pb ON sm.move_id = pb.move_id 
 								 WHERE pb.kode = '$kode'");
-
 	}
 
 	/*
@@ -316,8 +304,8 @@ class M_penerimaanBarang extends CI_Model
 								WHERE sm.source_move LIKE '%$move_id%' LIMIT 1");
 	}
 	*/
-	
-	public function cek_move_id_by_kode($origin,$method)
+
+	public function cek_move_id_by_kode($origin, $method)
 	{
 		return $this->db->query("SELECT move_id FROM stock_move WHERE origin = '$origin' AND method = '$method'");
 	}
@@ -331,47 +319,47 @@ class M_penerimaanBarang extends CI_Model
 	}
 
 
-	public function get_qty_penerimaan_barang_items_by_kode($kode,$kode_produk)
-    {
-   		return $this->db->query("SELECT qty FROM penerimaan_barang_items WHERE kode = '$kode' AND kode_produk = '$kode_produk'");
-    }
+	public function get_qty_penerimaan_barang_items_by_kode($kode, $kode_produk)
+	{
+		return $this->db->query("SELECT qty FROM penerimaan_barang_items WHERE kode = '$kode' AND kode_produk = '$kode_produk'");
+	}
 
-    public function update_status_penerimaan_barang_items($kode,$kode_produk,$status)
+	public function update_status_penerimaan_barang_items($kode, $kode_produk, $status)
 	{
 		return $this->db->query("UPDATE penerimaan_barang_items SET status_barang = '$status' WHERE kode = '$kode' AND kode_produk = '$kode_produk' ");
 	}
 
-	public function update_status_penerimaan_barang_items_origin_prod($kode,$kode_produk,$status,$origin_prod)
+	public function update_status_penerimaan_barang_items_origin_prod($kode, $kode_produk, $status, $origin_prod)
 	{
 		return $this->db->query("UPDATE penerimaan_barang_items SET status_barang = '$status' WHERE kode = '$kode' AND kode_produk = '$kode_produk' AND origin_prod = '$origin_prod'");
 	}
-	
+
 	public function cek_status_penerimaan_barang($kode)
 	{
 		return $this->db->query("SELECT status FROM penerimaan_barang WHERE kode = '$kode'");
 	}
 
 	public function get_list_penerimaan_barang_items($kode)
-    {
-   	    return $this->db->query("SELECT * FROM penerimaan_barang_items WHERE kode = '$kode' order by row_order")->result();
+	{
+		return $this->db->query("SELECT * FROM penerimaan_barang_items WHERE kode = '$kode' order by row_order")->result();
 	}
-	
-	public function get_origin_prod_mrp_production_by_kode($move_id,$kode_produk)
+
+	public function get_origin_prod_mrp_production_by_kode($move_id, $kode_produk)
 	{
 		return $this->db->query("SELECT * FROM mrp_production_rm_target where move_id = '$move_id' AND kode_produk = '$kode_produk' order by row_order ");
 	}
 
-	public function cek_scan_by_lot($kode,$lot)
+	public function cek_scan_by_lot($kode, $lot)
 	{
 		return $this->db->query("SELECT lot FROM penerimaan_barang_tmp WHERE kode = '$kode' AND lot = '$lot'");
 	}
 
-	public function get_list_stock_move_items_by_lot($move_id,$lot,$status)
+	public function get_list_stock_move_items_by_lot($move_id, $lot, $status)
 	{
 		return $this->db->query("SELECT * FROM stock_move_items where move_id = '$move_id' AND lot = '$lot' AND status = '$status'")->result();
 	}
 
-	public function simpan_penerimaan_barang_tmp($kode,$quant_id,$move_id,$kode_produk,$lot,$valid,$tgl)
+	public function simpan_penerimaan_barang_tmp($kode, $quant_id, $move_id, $kode_produk, $lot, $valid, $tgl)
 	{
 		return $this->db->query("INSERT INTO penerimaan_barang_tmp (kode,quant_id,move_id,kode_produk,lot,valid,valid_date) VALUES ('$kode','$quant_id','$move_id','$kode_produk','$lot','$valid','$tgl')");
 	}
@@ -415,20 +403,19 @@ class M_penerimaanBarang extends CI_Model
 	*/
 
 	public function get_stock_move_items_not_penerimaan_barang_tmp($move_id)
-    {
-   		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid, smi.lokasi_fisik, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi
+	{
+		return $this->db->query("SELECT  smi.move_id, smi.quant_id, smi.tanggal_transaksi, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.origin_prod, smi.row_order, tmp.valid, smi.lokasi_fisik, smi.lebar_greige, smi.uom_lebar_greige, smi.lebar_jadi, smi.uom_lebar_jadi
 							FROM stock_move_items  smi
 							LEFT JOIN penerimaan_barang_tmp tmp ON smi.move_id = tmp.move_id AND smi.lot = tmp.lot
 							WHERE smi.move_id = '$move_id' AND smi.lot NOT IN (SELECT lot FROM penerimaan_barang_tmp WHERE move_id = '$move_id')
 							order by smi.row_order ")->result();
-    }
+	}
 
 	public function cek_penerimaan_barang_tmp_by_kode($kode)
 	{
 		$this->db->where('kode', $kode);
 		$query = $this->db->get('penerimaan_barang_tmp');
 		return $query->num_rows();
-		
 	}
 
 	public function get_type_mo_dept_id_mrp_production_by_kode($kode_mo)
@@ -452,7 +439,7 @@ class M_penerimaanBarang extends CI_Model
 		return $query->num_rows();
 	}
 
-	public function cek_jml_produk_sama_penerimaan_barang_by_kode($kode,$kode_produk)
+	public function cek_jml_produk_sama_penerimaan_barang_by_kode($kode, $kode_produk)
 	{
 		return $this->db->query("SELECT count(kode_produk) as tot 
 								FROM penerimaan_barang_items   
@@ -461,29 +448,27 @@ class M_penerimaanBarang extends CI_Model
 								having COUNT(kode_produk) > 1 ");
 	}
 
-	public function get_qty_produk_penerimaan_by_kode_origin($kode,$kode_produk,$origin_prod)
+	public function get_qty_produk_penerimaan_by_kode_origin($kode, $kode_produk, $origin_prod)
 	{
-		$query =  $this->db->query("SELECT qty FROM penerimaan_barang_items where kode = '$kode' AND kode_produk = '$kode_produk' AND origin_prod = '$origin_prod'")->row_array()
-		;
+		$query =  $this->db->query("SELECT qty FROM penerimaan_barang_items where kode = '$kode' AND kode_produk = '$kode_produk' AND origin_prod = '$origin_prod'")->row_array();
 		return $query['qty'];
 	}
 
-	public function get_qty_produk_penerimaan_by_kode($kode,$kode_produk)
+	public function get_qty_produk_penerimaan_by_kode($kode, $kode_produk)
 	{
-		$query =  $this->db->query("SELECT qty FROM penerimaan_barang_items where kode = '$kode' AND kode_produk = '$kode_produk'")->row_array()
-		;
+		$query =  $this->db->query("SELECT qty FROM penerimaan_barang_items where kode = '$kode' AND kode_produk = '$kode_produk'")->row_array();
 		return $query['qty'];
 	}
 
 
-	public function get_produk_add_quant($kode,$kode_produk,$origin_prod) 
+	public function get_produk_add_quant($kode, $kode_produk, $origin_prod)
 	{
-		$this->db->where("pbi.kode",$kode);
-		$this->db->where("pbi.kode_produk",$kode_produk);
-		$this->db->where("pbi.origin_prod",$origin_prod);
+		$this->db->where("pbi.kode", $kode);
+		$this->db->where("pbi.kode_produk", $kode_produk);
+		$this->db->where("pbi.origin_prod", $origin_prod);
 		$this->db->SELECT('pbi.kode, pbi.nama_produk, pbi.qty, pbi.uom, pbi.origin_prod, mp.uom_2, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi');
 		$this->db->from('penerimaan_barang_items as pbi');
-		$this->db->JOIN('mst_produk mp','pbi.kode_produk = mp.kode_produk',"inner");
+		$this->db->JOIN('mst_produk mp', 'pbi.kode_produk = mp.kode_produk', "inner");
 		$query = $this->db->get();
 		return $query->row();
 	}
@@ -496,18 +481,18 @@ class M_penerimaanBarang extends CI_Model
 								WHERE short LIKE '%$name%' ORDER BY id   ")->result_array();
 	}
 
-	public function save_add_quant_penerimaan_barang($data) 
+	public function save_add_quant_penerimaan_barang($data)
 	{
 		$this->db->insert_batch('penerimaan_barang_tmpp_add_quant', $data);
 		$db_error = $this->db->error();
-        return is_array($db_error['code']);
+		return is_array($db_error['code']);
 	}
-	
-	public function delete_add_quant_penerimaan_barang($kode,$kode_produk,$origin_prod)
+
+	public function delete_add_quant_penerimaan_barang($kode, $kode_produk, $origin_prod)
 	{
 		$this->db->where('kode', $kode);
-		$this->db->where('kode_produk',$kode_produk);
-		$this->db->where('origin_prod',$origin_prod);
+		$this->db->where('kode_produk', $kode_produk);
+		$this->db->where('origin_prod', $origin_prod);
 		$this->db->delete('penerimaan_barang_tmpp_add_quant');
 	}
 
@@ -523,20 +508,20 @@ class M_penerimaanBarang extends CI_Model
 		return $row['row'] + 1;
 	}
 
-	public function get_list_add_quant_penerimaan_barang_tmp($kode,$kode_produk,$origin_prod)
+	public function get_list_add_quant_penerimaan_barang_tmp($kode, $kode_produk, $origin_prod)
 	{
-		$this->db->where('kode',$kode);
-		$this->db->where('kode_produk',$kode_produk);
-		$this->db->where('origin_prod',$origin_prod);
-		$this->db->order_by('row_order','asc');
+		$this->db->where('kode', $kode);
+		$this->db->where('kode_produk', $kode_produk);
+		$this->db->where('origin_prod', $origin_prod);
+		$this->db->order_by('row_order', 'asc');
 		$query = $this->db->get('penerimaan_barang_tmpp_add_quant');
 		return $query->result();
 	}
-        
-        public function get_list_add_quant_penerimaan_barang_tmp_1($kode)
+
+	public function get_list_add_quant_penerimaan_barang_tmp_1($kode)
 	{
-		$this->db->where('kode',$kode);
-		$this->db->order_by('row_order','asc');
+		$this->db->where('kode', $kode);
+		$this->db->order_by('row_order', 'asc');
 		$query = $this->db->get('penerimaan_barang_tmpp_add_quant');
 		return $query->result();
 	}
@@ -546,8 +531,4 @@ class M_penerimaanBarang extends CI_Model
 	{
 		return $this->db->query("SELECT * FROM mst_grade WHERE nama_grade LIKE '%$name%' ORDER BY id   ")->result();
 	}
-
 }
-
-
-?>

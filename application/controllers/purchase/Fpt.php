@@ -34,7 +34,7 @@ class Fpt extends MY_Controller {
 
     public function add() {
 //        $data['id_dept'] = 'FPT';
-//        $this->load->view('purchase/v_fpt_add', $data);
+        $data['warehouse'] = $this->_module->get_list_departement();
         $data['id_dept'] = 'FPT';
         $data['jenis'] = 'FPT';
         $this->load->view('purchase/v_order_add', $data);
@@ -89,11 +89,12 @@ class Fpt extends MY_Controller {
             $uom_jual = $this->input->post("uom_jual");
             $note = $this->input->post("note");
             $deskripsi = $this->input->post("deskripsi");
-//            $totals = $this->input->post("totals");
+            $order_date = $this->input->post("order_date");
             $amount_tax = $this->input->post("amount_tax");
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
-
+            $dpplain = $this->input->post("dpplain");
+            
             $data = [];
             $log_update = [];
             $no = 0;
@@ -101,6 +102,8 @@ class Fpt extends MY_Controller {
             $totals = 0.00;
             $diskons = 0.00;
             $taxes = 0.00;
+            $nilaiDppLain = 0;
+            
             foreach ($harga as $key => $value) {
                 $no++;
                 $checkKonversi = $this->m_konversiuom->wheres(["id" => $id_konversiuom[$key], "ke" => $uom_jual[$key], "dari" => $uom_beli[$key]])->getDetail();
@@ -116,14 +119,23 @@ class Fpt extends MY_Controller {
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
-                $taxes += ($total - $diskon) * $amount_tax[$key];
+                if ($dpplain === "1") {
+                    $taxes += ((($total - $diskon) * 11) / 12) *$amount_tax[$key];
+                }
+                else {
+                    $taxes += ($total - $diskon) * $amount_tax[$key];
+                }
+            }
+            if ($dpplain === "1") {
+                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
             }
             $grandTotal = ($totals - $diskons) + $taxes;
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,"total"=>$grandTotal]);
+            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency,
+                'note' => $note,"total"=>$grandTotal,'dpp_lain'=>$nilaiDppLain,"order_date" => $order_date]);
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -260,9 +272,6 @@ class Fpt extends MY_Controller {
                                 ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa"])->getData();
                 $produk = [];
 
-//                $invoiceDetail = [];
-//                $dataInvoice = ["id_supplier" => $data->supplier, "no_po" => $kode_decrypt, "order_date" => $orderDate,
-//                    "created_at" => date("Y-m-d H:i:s"), "matauang" => $data->currency, 'nilai_matauang' => $data->nilai_currency];
                 $inserInvoice = new $this->m_global;
                 $checkInvoice = clone $inserInvoice;
                 if ($checkInvoice->setTables("penerimaan_barang")->setWheres(["origin" => $kode_decrypt, 'dept_id' => "RCV", 'status <>' => 'cancel'])->getDataCountAll() > 0) {
@@ -281,12 +290,14 @@ class Fpt extends MY_Controller {
                             'status' => 'ready',
                             'origin_prod' => $value->kode_produk . "_" . $row,
                             'row_order' => $row,
-                            'kode_pp'=>$value->kode_pp
+                            'kode_pp'=>$value->kode_pp,
+                            'qty_beli'=>$value->qty_beli,
+                            'uom_beli'=>$value->uom_beli
                         ];
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
                     }
-                    if ($data->cfb_manual === "1") {
+                    if ($data->cfb_manual === "0") {
                         $updatePP = new $this->m_po;
                         $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "po"]);
                     }
@@ -314,7 +325,7 @@ class Fpt extends MY_Controller {
                     'lokasi_dari' => 'SUP/Stock',
                     'lokasi_tujuan' => 'RCV/Stock',
                     'reff_picking' => 'SUP|' . $kodeRcv,
-                    'reff_note' => '',
+                    'reff_note' =>  $data->note,
                     'status' => 'ready',
                     'dept_id' => 'RCV',
                     'partner_id' => $data->supplier,
@@ -325,7 +336,7 @@ class Fpt extends MY_Controller {
                 $detailProduk = [];
                 foreach ($produk as $keys => $values) {
                     $clone = $values;
-                    unset($clone["kode_pp"]);
+                    unset($clone["kode_pp"],$clone["qty_beli"],$clone["uom_beli"]);
                     $smProduk[] = array_merge($clone, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
                     unset($values["status"]);
                     $detailProduk[] = array_merge($values, ['kode' => $kodeRcv, 'lot' => '', 'status_barang' => 'ready']);
@@ -340,11 +351,10 @@ class Fpt extends MY_Controller {
 
                 $redirect = base_url('purchase/purchaseorder/edit/' . $id);
                 $this->_module->gen_history('penerimaanbarang', $kodeRcv, 'create', logArrayToString(";", $dataPenerimaan), $username);
-                $updatePO = array_merge($updatePO, ["order_date" => date("Y-m-d H:i:s"), "validated_by" => $users["nama"]]);
-
-                //create Invoice_detail
-//                $inserInvoice->setTables("invoice_detail")->saveBatch($invoiceDetail);
-//                $this->_module->gen_history('invoice', $idInsert, 'create', logArrayToString(";", $dataInvoice), $username);
+                if ($data->order_date === null || $data->order_date === "0000-00-00 00:00:00") {
+                    $updatePO = array_merge($updatePO, ["order_date" => date("Y-m-d H:i:s")]);
+                }
+                $updatePO = array_merge($updatePO, ["validated_by" => $users["nama"]]);
             }
             $po = new $this->m_po;
             $pod = clone $po;

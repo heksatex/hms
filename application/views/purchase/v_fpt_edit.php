@@ -211,24 +211,25 @@
                                                                 }
                                                                 ?>
                                                             </select>
-                                                          
+
                                                         </div>
+                                                        <input type="hidden" id="nilai_currency" class="form-control" name="nilai_currency" value="<?= ( $po->nilai_currency < 1) ? 1.00 : $po->nilai_currency ?>">
                                                     </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div class="form-group">
-                                                <div class="col-md-12 col-xs-12">
-                                                    <div class="col-xs-4">
-                                                        <label class="form-label required">Kurs</label>
-                                                    </div>
-                                                    <div class="col-xs-8 col-md-8">
-                                                        <input type="text" id="nilai_currency" class="form-control" name="nilai_currency" value="<?= ( $po->nilai_currency < 1) ? 1.00 : $po->nilai_currency ?>" 
-                                                               required <?= ($po->status === 'draft') ? '' : 'readonly' ?> >
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
+
+                                            <!--                                            <div class="form-group">
+                                                                                            <div class="col-md-12 col-xs-12">
+                                                                                                <div class="col-xs-4">
+                                                                                                    <label class="form-label required">Kurs</label>
+                                                                                                </div>
+                                                                                                <div class="col-xs-8 col-md-8">
+                                                                                                    <input type="text" id="nilai_currency" class="form-control" name="nilai_currency" value="<?= ( $po->nilai_currency < 1) ? 1.00 : $po->nilai_currency ?>" 
+                                                                                                           required <?= ($po->status === 'draft') ? '' : 'readonly' ?> >
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>-->
+
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -239,7 +240,18 @@
                                                         <label class="form-label">Tanggal order</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8 text-uppercase">
-                                                        <span><?= ( $po->order_date === null ) ? "" : date("l, d M Y H:i:s", strtotime($po->order_date)) ?></span>
+                                                        <?php
+                                                        if ($po->status === "draft") {
+                                                            ?>
+                                                            <input type="datetime-local" class="form-control" name="order_date" id="order_date" max="<?= date("Y-m-d H:m:s") ?>" value="<?= $po->order_date ?>">
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                            <span><?= ( $po->order_date === null ) ? "" : date("l, d M Y H:i:s", strtotime($po->order_date)) ?></span>
+                                                            <?php
+                                                        }
+                                                        ?>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -323,7 +335,7 @@
                                                         <?= $no ?>
                                                     </td>
                                                     <td>
-                                                        <?= ($value->kode_cfb === "") ? "" : ($value->kode_pp . " - " . $value->kode_cfb) ?>
+                                                        <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
                                                     </td>
                                                     <td>
                                                         <?php
@@ -378,12 +390,12 @@
                                                     <td>
                                                         <div class="form-group">
                                                             <?php if ($po->no_value === "1") { ?>
-                                                            <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" readonly
-                                                                   style="width: 70%" value="0">
-                                                            <?php } else { ?>
-                                                            <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                   style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
-                                                            <?php } ?>
+                                                                <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" readonly
+                                                                       style="width: 70%" value="0">
+                                                                   <?php } else { ?>
+                                                                <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                       style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                   <?php } ?>
 
                                                         </div>
                                                     </td>
@@ -413,7 +425,7 @@
                                                     </td>
                                                     <td>
                                                         <div class="form-group">
-                                                             <?php if ($po->no_value === "1") { ?>
+                                                            <?php if ($po->no_value === "1") { ?>
                                                                 <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
                                                             <?php } else { ?>
                                                                 <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
@@ -442,19 +454,19 @@
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Subtotal 1</td>
                                                     <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($totals, 2) ?>
+                                                        <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Discount</td>
                                                     <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($diskons, 2) ?>
+                                                        <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Subtotal 2</td>
                                                     <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
+                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <?php if ($setting !== null) {
@@ -462,7 +474,8 @@
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 2) ?>
+                                                            <input name="dpplain" type="hidden" value="1">
+                                                            <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
                                                             </strong>
                                                         </td>
                                                     </tr>
@@ -471,13 +484,13 @@
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Taxes</td>
                                                     <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
+                                                        <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Total</td>
                                                     <td class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 2) ?>
+                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                         </strong></td>
                                                 </tr>
 
@@ -488,19 +501,19 @@
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Subtotal 1</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($totals, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Discount</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($diskons, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Subtotal 2</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <?php if ($setting !== null) {
@@ -508,7 +521,8 @@
                                                         <tr>    
                                                             <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                             <td class="style text-center totalan"> 
-                                                                <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 2) ?>
+                                                                <input name="dpplain" type="hidden" value="1">
+                                                                <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
                                                                 </strong>
                                                             </td>
                                                         </tr>
@@ -517,13 +531,13 @@
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Taxes</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($taxes, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Total</td>
                                                         <td class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 2) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <?php
@@ -563,19 +577,19 @@
 
             });
             $(function () {
-                
+
                 $(".shipment").off("click").unbind("click").on("click", function () {
-                        $("#view_data").modal({
-                            show: true,
-                            backdrop: 'static'
-                        });
-                        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-                        $('.modal-title').text('Shipping');
-                        $.post("<?= base_url('purchase/purchaseorder/get_shipment/' . $id) ?>", {}, function (data) {
-                            $(".view_body").html(data.data);
-                        });
+                    $("#view_data").modal({
+                        show: true,
+                        backdrop: 'static'
                     });
-                    
+                    $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                    $('.modal-title').text('Shipping');
+                    $.post("<?= base_url('purchase/purchaseorder/get_shipment/' . $id) ?>", {}, function (data) {
+                        $(".view_body").html(data.data);
+                    });
+                });
+
 
                 $(".tax").on("select2:select", function () {
                     var row = $(this).attr("data-row");
@@ -700,9 +714,9 @@
                             });
                         },
                         success: function (data) {
-//                            if (data.redirect !== "") {
-//                                location.href = data.redirect;
-//                            }
+                            if (data.redirect !== "") {
+                                location.href = "<?= site_url('purchase/fpt/edit') ?>/" + data.redirect;
+                            }
                             location.reload();
                         }
 

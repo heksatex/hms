@@ -107,7 +107,9 @@
                     </div>
                 </div>
                 <div id="row">
-                    <div style="text-align: left">
+                    <div id="columnmd" style="text-align: left">
+                    </div>
+                    <div id="columnmd" style="text-align: left" >
                         <?= $head->alamat ?>
                     </div>
                 </div>
@@ -142,7 +144,9 @@
                 </thead>
                 <tbody>
                     <?php
+                    $kode_pp = "";
                     foreach ($item as $key => $value) {
+                        $kode_pp = $value->kode_pp;
                         ?>
                         <tr>
                             <td>
@@ -175,9 +179,13 @@
         </div>
 
         <div id="row">
-            <div id="columnmd">
-
+            <div id="columnmd" style="text-align: left">
+                <div id="row">
+                    <p>Kode PP :</p>
+                    <p><?= $kode_pp ?></p>
+                </div>
             </div>
+          
             <div id="columnmd">
                 <div style="text-align: right">
                     <p>Tgl.Cetak&nbsp;:<?= date("Y-m-d H:i:s") ?></p>

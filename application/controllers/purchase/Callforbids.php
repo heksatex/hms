@@ -18,14 +18,18 @@ class Callforbids extends MY_Controller {
         parent:: __construct();
         $this->is_loggedin();
         $this->load->model('m_cfb');
+        $this->load->model('m_global');
         $this->load->model('m_produk');
         $this->load->model("m_konversiuom");
         $this->load->model('_module');
+        $this->load->model('m_user');
     }
 
     public function index() {
         $data['id_dept'] = 'CFB';
         $depth = new $this->m_cfb;
+        $username = $this->session->userdata('username');
+        $data['user'] = $this->m_user->get_user_by_username($username);
         $data["dept"] = $depth->setTables("departemen")->setSelects(["kode", "nama"])->setOrder(["kode" => "asc"])->getData();
         $this->load->view('purchase/v_cfb', $data);
     }
@@ -41,7 +45,7 @@ class Callforbids extends MY_Controller {
                     ->setJoins("cfb", "ci.kode_cfb = cfb.kode_cfb")
                     ->setJoins("departemen", "departemen.kode = cfb.warehouse")
                     ->setJoins("mst_status", "mst_status.kode = ci.status", "left")
-                    ->setSelects(["ci.*", "departemen.nama as nama_warehouse", "cfb.create_date", "sales_order,priority,notes", "nama_status", "cfb.kode_pp"])
+                    ->setSelects(["ci.*", "departemen.nama as nama_warehouse,warehouse", "cfb.create_date", "sales_order,priority,notes", "nama_status", "cfb.kode_pp"])
                     ->setOrder(['create_date' => 'desc'])
                     ->setWhereRaw("ci.id NOT IN (select cfb_items_id from purchase_order_detail where status != 'cancel') and ci.status not in('cancel','done')");
             $no = $_POST['start'];
@@ -63,7 +67,7 @@ class Callforbids extends MY_Controller {
 //                $ids = $no;
 //                if (strtolower($field->status) != "cancel") {
                 $ids = $field->id . "#" . $field->kode_cfb . "." . $field->kode_pp . "#" . $field->kode_produk . "#" .
-                        $field->qty . "#" . $field->uom . "#" . $field->priority . "#" . $field->reff_notes . "#" . $field->status;
+                        $field->qty . "#" . $field->uom . "#" . $field->priority . "#" . $field->reff_notes . "#" . $field->warehouse . "#" . $field->status;
 //                }
                 $data [] = array(
                     $ids,
@@ -152,7 +156,7 @@ class Callforbids extends MY_Controller {
         try {
             $datas = $this->input->post("data");
             $data["jenis"] = $this->input->post("jenis");
-            $produk = $this->m_cfb->setTables("mst_produk")->setSelects(["mst_produk.kode_produk,nama_produk,uom_beli,mph.harga,nilai,dari,catatan"])
+            $produk = $this->m_cfb->setTables("mst_produk")->setSelects(["mst_produk.kode_produk,nama_produk,uom_beli,mph.harga,nilai,dari,catatan,uom"])
                     ->setJoins("mst_produk_harga mph", "(mph.kode_produk = mst_produk.kode_produk and mph.jenis = 'pembelian')", "left")
                     ->setJoins("nilai_konversi nk", "nk.id = uom_beli", "left");
             $items = [];
@@ -161,7 +165,8 @@ class Callforbids extends MY_Controller {
                 if (count($datas_) > 1) {
                     $prod = $produk->setWheres(["mst_produk.kode_produk" => $datas_[2]], true)->getDetail();
                     if ($prod) {
-                        if (is_null($prod->uom_beli)) {
+
+                        if (is_null($prod->uom_beli) || ($prod->uom !== $datas_[4])) {
                             $dari = $datas_[4];
                             $nilai = 1;
                             $ke = $datas_[4];
@@ -184,9 +189,9 @@ class Callforbids extends MY_Controller {
                             $nilai = $prod->nilai;
                             $catatan = $prod->catatan;
                         }
-                        $qtyBeli = $datas_[3] * $nilai;
+                        $qtyBeli = ceil($datas_[3] / $nilai);
                         array_push($items, [$datas_[0], $datas_[1], $prod->kode_produk, $prod->nama_produk, $datas_[3],
-                            $datas_[4], ($uom_beli ?? null), $datas_[5], $prod->harga, $dari, $nilai, $catatan, $qtyBeli, $datas_[6]]);
+                            $datas_[4], ($uom_beli ?? null), $datas_[5], $prod->harga, $dari, $nilai, $catatan, $qtyBeli, $datas_[6], $datas_[7]]);
                     }
                 }
             }
@@ -208,33 +213,37 @@ class Callforbids extends MY_Controller {
 
     public function update_status() {
         try {
-//            $sub_menu = $this->uri->segment(2);
+            $sub_menu = $this->uri->segment(2);
 //            $username = $this->session->userdata('username');
-
+            $users = $this->session->userdata('nama');
             $ids = $this->input->post("ids");
             $status = $this->input->post("status");
             $before_status = $this->input->post("before_status");
-            
-            if(is_string($ids)) {
+
+            if (is_string($ids)) {
                 $ids = array($ids);
             }
 
             $updt = new $this->m_cfb;
             $listCfb = clone $updt;
+            $log = new $this->m_global;
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("mst_produk WRITE,cfb_items ci write,cfb write,procurement_purchase_items write");
+            $this->_module->lock_tabel("mst_produk WRITE,cfb_items ci write,cfb write,procurement_purchase_items write,log_history WRITE,main_menu_sub WRITE");
             $updt->setTables('cfb_items ci')->setWhereRaw("id in (" . implode(",", $ids) . ")")->setWheres(['status' => $before_status])->update(['status' => $status]);
-
-            if($before_status === "confirm") {
+            $listLog = [];
+            if ($before_status === "confirm") {
                 $status = "generated";
             }
-            foreach ($listCfb->setJoins('cfb_items ci', "ci.kode_cfb = cfb.kode_cfb")->setOrder(["ci.id" => "asc"])->setSelects(['kode_pp', "kode_produk"])->setWhereRaw("ci.id in (" . implode(",", $ids) . ")")->getData() as $key => $value) {
+            foreach ($listCfb->setJoins('cfb_items ci', "ci.kode_cfb = cfb.kode_cfb")->setOrder(["ci.id" => "asc"])->setSelects(['kode_pp', "kode_produk", "ci.kode_cfb"])->setWhereRaw("ci.id in (" . implode(",", $ids) . ")")->getData() as $key => $value) {
                 $updatePP = new $this->m_cfb;
                 $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => $status]);
+                $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $value->kode_cfb,
+                    "jenis_log" => "edit", "note" => "Merubah Ke status {$status}", "nama_user" => $users["nama"], "ip_address" => ""];
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
+            $log->setTables("log_history")->saveBatch($listLog);
 //             $this->_module->gen_history($sub_menu, $nopo, 'create', logArrayToString('; ', $kode_cfb), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
