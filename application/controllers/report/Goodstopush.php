@@ -232,7 +232,7 @@ class Goodstopush extends MY_Controller {
                 $model->setWheres(["lokasi" => $lokasi]);
             }
             $list = $model->getData();
-            if(count($list) > 1) {
+            if(count($list) < 1) {
                 throw new \Exception("Data Tidak ditemukan",500);
             }
             $spreadsheet = new Spreadsheet();
