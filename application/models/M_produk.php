@@ -182,7 +182,7 @@ class M_produk extends CI_Model {
     }
 
     public function get_nama_category_by_id($id) {
-        return $this->db->query("SELECT id,nama_category FROM mst_category WHERE id = '$id'");
+        return $this->db->query("SELECT id,nama_category,has_parent FROM mst_category WHERE id = '$id'");
     }
 
     public function save_produk($kode_produk, $nama_produk, $uom, $uom_2, $create_date, $route_produksi, $type, $dapat_dibeli,
