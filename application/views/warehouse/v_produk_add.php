@@ -527,7 +527,14 @@
             show: true,
             backdrop: 'static'
         });
+        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Konversi Uom');
+        $.post("<?= base_url('warehouse/produk/get_view_konversi/') ?>", {}, function (data) {
+            setTimeout(function () {
+                $(".view_body").html(data.data);
+            }, 1000);
     });
+    })
     $("#foto").fileinput({
         showCaption: false,
         dropZoneEnabled: false,
