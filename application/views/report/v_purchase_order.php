@@ -223,8 +223,8 @@
                 });
 
                 $('input[name="periode"]').daterangepicker({
-                    endDate: moment().startOf('day'),
-                    startDate: moment().startOf('day').add(-1, 'week'),
+                    endDate: moment().endOf('month'),
+                    startDate: moment().startOf('month'),
                     locale: {
                         format: 'YYYY-MM-DD'
                     }
@@ -243,7 +243,7 @@
                         data: function (params) {
                             var query = {
                                 search: params.term
-                            }
+                            };
                             return query;
                         },
                         processResults: function (data) {
@@ -313,7 +313,6 @@
                                 }
                             }
                     ).catch().finally(() => {
-
                         unblockUI(function () {}, 100);
                     });
                     event.preventDefault();

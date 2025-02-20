@@ -278,7 +278,7 @@
                                                         <label class="form-label">Note</label>
                                                     </div>
                                                     <div class="col-xs-8 col-md-8 text-uppercase">
-                                                        <textarea class="form-control" id="note" name="note"><?= $po->note ?></textarea>
+                                                        <textarea class="form-control" id="note" name="note" readonly><?= $po->note ?></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -310,10 +310,66 @@
                                         <li><a href="#tab_2" data-toggle="tab">Retur</a></li>
                                     </ul>
                                     <div class="tab-content"><br>
+
+                                        <div class="tab-pane" id="tab_2">
+                                            <div class="col-md-12">
+                                                <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                                    <thead>
+                                                    <th class="style" width="10px">No</th>
+                                                    <th class="style" width="20px">Kode CFB</th>
+                                                    <th class="style" width="20px">Kode Produk</th>
+                                                    <th class="style" width="20px">Nama Produk</th>
+                                                    <th class="style" width="20px">Deskripsi</th>
+                                                    <th class="style" width="20px">Tanggal Retur</th>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $noo = 0;
+                                                        foreach ($po_items as $key => $value) {
+                                                            if ($value->status !== 'retur')
+                                                                continue;
+
+                                                            $noo++;
+                                                            ?>
+                                                        <td><?= $noo ?></td>
+                                                        <td>
+                                                            <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
+                                                        </td>
+                                                        <td>
+                                                            <?php
+                                                            $image = "/upload/product/" . $value->kode_produk . ".jpg";
+                                                            $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
+                                                            if (is_file(FCPATH . $image)) {
+                                                                ?>
+                                                                <a href="<?= base_url($image) ?>" class="pop-image">
+                                                                    <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
+                                                                </a>
+                                                            <?php } ?>
+                                                            <?= $value->kode_produk ?>
+                                                        </td>
+                                                        <td>
+                                                            <?= $value->nama_produk ?>
+                                                        </td>
+                                                        <td>
+                                                            <?= $value->deskripsi ?>
+                                                        </td>
+                                                        <td><?= date("l, d M Y H:i:s", strtotime($value->retur_date)) ?></td>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="col-md-3 col-xs-12">
                                                 <div class="pull-left">
-                                                    <button class="btn btn-danger btn-sm btn-retur" type="button">Retur</button></div>
+                                                    <?php if(!in_array($po->status,['exception','cancel'])){ ?>
+                                                    <button class="btn btn-danger btn-sm btn-retur" type="button">Retur</button>
+                                                     <?php }?>
+                                                </div>
+                                                   
                                             </div>
                                             <br>
                                             <div class="col-md-12">
@@ -354,8 +410,11 @@
                                                             ?>
                                                             <tr>
                                                                 <td>
-                                                                    <input type="checkbox" class="check-retur" name="checklist[]" value="<?= $value->id?>">
-
+                                                                    <?php if ($value->status !== 'retur') { ?>
+                                                                        <input type="checkbox" class="check-retur" name="checklist[]" value="<?= $value->id ?>">
+                                                                        <?php
+                                                                    }
+                                                                    ?>
                                                                 </td>
                                                                 <td>
                                                                     <?= $no ?>
@@ -412,7 +471,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception') ? '' : 'readonly' ?>
+                                                                        <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status,["cancel","retur"]))) ? '' : 'readonly' ?>
                                                                                style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
                                                                     </div>
                                                                 </td>
@@ -546,17 +605,41 @@
                     $(".check-all-retur").click(function () {
                         $('.check-retur').not(this).prop('checked', this.checked);
                     });
-                    
-                    $(".btn-retur").click(function(){
-                       var getlist = $(".check-retur:checked").map(function(){
-                           return $(this).val();
-                       });
-                       var list = getlist.get();
-                       if(list.length < 1) {
-                             alert_notify('fa fa-close',"Pilih item yang akan di retur", 'danger', function () {});
-                             return;
-                       }
+
+                    $(".btn-retur").click(function () {
+                        var getlist = $(".check-retur:checked").map(function () {
+                            return $(this).val();
+                        });
+                        var list = getlist.get();
+                        if (list.length < 1) {
+                            alert_notify('fa fa-close', "Pilih item yang akan di retur", 'danger', function () {});
+                            return;
+                        }
+                        confirmRequest("Retur", "Retur Item yang Dipilih ? ", function () {
+                            $.ajax({
+                                type: "POST",
+                                url: "<?= base_url('purchase/purchaseorder/retur/') ?>",
+                                data: {
+                                    items: list,
+                                    ids: "<?= $id ?>"
+                                },
+                                beforeSend: function (xhr) {
+                                    please_wait(function () {});
+                                },
+                                success: function (data) {
+                                    location.reload();
+                                },
+                                error: function (req, error) {
+                                    unblockUI(function () {
+                                        setTimeout(function () {
+                                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                        }, 500);
+                                    });
+                                }
+                            });
+                        });
                     });
+
 
                     $(".request_edit").off("click").unbind("click").on("click", function () {
                         var datastatus = $(this).data("status");
@@ -718,7 +801,7 @@
 
                 $(".tax").select2({
                     allowClear: true,
-                    placeholder: "Pajak",
+                    placeholder: "Pajak"
 
                 });
 

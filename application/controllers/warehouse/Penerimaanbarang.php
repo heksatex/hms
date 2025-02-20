@@ -1078,7 +1078,7 @@ class Penerimaanbarang extends MY_Controller {
                                 $origin = [];
                                 $kode_produk = [];
                                 $readyrcvItem = clone $datarcvItem;
-                                foreach ($datarcvItem->setWheres(["status_barang" => "done"])->getData() as $key => $value) {
+                                foreach ($readyrcvItem->setWheres(["status_barang" => "done"])->getData() as $key => $value) {
                                     $origin[] = $value->origin;
                                     $kode_produk[] = $value->kode_produk;
                                 }
@@ -1089,7 +1089,7 @@ class Penerimaanbarang extends MY_Controller {
                                 //             ->update(["status"=>"done"]);
                                 //    }
                                 $po->setTables("purchase_order_detail")
-                                        ->setWhereRaw("po_no_po in ('" . implode("','", $origin) . "') and kode_produk in ('" . implode("','", $kode_produk) . "') and status <> 'cancel'")
+                                        ->setWhereRaw("po_no_po in ('" . implode("','", $origin) . "') and kode_produk in ('" . implode("','", $kode_produk) . "') and status not in ('cancel','retur')")
                                         ->update(["status" => "done"]);
 
                                 // log_message('error', "po_no_po in ('". implode("','", $origin)."') and kode_produk in ('". implode("','", $kode_produk)."') and status <> 'cancel'");
