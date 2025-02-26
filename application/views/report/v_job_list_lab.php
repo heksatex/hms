@@ -297,10 +297,6 @@
                     "orderable": false, 
                 },
                 { 
-                    "targets": [ 7 ], 
-                    "orderable": false, 
-                },
-                { 
                     "targets": [ 19 ], 
                     "visible": false, 
                 },
