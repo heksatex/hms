@@ -6975,13 +6975,16 @@ class MO extends MY_Controller
             }
 
             $pdf->SetFont('Arial','B',12,'C'); // set font
-            $pdf->Multicell(74,5,"Dept Tujuan : ".$nh_dept.''.$nh_mc,0,'L');// Departemen Tujuan
+            $pdf->Multicell(30,5,"Dept Tujuan : ",0,'L');// Departemen Tujuan
+
+            $pdf->setXY(32,38);
+            $pdf->Multicell(42,5,$nh_dept.''.$nh_mc,0,'L');// Departemen Tujuan
             
-            $pdf->setXY(3,43);
+            $pdf->setXY(3,47);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
             
             $pdf->SetFont('Arial','B',8,'C'); // set font
-            $pdf->setXY(3,47);
+            $pdf->setXY(3,50);
             $pdf->Multicell(75,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
             
             // $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
@@ -6995,7 +6998,7 @@ class MO extends MY_Controller
 
         $pdf->output();
 
-    } 
+    }  
 
     function barcode_wrp($kode,$data_arr,$dept_id)
     {
