@@ -1720,7 +1720,7 @@ class MO extends MY_Controller
                 $consume    = "yes";              
 
                 // start transaction
-                $this->_module->startTransaction();
+                // $this->_module->startTransaction();
 
                 //lock table
                 $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
@@ -2435,7 +2435,7 @@ class MO extends MY_Controller
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'status'=>'failed', 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
-            $this->_module->rollbackTransaction();
+            // $this->_module->rollbackTransaction();
             // unlock table
             $this->_module->unlock_tabel();
         }
@@ -2509,7 +2509,7 @@ class MO extends MY_Controller
                 $consume    = "yes";
 
                 // start transaction
-                $this->_module->startTransaction();
+                // $this->_module->startTransaction();
 
                 //lock table
                 $this->_module->lock_tabel('mrp_production WRITE, mrp_production_rm_hasil WRITE, mrp_production_fg_hasil WRITE, mrp_production_rm_target WRITE, mrp_production_fg_target WRITE, stock_move WRITE, stock_move_items WRITE, stock_quant WRITE, stock_move_produk WRITE, departemen WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, sales_contract WRITE,mrp_production_rm_target as rm WRITE, mst_produk as mp WRITE, stock_move_items as smi WRITE, mrp_production as mrp WRITE, mrp_production_fg_hasil as fg WRITE, departemen as d WRITE');
@@ -3036,7 +3036,7 @@ class MO extends MY_Controller
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
-            $this->_module->rollbackTransaction();
+            // $this->_module->rollbackTransaction();
             // unlock table
             $this->_module->unlock_tabel();
         }
@@ -4945,8 +4945,8 @@ class MO extends MY_Controller
             $qty1_std           = $this->input->post('qty1_std');
             $qty2_std           = $this->input->post('qty2_std');
             $type_production    = $this->input->post('type_production');
-            $lot_prefix         = addslashes($this->input->post('lot_prefix'));
-            $lot_prefix_waste   = $this->input->post('lot_prefix_waste');
+            $lot_prefix         = addslashes(trim($this->input->post('lot_prefix')));
+            $lot_prefix_waste   = trim($this->input->post('lot_prefix_waste'));
             $lebar_greige       = addslashes($this->input->post('lebar_greige'));
             $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
             $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
@@ -6954,22 +6954,22 @@ class MO extends MY_Controller
 
             $pdf->SetFont('Arial','',12,'C'); // set font
 
-            $pdf->setXY(3,17);
+            $pdf->setXY(3,22);
             $pdf->Multicell(74,5,"Qty : ".$qty." ".$uom,0,'L'); // qty
 
-            $pdf->setXY(3,17);
+            $pdf->setXY(3,22);
             $pdf->Multicell(74,5,"MC : ".$mesin,0,'R');// MC TWS
 
-            $pdf->setXY(3,22);
+            $pdf->setXY(3,27);
             $pdf->Multicell(30,5,"Tgl.HPH   :",0,'L');// Tgl buat/hph
 
-            $pdf->setXY(24,22);
+            $pdf->setXY(24,27);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
-            $pdf->setXY(3,27);
+            $pdf->setXY(3,32);
             $pdf->Multicell(74,5,"Reff Note : ".$reff_note,0,'L');// reff note
 
-            $pdf->setXY(3,33);
+            $pdf->setXY(3,38);
             if($nh_mc != ''){
                 $nh_mc = ' - '.$nh_mc;
             }
@@ -6977,25 +6977,25 @@ class MO extends MY_Controller
             $pdf->SetFont('Arial','B',12,'C'); // set font
             $pdf->Multicell(74,5,"Dept Tujuan : ".$nh_dept.''.$nh_mc,0,'L');// Departemen Tujuan
             
-            $pdf->setXY(3,38);
+            $pdf->setXY(3,43);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
             
             $pdf->SetFont('Arial','B',8,'C'); // set font
-            $pdf->setXY(3,42);
+            $pdf->setXY(3,47);
             $pdf->Multicell(75,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
             
-            $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
+            // $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
 
             $pdf->SetFont('Arial','B',8,'C'); // set font
             $pdf->setXY(0,54);
-            $pdf->Multicell(80,5,$barcode.' - Barcode Twisting',0,'C');// barcode departement
+            $pdf->Multicell(80,5,'Barcode Twisting',0,'C');// barcode departement
 
             $loop++;
         }
 
         $pdf->output();
 
-    }
+    } 
 
     function barcode_wrp($kode,$data_arr,$dept_id)
     {
@@ -7086,23 +7086,27 @@ class MO extends MY_Controller
             $pdf->setXY(3,2);
             $pdf->Multicell(74,5,$nama_produk,0,'L'); // nama produk
 
-            $pdf->SetFont('Arial','',12,'C');
+            $pdf->SetFont('Arial','B',12,'C');
 
             $pdf->setXY(3,14);
+            $pdf->Multicell(74,5,"Lot : ".$barcode,0,'L');// Lot
+            
+            $pdf->SetFont('Arial','',12,'C');
+            $pdf->setXY(3,19);
             $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom.", Qty2 : ".round($qty2,2)." ".$uom2,0,'L'); // qty
 
-            $pdf->setXY(3,19);
+            $pdf->setXY(3,24);
             $pdf->Multicell(74,5,"Tgl.HPH : ",0,'L');// Tgl buat/hph
 
-            $pdf->setXY(24,19);
+            $pdf->setXY(24,24);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
             $pdf->SetFont('Arial','B',12,'C'); // set font
 
-            $pdf->setXY(3,25);
+            $pdf->setXY(3,30);
             $pdf->Multicell(74,5,"SC : ".$nh_sc,0,'L');// reff note
 
-            $pdf->setXY(3,30);
+            $pdf->setXY(3,35);
             if($nh_mc != ''){
                 $nh_mc = $nh_mc;
             }
@@ -7124,21 +7128,21 @@ class MO extends MY_Controller
 
             $pdf->Multicell(30,5,"Dept Tujuan : ",0,'L');// Caption Departemen Tujuan 
 
-            $pdf->setXY(32,30);
+            $pdf->setXY(32,35);
             $pdf->Multicell(42,5,$nh_mc."".$reff_note,0,'L'); // Departemen Tujuan - MC - Reff note Lot
 
-            $pdf->setXY(3,39);
+            $pdf->setXY(3,44);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
             $pdf->SetFont('Arial','B',8,'C'); // set font
-            $pdf->setXY(3,43);
+            $pdf->setXY(3,48);
             $pdf->Multicell(77,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
 
-            $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
+            // $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
             $tgl_now = (date('Y/m/d H:i:s'));
             $pdf->SetFont('Arial','B',8,'C'); // set font
             $pdf->setXY(0,54);
-            $pdf->Multicell(80,5,$barcode.' - Barcode WRP - '.$tgl_now,0,'C');// barcode
+            $pdf->Multicell(80,5,'Barcode WRP - '.$tgl_now,0,'C');// barcode
        
             $loop++;
         }
@@ -7146,6 +7150,7 @@ class MO extends MY_Controller
         $pdf->output();
 
     }
+
 
 
     function barcode_wrd($kode,$data_arr,$dept_id)

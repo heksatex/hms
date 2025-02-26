@@ -5,8 +5,8 @@
 class M_listOW extends CI_Model
 {
 	
-	var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','ms.nama_status', 'scl.status_jlb','scl.piece_info','scl.reff_notes','scl.delivery_date_items ','co.kode_co',null);
-	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group', 'scl.piece_info','scl.reff_notes', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','sc.delivery_date ');
+    var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','ms.nama_status', 'jlb.status_resep','scl.piece_info','scl.reff_notes','scl.delivery_date_items ','co.kode_co',null);
+	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group', 'scl.piece_info','scl.reff_notes', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','sc.delivery_date','jlb.status_resep');
 	var $order  	  = array('scl.tanggal_ow' => 'asc');
 
     

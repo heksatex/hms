@@ -1770,6 +1770,10 @@ class Marketing extends MY_Controller
                 $this->m_marketing->update_table_changed2($gtr->id, $tmp_id);
             }
 
+
+            $total_remove = $this->m_marketing->get_total_action('REMOVE');
+            $total_add    = $this->m_marketing->get_total_action('ADD');
+
             $list = $this->m_marketing->get_datatables14();
             $data = array();
             $no = $_POST['start'];
@@ -1793,6 +1797,8 @@ class Marketing extends MY_Controller
                 "data" => $data,
                 "past_date" => $past_date,
                 "last_date" => $last_date,
+                'total_add' => $total_add,
+                'total_remove' => $total_remove,
             );
             //output dalam format JSON
             echo json_encode($output);
