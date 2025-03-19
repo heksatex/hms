@@ -649,8 +649,8 @@ class Joinlot extends MY_Controller
                             }else{
                                 $cek_lot = $this->m_joinLot->cek_lot_join_by_kode($kode_join,$lot)->num_rows();
         
-                                if(!empty($tmp_items)){
-                                    foreach($tmp_items as $cki){
+                                if(!empty($cek_lot)){
+                                    foreach($cek_lot as $cki){
     
                                         if($cki['grade'] != $get_sq->nama_grade){
                                             $grade_note_same = true;
