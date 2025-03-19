@@ -7095,21 +7095,21 @@ class MO extends MY_Controller
             $pdf->Multicell(74,5,"Lot : ".$barcode,0,'L');// Lot
             
             $pdf->SetFont('Arial','',12,'C');
-            $pdf->setXY(3,19);
+            $pdf->setXY(3,25);
             $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom.", Qty2 : ".round($qty2,2)." ".$uom2,0,'L'); // qty
 
-            $pdf->setXY(3,24);
+            $pdf->setXY(3,30);
             $pdf->Multicell(74,5,"Tgl.HPH : ",0,'L');// Tgl buat/hph
 
-            $pdf->setXY(24,24);
+            $pdf->setXY(24,30);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
             $pdf->SetFont('Arial','B',12,'C'); // set font
 
-            $pdf->setXY(3,30);
+            $pdf->setXY(3,35);
             $pdf->Multicell(74,5,"SC : ".$nh_sc,0,'L');// reff note
 
-            $pdf->setXY(3,35);
+            $pdf->setXY(3,40);
             if($nh_mc != ''){
                 $nh_mc = $nh_mc;
             }
@@ -7129,16 +7129,16 @@ class MO extends MY_Controller
                 $reff_note = ' - '.$GB;
             }
 
-            $pdf->Multicell(30,5,"Dept Tujuan : ",0,'L');// Caption Departemen Tujuan 
+            $pdf->Multicell(30,4,"Dept Tujuan : ",0,'L');// Caption Departemen Tujuan 
 
-            $pdf->setXY(32,35);
-            $pdf->Multicell(42,5,$nh_mc."".$reff_note,0,'L'); // Departemen Tujuan - MC - Reff note Lot
+            $pdf->setXY(32,40);
+            $pdf->Multicell(42,4,$nh_mc."".$reff_note,0,'L'); // Departemen Tujuan - MC - Reff note Lot
 
-            $pdf->setXY(3,44);
+            $pdf->setXY(3,48);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
             $pdf->SetFont('Arial','B',8,'C'); // set font
-            $pdf->setXY(3,48);
+            $pdf->setXY(3,51);
             $pdf->Multicell(77,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
 
             // $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
@@ -7234,7 +7234,12 @@ class MO extends MY_Controller
     function barcode_tri($kode,$data_arr)
     {
        
-        $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
+        // $pdf=new PDF_Code128('p','mm',array(50,70));
+        $pdf=new PDF_Code128('l','mm',array(76.2,101.6));
+        // $pdf = new PDF_Code128('p','mm',array(80,101));
+        // // $pdf=new PDF_Code128('p','mm',array(88.9,50.8));
+        // // $pdf=new PDF_Code128('p','mm',array(89,101.6));
+
 
         $pdf->AddPage();
         $loop  = 1;
@@ -7253,36 +7258,41 @@ class MO extends MY_Controller
                 $barcode     = "Not Found";
                 $nama_grade  = "";
             }
-            
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,8);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 1
+            $pdf->Line(5, 10, 95, 10); // garis atas gunting
+
+            $pdf->SetDash(5,5); //5mm on, 5mm off
+            $pdf->Line(5, 18, 95, 18); // garis atas jahit
+            $pdf->SetDash(); //off
+
+
+            $pdf->SetFont('Arial','B',20,'C');
+            $pdf->setXY(0,8);
+            $pdf->Multicell(82,48,$barcode,0,'R');// Nama LOT 1
             //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
 
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,5);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+            $pdf->SetFont('Arial','B',30);
+            $pdf->setXY(82,6);
+            $pdf->Multicell(20,48,$nama_grade,0,'L'); // grade
             //$pdf->Cell(0,3,$nama_grade,0,1);//grade
             
-            $pdf->Code128(30,18,$barcode,110,23,'C');//barcode 1       
+            $pdf->Code128(5,40,$barcode,90,15,'C');//barcode 1       
             
-            
-            $pdf->Line(20, 47, 170, 47); // garis tengah
+            // $pdf->Line(5, 60, 95, 60); // garis bawah
             //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
 
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,54);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
-            //$pdf->Cell(100,30,$barcode,0,0,'R');
+            // $pdf->SetFont('Arial','B',25,'C');
+            // $pdf->setXY(10,54);
+            // $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
+            // //$pdf->Cell(100,30,$barcode,0,0,'R');
 
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,51);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
-            //$pdf->Cell(0,27,$nama_grade,0,1);//grade
+            // $pdf->SetFont('Arial','B',40);
+            // $pdf->setXY(120,51);
+            // $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+            // //$pdf->Cell(0,27,$nama_grade,0,1);//grade
 
-            $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
+            // $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
 
-            $pdf->Line(170,3,170,100);//vertical
+            // $pdf->Line(170,3,170,100);//vertical
 
             $loop++;
         }
@@ -7292,62 +7302,70 @@ class MO extends MY_Controller
     }
 
 
+
     function barcode_ins1($kode,$data_arr)
     {
        
-        $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
-
-        $pdf->AddPage();
-      
-        $loop  = 1;
-        foreach ($data_arr as $val) {
-
-            if($loop == 2){
-                $pdf->AddPage();
-                $loop = 1;
-            }
-            
-            $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
-            if(isset($get)){
-                $barcode     = $get['lot'];
-                $nama_grade  = $get['nama_grade'];
-            }else{
-                $barcode     = "Not Found";
-                $nama_grade  = "";
-            }
-
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,8);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 1
-            //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
-
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,5);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
-            //$pdf->Cell(0,3,$nama_grade,0,1);//grade
-            
-            $pdf->Code128(30,18,$barcode,110,23,'C');//barcode 1       
-            
-            
-            $pdf->Line(20, 47, 170, 47); // garis tengah
-            //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
-
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,54);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
-            //$pdf->Cell(100,30,$barcode,0,0,'R');
-
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,51);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
-            //$pdf->Cell(0,27,$nama_grade,0,1);//grade
-
-            $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
-
-            $pdf->Line(170,3,170,100);//vertical
-
-            $loop++;
-        }
+        $pdf=new PDF_Code128('l','mm',array(76.2,101.6));
+        
+ 
+         $pdf->AddPage();
+         $loop  = 1;
+         foreach ($data_arr as $val) {
+ 
+             if($loop == 2){
+                 $pdf->AddPage();
+                 $loop = 1;
+             }
+ 
+             $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
+             if(isset($get)){
+                 $barcode     = $get['lot'];
+                 $nama_grade  = $get['nama_grade'];
+             }else{
+                 $barcode     = "Not Found";
+                 $nama_grade  = "";
+             }
+             $pdf->Line(5, 10, 95, 10); // garis atas gunting
+ 
+             $pdf->SetDash(5,5); //5mm on, 5mm off
+             $pdf->Line(5, 18, 95, 18); // garis atas jahit
+             $pdf->SetDash(); //off
+ 
+ 
+             $pdf->SetFont('Arial','B',20,'C');
+             $pdf->setXY(0,8);
+             $pdf->Multicell(82,48,$barcode,0,'R');// Nama LOT 1
+             //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
+ 
+             $pdf->SetFont('Arial','B',30);
+             $pdf->setXY(82,6);
+             $pdf->Multicell(20,48,$nama_grade,0,'L'); // grade
+             //$pdf->Cell(0,3,$nama_grade,0,1);//grade
+             
+             $pdf->Code128(5,40,$barcode,90,15,'C');//barcode 1       
+             
+             // $pdf->Line(5, 60, 95, 60); // garis bawah
+             //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
+ 
+             // $pdf->SetFont('Arial','B',25,'C');
+             // $pdf->setXY(10,54);
+             // $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
+             // //$pdf->Cell(100,30,$barcode,0,0,'R');
+ 
+             // $pdf->SetFont('Arial','B',40);
+             // $pdf->setXY(120,51);
+             // $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+             // //$pdf->Cell(0,27,$nama_grade,0,1);//grade
+ 
+             // $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
+ 
+             // $pdf->Line(170,3,170,100);//vertical
+ 
+             $loop++;
+         }
+ 
+ 
 
 
         $pdf->Output();
