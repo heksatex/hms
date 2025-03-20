@@ -1843,21 +1843,23 @@ class MO extends MY_Controller
                         //simpan fg hasil
                         foreach ($array_fg as $row) {
 
+                            $rowLot = preg_replace('/\s/', '', $row['lot']);
+
                             // cek lot yg sama di mrp fg hasil
-                            $cek_lot_input = $this->m_mo->get_data_lot_mrp_fg_hasil_by_lot($kode, trim($row['lot']));
+                            $cek_lot_input = $this->m_mo->get_data_lot_mrp_fg_hasil_by_lot($kode, trim($rowLot));
                             if(!empty($cek_lot_input) && $type_mo['type_mo'] == 'colouring') {
-                                $tmp_lot_fg .= $row['lot'].', ';
+                                $tmp_lot_fg .= $rowLot.', ';
                             }
 
                             //simpan fg hasil
-                            $sql_mrp_production_fg_hasil .= "('".$row['kode']."','".$move_id_fg."','".$start."','".$tgl."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".$nama_user['nama']."','".$row_order."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
+                            $sql_mrp_production_fg_hasil .= "('".$row['kode']."','".$move_id_fg."','".$start."','".$tgl."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".$nama_user['nama']."','".$row_order."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
 
                             //simpan stock move items produksi
-                            $sql_stock_move_items_batch .= "('".$move_id_fg."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_done."','".$row_order_smi."','', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+                            $sql_stock_move_items_batch .= "('".$move_id_fg."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_done."','".$row_order_smi."','', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
 
                         
                             //simpan stock quant dengan quant_id baru              
-                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$sm_tj['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
+                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$sm_tj['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
                             
                             $case11   .= "when quant_id = '".$start."' then '".$consume."'";
                             $where11  .= "'".$start."',";
@@ -1914,7 +1916,7 @@ class MO extends MY_Controller
                                 }
                         
                                 //simpan stock move item tujuan
-                                $sql_stock_move_items_batch .= "('".$sm_tj['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_ready."','".$row_order_smi_tujuan."','".addslashes($origin_prod)."', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+                                $sql_stock_move_items_batch .= "('".$sm_tj['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_ready."','".$row_order_smi_tujuan."','".addslashes($origin_prod)."', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
 
                                 //update status stock move,stock move dan stock move produk  pengiriman brg = ready
                                 $case7  .= "when move_id = '".$sm_tj['move_id']."' then '".$status_ready."'";
@@ -1924,18 +1926,18 @@ class MO extends MY_Controller
 
                             //cek lot apa pernah diinput ?
                             if($cek_dl == 'true'){
-                                $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])))->row_array();
-                                if(strtoupper($cek_lot['lot']) == strtoupper(trim($row['lot']))){
-                                    $lot_double .= $row['lot'].',';
+                                $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($rowLot)))->row_array();
+                                if(strtoupper($cek_lot['lot']) == strtoupper(trim($rowLot))){
+                                    $lot_double .= $rowLot.',';
                                 }
                             }
 
                             /*
                             //cek lot apa pernah diinput ?
-                            $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])),'ADJ')->row_array();
-                            if($cek_lot['lot'] == trim($row['lot'])){
+                            $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($rowLot)),'ADJ')->row_array();
+                            if($cek_lot['lot'] == trim($rowLot)){
                                 //ambil lot double untuk alert
-                                $lot_double .= $row['lot'].',';
+                                $lot_double .= $rowLot.',';
                             }
                             */
 
@@ -1945,7 +1947,7 @@ class MO extends MY_Controller
                             $row_order_smi++;
                             $row_order_smi_tujuan++;
                             $jml_lot_fg++;
-                            $list_lot_fg .= trim($row['lot']).' <br> ';
+                            $list_lot_fg .= trim($rowLot).' <br> ';
                         }//foreach array_fg
                         
 
@@ -2459,7 +2461,7 @@ class MO extends MY_Controller
                 $origin_mo   = $this->input->post('origin_mo');
                 $kode_produk = $this->input->post('kode_produk');    
                 $nama_produk = $this->input->post('nama_produk');    
-                $lot         = $this->input->post('lot');
+                $lot         = preg_replace('/\s/', '', $this->input->post('lot'));
                 $qty         = $this->input->post('qty');
                 $uom         = $this->input->post('uom');
                 $qty2        = $this->input->post('qty2');
@@ -4945,8 +4947,8 @@ class MO extends MY_Controller
             $qty1_std           = $this->input->post('qty1_std');
             $qty2_std           = $this->input->post('qty2_std');
             $type_production    = $this->input->post('type_production');
-            $lot_prefix         = addslashes(trim($this->input->post('lot_prefix')));
-            $lot_prefix_waste   = trim($this->input->post('lot_prefix_waste'));
+            $lot_prefix         = preg_replace('/\s/', '', addslashes($this->input->post('lot_prefix')));
+            $lot_prefix_waste   = preg_replace('/\s/', '', $this->input->post('lot_prefix_waste'));
             $lebar_greige       = addslashes($this->input->post('lebar_greige'));
             $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
             $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
@@ -4956,7 +4958,6 @@ class MO extends MY_Controller
             $program            = addslashes($this->input->post('program'));
             $origin_mo          = addslashes($this->input->post('origin'));
             $alasan             = addslashes($this->input->post('alasan'));
-
             $show_lebar = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
 
             //cek status mrp_production = done
