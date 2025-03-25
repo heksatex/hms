@@ -65,6 +65,7 @@
                                                             <select name="status" class="form-control select2" id="status" style="width: 100%">
                                                                 <option></option>
                                                                 <option value="purchase_confirmed">Purchase Confirmed</option>
+                                                                <option value="done">Done</option>
                                                                 <option value="cancel">Cancel</option>
                                                                 <option value="exception">Exception</option>
                                                             </select>

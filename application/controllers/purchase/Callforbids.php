@@ -122,7 +122,7 @@ class Callforbids extends MY_Controller {
             $data = array();
             $no = $_POST['start'];
             $list = $this->m_cfb->setTables("cfb_items")->setSelects(["*"])
-                    ->setOrders([null, "kode_produk", "nama_produk", "qty", "uom", "notes", "status"])
+                    ->setOrders([null, "kode_produk", "nama_produk", "qty", "uom", null, "status"])
                     ->setSearch(["kode_produk", "nama_produk"])->setOrder(['row_order' => 'asc'])
                     ->setWheres(["kode_cfb" => $kode_decrypt]);
             foreach ($list->getData() as $field) {
@@ -189,7 +189,8 @@ class Callforbids extends MY_Controller {
                             $nilai = $prod->nilai;
                             $catatan = $prod->catatan;
                         }
-                        $qtyBeli = ceil($datas_[3] / $nilai);
+//                        $qtyBeli = ceil($datas_[3] / $nilai);
+                        $qtyBeli = $datas_[3] / $nilai;
                         array_push($items, [$datas_[0], $datas_[1], $prod->kode_produk, $prod->nama_produk, $datas_[3],
                             $datas_[4], ($uom_beli ?? null), $datas_[5], $prod->harga, $dari, $nilai, $catatan, $qtyBeli, $datas_[6], $datas_[7]]);
                     }
@@ -234,10 +235,11 @@ class Callforbids extends MY_Controller {
             if ($before_status === "confirm") {
                 $status = "generated";
             }
+            $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
             foreach ($listCfb->setJoins('cfb_items ci', "ci.kode_cfb = cfb.kode_cfb")->setOrder(["ci.id" => "asc"])->setSelects(['kode_pp', "kode_produk", "ci.kode_cfb"])->setWhereRaw("ci.id in (" . implode(",", $ids) . ")")->getData() as $key => $value) {
                 $updatePP = new $this->m_cfb;
                 $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => $status]);
-                $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $value->kode_cfb,
+                $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $value->kode_cfb,"main_menu_sub_kode"=>($kodes["kode"] ?? ""),
                     "jenis_log" => "edit", "note" => "Merubah Ke status {$status}", "nama_user" => $users["nama"], "ip_address" => ""];
             }
             if (!$this->_module->finishTransaction()) {

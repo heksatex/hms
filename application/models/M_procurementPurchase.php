@@ -219,10 +219,11 @@ class M_procurementPurchase extends CI_Model
 
 	public function get_data_detail_by_code($kode_pp)
 	{
-		$query = $this->db->query("SELECT ppi.*, ms.nama_status, cat.catatan, mp.uom as uom1
+		$query = $this->db->query("SELECT ppi.*, ms.nama_status, cat.catatan,  nk.nilai, nk.dari, nk.catatan as cat_beli
 								FROM procurement_purchase_items ppi 
 								INNER JOIN mst_produk mp ON ppi.kode_produk = mp.kode_produk 
 								LEFT JOIN mst_status ms ON ppi.status = ms.kode
+								LEFT JOIN nilai_konversi nk ON ppi.uom_beli = nk.id
 								LEFT JOIN (select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR '#') as catatan from mst_produk_catatan where jenis_catatan = 'pembelian' group by kode_produk) as cat ON cat.kopro = ppi.kode_produk
 								where ppi.kode_pp = '" . $kode_pp . "' ORDER BY row_order");
 		return $query->result();
@@ -237,9 +238,8 @@ class M_procurementPurchase extends CI_Model
 
 	public function get_produk_procurement_purchase_byid($kode_produk)
 	{
-		return $this->db->query("SELECT mp.kode_produk, mp.nama_produk, IFNULL(u.dari,mp.uom) as uom
-								FROM  mst_produk  mp
-								LEFT JOIN nilai_konversi u ON mp.uom_beli = u.id
+		return $this->db->query("SELECT mp.kode_produk, mp.nama_produk, mp.uom as uom
+								FROM  mst_produk  mp							
 								WHERE mp.kode_produk = '$kode_produk'  ");
 	}
 
@@ -248,9 +248,9 @@ class M_procurementPurchase extends CI_Model
 		return $this->db->query("SELECT row_order  FROM procurement_purchase_items WHERE kode_pp = '$kode_pp' order by row_order desc");
 	}
 
-	public function save_procurement_purchase_items($kode_pp, $kode_produk, $produk, $tgl, $qty, $uom, $reff, $status, $row_order)
+	public function save_procurement_purchase_items($kode_pp, $kode_produk, $produk, $tgl, $qty, $uom, $reff, $status, $row_order,$qty_beli,$uom_beli)
 	{
-		return $this->db->query("INSERT INTO procurement_purchase_items (kode_pp,kode_produk,nama_produk,schedule_date,qty,uom,reff_notes,status,row_order) values ('$kode_pp','$kode_produk','$produk','$tgl','$qty','$uom','$reff','$status','$row_order')");
+		return $this->db->query("INSERT INTO procurement_purchase_items (kode_pp,kode_produk,nama_produk,schedule_date,qty,uom,reff_notes,status,row_order,qty_beli,uom_beli) values ('$kode_pp','$kode_produk','$produk','$tgl','$qty','$uom','$reff','$status','$row_order','$qty_beli','$uom_beli')");
 	}
 
 	public function cek_status_procurement_purchase_items($kode_pp, $status)
@@ -279,9 +279,9 @@ class M_procurementPurchase extends CI_Model
 		return $this->db->query("DELETE FROM procurement_purchase_items WHERE kode_pp = '$kode_pp' AND row_order = '$row_order'");
 	}
 
-	public function update_procurement_purchase_items($kode_pp, $kode_produk, $nama_produk, $uom, $tgl, $qty, $reff, $row_order)
+	public function update_procurement_purchase_items($kode_pp, $kode_produk, $nama_produk, $uom, $tgl, $qty, $reff, $row_order, $qty_beli, $uom_beli)
 	{
-		return $this->db->query("UPDATE procurement_purchase_items SET kode_produk = '$kode_produk', nama_produk = '$nama_produk', uom = '$uom', schedule_date = '$tgl', qty = '$qty', reff_notes = '$reff' 
+		return $this->db->query("UPDATE procurement_purchase_items SET kode_produk = '$kode_produk', nama_produk = '$nama_produk', uom = '$uom', schedule_date = '$tgl', qty = '$qty', reff_notes = '$reff', qty_beli = '$qty_beli', uom_beli = '$uom_beli'
 																WHERE kode_pp = '$kode_pp' AND row_order = '$row_order'");
 	}
 
@@ -381,13 +381,27 @@ class M_procurementPurchase extends CI_Model
 
 	public function get_list_uom_by_kode_produk($kode_produk, $params)
 	{
-		return $this->db->query("SELECT uom from mst_produk where kode_produk = '".$kode_produk."' AND uom LIKE '%".$params."%'
-								UNION
-								SELECT IFNULL(u.dari,'') as uom
+		return $this->db->query("SELECT uom from mst_produk 
+								where kode_produk = '".$kode_produk."' AND uom LIKE '%".$params."%'
+								ORDER BY uom " )->result_array();
+
+	}
+
+	public function get_list_uom_beli_by_kode_produk($kode_produk, $params)
+	{
+		return $this->db->query("SELECT u.id, IFNULL(u.dari,'') as uom, u.catatan, u.nilai
 								FROM  mst_produk  mp
 								INNER JOIN nilai_konversi u ON mp.uom_beli = u.id
 								WHERE mp.kode_produk = '".$kode_produk."'  AND u.dari LIKE '%".$params."%'
-								ORDER BY uom " )->result_array();
+								ORDER BY uom " )->result();
+
+	}
+
+
+	public function get_nilai_konversi_uom_by_id($id)
+	{
+		$this->db->where('id',$id);
+		return $this->db->get('nilai_konversi')->row();;
 
 	}
 }

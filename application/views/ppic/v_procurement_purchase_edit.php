@@ -245,6 +245,8 @@
                                 <th class="style no">No.</th>
                                 <th class="style" width="200px">Product</th>
                                 <th class="style" width="150px">Schedule Date</th>
+                                <th class="style" style="width:100px; text-align: right;">Qty Uom Beli</th>
+                                <th class="style" width="80px">Uom Beli</th>
                                 <th class="style" style="width:100px; text-align: right;">Qty</th>
                                 <th class="style" width="80px">Uom</th>
                                 <th class="style" width="200px">Notes</th>
@@ -271,6 +273,8 @@
                                   <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"></td>
                                   <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk; ?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk) ?>"><?php echo '[' . $row->kode_produk . '] ' . $row->nama_produk; ?></a></td>
                                   <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date; ?>"><?php echo $row->schedule_date ?></td>
+                                  <td data-content="edit" data-id="qty_beli" data-name="Qty Beli" data-isi="<?php echo $row->qty_beli; ?>" align="right"><?php echo number_format($row->qty_beli, 2) ?></td>
+                                  <td data-content="edit" data-id="uom_beli" data-name="Uom Beli" data-isi="<?php echo $row->id; ?>" data-isi2="<?php echo $row->dari; ?>" data-nilai="<?php echo $row->cat_beli; ?>"><?php echo $row->dari ?> <p><small id="uom_beli_note" class="form-text text-muted"><?= $row->cat_beli; ?></small></p></td>
                                   <td data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty; ?>" align="right"><?php echo number_format($row->qty, 2) ?></td>
                                   <td data-content="edit" data-id="uom" data-name="Uom" data-isi="<?php echo $row->uom; ?>"><?php echo $row->uom ?></td>
                                   <td data-content="edit" data-id="reff" data-isi="<?php echo htmlentities($row->reff_notes); ?>" class="text-wrap width-200"> <?php echo $row->reff_notes ?></td>
@@ -393,6 +397,8 @@
         '<select type="text" class="form-control input-sm prod min-width-full" name="Product" id="product"></select>' +
         '<input type="hidden" class="form-control input-sm prodhidd" name="prodhidd" id="prodhidd"></td>' +
         '<td><div class="input-group width-150 date" id="sch_date" ><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>' +
+        '<td class="min-width-100"><input type="text" class="form-control input-sm width-100 qty_beli" name="Qty Beli" id="qty_beli"  onkeyup="validAngka(this)" ></td>' +
+        '<td class="min-width-100"><select type="text" class="form-control input-sm uom_beli" name="Uom Beli" id="uom_beli"></select> <small id="uom_beli_note" class="form-text text-muted uom_beli_note"></small></td>' +
         '<td class="min-width-100"><input type="text" class="form-control input-sm width-100 qty" name="Qty" id="qty"  onkeyup="validAngka(this)" ></td>' +
         '<td class="min-width-100"><select type="text" class="form-control input-sm uom" name="Uom" id="uom"></select></td>' +
         '<td class="min-width-50"><textarea type="text" class="form-control input-sm width-150" name="reff" id="reff"></textarea></td>' +
@@ -507,7 +513,41 @@
                             // alert(xhr.responseText);
                         }
                 }
-        });
+      });
+
+      $('.uom_beli').select2({
+                allowClear: true,
+                placeholder: "",
+                ajax: {
+                    url : "<?php echo base_url();?>ppic/procurementpurchase/get_list_uom_beli_select2",
+                    delay: 250,
+                    type: "POST",
+                    data: function (params) {
+                      return{
+                                prod:params.term,
+                                kode_produk:$(this).parents("tr").find("#product").val()
+                            };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(JSON.parse(data), function (obj) {
+                                return {
+                                    id: obj.id,
+                                    text: obj.uom,
+                                    catatan: obj.catatan,
+                                    nilai:obj.nilai
+                                };
+                            })
+                        };
+                    }
+                }
+           
+      });
+
+      $('.uom_beli').on('select2:select', function (e) {
+          var gt_cata_uom_beli = $('#procurements tbody tr .uom_beli :selected').data().data.catatan;
+          $('.uom_beli_note').html(gt_cata_uom_beli);
+      });
 
     });
 
@@ -570,7 +610,7 @@
 
       // validasi untuk inputan textbox
       input.each(function() {
-        if (!$(this).val() && $(this).attr('name') != 'reff') {
+        if (!$(this).val() && ($(this).attr('name') != 'reff') && ($(this).attr('id') != 'qty_beli') ) {
           alert_notify('fa fa-warning', $(this).attr('name') + ' Harus Diisi !', 'danger', function() {});
           empty = true;
         }
@@ -582,6 +622,8 @@
         var kode_produk = $(this).parents("tr").find("#product").val();
         var produk = $(this).parents("tr").find("#prodhidd").val();
         var schedule_date = $(this).parents("tr").find("#schedule_date").val();
+        var qty_beli = $(this).parents("tr").find("#qty_beli").val();
+        var uom_beli = $(this).parents("tr").find("#uom_beli").val();
         var qty = $(this).parents("tr").find("#qty").val();
         var uom = $(this).parents("tr").find("#uom").val();
         var reff = $(this).parents("tr").find("#reff").val();
@@ -601,6 +643,8 @@
             tgl: schedule_date,
             qty: qty,
             uom: uom,
+            qty_beli: qty_beli,
+            uom_beli: uom_beli,
             reff: reff,
             row_order: row_order
           },
@@ -648,7 +692,8 @@
           $(this).html('<select type="text"  class="form-control input-sm ' + class_sel2_prod + ' min-width-full " id="product" name="Product" ></select> ' + '<input type="hidden"  class="form-control ' + class_nama_produk + ' " value="' + htmlentities_script($(this).attr('data-isi2')) + '" id="' + $(this).attr('data-id2') + '"> ');
 
           // append berdasarkan nama produk
-          $newOption = new Option(nama_produk, kode_produk, true, true);
+          name_opt    = "["+kode_produk+"] "+nama_produk;
+          $newOption = new Option(name_opt, kode_produk, true, true);
           $('.t_sel2_prod' + row_order).append($newOption).trigger('change');
 
           //select 2 product
@@ -710,8 +755,6 @@
           });
 
         } else if ($(this).attr('data-id') == "schedule_date") {
-
-
           $(this).html('<div class="input-group date" id="sch_date2" ><input type="text" class="form-control input-sm " value="' + htmlentities_script($(this).attr('data-isi')) + '" id="' + $(this).attr('data-id') + '" name="' + $(this).attr('data-id') + '" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div> ');
           var datetomorrow = new Date();
           datetomorrow.setDate(datetomorrow.getDate() + 1);
@@ -720,6 +763,54 @@
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true,
           });
+        } else if ($(this).attr('data-id') == 'qty_beli') {
+          $(this).html('<input type="text"  class="form-control input-sm qty_beli" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="' + $(this).attr('data-id') + '" name="' + $(this).attr('data-name') + '" onkeyup="validAngka(this)"> ');
+        } else if ($(this).attr('data-id') == 'uom_beli') {
+
+          class_uom_beli = 'uom_beli' + row_order;
+          class_cata_uom_beli = 'uom_beli_note' + row_order;
+
+          $(this).html('<select type="text"  class="form-control input-sm ' + class_uom_beli + ' min-width-full " id="' + $(this).attr('data-id') + '" name="' + $(this).attr('data-name') + '" ></select> <small id="uom_beli_note" class="form-text text-muted '+class_cata_uom_beli+'"></small>');
+
+
+            $('.' + class_uom_beli).select2({
+                allowClear: true,
+                placeholder: "",
+                ajax: {
+                    url : "<?php echo base_url();?>ppic/procurementpurchase/get_list_uom_beli_select2",
+                    delay: 250,
+                    type: "POST",
+                    data: function (params) {
+                      return{
+                                prod:params.term,
+                                kode_produk:$(this).parents("tr").find("#product").val()
+                            };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(JSON.parse(data), function (obj) {
+                                return {
+                                    id: obj.id,
+                                    text: obj.uom,
+                                    catatan: obj.catatan,
+                                    nilai:obj.nilai
+                                };
+                            })
+                        };
+                    }
+                }
+           
+            });
+
+            $('.' + class_uom_beli).on('select2:select', function (e) {
+              var gt_cata_uom_beli = $('#procurements tbody tr .'+class_uom_beli+' :selected').data().data.catatan;
+              $('.'+class_cata_uom_beli).html(gt_cata_uom_beli);
+            });
+
+            // $newOption = new Option($(this).attr('data-isi2'), $(this).attr('data-isi'), true, true);
+            // $('.' + class_uom_beli).append($newOption).trigger('change');
+          
+
         } else if ($(this).attr('data-id') == 'qty') {
           $(this).html('<input type="text"  class="form-control input-sm" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="' + $(this).attr('data-id') + '" name="' + $(this).attr('data-name') + '" onkeyup="validAngka(this)"> ');
         } else if ($(this).attr('data-id') == 'uom') {
@@ -772,6 +863,15 @@
       $(this).parents("tr").find(".add, .edit").toggle();
       $(this).parents("tr").find(".cancel, .delete").toggle();
       $(".add-new").hide();
+    });
+
+
+    $(document).on("keyup", ".qty_beli", function(){
+        let qty_beli = $(this).val();
+        let uom_bei  = $(this).parents("tr").find("#uom_beli").val(); // id nilai konversi uom
+        let get_nilai = $(this).parents("tr").find("#uom_beli").find(':selected').data().data.nilai;
+        result    = qty_beli*get_nilai;
+        $(this).parents("tr").find("#qty").val(result);
     });
 
     // batal add row on batal button click

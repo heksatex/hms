@@ -43,7 +43,10 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setWheres(array $wheres) {
+    public function setWheres(array $wheres, $clearBefore = false) {
+        if ($clearBefore) {
+            $this->wheres = [];
+        }
         $this->wheres = array_merge($this->wheres, $wheres);
         return $this;
     }
@@ -62,6 +65,7 @@ class M_global extends CI_Model {
         $this->selects = array_merge($this->selects, $selects);
         return $this;
     }
+
     public function setGroups(array $groups) {
         $this->group = array_merge($this->group, $groups);
         return $this;
@@ -99,8 +103,8 @@ class M_global extends CI_Model {
                 $this->db->where_in($key, $value);
             }
         }
-        
-        if(count($this->group) > 0) {
+
+        if (count($this->group) > 0) {
             $this->db->group_by($this->group);
         }
 
@@ -123,10 +127,10 @@ class M_global extends CI_Model {
 //            $order = $this->order;
 //            $this->db->order_by(key($order), $order[key($order)]);
             foreach ($this->order as $key => $value) {
-                if(gettype($key) === "integer"){
-                    $this->db->order_by($value,"asc");
+                if (gettype($key) === "integer") {
+                    $this->db->order_by($value, "asc");
                 } else {
-                    $this->db->order_by($key,$value);
+                    $this->db->order_by($key, $value);
                 }
             }
         }
@@ -164,7 +168,7 @@ class M_global extends CI_Model {
                 $this->db->where_in($key, $value);
             }
         }
-        if(count($this->group) > 0) {
+        if (count($this->group) > 0) {
             $this->db->group_by($this->group);
         }
         return $this->db->count_all_results();
@@ -183,7 +187,7 @@ class M_global extends CI_Model {
                 $this->db->where($value, null, false);
             }
         }
-        if(count($this->group) > 0) {
+        if (count($this->group) > 0) {
             $this->db->group_by($this->group);
         }
 

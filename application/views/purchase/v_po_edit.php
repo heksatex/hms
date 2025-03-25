@@ -167,9 +167,11 @@
                                 <?php
                                 if (in_array($po->status, ["purchase_confirmed", "done", "exception"])) {
                                     if ($po->edited_status === null) {
-                                        ?>
-                                        <button class="btn btn-default btn-sm request_edit" data-status="request"> Request Edit </button>
-                                        <?php
+                                        if (in_array(strtolower($user->level), ["super administrator", 'direksi'])) {
+                                            ?>
+                                            <button class="btn btn-default btn-sm request_edit" data-status="request"> Request Edit </button>
+                                            <?php
+                                        }
                                     } else {
                                         ?>
                                         <span class="label label-warning text-black text-uppercase"><?= str_replace("_", " ", $po->edited_status) ?> Edit Harga</span>
@@ -247,7 +249,16 @@
                                                     </div>
                                                 </div>
                                             </div>
-
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">Foot Note (Print)</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8 text-uppercase">
+                                                        <textarea class="form-control" id="foot_note" name="foot_note"><?= $po->foot_note ?></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -312,51 +323,83 @@
                                     <div class="tab-content"><br>
 
                                         <div class="tab-pane" id="tab_2">
+                                            <div class="col-md-3 col-xs-12">
+                                                <div class="pull-left">
+                                                    <?php if (!in_array($po->status, ['exception', 'cancel'])) { ?>
+                                                        <button class="btn btn-default btn-sm btn-cancel_retur" type="button">Batalkan Retur</button>
+                                                    <?php } ?>
+                                                </div>
+
+                                            </div>
+                                            <br>
                                             <div class="col-md-12">
                                                 <table class="table table-condesed table-hover rlstable  over" width="100%">
                                                     <thead>
+                                                    <th class="style" width="10px"></th>
                                                     <th class="style" width="10px">No</th>
-                                                    <th class="style" width="20px">Kode CFB</th>
                                                     <th class="style" width="20px">Kode Produk</th>
                                                     <th class="style" width="20px">Nama Produk</th>
                                                     <th class="style" width="20px">Deskripsi</th>
+                                                    <th class="style" width="20px">Qty Beli Retur</th>
                                                     <th class="style" width="20px">Tanggal Retur</th>
+                                                    <th class="style" width="20px">Status</th>
                                                     </thead>
                                                     <tbody>
                                                         <?php
                                                         $noo = 0;
-                                                        foreach ($po_items as $key => $value) {
-                                                            if ($value->status !== 'retur')
-                                                                continue;
-
+                                                        $countStDraft = 0;
+                                                        foreach ($po_retur as $key => $value) {
                                                             $noo++;
+                                                            if ($value->status === 'draft') {
+                                                                $countStDraft++;
+                                                            }
                                                             ?>
-                                                        <td><?= $noo ?></td>
-                                                        <td>
-                                                            <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
-                                                        </td>
-                                                        <td>
+                                                            <tr>
+                                                                <td>
+                                                                    <?php if ($value->status === 'draft') { ?>
+                                                                        <input type="checkbox" class="data-id-retur" name="checklist_retur[]" value="<?= $value->id ?>">
+                                                                        <?php
+                                                                    }
+                                                                    ?>
+                                                                </td>
+                                                                <td><?= $noo ?></td>
+                                                                <td>
+                                                                    <?php
+                                                                    $image = "/upload/product/" . $value->kode_produk . ".jpg";
+                                                                    $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
+                                                                    if (is_file(FCPATH . $image)) {
+                                                                        ?>
+                                                                        <a href="<?= base_url($image) ?>" class="pop-image">
+                                                                            <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
+                                                                        </a>
+                                                                    <?php } ?>
+                                                                    <?= $value->kode_produk ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $value->nama_produk ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $value->deskripsi ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= "{$value->qty_beli_retur} {$value->uom_beli_retur}" ?>
+                                                                </td>
+                                                                <td><?= date("l, d M Y H:i:s", strtotime($value->retur_date)) ?></td>
+                                                                <td><?= $value->status ?></td>
+                                                            </tr>
                                                             <?php
-                                                            $image = "/upload/product/" . $value->kode_produk . ".jpg";
-                                                            $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
-                                                            if (is_file(FCPATH . $image)) {
-                                                                ?>
-                                                                <a href="<?= base_url($image) ?>" class="pop-image">
-                                                                    <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
-                                                                </a>
-                                                            <?php } ?>
-                                                            <?= $value->kode_produk ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $value->nama_produk ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $value->deskripsi ?>
-                                                        </td>
-                                                        <td><?= date("l, d M Y H:i:s", strtotime($value->retur_date)) ?></td>
-                                                        <?php
-                                                    }
-                                                    ?>
+                                                        }
+                                                        if ($countStDraft > 0) {
+                                                            ?>
+                                                            <tr>
+                                                                <td colspan="4"></td>
+                                                                <td>
+                                                                    <button class="btn btn-primary btn-sm btn-confirmasi-retur" type="button" data-ids="<?= $po->no_po ?>" >Konfirmasi Retur</button>
+                                                                </td>
+                                                            </tr>
+                                                            <?php
+                                                        }
+                                                        ?>
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -365,11 +408,10 @@
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="col-md-3 col-xs-12">
                                                 <div class="pull-left">
-                                                    <?php if(!in_array($po->status,['exception','cancel'])){ ?>
-                                                    <button class="btn btn-danger btn-sm btn-retur" type="button">Retur</button>
-                                                     <?php }?>
+                                                    <?php if (!in_array($po->status, ['exception', 'cancel'])) { ?>
+                                                        <button class="btn btn-danger btn-sm btn-retur" type="button">Retur</button>
+                                                    <?php } ?>
                                                 </div>
-                                                   
                                             </div>
                                             <br>
                                             <div class="col-md-12">
@@ -467,11 +509,10 @@
                                                                             <?= $value->catatan_nk ?? "" ?>
                                                                         </small>
                                                                     </div>
-
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status,["cancel","retur"]))) ? '' : 'readonly' ?>
+                                                                        <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
                                                                                style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
                                                                     </div>
                                                                 </td>
@@ -573,26 +614,17 @@
 
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <div class="col-md-12 col-xs-12">
-                                        <div class="col-xs-4">
-                                            <label class="form-label">Foot Note (Print)</label>
-                                        </div>
-                                        <div class="col-xs-8 col-md-8 text-uppercase">
-                                            <textarea class="form-control" id="foot_note" name="foot_note"><?= $po->foot_note ?></textarea>
-                                        </div>
-                                    </div>
-                                </div>
+
                         </form>
                     </div>
                 </section>
             </div>
             <footer class="main-footer">
                 <?php
-                $this->load->view("admin/_partials/js.php");
                 $this->load->view("admin/_partials/modal.php");
                 $this->load->view("admin/_partials/footer.php");
                 ?>
+                <?php $this->load->view("admin/_partials/js.php") ?>
                 <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
             </footer>
         </div>
@@ -602,32 +634,30 @@
             <script>
                 $(function () {
 
-                    $(".check-all-retur").click(function () {
-                        $('.check-retur').not(this).prop('checked', this.checked);
-                    });
-
-                    $(".btn-retur").click(function () {
-                        var getlist = $(".check-retur:checked").map(function () {
+                    $(".btn-cancel_retur").click(function () {
+                        var getlist = $(".data-id-retur:checked").map(function () {
                             return $(this).val();
                         });
                         var list = getlist.get();
                         if (list.length < 1) {
-                            alert_notify('fa fa-close', "Pilih item yang akan di retur", 'danger', function () {});
+                            alert_notify('fa fa-close', "Pilih item yang akan batal retur", 'danger', function () {});
                             return;
                         }
-                        confirmRequest("Retur", "Retur Item yang Dipilih ? ", function () {
+                        confirmRequest("Retur Purchase Order", "Batalkan Permintaan Retur ? ", function () {
                             $.ajax({
+                                url: "<?= base_url('purchase/purchaseorder/update_retur_status') ?>",
                                 type: "POST",
-                                url: "<?= base_url('purchase/purchaseorder/retur/') ?>",
                                 data: {
                                     items: list,
-                                    ids: "<?= $id ?>"
+                                    po: "<?= $po->no_po ?>"
                                 },
                                 beforeSend: function (xhr) {
                                     please_wait(function () {});
                                 },
                                 success: function (data) {
+                                    unblockUI(function () {});
                                     location.reload();
+
                                 },
                                 error: function (req, error) {
                                     unblockUI(function () {
@@ -637,6 +667,35 @@
                                     });
                                 }
                             });
+                        });
+                    });
+
+                    $(".check-all-retur").click(function () {
+                        $('.check-retur').not(this).prop('checked', this.checked);
+                    });
+
+                    $(".btn-retur").click(function (e) {
+                        var getlist = $(".check-retur:checked").map(function () {
+                            return $(this).val();
+                        });
+                        var list = getlist.get();
+                        if (list.length < 1) {
+                            alert_notify('fa fa-close', "Pilih item yang akan di retur", 'danger', function () {});
+                            return;
+                        }
+                        $("#view_data").modal({
+                            show: true,
+                            backdrop: 'static'
+                        });
+                        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                        $('.modal-title').text('Retur Pembelian');
+                        $.post("<?= base_url('purchase/purchaseorder/get_view_retur/') ?>", {
+                            items: list,
+                            ids: "<?= $id ?>"
+                        }, function (data) {
+                            setTimeout(function () {
+                                $(".view_body").html(data.data);
+                            }, 1000);
                         });
                     });
 
@@ -880,6 +939,34 @@
                         please_wait(function () {});
                         updateStatus(status);
                     });
+                });
+
+                $(".btn-confirmasi-retur").off("click").unbind("click").on("click", function () {
+                    var ids = $(this).data("ids");
+                    confirmRequest("Purchase Order", "Konfirmasi Retur Produk ? ", function () {
+                        $.ajax({
+                            url: "<?= base_url('purchase/purchaseorder/confirm_retur/') ?>",
+                            type: "POST",
+                            data: {
+                                ids: ids
+                            },
+                            beforeSend: function (xhr) {
+                                please_wait(function () {});
+                            },
+                            error: function (req, error) {
+                                unblockUI(function () {
+                                    setTimeout(function () {
+                                        alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                    }, 500);
+                                });
+                            },
+                            success: function (data) {
+                                location.reload();
+                            }
+
+                        });
+                    });
+
                 });
 
             });

@@ -90,7 +90,7 @@
                                                     <th>Nama Produk</th>
                                                     <th>QTY</th>
                                                     <th>SO</th>
-                                                    <th>Priority</th>
+                                                    <!--<th>Priority</th>-->
                                                     <th>Departement Tujuan</th>
                                                     <th>Schedule Date</th>
                                                     <th>Status</th>
@@ -131,7 +131,7 @@
                         data: function (params) {
                             var query = {
                                 search: params.term
-                            }
+                            };
                             return query;
                         },
                         processResults: function (data) {
@@ -224,8 +224,6 @@
                     }).catch(e => {
                         alert_notify("fa fa-warning", e.message, "danger", function () {});
                     });
-
-
                     $("#btn-simpan").button("reset");
                 });
             });

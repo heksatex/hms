@@ -18,7 +18,7 @@ class Konversiuom extends MY_Controller {
     protected $val_form = array(
         [
             'field' => 'dari',
-            'label' => 'Dari UOM',
+            'label' => 'Dari UOM Beli',
             'rules' => ['trim', 'required'],
             'errors' => [
                 'required' => '{field} Harus diisi'
@@ -26,7 +26,7 @@ class Konversiuom extends MY_Controller {
         ],
         [
             'field' => 'ke',
-            'label' => 'Ke UOM',
+            'label' => 'Ke UOM Stok',
             'rules' => ['trim', 'required'],
             'errors' => [
                 'required' => '{field} Harus diisi'
@@ -34,10 +34,11 @@ class Konversiuom extends MY_Controller {
         ],
         [
             'field' => 'nilai',
-            'label' => 'Nilai UOM',
-            'rules' => ['trim', 'required'],
+            'label' => 'Nilai Konversi',
+            'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
             'errors' => [
-                'required' => '{field} Harus diisi'
+                'required' => '{field} Harus diisi',
+                "regex_match" => "{field} harus berupa number / desimal"
             ]
         ]
     );
@@ -51,6 +52,7 @@ class Konversiuom extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'KUOM';
+        $data['uom'] = $this->_module->get_list_uom();
         $this->load->view('warehouse/v_konversi_uom', $data);
     }
 

@@ -466,9 +466,10 @@ class M_penerimaanBarang extends CI_Model
 		$this->db->where("pbi.kode", $kode);
 		$this->db->where("pbi.kode_produk", $kode_produk);
 		$this->db->where("pbi.origin_prod", $origin_prod);
-		$this->db->SELECT('pbi.kode, pbi.nama_produk, pbi.qty, pbi.uom, pbi.origin_prod, mp.uom_2, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi');
+		$this->db->SELECT('pbi.kode, pbi.nama_produk, pbi.qty, pbi.uom, pbi.origin_prod, mp.uom_2, mp.lebar_greige, mp.uom_lebar_greige, mp.lebar_jadi, mp.uom_lebar_jadi,cat.nama_category');
 		$this->db->from('penerimaan_barang_items as pbi');
 		$this->db->JOIN('mst_produk mp', 'pbi.kode_produk = mp.kode_produk', "inner");
+		$this->db->JOIN('mst_category cat','mp.id_category = cat.id','LEFT');
 		$query = $this->db->get();
 		return $query->row();
 	}

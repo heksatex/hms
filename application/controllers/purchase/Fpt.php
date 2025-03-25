@@ -49,13 +49,13 @@ class Fpt extends MY_Controller {
             $model1 = new $this->m_po;
             $model2 = clone $model1;
             $model3 = clone $model2;
-            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name"=>"dpp_lain","status"=>"1"])->setSelects(["value"])->getDetail();
+            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
-                    ->setJoins("currency_kurs","currency_kurs.id = po.currency","left")
-                    ->setJoins("currency","currency.nama = currency_kurs.currency","left")
-                            ->setSelects(["po.*", "p.nama as supp","currency.symbol"])
-                    ->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "FPT"])->getDetail();
+                            ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
+                            ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
+                            ->setSelects(["po.*", "p.nama as supp", "currency.symbol"])
+                            ->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "FPT"])->getDetail();
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
@@ -75,6 +75,35 @@ class Fpt extends MY_Controller {
     }
 
     public function update($id) {
+        $validation = [
+            [
+                'field' => 'qty_beli[]',
+                'label' => 'Qty',
+                'rules' => ['regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ],
+            [
+                'field' => 'harga[]',
+                'label' => 'Harga Satuan Beli',
+                'rules' => ['regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ],
+            [
+                'field' => 'diskon[]',
+                'label' => 'Diskon',
+                'rules' => ['regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ]
+        ];
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
@@ -94,16 +123,21 @@ class Fpt extends MY_Controller {
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
             $dpplain = $this->input->post("dpplain");
-            
+
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+
             $data = [];
             $log_update = [];
             $no = 0;
-            
+
             $totals = 0.00;
             $diskons = 0.00;
             $taxes = 0.00;
             $nilaiDppLain = 0;
-            
+
             foreach ($harga as $key => $value) {
                 $no++;
                 $checkKonversi = $this->m_konversiuom->wheres(["id" => $id_konversiuom[$key], "ke" => $uom_jual[$key], "dari" => $uom_beli[$key]])->getDetail();
@@ -114,28 +148,28 @@ class Fpt extends MY_Controller {
                 $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),]);
                 $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
                     'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key]];
-                
+
                 $total = ($qty_beli[$key] * $value);
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
                 if ($dpplain === "1") {
-                    $taxes += ((($total - $diskon) * 11) / 12) *$amount_tax[$key];
-                }
-                else {
+                    $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
+                } else {
                     $taxes += ($total - $diskon) * $amount_tax[$key];
                 }
             }
-            if ($dpplain === "1") {
-                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
-            }
+//            if ($dpplain === "1") {
+//                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
+//            }
             $grandTotal = ($totals - $diskons) + $taxes;
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
             $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency,
-                'note' => $note,"total"=>$grandTotal,'dpp_lain'=>$nilaiDppLain,"order_date" => $order_date]);
+                'note' => $note, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date]);
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -159,7 +193,7 @@ class Fpt extends MY_Controller {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
             $users = $this->session->userdata('nama');
-            
+
             $totalItem = $this->input->post("item");
             $kode_decrypt = decrypt_url($id);
             $status = $this->input->post("status");
@@ -228,7 +262,7 @@ class Fpt extends MY_Controller {
                     if ((int) $inshipment !== (int) $totalItem) {
                         throw new \Exception("Produk Pada RCV In dengan Origin {$kode_decrypt} Tidak dalam status <strong>DONE</strong> semua.", 500);
                     }
-                    
+
                     break;
                 case "cancel":
 
@@ -241,8 +275,8 @@ class Fpt extends MY_Controller {
                     if ((int) $inshipment > 0) {
                         throw new \Exception("Produk Pada RCV In dengan Origin {$kode_decrypt} Tidak dalam status <strong>CANCEL</strong> semua.", 500);
                     }
-                    
-                    
+
+
                     $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])
                                     ->setSelects(['group_CONCAT("\'",cfb_items_id,"\'") as items', 'group_CONCAT("\'",kode_cfb,"\'") cfb'])->getDetail();
                     if ($podd && $podd->cfb !== null) {
@@ -290,9 +324,9 @@ class Fpt extends MY_Controller {
                             'status' => 'ready',
                             'origin_prod' => $value->kode_produk . "_" . $row,
                             'row_order' => $row,
-                            'kode_pp'=>$value->kode_pp,
-                            'qty_beli'=>$value->qty_beli,
-                            'uom_beli'=>$value->uom_beli
+                            'kode_pp' => $value->kode_pp,
+                            'qty_beli' => $value->qty_beli,
+                            'uom_beli' => $value->uom_beli
                         ];
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
@@ -310,7 +344,6 @@ class Fpt extends MY_Controller {
                 $dgt = substr("00000" . $get_kode_in, -5);
                 $kodeRcv = $method_dept . "/" . "IN" . "/" . date("y") . date("m") . $dgt;
 
-
                 $sm = "SM" . $this->_module->get_kode_stock_move();
                 $insertPenerimaan = new $this->m_po;
                 $insertPenerimaanDetail = clone $insertPenerimaan;
@@ -325,7 +358,7 @@ class Fpt extends MY_Controller {
                     'lokasi_dari' => 'SUP/Stock',
                     'lokasi_tujuan' => 'RCV/Stock',
                     'reff_picking' => 'SUP|' . $kodeRcv,
-                    'reff_note' =>  $data->note,
+                    'reff_note' => $data->note,
                     'status' => 'ready',
                     'dept_id' => 'RCV',
                     'partner_id' => $data->supplier,
@@ -336,7 +369,7 @@ class Fpt extends MY_Controller {
                 $detailProduk = [];
                 foreach ($produk as $keys => $values) {
                     $clone = $values;
-                    unset($clone["kode_pp"],$clone["qty_beli"],$clone["uom_beli"]);
+                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"]);
                     $smProduk[] = array_merge($clone, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
                     unset($values["status"]);
                     $detailProduk[] = array_merge($values, ['kode' => $kodeRcv, 'lot' => '', 'status_barang' => 'ready']);

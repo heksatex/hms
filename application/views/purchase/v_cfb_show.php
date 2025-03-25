@@ -169,20 +169,20 @@
                     "serverSide": true,
                     "order": [],
 
-                    "paging": true,
-                    "lengthChange": true,
-                    "searching": true,
-                    "ordering": true,
-                    "info": true,
+                    "paging": false,
+                    "lengthChange": false,
+                    "searching": false,
+                    "ordering": false,
+                    "info": false,
                     "autoWidth": false,
-                    "stateSave": true,
+                    "stateSave": false,
                     "ajax": {
                         "url": "<?= site_url('purchase/callforbids/list_data_detail/' . $id) ?>",
                         "type": "POST"
                     },
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0,5],
                             "orderable": false
                         }
                     ],

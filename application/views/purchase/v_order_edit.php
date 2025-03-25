@@ -407,7 +407,7 @@
                                                         <?= $no ?>
                                                     </td>
                                                     <td>
-                                                     <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
+                                                        <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
                                                     </td>
                                                     <td>
                                                         <?php
@@ -658,7 +658,7 @@
                     allowClear: true,
                     placeholder: "Satuan Beli",
                     ajax: {
-                        dataType: 'JSON',
+                        dataType: "JSON",
                         type: "GET",
                         url: "<?php echo base_url(); ?>warehouse/produk/get_uom_beli",
                         delay: 250,
@@ -736,7 +736,7 @@
 
                 $(".tax").select2({
                     allowClear: true,
-                    placeholder: "Pajak",
+                    placeholder: "Pajak"
 
                 });
 
@@ -784,8 +784,9 @@
                         success: function (data) {
                             if (data.redirect !== "") {
                                 location.href = "<?= site_url('purchase/purchaseorder/edit') ?>/" + data.redirect;
+                            } else {
+                                location.reload();
                             }
-                            location.reload();
                         }
 
                     });
@@ -815,7 +816,7 @@
 
                             },
                             data: {
-                                status: status,
+                                status: status
                             },
                             error: function (req, error) {
                                 unblockUI(function () {

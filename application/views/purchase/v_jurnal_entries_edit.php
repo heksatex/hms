@@ -73,7 +73,7 @@
                                                     <label class="form-label">Jurnal</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $listJurnal[$jurnal->tipe] ?? "" ?></span>
+                                                    <span><?= $jurnal->nama_jurnal ?? "" ?></span>
                                                 </div>
                                             </div>
                                         </div>

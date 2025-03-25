@@ -43,7 +43,7 @@
                                             <div class="col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label required">Supplier</label></div>
                                                 <div class="col-xs-8 col-md-8">
-                                                    <select class="form-control input-sm select2" name="supplier" id="supplier" required>
+                                                    <select class="form-control input-sm" name="supplier" id="supplier" required>
                                                     </select>
                                                 </div>
                                             </div>
@@ -74,7 +74,7 @@
                                             <th>Satuan</th>
                                             <th>QTY Beli</th>
                                             <th>Satuan Beli</th>
-                                            <th>Prioritas</th>
+                                            <!--<th>Prioritas</th>-->
                                             <th>Warehouse</th>
                                             <th>#</th>
                                             </thead>

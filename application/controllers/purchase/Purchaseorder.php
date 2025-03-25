@@ -53,6 +53,7 @@ class Purchaseorder extends MY_Controller {
             $model1 = new $this->m_po;
             $model2 = new $this->m_po;
             $model3 = clone $model2;
+            $model4 = clone $model3;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
@@ -71,6 +72,10 @@ class Purchaseorder extends MY_Controller {
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
                             ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+            $data["po_retur"] = $model4->setTables("purchase_order_retur por")
+                            ->setJoins("purchase_order_detail pod", "pod.id = pod_id")
+                            ->setWheres(["pod.po_no_po" => $kode_decrypt])
+                            ->setSelects(["por.*", "kode_produk,nama_produk,deskripsi"])->setOrder(["por.retur_date" => "desc"])->getData();
             $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
             $data["tax"] = $this->m_po->setTables("tax")->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
@@ -158,6 +163,7 @@ class Purchaseorder extends MY_Controller {
                     throw new \Exception('Mata Uang Belum diperbaharui ', 500);
                 }
             }
+            $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
             $this->_module->startTransaction();
             $lockTable = "user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
                     . "purchase_order_detail write,purchase_order write,penerimaan_barang WRITE,penerimaan_barang_items WRITE";
@@ -272,7 +278,7 @@ class Purchaseorder extends MY_Controller {
                                 if ($cekUpdateIn !== "") {
                                     throw new \Exception("Update pada data Jurnal gagal.", 500);
                                 }
-                                $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode,
+                                $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
                                     "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
                             }
                         }
@@ -312,6 +318,17 @@ class Purchaseorder extends MY_Controller {
     }
 
     public function update($id) {
+        $validation = [
+            [
+                'field' => 'harga[]',
+                'label' => 'Harga',
+                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ]
+        ];
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
@@ -324,6 +341,10 @@ class Purchaseorder extends MY_Controller {
             $dpplain = $this->input->post("dpplain");
             $foot_note = $this->input->post("foot_note");
             $default_total = $this->input->post("default_total");
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
             $data = [];
             $log_update = [];
             $no = 0;
@@ -344,13 +365,14 @@ class Purchaseorder extends MY_Controller {
                 $diskons += $diskon;
                 if ($dpplain === "1") {
                     $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                    $nilaiDppLain += (($total - $diskon) * 11) / 12;
                 } else {
                     $taxes += ($total - $diskon) * $amount_tax[$key];
                 }
             }
-            if ($dpplain === "1") {
-                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
-            }
+//            if ($dpplain === "1") {
+//                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
+//            }
             $grandTotal = ($totals - $diskons) + $taxes;
             $this->_module->startTransaction();
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
@@ -409,7 +431,7 @@ class Purchaseorder extends MY_Controller {
                 }
                 if ($update) {
                     $model->update(["status" => $status]);
-                    $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status} Edit PO", $username);
+                    $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status} Edit Harga", $username);
                     if (!$this->_module->finishTransaction()) {
                         throw new \Exception('Gagal update status', 500);
                     }
@@ -419,7 +441,7 @@ class Purchaseorder extends MY_Controller {
             }
             $model->save(["po_id" => $kode_decrypt, "status" => "{$status}", "created_at" => date("Y-m-d H:i:s")]);
             $model2->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt])->update(["status" => "exception"]);
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status}", $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status} Edit Harga", $username);
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
@@ -436,37 +458,99 @@ class Purchaseorder extends MY_Controller {
         }
     }
 
+    public function get_view_retur() {
+        try {
+            $items = $this->input->post("items");
+            $id = $this->input->post("ids");
+            $kode_decrypt = decrypt_url($id);
+            $model = new $this->m_global;
+            $getItems = $model->setTables("purchase_order_detail")
+                            ->setWhereIn("id", $items)->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["created_at" => "asc"])->getData();
+
+            $view = $this->load->view("purchase/v_form_retur", ["data" => $getItems, "id" => $id], true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => $view)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => "")));
+        }
+    }
+
     public function retur() {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
-            
-            $items = $this->input->post("items");
+            $validation = [
+                [
+                    'field' => 'qty_beli[]',
+                    'label' => 'Qty',
+                    'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                    'errors' => [
+                        'required' => '{field} Harus dipilih',
+                        "regex_match" => "{field} harus berupa number / desimal"
+                    ]
+                ]
+            ];
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+
+            $items = $this->input->post("item");
+            $qtys = $this->input->post("qty_beli");
             $id = $this->input->post("ids");
             $kode_decrypt = decrypt_url($id);
-            
+
             $model = new $this->m_global;
-            $getItems = $model->setTables("purchase_order_detail")
-                            ->setWhereIn("id", $items)->setWheres(["po_no_po"=>$kode_decrypt])->setOrder(["created_at" => "asc"])->getData();
-            
+            $cekPenerimaan = clone $model;
+            if ($cekPenerimaan->setTables("penerimaan_barang")->setWheres(["status" => "done", "origin" => $kode_decrypt])->getDetail() === null) {
+                throw new \Exception("Penerimaan Barang <strong>{$kode_decrypt}</strong> harus dalam status Terkirim", 500);
+            }
             $this->_module->startTransaction();
             $locktabel = "purchase_order_detail Write, purchase_order WRITE, purchase_order_edited WRITE,"
-                    . "user WRITE, main_menu_sub WRITE, log_history WRITE";
+                    . "user WRITE, main_menu_sub WRITE, log_history WRITE,purchase_order_retur WRITE,tax WRITE,"
+                    . "jurnal_entries write,token_increment WRITE,nilai_konversi WRITE";
             $this->_module->lock_tabel($locktabel);
             $logProduk = [];
-            foreach ($getItems as $key => $value) {
-                if(!in_array($value->status, ["done","purchase_confirmed"])) {
-                    throw new \Exception("Produk [{$value->kode_produk}] {$value->nama_produk} tidak dalam status Confirmed / done", 500);
+            $dataRetur = [];
+
+            foreach ($items as $key => $value) {
+                $model1 = clone $model;
+                $checkData = $model1->setTables("purchase_order_detail")
+                        ->setJoins("purchase_order_retur", "(purchase_order_detail.id = pod_id and purchase_order_retur.status <> 'cancel')", "left")
+                        ->setJoins("nilai_konversi", "nilai_konversi.id = id_konversiuom", "left")
+                        ->setWheres(["purchase_order_detail.po_no_po" => $kode_decrypt, "purchase_order_detail.id" => $value], true)
+                        ->setGroups(["purchase_order_detail.id"])
+                        ->setSelects(["COALESCE(SUM(qty_beli_retur),0) as total_retur", "purchase_order_detail.*", "nilai_konversi.nilai as konversi"])
+                        ->getDetail();
+                if ($checkData === null) {
+                    throw new \Exception("Produk Item Produk tidak ditemukan", 500);
                 }
-                $logProduk[] = $value->kode_produk." ".$value->nama_produk;
+                if ($checkData->qty_beli < ($qtys[$key] + $checkData->total_retur)) {
+                    throw new \Exception("Retur Produk [{$checkData->kode_produk}] {$checkData->nama_produk} Melebihi Qty Beli", 500);
+                }
+                $dataRetur[] = [
+                    "pod_id" => $value,
+                    "po_no_po" => $kode_decrypt,
+                    "qty_beli_retur" => $qtys[$key],
+                    "uom_beli_retur" => $checkData->uom_beli,
+                    "qty_retur" => $qtys[$key] * $checkData->konversi,
+                    "uom_retur" => $checkData->uom,
+                    "konversi_beli_stok" => $checkData->konversi,
+                    "retur_date" => date("Y-m-d H:i:s")
+                ];
+                $checkData->qty_beli = $qtys[$key];
+                $logProduk[] = $checkData->kode_produk . " " . $checkData->nama_produk . " Sebanyak {$qtys[$key]} $checkData->uom_beli";
             }
-            
+
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
-            $model->update(["status"=>"retur","retur_date"=>date("Y-m-d H:i:s")]);
-            
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Retur Untuk Produk ". logArrayToString("; ", $logProduk,":"), $username);
+            $model->setTables("purchase_order_retur")->saveBatch($dataRetur);
+
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Retur Untuk Produk " . logArrayToString("; ", $logProduk, ":"), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -475,7 +559,250 @@ class Purchaseorder extends MY_Controller {
             $this->output->set_status_header(($ex->getCode() ?? 500))
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-        }finally {
+        } finally {
+            $this->_module->unlock_tabel();
+        }
+    }
+
+    public function update_retur_status() {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $status = $this->input->post("status");
+            $po = $this->input->post("po");
+            $items = $this->input->post("items");
+            $model = new $this->m_global;
+
+            $this->_module->startTransaction();
+            $locktabel = "purchase_order_detail pod Write, purchase_order WRITE,"
+                    . "user WRITE, main_menu_sub WRITE, log_history WRITE,purchase_order_retur por WRITE";
+            $this->_module->lock_tabel($locktabel);
+
+            $checkData = $model->setTables("purchase_order_retur por")
+                    ->setJoins("purchase_order_detail pod", "pod.id = pod_id", "left")
+                    ->setWhereIn("por.id", $items)->setWheres(["por.status <>" => 'cancel'])
+                    ->setSelects(["kode_produk", "nama_produk", "por.id", "por.status"])
+                    ->getData();
+            if (count($checkData) < 1) {
+                throw new \Exception("Produk Item tidak ditemukan", 500);
+            }
+            $logs = [];
+            foreach ($checkData as $key => $value) {
+                if ($value->status !== 'draft')
+                    throw new \Exception("Produk {$value->kode_produk} - {$value->nama_produk} tidak dalam status draft", 500);
+
+                $logs [] = "Retur Produk {$value->kode_produk} - {$value->nama_produk} dibatalkan";
+            }
+
+            $model->setTables("purchase_order_retur por")
+                    ->setWhereIn("por.id", $items)->setWheres(["por.status" => 'draft'])->update(["status" => "cancel"]);
+            $this->_module->gen_history($sub_menu, $po, 'edit', logArrayToString("; ", $logs, ":"), $username);
+
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal update status', 500);
+            }
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header(($ex->getCode() ?? 500))
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
+        }
+    }
+
+    public function confirm_retur() {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $nopo = $this->input->post("ids");
+            $model = new $this->m_global;
+
+            $checkData = $model->setTables("purchase_order_retur por")
+                    ->setJoins("purchase_order_detail pod", "pod.id = pod_id", "left")
+                    ->setJoins("mst_produk", "mst_produk.kode_produk = pod.kode_produk")
+                    ->setJoins("mst_category", "mst_category.id = mst_produk.id_category")
+                    ->setJoins("tax", "tax.id = pod.tax_id", "left")
+                    ->setWheres(["por.po_no_po" => $nopo, "por.status" => "draft"])
+                    ->setOrder(["pod_id" => "asc"])
+                    ->setSelects(["pod.*", "por.qty_retur,por.uom_retur,por.qty_beli_retur,por.uom_beli_retur", "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "mst_category.dept_id"])
+                    ->getData();
+            if (count($checkData) < 1) {
+                throw new \Exception("Produk Item Produk tidak ditemukan Atau tidak dalam status Draft", 500);
+            }
+
+            $modelInvoice = new $this->m_global;
+            $checkInv = $modelInvoice->setTables("invoice")->setJoins("invoice_detail", "invoice.id = invoice_id", "left")
+                            ->setJoins("tax", "invoice_detail.tax_id = tax.id", "left")
+                            ->setWheres(["no_po" => $nopo, "status <>" => "cancel"])
+                            ->setSelects(["invoice.*", "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama"])->getDetail();
+            if ($checkInv !== null) {
+                $now = date("Y-m-d H:i:s");
+                if (!$noDeb = $this->token->noUrut("invoice_pembelian_retur", date('y', strtotime($now)) . '/' . date('m', strtotime($now)), true)
+                                ->generate("INVR/", '/%05d')->get()) {
+                    throw new \Exception("No Debit Note tidak terbuat", 500);
+                }
+
+                $this->_module->startTransaction();
+                $locktabel = "purchase_order_detail pod Write, purchase_order WRITE,"
+                        . "user WRITE, main_menu_sub WRITE, log_history WRITE,purchase_order_retur por WRITE,tax WRITE,invoice write,"
+                        . "invoice_detail write,token_increment WRITE,invoice_retur WRITE,invoice_retur_detail WRITE,"
+                        . "stock_move WRITE, stock_move_produk WRITE, departemen d WRITE,"
+                        . "pengiriman_barang WRITE, pengiriman_barang_items WRITE, departemen WRITE, mst_produk WRITE";
+                $this->_module->lock_tabel($locktabel);
+                $invRetur = [
+                    "no_inv_retur" => $noDeb,
+                    "id_supplier" => $checkInv->id_supplier,
+                    "no_invoice_supp" => $checkInv->no_invoice_supp,
+                    "tanggal_invoice_supp" => $checkInv->tanggal_invoice_supp,
+                    "no_sj_supp" => $checkInv->no_sj_supp,
+                    "no_po" => $checkInv->no_po,
+                    "order_date" => $checkInv->order_date,
+                    "journal" => "RPB",
+                    "matauang" => $checkInv->matauang,
+                    "nilai_matauang" => $checkInv->nilai_matauang,
+                    "origin" => $checkInv->origin,
+                    "total" => 0,
+                    "dpp_lain" => 0,
+                    "created_at" => date("Y-m-d H:i:s"),
+                    "tanggal_sj" => $checkInv->tanggal_sj,
+                    "status" => "draft"
+                ];
+
+                $move_id = "";
+                $pengirimanHead = [];
+                $pengirimanItem = [];
+                $pengirimanHeadCek = [];
+                $stmvProduk = [];
+                $totals = 0.00;
+                $diskons = 0.00;
+                $taxes = 0.00;
+                $dpp = 0;
+                $idInsert = $modelInvoice->setTables("invoice_retur")->save($invRetur);
+                $model2 = new $this->m_global;
+                $logProduk = [];
+                $stmv = [];
+                $countItems = 0;
+                $last_move = $this->_module->get_kode_stock_move();
+                foreach ($checkData as $key => $value) {
+                    $countItems++;
+                    $dataInv = $model2->setTables("invoice_detail")->setWheres(["invoice_id" => $checkInv->id, "kode_produk" => $value->kode_produk], true)->getDetail();
+                    $invoiceReturDetail[] = [
+                        'invoice_retur_id' => $idInsert,
+                        'nama_produk' => $value->nama_produk,
+                        'kode_produk' => $value->kode_produk,
+                        'qty_beli' => $value->qty_beli_retur,
+                        'uom_beli' => $value->uom_beli_retur,
+                        'deskripsi' => $value->deskripsi,
+                        'reff_note' => $value->reff_note,
+                        'account' => $dataInv->account,
+                        'harga_satuan' => $value->harga_per_uom_beli,
+                        'tax_id' => $value->tax_id,
+                        'diskon' => $value->diskon,
+                        "amount_tax" => $value->tax_amount
+                    ];
+                    $total = ($value->qty_retur * $value->harga_per_uom_beli);
+                    $totals += $total;
+                    $diskon = ($value->diskon ?? 0);
+                    $diskons += $diskon;
+                    if ($checkInv->dpp_lain > 0) {
+                        $taxes += ((($total - $diskon) * 11) / 12) * $value->tax_amount;
+                        $dpp += ((($total - $diskon) * 11) / 12);
+                    } else {
+                        $taxes += ($total - $diskon) * $value->tax_amount;
+                    }
+                    $logProduk[] = $value->kode_produk . " " . $value->nama_produk;
+
+                    $head = $value->dept_id;
+                    if (!isset($pengirimanHeadCek[$head])) {
+                        $countItems = 1;
+                        $move_id = "SM" . $last_move; //Set kode stock_move
+                        $stmv [] = [
+                            "move_id" => $move_id,
+                            "create_date" => $now,
+                            "origin" => $nopo . "|" . $noDeb,
+                            "method" => "{$head}|OUT",
+                            "lokasi_dari" => "{$head}/Stock",
+                            "lokasi_tujuan" => "SUP/Stock",
+                            "status" => "draft",
+                            "row_order" => count($pengirimanHeadCek) + 1
+                        ];
+                        $getCounter = $this->_module->get_kode_pengiriman($head);
+                        $dgt = substr("00000" . $getCounter, -5);
+                        $kode_out = $head . "/OUT/" . date("y") . date("m") . $dgt;
+                        $pengirimanHeadCek[$head] = ["kode" => $kode_out];
+                        $pengirimanHead[] = [
+                            "kode" => $kode_out,
+                            "tanggal" => $now,
+                            "tanggal_transaksi" => $now,
+                            "tanggal_jt" => $now,
+                            "origin" => $nopo . "|" . $noDeb,
+                            "move_id" => $move_id,
+                            "lokasi_dari" => "{$head}/Stock",
+                            "lokasi_tujuan" => "SUP/Stock",
+                            "status" => "draft",
+                            "dept_id" => $head,
+                            "reff_picking" => "{$kode_out}|SUP"
+                        ];
+                        $last_move++;
+                    }
+                    $pengirimanItem[] = [
+                        "kode" => $pengirimanHeadCek[$head]["kode"],
+                        'nama_produk' => $value->nama_produk,
+                        'kode_produk' => $value->kode_produk,
+                        'qty' => $value->qty_retur,
+                        'uom' => $value->uom_retur,
+                        'status_barang' => "draft",
+                        "row_order" => $countItems,
+                        "origin_prod" => $value->kode_produk . "_" . $countItems
+                    ];
+                    $countSmP = count($stmvProduk);
+                    $stmvProduk[] = [
+                        "move_id" => $move_id,
+                        "kode_produk" => $value->kode_produk,
+                        "nama_produk" => $value->nama_produk,
+                        "qty" => $value->qty_retur,
+                        "uom" => $value->uom_retur,
+                        "origin_prod" => $value->kode_produk . "_" . ($countSmP + 1),
+                        "row_order" => $countSmP + 1,
+                        "status" => "draft",
+                    ];
+                }
+
+                if (count($pengirimanHead) > 0) {
+                    $models = new $this->m_global;
+                    $models->setTables("pengiriman_barang")->saveBatch($pengirimanHead);
+                    $models->setTables("pengiriman_barang_items")->saveBatch($pengirimanItem);
+                    $models->setTables("stock_move")->saveBatch($stmv);
+                    $models->setTables("stock_move_produk")->saveBatch($stmvProduk);
+                }
+
+                $grandTotal = ($totals - $diskons) + $taxes;
+                $modelInvoice->setTables("invoice_retur_detail")->saveBatch($invoiceReturDetail);
+                $modelInvoice->setTables("invoice_retur")->setWheres(["id" => $idInsert], true)->update(["total" => $grandTotal, "dpp_lain" => $dpp]);
+                $model2->setTables("purchase_order_retur por")->setWheres(["po_no_po" => $nopo, "status" => "draft"], true)->update(["status" => "confirm"]);
+                $this->_module->gen_history('debitnote', $noDeb, 'create', logArrayToString(";", $invRetur), $username);
+                $this->_module->gen_history($sub_menu, $nopo, 'edit', "Konfirmasi Retur Untuk Produk " . logArrayToString("; ", $logProduk, ":"), $username);
+            }
+
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal update status', 500);
+            }
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            log_message('error', $ex->getMessage());
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header(($ex->getCode() ?? 500))
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
             $this->_module->unlock_tabel();
         }
     }
@@ -577,9 +904,9 @@ class Purchaseorder extends MY_Controller {
     public function get_invoice($id) {
         try {
             $kode_decrypt = decrypt_url($id);
-            if (!$kode_decrypt) {
+            if (!$kode_decrypt)
                 throw new \Exception('', 500);
-            }
+
             $rcv = new $this->m_po;
             $inshipment = $rcv->setTables('invoice')
                     ->setWheres(['no_po' => $kode_decrypt, "status <>" => "cancel"])->setOrder(["order_date" => "asc"])

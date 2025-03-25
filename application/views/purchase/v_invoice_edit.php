@@ -151,7 +151,7 @@
                                                     <label class="form-label required">Kurs</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang,0,'','') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?> required>
+                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?> required>
                                                 </div>
                                             </div>
                                         </div>
@@ -195,6 +195,16 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <input type="text" class="form-control pull-right input-sm" name="no_sj_supp" value="<?= $inv->no_sj_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Tgl SJ</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <input type="datetime-local" class="form-control pull-right input-sm" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
                                                 </div>
                                             </div>
                                         </div>
@@ -265,7 +275,7 @@
                                                                     <td class="td-coa">
                                                                         <div class="form-group">
                                                                             <select class="form-control kode_coa input-xs kode_coa_data_<?= $key ?>" style="width: 100% !important;" data-row="<?= $key ?>"
-                                                                                    name="kode_coa[<?= $value->id ?>]" <?= ($inv->status === 'draft') ? '' : 'disabled' ?> required>
+                                                                                    name="kode_coa[<?= $value->id ?>]" <?= ($inv->status === 'draft') ? '' : 'disabled' ?>>
                                                                                 <option></option>
                                                                                 <?php
                                                                                 if (!is_null($value->kode_coa)) {
@@ -280,7 +290,7 @@
                                                                     </td>
                                                                     <td class="td-beli" >
                                                                         <input type="hidden"  class="form-control input-sm qty_<?= $value->id ?>" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>" readonly>
-                                                                        <input type="text"  class="form-control input-sm" value="<?= number_format($value->qty_beli, 2) ?>" disabled>
+                                                                        <input type="text"  class="form-control input-sm" value="<?= number_format($value->qty_beli, 3) ?>" disabled>
                                                                     </td>
                                                                     <td class="td-uom"><?= $value->uom_beli ?></td>
                                                                     <td class="td-harga">
@@ -314,7 +324,7 @@
                                                                         <input type="hidden" class="form-control" name="diskon[<?= $value->id ?>]" value="<?= $value->diskon ?>">
                                                                         <input type="text" class="form-control" value="<?= $value->diskon ?>" disabled>
                                                                     </td>
-<!--                                                                    <td class="td-aksi">
+        <!--                                                                    <td class="td-aksi">
                                                                         <a class="add_duplicate" data-id="<?= $value->id ?>" data-toggle="tooltip" data-placement="top" title="Split"><i class="fa fa-copy"></i></a>
                                                                     </td>-->
                                                                 </tr>
@@ -356,15 +366,15 @@
                                                                             <td>1</td>
                                                                             <td><?= $dataPajak["ket"] ?? "" ?></td>
                                                                             <td>1193.05 - Pajak Dibayar Muka PPN</td>
-                                                                            <td><?= $inv->symbol ?> <?php
+                                                                            <td>IDR <?php
                                                                                 if ($setting !== null) {
-                                                                                    print( number_format((($subtotal1 - $totalDiskon) * 11) / 12, 4));
+                                                                                    print( number_format(((($subtotal1 - $totalDiskon) * 11) / 12) * $inv->nilai_matauang, 4));
                                                                                 } else {
-                                                                                    print(number_format($subtotal2, 4));
+                                                                                    print(number_format(($subtotal2 * $inv->nilai_matauang), 4));
                                                                                 }
                                                                                 ?>
                                                                             </td>
-                                                                            <td><?= $inv->symbol ?> <?= number_format($totalTax, 4) ?></td>
+                                                                            <td>IDR <?= number_format(($totalTax * $inv->nilai_matauang), 4) ?></td>
                                                                         </tr>
                                                                     <?php } ?>
 
@@ -377,15 +387,15 @@
                                                         <table class="table table-condesed table-hover rlstable  over">
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 1</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal1, 4) ?></td>
+                                                                <td>IDR <?= number_format(($subtotal1 * $inv->nilai_matauang), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right">Diskon</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($totalDiskon, 4) ?></td>
+                                                                <td>IDR <?= number_format(($totalDiskon * $inv->nilai_matauang), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2, 4) ?></td>
+                                                                <td>IDR<?= number_format(($subtotal2 * $inv->nilai_matauang), 4) ?></td>
                                                             </tr>
                                                             <?php if ($setting !== null) {
                                                                 ?>
@@ -393,7 +403,7 @@
                                                                     <td class="style text-right">DPP Nilai Lain</td>
                                                                     <td class="style totalan"> 
                                                                         <input name="dpplain" type="hidden" value="1">
-                                                                        <strong><?= $inv->symbol ?> <?= number_format((($subtotal1 - $totalDiskon) * 11) / 12, 4) ?>
+                                                                        <strong>IDR<?= number_format(((($subtotal1 - $totalDiskon) * 11) / 12) * $inv->nilai_matauang, 4) ?>
                                                                         </strong>
                                                                     </td>
                                                                 </tr>
@@ -401,11 +411,11 @@
                                                             ?>
                                                             <tr>
                                                                 <td class="text-right">Tax</td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($totalTax, 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($totalTax * $inv->nilai_matauang), 4) ?></td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><?= $inv->symbol ?> <?= number_format($subtotal2 + $totalTax, 4) ?></td>
+                                                                <td><?= $inv->symbol ?> <?= number_format(($subtotal2 + $totalTax) * $inv->nilai_matauang, 4) ?></td>
                                                             </tr>
                                                         </table>
                                                     </div>

@@ -36,7 +36,7 @@
                                     <div class="col-md-8">
                                         <div class="fields-group">
                                             <div class="form-group">
-                                                <label for="tanggal" class="col-sm-2 required control-label">Dari UOM</label>
+                                                <label for="tanggal" class="col-sm-2 required control-label">Dari UOM Beli</label>
                                                 <div class="col-sm-8">
                                                     <div class="input-group">
                                                         <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
@@ -47,16 +47,23 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label for="tanggal" class="col-sm-2 required control-label">Ke UOM</label>
+                                                <label for="tanggal" class="col-sm-2 required control-label">Ke UOM Stok</label>
                                                 <div class="col-sm-8">
                                                     <div class="input-group">
                                                         <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
-                                                        <input type="text" name="ke" class="form-control" id="ke" required>
+                                                        <select name="ke" id="ke" class="form-control select2" required>
+                                                            <option></option>
+                                                            <?php
+                                                            foreach ($uom as $key => $value) {
+                                                                echo "<option value='" . $value->short . "'>" . $value->short . "</option>";
+                                                            }
+                                                            ?>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label for="tanggal" class="col-sm-2 required control-label">Nilai UOM</label>
+                                                <label for="tanggal" class="col-sm-2 required control-label">Nilai Konversi</label>
                                                 <div class="col-sm-8">
                                                     <div class="input-group">
                                                         <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
@@ -106,11 +113,15 @@
             </div>
         </div>
         <footer class="main-footer">
-            <?php $this->load->view("admin/_partials/footer.php") ?>
+        <?php $this->load->view("admin/_partials/footer.php") ?>
         </footer>
-        <?php $this->load->view("admin/_partials/js.php") ?>
+<?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
+                $(".select2").select2({
+                    allowClear:true,
+                    placeholder:"pilih"
+                });
                 const formKonversi = document.forms.namedItem("input");
                 formKonversi.addEventListener(
                         "submit",
@@ -149,7 +160,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0],
+                            "targets": [0, 4],
                             "orderable": false
                         }
                     ],
@@ -158,7 +169,7 @@
                             var data = $(this).data();
                             $("#posisi").val("edit");
                             $("#ids").val(data.id);
-                            $("#ke").val(data.ke);
+                            $("#ke").val(data.ke).trigger("change");
                             $("#dari").val(data.dari);
                             $("#nilai").val(data.nilai);
                             $("#catatan").val(data.catatan);

@@ -151,6 +151,11 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Gudangobat() {
+        $data['id_dept'] = 'GOB';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     function limit_words($string, $awal_start, $awal_length, $akhir_start, $akhir_length) {
 
         //$jml_kata = str_word_count($string);
@@ -1144,7 +1149,8 @@ class Penerimaanbarang extends MY_Controller {
                         "dpp_lain" => 0,
                         "origin" => $kode,
                         "no_sj_supp" => $head->no_sj,
-                        "tanggal_invoice_supp" => $head->tanggal_sj
+                        "tanggal_invoice_supp" => $head->tanggal_sj,
+                        "tanggal_sj" => $head->tanggal_sj
                     ];
 
                     $idInsert = $inserInvoice->setTables("invoice")->save($dataInvoice);
@@ -1292,7 +1298,19 @@ class Penerimaanbarang extends MY_Controller {
         $data['origin_prod'] = $origin_prod;
         $data['list_grade'] = $this->_module->get_list_grade();
 
-        $data['data_produk'] = $this->m_penerimaanBarang->get_produk_add_quant($kode, $kode_produk, $origin_prod);
+        $data_produk         = $this->m_penerimaanBarang->get_produk_add_quant($kode, $kode_produk, $origin_prod);
+        $data['data_produk'] = $data_produk;
+        if(strpos($data_produk->nama_category, 'Kain Hasil') !== false){
+            $data['hidden_field'] = 'No';
+        }else{
+            $data['hidden_field'] = 'Yes';
+        }
+
+        if(strpos($data_produk->nama_category, 'Benang') !== false){
+            $data['category_benang'] = 'Yes';
+        }else{
+            $data['category_benang'] = 'No';
+        }
 
         if ($deptid == 'RCV') {
             return $this->load->view('modal/v_tambah_details_quant_penerimaan_2_modal', $data);
@@ -2463,22 +2481,22 @@ class Penerimaanbarang extends MY_Controller {
                             'kode' => $kode,
                             'kode_produk' => $dl['kode_produk'],
                             'nama_produk' => $dl['nama_produk'],
-                            'lot' => $dl['lot'],
+                            'lot' => $dl['lot'] ?? '',
                             'qty' => $dl['qty'],
                             'uom' => $dl['uom'],
                             'qty2' => $dl['qty2'],
                             'uom2' => $dl['uom2'],
                             'grade' => $dl['grade'],
-                            'lebar_greige' => $dl['lebar_greige'],
-                            'uom_lebar_greige' => $dl['uom_lebar_greige'],
-                            'lebar_jadi' => $dl['lebar_jadi'],
-                            'uom_lebar_jadi' => $dl['uom_lebar_jadi'],
+                            'lebar_greige' => $dl['lebar_greige'] ?? '',
+                            'uom_lebar_greige' => $dl['uom_lebar_greige'] ?? '',
+                            'lebar_jadi' => $dl['lebar_jadi'] ?? '',
+                            'uom_lebar_jadi' => $dl['uom_lebar_jadi'] ?? '',
                             'reff_note' => $dl['reff_note'],
                             'origin_prod' => $origin_prod,
                             'row_order' => $row_order
                         );
                         $tmp_jml_qty = $tmp_jml_qty + $dl['qty'];
-                        $list_product .= "(" . $loop . ") " . $dl['nama_produk'] . " " . $dl['lot'] . " " . $dl['qty'] . " " . $dl['uom'] . " " . $dl['qty2'] . " " . $dl['uom2'] . " " . $dl['grade'] . " " . $dl['lebar_greige'] . " " . $dl['uom_lebar_greige'] . " " . $dl['lebar_jadi'] . " " . $dl['uom_lebar_jadi'] . " " . $dl['reff_note'] . " <br>";
+                        $list_product .= "(" . $loop . ") " . $dl['nama_produk'] . " " . $dl['lot'] ?? '' . " " . $dl['qty'] . " " . $dl['uom'] . " " . $dl['qty2'] . " " . $dl['uom2'] . " " . $dl['grade'] . " " . $dl['lebar_greige'] ?? ''. " " . $dl['uom_lebar_greige'] ?? ''. " " . $dl['lebar_jadi'] ?? ''. " " . $dl['uom_lebar_jadi'] ?? ''. " " . $dl['reff_note'] . " <br>";
                         $row_order++;
                         $loop++;
                     }

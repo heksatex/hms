@@ -743,6 +743,19 @@ class M_pengirimanBarang extends CI_Model
 						ORDER BY lokasi")->result_array();
 	}
 
+
+	public function cek_produk_mrp_production_rm_target($kode,$kode_produk) 
+	{
+		$this->db->where('kode',$kode);
+		$this->db->where('kode_produk',$kode_produk);
+		return $this->db->get('mrp_production_rm_target');
+	}
+
+	public function cek_produk_penerimaan_barang_items($kode,$kode_produk)
+  	{
+  		return $this->db->query("SELECT * FROM penerimaan_barang_items Where kode = '$kode' AND kode_produk = '$kode_produk' ");
+  	}
+
   
 }
 

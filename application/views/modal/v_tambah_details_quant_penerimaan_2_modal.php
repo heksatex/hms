@@ -91,10 +91,12 @@
                                     <th class="style nowrap" width="80px">Uom</th>
                                     <th class="style nowrap" width="100px" style="text-align: right;">Qty2</th>
                                     <th class="style nowrap" width="80px">Uom</th>
+                                    <?php if($hidden_field == 'No') {?>
                                     <th class="style" style="width: 100px;">Lbr Greige</th>
                                     <th class="style" style="width: 65px;">Uom.Lbr Grg</th>
                                     <th class="style" style="width: 100px;">Lbr Jadi</th>
                                     <th class="style" style="width: 65px;">Uom.Lbr Jadi</th>
+                                    <?php  } ?>
                                     <th class="style nowrap">Reff Note</th>
                                     <th class="style" width="50px">#</th>
                                 </tr>
@@ -305,14 +307,23 @@
         var lot_ = document.getElementsByName('txtlot[]');
         var inx_lot = lot_.length - 1;
         var tambah = true;
-
+        var hidden_field = `<?php echo $hidden_field; ?>`;
+        var category_benang = `<?php echo $category_benang; ?>`;
 
         //cek Lot apa ada yg kosong
         $('.txtlot').each(function(index, value) {
             if ($(value).val().trim().length === 0) {
-                alert_notify('fa fa-warning', 'Lot tidak boleh kosong !', 'danger', function() {});
-                $(value).addClass('error');
-                tambah = false;
+                if(hidden_field == 'No' ) {
+                    alert_notify('fa fa-warning', 'Lot tidak boleh kosong !', 'danger', function() {});
+                    $(value).addClass('error');
+                    tambah = false;
+                }
+
+                if(category_benang == 'Yes' ) {
+                    alert_notify('fa fa-warning', 'Lot tidak boleh kosong !l', 'danger', function() {});
+                    $(value).addClass('error');
+                    tambah = false;
+                }
             } else {
                 $(value).removeClass('error');
             }
@@ -379,10 +390,12 @@
                 '<td class="min-width-80"><input type="text" name="txtuom"  id="txtuom" class="form-control input-sm min-width-80 txtuom" value="" readonly style="width:100% !important;"></td>' +
                 '<td class="min-width-80"><input type="text" name="txtqty2[]" id="txtqty2" class="form-control input-sm min-width-80 text-right txtqty2"  onkeypress="enter(event);"   onkeyup="validAngka(this)"  data-decimal="2" oninput="enforceNumberValidation(this)" value="' + Math.round(qty2, 2) + '" ></td>' +
                 '<td class="min-width-80"><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm min-width-80 txtuom2"  readonly style="width:100% !important;"></td>' +
+                <?php if($hidden_field == 'No') {?>
                 '<td class="min-width-100"><input type="text" name="txt_lebar_greige"  id="txt_lebar_greige" class="form-control input-sm min-width-100 txt_lebar_greige" style="width:100% !important;" onkeypress="enter(event);" value="' + lebar_greige + '" ></td>' +
                 '<td class="min-width-100"><select type="text" name="txt_uom_lebar_greige"  id="txt_uom_lebar_greige" class="form-control input-sm min-width-80 txt_uom_lebar_greige" style="width:100% !important;"></select></td>' +
                 '<td class="min-width-100"><input type="text" name="txt_lebar_jadi"  id="txt_lebar_jadi" class="form-control input-sm min-width-100 txt_lebar_jadi" style="width:100% !important;" onkeypress="enter(event);" value="' + lebar_jadi + '" ></td>' +
                 '<td class="min-width-100"><select type="text" name="txt_uom_lebar_jadi"  id="txt_uom_lebar_jadi" class="form-control input-sm min-width-80 txt_uom_lebar_jadi" style="width:100% !important;"></select></td>' +
+                <?php } ?>
                 '<td class="min-width-150"><input type="text" name="txt_reff_note"  id="txt_reff_note" class="form-control input-sm min-width-150 txt_reff_note" style="width:100% !important;" onkeypress="enter(event);" value="' + reff_note + '" ></td>' +
                 '<td><button type="button" class="btn btn-xs btn-danger" onclick="delRow(this);"    data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" </i> </a></td>' +
                 '</tr>';
@@ -465,12 +478,23 @@
         var valid = true;
         var btn = $(this);
 
-        //cek lot apa ada yg kosong
+        var hidden_field = `<?php echo $hidden_field; ?>`;
+        var category_benang = `<?php echo $category_benang; ?>`;
+
+        //cek Lot apa ada yg kosong
         $('.txtlot').each(function(index, value) {
             if ($(value).val().trim().length === 0) {
-                alert_notify('fa fa-warning', 'Lot tidak boleh kosong !', 'danger', function() {});
-                $(value).addClass('error');
-                valid = false;
+                if(hidden_field == 'No' ) {
+                    alert_notify('fa fa-warning', 'Lot tidak boleh kosong !', 'danger', function() {});
+                    $(value).addClass('error');
+                    valid = false;
+                }
+
+                if(category_benang == 'Yes' ) {
+                    alert_notify('fa fa-warning', 'Lot tidak boleh kosong !l', 'danger', function() {});
+                    $(value).addClass('error');
+                    valid = false;
+                }
             } else {
                 $(value).removeClass('error');
             }

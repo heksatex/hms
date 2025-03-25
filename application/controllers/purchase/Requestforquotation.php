@@ -135,6 +135,18 @@ class Requestforquotation extends MY_Controller {
     }
 
     public function save() {
+        $validation = [
+            [
+                'field' => 'qty_beli[]',
+                'label' => 'Qty',
+                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ]
+        ];
+
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
@@ -162,6 +174,12 @@ class Requestforquotation extends MY_Controller {
             if (count($kod_pro) < 1) {
                 throw new \Exception("Item Produk Belum dipilih", 500);
             }
+
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+
             $this->_module->startTransaction();
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,token_increment WRITE,cfb WRITE,cfb_items WRITE,procurement_purchase_items WRITE,"
                     . "purchase_order_detail write,purchase_order write,nilai_konversi WRITE");
@@ -261,6 +279,35 @@ class Requestforquotation extends MY_Controller {
     }
 
     public function update($id) {
+        $validation = [
+            [
+                'field' => 'qty_beli[]',
+                'label' => 'Qty',
+                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ],
+            [
+                'field' => 'harga[]',
+                'label' => 'Harga Satuan Beli',
+                'rules' => ['regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ],
+            [
+                'field' => 'diskon[]',
+                'label' => 'Diskon',
+                'rules' => ['regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ]
+        ];
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
@@ -281,6 +328,12 @@ class Requestforquotation extends MY_Controller {
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
             $dpplain = $this->input->post("dpplain");
+
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+
             $data = [];
             $log_update = [];
             $no = 0;
@@ -292,7 +345,7 @@ class Requestforquotation extends MY_Controller {
             foreach ($harga as $key => $value) {
                 $no++;
                 if ($noVal === "0") {
-                    $checkKonversi = $this->m_konversiuom->wheres(["id" => $id_konversiuom[$key], "ke" => $uom_beli[$key], "dari" => $uom_jual[$key]])->getDetail();
+                    $checkKonversi = $this->m_konversiuom->wheres(["id" => $id_konversiuom[$key], "ke" => $uom_jual[$key], "dari" => $uom_beli[$key]])->getDetail();
                     if (!$checkKonversi) {
                         throw new \Exception("<strong>Data No {$no}, Uom dan Uom Beli Tidak ada dalam tabel konversi</strong>", 500);
                     }
@@ -302,7 +355,7 @@ class Requestforquotation extends MY_Controller {
                     $tax[$key] = null;
                 }
                 $log_update ["item ke " . $no] = logArrayToString(";", ['harga' => $value, 'uom beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
-                    "dison" => $dsk[$key]]);
+                    "diskon" => $dsk[$key]]);
                 $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
                     'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key]];
 
@@ -312,13 +365,14 @@ class Requestforquotation extends MY_Controller {
                 $diskons += $diskon;
                 if ($dpplain === "1") {
                     $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                 } else {
                     $taxes += ($total - $diskon) * $amount_tax[$key];
                 }
             }
-            if ($dpplain === "1") {
-                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
-            }
+//            if ($dpplain === "1") {
+//                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
+//            }
             $grandTotal = ($totals - $diskons) + $taxes;
             $this->_module->startTransaction();
             $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
@@ -477,6 +531,7 @@ class Requestforquotation extends MY_Controller {
             }
             $updatePO = ["status" => $listStatus[$status]];
             if ($listStatus[$status] === "purchase_confirmed") {
+                $redirect = $id;
                 $orderDate = date("Y-m-d H:i:s");
                 $listCfb = new $this->m_po;
                 $dataItemOrder = $listCfb->setTables('purchase_order_detail')
@@ -485,7 +540,7 @@ class Requestforquotation extends MY_Controller {
                                 ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")
 //                                ->setJoins('nilai_konversi nk', "id_konversiuom = mst_produk.uom_beli", "left")
                                 ->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
-                                ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa","mst_produk.uom as uom_stock"])->getData();
+                                ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa", "mst_produk.uom as uom_stock"])->getData();
                 $produk = [];
                 $inserInvoice = new $this->m_global;
                 $checkInvoice = clone $inserInvoice;
@@ -559,8 +614,6 @@ class Requestforquotation extends MY_Controller {
                 $this->_module->create_stock_move_batch($smdata);
                 $insertSMProduk = new $this->m_global;
                 $insertSMProduk->setTables('stock_move_produk')->saveBatch($smProduk);
-//                $redirect = base_url('purchase/purchaseorder/edit/' . $id);
-                $redirect = $id;
                 $this->_module->gen_history('penerimaanbarang', $kodeRcv, 'create', logArrayToString(";", $dataPenerimaan), $username);
                 if ($data->order_date === null || $data->order_date === "0000-00-00 00:00:00") {
                     $updatePO = array_merge($updatePO, ["order_date" => $orderDate]);
@@ -580,7 +633,7 @@ class Requestforquotation extends MY_Controller {
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'redirect' => $redirect)));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
-            $this->output->set_status_header($ex->getCode() ?? 500)
+            $this->output->set_status_header(($ex->getCode() ?? 500))
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {

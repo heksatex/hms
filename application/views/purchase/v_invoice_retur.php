@@ -2,14 +2,6 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
-        <style>
-            .cancelPL{
-                color: red;
-            }
-            .donePL{
-                color: green;
-            }
-        </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -23,6 +15,7 @@
             <aside class="main-sidebar">
                 <?php $this->load->view("admin/_partials/sidebar.php") ?>
             </aside>
+
             <div class="content-wrapper">
                 <section class="content-header">
                 </section>
@@ -37,7 +30,6 @@
                                         </label>
                                     </div>
                                 </div>
-
                             </div>
                             <br>
                             <br>
@@ -49,10 +41,11 @@
                                                 <div class="form-group">
                                                     <div class="col-md-12 col-xs-12">
                                                         <div class="col-xs-4">
-                                                            <label class="form-label">Nama Produk</label>
+                                                            <label class="form-label">Supplier</label>
                                                         </div>
                                                         <div class="col-xs-8 col-md-8">
-                                                            <input class="form-control input-sm" name="nama_produk" id="nama_produk" value="">
+                                                            <select name="supplier" class="form-control select2" id="supplier" style="width: 100%" multiple>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -64,16 +57,13 @@
                                                         <div class="col-xs-8 col-md-8">
                                                             <select name="status" class="form-control select2" id="status" style="width: 100%">
                                                                 <option></option>
-                                                                <option value="draft">draft</option>
-                                                                <option value="purchase_confirmed">Purchase Confirmed</option>
+                                                                <option value="draft">Draft</option>
                                                                 <option value="done">Done</option>
-                                                                <option value="cancel">Cancel</option>
                                                             </select>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="col-md-2 col-xs-12">
                                                 <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
                                             </div>
@@ -81,24 +71,27 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-xs-12 table-responsive">
-                                <table id="tbl-po" class="table">
+                                <table id="tbl-invr" class="table">
                                     <thead>
                                         <tr>
-                                            <th class="no">No</th>
-                                            <th>No PO</th>
+                                            <th class="style">#</th>
+                                            <th>Invoice</th>
                                             <th>Supplier</th>
-                                            <th>Tanggal Dokumen</th>
-                                            <th>Total</th>
+                                            <th>No Inv Supp</th>
+                                            <th>TGL Inv Supp</th>
+                                            <th>No SJ Supplier</th>
+                                            <th>No PO</th>
+                                            <th>Origin</th>
                                             <th>Status</th>
-                                            <th>Note</th>
                                         </tr>
                                     </thead>
+                                    <tbody>
+
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
-                        <!-- /.box-body -->
                     </div>
                 </section>
             </div>
@@ -106,7 +99,6 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
-
                 $('#advancedSearch').on('shown.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
                 });
@@ -115,13 +107,12 @@
                 $('#advancedSearch').on('hidden.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
                 });
-
                 $(".select2").select2({
                     allowClear: true,
                     placeholder: "Pilih"
                 });
-
-                const table = $("#tbl-po").DataTable({
+                
+                const table = $('#tbl-invr').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
@@ -133,31 +124,46 @@
                     "ordering": true,
                     "info": true,
                     "autoWidth": false,
-                    "stateSave": true,
                     "ajax": {
-                        "url": "<?php echo site_url('purchase/requestforquotation/list_data') ?>",
+                        "url": "<?php echo site_url('purchase/debitnote/data') ?>",
                         "type": "POST",
                         "data": function (d) {
-                            d.jenis = "FPT";
-                            d.nama_produk = $("#nama_produk").val();
+                            d.supplier = $("#supplier").val();
                             d.status = $("#status").val();
                         }
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 4, 6],
+                            "targets": [0, 8],
                             "orderable": false
                         }
-                    ],
-                    "createdRow": function (row, data, dataIndex) {
-                        if (data[5].toLowerCase() === "cancel") {
-                            $(row).addClass('cancelPL');
-                        }
-                    }
+                    ]
+
                 });
+                
                 $("#search").on("click", function () {
                     table.ajax.reload();
                 });
+                
+                $("#supplier").select2({
+                    allowClear: true,
+                    placeholder: "Supplier",
+                    ajax: {
+                        url: "<?= site_url('purchase/requestforquotation/get_supp') ?>",
+                        data: function (params) {
+                            var query = {
+                                search: params.term
+                            }
+                            return query;
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data.data
+                            };
+                        }
+                    }
+                });
+                
             });
         </script>
     </body>

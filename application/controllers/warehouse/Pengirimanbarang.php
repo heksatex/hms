@@ -258,15 +258,15 @@ class Pengirimanbarang extends MY_Controller
 
           if(empty($kode) AND $type == 1){// jika kode nya kosong
 
+            $departemen_tujuan   = $this->input->post('departemen_tujuan');
             $lok_tujuan  = $this->input->post('lokasi_tujuan');
-            $stock_pos   = $this->input->post('stock_pos');
             $tgl         = date('Y-m-d H:i:s');
             $tgl_jt      = $this->input->post('tgl_jt');
 
             if(empty($reff_note)){
                $callback = array('status' => 'failed', 'message' => 'Reff Note Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger');
-            }else if(empty($lok_tujuan)){
-              $callback = array('status' => 'failed', 'message' => 'Lokasi Tujuan Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger');
+            }else if(empty($lok_tujuan) || empty($departemen_tujuan)){
+              $callback = array('status' => 'failed', 'message' => 'Lokasi  / Departemen Tujuan Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger');
             }else{
 
               //lock table
@@ -296,13 +296,13 @@ class Pengirimanbarang extends MY_Controller
               $move_id     = "SM".$last_move; //Set kode stock_move
 
               // simpan stock_move
-              $sql_stock_move_batch = "('".$move_id."','".$tgl."','','".$method."','".$lokasi_dari."','".$stock_pos."','draft','1','')";      
+              $sql_stock_move_batch = "('".$move_id."','".$tgl."','','".$method."','".$lokasi_dari."','".$lok_tujuan."','draft','1','')";      
               $this->_module->create_stock_move_batch($sql_stock_move_batch);    
 
-              $reff_picking = $kode_out.'|'.$lok_tujuan;
+              $reff_picking = $kode_out.'|'.$departemen_tujuan;
 
               // simpan pengiriman barang
-              $sql_out_batch   = "('".$kode_out."','".$tgl."','".$tgl."','".$tgl_jt."','".addslashes($reff_note)."','draft','".$method_dept."','','".$move_id."','".$reff_picking."','".$lokasi_dari."','".$stock_pos."','1')"; 
+              $sql_out_batch   = "('".$kode_out."','".$tgl."','".$tgl."','".$tgl_jt."','".addslashes($reff_note)."','draft','".$method_dept."','','".$move_id."','".$reff_picking."','".$lokasi_dari."','".$lok_tujuan."','1')"; 
               $this->_module->simpan_pengiriman_add_manual($sql_out_batch);    
 
               //unlock table
@@ -1233,7 +1233,7 @@ class Pengirimanbarang extends MY_Controller
                     $this->_module->startTransaction();
 
                       //lock tabel 
-                      $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE, departemen WRITE, user WRITE');
+                      $this->_module->lock_tabel('stock_move WRITE,stock_move_items WRITE,stock_move_produk WRITE, pengiriman_barang WRITE, pengiriman_barang_items WRITE, stock_quant WRITE, penerimaan_barang WRITE, penerimaan_barang_items WRITE, mrp_production WRITE, log_history WRITE, mrp_production_rm_target WRITE, main_menu_sub WRITE, pengiriman_barang_tmp WRITE, stock_move_items  as smi WRITE, pengiriman_barang_tmp as tmp WRITE, mrp_production as mrp WRITE, departemen as dept WRITE, departemen WRITE, user WRITE, pengiriman_barang as pb WRITE, stock_quant as sq WRITE, sales_contract WRITE, mst_sales_group WRITE, color_order_detail as cod WRITE, warna as w WRITE, departemen as d WRITE, greige_out_prints WRITE');
               
                       //lokasi tujuan 
                       $lokasi = $this->m_pengirimanBarang->get_location_by_move_id($move_id)->row_array();                    
@@ -1252,6 +1252,12 @@ class Pengirimanbarang extends MY_Controller
                       $sm_tj = $this->_module->get_stock_move_tujuan($move_id,$origin,'done','cancel')->row_array();
 
                       $move_id_out = $move_id;//move id asal yg ngebentuk back order
+
+                      $get_head    = $this->m_pengirimanBarang->get_data_by_code($kode);
+
+                      if(empty($sm_tj['move_id']) AND strpos(strtoupper($get_head->lokasi_tujuan), strtoupper('Transit')) !== false) {
+                          throw new \Exception('Lokasi Tujuan Tidak ditemukan !', 200);
+                      }
                     
                       //get row order stock_move_items
                       $row_order  = $this->_module->get_row_order_stock_move_items_by_kode($sm_tj['move_id']);
@@ -1370,6 +1376,15 @@ class Pengirimanbarang extends MY_Controller
                                     //update penerimaan barang items = ready
                                       $case4  .= "when kode = '".$get_kode_in['kode']."' then '".$status."'";
                                       $where4 .= "'".$get_kode_in['kode']."',"; 
+
+
+                                    // cek produk penerimaan barang items by kode & kode produk
+                                    $cek_prod_in = $this->m_pengirimanBarang->cek_produk_penerimaan_barang_items($get_kode_in['kode'],$val->kode_produk)->row_array();
+                                    if(empty($cek_prod_in['kode_produk'])){
+                                        throw new \Exception('Maaf, Data Tidak bisa Dikirim. <br> Penerimaan Barang <b>'.$get_kode_in['kode'].'</b> Tidak Tersedia untuk produk <b>'.$val->nama_produk.'</b>', 200);
+                                    }
+
+
                                   }
                                     
                                   //cek jika method stock move tujuan nya IN
@@ -1388,6 +1403,12 @@ class Pengirimanbarang extends MY_Controller
                                     $case8  .= "when origin_prod = '".addslashes($origin_prod)."' then '".$status."'";
                                     $where8 .= "'".addslashes($origin_prod)."',";
                                     $whereMo = "'".$mrp['kode']."',";
+
+                                    // cek produk mrp_rm target by kode & kode_produk
+                                    $cek_prod_mrp = $this->m_pengirimanBarang->cek_produk_mrp_production_rm_target($mrp['kode'],$val->kode_produk)->row_array();
+                                    if(empty($cek_prod_mrp['kode_produk'])){
+                                      throw new \Exception('Maaf, Data Tidak bisa Dikirim. <br> <b>'.$get_kode_in['kode'].'</b> Tidak Tersedia untuk produk <b>'.$val->nama_produk.'</b>', 200);
+                                    }
                                   }
                                     
                               }else{

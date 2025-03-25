@@ -33,9 +33,9 @@ class Jurnalentries extends MY_Controller {
             $list = new $this->m_global;
             $no = $_POST['start'];
 
-            $list->setTables("jurnal_entries")->setOrder(["tanggal_dibuat"=>"desc"])
+            $list->setTables("jurnal_entries")->setOrder(["tanggal_dibuat" => "desc"])
                     ->setJoins("mst_status", "mst_status.kode = jurnal_entries.status", "left")
-                    ->setSearch(["jurnal_entries.kode", "periode", "origin","reff_note"])
+                    ->setSearch(["jurnal_entries.kode", "periode", "origin", "reff_note"])
                     ->setOrders([null, "jurnal_entries.kode", "tanggal_dibuat", "tanggal_posting", "periode", "origin", "reff_note", "status"])
                     ->setSelects(["jurnal_entries.*", "nama_status"]);
             foreach ($list->getData() as $key => $field) {
@@ -75,16 +75,18 @@ class Jurnalentries extends MY_Controller {
             $head = new $this->m_global;
             $detail = clone $head;
 
-            $data["jurnal"] = $head->setTables("jurnal_entries")->setWheres(["kode" => $kode_decrypt])->getDetail();
+            $data["jurnal"] = $head->setTables("jurnal_entries")
+                            ->setJoins("mst_jurnal", "mst_jurnal.kode = jurnal_entries.tipe", "left")
+                            ->setWheres(["jurnal_entries.kode" => $kode_decrypt])
+                            ->setSelects(["mst_jurnal.nama as nama_jurnal","jurnal_entries.*"])->getDetail();
             if ($data["jurnal"] === null) {
                 throw new \Exception();
             }
             $data["detail"] = $detail->setTables("jurnal_entries_items jei")->setOrder(["jei.row_order"])
                             ->setJoins("partner", "partner.id = jei.partner", "left")
                             ->setJoins("coa", "coa.kode_coa = jei.kode_coa", "left")
-                            ->setJoins("jurnal_entries je","je.kode = jei.kode")
-                            ->setSelects(["jei.*", "partner.nama as supplier", "coa.nama as account"])
-                            ->setSelects(["je.tipe"])
+                            ->setJoins("jurnal_entries je", "je.kode = jei.kode")
+                            ->setSelects(["jei.*", "partner.nama as supplier", "coa.nama as account", "je.tipe"])
                             ->setWheres(["je.kode" => $kode_decrypt])->getData();
             $this->load->view('purchase/v_jurnal_entries_edit', $data);
         } catch (Exception $ex) {
@@ -161,7 +163,7 @@ class Jurnalentries extends MY_Controller {
             $_POST['length'] = 50;
             $_POST['start'] = 0;
 
-            $data = $coa->setTables("coa")->setSearch(["kode_coa", "nama"])->setWheres(["level"=>5])->setOrder(['nama'])->setSelects(['kode_coa', 'nama'])->getData();
+            $data = $coa->setTables("coa")->setSearch(["kode_coa", "nama"])->setWheres(["level" => 5])->setOrder(['kode_coa' => "asc"])->setSelects(['kode_coa', 'nama'])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => $data)));
@@ -171,4 +173,6 @@ class Jurnalentries extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => [])));
         }
     }
+    
+    
 }

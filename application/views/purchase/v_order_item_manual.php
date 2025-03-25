@@ -19,7 +19,7 @@
             <?php
             foreach ($uom_jual as $key => $value) {
                 ?>
-                                    <option value="<?= $value->short ?>"><?= $value->short ?></option>
+                                        <option value="<?= $value->short ?>"><?= $value->short ?></option>
                 <?php
             }
             ?>
@@ -36,18 +36,19 @@
             <select class="form-control input-sm select2 uom_beli uom_beli_data_<?= $index ?>" data-row="<?= $index ?>" style="width: 70%" name="id_konversiuom[]">
             </select>
             <input type="hidden" class="nama_uom_<?= $index ?>" name="uom_beli[]">
+            <input type="hidden" name="prio[]" value="normal">
             <br>
             <small class="form-text text-muted note_uom_beli_<?= $index ?>">
 
             </small>
         </div>
     </td>
-    <td style="width: 80px">
+<!--    <td style="width: 80px">
         <select class="form-control input-sm select2 prio"  style="width: 70%" name="prio[]">
             <option value="normal" selected>Normal</option>
             <option value="urgent">Urgent</option>
         </select>
-    </td>
+    </td>-->
     <td style="width: 100px">
         <select class="form-control input-sm select2" name="warehouse[]" style="width: 100%" id="warehouse" required>
             <?php foreach ($warehouse as $key => $value) {
@@ -69,10 +70,7 @@
         $(document).unbind("click").off("click").on("click", ".batal", function () {
             $(this).closest("tr").remove();
         });
-        $(".select2").select2({
-            allowClear: true,
-            placeholder: "Pilih"
-        });
+        
         $(".uom").select2({
             allowClear: true,
             placeholder: "Satuan Stok"
@@ -106,8 +104,6 @@
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     alert_notify("fa fa-warning", xhr.responseJSON.message, "danger", function () {}, 500);
-                    //alert('Error data');
-                    //alert(xhr.responseText);
                 }
             }
         });
@@ -116,8 +112,8 @@
             var row = $(this).attr("data-row");
             var selectedSelect2OptionSource = $(".kod_pro_" + row + " :selected").data().data.uom;
             $(".uom_" + row).val(selectedSelect2OptionSource);
-            var text = $(".kod_pro_" + row + " :selected").text();
-            $(".nm_pro_" + row).val(text.trim());
+            var text =$(".kod_pro_" + row + " :selected").data().data.name;
+            $(".nm_pro_" + row).val(text);
         });
 
         $(".kod_pro").on("change", function () {
@@ -150,7 +146,7 @@
                 data: function (params) {
                     var query = {
                         search: params.term
-                    }
+                    };
                     return query;
                 },
                 processResults: function (data) {
@@ -159,7 +155,8 @@
                         results.push({
                             id: item.kode_produk,
                             text: item.kode_produk + " | " + item.nama_produk,
-                            uom: item.uom
+                            uom: item.uom,
+                            name:item.nama_produk
                         });
                     });
                     return {
@@ -168,7 +165,6 @@
                 }
             }
         });
-
 
     })
 </script>

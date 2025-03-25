@@ -220,6 +220,8 @@
                               <th class="style no">No.</th>
                               <th class="style" width="200px">Product</th>
                               <th class="style" width="150px">Schedule Date</th>
+                              <th class="style" style="width:100px; text-align: right;" >Qty Beli</th>
+                              <th class="style" width="80px">Uom Beli</th>
                               <th class="style" style="width:100px; text-align: right;" >Qty</th>
                               <th class="style" width="80px">Uom</th>
                               <th class="style" width="200px">Notes</th>
@@ -231,7 +233,7 @@
                           </tbody>
                           <tfoot>
                             <tr>
-                              <td colspan="8">
+                              <td colspan="10">
                                  <a href="javascript:void(0)" onclick="tambah_baris(false,'','','','','','')"><i class="fa fa-plus"></i> Tambah Data</a>
                               </td>
                             </tr>
@@ -349,6 +351,8 @@
                     schedule_date:$(element).parents("tr").find("#schedule_date").val(),
                     qty 		:$(element).parents("tr").find("#qty").val(),
                     uom 		:$(element).parents("tr").find("#uom").val(),
+                    qty_beli:$(element).parents("tr").find("#qty_beli").val(),
+                    uom_beli:$(element).parents("tr").find("#uom_beli").val(),
                     reff_note 	:$(element).parents("tr").find("#reff").val(),
                 });
             }
@@ -359,13 +363,13 @@
                 if(this.checked == true){
                     return i.value;
                 }
-          }).get();
+        }).get();
 
-          var radio_type_2 = $('input[name="sc[]"]').map(function(e, i) {
+        var radio_type_2 = $('input[name="sc[]"]').map(function(e, i) {
                 if(this.checked == true){
                     return i.value;
                 }
-          }).get();
+        }).get();
         please_wait(function(){});
         $.ajax({
             type: "POST",
@@ -561,19 +565,22 @@
             var class_produk = 'kode_produk_'+ro;
             var produk       = 'nama_produk'+ro;
             var class_uom    = 'uom_'+ro;
+            var class_uom_beli= 'uom_beli'+ro;
+            var class_cata_uom_beli= 'uom_beli_note'+ro;
             var row        = '<tr class="">'
                         + '<td><input type="hidden"  name="row" class="row" value="'+ro+'">'+ro+'.</td>'
                         + '<td  class="min-width-200">'
                             + '<select add="manual" type="text" class="form-control input-sm kode_produk '+class_produk+' min-width-full" name="Product" id="kode_produk"></select>'
                             // + '<input type="hidden" class="form-control input-sm nama_produk '+produk+'" name="nama_produk" id="nama_produk" value="'+nama_produk+'"></td>'
                         + '<td><div class="input-group min-width-full date sch_date" id="sch_date" min-width-full><input type="text" class="form-control input-sm" name="schedule_date" id="schedule_date" readonly="readonly" /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div></td>'
+                        + '<td class="min-width-100"><input type="text" class="form-control input-sm qty_beli" name="Qty Beli" id="qty_beli"  onkeyup="validAngka(this)" onkeypress="'+event+'"></td>'
+                        + '<td class="min-width-100"><select type="text" class="form-control input-sm uom_beli '+class_uom_beli+'" name="Uom Beli" id="uom_beli"></select><small id="uom_beli_note" class="form-text text-muted '+class_cata_uom_beli+'"></small></td>'
                         + '<td class="min-width-100"><input type="text" class="form-control input-sm qty" name="Qty" id="qty"  onkeyup="validAngka(this)" onkeypress="'+event+'" value="'+qty+'"></td>'
                         + '<td class="min-width-100"><select type="text" class="form-control input-sm uom '+class_uom+'" name="Uom" id="uom"></select></td>'
                         + '<td class="min-width-100"><textarea type="text" class="form-control input-sm" name="note" id="reff" onkeypress="'+event+'">'+reff_note+'</textarea></td>'
                         +'<td></td>'
                         + '<td class="width-50" align="center"><a onclick="'+delRow+';"  href="javascript:void(0)"  data-toggle="tooltip" title="Hapus Data"><i class="fa fa-trash" style="color: red"></i> </a></td>'
                         + '</tr>';
-
             $('#table_items tbody[id="tbody_items"] ').append(row);
             //$("#components tbody tr").eq(index + 1).find(".add, .edit").toggle();
             $('[data-toggle="tooltip"]').tooltip();
@@ -581,15 +588,16 @@
             var sel_produk  = $('#table_items tbody[id="tbody_items"] tr .'+class_produk);
             var sel_uom     = $('#table_items tbody[id="tbody_items"] tr .'+class_uom);
             var produk_hide = $('#table_items tbody[id="tbody_items"] tr .'+produk);
-
+            var sel_uom_beli= $('#table_items tbody[id="tbody_items"] tr .'+class_uom_beli);
+            // var cata_uom_beli= $('#table_items tbody[id="tbody_items"] tr .'+class_cata_uom_beli);
             if(data==true){
                 //untuk event selected select2 nama_produk
                 custom_nama = '['+kode_produk+'] '+nama_produk;
                 var $newOption = $("<option></option>").val(kode_produk).text(custom_nama);
                 sel_produk.empty().append($newOption).trigger('change');
 
-                var $newOption2 = $("<option></option>").val(uom).text(uom);
-                sel_uom.empty().append($newOption2).trigger('change');
+                // var $newOption2 = $("<option></option>").val(uom).text(uom);
+                // sel_uom.empty().append($newOption2).trigger('change');
 
             }
 
@@ -688,10 +696,52 @@
                 }
             });
 
+            sel_uom_beli.select2({
+                allowClear: true,
+                placeholder: "",
+                ajax: {
+                    url : "<?php echo base_url();?>ppic/procurementpurchase/get_list_uom_beli_select2",
+                    delay: 250,
+                    type: "POST",
+                    data: function (params) {
+                      return{
+                                prod:params.term,
+                                kode_produk: $(this).parents("tr").find("#kode_produk").val() 
+                            };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(JSON.parse(data), function (obj) {
+                                return {
+                                    id: obj.id,
+                                    text: obj.uom,
+                                    catatan: obj.catatan,
+                                    nilai:obj.nilai
+                                };
+                            })
+                        };
+                    }
+                }
+           
+            });
+
+            sel_uom_beli.on('select2:select', function (e) {
+              var gt_cata_uom_beli = $('#table_items tbody[id="tbody_items"] tr .'+class_uom_beli+' :selected').data().data.catatan;
+              $('.'+class_cata_uom_beli).html(gt_cata_uom_beli);
+            });
+
         }
 
-
     }
+
+
+    $(document).on("keyup", ".qty_beli", function(){
+        let qty_beli = $(this).val();
+        let uom_bei  = $(this).parents("tr").find("#uom_beli").val(); // id nilai konversi uom
+        let get_nilai = $(this).parents("tr").find("#uom_beli").find(':selected').data().data.nilai;
+        result    = qty_beli*get_nilai;
+        $(this).parents("tr").find("#qty").val(result);
+    });
 
   
     
