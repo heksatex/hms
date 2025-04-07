@@ -188,7 +188,9 @@ class Lokasi extends MY_Controller
 
   public function print_lokasi()
   {
-      $pdf=new PDF_Code128('l','mm',array(59.944,89.916));
+      // $pdf=new PDF_Code128('l','mm',array(59.944,89.916));
+      $pdf = new PDF_Code128('L','mm',array(90,60));
+
       $pdf->SetMargins(0,0,0,0);
       $pdf->SetAutoPageBreak(FALSE);
       
