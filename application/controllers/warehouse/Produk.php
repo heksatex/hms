@@ -15,6 +15,7 @@ class Produk extends MY_Controller {
         $this->load->model("m_user");
         $this->load->model("m_konversiuom");
         $this->load->model("m_coa");
+        $this->load->model("m_global");
         $this->load->library("upload");
         $this->load->library("token");
         $this->load->helper('file');
@@ -34,11 +35,10 @@ class Produk extends MY_Controller {
         $level = $this->session->userdata('nama')['level'] ?? "";
         if ($level === "Entry Data") {
             $masking = $this->m_coa->setTables("user_masking")->setSelects(["GROUP_CONCAT(mst_category_id) as category"])->setOrder(["mst_category_id"])->setWheres(["username" => $username])->getDetail();
-            if(!empty($masking->category)){
-            $list = $this->m_produk->setWhereRaw("id_category in ({$masking->category})")->get_datatables();
-            }
-            else {
-            $list = $this->m_produk->get_datatables();
+            if (!empty($masking->category)) {
+                $list = $this->m_produk->setWhereRaw("id_category in ({$masking->category})")->get_datatables();
+            } else {
+                $list = $this->m_produk->get_datatables();
             }
         } else {
             $list = $this->m_produk->get_datatables();
@@ -164,27 +164,47 @@ class Produk extends MY_Controller {
             } else {
                 $ids = 0;
                 //lock table
-                $this->_module->lock_tabel('token_increment WRITE, mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE, log_history WRITE, mst_status WRITE, mst_produk_parent WRITE, mst_jenis_kain WRITE, mst_produk_sub_parent WRITE');
+                $this->_module->lock_tabel('token_increment WRITE, mst_produk WRITE, mst_category WRITE, user WRITE, main_menu_sub WRITE,'
+                        . ' log_history WRITE, mst_status WRITE, mst_produk_parent WRITE,'
+                        . ' mst_jenis_kain WRITE, mst_produk_sub_parent WRITE,departemen WRITE');
 
                 //cek auto generate kode produk atau input sendiri
                 $autogenerate = $this->input->post('autogenerate');
                 $kategoribarang = $this->input->post('kategoribarang');
-
+                $autogenerate_gudang = $this->input->post('autogenerate_gudang');
                 //get id kategori barang
                 $nmKategori = $this->m_produk->get_nama_category_by_id($kategoribarang)->row_array();
+
                 $this->_module->startTransaction();
-                if ($autogenerate == 0) {
-                    $kodeproduk = addslashes($this->input->post('kodeproduk'));
-                } else {
-                    $kategoriPrefix = str_replace(" ", "_", $nmKategori["nama_category"]);
-                    $check = $this->token->exists(["modul" => strtolower($kategoriPrefix), "periode" => "-"]);
-                    if (!$check) {
-                        $kodeproduk = $this->_module->get_kode_product();
-                        $kodeproduk = 'MF' . $kodeproduk;
-                    } else {
-                        $kodeproduk = $this->token->noUrut(strtolower($kategoriPrefix), "-", true)->prefixAdd("")->generate($check->prefix, $check->format)->get();
+                if ($autogenerate === "1") {
+                    $kodeproduk = $this->_module->get_kode_product();
+                    $kodeproduk = 'MF' . $kodeproduk;
+                } else if ($autogenerate_gudang === "1") {
+                    $model = new $this->m_global;
+                    $check = $model->setTables("mst_category")->setJoins("departemen", "departemen.kode = dept_id")
+                                    ->setWheres(["mst_category.id" => $kategoribarang, "type_dept" => "gudang"])
+                                    ->setSelects(["mst_category.*"])->getDetail();
+                    if ($check === null) {
+                        $callback = array('status' => 'failed', 'field' => 'namaproduk', 'message' => 'Kode Generate Tidak tersedia', 'icon' => 'fa fa-warning',
+                            'type' => 'danger');
+                        throw new \Exception('', 500);
                     }
+                    $kodeproduk = $this->token->noUrut($check->dept_id, "", true)->generate($check->dept_id, "%d")->get();
+                } else {
+                    $kodeproduk = addslashes($this->input->post('kodeproduk'));
                 }
+//                if ($autogenerate == 0) {
+//                    $kodeproduk = addslashes($this->input->post('kodeproduk'));
+//                } else {
+//                    $kategoriPrefix = str_replace(" ", "_", $nmKategori["nama_category"]);
+//                    $check = $this->token->exists(["modul" => strtolower($kategoriPrefix), "periode" => "-"]);
+//                    if (!$check) {
+//                        $kodeproduk = $this->_module->get_kode_product();
+//                        $kodeproduk = 'MF' . $kodeproduk;
+//                    } else {
+//                        $kodeproduk = $this->token->noUrut(strtolower($kategoriPrefix), "-", true)->prefixAdd("")->generate($check->prefix, $check->format)->get();
+//                    }
+//                }
 
                 $id = $this->input->post('id'); //id produk auto increment
                 $nama_produk = ($this->input->post('namaproduk'));
@@ -255,10 +275,10 @@ class Produk extends MY_Controller {
                     $callback = array('status' => 'failed', 'field' => 'uom_lebarjadi', 'message' => 'Uom Lebar Jadi Harus Diisi !', 'icon' => 'fa fa-warning',
                         'type' => 'danger');
                     throw new \Exception('', 500);
-                } else if (empty($product_parent)) {
-                    $callback = array('status' => 'failed', 'field' => 'product_parent', 'message' => 'Product Parent Harus Diisi !', 'icon' => 'fa fa-warning',
-                        'type' => 'danger');
-                    throw new \Exception('', 500);
+                } else if (empty($product_parent) && $nmKategori["has_parent"] === "1") {
+                        $callback = array('status' => 'failed', 'field' => 'product_parent', 'message' => 'Product Parent Harus Diisi !', 'icon' => 'fa fa-warning',
+                            'type' => 'danger');
+                        throw new \Exception('', 500);
                 } else if (empty($jenis_kain) AND (strpos($nmKategori['nama_category'], 'Kain') !== FALSE)) {
                     $callback = array('status' => 'failed', 'field' => 'jenis_kain', 'message' => 'Jenis Kain Harus disini jika Kategori Barangnya Kain !', 'icon' => 'fa fa-warning',
                         'type' => 'danger');
@@ -347,7 +367,7 @@ class Produk extends MY_Controller {
                         }
 
                         $jenis_log = "edit";
-                        $note_log = $kodeproduk . " | " . $namaproduk . " | " . $uomproduk . " | " . $uomproduk2 . " | " . $lebargreige . " " . $uom_lebargreige . " | " . $lebarjadi . " " . $uom_lebarjadi . " | " . $routeproduksi . " | " . $typeproduk . " | " . $dapatdibeli . " | " . $dapatdijual . " | " . $nmKategori['nama_category'] . " | " . $log_bom . " | " . $parent['nama'] . " | " . $nama_sub_parent . " | " . $jk['nama_jenis_kain'] . " | " . $status_aktif;
+                        $note_log = $kodeproduk . " | " . $namaproduk . " | " . $uomproduk . " | " . $uomproduk2 . " | " . $lebargreige . " " . $uom_lebargreige . " | " . $lebarjadi . " " . $uom_lebarjadi . " | " . $routeproduksi . " | " . $typeproduk . " | " . $dapatdibeli . " | " . $dapatdijual . " | " . $nmKategori['nama_category'] . " | " . $log_bom . " | " . ($parent['nama'] ?? "") . " | " . $nama_sub_parent . " | " . $jk['nama_jenis_kain'] . " | " . $status_aktif;
                         $this->_module->gen_history($sub_menu, $kodeproduk, $jenis_log, ($note_log), $username);
                         $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' => 'fa fa-check', 'type' => 'success', 'id' => $sub_parent, 'nama' => $nama_sub_parent);
                     } else {
@@ -368,10 +388,10 @@ class Produk extends MY_Controller {
                             $kode_produk_before = addslashes($this->input->post('kode_produk_before'));
                             $nama_produk_before = addslashes($this->input->post('nama_produk_before'));
 
-                            $note_logs = "Duplicate dari Produk " . addslashes($kode_produk_before) . " " . addslashes($nama_produk_before) . "<br>" . $kodeproduk . " | " . $namaproduk . " | " . $uomproduk . " | " . $uomproduk2 . " | " . $lebargreige . " " . $uom_lebargreige . " | " . $lebarjadi . " " . $uom_lebarjadi . " | " . $routeproduksi . " | " . $typeproduk . " | " . $dapatdibeli . " | " . $dapatdijual . " | " . $nmKategori['nama_category'] . " | " . $log_bom . " | " . $parent['nama'] . " | " . $nama_sub_parent . " | " . $jk['nama_jenis_kain'] . " | " . $status_aktif;
+                            $note_logs = "Duplicate dari Produk " . addslashes($kode_produk_before) . " " . addslashes($nama_produk_before) . "<br>" . $kodeproduk . " | " . $namaproduk . " | " . $uomproduk . " | " . $uomproduk2 . " | " . $lebargreige . " " . $uom_lebargreige . " | " . $lebarjadi . " " . $uom_lebarjadi . " | " . $routeproduksi . " | " . $typeproduk . " | " . $dapatdibeli . " | " . $dapatdijual . " | " . $nmKategori['nama_category'] . " | " . $log_bom . " | " . ($parent['nama'] ?? "") . " | " . $nama_sub_parent . " | " . $jk['nama_jenis_kain'] . " | " . $status_aktif;
                             ;
                         } else {
-                            $note_logs = $kodeproduk . " | " . $namaproduk . " | " . $uomproduk . " | " . $uomproduk2 . " | " . $lebargreige . " " . $uom_lebargreige . " | " . $lebarjadi . " " . $uom_lebarjadi . " | " . $routeproduksi . " | " . $typeproduk . " | " . $dapatdibeli . " | " . $dapatdijual . " | " . $nmKategori['nama_category'] . " | " . $log_bom . " | " . $parent['nama'] . " | " . $nama_sub_parent . " | " . $jk['nama_jenis_kain'] . " | " . $status_aktif;
+                            $note_logs = $kodeproduk . " | " . $namaproduk . " | " . $uomproduk . " | " . $uomproduk2 . " | " . $lebargreige . " " . $uom_lebargreige . " | " . $lebarjadi . " " . $uom_lebarjadi . " | " . $routeproduksi . " | " . $typeproduk . " | " . $dapatdibeli . " | " . $dapatdijual . " | " . $nmKategori['nama_category'] . " | " . $log_bom . " | " . ($parent['nama'] ?? "") . " | " . $nama_sub_parent . " | " . $jk['nama_jenis_kain'] . " | " . $status_aktif;
                         }
 
                         $jenis_log = "create";
@@ -411,6 +431,7 @@ class Produk extends MY_Controller {
             echo json_encode($callback);
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
+            log_message("error",json_encode($ex));
             echo json_encode($callback);
         } finally {
             //unlock table
@@ -429,6 +450,8 @@ class Produk extends MY_Controller {
             show_404();
         $username = $this->session->userdata('username');
         $kode_decrypt = decrypt_url($id);
+        if(!$kode_decrypt)
+            show_404();
         $data['id_dept'] = 'MPROD';
         $data['mms'] = $this->_module->get_data_mms_for_log_history('MPROD'); // get mms by dept untuk log history
         $produk = $this->m_produk->get_produk_by_kode($kode_decrypt); //id auto increment
@@ -635,7 +658,7 @@ class Produk extends MY_Controller {
 //            if (!empty($search)) {
 //                $coa->setWhereRaw("(kode_coa like '%{$search}%' or nama like '%{$search}%')");
 //            }
-            $data = $coa->setWheres(['level' => 5])->setSearch(["kode_coa", "nama"])->setOrder(['kode_coa'=>"asc"])->setSelects(['kode_coa', 'nama'])->getData();
+            $data = $coa->setWheres(['level' => 5])->setSearch(["kode_coa", "nama"])->setOrder(['kode_coa' => "asc"])->setSelects(['kode_coa', 'nama'])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => $data)));
@@ -693,6 +716,19 @@ class Produk extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+    
+    public function get_view_konversi() {
+        try {
+            $html = $this->load->view('modal/v_produk_konversi_oum', [],true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger','data'=>$html)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger','data'=>"")));
         }
     }
 }

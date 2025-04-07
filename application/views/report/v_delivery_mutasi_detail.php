@@ -17,6 +17,7 @@ $sumUomDef = array(
 $sum = $sumDef;
 $sumUom = $sumUomDef;
 foreach ($list as $key => $value) {
+    $tgl_retur = "";
     $sum["total_qty"] += $value->total_qty;
     $sum["total_qty2"] += $value->total_qty2;
     $sum["total_qty_jual"] += $value->total_qty_jual;
@@ -30,6 +31,8 @@ foreach ($list as $key => $value) {
     } else {
         $sum["total_lot"] = $value->total_lot;
     }
+    if($rekap === 'barcode')
+        $tgl_retur = $value->tanggal_retur;
     ?>
     <tr>
         <td><?= $no ?></td>
@@ -53,6 +56,7 @@ foreach ($list as $key => $value) {
         <td><?= substr($value->note, 0, 50) ?></td>
         <td><?= $value->marketing ?></td>
         <td><?= $value->dod_status ?></td>
+        <td><?= $tgl_retur ?></td>
     </tr>
     <?php
     if ($summary === "1") {
@@ -81,8 +85,10 @@ foreach ($list as $key => $value) {
                     <td><?= substr($value->note, 0, 50) ?></td>
                     <td><?= $value->marketing ?></td>
                     <td></td>
+                    <td><?= $tgl_retur ?></td>
                 </tr>
                 <tr>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -136,6 +142,7 @@ foreach ($list as $key => $value) {
                 <td><?= substr($value->note, 0, 50) ?></td>
                 <td><?= $value->marketing ?></td>
                 <td></td>
+                <td><?= $tgl_retur ?></td>
             </tr>
             <?php
         }

@@ -103,6 +103,11 @@ class M_produk extends CI_Model {
         $this->db->from("mst_produk p");
         $this->db->JOIN("mst_category c", "p.id_category=c.id", "LEFT");
         $this->db->JOIN("mst_status s", "p.status_produk=s.kode", "LEFT");
+        if (count($this->wheresRaw) > 0) {
+            foreach ($this->wheresRaw as $key => $value) {
+                $this->db->where($value, null, false);
+            }
+        }
         return $this->db->count_all_results();
     }
 
@@ -177,7 +182,7 @@ class M_produk extends CI_Model {
     }
 
     public function get_nama_category_by_id($id) {
-        return $this->db->query("SELECT id,nama_category FROM mst_category WHERE id = '$id'");
+        return $this->db->query("SELECT id,nama_category,has_parent FROM mst_category WHERE id = '$id'");
     }
 
     public function save_produk($kode_produk, $nama_produk, $uom, $uom_2, $create_date, $route_produksi, $type, $dapat_dibeli,
