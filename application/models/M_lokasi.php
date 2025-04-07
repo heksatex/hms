@@ -130,7 +130,7 @@ class M_lokasi extends CI_Model
 		$this->db->JOIN("departemen b","a.dept_id=b.kode","INNER");
 		$this->db->where('a.id', $id);
 		$query  = $this->db->get();
-		return $query->row();
+		return $query;
 
 	}
 

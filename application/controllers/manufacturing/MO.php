@@ -1843,21 +1843,23 @@ class MO extends MY_Controller
                         //simpan fg hasil
                         foreach ($array_fg as $row) {
 
+                            $rowLot = preg_replace('/\s/', '', $row['lot']);
+
                             // cek lot yg sama di mrp fg hasil
-                            $cek_lot_input = $this->m_mo->get_data_lot_mrp_fg_hasil_by_lot($kode, trim($row['lot']));
+                            $cek_lot_input = $this->m_mo->get_data_lot_mrp_fg_hasil_by_lot($kode, trim($rowLot));
                             if(!empty($cek_lot_input) && $type_mo['type_mo'] == 'colouring') {
-                                $tmp_lot_fg .= $row['lot'].', ';
+                                $tmp_lot_fg .= $rowLot.', ';
                             }
 
                             //simpan fg hasil
-                            $sql_mrp_production_fg_hasil .= "('".$row['kode']."','".$move_id_fg."','".$start."','".$tgl."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".$nama_user['nama']."','".$row_order."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
+                            $sql_mrp_production_fg_hasil .= "('".$row['kode']."','".$move_id_fg."','".$start."','".$tgl."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".$nama_user['nama']."','".$row_order."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
 
                             //simpan stock move items produksi
-                            $sql_stock_move_items_batch .= "('".$move_id_fg."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_done."','".$row_order_smi."','', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+                            $sql_stock_move_items_batch .= "('".$move_id_fg."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_done."','".$row_order_smi."','', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
 
                         
                             //simpan stock quant dengan quant_id baru              
-                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$sm_tj['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
+                            $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".addslashes($row['grade'])."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$lokasi_fg['lokasi_tujuan']."','".addslashes($row['reff_note'])."','".$sm_tj['move_id']."','".$origin_mo."','".$tgl."','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."', '".addslashes($sales_order)."','".addslashes($sales_group)."'), ";
                             
                             $case11   .= "when quant_id = '".$start."' then '".$consume."'";
                             $where11  .= "'".$start."',";
@@ -1914,7 +1916,7 @@ class MO extends MY_Controller
                                 }
                         
                                 //simpan stock move item tujuan
-                                $sql_stock_move_items_batch .= "('".$sm_tj['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($row['lot']))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_ready."','".$row_order_smi_tujuan."','".addslashes($origin_prod)."', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
+                                $sql_stock_move_items_batch .= "('".$sm_tj['move_id']."', '".$start."','".addslashes($row['kode_produk'])."', '".addslashes($row['nama_produk'])."','".addslashes(trim($rowLot))."','".round($row['qty'],2)."','".addslashes($row['uom'])."','".round($row['qty2'],2)."','".addslashes($row['uom2'])."','".$status_ready."','".$row_order_smi_tujuan."','".addslashes($origin_prod)."', '".$tgl."','','".addslashes($row['lbr_greige'])."','".addslashes($row['uom_lbr_greige'])."','".addslashes($row['lbr_jadi'])."','".addslashes($row['uom_lbr_jadi'])."'), ";
 
                                 //update status stock move,stock move dan stock move produk  pengiriman brg = ready
                                 $case7  .= "when move_id = '".$sm_tj['move_id']."' then '".$status_ready."'";
@@ -1924,18 +1926,18 @@ class MO extends MY_Controller
 
                             //cek lot apa pernah diinput ?
                             if($cek_dl == 'true'){
-                                $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])))->row_array();
-                                if(strtoupper($cek_lot['lot']) == strtoupper(trim($row['lot']))){
-                                    $lot_double .= $row['lot'].',';
+                                $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($rowLot)))->row_array();
+                                if(strtoupper($cek_lot['lot']) == strtoupper(trim($rowLot))){
+                                    $lot_double .= $rowLot.',';
                                 }
                             }
 
                             /*
                             //cek lot apa pernah diinput ?
-                            $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($row['lot'])),'ADJ')->row_array();
-                            if($cek_lot['lot'] == trim($row['lot'])){
+                            $cek_lot = $this->m_mo->cek_lot_stock_quant(addslashes(trim($rowLot)),'ADJ')->row_array();
+                            if($cek_lot['lot'] == trim($rowLot)){
                                 //ambil lot double untuk alert
-                                $lot_double .= $row['lot'].',';
+                                $lot_double .= $rowLot.',';
                             }
                             */
 
@@ -1945,7 +1947,7 @@ class MO extends MY_Controller
                             $row_order_smi++;
                             $row_order_smi_tujuan++;
                             $jml_lot_fg++;
-                            $list_lot_fg .= trim($row['lot']).' <br> ';
+                            $list_lot_fg .= trim($rowLot).' <br> ';
                         }//foreach array_fg
                         
 
@@ -2459,7 +2461,7 @@ class MO extends MY_Controller
                 $origin_mo   = $this->input->post('origin_mo');
                 $kode_produk = $this->input->post('kode_produk');    
                 $nama_produk = $this->input->post('nama_produk');    
-                $lot         = $this->input->post('lot');
+                $lot         = preg_replace('/\s/', '', $this->input->post('lot'));
                 $qty         = $this->input->post('qty');
                 $uom         = $this->input->post('uom');
                 $qty2        = $this->input->post('qty2');
@@ -4945,8 +4947,8 @@ class MO extends MY_Controller
             $qty1_std           = $this->input->post('qty1_std');
             $qty2_std           = $this->input->post('qty2_std');
             $type_production    = $this->input->post('type_production');
-            $lot_prefix         = addslashes(trim($this->input->post('lot_prefix')));
-            $lot_prefix_waste   = trim($this->input->post('lot_prefix_waste'));
+            $lot_prefix         = preg_replace('/\s/', '', addslashes($this->input->post('lot_prefix')));
+            $lot_prefix_waste   = preg_replace('/\s/', '', $this->input->post('lot_prefix_waste'));
             $lebar_greige       = addslashes($this->input->post('lebar_greige'));
             $uom_lebar_greige   = addslashes($this->input->post('uom_lebar_greige'));
             $lebar_jadi         = addslashes($this->input->post('lebar_jadi'));
@@ -4956,7 +4958,6 @@ class MO extends MY_Controller
             $program            = addslashes($this->input->post('program'));
             $origin_mo          = addslashes($this->input->post('origin'));
             $alasan             = addslashes($this->input->post('alasan'));
-
             $show_lebar = $this->_module->cek_show_lebar_by_dept_id($deptid)->row_array();
 
             //cek status mrp_production = done
@@ -7095,21 +7096,21 @@ class MO extends MY_Controller
             $pdf->Multicell(74,5,"Lot : ".$barcode,0,'L');// Lot
             
             $pdf->SetFont('Arial','',12,'C');
-            $pdf->setXY(3,19);
+            $pdf->setXY(3,25);
             $pdf->Multicell(74,5,"Qty : ".round($qty,2)." ".$uom.", Qty2 : ".round($qty2,2)." ".$uom2,0,'L'); // qty
 
-            $pdf->setXY(3,24);
+            $pdf->setXY(3,30);
             $pdf->Multicell(74,5,"Tgl.HPH : ",0,'L');// Tgl buat/hph
 
-            $pdf->setXY(24,24);
+            $pdf->setXY(24,30);
             $pdf->Multicell(60,5," ".$tgl,0,'L');// isi Tgl buat/hph
 
             $pdf->SetFont('Arial','B',12,'C'); // set font
 
-            $pdf->setXY(3,30);
+            $pdf->setXY(3,35);
             $pdf->Multicell(74,5,"SC : ".$nh_sc,0,'L');// reff note
 
-            $pdf->setXY(3,35);
+            $pdf->setXY(3,40);
             if($nh_mc != ''){
                 $nh_mc = $nh_mc;
             }
@@ -7129,16 +7130,16 @@ class MO extends MY_Controller
                 $reff_note = ' - '.$GB;
             }
 
-            $pdf->Multicell(30,5,"Dept Tujuan : ",0,'L');// Caption Departemen Tujuan 
+            $pdf->Multicell(30,4,"Dept Tujuan : ",0,'L');// Caption Departemen Tujuan 
 
-            $pdf->setXY(32,35);
-            $pdf->Multicell(42,5,$nh_mc."".$reff_note,0,'L'); // Departemen Tujuan - MC - Reff note Lot
+            $pdf->setXY(32,40);
+            $pdf->Multicell(42,4,$nh_mc."".$reff_note,0,'L'); // Departemen Tujuan - MC - Reff note Lot
 
-            $pdf->setXY(3,44);
+            $pdf->setXY(3,48);
             $pdf->Multicell(74,5,"MO Tujuan   : ".$nh_mo,0,'L');// MO Tujuan
 
             $pdf->SetFont('Arial','B',8,'C'); // set font
-            $pdf->setXY(3,48);
+            $pdf->setXY(3,51);
             $pdf->Multicell(77,5,"Reff Picking : ".$reff_picking,0,'L');// reff picking pengiriman barang
 
             // $pdf->Code128(5,47,$barcode,70,8,'C',0,1); // barcode
@@ -7234,7 +7235,12 @@ class MO extends MY_Controller
     function barcode_tri($kode,$data_arr)
     {
        
-        $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
+        // $pdf=new PDF_Code128('p','mm',array(50,70));
+        $pdf=new PDF_Code128('l','mm',array(76.2,101.6));
+        // $pdf = new PDF_Code128('p','mm',array(80,101));
+        // // $pdf=new PDF_Code128('p','mm',array(88.9,50.8));
+        // // $pdf=new PDF_Code128('p','mm',array(89,101.6));
+
 
         $pdf->AddPage();
         $loop  = 1;
@@ -7253,36 +7259,41 @@ class MO extends MY_Controller
                 $barcode     = "Not Found";
                 $nama_grade  = "";
             }
-            
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,8);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 1
+            $pdf->Line(5, 10, 95, 10); // garis atas gunting
+
+            $pdf->SetDash(5,5); //5mm on, 5mm off
+            $pdf->Line(5, 18, 95, 18); // garis atas jahit
+            $pdf->SetDash(); //off
+
+
+            $pdf->SetFont('Arial','B',20,'C');
+            $pdf->setXY(0,8);
+            $pdf->Multicell(82,48,$barcode,0,'R');// Nama LOT 1
             //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
 
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,5);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+            $pdf->SetFont('Arial','B',30);
+            $pdf->setXY(82,6);
+            $pdf->Multicell(20,48,$nama_grade,0,'L'); // grade
             //$pdf->Cell(0,3,$nama_grade,0,1);//grade
             
-            $pdf->Code128(30,18,$barcode,110,23,'C');//barcode 1       
+            $pdf->Code128(5,40,$barcode,90,15,'C');//barcode 1       
             
-            
-            $pdf->Line(20, 47, 170, 47); // garis tengah
+            // $pdf->Line(5, 60, 95, 60); // garis bawah
             //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
 
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,54);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
-            //$pdf->Cell(100,30,$barcode,0,0,'R');
+            // $pdf->SetFont('Arial','B',25,'C');
+            // $pdf->setXY(10,54);
+            // $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
+            // //$pdf->Cell(100,30,$barcode,0,0,'R');
 
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,51);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
-            //$pdf->Cell(0,27,$nama_grade,0,1);//grade
+            // $pdf->SetFont('Arial','B',40);
+            // $pdf->setXY(120,51);
+            // $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+            // //$pdf->Cell(0,27,$nama_grade,0,1);//grade
 
-            $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
+            // $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
 
-            $pdf->Line(170,3,170,100);//vertical
+            // $pdf->Line(170,3,170,100);//vertical
 
             $loop++;
         }
@@ -7292,62 +7303,70 @@ class MO extends MY_Controller
     }
 
 
+
     function barcode_ins1($kode,$data_arr)
     {
        
-        $pdf=new PDF_Code128('l','mm',array(177.8,101.6));
-
-        $pdf->AddPage();
-      
-        $loop  = 1;
-        foreach ($data_arr as $val) {
-
-            if($loop == 2){
-                $pdf->AddPage();
-                $loop = 1;
-            }
-            
-            $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
-            if(isset($get)){
-                $barcode     = $get['lot'];
-                $nama_grade  = $get['nama_grade'];
-            }else{
-                $barcode     = "Not Found";
-                $nama_grade  = "";
-            }
-
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,8);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 1
-            //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
-
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,5);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
-            //$pdf->Cell(0,3,$nama_grade,0,1);//grade
-            
-            $pdf->Code128(30,18,$barcode,110,23,'C');//barcode 1       
-            
-            
-            $pdf->Line(20, 47, 170, 47); // garis tengah
-            //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
-
-            $pdf->SetFont('Arial','B',25,'C');
-            $pdf->setXY(10,54);
-            $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
-            //$pdf->Cell(100,30,$barcode,0,0,'R');
-
-            $pdf->SetFont('Arial','B',40);
-            $pdf->setXY(120,51);
-            $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
-            //$pdf->Cell(0,27,$nama_grade,0,1);//grade
-
-            $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
-
-            $pdf->Line(170,3,170,100);//vertical
-
-            $loop++;
-        }
+        $pdf=new PDF_Code128('l','mm',array(76.2,101.6));
+        
+ 
+         $pdf->AddPage();
+         $loop  = 1;
+         foreach ($data_arr as $val) {
+ 
+             if($loop == 2){
+                 $pdf->AddPage();
+                 $loop = 1;
+             }
+ 
+             $get    = $this->m_mo->get_data_fg_hasil_by_kode($kode,$val)->row_array();
+             if(isset($get)){
+                 $barcode     = $get['lot'];
+                 $nama_grade  = $get['nama_grade'];
+             }else{
+                 $barcode     = "Not Found";
+                 $nama_grade  = "";
+             }
+             $pdf->Line(5, 10, 95, 10); // garis atas gunting
+ 
+             $pdf->SetDash(5,5); //5mm on, 5mm off
+             $pdf->Line(5, 18, 95, 18); // garis atas jahit
+             $pdf->SetDash(); //off
+ 
+ 
+             $pdf->SetFont('Arial','B',20,'C');
+             $pdf->setXY(0,8);
+             $pdf->Multicell(82,48,$barcode,0,'R');// Nama LOT 1
+             //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
+ 
+             $pdf->SetFont('Arial','B',30);
+             $pdf->setXY(82,6);
+             $pdf->Multicell(20,48,$nama_grade,0,'L'); // grade
+             //$pdf->Cell(0,3,$nama_grade,0,1);//grade
+             
+             $pdf->Code128(5,40,$barcode,90,15,'C');//barcode 1       
+             
+             // $pdf->Line(5, 60, 95, 60); // garis bawah
+             //$pdf->Cell(150,30,'','B',1,'C');//garis tengah   
+ 
+             // $pdf->SetFont('Arial','B',25,'C');
+             // $pdf->setXY(10,54);
+             // $pdf->Multicell(110,10,$barcode,0,'R');// Nama LOT 2
+             // //$pdf->Cell(100,30,$barcode,0,0,'R');
+ 
+             // $pdf->SetFont('Arial','B',40);
+             // $pdf->setXY(120,51);
+             // $pdf->Multicell(30,13,$nama_grade,0,'L'); // grade
+             // //$pdf->Cell(0,27,$nama_grade,0,1);//grade
+ 
+             // $pdf->Code128(30,65,$barcode,110,23,'C');//barcode 2
+ 
+             // $pdf->Line(170,3,170,100);//vertical
+ 
+             $loop++;
+         }
+ 
+ 
 
 
         $pdf->Output();

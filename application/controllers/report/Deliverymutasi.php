@@ -151,6 +151,7 @@ class Deliverymutasi extends MY_Controller {
             $sheet->setCellValue('X1', 'Catatan');
             $sheet->setCellValue('Y1', 'Marketing');
             $sheet->setCellValue('Z1', 'Status');
+            $sheet->setCellValue('AA1', 'Tanggal Retur');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
 
@@ -209,6 +210,7 @@ class Deliverymutasi extends MY_Controller {
             }
 
             foreach ($list as $key => $value) {
+                $tgl_retur = "";
                 $rowStartData++;
                 $sum["total_qty"] += $value->total_qty;
                 $sum["total_qty2"] += $value->total_qty2;
@@ -223,6 +225,9 @@ class Deliverymutasi extends MY_Controller {
                 } else {
                     $sum["total_lot"] = $value->total_lot;
                 }
+
+                if ($rekap === 'barcode')
+                    $tgl_retur = $value->tanggal_retur;
 
                 $sheet->setCellValue("A" . $rowStartData, $no++);
                 $sheet->setCellValue('B' . $rowStartData, $value->no);
@@ -250,6 +255,7 @@ class Deliverymutasi extends MY_Controller {
                 $sheet->setCellValue('x' . $rowStartData, $value->note);
                 $sheet->setCellValue('y' . $rowStartData, $value->marketing ?? "-");
                 $sheet->setCellValue('z' . $rowStartData, $value->dod_status);
+                $sheet->setCellValue('aa' . $rowStartData, $tgl_retur);
                 if ($summary === "1") {
                     if (isset($list[$key + 1])) {
                         if ($value->no_sj . "_" . $value->dod_status !== $list[$key + 1]->no_sj . "_" . $list[$key + 1]->dod_status) {
@@ -280,6 +286,7 @@ class Deliverymutasi extends MY_Controller {
                             $sheet->setCellValue('x' . $rowStartData, $value->note);
                             $sheet->setCellValue('y' . $rowStartData, $value->marketing ?? "-");
                             $sheet->setCellValue('Z' . $rowStartData, "");
+                            $sheet->setCellValue('AA' . $rowStartData, "");
 
                             $rowStartData++;
                             $sheet->setCellValue("A" . $rowStartData, "");
@@ -308,6 +315,7 @@ class Deliverymutasi extends MY_Controller {
                             $sheet->setCellValue('X' . $rowStartData, "");
                             $sheet->setCellValue('Y' . $rowStartData, "");
                             $sheet->setCellValue('Z' . $rowStartData, "");
+                            $sheet->setCellValue('AA' . $rowStartData, "");
 
                             $sum = $sumDef;
                             $sumUom = $sumUomDef;
@@ -340,6 +348,7 @@ class Deliverymutasi extends MY_Controller {
                         $sheet->setCellValue('x' . $rowStartData, $value->note);
                         $sheet->setCellValue('y' . $rowStartData, $value->marketing ?? "-");
                         $sheet->setCellValue('Z' . $rowStartData, "");
+                        $sheet->setCellValue('AA' . $rowStartData, "");
                     }
                 }
                 $tempid = $value->no_sj;

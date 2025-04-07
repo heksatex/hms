@@ -11,6 +11,7 @@ class Lokasi extends MY_Controller
     $this->is_loggedin();//cek apakah user sudah login
     $this->load->model("_module");
     $this->load->model("m_lokasi");
+    $this->load->library('Pdf');//load library pdf
   }
 
 
@@ -38,7 +39,7 @@ class Lokasi extends MY_Controller
             $row[] = $field->nama_lokasi;
             $row[] = $field->arah_panah;
             $row[] = $field->nama_status;
-
+            $row[] = $field->id;
             $data[] = $row;
       }
         
@@ -71,7 +72,7 @@ class Lokasi extends MY_Controller
     $data['id_dept']  = $id_dept;
     $data['mms']      = $this->_module->get_data_mms_for_log_history($id_dept);// get mms by dept untuk menu yg beda-beda
     $data['warehouse'] = $this->_module->get_list_departement();
-    $data['lokasi']    = $this->m_lokasi->get_mst_lokasi_by_kode($kode_decrypt);
+    $data['lokasi']    = $this->m_lokasi->get_mst_lokasi_by_kode($kode_decrypt)->row();
     return $this->load->view('warehouse/v_lokasi_edit', $data);
 
   }
@@ -181,6 +182,91 @@ class Lokasi extends MY_Controller
     }
 
   	echo json_encode($callback);
+  }
+
+
+
+  public function print_lokasi()
+  {
+      // $pdf=new PDF_Code128('l','mm',array(59.944,89.916));
+      $pdf = new PDF_Code128('L','mm',array(90,60));
+
+      $pdf->SetMargins(0,0,0,0);
+      $pdf->SetAutoPageBreak(FALSE);
+      
+      $data_arr  = json_decode($this->input->get('lokasi'),true);  
+
+      if(empty($data_arr)){
+        $lokasi_id   =  array(); // id lokasi 
+      } else {
+        $lokasi_id  = $data_arr;
+      }
+
+      $data_print = [];
+      foreach($lokasi_id as $i){
+        $gt = $this->m_lokasi->get_mst_lokasi_by_kode($i)->result();
+        foreach($gt as $gts) {
+            $data_print[] = array(
+                            'kode_lokasi'=>$gts->kode_lokasi,
+                            'aisle'=>$gts->aisle,
+                            'bay'=>$gts->bay,
+                            'slot'=>$gts->slot,
+                            'panah'=>$gts->panah
+            );
+        }
+      }
+
+      foreach($data_print as $dp) {
+
+        $pdf->AddPage();
+        // $row = explode('^',$check1[$i]);
+    
+        $kode_lokasi  = $dp['kode_lokasi'];
+        $aisle = $dp['aisle'];
+        $bay   = $dp['bay'];
+        $slot  = $dp['slot'];
+        $panah = $dp['panah'];
+
+        $pdf->SetFont('Arial','B',15,'C');
+        $pdf->SetXY(1,2);
+
+
+        $pdf->Cell(5,3,'',0,1,'');
+
+        $pdf->Cell(5,10,'',0,0,'');
+        $pdf->SetTextColor(255,255,255);
+        $pdf->Cell(63,10,'KODE RACK : '.$kode_lokasi,0,1,'C',TRUE);
+        $pdf->Code128(7,16,$kode_lokasi,60,23,'C',0,1);//barcode
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->Cell(10,9,'',0,0,'');
+        $pdf->Cell(5,9,'',0,1);
+        $pdf->Cell(5,8,'',0,1);
+        $pdf->Cell(5,8,'',0,1);
+
+        $pdf->SetFont('Arial','B',25,'C');
+        $pdf->SetTextColor(255,255,255);
+        $pdf->Cell(11,5,'',0,0,'');
+        $pdf->Cell(14,10,$aisle,0,0,'C',TRUE);
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->Cell(25,10,$bay,0,0,'C');
+        $pdf->Cell(25,10,$slot,0,0,'L');
+        $pdf->Cell(25,5,'',0,1,'L');
+        if($panah=='1'){
+          $pdf->Image(base_url('dist/img/panah_atas.png'),60,5,-600);
+        }elseif($panah=='0'){
+          $pdf->Image(base_url('dist/img/panah_bawah.png'),60,5,-600);
+        }
+        $pdf->SetFont('Arial','',10,'C');
+        $pdf->Cell(25,15,'X/Aisle',0,0,'R');
+        $pdf->Cell(25,15,'Y/Bay',0,0,'C');
+        $pdf->Cell(25,15,'Z/Slot',0,0,'L');
+        $pdf->Cell(25,5,'',0,1,'L');
+
+    }
+      
+      $pdf->Output();
   }
 
 

@@ -1676,8 +1676,9 @@ class m_marketing extends CI_Model
 		$this->db->truncate();
 	}
 
-	function cek_data_in_table($corak,$warna,$lebar_jadi,$uom_lebar_jadi)
+	function cek_data_in_table($cat_id,$corak,$warna,$lebar_jadi,$uom_lebar_jadi)
 	{
+		$this->db->where('cat_id',$cat_id);
 		$this->db->where('corak',$corak);
 		$this->db->where('warna',$warna);
 		$this->db->where('lebar_Jadi',$lebar_jadi);

@@ -1717,7 +1717,7 @@ class Marketing extends MY_Controller
             foreach($get_data2_ as $pd){
 
                 // cek data in table
-                $cek_dt = $this->m_marketing->cek_data_in_table($pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+                $cek_dt = $this->m_marketing->cek_data_in_table($pd->cat_id,$pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
                 if($cek_dt){// update
                     $tmp_update = array(
                                 'cat_id_last'     =>$pd->cat_id,

@@ -81,7 +81,7 @@ class Outlet extends MY_Controller
                 if(empty($id)){
                     $callback = array('status' => 'failed', 'message' => 'Data KP/Lot Kosong / tidak ditemukan !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else if($cek_lot == 0){
-                    $callback = array('status' => 'failed', 'message' => 'Lot <b>'.$lot.'</b> belum masuk MG GJD !'.$method, 'icon' =>'fa fa-warning', 'type' => 'danger');
+                    $callback = array('status' => 'failed', 'message' => 'Lot <b>'.$lot.'</b> belum masuk MG GJD !', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }else{
 
                     $inlet     = $this->m_inlet->get_data_inlet_by_id($id);
