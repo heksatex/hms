@@ -151,7 +151,7 @@ class Deliverymutasi extends MY_Controller {
             $sheet->setCellValue('X1', 'Catatan');
             $sheet->setCellValue('Y1', 'Marketing');
             $sheet->setCellValue('Z1', 'Status');
-            $sheet->setCellValue('AA1', 'Tanggal Retur');
+            $sheet->setCellValue('AA1', 'Tanggal Retur / Batal');
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
 
@@ -227,7 +227,7 @@ class Deliverymutasi extends MY_Controller {
                 }
 
                 if ($rekap === 'barcode')
-                    $tgl_retur = $value->tanggal_retur;
+                    $tgl_retur = ($value->dod_status === 'cancel') ? $value->tanggal_batal : $value->tanggal_retur;
 
                 $sheet->setCellValue("A" . $rowStartData, $no++);
                 $sheet->setCellValue('B' . $rowStartData, $value->no);

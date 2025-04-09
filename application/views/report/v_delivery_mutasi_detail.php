@@ -32,7 +32,7 @@ foreach ($list as $key => $value) {
         $sum["total_lot"] = $value->total_lot;
     }
     if($rekap === 'barcode')
-        $tgl_retur = $value->tanggal_retur;
+        $tgl_retur = ($value->dod_status === 'cancel') ? $value->tanggal_batal :$value->tanggal_retur;
     ?>
     <tr>
         <td><?= $no ?></td>
