@@ -277,7 +277,7 @@
                                                 <th class="style bb ws">Catatan</th>
                                                 <th class="style bb ws">Marketing</th>
                                                 <th class="style bb ws">Status</th>
-                                                <th class="style bb ws">Tanggal Retur</th>
+                                                <th class="style bb ws">Tanggal Retur / Batal</th>
                                             </tr>
                                             <tbody id="tBody" class="ws">
 
