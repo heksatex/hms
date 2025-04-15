@@ -46,8 +46,8 @@
                                             <div class="col-md-3 col-xs-6">
                                                 <select class="form-control select2" name="report_date" id="report_date" required>
                                                     <option></option>
-                                                    <?php foreach ($dates as $key => $value) {?>
-                                                    <<option value="<?=$value->dt ?>"><?=$value->dt ?></option>
+                                                    <?php foreach ($dates as $key => $value) { ?>
+                                                        <<option value="<?= $value->dt ?>"><?= $value->dt ?></option>
                                                     <?php } ?>
                                                 </select>
                                             </div>
@@ -85,8 +85,18 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <button type="submit" class="btn btn-sm btn-default" name="btn-search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
-                                        <i class="fa fa-search"  style="color:green"></i> Search</button>
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <button type="submit" class="btn btn-sm btn-default" name="btn-search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                                <i class="fa fa-search"  style="color:green"></i> Search</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <button type="button" class="btn btn-sm btn-default" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
+                                                <i class="fa fa-file"  style="color:blue"></i> Export </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <br>
                                 <br>
@@ -106,7 +116,7 @@
                                 <?php
                                 foreach ($sales as $key => $value) {
                                     ?>
-                                                                                                                                                <option value="<?= $value->nama_sales_group ?>"><?= $value->nama_sales_group ?></option>
+                                                                                                                                                                        <option value="<?= $value->nama_sales_group ?>"><?= $value->nama_sales_group ?></option>
                                     <?php
                                 }
                                 ?>
@@ -218,6 +228,40 @@
                 },
                         false
                         );
+
+                $("#btn-excel").off("click").on("click", function () {
+                    var report_date = $("#report_date").val();
+                    if (report_date === "") {
+                        alert_notify("fa fa-check", "Tentukan Tanggal Report", "danger", function () {});
+                        return;
+                    }
+                    $.ajax({
+                        url: "<?= base_url('report/goodstopush/excel/') ?>",
+                        type: "post",
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        data: {
+                            report_date: report_date,
+                            sales: $("#sales").val(),
+                            lokasi: $("#lokasi").val()
+                        },
+                        success: function (data) {
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = data.data;
+                            a.download = data.text_name;
+                            document.body.appendChild(a);
+                            a.click();
+                        },
+                        error: function (jqXHR) {
+                            alert_notify("fa fa-check", jqXHR?.responseJSON?.message , "danger", function () {});
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {}, 100);
+                        }
+                    });
+                });
             });
         </script>
     </body>
