@@ -1615,6 +1615,10 @@ class m_marketing extends CI_Model
 	public function get_data_ready_goods_category()
 	{
 		$this->get_query_13();
+		$order = $this->order13;
+		foreach($order as $key => $value){
+			$this->db->order_by($key, $value);
+		}
 		$query = $this->db->get();
 		return $query->result();
 	}
