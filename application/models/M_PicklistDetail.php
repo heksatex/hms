@@ -49,8 +49,10 @@ class M_PicklistDetail extends CI_Model {
         $this->db->from($this->table . ' a');
 
         $this->db->join('stock_quant as sq', 'sq.quant_id = a.quant_id');
-        $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id", "left");
-        $this->db->join("delivery_order_detail dod", "(dod.barcode_id = a.barcode_id and dod.status = 'done')", "left");
+//        $this->db->join("bulk_detail dt", "dt.barcode = a.barcode_id", "left");
+        $this->db->join("bulk_detail dt", "dt.picklist_detail_id = a.id", "left");
+//        $this->db->join("delivery_order_detail dod", "(dod.barcode_id = a.barcode_id and dod.status = 'done')", "left");
+        $this->db->join("delivery_order_detail dod", "(dod.picklist_detail_id = a.id and dod.status = 'done')", "left");
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
