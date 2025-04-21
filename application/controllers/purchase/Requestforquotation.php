@@ -199,7 +199,7 @@ class Requestforquotation extends MY_Controller {
                 }
             }
 
-            $dataPO = ["no_po" => $nopo, 'supplier' => $supp, 'note' => $note, 'order_date' => null, 'create_date' => $createDokumen, 'status' => 'draft', "jenis" => $jenis];
+            $dataPO = ["no_po" => $nopo, 'supplier' => $supp, 'note' => $note, 'order_date' => date("Y-m-d H:i:s"), 'create_date' => $createDokumen, 'status' => 'draft', "jenis" => $jenis];
             $id_rfq = $this->m_po->save(array_merge($dataPO, ['cfb_manual' => ($cfb_manual ?? '0'), 'no_value' => $novalue]));
             if (is_null($id_rfq)) {
                 throw new \Exception('Gagal Menyimpan ' . $jenis, 500);
@@ -328,6 +328,7 @@ class Requestforquotation extends MY_Controller {
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
             $dpplain = $this->input->post("dpplain");
+            $foot_note = $this->input->post("foot_note");
 
             $this->form_validation->set_rules($validation);
             if ($this->form_validation->run() == FALSE) {
@@ -379,12 +380,13 @@ class Requestforquotation extends MY_Controller {
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,
-                "no_value" => $noVal, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date]);
+            $update = ["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,
+                "no_value" => $noVal, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date,'foot_note'=>$foot_note];
+            $po->setWheres(["no_po" => $kode_decrypt])->update($update);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit',"Header -> ".logArrayToString('; ', $update, " : ")."<br> Detail -> ". logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));

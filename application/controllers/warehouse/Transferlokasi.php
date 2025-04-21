@@ -145,6 +145,7 @@ class Transferlokasi extends MY_Controller
 	      	$dept_id    = addslashes($this->input->post('departemen'));
 	      	$note       = addslashes($this->input->post('note'));
 	      	$lokasi_tujuan = addslashes(strtoupper($this->input->post('lokasi_tujuan')));
+			$lokasi_dari= addslashes(strtoupper($this->input->post('lokasi_dari')));
 	      	$tgl        = date('Y-m-d H:i:s');
 	      	$status     = 'draft';
 
@@ -169,15 +170,24 @@ class Transferlokasi extends MY_Controller
 	      		$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Sudah Tidak Aktif !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      	}else if(empty($lokasi_tujuan)){
 	      		$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+			// }else if($dept_id == 'GSP' && empty($lokasi_dari)){
+			// 	$callback = array('status' => 'failed', 'field' => 'lokasi_dari', 'message' => 'Lokasi Dari Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+			// }else if($dept_id == 'GSP' && $lokasi_dari == $lokasi_tujuan){
+			// 	$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan tidak boleh sama dengan Lokasi Dari !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 	      	}else{
 
                 $nmd = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
                 $nama_departemen = $nmd['nama'];
 
-	      		 // cek lokasi tujuan apa valid  berdasarkan lokasi departemen
-	      		$validLokasiTujuan = $this->m_transferLokasi->valid_lokasi_tujuan_by_dept($dept_id,$lokasi_tujuan);
+				// cek lokasi dari valid berdasarkan departemen
+				$validLokasiDari = $this->m_transferLokasi->valid_lokasi_by_dept($dept_id,$lokasi_dari);
 
-	      		if(!$validLokasiTujuan){
+	     		 // cek lokasi tujuan apa valid  berdasarkan lokasi departemen
+	      		$validLokasiTujuan = $this->m_transferLokasi->valid_lokasi_by_dept($dept_id,$lokasi_tujuan);
+
+				if(!$validLokasiDari && $dept_id == 'GSP' && !empty($lokasi_dari)){
+					$callback = array('status' => 'failed', 'field' => 'lokasi_dari', 'message' => 'Lokasi Dari Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
+			  	}else if(!$validLokasiTujuan){
 	      			$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan Tidak Valid !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 				}else if($dept_id == "GJD" AND $lokasi_tujuan == "XPD"){
 					$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan di Departemen Gudang Jadi tidak boleh XPD !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
@@ -203,10 +213,10 @@ class Transferlokasi extends MY_Controller
 							
 							$kode = $this->m_transferLokasi->get_kode_tl();
 							$last_id_encr = encrypt_url($kode);
-							$this->m_transferLokasi->save_transfer_lokasi($kode,$tgl,$note,$dept_id,$lokasi_tujuan,$nama_user['nama'],$status);
+							$this->m_transferLokasi->save_transfer_lokasi($kode,$tgl,$note,$dept_id,$lokasi_dari,$lokasi_tujuan,$nama_user['nama'],$status);
 							
 							$jenis_log   = "create";
-							$note_log    = $nama_departemen." | ".$lokasi_tujuan." | ".$note;
+							$note_log    = $nama_departemen." | ".$lokasi_dari." | ".$lokasi_tujuan." | ".$note;
 							$this->_module->gen_history($sub_menu, $kode, $jenis_log, $note_log, $username);
 							$callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $last_id_encr, 'icon' =>'fa fa-check', 'type' => 'success');
 						}
@@ -223,10 +233,10 @@ class Transferlokasi extends MY_Controller
 							$callback = array('status' => 'failed', 'field' => 'lokasi_tujuan', 'message' => 'Lokasi Tujuan tidak bisa dirubah !', 'icon' =>'fa fa-warning', 'type' => 'danger'  ); 
 						}else{
 
-							$this->m_transferLokasi->update_transfer_lokasi($kode_tl,$lokasi_tujuan,$note);
+							$this->m_transferLokasi->update_transfer_lokasi($kode_tl,$lokasi_dari,$lokasi_tujuan,$note);
 
 							$jenis_log   = "edit";
-				            $note_log    = $nama_departemen." | ".$lokasi_tujuan." | ".$note;
+				            $note_log    = $nama_departemen." | ".$lokasi_dari." | ".$lokasi_tujuan." | ".$note;
 				          	$this->_module->gen_history($sub_menu, $kode_tl, $jenis_log, $note_log, $username);
 							$callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !',  'icon' =>'fa fa-check', 'type' => 'success');
 						}
@@ -255,6 +265,7 @@ class Transferlokasi extends MY_Controller
 
 	    	$kode_tl  = addslashes($this->input->post('kode'));
 	    	$dept_id  = addslashes($this->input->post('dept_id'));
+	      	$lokasi_dari = addslashes($this->input->post('lokasi_dari'));
 	      	$lokasi_tujuan = addslashes($this->input->post('lokasi_tujuan'));
 	      	$barcode_id    = addslashes($this->input->post('barcode_id'));
 
@@ -283,7 +294,7 @@ class Transferlokasi extends MY_Controller
 	      		$validLokasiTujuanBy = $this->m_transferLokasi->is_valid_lokasi_tujuan_by_kode($kode_tl,$lokasi_tujuan);
                   
 	      		// cek lokasi tujuan berdasarkan departemen
-	      		$validLokasiTujuan = $this->m_transferLokasi->valid_lokasi_tujuan_by_dept($dept_id,$lokasi_tujuan);
+	      		$validLokasiTujuan = $this->m_transferLokasi->valid_lokasi_by_dept($dept_id,$lokasi_tujuan);
 
 	      		// validasi barcode
 	      		$validBarcode = $this->m_transferLokasi->verified_barcode_by_dept($lokasi_stock,$barcode_id);
@@ -343,7 +354,11 @@ class Transferlokasi extends MY_Controller
 		      			$ro = $this->m_transferLokasi->get_row_order_transfer_lokasi_item_by_kode($kode_tl);
 		      			$count = 0;
 		      			// get barcode di stock_quant
-		      			$items = $this->m_transferLokasi->get_list_stock_quant_by_kode($lokasi_stock,$barcode_id);
+						if($dept_id == 'GSP'){
+							$items = $this->m_transferLokasi->get_list_stock_quant_by_kode2($lokasi_stock,$lokasi_dari,$barcode_id);
+						}else{
+							$items = $this->m_transferLokasi->get_list_stock_quant_by_kode($lokasi_stock,$barcode_id);
+						}
 		      			foreach ($items as $val) {
 		      				# code...
 		      				$quant_id     = $val->quant_id;

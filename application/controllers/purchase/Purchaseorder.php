@@ -60,7 +60,7 @@ class Purchaseorder extends MY_Controller {
                             ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
                             ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
                             ->setJoins("purchase_order_edited poe", "(po.no_po = poe.po_id and poe.status not in ('done','cancel') )", "left")
-                            ->setSelects(["po.*", "p.nama as supp", "currency.symbol,currency.nama as curr_name", "poe.status as edited_status"])
+                            ->setSelects(["po.*", "p.nama as supp", "currency.symbol,currency.nama as curr_name", "poe.status as edited_status,poe.alasan"])
                             ->setWheres(["po.no_po" => $kode_decrypt])
                             ->setWhereRaw("po.status in ('done','cancel','purchase_confirmed','exception')")->getDetail();
             if (!$data["po"]) {
@@ -408,6 +408,7 @@ class Purchaseorder extends MY_Controller {
 
             $ids = $this->input->post("ids");
             $status = $this->input->post("status");
+            $alasan = $this->input->post("alasan");
             $kode_decrypt = decrypt_url($ids);
             if (!$kode_decrypt) {
                 throw new \Exception('Tidak dapat Dilakukan', 500);
@@ -428,6 +429,9 @@ class Purchaseorder extends MY_Controller {
                         $update = true;
                         $model2->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt, "status" => "exception"])->update(["status" => "purchase_confirmed"]);
                         break;
+                    case "approve":
+                        $update = true;
+                        break;
                 }
                 if ($update) {
                     $model->update(["status" => $status]);
@@ -439,9 +443,9 @@ class Purchaseorder extends MY_Controller {
                 }
                 throw new \Exception("PO Sedang Dalam Status " . (($cek->nama_status === 'null') ? $cek->nama_status : $cek->status), 500);
             }
-            $model->save(["po_id" => $kode_decrypt, "status" => "{$status}", "created_at" => date("Y-m-d H:i:s")]);
+            $model->save(["po_id" => $kode_decrypt, "status" => "{$status}", "created_at" => date("Y-m-d H:i:s"), "alasan" => $alasan]);
             $model2->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt])->update(["status" => "exception"]);
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status} Edit Harga", $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Permintaan Untuk {$status} Edit Harga ({$alasan})", $username);
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);

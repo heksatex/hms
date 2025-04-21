@@ -173,18 +173,41 @@
                                             <?php
                                         }
                                     } else {
+                                        if (in_array(strtolower($user->level), ["super administrator", 'direksi'])) {
+                                            if ($po->edited_status === "request") {
+                                                ?>
+                                                <button class="btn btn-primary btn-sm approve_edit" data-status="approve"> Approve Edit Harga </button>
+                                                <?php
+                                            } else {
+                                                ?>
+                                                <span class="label label-warning text-black text-uppercase"><?= str_replace("_", " ", $po->edited_status) ?> Edit Harga</span>
+                                                <?php
+                                            }
+                                            ?>
+
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <span class="label label-warning text-black text-uppercase"><?= str_replace("_", " ", $po->edited_status) ?> Edit Harga</span>
+                                            <?php
+                                        }
                                         ?>
-                                        <span class="label label-warning text-black text-uppercase"><?= str_replace("_", " ", $po->edited_status) ?> Edit Harga</span>
+                                        <br>
+                                        <span class="label label-danger text-black"><?= $po->alasan ?></span>
                                         <!--<button class="btn btn-primary btn-sm request_edit" data-status="cancel"> Cancel Request </button>-->
-                                        <style>
-                                            #btn-print {
-                                                display:none;
-                                            }
-                                            #btn-approve,#btn-simpan {
-                                                display:inline-block
-                                            }
-                                        </style>
                                         <?php
+                                        if ($po->edited_status === "approve") {
+                                            ?>
+                                            <style>
+                                                #btn-print {
+                                                    display:none;
+                                                }
+                                                #btn-approve,#btn-simpan {
+                                                    display:inline-block
+                                                }
+                                            </style>
+                                            <?php
+                                        }
                                     }
                                     ?>
 
@@ -492,7 +515,7 @@
                                                                             <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
                                                                             <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                             <input type="hidden" name="id_konversiuom[<?= $value->id ?>]"  value="<?= $value->id_konversiuom ?>">
-                                                                            <input type="hidden" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                                            <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
                                                                             <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>" disabled>
                                                                                 <option></option>
                                                                                 <?php
@@ -518,13 +541,12 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group text-right">
-                                                                        <input type="hidden" name="tax[<?= $value->id ?>]"  value="<?= $value->tax_id ?>">
-                                                                        <select style="width: 70%" class="form-control tax input-xs"  disabled>
+                                                                        <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs" name="tax[<?= $value->id ?>]" data-row="<?= $key ?>">
                                                                             <option></option>
                                                                             <?php
                                                                             foreach ($tax as $key => $taxs) {
                                                                                 ?>
-                                                                                <option value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                <option data-nilai_tax="<?= $taxs->amount ?>" value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                                 <?php
                                                                             }
                                                                             ?>
@@ -700,7 +722,7 @@
                     });
 
 
-                    $(".request_edit").off("click").unbind("click").on("click", function () {
+                    $(".approve_edit").off("click").unbind("click").on("click", function () {
                         var datastatus = $(this).data("status");
                         confirmRequest("Purchase Order", datastatus.toUpperCase() + " Edit PO ? ", function () {
                             $.ajax({
@@ -724,6 +746,41 @@
                                     });
                                 }
                             });
+                        });
+                    });
+                    $(".request_edit").off("click").unbind("click").on("click", function () {
+                        var datastatus = $(this).data("status");
+                        bootbox.prompt({
+                            title: "Alasan Request Edit",
+                            centerVertical: true,
+                            callback: function (result) {
+                                if (!result)
+                                    return;
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: "<?= base_url('purchase/purchaseorder/request_edit/') ?>",
+                                    data: {
+                                        ids: "<?= $id ?>",
+                                        status: datastatus,
+                                        alasan: result
+                                    },
+                                    beforeSend: function (xhr) {
+                                        please_wait(function () {});
+                                    },
+                                    success: function (data) {
+                                        location.reload();
+                                    },
+                                    error: function (req, error) {
+                                        unblockUI(function () {
+                                            setTimeout(function () {
+                                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                            }, 500);
+                                        });
+                                    }
+                                });
+
+                            }
                         });
                     });
 
@@ -862,6 +919,12 @@
                     allowClear: true,
                     placeholder: "Pajak"
 
+                });
+                
+                 $(".tax").on("select2:select", function () {
+                    var row = $(this).attr("data-row");
+                    var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
+                    $(".amount_tax_" + row).val(selectedSelect2OptionSource);
                 });
 
                 $("#currency").on("select2:select", function () {

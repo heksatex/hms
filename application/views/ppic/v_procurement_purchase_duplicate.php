@@ -188,7 +188,7 @@
                     <option value="">Pilih Priority</option>
                     <?php 
                     $val = array('Normal','Urgent');
-                    for($i=0;$i<=2;$i++) {
+                    for($i=0;$i<=1;$i++) {
                       if($val[$i] == $procurementpurchase->priority){?>
                          <option selected><?php echo $val[$i];?></option>
                       <?php
@@ -596,8 +596,8 @@
                 var $newOption = $("<option></option>").val(kode_produk).text(custom_nama);
                 sel_produk.empty().append($newOption).trigger('change');
 
-                // var $newOption2 = $("<option></option>").val(uom).text(uom);
-                // sel_uom.empty().append($newOption2).trigger('change');
+                var $newOption2 = $("<option></option>").val(uom).text(uom);
+                sel_uom.empty().append($newOption2).trigger('change');
 
             }
 

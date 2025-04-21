@@ -123,6 +123,7 @@ class Fpt extends MY_Controller {
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
             $dpplain = $this->input->post("dpplain");
+            $foot_note = $this->input->post("foot_note");
 
             $this->form_validation->set_rules($validation);
             if ($this->form_validation->run() == FALSE) {
@@ -168,9 +169,10 @@ class Fpt extends MY_Controller {
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["currency" => $currency, "nilai_currency" => $nilai_currency,
-                'note' => $note, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date]);
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $log_update, " : "), $username);
+            $update = ["currency" => $currency, "nilai_currency" => $nilai_currency,'foot_note'=>$foot_note,
+                'note' => $note, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date];
+            $po->setWheres(["no_po" => $kode_decrypt])->update($update);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit',"Header -> ".logArrayToString('; ', $update, " : ")."<br> Detail -> ". logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));

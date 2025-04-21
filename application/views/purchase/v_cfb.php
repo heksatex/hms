@@ -274,7 +274,7 @@
                         alert_notify("fa fa-warning", "Pilihan Item masih kosong", "danger", function () {});
                         return;
                     }
-                    confirmRequest("Call For Bid", "Tandai CFB telah selesai ? ", function () {
+                //    confirmRequest("Call For Bid", "Tandai CFB telah selesai ? ", function () {
                         const dataStatus = new Promise((resolve, reject) => {
                             let dt = [];
                             $.each(rows_selected, function (index, rowId) {
@@ -307,7 +307,7 @@
                             alert_notify("fa fa-warning", e.message, "danger", function () {});
                         });
 
-                    });
+                //    });
                 });
 
                 $(".confirm-order").on("click", function (e) {
@@ -317,7 +317,7 @@
                         alert_notify("fa fa-warning", "Pilihan Item masih kosong", "danger", function () {});
                         return;
                     }
-                    confirmRequest("Call For Bid", "Konfirmasi Permintaan Pesanan ? ", function () {
+              //      confirmRequest("Call For Bid", "Konfirmasi Permintaan Pesanan ? ", function () {
 //                        please_wait(function () {});
 
                         const dataStatus = new Promise((resolve, reject) => {
@@ -354,7 +354,7 @@
                             alert_notify("fa fa-warning", e.message, "danger", function () {});
                         });
 
-                    });
+                  //  });
                 });
 
                 $(".add-rfq").on("click", function (e) {

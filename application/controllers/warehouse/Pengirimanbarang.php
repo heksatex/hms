@@ -2055,6 +2055,7 @@ class Pengirimanbarang extends MY_Controller
             $status_brg = 'ready';
             $tgl        = date('Y-m-d H:i:s');
             $sql_stock_quant_batch      = "";
+            $sql_stock_quant_batch_array = [];
             $sql_stock_move_items_batch = "";
             $case ="";
             $where="";
@@ -2203,7 +2204,36 @@ class Pengirimanbarang extends MY_Controller
                                   //$where_move_items .= "'".$stock['move_id']."',";
 
                                   //insert stock_quant_batch
-                                  $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".addslashes($stock['nama_grade'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$lokasi['lokasi_dari']."','".addslashes($stock['reff_note'])."','".$move_id."','".$stock['reserve_origin']."','".$tgl."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."','".addslashes($stock['sales_order'])."','".addslashes($stock['sales_group'])."'), ";
+                                  //ini ganti
+                                  //$sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."',
+                                  //'".addslashes($stock['nama_grade'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$lokasi['lokasi_dari']."',
+                                  //'".addslashes($stock['reff_note'])."','".$move_id."','".$stock['reserve_origin']."','".$tgl."','".addslashes($stock['lebar_greige'])."',
+                                  //'".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."','".addslashes($stock['sales_order'])."',
+                                  //'".addslashes($stock['sales_group'])."'), ";
+                                  $sql_stock_quant_batch_array[] = [
+                                      "quant_id"=>$start,
+                                      "create_date"=>$tgl,
+                                      "kode_produk"=>addslashes($kode_produk),
+                                      "nama_produk"=>addslashes($nama_produk),
+                                      "lot"=>addslashes($stock['lot']),
+                                      "nama_grade"=>addslashes($stock['nama_grade']),
+                                      "qty"=>$kebutuhan_qty,
+                                      "uom"=>addslashes($uom),
+                                      "qty2"=>$qty2_new,
+                                      "uom2"=>addslashes($stock['uom2']),
+                                      "lokasi"=>$lokasi['lokasi_dari'],
+                                      "reff_note"=>addslashes($stock['reff_note']),
+                                      "reserve_move"=>$move_id,
+                                      "reserve_origin"=>$stock['reserve_origin'],
+                                      "move_date"=>$tgl,
+                                      "lebar_greige"=>addslashes($stock['lebar_greige']),
+                                      "uom_lebar_greige"=>addslashes($stock['uom_lebar_greige']),
+                                      "lebar_jadi"=>addslashes($stock['lebar_jadi']),
+                                      "uom_lebar_jadi"=>addslashes($stock['uom_lebar_jadi']),
+                                      "sales_order"=>addslashes($stock['sales_order']),
+                                      "sales_group"=>addslashes($stock['sales_group']),
+                                      "lokasi_fisik"=>addslashes($stock['lokasi_fisik'])
+                                  ];
                                   //insert  stock move items batch
                                   $sql_stock_move_items_batch .= "('".$move_id."', '".$start."','".addslashes($kode_produk)."', '".addslashes($nama_produk)."','".addslashes($stock['lot'])."','".$kebutuhan_qty."','".addslashes($uom)."','".$qty2_new."','".addslashes($stock['uom2'])."','".$status_brg."','".$row_order."','".addslashes($origin_prod)."', '".$tgl."','".addslashes($stock['lokasi_fisik'])."','".addslashes($stock['lebar_greige'])."','".addslashes($stock['uom_lebar_greige'])."','".addslashes($stock['lebar_jadi'])."','".addslashes($stock['uom_lebar_jadi'])."'), ";
                                   $row_order++;
@@ -2271,7 +2301,34 @@ class Pengirimanbarang extends MY_Controller
                                         $case_qty2 = "when quant_id = '".$val['quant_id']."' then '".$qty2_update."'";
 
                                         //insert qty stock_quant_batch dengan quant_id baru 
-                                        $sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($cek_sq['kode_produk'])."', '".addslashes($cek_sq['nama_produk'])."','".addslashes(trim($cek_sq['lot']))."','".addslashes($cek_sq['nama_grade'])."','".$qty_lebih."','".addslashes($cek_sq['uom'])."','".$qty2_new."','".addslashes($cek_sq['uom2'])."','".$cek_sq['lokasi']."','".addslashes($cek_sq['reff_note'])."','','".$cek_sq['reserve_origin']."','".$tgl."','".addslashes($cek_sq['lebar_greige'])."','".addslashes($cek_sq['uom_lebar_greige'])."','".addslashes($cek_sq['lebar_jadi'])."','".addslashes($cek_sq['uom_lebar_jadi'])."','".addslashes($cek_sq['sales_order'])."','".addslashes($cek_sq['sales_group'])."'), ";
+                                        //ini ganti
+                                        //$sql_stock_quant_batch .= "('".$start."','".$tgl."', '".addslashes($cek_sq['kode_produk'])."', '".addslashes($cek_sq['nama_produk'])."','".addslashes(trim($cek_sq['lot']))."',
+                                        //'".addslashes($cek_sq['nama_grade'])."','".$qty_lebih."','".addslashes($cek_sq['uom'])."','".$qty2_new."','".addslashes($cek_sq['uom2'])."','".$cek_sq['lokasi']."',
+                                        //'".addslashes($cek_sq['reff_note'])."','','".$cek_sq['reserve_origin']."','".$tgl."','".addslashes($cek_sq['lebar_greige'])."','".addslashes($cek_sq['uom_lebar_greige'])."',
+                                        //'".addslashes($cek_sq['lebar_jadi'])."','".addslashes($cek_sq['uom_lebar_jadi'])."','".addslashes($cek_sq['sales_order'])."','".addslashes($cek_sq['sales_group'])."'), ";
+                                        $sql_stock_quant_batch_array[] = [
+                                      "quant_id"=>$start,
+                                      "create_date"=>$tgl,
+                                      "kode_produk"=>addslashes($kode_produk),
+                                      "nama_produk"=>addslashes($nama_produk),
+                                      "lot"=>addslashes(trim($cek_sq['lot'])),
+                                      "nama_grade"=>addslashes($cek_sq['nama_grade']),
+                                      "qty"=>$qty_lebih,
+                                      "uom"=>addslashes($cek_sq['uom']),
+                                      "qty2"=>$qty2_new,
+                                      "uom2"=>addslashes($cek_sq['uom2']),
+                                      "lokasi"=>$cek_sq['lokasi'],
+                                      "reff_note"=>addslashes($cek_sq['reff_note']),
+                                      "reserve_origin"=>$cek_sq['reserve_origin'],
+                                      "move_date"=>$tgl,
+                                      "lebar_greige"=>addslashes($cek_sq['lebar_greige']),
+                                      "uom_lebar_greige"=>addslashes($cek_sq['uom_lebar_greige']),
+                                      "lebar_jadi"=>addslashes($cek_sq['lebar_jadi']),
+                                      "uom_lebar_jadi"=>addslashes($cek_sq['uom_lebar_jadi']),
+                                      "sales_order"=>addslashes($cek_sq['sales_order']),
+                                      "sales_group"=>addslashes($cek_sq['sales_group']),
+                                      "lokasi_fisik"=>addslashes($cek_sq['lokasi_fisik'])
+                                  ];                                        
                                         $start++;
 
                                         $qty_lebih = 0;
@@ -2307,11 +2364,15 @@ class Pengirimanbarang extends MY_Controller
 
 
                         //* insert dan update data 
-                        if(!empty($sql_stock_quant_batch)){
-                          $sql_stock_quant_batch = rtrim($sql_stock_quant_batch, ', ');
-                          $this->_module->simpan_stock_quant_batch($sql_stock_quant_batch);
-                          $sql_stock_quant_batch      = "";
-     
+//                        if(!empty($sql_stock_quant_batch)){
+//                          $sql_stock_quant_batch = rtrim($sql_stock_quant_batch, ', ');
+//                          $this->_module->simpan_stock_quant_batch($sql_stock_quant_batch);
+//                          $sql_stock_quant_batch      = "";
+//     
+//                        }
+                        if(count($sql_stock_quant_batch_array) > 0){
+                            $this->_module->simpan_stock_quant_batch_2($sql_stock_quant_batch_array);
+                            $sql_stock_quant_batch_array = [];
                         }
 
                         if(!empty($sql_stock_move_items_batch)){

@@ -2185,7 +2185,7 @@ class Penerimaanbarang extends MY_Controller {
             $printer->feed();
             $printer->feed();
             $printer->feed();
-            $printer->text("(__________) (__________) (" . ($users["nama"]) . ")");
+            $printer->text(str_pad("(__________)",12). str_pad("(__________) ",12) . " " . str_pad("(" . substr(($users["nama"]), 0, 14) . ")",14," ", STR_PAD_RIGHT )  );
             $printer->feed();
             $printer->feed();
             $datas = $connector->getData();

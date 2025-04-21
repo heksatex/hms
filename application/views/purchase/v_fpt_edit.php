@@ -217,6 +217,16 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="form-group">
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">Foot Note (Print)</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8 text-uppercase">
+                                                        <textarea class="form-control" id="foot_note" name="foot_note"><?= $po->foot_note ?></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                             <!--                                            <div class="form-group">
                                                                                             <div class="col-md-12 col-xs-12">
@@ -724,10 +734,11 @@
                 });
                 $("#btn-update-status").off("click").unbind("click").on("click", function () {
                     var status = $(this).data("status");
-                    confirmRequest("FPT", "Update Status FPT ? ", function () {
-                        please_wait(function () {});
-                        updateStatus(status);
-                    });
+//                    confirmRequest("FPT", "Update Status FPT ? ", function () {
+//                        please_wait(function () {});
+//                        updateStatus(status);
+//                    });
+                    updateStatus(status);
                 });
                 $("#btn-cancel").off("click").unbind("click").on("click", function () {
                     var status = "cancel";
@@ -739,10 +750,11 @@
 
                 $("#btn-approve").off("click").unbind("click").on("click", function () {
                     var status = "done";
-                    confirmRequest("FPT", "Selesaikan FPT ? ", function () {
-                        please_wait(function () {});
-                        updateStatus(status);
-                    });
+//                    confirmRequest("FPT", "Selesaikan FPT ? ", function () {
+//                        please_wait(function () {});
+//                        updateStatus(status);
+//                    });
+                    updateStatus(status);
                 });
 
 

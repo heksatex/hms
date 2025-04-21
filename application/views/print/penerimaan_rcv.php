@@ -204,10 +204,10 @@
                 <br>
                 <div id="row" style="font-size: 12px">
                     <div id="column">
-                        <p>_________</p>
+                        <p>(____________)</p>
                     </div>
                     <div id="column">
-                        <p>_________</p>
+                        <p>(_____________)</p>
                     </div>
                     <div id="column">
                         <p>(<?= $users["nama"] ?? "" ?>)</p>

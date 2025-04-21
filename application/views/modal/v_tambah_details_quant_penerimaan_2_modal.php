@@ -303,14 +303,18 @@
 
 
     //untuk tambah baris
-    function tambah_baris(data, table, kode_produk, nama_produk, lot, qty, uom, qty2, uom2, grade, reff_note, lebar_greige, uom_lebar_greige, lebar_jadi, uom_lebar_jadi) {
+    function tambah_baris(data, table, kode_produk, nama_produk, lot = "", qty, uom, qty2, uom2, grade, reff_note, lebar_greige, uom_lebar_greige, lebar_jadi, uom_lebar_jadi) {
         var lot_ = document.getElementsByName('txtlot[]');
         var inx_lot = lot_.length - 1;
         var tambah = true;
         var hidden_field = `<?php echo $hidden_field; ?>`;
         var category_benang = `<?php echo $category_benang; ?>`;
-
+        var nama_category = '<?= $data_produk->nama_category ?>';
         //cek Lot apa ada yg kosong
+        if(lot === "") {
+            if(nama_category.toLowerCase() === 'sparepart')
+                lot = '<?= $kode_produk ?>';
+        }
         $('.txtlot').each(function(index, value) {
             if ($(value).val().trim().length === 0) {
                 if(hidden_field == 'No' ) {
@@ -320,7 +324,7 @@
                 }
 
                 if(category_benang == 'Yes' ) {
-                    alert_notify('fa fa-warning', 'Lot tidak boleh kosong !l', 'danger', function() {});
+                    alert_notify('fa fa-warning', 'Lot tidak boleh kosong !', 'danger', function() {});
                     $(value).addClass('error');
                     tambah = false;
                 }

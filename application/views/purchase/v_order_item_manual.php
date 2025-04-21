@@ -86,7 +86,7 @@
                 data: function (params) {
                     return{
                         nama: params.term,
-                        ke: 0
+                        ke: $(".uom_<?=$index?>").val()
                     };
                 },
                 processResults: function (data) {
@@ -120,6 +120,7 @@
             var row = $(this).attr("data-row");
             $(".nm_pro_" + row).val("");
             $(".uom_" + row).val("");
+            $(".uom_beli_data_"+ row).val('').trigger('change');
         });
 
         $(".uom_beli").on("select2:select", function () {

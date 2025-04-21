@@ -70,9 +70,9 @@
                                             <th>
                                                 Produk
                                             </th>
-                                            <th>QTY</th>
+                                            <th>Qty Permintaan</th>
                                             <th>Satuan</th>
-                                            <th>QTY Beli</th>
+                                            <th>Qty Beli</th>
                                             <th>Satuan Beli</th>
                                             <!--<th>Prioritas</th>-->
                                             <th>Warehouse</th>

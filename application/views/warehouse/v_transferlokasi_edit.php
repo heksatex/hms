@@ -112,6 +112,14 @@
                     <input type="text" class="form-control input-sm" name="departemen" id="departemen"  value="<?php echo $tl->departemen; ?>" readonly="readonly" >
                   </div>                                    
                 </div>
+                <?php if($tl->dept_id == "GSP"){ ?>
+                <div class="col-md-12 col-xs-12">
+                  <div class="col-xs-12 col-md-4 col-sm-4"><label>Lokasi Dari / Asal</label></div>
+                  <div class="col-xs-12 col-md-8 col-sm-8">
+                    <input type="text" class="form-control input-lg" name="lokasi_dari" id="lokasi_dari"  value="<?php echo $tl->lokasi_dari; ?>" placeholder="Scan Lokasi Dari">
+                  </div>                                    
+                </div>
+                <?php } ?>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-12 col-md-4 col-sm-4"><label>Lokasi Tujuan</label></div>
                   <div class="col-xs-12 col-md-8 col-sm-8">
@@ -209,6 +217,7 @@
 <script type="text/javascript">
   status  = '<?php echo $tl->status;?>';
   if(status == 'done' || status == 'cancel'){
+    $('#lokasi_dari').prop('disabled', true);
     $('#lokasi_tujuan').prop('disabled', true);
     $('#barcode_id').prop('disabled', true);
   }
@@ -258,6 +267,7 @@
                   note              : $('#note').val(),
                   departemen        : dept_id,
                   lokasi_tujuan     : $('#lokasi_tujuan').val(),
+                  lokasi_dari       : $("#lokasi_dari").val()
 
             },success: function(data){
               if(data.sesi == "habis"){
@@ -393,7 +403,7 @@
         dataType: "JSON",
         url     :'<?php echo base_url('warehouse/transferlokasi/scan_barcode')?>',
         type    : "POST",
-        data    : {kode:$('#kode').val(), dept_id:dept_id, lokasi_tujuan : $('#lokasi_tujuan').val(), barcode_id : barcode_id},
+        data    : {kode:$('#kode').val(), dept_id:dept_id, lokasi_dari : $('#lokasi_dari').val(), lokasi_tujuan : $('#lokasi_tujuan').val(), barcode_id : barcode_id},
         success: function(data){
           if(data.sesi == "habis"){
               //alert jika session habis
