@@ -124,14 +124,14 @@
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label>No SJ</label></div>
                                             <div class="col-xs-8">
-                                                <input type='text' class="form-control input-sm" name="no_sj" id="no_sj" value="<?php echo $list->no_sj; ?>" <?php echo ($list->status == 'done' || $list->status == 'cancel') ? 'readonly' : ''; ?> />
+                                                <input type='text' class="form-control input-sm" name="no_sj" id="no_sj" value="<?php echo $list->no_sj; ?>" <?php echo ($list->status == 'cancel') ? 'readonly' : ''; ?> />
                                             </div>
                                         </div>
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4"><label>Tanggal SJ</label></div>
                                             <div class="col-xs-8">
                                                 <div class='input-group date' id='datetimepicker3'>
-                                                    <input type='text' class="form-control input-sm" name="tgl_sj" id="tgl_sj" value="<?php echo $list->tanggal_sj; ?>" <?php echo ($list->status == 'done' || $list->status == 'cancel') ? 'disabled' : ''; ?> />
+                                                    <input type='text' class="form-control input-sm" name="tgl_sj" id="tgl_sj" value="<?php echo $list->tanggal_sj; ?>" <?php echo ($list->status == 'cancel') ? 'readonly' : ''; ?> />
                                                     <span class="input-group-addon">
                                                         <span class="glyphicon glyphicon-calendar"></span>
                                                     </span>

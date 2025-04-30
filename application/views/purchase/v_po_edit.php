@@ -11,16 +11,15 @@
             .totalan {
                 font-size: 14px;
             }
-
+            #btn-approve {
+                display: none;
+            }
             <?php if ($po->status !== 'purchase_confirmed') { ?>
 
                 #btn-simpan {
                     display: none;
                 }
                 #btn-cancel {
-                    display: none;
-                }
-                #btn-approve {
                     display: none;
                 }
                 #btn-print {
@@ -169,7 +168,7 @@
                                     if ($po->edited_status === null) {
                                         if (in_array(strtolower($user->level), ["super administrator", 'direksi'])) {
                                             ?>
-                                            <button class="btn btn-default btn-sm request_edit" data-status="request"> Request Edit </button>
+                                            <button class="btn btn-default btn-sm request_edit" data-status="approve"> Request Edit </button>
                                             <?php
                                         }
                                     } else {
@@ -193,7 +192,7 @@
                                         }
                                         ?>
                                         <br>
-                                        <span class="label label-danger text-black"><?= $po->alasan ?></span>
+                                        <span class="label label-danger"><?= $po->alasan ?></span>
                                         <!--<button class="btn btn-primary btn-sm request_edit" data-status="cancel"> Cancel Request </button>-->
                                         <?php
                                         if ($po->edited_status === "approve") {
@@ -216,7 +215,7 @@
 
                         </div>
                         <form  class="form-horizontal" method="POST" name="form-cfq" id="form-cfq" action="<?= base_url('purchase/purchaseorder/update/' . $id) ?>">
-                            <input type="hidden" name="default_total" value="<?= $default_total ?>" >
+                            <input type="hidden" name="default_total" id="default_total" value="<?= $default_total ?>" >
                             <div class="box-body">
                                 <div class="col-md-8 col-xs-12">
                                     <div class="col-md-6 col-xs-12">
@@ -541,7 +540,8 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group text-right">
-                                                                        <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs" name="tax[<?= $value->id ?>]" data-row="<?= $key ?>">
+                                                                        <input  name="tax[<?= $value->id ?>]" type="hidden" value="<?= $value->tax_id ?>">
+                                                                        <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs" name="tax[<?= $value->id ?>]" data-row="<?= $key ?>" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'disabled' ?>  > 
                                                                             <option></option>
                                                                             <?php
                                                                             foreach ($tax as $key => $taxs) {
@@ -555,8 +555,8 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
-                                                                        <input type="hidden" name="diskon[<?= $value->id ?>]"  value="<?= $value->diskon ?>">
-                                                                        <input class="form-control pull-right input-sm" readonly
+                                                                        <!--<input type="hidden" name="diskon[<?= $value->id ?>]"  value="<?= $value->diskon ?>">-->
+                                                                        <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
                                                                                style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" >
 
                                                                     </div>
@@ -652,6 +652,14 @@
         </div>
         <?php
         if ($po->status !== 'cancel') {
+            if ($po->edited_status === "approve") {
+                ?>
+                <script>
+                    $("#btn-approve").html("Done");
+                </script>
+
+                <?php
+            }
             ?>
             <script>
                 $(function () {
@@ -920,8 +928,8 @@
                     placeholder: "Pajak"
 
                 });
-                
-                 $(".tax").on("select2:select", function () {
+
+                $(".tax").on("select2:select", function () {
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
@@ -965,7 +973,8 @@
                         data: {
                             status: status,
                             totals: $("#totals").val(),
-                            item: "<?= count($po_items) ?>"
+                            item: "<?= count($po_items) ?>",
+                            default_total:$("#default_total").val()
                         },
                         error: function (req, error) {
                             unblockUI(function () {
@@ -984,17 +993,17 @@
                     });
                 });
                 $("#btn-simpan").off("click").unbind("click").on("click", function () {
-                    confirmRequest("Purchase Order", "Update Purchase Order ? ", function () {
-                        $("#form-cfq-submit").trigger("click");
-                    });
+//                    confirmRequest("Purchase Order", "Update Purchase Order ? ", function () {
+                    $("#form-cfq-submit").trigger("click");
+//                    });
                 });
                 $("#btn-approve").off("click").unbind("click").on("click", function () {
                     var status = "<?= ($po->status === 'exception') ? 'purchase_confirmed' : 'done' ?>";
 
-                    confirmRequest("Purchase Order", "Done Purchase Order ? ", function () {
-                        please_wait(function () {});
-                        updateStatus(status);
-                    });
+//                    confirmRequest("Purchase Order", "Done Purchase Order ? ", function () {
+                    please_wait(function () {});
+                    updateStatus(status);
+//                    });
                 });
                 $("#btn-cancel").off("click").unbind("click").on("click", function () {
                     var status = "cancel";

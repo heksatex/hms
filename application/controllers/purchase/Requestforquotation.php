@@ -31,6 +31,7 @@ class Requestforquotation extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'RFQ';
+        $data['level'] = $this->session->userdata('nama')['level'] ?? "";
         $this->load->view('purchase/v_order', $data);
     }
 
@@ -84,18 +85,20 @@ class Requestforquotation extends MY_Controller {
             $nama_produk = $this->input->post("nama_produk");
 
             $data = array();
-            $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "create_date", "order_date", "status"])
-                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode"])->setOrder(['create_date' => 'desc'])
-                    ->setSearch(["p.nama", "no_po", "status", "note"])
+            $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "create_date", "order_date", "po.status"])
+                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode","coalesce(poe.status,'') as poe_status"])->setOrder(['create_date' => 'desc'])
+                    ->setSearch(["p.nama", "no_po", "po.status", "note"])
                     ->setJoins("currency_kurs ck", "ck.id = po.currency", "left")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
+                    ->setJoins("purchase_order_edited poe","(poe.po_id = po.no_po and poe.status not in ('cancel','done'))","left")
+                    
                     ->setWheres(["jenis" => $jenis]);
             if (strtolower($level) === "direksi") {
-                $list->setWhereRaw("status in ('waiting_approval','exception')");
+                $list->setWhereRaw("(po.status in ('waiting_approval','exception') and poe.status in ('waiting_approve'))");
             } else {
                 if ($jenis !== "FPT")
-                    $list->setWhereRaw("status in ('draft','rfq','waiting_approval','exception')");
+                    $list->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
             }
 
             if ($status !== "")
@@ -109,14 +112,24 @@ class Requestforquotation extends MY_Controller {
             $sub = (($jenis === "FPT") ? "fpt" : "requestforquotation");
             foreach ($list->getData() as $field) {
                 $no++;
+                $status = ($field->nama_status ?? $field->status);
+                if(strtolower($status) === 'exception') {
+                    $status.=" ({$field->poe_status})";
+                }
+                if (strtolower($level) === "direksi") {
+                    $poenc = encrypt_url($field->no_po);
+                    $no = "{$field->id}|{$poenc}|{$field->status}|{$field->poe_status}";
+                }
+                
                 $data [] = [
                     $no,
                     '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->create_date,
                     number_format($field->total, 2) . " " . ( ($field->total === null) ? "" : $field->curr_kode),
-                    $field->nama_status ?? $field->status,
-                    $field->note
+                    $status,
+                    $field->note,
+                    $field->poe_status
                 ];
             }
             echo json_encode(array("draw" => $_POST['draw'],
@@ -171,6 +184,7 @@ class Requestforquotation extends MY_Controller {
             $warehouse = $this->input->post("warehouse");
             $reffNotes = $this->input->post("reff_note");
             $createDokumen = date("Y-m-d H:i:d");
+            $nilai = $this->input->post("nilai");
             if (count($kod_pro) < 1) {
                 throw new \Exception("Item Produk Belum dipilih", 500);
             }
@@ -213,7 +227,7 @@ class Requestforquotation extends MY_Controller {
                     $no = $key + 1;
                     throw new \Exception("Data Ke ({$no}) Qty Harus Lebih Dari 0", 500);
                 }
-                if (!isset($id_konversiuom[$key]) || is_null($id_konversiuom[$key])) {
+                if (!isset($id_konversiuom[$key]) || is_null($id_konversiuom[$key]) || $id_konversiuom[$key] === "") {
                     $datakonversi = ["ke" => $uom[$key], "dari" => $uom[$key], "nilai" => 1];
                     $getDataKonv = $this->m_konversiuom->wheres($datakonversi)->getDetail();
                     $uom_beli[$key] = $uom[$key];
@@ -226,6 +240,9 @@ class Requestforquotation extends MY_Controller {
                 }
                 $v = explode(".", $value);
                 $kode_cfb[] = $v[0] ?? 0;
+                if($qty[$key] === "") {
+                    $qty[$key] = $qty_beli[$key] * ($nilai[$key] ?? 1);
+                }
                 $items [] = array(
                     "po_id" => $id_rfq,
                     "po_no_po" => $nopo,
@@ -410,7 +427,7 @@ class Requestforquotation extends MY_Controller {
             if ($checkData->setTables("purchase_order_edited")->setWhereRaw("po_id = '{$kode_decrypt}' and status not in ('cancael','done')")->getDetail() === null) {
                 throw new \Exception('Data tidak ditemukan', 500);
             }
-            $checkData->update(["status" => "approved"]);
+            $checkData->update(["status" => "approve"]);
             $this->_module->gen_history("purchaseorder", $kode_decrypt, 'edit', "Appoved Perubahan Harga", $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -647,7 +664,10 @@ class Requestforquotation extends MY_Controller {
         try {
             $data["index"] = $this->input->post("index");
             $data["uom_jual"] = $this->m_produk->get_list_uom(['jual' => 'yes']);
-            $data['warehouse'] = $this->_module->get_list_departement();
+            $model = new $this->m_global;
+            $warehouse = $model->setTables("departemen")->setSelects(["kode","nama"])->setOrder(["nama"])->setWheres(["type_dept"=>"gudang","show_dept"=>true])->getData();
+//            $data['warehouse'] = $this->_module->get_list_departement();
+            $data['warehouse'] = $warehouse;
             $item = $this->load->view('purchase/v_order_item_manual', $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -705,7 +725,10 @@ class Requestforquotation extends MY_Controller {
         }
         $_POST['length'] = 50;
         $_POST['start'] = 0;
-        $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])->setOrder(["kode_produk" => "asc"])->getData();
+        $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])
+                ->setJoins("nilai_konversi nk","nk.id = uom_beli" , "left")
+                ->setSelects(["mst_produk.*","coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai"])
+                ->setOrder(["kode_produk" => "asc"])->getData();
         $this->output->set_status_header(200)
                 ->set_content_type('application/json', 'utf-8')
                 ->set_output(json_encode(['data' => $datas]));

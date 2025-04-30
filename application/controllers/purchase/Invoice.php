@@ -40,7 +40,7 @@ class Invoice extends MY_Controller {
             $supplier = $this->input->post("supplier");
             $list->setTables("invoice")
                     ->setOrders([null, "no_invoice", "partner.nama", "no_invoice_supp", "tanggal_invoice_supp", "no_sj_supp", "no_po", "order_date", "status"])
-                    ->setSearch(["partner.nama", "no_invoice_supp", "no_sj_supp", "no_po", "status", "no_invoice"])
+                    ->setSearch(["partner.nama", "no_invoice_supp", "no_sj_supp", "no_po", "status", "no_invoice","origin"])
                     ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
                     ->setSelects(["invoice.*", "partner.nama as supplier"])->setOrder(['created_at' => 'desc']);
 

@@ -820,14 +820,17 @@
                     var status = "exception";
                     confirmRequest("Request For Quotation", "Approve perubahan Harga PO ? ", function () {
                         $.ajax({
-                            url: "<?= base_url('purchase/requestforquotation/update_status_exception/' . $id) ?>",
+                            url: "<?= base_url('purchase/purchaseorder/update_status/' . $id) ?>",
                             type: "POST",
                             beforeSend: function (xhr) {
                                 please_wait(function () {});
 
                             },
                             data: {
-                                status: status
+                                status: "purchase_confirmed",
+                                items : "<?php count($po_items) ?>",
+                                totals: 0,
+                                default_total:1
                             },
                             error: function (req, error) {
                                 unblockUI(function () {

@@ -117,6 +117,10 @@
             .tbl-catatan {
                 font-size: 11px
             }
+            
+            #btn-approve {
+                display: none;
+            }
         </style>
         <?php $this->load->view("admin/_partials/js.php") ?>
 
@@ -295,6 +299,10 @@
                                                 <span class="glyphicon glyphicon-transfer"></span>            
                                                 <span class="glyphicon-class"></strong> In Shipment</span>
                                             </li>
+<!--                                            <li class="pointer invoice">
+                                                <span class="glyphicon glyphicon-list-alt"></span>
+                                                <span class="glyphicon-class"><strong id="invoice"></strong> Invoice</span>
+                                            </li>-->
                                         </ul>
                                     </div>
                                 <?php } ?>
@@ -782,6 +790,17 @@
                         }
                     });
                 });
+                
+                const getRcv = (() => {
+                        $.ajax({
+                            type: "POST",
+                            url: "<?= base_url('purchase/purchaseorder/get_rcv/' . $id) ?>",
+                            success: function (data) {
+                                $("#invoice").html(data.in_inv);
+                            }
+                        });
+                    });
+                    getRcv();
 
             });
 

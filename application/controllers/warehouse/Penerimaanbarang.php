@@ -303,7 +303,21 @@ class Penerimaanbarang extends MY_Controller {
             //cek status terkirim ?
             $cek_kirim = $this->m_penerimaanBarang->cek_status_barang($kode)->row_array();
             if ($cek_kirim['status'] == 'done') {
-                $callback = array('status' => 'ada', 'message' => 'Maaf, Data Tidak Bisa Disimpan, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                if ($deptid !== 'RCV') {
+                    $callback = array('status' => 'ada', 'message' => 'Maaf, Data Tidak Bisa Disimpan, Data Sudah Terkirim !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                } else {
+                    $model = new $this->m_global;
+                    $model->setTables("penerimaan_barang")->setWheres(["kode" => $kode])->update(["no_sj" => $no_sj, "tanggal_sj" => $tgl_sj]);
+                    $this->_module->gen_history_deptid($sub_menu, $kode, "edit", "-> no SJ " . $no_sj . " tanggal SJ " . $tgl_sj, $username, $deptid);
+
+                    $inv = $model->setTables("invoice")->setWheres(["origin" => $kode, "status <>" => "cancel"], true)->getDetail();
+                    if ($inv) {
+                        $model->update(["no_sj_supp" => $no_sj, "tanggal_sj" => $tgl_sj]);
+                        $this->_module->gen_history("invoice", $inv->id, "edit", "-> no SJ " . $no_sj . " tanggal SJ " . $tgl_sj, $username);
+                    }
+                    //
+                    $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' => 'fa fa-check', 'type' => 'success');
+                }
             } else if ($cek_kirim['status'] == 'cancel') {
                 $callback = array('status' => 'ada', 'message' => 'Maaf, Data Tidak Bisa Disimpan, Data Penerimaan Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type' => 'danger');
             } else {
@@ -1117,7 +1131,7 @@ class Penerimaanbarang extends MY_Controller {
                             "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
                             "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value",
                             "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency",
-                            "penerimaan_barang_items.*", "amount,tax.id as pajak_id","dpp_lain"
+                            "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain"
                         ])
                         ->getData();
                 if (is_null($dataPO)) {
@@ -1127,7 +1141,7 @@ class Penerimaanbarang extends MY_Controller {
                 if ($dataPO[0]->no_value !== "1") {
                     $orderDate = date("Y-m-d H:i:s");
                     if (!$noinv = $this->token->noUrut('invoice_pembelian', date('y') . '/' . date('m'), true)
-                                    ->generate("INV/", '/%05d')->get()) {
+                                    ->generate("PBINV/", '/%05d')->get()) {
                         throw new \Exception("No Invoice tidak terbuat", 500);
                     }
                     $inserInvoice = new m_po;
@@ -1187,13 +1201,13 @@ class Penerimaanbarang extends MY_Controller {
                             $dpp = $value->dpp_lain;
                             $taxes += ((($total - $diskon) * 11) / 12) * $value->amount;
                         } else {
-                            $taxes += ($total - $diskon) *  $value->amount;
+                            $taxes += ($total - $diskon) * $value->amount;
                         }
                     }
                     $grandTotal = ($totals - $diskons) + $taxes;
                     //create Invoice_detail
                     $inserInvoice->setTables("invoice_detail")->saveBatch($invoiceDetail);
-                    $inserInvoice->setTables("invoice")->setWheres(["id"=>$idInsert])->update(["total"=>$grandTotal,"dpp_lain"=>$dpp]);
+                    $inserInvoice->setTables("invoice")->setWheres(["id" => $idInsert])->update(["total" => $grandTotal, "dpp_lain" => $dpp]);
                     $this->_module->gen_history('invoice', $idInsert, 'create', logArrayToString(";", $dataInvoice), $username);
                 }
             }
@@ -1298,17 +1312,17 @@ class Penerimaanbarang extends MY_Controller {
         $data['origin_prod'] = $origin_prod;
         $data['list_grade'] = $this->_module->get_list_grade();
 
-        $data_produk         = $this->m_penerimaanBarang->get_produk_add_quant($kode, $kode_produk, $origin_prod);
+        $data_produk = $this->m_penerimaanBarang->get_produk_add_quant($kode, $kode_produk, $origin_prod);
         $data['data_produk'] = $data_produk;
-        if(strpos($data_produk->nama_category, 'Kain Hasil') !== false){
+        if (strpos($data_produk->nama_category, 'Kain Hasil') !== false) {
             $data['hidden_field'] = 'No';
-        }else{
+        } else {
             $data['hidden_field'] = 'Yes';
         }
 
-        if(strpos($data_produk->nama_category, 'Benang') !== false){
+        if (strpos($data_produk->nama_category, 'Benang') !== false) {
             $data['category_benang'] = 'Yes';
-        }else{
+        } else {
             $data['category_benang'] = 'No';
         }
 
@@ -2096,7 +2110,7 @@ class Penerimaanbarang extends MY_Controller {
             $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
             foreach ($items as $keyss => $item) {
                 $kodeProduk = str_split($item->kode_produk, 11);
-                $kode_pp    = $item->kode_pp;
+                $kode_pp = $item->kode_pp;
                 foreach ($kodeProduk as $key => $value) {
                     $value = trim($value);
                     $kodeProduk[$key] = $value;
@@ -2161,17 +2175,15 @@ class Penerimaanbarang extends MY_Controller {
 
                     $printer->text($line . "\n");
                 }
-
-
             }
             $printer->feed();
-            $printer->feed();   
+            $printer->feed();
 
             // kode pp
-            $printer->text(str_pad("kode PP : ",12) . str_pad("", 32) . str_pad("Tgl.Cetak :" . date('Y-m-d H:i:s'), 35," ", STR_PAD_RIGHT));
+            $printer->text(str_pad("kode PP : ", 12) . str_pad("", 32) . str_pad("Tgl.Cetak :" . date('Y-m-d H:i:s'), 35, " ", STR_PAD_RIGHT));
             // $printer->text("Tgl.Cetak :" . date("Y-m-d H:i:s"));
-            $printer->feed();   
-            $splitKodePP  = str_split($kode_pp, 30);
+            $printer->feed();
+            $splitKodePP = str_split($kode_pp, 30);
             foreach ($splitKodePP as $key => $value) {
                 $printer->text(str_pad($value, 30));
                 $printer->feed();
@@ -2185,7 +2197,7 @@ class Penerimaanbarang extends MY_Controller {
             $printer->feed();
             $printer->feed();
             $printer->feed();
-            $printer->text(str_pad("(__________)",12). str_pad("(__________) ",12) . " " . str_pad("(" . substr(($users["nama"]), 0, 14) . ")",14," ", STR_PAD_RIGHT )  );
+            $printer->text(str_pad("(__________)", 12) . str_pad("(__________) ", 12) . " " . str_pad("(" . substr(($users["nama"]), 0, 14) . ")", 14, " ", STR_PAD_RIGHT));
             $printer->feed();
             $printer->feed();
             $datas = $connector->getData();
@@ -2496,7 +2508,7 @@ class Penerimaanbarang extends MY_Controller {
                             'row_order' => $row_order
                         );
                         $tmp_jml_qty = $tmp_jml_qty + $dl['qty'];
-                        $list_product .= "(" . $loop . ") " . $dl['nama_produk'] . " " . $dl['lot'] ?? '' . " " . $dl['qty'] . " " . $dl['uom'] . " " . $dl['qty2'] . " " . $dl['uom2'] . " " . $dl['grade'] . " " . $dl['lebar_greige'] ?? ''. " " . $dl['uom_lebar_greige'] ?? ''. " " . $dl['lebar_jadi'] ?? ''. " " . $dl['uom_lebar_jadi'] ?? ''. " " . $dl['reff_note'] . " <br>";
+                        $list_product .= "(" . $loop . ") " . $dl['nama_produk'] . " " . $dl['lot'] ?? '' . " " . $dl['qty'] . " " . $dl['uom'] . " " . $dl['qty2'] . " " . $dl['uom2'] . " " . $dl['grade'] . " " . $dl['lebar_greige'] ?? '' . " " . $dl['uom_lebar_greige'] ?? '' . " " . $dl['lebar_jadi'] ?? '' . " " . $dl['uom_lebar_jadi'] ?? '' . " " . $dl['reff_note'] . " <br>";
                         $row_order++;
                         $loop++;
                     }

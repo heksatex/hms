@@ -41,6 +41,8 @@ class Purchaseorder extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'PO';
+        $username = $this->session->userdata('username');
+        $data['user'] = $this->m_user->get_user_by_username($username);
         $this->load->view('purchase/v_po', $data);
     }
 
@@ -94,14 +96,18 @@ class Purchaseorder extends MY_Controller {
             $data = array();
             $status = $this->input->post("status");
             $nama_produk = $this->input->post("nama_produk");
-
-            $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "order_date", "create_date", "status"])
-                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode"])->setOrder(['create_date' => 'desc'])
-                    ->setSearch(["p.nama", "no_po", "prioritas", "status"])
+            $level = $this->input->post("level");
+            $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "order_date", "create_date", "po.status"])
+                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode", "poe.status as poe_status"])->setOrder(['create_date' => 'desc'])
+                    ->setSearch(["p.nama", "no_po", "prioritas", "po.status"])
                     ->setJoins("currency_kurs ck", "ck.id = po.currency", "left")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
-                    ->setWhereRaw("status in ('done','cancel','purchase_confirmed','exception') and jenis <>'FPT'");
+                    ->setJoins("purchase_order_edited poe", "(poe.po_id = po.no_po and poe.status not in ('cancel','done'))", "left");
+//            if (strtolower($level) === 'direksi')
+//                $list->setWhereRaw("jenis <>'FPT'");
+//            else
+            $list->setWhereRaw("po.status in ('done','cancel','purchase_confirmed','exception') and jenis <>'FPT'");
 
             $no = $_POST['start'];
 
@@ -114,6 +120,10 @@ class Purchaseorder extends MY_Controller {
 
             foreach ($list->getData() as $field) {
                 $no++;
+                $status = ($field->nama_status ?? $field->status);
+                if (strtolower($status) === 'exception') {
+                    $status .= " ({$field->poe_status})";
+                }
                 $data [] = [
                     $no,
                     '<a href="' . base_url('purchase/purchaseorder/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
@@ -121,7 +131,7 @@ class Purchaseorder extends MY_Controller {
                     $field->order_date,
                     $field->create_date,
                     number_format($field->total, 2) . " " . ( ($field->total === null) ? "" : $field->curr_kode),
-                    $field->nama_status ?? $field->status
+                    $status
                 ];
             }
             echo json_encode(array("draw" => $_POST['draw'],
@@ -148,6 +158,8 @@ class Purchaseorder extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $status = $this->input->post("status");
             $totalItem = $this->input->post("item");
+            $default_total = $this->input->post("default_total");
+            $totals = $this->input->post("totals");
             $checkData = new $this->m_po;
             $listLog = [];
             $data = $checkData->setWheres(["no_po" => $kode_decrypt])->setJoins("purchase_order_edited poe", "(poe.po_id = no_po and poe.status not in ('cancel','done'))", "left")
@@ -155,8 +167,8 @@ class Purchaseorder extends MY_Controller {
             if (!$data) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            if ($data->poe_status === "waiting_approve")
-                throw new \Exception('PO dalam status WAITING APPROVE', 500);
+//            if ($data->poe_status === "waiting_approve")
+//                throw new \Exception('PO dalam status WAITING APPROVE', 500);
 
             if ($status !== "cancel") {
                 if ($data->currency === null) {
@@ -213,81 +225,92 @@ class Purchaseorder extends MY_Controller {
                     }
                     break;
                 case "purchase_confirmed" :
+                    $status_ = 'done';
                     $modelInv = new $this->m_global;
-                    $cekInv = $modelInv->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "status <>" => "cancel"])->getDetail();
-                    if ($cekInv) {
-                        $modelPO = new $this->m_global;
-                        $modelJurnal = clone $modelPO;
-                        $dataDetail = $modelPO->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["po_no_po"])->getData();
-                        $query = [];
-                        foreach ($dataDetail as $key => $value) {
-                            $query [] = "update invoice_detail set harga_satuan='{$value->harga_per_uom_beli}' where invoice_id={$cekInv->id} and kode_produk='{$value->kode_produk}'";
-                            $logInvDetail [] = "kode produk {$value->kode_produk}, harga satuan " . number_format($value->harga_per_uom_beli, 4);
-                        }
-                        if (count($query) > 0) {
-                            $cekUpdateIn = $modelPO->query($query);
-                            if ($cekUpdateIn !== "") {
-                                throw new \Exception("Update pada data invoice gagal.", 500);
+                    if ($totals >= $default_total) {
+                        $status_ = "waiting_approve";
+                        $status = "exception";
+                    } else {
+                        $cekInv = $modelInv->setTables("invoice")->setWheres(["no_po" => $kode_decrypt, "status <>" => "cancel"])->getDetail();
+                        if ($cekInv) {
+                            $modelPO = new $this->m_global;
+                            $modelJurnal = clone $modelPO;
+                            $dataDetail = $modelPO->setTables("purchase_order_detail")->setJoins("tax","tax_id = tax.id","left")
+                                    ->setSelects(["purchase_order_detail.*","tax.amount as tax_amount"])
+                                    ->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["po_no_po"])->getData();
+                            $query = [];
+                            foreach ($dataDetail as $key => $value) {
+                                $query [] = "update invoice_detail set harga_satuan='{$value->harga_per_uom_beli}',tax_id='{$value->tax_id}',amount_tax='{$value->tax_amount}',diskon='{$value->diskon}' "
+                                . " where invoice_id={$cekInv->id} and kode_produk='{$value->kode_produk}'";
+                                $logInvDetail [] = "kode produk {$value->kode_produk}, harga satuan " . number_format($value->harga_per_uom_beli, 4)."Nilai Pajak ".($value->tax_amount *100)."% ,"
+                                        . "diskon {$value->diskon}";
                             }
-                            $modelInv->update(["total" => $data->total, "dpp_lain" => $data->dpp_lain]);
-                            $this->_module->gen_history("invoice", $cekInv->id, 'edit',
-                                    "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
-                                    $username);
-                        }
-                        $cekJurnal = $modelJurnal->setTables("jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
-                        if ($cekJurnal !== null) {
-                            $items = new $this->m_global;
-                            $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $cekInv->id])
-                                            ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
-                                            ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
-                                            ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
-                                            ->setJoins("currency_kurs", "currency_kurs.id = invoice.matauang", "left")
-                                            ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
-                                            ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
-                                                "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "partner.nama as nama_supp"])
-                                            ->setOrder(["invoice_id"])->getData();
-                            $updateQueryJurnal = [];
-                            $tax = 0;
-                            $totalNominal = 0;
-                            foreach ($dataItems as $key => $value) {
-                                $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
-                                $ttls = ($nominal * $value->nilai_matauang);
-                                $nm = "[{$value->kode_produk}] {$value->nama_produk} (%";
-                                $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$nominal}',nominal='{$ttls}' where kode = '{$cekJurnal->kode}' and nama LIKE '{$nm}'";
-                                $tax += $nominal * $value->tax_amount;
-                                $totalNominal += $nominal;
-
-                                $logJurnal [] = "nominal Kurs {$nominal} nominal {$ttls} untuk produk {$value->kode_produk} {$value->nama_produk}";
-                            }
-                            if ($tax > 0) {
-                                if ($dataItems[0]->dpp_lain > 0) {
-                                    $tax = $dataItems[0]->dpp_lain * $dataItems[0]->tax_amount;
-                                }
-                                $ttx = ($tax * $dataItems[0]->nilai_matauang);
-                                $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$tax}',nominal='{$ttx}' where kode = '{$cekJurnal->kode}' and kode_coa = '1193.05'";
-                                $logJurnal [] = "nominal Kurs {$tax} nominal {$ttx} Untuk Tax";
-                            }
-
-                            if (count($updateQueryJurnal) > 0) {
-                                $ttmax = $totalNominal + $tax;
-                                $nttmax = $ttmax * $dataItems[0]->nilai_matauang;
-                                $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$ttmax}',nominal='{$nttmax}' where kode = '{$cekJurnal->kode}' and kode_coa = '2112.01'";
-                                $logJurnal [] = "nominal Kurs {$ttmax} nominal {$nttmax} Untuk Hutang Dagang";
-
-                                $cekUpdateIn = $modelPO->query($updateQueryJurnal);
+                            if (count($query) > 0) {
+                                $cekUpdateIn = $modelPO->query($query);
                                 if ($cekUpdateIn !== "") {
-                                    throw new \Exception("Update pada data Jurnal gagal.", 500);
+                                    throw new \Exception("Update pada data invoice gagal.", 500);
                                 }
-                                $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
-                                    "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
+                                $modelInv->update(["total" => $data->total, "dpp_lain" => $data->dpp_lain]);
+                                $this->_module->gen_history("invoice", $cekInv->id, 'edit',
+                                        "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
+                                        $username);
+                            }
+                            $cekJurnal = $modelJurnal->setTables("jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
+                            if ($cekJurnal !== null) {
+                                $items = new $this->m_global;
+                                $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $cekInv->id])
+                                                ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
+                                                ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
+                                                ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
+                                                ->setJoins("currency_kurs", "currency_kurs.id = invoice.matauang", "left")
+                                                ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
+                                                ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
+                                                    "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "partner.nama as nama_supp"])
+                                                ->setOrder(["invoice_id"])->getData();
+                                $updateQueryJurnal = [];
+                                $tax = 0;
+                                $totalNominal = 0;
+                                foreach ($dataItems as $key => $value) {
+                                    $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
+                                    $ttls = ($nominal * $value->nilai_matauang);
+                                    $nm = "[{$value->kode_produk}] {$value->nama_produk} (%";
+                                    $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$nominal}',nominal='{$ttls}' where kode = '{$cekJurnal->kode}' and nama LIKE '{$nm}'";
+                                    $tax += $nominal * $value->tax_amount;
+                                    $totalNominal += $nominal;
+
+                                    $logJurnal [] = "nominal Kurs {$nominal} nominal {$ttls} untuk produk {$value->kode_produk} {$value->nama_produk}";
+                                }
+                                if ($tax > 0) {
+                                    if ($dataItems[0]->dpp_lain > 0) {
+                                        $tax = $dataItems[0]->dpp_lain * $dataItems[0]->tax_amount;
+                                    }
+                                    $ttx = ($tax * $dataItems[0]->nilai_matauang);
+                                    $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$tax}',nominal='{$ttx}' where kode = '{$cekJurnal->kode}' and kode_coa = '1193.05'";
+                                    $logJurnal [] = "nominal Kurs {$tax} nominal {$ttx} Untuk Tax";
+                                }
+
+                                if (count($updateQueryJurnal) > 0) {
+                                    $ttmax = $totalNominal + $tax;
+                                    $nttmax = $ttmax * $dataItems[0]->nilai_matauang;
+                                    $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$ttmax}',nominal='{$nttmax}' where kode = '{$cekJurnal->kode}' and kode_coa = '2112.01'";
+                                    $logJurnal [] = "nominal Kurs {$ttmax} nominal {$nttmax} Untuk Hutang Dagang";
+
+                                    $cekUpdateIn = $modelPO->query($updateQueryJurnal);
+                                    if ($cekUpdateIn !== "") {
+                                        throw new \Exception("Update pada data Jurnal gagal.", 500);
+                                    }
+                                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $cekJurnal->kode, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                                        "jenis_log" => "edit", "note" => logArrayToString(";", $logInvDetail), "nama_user" => $users["nama"], "ip_address" => ""];
+                                }
                             }
                         }
                     }
+
                     $model = new $this->m_global;
                     $model->setTables("purchase_order_edited")->setWheres(["po_id" => $kode_decrypt])
-                            ->setWhereRaw("status not in('cancel','retur')")->update(["status" => 'done']);
+                            ->setWhereRaw("status not in('cancel','retur','done')")->update(["status" => $status_]);
                     $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $kode_decrypt,
-                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO Selesai", "nama_user" => $users["nama"], "ip_address" => ""];
+                        "jenis_log" => "edit", "note" => "Permintaan Untuk Edit PO status -> {$status_}", "nama_user" => $users["nama"], "ip_address" => ""];
                     break;
             }
             $po = new $this->m_po;
@@ -337,6 +360,7 @@ class Purchaseorder extends MY_Controller {
             $harga = $this->input->post("harga");
             $qty_beli = $this->input->post("qty_beli");
             $amount_tax = $this->input->post("amount_tax");
+            $tax = $this->input->post("tax");
             $dsk = $this->input->post("diskon");
             $dpplain = $this->input->post("dpplain");
             $foot_note = $this->input->post("foot_note");
@@ -356,8 +380,8 @@ class Purchaseorder extends MY_Controller {
             $log_update["Foot Note "] = $foot_note;
             foreach ($harga as $key => $value) {
                 $no++;
-                $log_update ["item ke " . $no] = logArrayToString(";", ['harga' => $value]);
-                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value];
+                $log_update ["item ke " . $no] = logArrayToString("; ", ['harga' => $value, 'diskon' => $dsk[$key], "pajak" => ($amount_tax[$key] * 100) . "%"]);
+                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'tax_id' => $tax[$key], 'diskon' => $dsk[$key]];
 
                 $total = ($qty_beli[$key] * $value);
                 $totals += $total;
@@ -380,10 +404,10 @@ class Purchaseorder extends MY_Controller {
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
             $po->setWheres(["no_po" => $kode_decrypt])->update(["total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "foot_note" => $foot_note]);
-            if ($grandTotal >= $default_total) {
-                $poe = new $this->m_po;
-                $poe->setTables("purchase_order_edited")->setWhereRaw("po_id = '{$kode_decrypt}' and status not in ('cancel','done')")->update(['status' => "waiting_approve"]);
-            }
+//            if ($grandTotal >= $default_total) {
+//                $poe = new $this->m_po;
+//                $poe->setTables("purchase_order_edited")->setWhereRaw("po_id = '{$kode_decrypt}' and status not in ('cancel','done')")->update(['status' => "waiting_approve"]);
+//            }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
@@ -647,7 +671,7 @@ class Purchaseorder extends MY_Controller {
             if ($checkInv !== null) {
                 $now = date("Y-m-d H:i:s");
                 if (!$noDeb = $this->token->noUrut("invoice_pembelian_retur", date('y', strtotime($now)) . '/' . date('m', strtotime($now)), true)
-                                ->generate("INVR/", '/%05d')->get()) {
+                                ->generate("PBINVR/", '/%05d')->get()) {
                     throw new \Exception("No Debit Note tidak terbuat", 500);
                 }
 

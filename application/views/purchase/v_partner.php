@@ -22,24 +22,26 @@
                     <div class="box">
                         <div class="box-body">
                             <div class="col-xs-12 table-responsive">
-                                <table id="tbl-jurnal" class="table">
+                                <table id="tbl-partner" class="table">
                                     <thead>
                                         <tr>
                                             <th class="no">#</th>
-                                            <th>Kode</th>
-                                            <th>Jurnal</th>
-                                            <th>Tanggal dibuat</th>
-                                            <th>Tanggal Posting</th>
-                                            <th>Periode</th>
-                                            <th>Origin</th>
-                                            <th>Reff Note</th>
-                                            <th>Status</th>
+                                            <th class="style">Nama</th>
+                                            <th class="style">Invoice Street</th>
+                                            <th class="style">Invoice City</th>
+                                            <th class="style">Invoice State</th>
+                                            <th class="style">Invoice Country</th>
+                                            <th class="style">Invoice Zip</th>
+                                            
                                         </tr>
-                                    </thead>                                   
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+
                                 </table>
                             </div>
                         </div>
-                        <!-- /.box-body -->
                     </div>
                 </section>
             </div>
@@ -47,12 +49,11 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
-                const table = $('#tbl-jurnal').DataTable({
+                const table = $('#tbl-partner').DataTable({
                     "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
                     "order": [],
-
                     "paging": true,
                     "lengthChange": true,
                     "searching": true,
@@ -60,7 +61,7 @@
                     "info": true,
                     "autoWidth": false,
                     "ajax": {
-                        "url": "<?php echo site_url('purchase/jurnalentries/data') ?>",
+                        "url": "<?php echo site_url('purchase/partner/list_data') ?>",
                         "type": "POST"
                     },
                     "columnDefs": [
@@ -69,8 +70,9 @@
                             "orderable": false
                         }
                     ]
-                })
-            })
+
+                });
+            });
         </script>
     </body>
 </html>

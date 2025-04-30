@@ -251,4 +251,26 @@ class M_global extends CI_Model {
             return $ex->getMessage();
         }
     }
+    
+    public function delete(){
+        try {
+            if (count($this->wheres) > 0) {
+                $this->db->where($this->wheres);
+            }
+            if (count($this->wheresRaw) > 0) {
+                foreach ($this->wheresRaw as $key => $value) {
+                    $this->db->where($value, null, false);
+                }
+            }
+            if (count($this->whereIn) > 0) {
+                foreach ($this->whereIn as $key => $value) {
+                    $this->db->where_in($key, $value);
+                }
+            }
+            $this->db->delete($this->table);
+            return "";
+        } catch (Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
 }

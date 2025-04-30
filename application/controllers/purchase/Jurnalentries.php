@@ -34,16 +34,18 @@ class Jurnalentries extends MY_Controller {
             $no = $_POST['start'];
 
             $list->setTables("jurnal_entries")->setOrder(["tanggal_dibuat" => "desc"])
+                     ->setJoins("mst_jurnal", "mst_jurnal.kode = jurnal_entries.tipe", "left")
                     ->setJoins("mst_status", "mst_status.kode = jurnal_entries.status", "left")
-                    ->setSearch(["jurnal_entries.kode", "periode", "origin", "reff_note"])
-                    ->setOrders([null, "jurnal_entries.kode", "tanggal_dibuat", "tanggal_posting", "periode", "origin", "reff_note", "status"])
-                    ->setSelects(["jurnal_entries.*", "nama_status"]);
+                    ->setSearch(["jurnal_entries.kode", "periode", "origin", "reff_note","mst_jurnal.nama"])
+                    ->setOrders([null, "jurnal_entries.kode","mst_jurnal.nama", "tanggal_dibuat", "tanggal_posting", "periode", "origin", "reff_note", "status"])
+                    ->setSelects(["jurnal_entries.*", "nama_status","mst_jurnal.nama as nama_jurnal"]);
             foreach ($list->getData() as $key => $field) {
                 $kode_encrypt = encrypt_url($field->kode);
                 $no++;
                 $data [] = array(
                     $no,
                     '<a href="' . base_url('purchase/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
+                    $field->nama_jurnal,
                     $field->tanggal_dibuat,
                     $field->tanggal_posting,
                     $field->periode,
@@ -82,7 +84,7 @@ class Jurnalentries extends MY_Controller {
             if ($data["jurnal"] === null) {
                 throw new \Exception();
             }
-            $data["detail"] = $detail->setTables("jurnal_entries_items jei")->setOrder(["jei.row_order"])
+            $data["detail"] = $detail->setTables("jurnal_entries_items jei")->setOrder(["jei.posisi"=>"desc","jei.kode_coa"=>"asc"])
                             ->setJoins("partner", "partner.id = jei.partner", "left")
                             ->setJoins("coa", "coa.kode_coa = jei.kode_coa", "left")
                             ->setJoins("jurnal_entries je", "je.kode = jei.kode")

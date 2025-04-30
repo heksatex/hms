@@ -140,6 +140,7 @@
                 "data": function (d) {
                     d.nama_produk = $("#nama_produk").val();
                     d.status = $("#status").val();
+                    d.level = "<?= $user->level ?>";
                 }
             },
             "columnDefs": [

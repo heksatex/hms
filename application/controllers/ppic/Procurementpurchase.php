@@ -31,9 +31,16 @@ class Procurementpurchase extends MY_Controller
             $masking = $this->m_coa->setTables("user_masking_procurement_purchase")->setSelects(["GROUP_CONCAT(departemen) as departemen"])
                     ->setOrder(["departemen"])->setWheres(["username" => $username])->getDetail();
             $maskings = explode(",", $masking->departemen);
-            $list = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->get_datatables($kode['kode']);
-            $recordsTotal = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->count_all($kode['kode']);
-            $recordFilter = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->count_filtered($kode['kode']);
+            if(!empty($masking->departemen)){
+                $list = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->get_datatables($kode['kode']);
+                $recordsTotal = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->count_all($kode['kode']);
+                $recordFilter = $this->m_procurementPurchase->setWhereRaw("warehouse in ('". implode("','", $maskings)."')")->count_filtered($kode['kode']);
+            }else{
+                $list = $this->m_procurementPurchase->get_datatables($kode['kode']);
+                $recordsTotal = $this->m_procurementPurchase->count_all($kode['kode']);
+                $recordFilter = $this->m_procurementPurchase->count_filtered($kode['kode']);
+            }
+            
         }else {
             $list = $this->m_procurementPurchase->get_datatables($kode['kode']);
             $recordsTotal = $this->m_procurementPurchase->count_all($kode['kode']);
