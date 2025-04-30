@@ -1,5 +1,5 @@
 <div class="col-md-12 table-responsive over">
-    <table class="table table-condesed table-hover rlstable  over list_detail_items" width="100%" id="list_detail_items" >
+    <table class="table table-condesed table-hover rlstable list_detail_items over" width="100%" id="list_detail_items" >
         <thead>
             <tr>
                 <th class="style" width="10px">No</th>

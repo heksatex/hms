@@ -339,8 +339,6 @@
                                                                         <option value=""></option>
                                                                         <?php
                                                                         foreach ($category as $row) {
-                                                                            if (in_array($row->id, $masking))
-                                                                                continue;
                                                                             if ($row->id == $produk->id_category) {
                                                                                 ?>
                                                                                 <option value='<?php echo $row->id; ?>' selected><?php echo $row->nama_category; ?></option>

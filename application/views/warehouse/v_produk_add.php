@@ -67,14 +67,18 @@
                                                 </div>                                    
                                                 <div class="col-xs-2">
                                                     <input type="checkbox" name="auto_generate" id="auto_generate">
-                                                    <label>Auto Generate</label>
+                                                    <label>Auto Generate MF</label>
                                                 </div>                                    
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-2"><label>Nama Produk </label></div>
                                                 <div class="col-xs-6">
                                                     <input type="text" class="form-control input-sm" name="namaproduk" id="namaproduk">
-                                                </div>                                    
+                                                </div>
+                                                <div class="col-xs-2">
+                                                    <input type="checkbox" name="auto_generate_gudang" id="auto_generate_gudang">
+                                                    <label>Auto Generate Gudang</label>
+                                                </div> 
                                             </div>
                                             <div class="col-md-12 col-xs-12">
                                                 <!-- <div class="col-xs-8">                      
@@ -206,7 +210,12 @@
                                                                     <small id="note_uom_beli" class="form-text text-muted">
 
                                                                     </small>
-                                                                </div>               
+                                                                </div> 
+                                                                <div class="col-xs-2">
+                                                                    <button type="button" class="btn btn-default btn-sm create_konversi_uom" data-toggle="tooltip" data-title="Buat Konversi Satuan">
+                                                                        <i class="fa fa-plus"></i>
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -221,8 +230,9 @@
                                                                     <?php
                                                                     foreach ($category as $row) {
                                                                         if (in_array($row->id, $masking))
-                                                                            continue;
-                                                                        ?>
+                                                                        // continue;
+                                                                            
+                                                                            ?>
                                                                         <option value='<?php echo $row->id; ?>'><?php echo $row->nama_category; ?></option>
                                                                     <?php } ?>
                                                                     </select>
@@ -345,6 +355,7 @@
                                                                         <option value="f">Tidak Aktif</option>
                                                                     </select>              
                                                                     <input type="hidden" name="autogenerate" id="autogenerate" value="0">
+                                                                    <input type="hidden" name="autogenerate_gudang" id="autogenerate_gudang" value="0">
                                                                 </div>               
                                                             </div>                            
                                                         </div>
@@ -510,6 +521,20 @@
 <script src="<?php echo base_url('dist/js/uploads/fileinput.js') ?>"></script>
 <script src="<?php echo base_url('dist/js/uploads/fileinput-sortable.js') ?>"></script>
 <script type="text/javascript">
+    $(".create_konversi_uom").click(function(e){
+        e.preventDefault();
+        $("#view_data").modal({
+            show: true,
+            backdrop: 'static'
+        });
+        $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+        $('.modal-title').text('Konversi Uom');
+        $.post("<?= base_url('warehouse/produk/get_view_konversi/') ?>", {}, function (data) {
+            setTimeout(function () {
+                $(".view_body").html(data.data);
+            }, 1000);
+    });
+    })
     $("#foto").fileinput({
         showCaption: false,
         dropZoneEnabled: false,
@@ -636,11 +661,13 @@
 
 
     autogenerate_value = 0;
+    autogenerategudang_value = 0;
 
     //auto generate
     $('#auto_generate').change(function () {
         var auto_generate = $('#auto_generate').is(":checked");
         if (auto_generate == true) {
+            $('#auto_generate_gudang').prop('checked', false);
             autogenerate_value = 1;
             $('#kodeproduk').val('');
             $('#kodeproduk').attr('disabled', 'disabled');
@@ -650,6 +677,21 @@
             $('#kodeproduk').val('');
         }
         $("#autogenerate").val(autogenerate_value);
+
+    });
+    $('#auto_generate_gudang').change(function () {
+        var auto_generate = $('#auto_generate_gudang').is(":checked");
+        if (auto_generate == true) {
+            $('#auto_generate').prop('checked', false);
+            autogenerategudang_value = 1;
+            $('#kodeproduk').val('');
+            $('#kodeproduk').attr('disabled', 'disabled');
+        } else {
+            autogenerategudang_value = 0;
+            $('#kodeproduk').removeAttr('disabled');
+            $('#kodeproduk').val('');
+        }
+        $("#autogenerate_gudang").val(autogenerategudang_value);
     });
 
     //select2 glacc
@@ -755,6 +797,7 @@
                 sub_parent: $('#sub_parent').val(),
                 jenis_kain: $('#jenis_kain').val(),
                 autogenerate: autogenerate_value,
+                autogenerate_gudang: autogenerategudang_value
 
             }, success: function (data) {
                 if (data.sesi == "habis") {
