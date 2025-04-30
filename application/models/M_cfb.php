@@ -128,8 +128,18 @@ class M_cfb extends CI_Model {
 
     public function getDataCountAll() {
         $this->db->from($this->table);
+        foreach ($this->joins["table"] as $key => $value) {
+            $this->db->join($value, $this->joins["kondisi"][$key], $this->joins["posisi"][$key]);
+        }
         if (count($this->wheres) > 0)
             $this->db->where($this->wheres);
+        
+        if (count($this->wheresRaw) > 0) {
+            foreach ($this->wheresRaw as $key => $value) {
+                $this->db->where($value, null, false);
+            }
+        }
+        
         return $this->db->count_all_results();
     }
 
@@ -138,6 +148,12 @@ class M_cfb extends CI_Model {
         if (count($this->wheres) > 0) {
             $this->db->where($this->wheres);
         }
+        if (count($this->wheresRaw) > 0) {
+            foreach ($this->wheresRaw as $key => $value) {
+                $this->db->where($value, null, false);
+            }
+        }
+        
         foreach ($this->joins["table"] as $key => $value) {
             $this->db->join($value, $this->joins["kondisi"][$key], $this->joins["posisi"][$key]);
         }

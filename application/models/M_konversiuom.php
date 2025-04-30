@@ -16,7 +16,7 @@ class M_konversiuom extends CI_Model {
     //put your code here
     protected $table = "nilai_konversi";
     protected $columnOrder = [null, "dari", "ke", "nilai"];
-    protected $columnSearch = ["dari", "ke", "nilai"];
+    protected $columnSearch = ["dari", "ke", "nilai","catatan"];
     protected $order = ['id' => 'desc'];
     protected $select = "*";
     protected $where = [];

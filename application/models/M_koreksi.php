@@ -636,6 +636,7 @@ class M_koreksi extends CI_Model
 		$this->db->from('koreksi_mundur_batch km ');
 		$this->db->join('koreksi_mundur_batch_items kmbs', 'km.no_batch = kmbs.no_batch','inner');
 		$this->db->group_by('kmbs.lot');
+		$this->db->order_by('kmbs.row_order');
 		$result = $this->db->get();
 		return $result->result();
 	}

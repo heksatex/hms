@@ -53,7 +53,7 @@
       <!--  box content -->
       <div class="box">
         <div class="box-header with-border">
-          <h3 class="box-title"><b></b></h3>
+          <h3 class="box-title"><b>Form Add</b></h3>
         </div>
         <div class="box-body">
           <form class="form-horizontal">
@@ -223,12 +223,12 @@
                               </div>                                    
                             </div>
                             <div class="col-md-12 col-xs-12">
-                              <div class="col-xs-4"><label>Lokasi Tujuan </label></div>
+                              <div class="col-xs-4"><label>Departemen </label></div>
                               <div class="col-xs-1 col-md-1">
                                 <?php echo ": "?>
                               </div>
                               <div class="col-xs-6 col-md-6">
-                                <select class="form-control input-sm" name="lokasi_tujuan" id="lokasi_tujuan" required="">
+                                <select class="form-control input-sm" name="departemen" id="departemen" required="" style="width:100% !important">
                                   <?php
                                       echo '<option value="">Pilih Lokasi Tujuan</option>';
                                       foreach ($warehouse as $row) {   ?>
@@ -238,6 +238,16 @@
                                   ?>
                                 </select>
 
+                              </div>
+                            </div>
+                            <div class="col-md-12 col-xs-12">
+                              <div class="col-xs-4"><label>Lokasi Tujuan </label></div>
+                              <div class="col-xs-1 col-md-1">
+                                <?php echo ": "?> 
+                              </div>
+                              <div class="col-xs-6 col-md-6">
+                                <select class="form-control input-sm" name="lokasi_tujuan" id="lokasi_tujuan" required="" style="width:100% !important">
+                                </select>
                               </div>
                             </div>
                             <div class="col-md-12 col-xs-12">
@@ -302,6 +312,43 @@
   });
  */ 
 
+  $('#departemen').select2({});
+  $('#departemen').on('select2:selecting', function(e) {
+    $('#lokasi_tujuan').val(null).trigger('change');
+  });
+
+  $('#lokasi_tujuan').select2({
+      allowClear: true,
+      placeholder: "",
+      ajax:{
+          dataType: 'JSON',
+          type : "POST",
+          url : "<?php echo base_url();?>warehouse/pengirimanbarang/get_list_lokasi_tujuan_out_select2",
+          data : function(params){
+                  return{
+                        params:params.term,
+                        dept: $("#departemen").val() 
+                  };
+          }, 
+          processResults:function(data){
+                  var results = [];
+                  $.each(data, function(index,item){
+                      results.push({
+                            id:item.lokasi,
+                            text:item.lokasi
+                      });
+                  });
+                  return {
+                        results:results
+                        };
+          },
+          error: function (xhr, ajaxOptions, thrownError){
+                // alert('Error data');
+                // alert(xhr.responseText);
+          }
+      }
+  });
+
   $('#tanggal2').datetimepicker({
       defaultDate: datenow,
       format : 'YYYY-MM-DD HH:mm:ss',
@@ -314,14 +361,19 @@
   $('#btn-simpan').click(function(){
 
     var lokasi_tujuan = $('#lokasi_tujuan').val();
+    var departemen     = $('#departemen').val();
 
-    if(lokasi_tujuan == ''){
+    if(lokasi_tujuan == '' || departemen == '' || lokasi_tujuan == null){
       $('.nav.nav-tabs li,.tab-pane').removeClass('active');
       $('.nav.nav-tabs li:eq(2)').addClass('active');
       $('.tab-content .tab-pane:eq(2)').addClass('active')
-      $('#lokasi_tujuan').focus();
-      alert_notify('fa fa-warning','Lokasi Tujuan Harus Diisi !','danger',function(){});
-
+      if(departemen == ''){
+        $('#lokasi_tujuan').focus();
+        alert_notify('fa fa-warning','Departemen Harus Diisi !','danger',function(){});
+      } else {
+        $('#lokasi_tujuan').select2('open');
+        alert_notify('fa fa-warning','Lokasi Tujuan Harus Diisi !','danger',function(){});
+      }
     }else{
 
       var deptid = "<?php echo $id_dept; ?>"//parsing data id dept untuk log history
@@ -332,7 +384,7 @@
          type: "POST",
          dataType: "json",
          url : '<?php echo base_url('warehouse/pengirimanbarang/simpan')?>',
-         data: { kode:$('#kode').val(), tgl_transaksi:$('#tgl_transaksi').val(), tgl_jt:$('#tgl_jt').val(), reff_note:$('#note').val(), deptid:deptid, lokasi_tujuan:lokasi_tujuan, type:'1' },
+         data: { kode:$('#kode').val(), tgl_transaksi:$('#tgl_transaksi').val(), tgl_jt:$('#tgl_jt').val(), reff_note:$('#note').val(), deptid:deptid, lokasi_tujuan:lokasi_tujuan, type:'1', departemen_tujuan:departemen },
          success: function(data){
             if(data.sesi == "habis"){
               //alert jika session habis

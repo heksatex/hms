@@ -193,7 +193,7 @@
 						<td align="right"><?php echo number_format($row->qty,2)?></td>
 						<td><?php echo $row->uom;?></td>
 						<td>
-							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" onkeyup="validAngka2(this)">
+							<input type="text" name="qty_konsum"  id="qty_konsum" class="form-control input-sm qty_konsum" data-index="<?php echo $i;?>" data-decimal="2" oninput="enforceNumberValidation(this)" onkeyup="validAngka2(this)">
 							<input type="hidden" name="jml_produk"  id="jml_produk" class="form-control input-sm jml_produk" value="<?php echo $row->jml_produk ?>">
 							<input type="hidden" name="qty_rm"  id="qty_rm" class="form-control input-sm qty_rm" value="<?php echo $row->qty_rm ?>">
 							<input type="hidden" name="quant_id"  id="quant_id" class="form-control input-sm quant_id" value="<?php echo $row->quant_id ?>">
@@ -357,9 +357,29 @@
 
 	//validasi qty
 	function validAngka(a){
-	    if(!/^[0-9.]+$/.test(a.value)){
-	        a.value = a.value.substring(0,a.value.length-1000);
-	    }
+	    // if(!/^[0-9.]+$/.test(a.value)){
+	    //     a.value = a.value.substring(0,a.value.length-1000);
+	    // }
+		let tmp_char = '';
+		let len      = a.value.length;
+		let text     = a.value;
+		for(let i = 0; i < len; i++){
+			if(len > 1){
+				var char = text.substring(i,i+1);
+			}else{
+				var char = text;
+			}
+			if(/^[0-9.]+$/.test(char)){
+				char1 = char; 
+				tmp_char += char1;
+	    	}else{
+				char.replace(/[^0-9.-]/, '')
+			}
+		}
+		// alert(tmp_char);
+		a.value = "";
+		a.value = tmp_char;
+
 	    total();
 	}
 
@@ -423,9 +443,9 @@
 		 
 		    +  '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot width-200" value="'+lot_prefix_next+'" onkeypress="enter(event);"></td>'
 		    + '<td class="width-120"><select class="form-control input-sm grade width-100" name="grade" id="grade"><option value=""> Pilih Grade </option><?php foreach($list_grade as $row){ echo "<option>".$row->nama_grade."</option>";}?></select></td>'
-		    + '<td class="width-100"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm width-80 txtqty" value="<?php echo $qty1_std;?>"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+		    + '<td class="width-100"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm width-80 txtqty" value="<?php echo $qty1_std;?>"   onkeypress="enter(event);" onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)"></td>'
 		    + '<td ><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm width-50" value="<?php echo $uom_1;?>"  readonly="readonly"></td>'
-		    + '<td class="width-100"><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm width-80" value="<?php echo $qty2_std;?>"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+		    + '<td class="width-100"><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm width-80" value="<?php echo $qty2_std;?>"  onkeypress="enter(event);" onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)"></td>'
 		    + '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm width-50" value="<?php echo $uom_2?>"  readonly="readonly"></td>'
 			<?php if($show_lebar['show_lebar'] == 'true'){?>
 			+ '<td><input type="text" name="txtlebar_greige" id="txtlebar_greige" class="form-control input-sm width-80" value="<?php echo $lbr_produk->lebar_greige;?>"  onkeypress="enter(event);"></td>'
@@ -529,9 +549,28 @@
 
 	//validasi qty
 	function validAngka2(a){
-	    if(!/^[0-9.]+$/.test(a.value)){
-	        a.value = a.value.substring(0,a.value.length-1000);
-	    }
+	    // if(!/^[0-9.]+$/.test(a.value)){
+	    //     a.value = a.value.substring(0,a.value.length-1000);
+	    // }
+		let tmp_char = '';
+		let len      = a.value.length;
+		let text     = a.value;
+		for(let i = 0; i < len; i++){
+			if(len > 1){
+				var char = text.substring(i,i+1);
+			}else{
+				var char = text;
+			}
+			if(/^[0-9.]+$/.test(char)){
+				char1 = char; 
+				tmp_char += char1;
+	    	}else{
+				char.replace(/[^0-9.-]/, '')
+			}
+		}
+		// alert(tmp_char);
+		a.value = "";
+		a.value = tmp_char;
 	}
 
 	//validasi qty
@@ -540,6 +579,29 @@
 	        a.value = a.value.substring(0,a.value.length-1000);
 	    }
 	}
+
+	// validasi decimal
+	function enforceNumberValidation(ele) {
+            if ($(ele).data('decimal') != null) {
+                // found valid rule for decimal
+                var decimal = parseInt($(ele).data('decimal')) || 0;
+                var val = $(ele).val();
+                if (decimal > 0) {
+                    var splitVal = val.split('.');
+                    if (splitVal.length == 2 && splitVal[1].length > decimal) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0] + '.' + splitVal[1].substr(0, decimal));
+                    }
+                } else if (decimal == 0) {
+                    // do not allow decimal place
+                    var splitVal = val.split('.');
+                    if (splitVal.length > 1) {
+                        // user entered invalid input
+                        $(ele).val(splitVal[0]); // always trim everything after '.'
+                    }
+                }
+            }
+    }
 
 	var last_counter_waste = parseInt("<?php echo $counter_waste;?>");
 
@@ -825,9 +887,9 @@
 						+ '<td><input type="hidden" name="txtkode_produk" id="txtkode_produk"  class="form-control input-sm"  readonly="readonly" value="'+kode_produk+'"><input type="hidden" name="txtproduct[]" id="txtproduct"  class="form-control input-sm produk"  readonly="readonly" value="'+nama_produk+'">'
 						+ '<input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot width-150" value="'+lot+'" onkeypress="enter(event);"></td>'
 						+ '<td><select class="form-control input-sm grade width-100" name="grade" id="grade"><option value=""> Pilih Grade </option>'+grade_foreach+'</select></td>'
-						+ '<td><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm txtqty width-80" value="'+qty_smi+'"   onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+						+ '<td><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm txtqty width-80" value="'+qty_smi+'"   onkeypress="enter(event);" onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)"></td>'
 						+ '<td><input type="text" name="txtuom[]"  id="txtuom" class="form-control input-sm width-50" value="'+uom+'"  readonly="readonly"></td>'
-						+ '<td><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm width-80" value="'+qty2+'"  onkeypress="enter(event);" onkeyup="validAngka(this)"></td>'
+						+ '<td><input type="text" name="txtqty2" id="txtqty2" class="form-control input-sm width-80" value="'+qty2+'"  onkeypress="enter(event);" onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)"></td>'
 						+ '<td><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm width-50" value="'+uom2+'"   readonly="readonly"></td>'
 						<?php if($show_lebar['show_lebar'] == 'true'){?>
 						+ '<td><input type="text" name="txtlebar_greige" id="txtlebar_greige" class="form-control input-sm width-80" value="'+lbr_greige+'"  onkeypress="enter(event);"></td>'

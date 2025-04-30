@@ -89,6 +89,12 @@
                     </select>
                   </div>                                    
                 </div>
+                <div class="col-md-12 col-xs-12" id="tampil_lokasi_dari" style="display: inline;">
+                  <div class="col-xs-12 col-md-4 col-sm-4"><label>Lokasi Dari / Asal</label></div>
+                  <div class="col-xs-12 col-md-8 col-sm-8">
+                    <input type="text" class="form-control input-lg" name="lokasi_dari" id="lokasi_dari"  placeholder="Scan Lokasi dari" style="text-transform:uppercase">
+                  </div>                                    
+                </div>
                 <div class="col-md-12 col-xs-12">
                   <div class="col-xs-12 col-md-4 col-sm-4"><label>Lokasi Tujuan</label></div>
                   <div class="col-xs-12 col-md-8 col-sm-8">
@@ -136,6 +142,7 @@
        data: {kode              : $('#kode').val(),
               note              : $('#note').val(),
               departemen        : $('#departemen').val(),
+              lokasi_dari       : $('#lokasi_dari').val(),
               lokasi_tujuan     : $('#lokasi_tujuan').val(),
 
         },success: function(data){
@@ -171,6 +178,19 @@
         }
     });
   });
+
+
+  $('#departemen').change(checkTampil);
+  function checkTampil() {
+    dept_id = $("#departemen").val();
+    if(dept_id != 'GSP'){
+      $('#tampil_lokasi_dari').hide();
+      $('#lokasi_dari').val('');
+    } else {
+      $('#tampil_lokasi_dari').show();
+      $('#lokasi_dari').val('');
+    }
+  }
 
    
 </script>

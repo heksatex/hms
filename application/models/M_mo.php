@@ -1303,5 +1303,16 @@ class M_mo extends CI_Model
 		return $query->num_rows();
 	}
 
+	public function cek_qty_smi_by_kode($move_id,$quant_id,$lot) 
+	{
+
+		$this->db->where('move_id',$move_id);
+		$this->db->where('quant_id',$quant_id);
+		$this->db->where('lot',$lot);
+		$this->db->where('status','ready');
+		$query = $this->db->get("stock_move_items");
+		return $query->row();
+	}
+
 
 }
