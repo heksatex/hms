@@ -1717,7 +1717,7 @@ class Marketing extends MY_Controller
             foreach($get_data2_ as $pd){
 
                 // cek data in table
-                $cek_dt = $this->m_marketing->cek_data_in_table($pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
+                $cek_dt = $this->m_marketing->cek_data_in_table($pd->cat_id,$pd->corak,$pd->warna,$pd->lebar_Jadi,$pd->uom_lebar_jadi);
                 if($cek_dt){// update
                     $tmp_update = array(
                                 'cat_id_last'     =>$pd->cat_id,
@@ -1770,6 +1770,10 @@ class Marketing extends MY_Controller
                 $this->m_marketing->update_table_changed2($gtr->id, $tmp_id);
             }
 
+
+            $total_remove = $this->m_marketing->get_total_action('REMOVE');
+            $total_add    = $this->m_marketing->get_total_action('ADD');
+
             $list = $this->m_marketing->get_datatables14();
             $data = array();
             $no = $_POST['start'];
@@ -1793,6 +1797,8 @@ class Marketing extends MY_Controller
                 "data" => $data,
                 "past_date" => $past_date,
                 "last_date" => $last_date,
+                'total_add' => $total_add,
+                'total_remove' => $total_remove,
             );
             //output dalam format JSON
             echo json_encode($output);
@@ -2386,6 +2392,109 @@ class Marketing extends MY_Controller
 		
 	        $rowCount++;
 		}
+        $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
+		$object->save('php://output');
+		$xlsData = ob_get_contents();
+		ob_end_clean();
+		$name_file = $title.".xlsx";
+		$response =  array(
+			'op'        => 'ok',
+			'file'      => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData),
+			'filename'  => $name_file
+		);
+		
+		die(json_encode($response));
+
+    }
+
+
+    function export_excel_ready_goods_category()
+    {
+
+        $this->load->library('excel');
+		ob_start();
+        $get_data = $this->m_marketing->get_data_ready_goods_category();
+        $get_last_date = $this->m_marketing->get_last_date_history();
+
+        $object = new PHPExcel();
+    	$object->setActiveSheetIndex(0);
+        $title = 'Report Ready Goods Category';
+        
+        
+    	// SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A1',$title);
+ 		$object->getActiveSheet()->getStyle('A1')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A1:L1');
+
+        // SET JUDUL
+ 		$object->getActiveSheet()->SetCellValue('A2','Data Per Tanggal');
+ 		$object->getActiveSheet()->getStyle('A2')->getAlignment()->setIndent(1);
+		$object->getActiveSheet()->mergeCells('A2:D2');
+
+ 		$object->getActiveSheet()->SetCellValue('E2',": ".$get_last_date);
+ 		$object->getActiveSheet()->getStyle('E2')->getAlignment()->setIndent(1);
+
+
+       //bold huruf
+		$object->getActiveSheet()->getStyle("A1:Q4")->getFont()->setBold(true);
+
+		// Border 
+		$styleArray = array(
+			  'borders' => array(
+			    'allborders' => array(
+			      'style' => PHPExcel_Style_Border::BORDER_THIN
+			    )
+			  )
+		);	
+
+         // header table
+        $table_head_columns  = array('No', 'Category' , 'Article', 'Color', 'Size', 'Uom Size', 'Qty', 'Uom', 'Qty2', 'Uom2','Gl/Lot');
+
+        $column = 0;
+        foreach ($table_head_columns as $judul) {
+            # code...
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 4, $judul);  
+            $column++;
+        }
+
+        // set with and border
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K');
+    	$loop = 0;
+    	foreach ($index_header as $val) {
+            $object->getActiveSheet()->getStyle($val.'4')->applyFromArray($styleArray);
+        }
+        $rowCount  = 5;
+        $num       = 1;
+        foreach ($get_data as $val) {
+			$object->getActiveSheet()->SetCellValue('A'.$rowCount, ($num++));
+			$object->getActiveSheet()->SetCellValue('B'.$rowCount, $val->cat_id);
+			$object->getActiveSheet()->SetCellValue('C'.$rowCount, $val->corak);
+			$object->getActiveSheet()->SetCellValue('D'.$rowCount, $val->warna);
+			$object->getActiveSheet()->SetCellValue('E'.$rowCount, $val->lebar_Jadi);
+			$object->getActiveSheet()->SetCellValue('F'.$rowCount, $val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('G'.$rowCount, $val->qty_jual);
+			$object->getActiveSheet()->SetCellValue('H'.$rowCount, $val->uom_jual);
+			$object->getActiveSheet()->SetCellValue('I'.$rowCount, $val->qty2_jual);
+			$object->getActiveSheet()->SetCellValue('J'.$rowCount, $val->uom2_jual);
+			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->jumlah_lot);
+			
+            //set border true
+			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('B'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('C'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('D'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('E'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('F'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('G'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('H'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('I'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('J'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('K'.$rowCount)->applyFromArray($styleArray);
+		
+	        $rowCount++;
+
+		}
+        
         $object = PHPExcel_IOFactory::createWriter($object, 'Excel2007');  
 		$object->save('php://output');
 		$xlsData = ob_get_contents();

@@ -73,9 +73,10 @@
                     </div>
                     <div class="col-md-12">
                       <div class="col-md-8 col-lg-8">
-                          <div class="col-sm-4 col-md-4 col-lg-4">
+                          <div class="col-sm-12 col-md-12 col-lg-12">
                             <button type="button" class="btn btn-sm btn-default" name="cetak-kategori" id="cetak-kategori" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-print"></i> Print</button>
                             <button type="button" class="btn btn-sm btn-default" name="cetak-tag" id="cetak-tag" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-print"></i> Print Label</button>
+                            <button type="button" class="btn btn-sm btn-default" name="btn-excel" id="btn-excel" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-file-excel-o" style="color:green"></i> Excel</button>
                           </div>
                       </div>   
                     </div>
@@ -276,8 +277,7 @@
     $('#btn-excel').click(function(){
         $.ajax({
             "type":'POST',
-            "url": "<?php echo site_url('report/Marketing/export_excel_ready_goods_group')?>",
-            "data": {"search_field": $('#search_field').val(), "cmbSearch": $('#cmbSearch').val(), "cmbOperator": $('#cmbOperator').val()},
+            "url": "<?php echo site_url('report/Marketing/export_excel_ready_goods_category')?>",
             "dataType":'json',
             beforeSend: function() {
               $('#btn-excel').button('loading');
@@ -298,8 +298,7 @@
             }
             $('#btn-excel').button('reset');
         });
-    });
-
+      });
 
 
 </script>

@@ -604,37 +604,118 @@
     var ow          = $(this).attr('ow');
     var qty         = $(this).attr('qty');
     var kode_produk = $(this).attr('kode_produk');
-    $.ajax({
-          dataType: "JSON",
-          url : '<?php echo site_url('sales/salescontract/update_status_color_lines') ?>',
-          type: "POST",
-          data: {sales_order  : sales_order, 
-                row_order     : row_order,
-                ow            : ow,
-                kode_produk   : kode_produk,
-                qty           : qty,
-                value         : value},
-          success: function(data){
-            if(data.sesi=='habis'){
-                //alert jika session habis
-                alert_modal_warning(data.message);
-                window.location.replace('../index');
-            }else if(data.status == 'failed'){
-              $("#tab_2").load(location.href + " #tab_2");
-                alert_modal_warning(data.message);
-            }else{
-                $("#foot").load(location.href + " #foot");
-                $("#tab_2").load(location.href + " #tab_2");
-                //$("#total").load(location.href + " #total");
-                alert_notify(data.icon,data.message,data.type,function(){});
-             }
-          },
-          error: function (xhr, ajaxOptions, thrownError){
-            alert('Error data');
-            alert(xhr.responseText);
+    bootbox.dialog({
+          message: "Anda yakin ingin mengubah Status "+ow+" ini ?",
+          title: "<i class='fa fa-warning '></i> Ubah Status OW !",
+          buttons: {
+                danger: {
+                      label    : "Yes ",
+                      className: "btn-primary btn-sm",
+                      callback : function() {
+                          $.ajax({
+                            dataType: "JSON",
+                            url : '<?php echo site_url('sales/salescontract/update_status_color_lines') ?>',
+                            type: "POST",
+                            data: {sales_order  : sales_order, 
+                                  row_order     : row_order,
+                                  ow            : ow,
+                                  kode_produk   : kode_produk,
+                                  qty           : qty,
+                                  value         : value,
+                                  approve       : 'no',
+                                },
+                            success: function(data){
+                              if(data.sesi=='habis'){
+                                  //alert jika session habis
+                                  alert_modal_warning(data.message);
+                                  window.location.replace('../index');
+                                  unblockUI( function() {});
+                              }else if(data.status == 'failed'){
+                              
+                                  if(data.status2){
+                                    $("#tab_2").load(location.href + " #tab_2");
+                                    alert_modal_warning(data.message);
+                                  } else {
+                                    bootbox.dialog({
+                                      message: data.message+" <br> Anda yakin ingin menonaktifkan "+ow+" ini ?",
+                                      title: "<i class='fa fa-warning '></i> Tidak Aktif !",
+                                      buttons: {
+                                        danger: {
+                                            label    : "Yes ",
+                                            className: "btn-primary btn-sm",
+                                            callback : function() {
+                                                  please_wait(function(){});
+                                                  $.ajax({
+                                                        type: 'POST',
+                                                        dataType : 'json',
+                                                        url : '<?php echo site_url('sales/salescontract/update_status_color_lines') ?>',
+                                                        data: {sales_order  : sales_order, 
+                                                                row_order     : row_order,
+                                                                ow            : ow,
+                                                                kode_produk   : kode_produk,
+                                                                qty           : qty,
+                                                                value         : value,
+                                                                approve       : 'yes',
+                                                              },
+                                                        error: function (xhr, ajaxOptions, thrownError) { 
+                                                          alert(xhr.responseText);
+                                                          $('#btn-kirim').button('reset');
+                                                          unblockUI( function() {});
+                                                        }
+                                                  })
+                                                  .done(function(response){
+                                                    if(response.status == 'failed'){//jika session habis
+                                                      $("#tab_2").load(location.href + " #tab_2");
+                                                      alert_modal_warning(data.message);
+                                                      unblockUI( function() {});
+                                                    }else{
+                                                      $("#tab_2").load(location.href + " #tab_2");
+                                                      $("#foot").load(location.href + " #foot");
+                                                      unblockUI( function() {
+                                                        setTimeout(function() { alert_notify(response.icon,response.message,response.type,function(){}); }, 1000);
+                                                      });
+                                                    
+                                                    }
+                                                  })
+                                            }
+                                        },
+                                        success: {
+                                              label    : "No",
+                                              className: "btn-default  btn-sm",
+                                              callback : function() {
+                                                $('.bootbox').modal('hide');
+                                                $("#tab_2").load(location.href + " #tab_2");
+                                                unblockUI( function() {});
+                                              }
+                                        }
+                                      }
+                                    });
+                                  }
+                              }else{
+                                  $("#foot").load(location.href + " #foot");
+                                  $("#tab_2").load(location.href + " #tab_2");
+                                  //$("#total").load(location.href + " #total");
+                                  alert_notify(data.icon,data.message,data.type,function(){});
+                                  unblockUI( function() {});
+                              }
+                            },
+                            error: function (xhr, ajaxOptions, thrownError){
+                              alert('Error data');
+                              alert(xhr.responseText);
+                            }
+                          });
+                     } 
+                } ,
+                success: {
+                    label    : "No",
+                    className: "btn-default  btn-sm",
+                    callback : function() {
+                              $('.bootbox').modal('hide');
+                              $("#tab_2").load(location.href + " #tab_2");                                               
+                    }
+                }
           }
-        });
-        
+    });
 
   });
 

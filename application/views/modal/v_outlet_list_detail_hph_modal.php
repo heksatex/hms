@@ -1,7 +1,7 @@
 <form class="form-horizontal">
   <div class="form-group">
     <div class="col-xs-12 table-responsive">
-        <table id="example3" class="table table-condesed table-hover rlstable  over" style="border-bottom:0px !important">
+        <table id="example3" class="table table-condesed table-hover rlstable  over detail_hph_modal" style="border-bottom:0px !important">
           <thead>
             <tr>
               <th class="no">No</th>
@@ -41,7 +41,7 @@
     var table;
     $(document).ready(function() {
         //datatables
-        table = $('#example3').DataTable({ 
+        table = $('.detail_hph_modal').DataTable({ 
             "processing": true, 
             "serverSide": true, 
             "order": [], 

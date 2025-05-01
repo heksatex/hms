@@ -1615,6 +1615,10 @@ class m_marketing extends CI_Model
 	public function get_data_ready_goods_category()
 	{
 		$this->get_query_13();
+		$order = $this->order13;
+		foreach($order as $key => $value){
+			$this->db->order_by($key, $value);
+		}
 		$query = $this->db->get();
 		return $query->result();
 	}
@@ -1676,8 +1680,9 @@ class m_marketing extends CI_Model
 		$this->db->truncate();
 	}
 
-	function cek_data_in_table($corak,$warna,$lebar_jadi,$uom_lebar_jadi)
+	function cek_data_in_table($cat_id,$corak,$warna,$lebar_jadi,$uom_lebar_jadi)
 	{
+		$this->db->where('cat_id',$cat_id);
 		$this->db->where('corak',$corak);
 		$this->db->where('warna',$warna);
 		$this->db->where('lebar_Jadi',$lebar_jadi);
@@ -1728,7 +1733,7 @@ class m_marketing extends CI_Model
 	
 	var $column_order14 = array(null,'cat_id','corak','warna','lebar_Jadi');
 	var $column_search14= array('cat_id','corak','warna','lebar_Jadi');
-	var $order14  	  = array('cat_id' => 'asc','corak' => 'asc','warna' => 'asc');
+	var $order14  	  = array('length(cat_id)' => 'asc','corak' => 'asc','warna' => 'asc');
 	var $table14      = "ready_goods_history_changed";
 
 
@@ -1819,6 +1824,13 @@ class m_marketing extends CI_Model
 		$this->db->where('id',$id);
 		$query = $this->db->get();
 		return $query->row();
+	}
+
+	public function get_total_action($action)
+	{
+		$this->db->where('action',$action);
+		$this->db->from($this->table14);
+		return $this->db->count_all_results();
 	}
 
 	public function goods_to_push()

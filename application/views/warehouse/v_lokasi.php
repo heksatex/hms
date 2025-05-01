@@ -102,6 +102,7 @@
                     <th>Nama Lokasi</th>
                     <th>Arah Panah</th>
                     <th>Status</th>
+                    <th></th>
                     </tr>
                 </thead>
                 </table>
@@ -125,7 +126,7 @@
  
         //datatables
         table = $('#example1').DataTable({ 
-            "stateSave": true,
+            // "stateSave": true,
             "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-5'><'col-sm-7'p>>",
@@ -154,17 +155,29 @@
             },
  
             "columnDefs": [
-              { 
-                  "targets": [ 0 ], 
-                  "orderable": false, 
-              },
-              {
-                "targets" : 2,
-                 render: function (data, type, full, meta) {
-                        return "<div class='text-wrap width-100'>" + data + "</div>";
-                }
-              },
+                { 
+                    "targets": [ 0 ], 
+                    "orderable": false, 
+                },
+                {
+                    "targets" : 2,
+                    render: function (data, type, full, meta) {
+                            return "<div class='text-wrap width-100'>" + data + "</div>";
+                    }
+                },
+                {
+                'targets':6,
+                'checkboxes': {
+                    'selectRow': true
+                    },
+                    'createdCell':  function (td, cellData, rowData, row, col){
+                    },
+                },
             ],
+            "select": {
+                'style': 'multi'
+            },
+            
         });
 
         $('#btn-filter').click(function(){ //button filter event click
@@ -182,6 +195,20 @@
                     $('#btn-filter').button('reset');
              });
             }
+        });
+
+        $(document).on('click','#btn-print',function(e){
+            e.preventDefault();
+
+            var myCheckboxes = table.column(6).checkboxes.selected();
+            var myCheckboxes_arr = new Array();
+            $.each(myCheckboxes, function(index, rowId){        
+                myCheckboxes_arr.push(rowId);
+            });
+            var arrStr = encodeURIComponent(JSON.stringify(myCheckboxes_arr));
+            var url = '<?php echo base_url() ?>warehouse/lokasi/print_lokasi';
+            window.open(url+'?lokasi='+ arrStr,'_blank');
+
         });
  
     });

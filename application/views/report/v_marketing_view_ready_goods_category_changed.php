@@ -68,13 +68,20 @@
                             </div>
                         </div>
                       </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <div class="col-xs-12" id="total_add"><label>Total Add : 0 </label></div>
+                          <div class="col-xs-12" id="total_remove"><label>Total Remove : 0 </label></div>
+                        </div>
+                      </div>
                     </div>
                     <div class="col-md-12">
                       <div class="col-md-8 col-lg-8">
                           <div class="col-sm-4 col-md-4 col-lg-4">
                             <button type="button" class="btn btn-sm btn-default" name="cetak-tag" id="cetak-tag" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> <i class="fa fa-print"></i> Print Label</button>
                           </div>
-                      </div>   
+                      </div>  
+                     
                     </div>
                 </form>
                 &nbsp
@@ -187,6 +194,10 @@
                 let past_date = settings.json.past_date; 
                 let last_date = settings.json.last_date; 
                 $('#date_ready_goods').html('Data Ready Goods Category yang berubah <br> Tanggal <b> '+ (past_date) + '</b> sampai Tanggal <b>'+last_date+' </b>' )
+                let total_add = settings.json.total_add; 
+                let total_remove = settings.json.total_remove;
+                $('#total_add').html('<label>Total Add : '+ total_add + '</label>');
+                $('#total_remove').html('<label>Total Remove : '+ total_remove + '</label>');
             },
         });
 
