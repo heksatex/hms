@@ -193,7 +193,7 @@ class M_trackinglot extends CI_Model
 
 
     function get_picklist_by_Lot($lot){
-        return $this->db->query("SELECT pl.no_pl, pl.barcode_id, pl.tanggal_masuk, ms.nama_status
+        return $this->db->query("SELECT pl.no_pl, pl.barcode_id, pl.tanggal_masuk, pl.valid, pl.valid_date,ms.nama_status
                                 FROM picklist_detail pl
                                 INNER JOIN mst_status ms ON pl.valid = ms.kode
                                 WHERE pl.barcode_id LIKE '$lot%'  ")->result();
@@ -201,11 +201,36 @@ class M_trackinglot extends CI_Model
 
 
     function get_delivery_by_Lot($lot){
-        return $this->db->query("SELECT do.no, do.no_sj, do.tanggal_buat, do.user as nama_user, ms.nama_status
+        return $this->db->query("SELECT do.no, do.no_sj, do.tanggal_buat, do.tanggal_dokumen, do.tanggal_batal, dod.status, do.user as nama_user, ms.nama_status, dod.tanggal_retur
                                 FROM delivery_order do
                                 INNER JOIN delivery_order_detail as dod ON do.id = dod.do_id
                                 INNER JOIN mst_status ms ON dod.status = ms.kode
                                 WHERE dod.barcode_id LIKE '$lot%'  ")->result();
+    }
+
+    function cek_log_history($kode,$param) {
+
+        $this->db->where('kode',$kode);
+        if(!empty($param)){
+            $loop  = 1;
+			$this->db->group_start();
+            foreach($param as $params){
+
+                if($loop == 1){
+                    $this->db->like('note',$params);
+                } else {
+                    $this->db->like('note',$params);
+                }
+                $loop++;
+            }
+			$this->db->group_end();
+
+        }
+        
+       
+        $query = $this->db->get('log_history');
+        return $query->row();
+
     }
 
 

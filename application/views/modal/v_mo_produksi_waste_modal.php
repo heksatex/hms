@@ -1160,7 +1160,7 @@
 		    + '<td width="150px">'
 		    +'<select type="text" class="form-control input-sm width-200 wproduk" name="wtxtproduct" id="wtxtproduct"></select>'
 		    +'<input type="hidden" name="wtxtnameproduct" id="wtxtnameproduct"  class="form-control input-sm wnameproduct"  readonly="readonly"></td>'
-		    + '<td style="min-width:180px !important;"><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-160 wtxtlot"  onkeypress="enter_waste(event);" ></td>'
+		    + '<td style="min-width:180px !important;"><input type="text" name="wtxtlot"  id="wtxtlot" class="form-control input-sm width-160 wtxtlot"  onkeypress="enter_waste(event);"  readonly="readonly" ></td>'
 		    + '<td></td>'
 		    + '<td><input type="text" name="wtxtqty"  id="wtxtqty" class="form-control input-sm width-80 wtxtqty" onkeypress="enter_waste(event);" onkeyup="validAngka_waste(this,'+wtxtqty+')" data-decimal="2" oninput="enforceNumberValidation(this)"></td>'
 		    + '<td><input type="text" name="wtxtuom"  id="wtxtuom" class="form-control input-sm width-80 wtxtuom"   readonly="readonly"></td>'

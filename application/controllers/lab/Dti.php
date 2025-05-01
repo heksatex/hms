@@ -89,7 +89,7 @@ class Dti extends MY_Controller
       $sub_menu   = $this->uri->segment(2);
       $username   = $this->session->userdata('username'); 
 
-      $warna      = addslashes($this->input->post('warna'));
+      $warna      = addslashes(trim($this->input->post('warna')));
 			$id         = $this->input->post('id');
 			$tanggal    = date('Y-m-d H:i:s');
       $notes      = addslashes($this->input->post('note'));
