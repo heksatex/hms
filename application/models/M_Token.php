@@ -50,7 +50,8 @@ class M_Token extends CI_Model {
 
     protected function updateIncr(int $incr) {
         $this->db->where(['modul' => $this->modul, 'periode' => $this->periode]);
-        $this->db->update($this->table, ['increment' => $incr + 1]);
+        $incrs = $incr + 1;
+        $this->db->update($this->table, ['increment' =>$incrs ]);
         $db_error = $this->db->error();
         if ($db_error['code'] > 0) {
             throw new Exception($db_error['message']);

@@ -695,12 +695,28 @@ class Produk extends MY_Controller {
     }
 
     public function save_harga($id) {
+        $validation = [
+            [
+                'field' => 'harga',
+                'label' => 'Harga',
+                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ]
+        ];
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
             $kode_produk = decrypt_url($id);
             $harga = $this->input->post("harga");
             $jenis = $this->input->post("jenis");
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+            
             $check = new $this->m_coa;
             $insertUpdate = clone $check;
             if ($check->setTables("mst_produk_harga")->setWheres(["kode_produk" => $kode_produk, 'jenis' => $jenis])->getDetail()) {
@@ -719,9 +735,30 @@ class Produk extends MY_Controller {
         }
     }
     
+    public function hapuscatatan($id) {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $kode_decrypt = decrypt_url($id);
+            $ids = $this->input->post("ids");
+            $catatan = $this->input->post("catatan");
+            $model = new $this->m_global;
+            $model->setTables("mst_produk_catatan")->setWheres(["id"=>$ids])->delete();
+            $this->_module->gen_history($sub_menu, $kode_decrypt, "cancel", "Hapus Catatan `{$catatan}`", $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }catch (Exception $ex) {
+            $this->output->set_status_header(($ex->getCode() ?? 500))
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+    
     public function get_view_konversi() {
         try {
-            $html = $this->load->view('modal/v_produk_konversi_oum', [],true);
+            $data['uom'] = $this->_module->get_list_uom();
+            $html = $this->load->view('modal/v_produk_konversi_oum', $data,true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'success', 'icon' => 'fa fa-warning', 'type' => 'danger','data'=>$html)));

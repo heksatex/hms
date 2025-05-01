@@ -452,6 +452,7 @@ class Mutasi extends MY_Controller
     {
         $list_dept_mutasi = array(
             array('kode' => 'GDB', 'nama'=>'Gudang Benang'),
+            array('kode' => 'GOB', 'nama'=>'Gudang Obat'),
             array('kode' => 'WRD', 'nama'=>'Warping Dasar'),
             array('kode' => 'WRP', 'nama'=>'Warping Panjang'),
             array('kode' => 'TWS', 'nama'=>'Twisting'),

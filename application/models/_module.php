@@ -227,9 +227,19 @@ class _module extends CI_Model {
         return $this->db->query("INSERT INTO penerimaan_barang (kode,tanggal,tanggal_transaksi,tanggal_jt,reff_note,status,dept_id,origin,move_id,reff_picking,lokasi_dari,lokasi_tujuan)  values $sql ");
     }
 
+    public function simpan_penerimaan_batch_2($data_in) {
+        $this->db->insert_batch('penerimaan_barang', $data_in);
+        return is_array($this->db->error());
+    }
+
     public function simpan_penerimaan_items_batch($sql) {
         return $this->db->query("INSERT INTO penerimaan_barang_items  (kode,kode_produk,nama_produk,qty,uom,status_barang,row_order) 
 								values $sql ");
+    }
+
+    public function simpan_penerimaan_items_batch_2($data_in_item) {
+        $this->db->insert_batch('penerimaan_barang_items', $data_in_item);
+        return is_array($this->db->error());
     }
 
     public function simpan_penerimaan_items_batch_origin_prod($sql) {
@@ -830,8 +840,8 @@ class _module extends CI_Model {
     }
   
     public function rollbackTransaction() {
-        $this->db->trans_complete();
         $this->db->trans_rollback();
+        $this->db->trans_complete();
     }
 
     public function finishTransaction() {
