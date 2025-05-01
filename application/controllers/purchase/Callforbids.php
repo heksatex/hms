@@ -186,7 +186,7 @@ class Callforbids extends MY_Controller {
                         } else {
                             $uom_beli = $prod->uom_beli;
                             $dari = $prod->dari;
-                            $nilai = $prod->nilai;
+                            $nilai = ($prod->nilai ?? 1);
                             $catatan = $prod->catatan;
                         }
 //                        $qtyBeli = ceil($datas_[3] / $nilai);

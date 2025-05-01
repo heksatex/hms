@@ -95,7 +95,7 @@ class Requestforquotation extends MY_Controller {
                     
                     ->setWheres(["jenis" => $jenis]);
             if (strtolower($level) === "direksi") {
-                $list->setWhereRaw("(po.status in ('waiting_approval','exception') and poe.status in ('waiting_approve'))");
+                $list->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
             } else {
                 if ($jenis !== "FPT")
                     $list->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
