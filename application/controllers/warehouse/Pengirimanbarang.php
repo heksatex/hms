@@ -164,7 +164,7 @@ class Pengirimanbarang extends MY_Controller
   }
 
   public function ATK() {
-      $data['id_dept'] = 'ATK';
+      $data['id_dept'] = 'GATK';
       $this->load->view('warehouse/v_pengiriman_barang',$data);
   }
 

@@ -204,7 +204,7 @@
                                                             <div class="col-md-12 col-xs-12">
                                                                 <div class="col-xs-4">UOM/Satuan Beli</div>
                                                                 <div class="col-xs-4">
-                                                                    <select class="form-control input-sm" name="uom_beli" id="uom_beli" />
+                                                                    <select class="form-control input-sm select-uom-beli" name="uom_beli" id="uom_beli" />
                                                                     <option value=""></option>
                                                                     </select>
                                                                     <small id="note_uom_beli" class="form-text text-muted">
@@ -549,7 +549,7 @@
     });
 
     //select 2 uom_beli
-    $("#uom_beli").select2({
+    $(".select-uom-beli").select2({
         allowClear: true,
         placeholder: "Satuan Beli",
         ajax: {
@@ -796,8 +796,8 @@
                 product_parent: $('#product_parent').val(),
                 sub_parent: $('#sub_parent').val(),
                 jenis_kain: $('#jenis_kain').val(),
-                autogenerate: autogenerate_value,
-                autogenerate_gudang: autogenerategudang_value
+                autogenerate: $("#autogenerate").val(),
+                autogenerate_gudang: $("#autogenerate_gudang").val()
 
             }, success: function (data) {
                 if (data.sesi == "habis") {
