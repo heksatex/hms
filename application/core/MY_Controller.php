@@ -31,7 +31,7 @@ class MY_Controller extends CI_Controller {
                     $menu = decrypt_url($text);
                     $privilage = 0;
                     foreach (unserialize($menu) as $key => $value) {
-                        if ($sub_menu === $value->inisial_class) {
+                        if (strtolower($sub_menu) === strtolower($value->inisial_class)) {
                             $privilage++;
                             break;
                         }
