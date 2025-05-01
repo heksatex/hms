@@ -178,7 +178,7 @@ class M_transferLokasi extends CI_Model
 		return $this->db->get('mst_lokasi');
 	}
 
-	public function valid_lokasi_tujuan_by_dept($dept_id,$lokasi_tujuan)
+	public function valid_lokasi_by_dept($dept_id,$lokasi_tujuan)
 	{
 		$query =  $this->db->query("SELECT * FROM mst_lokasi Where dept_id = '$dept_id' AND kode_lokasi = '$lokasi_tujuan' AND kode_lokasi NOT IN (SELECT kode_lokasi FROM mst_lokasi WHERE nama_lokasi = 'default_greige_out' OR nama_lokasi = 'default_adjustment') ");
 		return $query->data_seek(0);
@@ -234,20 +234,20 @@ class M_transferLokasi extends CI_Model
 	}
 
 
-	public function save_transfer_lokasi($kode,$tgl,$note,$dept_id,$lokasi_tujuan,$nama_user,$status)
+	public function save_transfer_lokasi($kode,$tgl,$note,$dept_id,$lokasi_dari,$lokasi_tujuan,$nama_user,$status)
 	{
-		return $this->db->query("INSERT INTO transfer_lokasi (kode_tl,tanggal_dibuat,dept_id,lokasi_tujuan,note,status,nama_user) values ('$kode','$tgl','$dept_id','$lokasi_tujuan','$note','$status','$nama_user') ");
+		return $this->db->query("INSERT INTO transfer_lokasi (kode_tl,tanggal_dibuat,dept_id,lokasi_dari,lokasi_tujuan,note,status,nama_user) values ('$kode','$tgl','$dept_id','$lokasi_dari','$lokasi_tujuan','$note','$status','$nama_user') ");
 	}
 
-	public function update_transfer_lokasi($kode_tl,$lokasi_tujuan,$note)
+	public function update_transfer_lokasi($kode_tl,$lokasi_dari,$lokasi_tujuan,$note)
 	{
-		return $this->db->query("UPDATE transfer_lokasi SET lokasi_tujuan = '$lokasi_tujuan', note = '$note' WHERE kode_tl  = '$kode_tl'");
+		return $this->db->query("UPDATE transfer_lokasi SET lokasi_dari = '$lokasi_dari', lokasi_tujuan = '$lokasi_tujuan', note = '$note' WHERE kode_tl  = '$kode_tl'");
 	}
 
 	public function get_transfer_lokasi_by_kode($kode_tl)
 	{
 		
-		$this->db->select("a.kode_tl, a.tanggal_dibuat,a.tanggal_transfer, a.total_lot, a.lokasi_tujuan, a.note, a.status, a.dept_id, d.kode, d.nama as departemen" );
+		$this->db->select("a.kode_tl, a.tanggal_dibuat,a.tanggal_transfer, a.total_lot, a.lokasi_tujuan, a.note, a.status, a.dept_id, d.kode, d.nama as departemen, a.lokasi_dari" );
 		$this->db->from("transfer_lokasi a");		
 		$this->db->JOIN("departemen d","a.dept_id=d.kode","INNER");
 		$this->db->where("a.kode_tl", $kode_tl);
@@ -265,6 +265,16 @@ class M_transferLokasi extends CI_Model
 
 	public function get_list_stock_quant_by_kode($lokasi,$barcode_id)
 	{
+		$this->db->where('lokasi',$lokasi);
+		$this->db->where('lot',$barcode_id);
+		$this->db->order_by('quant_id','asc');
+		$query  = $this->db->get('stock_quant');
+		return $query->result();
+	}
+
+	public function get_list_stock_quant_by_kode2($lokasi,$lokasi_fisik,$barcode_id)
+	{
+		$this->db->where('lokasi_fisik',$lokasi_fisik);
 		$this->db->where('lokasi',$lokasi);
 		$this->db->where('lot',$barcode_id);
 		$this->db->order_by('quant_id','asc');

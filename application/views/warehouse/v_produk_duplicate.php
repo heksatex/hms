@@ -222,7 +222,12 @@
                                                                         <small id="note_uom_beli" class="form-text text-muted">
                                                                             <?= $uom_beli->catatan ?? "" ?>
                                                                         </small>
-                                                                    </div>              
+                                                                    </div>
+                                                                    <div class="col-xs-2">
+                                                                        <button type="button" class="btn btn-default btn-sm create_konversi_uom" data-toggle="tooltip" data-title="Buat Konversi Satuan">
+                                                                            <i class="fa fa-plus"></i>
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -557,6 +562,21 @@
         <script src="<?php echo base_url('dist/js/uploads/fileinput.js') ?>"></script>
         <script src="<?php echo base_url('dist/js/uploads/fileinput-sortable.js') ?>"></script>
         <script type="text/javascript">
+
+            $(".create_konversi_uom").click(function (e) {
+                e.preventDefault();
+                $("#view_data").modal({
+                    show: true,
+                    backdrop: 'static'
+                });
+                $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                $('.modal-title').text('Konversi Uom');
+                $.post("<?= base_url('warehouse/produk/get_view_konversi/') ?>", {}, function (data) {
+                    setTimeout(function () {
+                        $(".view_body").html(data.data);
+                    }, 1000);
+                });
+            });
 
             //select 2 uom_beli
             $("#uom_beli").select2({

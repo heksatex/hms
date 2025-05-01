@@ -22,6 +22,30 @@ class MY_Controller extends CI_Controller {
             } else {
                 redirect(base_url());
             }
+        } else {
+            $level = $this->session->userdata('nama')['level'] ?? "";
+            if (!in_array(strtolower($level), ["super administrator"])) {
+                $sub_menu = $this->uri->segment(2);
+                if ($sub_menu !== null) {
+                    $text = $this->session->userdata('menu');
+                    $menu = decrypt_url($text);
+                    $privilage = 0;
+                    foreach (unserialize($menu) as $key => $value) {
+                        if ($sub_menu === $value->inisial_class) {
+                            $privilage++;
+                            break;
+                        }
+                    }
+                    if ($privilage === 0) {
+                        if ($this->input->is_ajax_request() || $this->input->get_request_header('_request')) {
+//                            $this->output->set_status_header(403)->set_content_type('application/json', 'utf-8')
+//                                    ->set_output(json_encode(array('message' => 'Akses Dilarang', 'icon' => 'fa fa-warning', 'type' => 'danger', 'data' => [])));
+                        } else {
+                            show_404();
+                        }
+                    }
+                }
+            }
         }
     }
 }

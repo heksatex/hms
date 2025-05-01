@@ -10,6 +10,7 @@ class Login extends CI_Controller {
     function __construct() {
         parent::__construct();
         $this->load->model('m_login');
+        $this->load->model('m_global');
     }
 
     function index() {
@@ -42,15 +43,21 @@ class Login extends CI_Controller {
                     throw new Exception("Status User Tidak aktif");
                 }
                 $row = $this->m_login->cek_nama($username)->row_array();
+                $modelMenu = new $this->m_global;
+                $menu = $modelMenu->setTables("user_priv")->setJoins("main_menu_sub", "kode = main_menu_sub_kode")
+                                ->setWheres(["username" => $username])->setSelects(["inisial_class"])
+                                ->setOrder(["row_order" => "asc"])->getData();
+                $text = serialize($menu);
                 $data_session = array(
                     'username' => $username,
                     'nama' => $row,
-                    'status' => "login"
+                    'status' => "login",
+                    'menu' => encrypt_url($text)
                 );
                 $this->session->set_userdata($data_session);
                 $this->output->set_status_header(200)
                         ->set_content_type('application/json', 'utf-8')
-                        ->set_output(json_encode(array('message' => 'Berhasil','icon' => 'fa fa-check', 'type' => 'success')));
+                        ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
             } catch (Exception $ex) {
                 $this->output->set_status_header(500)
                         ->set_content_type('application/json', 'utf-8')
@@ -65,10 +72,16 @@ class Login extends CI_Controller {
             }
             //login berhasil
             $row = $this->m_login->cek_nama($username)->row_array(); //mengambil data nama 
+            $modelMenu = new $this->m_global;
+            $menu = $modelMenu->setTables("user_priv")->setJoins("main_menu_sub", "kode = main_menu_sub_kode")
+                            ->setWheres(["username" => $username])->setSelects(["inisial_class"])
+                            ->setOrder(["row_order" => "asc"])->getData();
+            $text = serialize($menu);
             $data_session = array(
                 'username' => $username,
                 'nama' => $row,
-                'status' => "login"
+                'status' => "login",
+                'menu' => encrypt_url($text)
             );
             $row = $this->m_login->cek_menu_default($username)->row_array(); //mengambil data menu default
 
@@ -80,7 +93,6 @@ class Login extends CI_Controller {
             $this->session->set_flashdata('gagal', 'Username atau Password Salah !');
             redirect(base_url("login"));
         }
-
     }
 
     function logout() {

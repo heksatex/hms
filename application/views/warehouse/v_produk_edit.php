@@ -136,17 +136,17 @@
                                             <!--  <div class="col-md-12 col-xs-12">
                                                <div class="col-xs-8">
                                             <?php if ($produk->dapat_dijual == 0) { ?>
-                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdijual" id="dapatdijual" value="true">
+                                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdijual" id="dapatdijual" value="true">
                                             <?php } else { ?>
-                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdijual" id="dapatdijual" checked value="true">
+                                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdijual" id="dapatdijual" checked value="true">
                                             <?php } ?>
                                                  <label>Dapat Dijual</label>
                                                </div>
                                                <div class="col-xs-8">                      
                                             <?php if ($produk->dapat_dibeli == 0) { ?>
-                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdibeli" id="dapatdibeli" value="true">
+                                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdibeli" id="dapatdibeli" value="true">
                                             <?php } else { ?>
-                                                                                                                                                                                                                                                                                                                                                           <input type="checkbox" name="dapatdibeli" id="dapatdibeli" checked value="true">
+                                                                                                                                                                                                                                                                                                                                                                       <input type="checkbox" name="dapatdibeli" id="dapatdibeli" checked value="true">
                                             <?php } ?>                           
                                                  <label>Dapat Dibeli</label>
                                                </div>
@@ -652,6 +652,12 @@
                                                                     ?>
                                                                     <tr>
                                                                         <td><?= $value->catatan ?></td>
+                                                                        <td style="text-align: right;">
+                                                                            <a href="#" class="hapus-catatan" data-ids="<?= $value->id ?>" data-catatan="<?= $value->catatan ?>"
+                                                                               data-toggle="tooltip" data-placement="top" title="Hapus">
+                                                                                <i class="fa fa-trash" style="color:red"></i>
+                                                                            </a>
+                                                                        </td>
                                                                     </tr>
                                                                 <?php }
                                                                 ?>
@@ -777,6 +783,26 @@ if (is_file(FCPATH . "upload/product/{$produk->kode_produk}.jpg")) {
                             y = offsetY / zoomer.offsetHeight * 100
                             zoomer.style.backgroundPosition = x + '% ' + y + '%';
                         }
+                        $(".hapus-catatan").off("click").unbind("click").on("click", function () {
+                            var ids = $(this).data("ids");
+                            var catatan = $(this).data("catatan");
+                            confirmRequest("Produk", "Hapus Catatan ?", function () {
+                                $.ajax({
+                                    url: "<?php echo base_url(); ?>warehouse/produk/hapuscatatan/<?= encrypt_url($produk->kode_produk) ?>",
+                                    type: "POST",
+                                    data: {
+                                        ids: ids,
+                                        catatan : catatan
+                                    }, success: function (data) {
+                                        location.reload();
+                                    }, error: function (xhr, ajaxOptions, thrownError) {
+                                        alert_notify(xhr.responseJSON.icon, xhr.responseJSON.message, xhr.responseJSON.type, function () {});
+                                        unblockUI(function () {});
+                                    }
+
+                                });
+                            })
+                        })
                         $("#sbmt-coa").off("click").unbind("click").on("click", function () {
                             confirmRequest("Produk", "Update COA untuk produk ini ? ", function () {
                                 please_wait(function () {});
@@ -1119,6 +1145,10 @@ if (is_file(FCPATH . "upload/product/{$produk->kode_produk}.jpg")) {
                                                                             });
                                                                             document.getElementById(response.data.field).focus();
                                                                         } else {
+                                                                            setTimeout(function () {
+                                                                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+                                                                            }, 1000);
+
                                                                             $("#foot").load(location.href + " #foot");
                                                                             var $newOptionuom = $("<option></option>").val(data.id).html(data.nama);
                                                                             $("#sub_parent").empty().append($newOptionuom).trigger('change');

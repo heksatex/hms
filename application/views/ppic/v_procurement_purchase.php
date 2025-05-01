@@ -41,6 +41,8 @@
                   <th class="no">No</th>
                   <th>Procurement Purchase No</th>
                   <th>Create Date</th>
+                  <th>Type </th>
+                  <th>Show SO </th>
                   <th>Schedule Date</th>
                   <th>SO</th>
                   <th>Priority</th>

@@ -49,7 +49,7 @@
             "ajax": {
                 "url": "<?php echo site_url('warehouse/penerimaanbarang/tambah_data_details_quant_penerimaan_modal')?>",
                 "type": "POST",
-                "data":{"kode_produk" : "<?php echo $kode;?>", "move_id" : "<?php echo $move_id;?>",  "origin" : "<?php echo $origin;?>", "deptid": "<?php echo $deptid;?>" }
+                "data":{"kode_produk" : "<?php echo $kode_produk;?>", "move_id" : "<?php echo $move_id;?>",  "origin" : "<?php echo $origin;?>", "deptid": "<?php echo $deptid;?>" }
 
             },
            
