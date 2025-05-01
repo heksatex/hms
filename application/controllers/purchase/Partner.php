@@ -32,8 +32,11 @@ class Partner extends MY_Controller {
             $data = array();
             $list = new $this->m_global;
             $list->setTables("partner")->setWheres(["supplier" => 1])
+                    ->setJoins("partner_states","partner_states.id = invoice_state","left")
+                    ->setJoins("partner_country","partner_country.id = invoice_country","left")
                     ->setOrder(["id" => "desc"])->setSearch(["nama", "invoice_city", "delivery_city"])
-                    ->setOrders([null, "nama"]);
+                    ->setOrders([null, "nama","invoice_street","invoice_city","nama_state","nama_country","invoice_zip"])
+                    ->setSelects(["partner.*","partner_states.name as nama_state","partner_country.name as nama_country"]);
             $no = $_POST['start'];
             foreach ($list->getData() as $field) {
                 $kode_encrypt = encrypt_url($field->id);
@@ -43,8 +46,8 @@ class Partner extends MY_Controller {
                     '<a href="' . base_url('purchase/partner/edit/' . $kode_encrypt) . '">' . $field->nama . '</a>',
                     $field->invoice_street,
                     $field->invoice_city,
-                    $field->invoice_state,
-                    $field->invoice_country,
+                    $field->nama_state,
+                    $field->nama_country,
                     $field->invoice_zip,
                 );
             }
