@@ -50,6 +50,7 @@ class Requestforquotation extends MY_Controller {
             $model1 = new $this->m_po;
             $model2 = clone $model1;
             $model3 = clone $model2;
+            $model4= clone $model2;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
@@ -68,7 +69,7 @@ class Requestforquotation extends MY_Controller {
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
                             ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 //        $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
-            $data["tax"] = $this->m_po->setTables("tax")->setOrder(["id" => "asc"])->getData();
+            $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
 
             $this->load->view('purchase/v_order_edit', $data);
@@ -694,7 +695,7 @@ class Requestforquotation extends MY_Controller {
 
     public function get_tax() {
         try {
-            $kurs = $this->m_po->setTables("tax")->setOrder(["id" => "asc"])->getData();
+            $kurs = $this->m_po->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode($kurs));

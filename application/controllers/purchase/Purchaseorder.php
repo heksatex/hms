@@ -841,6 +841,8 @@ class Purchaseorder extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $model1 = new $this->m_po;
             $model2 = clone $model1;
+            $model3 = clone $model1;
+            $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
                             ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
                             ->setSelects(["po.*", "p.nama as supp,concat(delivery_street,' ',delivery_city) as alamat_kirim", "currency_kurs.currency as matauang"])

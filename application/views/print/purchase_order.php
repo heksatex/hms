@@ -38,10 +38,10 @@
         <div id="row">
             <div id="column" style="text-align: left;font-size: 10px;margin-top: -20px;line-height: 1.5">
                 <p style="line-height:1.5">
-                <span>PT. Heksatex Indah</span><br/>
-                <span>Jl. Nanjung KM 2</span><br/>
-                <span>Cimahi 40533</span><br/>
-                <span>Indonesia</span>
+                    <span>PT. Heksatex Indah</span><br/>
+                    <span>Jl. Nanjung KM 2</span><br/>
+                    <span>Cimahi 40533</span><br/>
+                    <span>Indonesia</span>
                 </p>
 
                 <hr style="border: 2px solid black">
@@ -102,8 +102,13 @@
                         $jumlah = $value->harga_per_uom_beli * $value->qty_beli;
                         $subtotal1 += $jumlah;
                         $totalDiskon += $value->diskon;
-                        $tax = ($jumlah - $value->diskon) * $value->amount_tax;
-                        $totalTax += $tax;
+//                        $tax = ($jumlah - $value->diskon) * $value->amount_tax;
+//                        $totalTax += $tax;
+                        if ($setting !== null) {
+                            $totalTax += ((($jumlah - $value->diskon) * 11) / 12) * $value->amount_tax;
+                        } else {
+                            $totalTax += ($jumlah - $value->diskon) * $value->amount_tax;
+                        }
                         ?>
                         <tr>
                             <td>
@@ -143,6 +148,21 @@
                         <td style="text-align: right;border-top: 1px solid black;">Discount</td>
                         <td style="text-align: right;"><?= number_format($totalDiskon, 2) . " " . $po->matauang ?></td>
                     </tr>
+                    <?php
+                    if ($setting !== null) {
+                    ?>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align: right;border-top: 1px solid grey;">DPP Nilai Lain</td>
+                        <td style="text-align: right;"><?= number_format(($subtotal1 - $totalDiskon) * (11 / 12), 2) . " " . $po->matauang ?></td>
+                    </tr>
+                    <?php
+                    }
+                    ?>
                     <tr>
                         <td></td>
                         <td></td>
