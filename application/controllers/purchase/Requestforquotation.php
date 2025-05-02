@@ -720,14 +720,17 @@ class Requestforquotation extends MY_Controller {
 
     public function get_produk() {
         $search = $this->input->get("search");
-        $datas = new $this->m_po;
+        $datas = new $this->m_global;
         if ($search !== "") {
             $datas = $datas->setWhereRaw("kode_produk LIKE '%{$search}%' or nama_produk LIKE '%{$search}%'");
         }
         $_POST['length'] = 50;
         $_POST['start'] = 0;
         $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])
+                ->setJoins("mst_category","id_category = mst_category.id")
+                ->setJoins("departemen","(departemen.kode = mst_category.dept_id and departemen.type_dept='gudang')")
                 ->setJoins("nilai_konversi nk","nk.id = uom_beli" , "left")
+                ->setGroups(["mst_produk.kode_produk"])
                 ->setSelects(["mst_produk.*","coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai"])
                 ->setOrder(["kode_produk" => "asc"])->getData();
         $this->output->set_status_header(200)

@@ -78,7 +78,7 @@ class Purchaseorder extends MY_Controller {
                             ->setJoins("purchase_order_detail pod", "pod.id = pod_id")
                             ->setWheres(["pod.po_no_po" => $kode_decrypt])
                             ->setSelects(["por.*", "kode_produk,nama_produk,deskripsi"])->setOrder(["por.retur_date" => "desc"])->getData();
-            $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
+//            $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
             $data["tax"] = $this->m_po->setTables("tax")->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
             $data["status"] = $this->status;
