@@ -14,7 +14,7 @@
             #btn-approve {
                 display: none;
             }
-            <?php if ($po->status !== 'purchase_confirmed') { ?>
+            <?php if (!in_array($po->status ,['purchase_confirmed','done'])) { ?>
 
                 #btn-simpan {
                     display: none;
