@@ -20,9 +20,9 @@
     }
 
     @media screen and (min-width: 768px) {
-      .over {
+/*      .over {
         overflow-x: visible !important;
-      }
+      }*/
     }
 
     .min-width-full {
