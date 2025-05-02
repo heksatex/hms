@@ -47,6 +47,7 @@
                         </div>
                         <form class="form-horizontal" id="form-produk-add" name="form-produk-add" method="POST" action="<?php echo base_url('warehouse/produk/simpan') ?>" enctype="multipart/form-data">
                             <button class="hide" id="btn-save" type="submit"></button>
+                            <input type="hidden" name="status" id="status" value="tambah">
                             <div class="box-body">
                                 <!--<form class="form-horizontal">-->
 
