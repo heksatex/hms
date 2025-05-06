@@ -252,7 +252,21 @@
                                                     <label class="form-label">Supplier</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $po->supp ?></span>
+                                                    <?php
+                                                    if ($po->status === 'draft') {
+                                                        ?>
+                                                    <select class="form-control input-sm select2" name="supplier" id="supplier" required>
+                                                            <option value='<?= $po->supplier ?>' selected><?= $po->supp ?></option>
+                                                        </select>
+                                                        <?php
+                                                    } else {
+                                                        ?>
+                                                        <span><?= $po->supp ?></span>
+                                                        <input type="hidden" value="<?= $po->supplier ?>">
+                                                        <?php
+                                                    }
+                                                    ?>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -389,6 +403,7 @@
                                         <th class="style">Qty / Uom Beli</th>
                                         <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
                                         <td class="style text-right" >Tax</td>
+                                        <td class="style" >Reff Note</td>
                                         <!--<td class="style text-right" width="20px">Diskon</td>-->
                                         </thead>
                                         <tbody>
@@ -427,7 +442,7 @@
                                                                 <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
                                                             </a>
                                                         <?php } ?>
-                                                        <?="[{$value->kode_produk }] {$value->nama_produk }"?>
+                                                        <?= "[{$value->kode_produk }] {$value->nama_produk }" ?>
                                                     </td>
                                                     <td >
                                                         <div class="form-group" style="width:100%">
@@ -464,13 +479,16 @@
                                                     <td>
                                                         <div class="form-group" style="width: 100%" >
                                                             <?php if ($po->no_value === "1") { ?>
-                                                                <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" readonly
+                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" readonly
                                                                        value="0">
                                                                    <?php } else { ?>
-                                                                <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                       value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                       value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" data-row="<?= $key ?>" required>
                                                                    <?php } ?>
 
+                                                            <small class="form-text text-muted note_harga_<?= $key ?>">
+                                                                <?= number_format(($value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0), 2, ".", ",") ?>
+                                                            </small>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -498,16 +516,21 @@
                                                             <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]"value="0" readonly>
                                                         </div>
                                                     </td>
-<!--                                                    <td>
-                                                        <div class="form-group">
-                                                            <?php if ($po->no_value === "1") { ?>
-                                                                <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
-                                                            <?php } else { ?>
-                                                                <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                       style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
-                                                                   <?php } ?>
+                                                    <td>
+                                                        <div class="form-text">
+                                                            <?= $value->reff_note ?>
                                                         </div>
-                                                    </td>-->
+                                                    </td>
+    <!--                                                    <td>
+                                            <div class="form-group">
+                                                    <?php if ($po->no_value === "1") { ?>
+                                                                                <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
+                                                    <?php } else { ?>
+                                                                                <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                                       style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
+                                                    <?php } ?>
+                                            </div>
+                                        </td>-->
                                                 </tr>
                                                 <?php
                                                 if (!empty($value->catatan)) {
@@ -633,7 +656,7 @@
                     </div>
                 </section>
             </div>
-                <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
+            <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
             <footer class="main-footer">
                 <?php
                 $this->load->view("admin/_partials/modal.php");
@@ -656,6 +679,25 @@
 
             });
             $(function () {
+
+                $("#supplier").select2({
+                    allowClear: true,
+                    placeholder: "Supplier",
+                    ajax: {
+                        url: "<?= site_url('purchase/requestforquotation/get_supp') ?>",
+                        data: function (params) {
+                            var query = {
+                                search: params.term
+                            }
+                            return query;
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data.data
+                            };
+                        }
+                    }
+                });
 
                 $(".uom_beli").select2({
                     allowClear: true,
@@ -718,6 +760,13 @@
                     var row = $(this).attr("data-row");
                     $(".note_uom_beli_" + row).html("");
                     $(".nama_uom_" + row).val("");
+                });
+
+                $(".harga_satuan").on("input", function () {
+                    var row = $(this).attr("data-row");
+                    var number = $(".harga_satuan_" + row).val();
+                    var formatVal = new Intl.NumberFormat(["ban", "id"], {maximumSignificantDigits: 3}).format(number);
+                    $(".note_harga_" + row).html(formatVal);
                 });
 
 
@@ -821,9 +870,9 @@
                             },
                             data: {
                                 status: "purchase_confirmed",
-                                items : "<?php count($po_items) ?>",
+                                items: "<?php count($po_items) ?>",
                                 totals: 0,
-                                default_total:1
+                                default_total: 1
                             },
                             error: function (req, error) {
                                 unblockUI(function () {

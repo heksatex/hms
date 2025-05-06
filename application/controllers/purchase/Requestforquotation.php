@@ -347,6 +347,7 @@ class Requestforquotation extends MY_Controller {
             $nilai_currency = $this->input->post("nilai_currency");
             $dpplain = $this->input->post("dpplain");
             $foot_note = $this->input->post("foot_note");
+            $supplier = $this->input->post("supplier");
 
             $this->form_validation->set_rules($validation);
             if ($this->form_validation->run() == FALSE) {
@@ -399,7 +400,7 @@ class Requestforquotation extends MY_Controller {
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
             $update = ["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,
-                "no_value" => $noVal, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date,'foot_note'=>$foot_note];
+                "no_value" => $noVal, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date,'foot_note'=>$foot_note,'supplier'=>$supplier];
             $po->setWheres(["no_po" => $kode_decrypt])->update($update);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update Data', 500);

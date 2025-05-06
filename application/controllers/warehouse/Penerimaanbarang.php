@@ -394,7 +394,7 @@ class Penerimaanbarang extends MY_Controller {
                         . ' stock_move_items  as smi WRITE, penerimaan_barang_tmp as tmp WRITE, mrp_production as mrp WRITE,'
                         . ' departemen as dept WRITE, departemen WRITE,  user WRITE, penerimaan_barang_tmpp_add_quant WRITE,'
                         . 'penerimaan_barang pb WRITE,penerimaan_barang_items pbi WRITE,penerimaan_barang WRITE,penerimaan_barang_items WRITE, invoice WRITE,'
-                        . 'mst_produk_coa WRITE,invoice_detail WRITE,purchase_order WRITE,purchase_order_detail WRITE,token_increment WRITE, tax WRITE,setting WRITE';
+                        . 'mst_produk_coa WRITE,invoice_detail WRITE,purchase_order WRITE,purchase_order_detail WRITE,token_increment WRITE, tax WRITE,setting WRITE,nilai_konversi WRITE';
                 // if ($deptid === "RCV") {
                 // }
                 $this->_module->lock_tabel($lockTable);
@@ -1123,16 +1123,20 @@ class Penerimaanbarang extends MY_Controller {
             if ($deptid === 'RCV') {
                 $orig = $this->input->post('origin');
                 $po = new m_po;
-                $dataPO = $po->setWheres(["no_po" => $orig])->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
+                $dataPO = $po->setWheres(["no_po" => $orig])
+                        ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
                         ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk)")
+                        ->setJoins("penerimaan_barang","penerimaan_barang_items.kode = penerimaan_barang.kode")
                         ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
                         ->setJoins("tax", "tax.id = purchase_order_detail.tax_id", "left")
+                        ->setJoins("nilai_konversi","nilai_konversi.id = purchase_order_detail.id_konversiuom","left")
+                        ->setJoins("stock_move_items as smi","smi.move_id = penerimaan_barang.move_id","left")
                         ->setOrder(["no_po"])
                         ->setSelects([
                             "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
-                            "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value",
+                            "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value","smi.qty as qty_dtg",
                             "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency",
-                            "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain"
+                            "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain","nilai_konversi.nilai"
                         ])
                         ->getData();
                 if (is_null($dataPO)) {
@@ -1178,12 +1182,14 @@ class Penerimaanbarang extends MY_Controller {
                     $nilaiDppLain = 0;
 //                    $modelDpp = new $this->m_global;
                     $dpp = 0;
+                    $qty = 0;
                     foreach ($dataPO as $key => $value) {
+                        $qty = $value->qty_dtg / $value->nilai;
                         $invoiceDetail[] = [
                             'invoice_id' => $idInsert,
                             'nama_produk' => $value->nama_produk,
                             'kode_produk' => $value->kode_produk,
-                            'qty_beli' => $value->qty_beli,
+                            'qty_beli' => $qty,
                             'uom_beli' => $value->uom_beli,
                             'deskripsi' => $value->deskripsi,
                             'reff_note' => $value->reff_note,
@@ -1193,7 +1199,7 @@ class Penerimaanbarang extends MY_Controller {
                             'diskon' => $value->diskon,
                             "amount_tax" => $value->amount
                         ];
-                        $total = ($value->qty_beli * $value->harga_per_uom_beli);
+                        $total = ($qty * $value->harga_per_uom_beli);
                         $totals += $total;
                         $diskon = ($value->diskon ?? 0);
                         $diskons += $diskon;

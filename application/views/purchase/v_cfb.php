@@ -16,16 +16,18 @@
                 background-color: blue !important;
                 margin-left: 30px !important;
             }
-            <?php 
+            <?php
             if (in_array($user->level, ["Super Administrator", "Administrator", "Supervisor"])) {
                 ?>
-            .confirm-as{
-                display: inline-block !important;
-            }
-            <?php
+                .confirm-as{
+                    display: inline-block !important;
+                }
+                <?php
             }
             ?>
+
         </style>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.1.2/css/fixedHeader.dataTables.min.css">
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -177,23 +179,22 @@
                 $('#advancedSearch').on('shown.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
                 });
-
                 //* Hide collapse advanced search
                 $('#advancedSearch').on('hidden.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
                 });
-
                 $(".select2").select2({
                     allowClear: true,
                     placeholder: "pilih"
                 });
-
                 const table = $('#tbl-cfb').DataTable({
+                    "fixedHeader": {
+                        header: true,
+                    },
                     "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
                     "order": [],
-
                     "paging": true,
                     "lengthChange": true,
                     "searching": true,
@@ -252,7 +253,6 @@
                                 $(".add-fpt").trigger("click");
                             }
                         },
-
 //                        {
 //                            "text": 'Mark As Done',
 //                            "className": "btn btn-success as-done",
@@ -263,7 +263,6 @@
 
                     ]
                 });
-
                 $("#search").on("click", function () {
                     table.ajax.reload();
                 });
@@ -274,42 +273,40 @@
                         alert_notify("fa fa-warning", "Pilihan Item masih kosong", "danger", function () {});
                         return;
                     }
-                //    confirmRequest("Call For Bid", "Tandai CFB telah selesai ? ", function () {
-                        const dataStatus = new Promise((resolve, reject) => {
-                            let dt = [];
-                            $.each(rows_selected, function (index, rowId) {
-                                var splt = rowId.split("#");
-                                if ("draft" !== splt[splt.length - 1]) {
-                                    throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status Draft");
-                                }
-                                dt.push(splt[0]);
-                            });
-                            resolve(dt);
+                    //    confirmRequest("Call For Bid", "Tandai CFB telah selesai ? ", function () {
+                    const dataStatus = new Promise((resolve, reject) => {
+                        let dt = [];
+                        $.each(rows_selected, function (index, rowId) {
+                            var splt = rowId.split("#");
+                            if ("draft" !== splt[splt.length - 1]) {
+                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status Draft");
+                            }
+                            dt.push(splt[0]);
                         });
-                        dataStatus.then((rsp) => {
-                            $.ajax({
-                                url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
-                                type: "POST",
-                                data: {
-                                    ids: rsp,
-                                    status: "done",
-                                    before_status: "draft"
-                                },
-                                success: function (data) {
-                                    alert_notify(data.icon, data.message, data.type, function () {});
-                                    location.reload();
-                                },
-                                error: function (err) {
-                                    alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
-                                }
-                            });
-                        }).catch(e => {
-                            alert_notify("fa fa-warning", e.message, "danger", function () {});
+                        resolve(dt);
+                    });
+                    dataStatus.then((rsp) => {
+                        $.ajax({
+                            url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
+                            type: "POST",
+                            data: {
+                                ids: rsp,
+                                status: "done",
+                                before_status: "draft"
+                            },
+                            success: function (data) {
+                                alert_notify(data.icon, data.message, data.type, function () {});
+                                location.reload();
+                            },
+                            error: function (err) {
+                                alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                            }
                         });
-
-                //    });
+                    }).catch(e => {
+                        alert_notify("fa fa-warning", e.message, "danger", function () {});
+                    });
+                    //    });
                 });
-
                 $(".confirm-order").on("click", function (e) {
                     e.preventDefault();
                     var rows_selected = table.column(0).checkboxes.selected();
@@ -317,46 +314,43 @@
                         alert_notify("fa fa-warning", "Pilihan Item masih kosong", "danger", function () {});
                         return;
                     }
-              //      confirmRequest("Call For Bid", "Konfirmasi Permintaan Pesanan ? ", function () {
+                    //      confirmRequest("Call For Bid", "Konfirmasi Permintaan Pesanan ? ", function () {
 //                        please_wait(function () {});
 
-                        const dataStatus = new Promise((resolve, reject) => {
-                            let dt = [];
-                            $.each(rows_selected, function (index, rowId) {
-                                var splt = rowId.split("#");
-                                if ("draft" !== splt[splt.length - 1]) {
-                                    throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status Draft");
-                                }
-                                dt.push(splt[0]);
-                            });
-                            resolve(dt);
+                    const dataStatus = new Promise((resolve, reject) => {
+                        let dt = [];
+                        $.each(rows_selected, function (index, rowId) {
+                            var splt = rowId.split("#");
+                            if ("draft" !== splt[splt.length - 1]) {
+                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status Draft");
+                            }
+                            dt.push(splt[0]);
                         });
-
-                        dataStatus.then((rsp) => {
+                        resolve(dt);
+                    });
+                    dataStatus.then((rsp) => {
 //                            table.ajax.reload();
-                            $.ajax({
-                                url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
-                                type: "POST",
-                                data: {
-                                    ids: rsp,
-                                    status: "confirm",
-                                    before_status: "draft"
-                                },
-                                success: function (data) {
-                                    alert_notify(data.icon, data.message, data.type, function () {});
-                                    location.reload();
-                                },
-                                error: function (err) {
-                                    alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
-                                }
-                            });
-                        }).catch(e => {
-                            alert_notify("fa fa-warning", e.message, "danger", function () {});
+                        $.ajax({
+                            url: "<?php echo site_url('purchase/callforbids/update_status') ?>",
+                            type: "POST",
+                            data: {
+                                ids: rsp,
+                                status: "confirm",
+                                before_status: "draft"
+                            },
+                            success: function (data) {
+                                alert_notify(data.icon, data.message, data.type, function () {});
+                                location.reload();
+                            },
+                            error: function (err) {
+                                alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                            }
                         });
-
-                  //  });
+                    }).catch(e => {
+                        alert_notify("fa fa-warning", e.message, "danger", function () {});
+                    });
+                    //  });
                 });
-
                 $(".add-rfq").on("click", function (e) {
                     var rows_selected = table.column(0).checkboxes.selected();
                     if (rows_selected.length < 1) {
@@ -394,7 +388,6 @@
                     });
                     $(".add-rfq-btn").button("reset");
                 });
-
                 $(".add-fpt").on("click", function (e) {
                     var rows_selected = table.column(0).checkboxes.selected();
                     if (rows_selected.length < 1) {
@@ -433,7 +426,6 @@
                     });
                     $(".add-fpt-btn").button("reset");
                 });
-
             });
 
         </script>
