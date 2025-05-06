@@ -166,13 +166,13 @@
                                 <?php
                                 if (in_array($po->status, ["purchase_confirmed", "done", "exception"])) {
                                     if ($po->edited_status === null) {
-                                        if (in_array(strtolower($user->level), ["super administrator", 'direksi'])) {
+                                        if (in_array(strtolower($user->level), ["super administrator", 'supervisor'])) {
                                             ?>
                                             <button class="btn btn-default btn-sm request_edit" data-status="approve"> Request Edit </button>
                                             <?php
                                         }
                                     } else {
-                                        if (in_array(strtolower($user->level), ["super administrator", 'direksi'])) {
+                                        if (in_array(strtolower($user->level), ["super administrator", 'supervisor'])) {
                                             if ($po->edited_status === "request") {
                                                 ?>
                                                 <button class="btn btn-primary btn-sm approve_edit" data-status="approve"> Approve Edit Harga </button>
@@ -359,12 +359,11 @@
                                                     <thead>
                                                     <th class="style" width="10px"></th>
                                                     <th class="style" width="10px">No</th>
-                                                    <th class="style" width="20px">Kode Produk</th>
-                                                    <th class="style" width="20px">Nama Produk</th>
-                                                    <th class="style" width="20px">Deskripsi</th>
-                                                    <th class="style" width="20px">Qty Beli Retur</th>
-                                                    <th class="style" width="20px">Tanggal Retur</th>
-                                                    <th class="style" width="20px">Status</th>
+                                                    <th class="style">Produk</th>
+                                                    <th class="style">Deskripsi</th>
+                                                    <th class="style">Qty Beli Retur</th>
+                                                    <th class="style">Tanggal Retur</th>
+                                                    <th class="style" >Status</th>
                                                     </thead>
                                                     <tbody>
                                                         <?php
@@ -395,10 +394,7 @@
                                                                             <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
                                                                         </a>
                                                                     <?php } ?>
-                                                                    <?= $value->kode_produk ?>
-                                                                </td>
-                                                                <td>
-                                                                    <?= $value->nama_produk ?>
+                                                                    <?= "[{$value->kode_produk}] {$value->nama_produk}" ?>
                                                                 </td>
                                                                 <td>
                                                                     <?= $value->deskripsi ?>
@@ -443,15 +439,12 @@
                                                         <input type="checkbox" class="check-all-retur" id="checkall">
                                                     </th>
                                                     <th class="style" width="10px">No</th>
-                                                    <th class="style" width="20px">Kode CFB</th>
-                                                    <th class="style" width="20px">Kode Produk</th>
-                                                    <th class="style" width="20px">Nama Produk</th>
-                                                    <th class="style" width="20px">Deskripsi</th>
-                                                    <th class="style" width="20px">Qty</th>
-                                                    <th class="style" width="20px">Qty Beli</th>
-                                                    <th class="style text-right" width="20px">Harga Satuan Beli</th>
-                                                    <th class="style text-right" width="20px">Tax</th>
-                                                    <th class="style text-right" width="20px">Diskon</th>
+                                                    <th class="style" style="width:10%">Kode CFB</th>
+                                                    <th class="style" style="width:20%">Produk</th>
+                                                    <th class="style" style="width:20%">Deskripsi</th>
+                                                    <th class="style" style="width:20%">Qty Beli</th>
+                                                    <th class="style text-right" style="width:20%">Harga Satuan Beli</th>
+                                                    <th class="style text-right" style="width:30%">Tax</th>
                                                     </thead>
                                                     <tbody>
                                                         <?php
@@ -496,18 +489,12 @@
                                                                             <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
                                                                         </a>
                                                                     <?php } ?>
-                                                                    <?= $value->kode_produk ?>
-                                                                </td>
-                                                                <td>
-                                                                    <?= $value->nama_produk ?>
+                                                                      <?= "[{$value->kode_produk}] {$value->nama_produk}" ?>
                                                                 </td>
                                                                 <td>
                                                                     <?= $value->deskripsi ?>
                                                                 </td>
                                                                 <td>
-                                                                    <?= $value->qty . " " . $value->uom ?>
-                                                                </td>
-                                                                <td style="width: 15%">
                                                                     <div class="form-group">
                                                                         <div class="input-group">
                                                                             <div class="input-group-addon"><?= $value->qty_beli ?></div>
@@ -535,13 +522,13 @@
                                                                 <td>
                                                                     <div class="form-group">
                                                                         <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
-                                                                               style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                                value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group text-right">
                                                                         <input  name="tax[<?= $value->id ?>]" type="hidden" value="<?= $value->tax_id ?>">
-                                                                        <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs" name="tax[<?= $value->id ?>]" data-row="<?= $key ?>" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'disabled' ?>  > 
+                                                                        <select  class="form-control tax tax<?= $key ?> input-xs" name="tax[<?= $value->id ?>]" data-row="<?= $key ?>" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'disabled' ?>  > 
                                                                             <option></option>
                                                                             <?php
                                                                             foreach ($tax as $key => $taxs) {
@@ -552,14 +539,8 @@
                                                                             ?>
                                                                         </select>
                                                                     </div>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="form-group">
-                                                                        <!--<input type="hidden" name="diskon[<?= $value->id ?>]"  value="<?= $value->diskon ?>">-->
-                                                                        <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
-                                                                               style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" >
-
-                                                                    </div>
+                                                                     <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]"
+                                                                            value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" >
                                                                 </td>
                                                             </tr>
                                                             <?php
@@ -569,7 +550,7 @@
                                                                     ?>
                                                                     <tr>
                                                                         <td class="text-right tbl-catatan"><?= $no . "." . ($keys + 1) ?></td>
-                                                                        <td class="tbl-catatan" colspan="8" style="vertical-align: top; color:red;">
+                                                                        <td class="tbl-catatan" colspan="6" style="vertical-align: top; color:red;">
                                                                             <?= $catt ?>
                                                                         </td>
                                                                     </tr>
@@ -580,20 +561,20 @@
                                                         if (strtolower($po->status) !== "draft") {
                                                             ?>
                                                             <tr>    
-                                                                <td colspan="8" class="style text-right">Subtotal 1</td>
+                                                                <td colspan="6" class="style text-right">Subtotal 1</td>
                                                                 <td class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                                     </strong>
                                                                 </td>
                                                             </tr>
                                                             <tr>    
-                                                                <td colspan="8" class="style text-right">Discount</td>
+                                                                <td colspan="6" class="style text-right">Discount</td>
                                                                 <td class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                                     </strong></td>
                                                             </tr>
                                                             <tr>    
-                                                                <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                                <td colspan="6" class="style text-right">Subtotal 2</td>
                                                                 <td class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                                     </strong></td>
@@ -601,7 +582,7 @@
                                                             <?php if ($setting !== null) {
                                                                 ?>
                                                                 <tr>    
-                                                                    <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                                    <td colspan="6" class="style text-right">DPP Nilai Lain</td>
                                                                     <td class="style text-center totalan"> 
                                                                         <input name="dpplain" type="hidden" value="1">
                                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) * (11 / 12), 4) ?>
@@ -611,14 +592,14 @@
                                                             <?php }
                                                             ?>
                                                             <tr>    
-                                                                <td colspan="8" class="style text-right">Taxes</td>
+                                                                <td colspan="6" class="style text-right">Taxes</td>
                                                                 <td class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                                     </strong></td>
                                                             </tr>
 
                                                             <tr>    
-                                                                <td colspan="8" class="style text-right">Total</td>
+                                                                <td colspan="6" class="style text-right">Total</td>
                                                                 <td class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                                     </strong></td>
@@ -644,7 +625,7 @@
             <footer class="main-footer">
                 <?php
                 $this->load->view("admin/_partials/modal.php");
-                $this->load->view("admin/_partials/footer.php");
+                $this->load->view("admin/_partials/footer_new.php");
                 ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
                 <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>

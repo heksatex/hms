@@ -23,6 +23,7 @@ class Service extends CI_Controller {
         $this->load->model("m_gtp");
         $this->load->library("wa_message");
         $this->config->load('additional');
+        $this->load->model("m_menu");
     }
 
     public function generate_gtp() {
@@ -135,6 +136,34 @@ class Service extends CI_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             ini_set("pcre.backtrack_limit", "1000000");
+        }
+    }
+
+    public function get_log() {
+        try {
+            $kode = $this->input->post("kode");
+            $mms = $this->input->post("mms");
+            $uri_segmen = $this->input->post("uri_segmen");
+
+            $list = [];
+
+            if ($kode !== "") {
+                $list = $this->m_menu->log_history_new($kode, $mms);
+            } else {
+                if ($uri_segmen !== "") {
+                    $kodes = decrypt_url($uri_segmen);
+                    $list = $this->m_menu->log_history($kodes);
+                }
+            }
+            $html = $this->load->view("admin/_partials/footer_new_item.php", ["list" => $list], true);
+            
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' =>$html]));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger',"data"=>"")));
         }
     }
 }
