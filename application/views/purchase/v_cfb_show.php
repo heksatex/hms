@@ -157,10 +157,10 @@
             </div>
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
-                <?php $this->load->view("admin/_partials/footer.php") ?>
+                <?php $this->load->view("admin/_partials/js.php") ?>
+                <?php $this->load->view("admin/_partials/footer_new.php") ?>
             </footer>
         </div>
-        <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
                 const table = $("#cfb-detail").DataTable({
@@ -182,7 +182,7 @@
                     },
                     "columnDefs": [
                         {
-                            "targets": [0,5],
+                            "targets": [0, 5],
                             "orderable": false
                         }
                     ],

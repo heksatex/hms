@@ -319,15 +319,12 @@
                                     <table class="table table-condesed table-hover rlstable  over" width="100%">
                                         <thead>
                                         <th class="style" width="10px">No</th>
-                                        <th class="style" width="20px">Kode CFB</th>
-                                        <th class="style" width="20px">Kode Produk</th>
-                                        <th class="style" width="20px">Nama Produk</th>
-                                        <th class="style" width="20px">Deskripsi</th>
-                                        <th class="style" width="20px">Qty / Uom</th>
-                                        <th class="style" width="20px">Qty / Uom Beli</th>
-                                        <td class="style text-right" width="20px">Harga Satuan Beli</td>
-                                        <td class="style text-right" width="20px">Tax</td>
-                                        <td class="style text-right" width="20px">Diskon</td>
+                                        <th class="style" style="width:10%">Kode CFB</th>
+                                        <th class="style" style="width:20%">Produk</th>
+                                        <th class="style" style="width:20%">Deskripsi</th>
+                                        <th class="style" style="width:20%">Qty / Uom Beli</th>
+                                        <td class="style text-right" style="width:20%">Harga Satuan Beli</td>
+                                        <td class="style text-right" style="width:20%">Tax</td>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -365,10 +362,7 @@
                                                                 <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
                                                             </a>
                                                         <?php } ?>
-                                                        <?= $value->kode_produk ?>
-                                                    </td>
-                                                    <td>
-                                                        <?= $value->nama_produk ?>
+                                                        <?= "[{$value->kode_produk}] {$value->nama_produk }" ?>
                                                     </td>
                                                     <td>
                                                         <div class="form-group">
@@ -376,9 +370,6 @@
                                                                    value="<?= $value->deskripsi ?>">
 
                                                         </div>
-                                                    </td>
-                                                    <td>
-                                                        <?= $value->qty . " " . $value->uom ?>
                                                     </td>
                                                     <td style="width: 15%">
                                                         <div class="form-group">
@@ -440,16 +431,7 @@
                                                                 </select>
                                                             <?php } ?>
                                                         </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group">
-                                                            <?php if ($po->no_value === "1") { ?>
-                                                                <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
-                                                            <?php } else { ?>
-                                                                <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                       style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
-                                                                   <?php } ?>
-                                                        </div>
+                                                        <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" value="0" readonly>
                                                     </td>
                                                 </tr>
                                                 <?php
@@ -459,7 +441,7 @@
                                                         ?>
                                                         <tr>
                                                             <td class="text-right tbl-catatan"><?= $no . "." . ($keys + 1) ?></td>
-                                                            <td class="tbl-catatan" colspan="8" style="vertical-align: top; color:red;">
+                                                            <td class="tbl-catatan" colspan="5" style="vertical-align: top; color:red;">
                                                                 <?= $catt ?>
                                                             </td>
                                                         </tr>
@@ -470,19 +452,19 @@
                                             if (strtolower($po->status) !== "draft") {
                                                 ?>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal 1</td>
+                                                    <td colspan="5" class="style text-right">Subtotal 1</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Discount</td>
+                                                    <td colspan="5" class="style text-right">Discount</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                    <td colspan="5" class="style text-right">Subtotal 2</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                         </strong></td>
@@ -490,7 +472,7 @@
                                                 <?php if ($setting !== null) {
                                                     ?>
                                                     <tr>    
-                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                        <td colspan="5" class="style text-right">DPP Nilai Lain</td>
                                                         <td class="style text-center totalan"> 
                                                             <input name="dpplain" type="hidden" value="1">
                                                             <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
@@ -500,13 +482,13 @@
                                                 <?php }
                                                 ?>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Taxes</td>
+                                                    <td colspan="5" class="style text-right">Taxes</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
-                                                    <td colspan="8" class="style text-right">Total</td>
+                                                    <td colspan="5" class="style text-right">Total</td>
                                                     <td class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                         </strong></td>
@@ -517,19 +499,19 @@
                                                 if ($po->nilai_currency !== null) {
                                                     ?> 
                                                     <tr>    
-                                                        <td colspan="8" class="style text-right">Subtotal 1</td>
+                                                        <td colspan="5" class="style text-right">Subtotal 1</td>
                                                         <td class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
-                                                        <td colspan="8" class="style text-right">Discount</td>
+                                                        <td colspan="5" class="style text-right">Discount</td>
                                                         <td class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
-                                                        <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                        <td colspan="5" class="style text-right">Subtotal 2</td>
                                                         <td class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                             </strong></td>
@@ -537,7 +519,7 @@
                                                     <?php if ($setting !== null) {
                                                         ?>
                                                         <tr>    
-                                                            <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                            <td colspan="5" class="style text-right">DPP Nilai Lain</td>
                                                             <td class="style text-center totalan"> 
                                                                 <input name="dpplain" type="hidden" value="1">
                                                                 <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
@@ -547,13 +529,13 @@
                                                     <?php }
                                                     ?>
                                                     <tr>    
-                                                        <td colspan="8" class="style text-right">Taxes</td>
+                                                        <td colspan="5" class="style text-right">Taxes</td>
                                                         <td class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
-                                                        <td colspan="8" class="style text-right">Total</td>
+                                                        <td colspan="5" class="style text-right">Total</td>
                                                         <td class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                             </strong></td>
@@ -572,11 +554,11 @@
                 </section>
             </div>
             <footer class="main-footer">
+                <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
                 <?php
                 $this->load->view("admin/_partials/modal.php");
-                $this->load->view("admin/_partials/footer.php");
+                $this->load->view("admin/_partials/footer_new.php");
                 ?>
-                <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
             </footer>
         </div>
         <script>

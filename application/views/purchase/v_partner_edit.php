@@ -246,7 +246,7 @@
             <?php
             $data['kode'] = $partner->id;
             $data['mms'] = $mms->kode;
-            $this->load->view("admin/_partials/footer.php", $data)
+            $this->load->view("admin/_partials/footer_new.php", $data)
             ?>
         </div>
     </footer>

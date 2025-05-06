@@ -380,18 +380,16 @@
                                     </ul>
 
                                     <button type="submit" id="form-cfq-submit" style="display: none"></button>
-                                    <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                    <table class="table table-condesed table-hover rlstable  over" style="width:100%">
                                         <thead>
                                         <th class="style" width="10px">No</th>
-                                        <th class="style" width="20px">Kode CFB</th>
-                                        <th class="style" width="20px">Kode Produk</th>
-                                        <th class="style" width="20px">Nama Produk</th>
-                                        <th class="style" width="20px">Deskripsi</th>
-                                        <th class="style" width="20px">Qty / Uom</th>
-                                        <th class="style" width="20px">Qty / Uom Beli</th>
-                                        <td class="style text-right" width="20px">Harga Satuan Beli</td>
-                                        <td class="style text-right" width="20px">Tax</td>
-                                        <td class="style text-right" width="20px">Diskon</td>
+                                        <th class="style" style="width:10%">Kode CFB</th>
+                                        <th class="style" style="width:20%" >Produk</th>
+                                        <th class="style" style="width:15%">Deskripsi</th>
+                                        <th class="style">Qty / Uom Beli</th>
+                                        <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
+                                        <td class="style text-right" >Tax</td>
+                                        <!--<td class="style text-right" width="20px">Diskon</td>-->
                                         </thead>
                                         <tbody>
                                             <?php
@@ -429,22 +427,16 @@
                                                                 <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
                                                             </a>
                                                         <?php } ?>
-                                                        <?= $value->kode_produk ?>
+                                                        <?="[{$value->kode_produk }] {$value->nama_produk }"?>
                                                     </td>
-                                                    <td>
-                                                        <?= $value->nama_produk ?>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group">
+                                                    <td >
+                                                        <div class="form-group" style="width:100%">
                                                             <input class="form-control pull-right input-sm" name="deskripsi[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
                                                                    value="<?= htmlentities($value->deskripsi) ?>">
 
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <?= $value->qty . " " . $value->uom ?>
-                                                    </td>
-                                                    <td style="width: 15%">
                                                         <div class="form-group">
                                                             <div class="input-group">
                                                                 <div class="input-group-addon"><?= $value->qty_beli ?></div>
@@ -470,13 +462,13 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div class="form-group">
+                                                        <div class="form-group" style="width: 100%" >
                                                             <?php if ($po->no_value === "1") { ?>
                                                                 <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" readonly
-                                                                       style="width: 70%" value="0">
+                                                                       value="0">
                                                                    <?php } else { ?>
                                                                 <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                       style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                       value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
                                                                    <?php } ?>
 
                                                         </div>
@@ -485,13 +477,13 @@
                                                         <div class="form-group text-right">
                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
                                                             <?php if ($po->no_value === "1") { ?>
-                                                                <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                         name="tax[<?= $value->id ?>]"  disabled>
                                                                     <option></option>
                                                                 </select>
                                                             <?php } else { ?>
 
-                                                                <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                         name="tax[<?= $value->id ?>]"  <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
                                                                     <option></option>
                                                                     <?php
@@ -503,9 +495,10 @@
                                                                     ?>
                                                                 </select>
                                                             <?php } ?>
+                                                            <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]"value="0" readonly>
                                                         </div>
                                                     </td>
-                                                    <td>
+<!--                                                    <td>
                                                         <div class="form-group">
                                                             <?php if ($po->no_value === "1") { ?>
                                                                 <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
@@ -514,7 +507,7 @@
                                                                        style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
                                                                    <?php } ?>
                                                         </div>
-                                                    </td>
+                                                    </td>-->
                                                 </tr>
                                                 <?php
                                                 if (!empty($value->catatan)) {
@@ -640,12 +633,12 @@
                     </div>
                 </section>
             </div>
+                <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
             <footer class="main-footer">
                 <?php
                 $this->load->view("admin/_partials/modal.php");
-                $this->load->view("admin/_partials/footer.php");
+                $this->load->view("admin/_partials/footer_new.php");
                 ?>
-                <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
             </footer>
         </div>
         <script>
