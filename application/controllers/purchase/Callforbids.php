@@ -29,7 +29,7 @@ class Callforbids extends MY_Controller {
         $data['id_dept'] = 'CFB';
         $depth = new $this->m_cfb;
         $username = $this->session->userdata('username');
-        $data['user'] = $this->m_user->get_user_by_username($username);
+        $data['user'] = (object)$this->session->userdata('nama');//$this->m_user->get_user_by_username($username);
         $data["dept"] = $depth->setTables("departemen")->setSelects(["kode", "nama"])->setOrder(["kode" => "asc"])->getData();
         $this->load->view('purchase/v_cfb', $data);
     }

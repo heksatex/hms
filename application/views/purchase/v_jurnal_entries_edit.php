@@ -230,7 +230,7 @@
         </div>
         <footer class="main-footer">
             <?php
-            $this->load->view("admin/_partials/footer.php");
+            $this->load->view("admin/_partials/footer_new.php");
             ?>
         </footer>
         <?php $this->load->view("admin/_partials/js.php") ?>

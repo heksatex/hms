@@ -2100,13 +2100,26 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad("Tgl.Dibuat", 12));
             $printer->text(str_pad(":{$head->tanggal}", 25));
             $printer->text(str_pad("", 10));
-            // $splitAlamat = str_split($head->alamat, 30);
-            $splitAlamat = str_split("TES PRNT UNTUK ALAMT DI BANDUNG TES BANDUNG", 30);
+            $splitAlamat = str_split($head->alamat, 30);
+//            $splitAlamat = str_split("TES PRNT UNTUK ALAMT DI BANDUNG TES BANDUNG", 30);
             foreach ($splitAlamat as $key => $value) {
                 $printer->text(str_pad($value, 30));
                 $printer->feed();
                 $printer->text(str_pad("", 47));
             }
+            $printer->feed();
+
+            $printer->text(str_pad("", 12));
+            $printer->text(str_pad("", 25));
+            $printer->text(str_pad("Reff Note", 10));
+            $splitNotes = str_split($head->reff_note, 30);
+
+            foreach ($splitNotes as $key => $value) {
+                $printer->text(str_pad($value, 30));
+                $printer->feed();
+                $printer->text(str_pad("", 47));
+            }
+
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 11, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 18, " ", STR_PAD_BOTH) . str_pad("LOT", 20, " ", STR_PAD_BOTH)
@@ -2125,7 +2138,7 @@ class Penerimaanbarang extends MY_Controller {
                     $kodeProduk[$key] = $value;
                 }
 
-                $namaProduk = str_split(substr($item->nama_produk, 0, 18), 18);
+                $namaProduk = str_split($item->nama_produk, 18);
                 foreach ($namaProduk as $key => $value) {
                     $value = trim($value);
                     $namaProduk[$key] = $value;
@@ -2149,7 +2162,7 @@ class Penerimaanbarang extends MY_Controller {
                     $uom[$key] = $value;
                 }
 
-                $reff = str_split(substr($item->reff_note, 0, 15), 15);
+                $reff = str_split($item->reff_note, 15);
                 foreach ($reff as $key => $value) {
                     $value = trim($value);
                     $reff[$key] = $value;
@@ -2198,6 +2211,7 @@ class Penerimaanbarang extends MY_Controller {
                 $printer->feed();
                 $printer->text(str_pad("", 30));
             }
+            $splitRcv = str_split($users["nama"], 14);
             $printer->setJustification(Printer::JUSTIFY_RIGHT);
             $printer->feed();
             $printer->feed();
@@ -2206,13 +2220,20 @@ class Penerimaanbarang extends MY_Controller {
             $printer->feed();
             $printer->feed();
             $printer->feed();
-            $printer->text(str_pad("(__________)", 12) . str_pad("(__________) ", 12) . " " . str_pad("(" . substr(($users["nama"]), 0, 14) . ")", 14, " ", STR_PAD_RIGHT));
+            $linesTtd = "";
+            foreach ($splitRcv as $key => $value) {
+                if ($key === 0) {
+                    $linesTtd .= str_pad("(__________)", 12) . str_pad("(__________) ", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
+                } else {
+                    $linesTtd .= str_pad("", 12) . str_pad("", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
+                }
+            }
+            $printer->text($linesTtd . "\n");
             $printer->feed();
             $printer->feed();
             $datas = $connector->getData();
             $printer->close();
             $client = new GuzzleHttp\Client();
-
             $resp = $client->request("POST", $this->config->item('url_web_print'), [
                 "form_params" => [
                     "data" => $datas,

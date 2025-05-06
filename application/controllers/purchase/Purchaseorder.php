@@ -42,7 +42,7 @@ class Purchaseorder extends MY_Controller {
     public function index() {
         $data['id_dept'] = 'PO';
         $username = $this->session->userdata('username');
-        $data['user'] = $this->m_user->get_user_by_username($username);
+        $data['user'] = (object)$this->session->userdata('nama');//$this->m_user->get_user_by_username($username);
         $this->load->view('purchase/v_po', $data);
     }
 
