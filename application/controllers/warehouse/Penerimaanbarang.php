@@ -1125,7 +1125,7 @@ class Penerimaanbarang extends MY_Controller {
                 $po = new m_po;
                 $dataPO = $po->setWheres(["no_po" => $orig])
                         ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
-                        ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk)")
+                        ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and penerimaan_barang_items.status_barang='done' and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk)")
                         ->setJoins("penerimaan_barang","penerimaan_barang_items.kode = penerimaan_barang.kode")
                         ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
                         ->setJoins("tax", "tax.id = purchase_order_detail.tax_id", "left")
