@@ -2111,7 +2111,7 @@ class Penerimaanbarang extends MY_Controller {
 
             $printer->text(str_pad("", 12));
             $printer->text(str_pad("", 25));
-            $printer->text(str_pad("Reff Note", 10));
+            $printer->text(str_pad("Reff Note :", 10));
             $splitNotes = str_split($head->reff_note, 30);
 
             foreach ($splitNotes as $key => $value) {
