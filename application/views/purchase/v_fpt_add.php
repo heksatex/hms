@@ -90,7 +90,7 @@
                                                     <th>Nama Produk</th>
                                                     <th>QTY</th>
                                                     <th>SO</th>
-                                                    <!--<th>Priority</th>-->
+                                                    <th>Schedule Date</th>
                                                     <th>Departement Tujuan</th>
                                                     <th>Schedule Date</th>
                                                     <th>Status</th>

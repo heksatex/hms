@@ -25,9 +25,7 @@
                 <?php
             }
             ?>
-
         </style>
-        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.1.2/css/fixedHeader.dataTables.min.css">
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -65,70 +63,77 @@
                                     <div class="panel panel-default" style="margin-bottom: 0px;">
                                         <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
                                             <div class="panel-body" style="padding: 5px">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-4">
-                                                                <label class="form-label">Departemen</label>
-                                                            </div>
-                                                            <div class="col-xs-8 col-md-8">
-                                                                <select name="dpt" class="form-control select2" id="dpt" style="width: 100%">
-                                                                    <option></option>
-                                                                    <?php
-                                                                    foreach ($dept as $value) {
-                                                                        ?>
-                                                                        <option value="<?= $value->kode ?>"><?= $value->nama ?></option>
+                                                <form>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="col-md-12 col-xs-12">
+                                                                <div class="col-xs-4">
+                                                                    <label class="form-label">Departemen</label>
+                                                                </div>
+                                                                <div class="col-xs-8 col-md-8">
+                                                                    <select name="dpt" class="form-control select2" id="dpt" style="width: 100%">
+                                                                        <option></option>
                                                                         <?php
-                                                                    }
-                                                                    ?>
-                                                                </select>
+                                                                        foreach ($dept as $value) {
+                                                                            ?>
+                                                                            <option value="<?= $value->kode ?>"><?= $value->nama ?></option>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="col-md-12 col-xs-12">
+                                                                <div class="col-xs-4">
+                                                                    <label class="form-label">Kode</label>
+                                                                </div>
+                                                                <div class="col-xs-8 col-md-8">
+                                                                    <input id="kode" class="form-control" name="kode" type="text">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-4">
-                                                                <label class="form-label">Kode</label>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <div class="col-md-12 col-xs-12">
+                                                                <div class="col-xs-4">
+                                                                    <label class="form-label">Prioritas</label>
+                                                                </div>
+                                                                <div class="col-xs-8 col-md-8">
+                                                                    <select name="prio" class="form-control select2" id="prio" style="width: 100%">
+                                                                        <option></option>
+                                                                        <option value="urgent">Urgent</option>
+                                                                        <option value="normal">Normal</option>
+                                                                    </select>
+                                                                </div>
                                                             </div>
-                                                            <div class="col-xs-8 col-md-8">
-                                                                <input id="kode" class="form-control" name="kode" type="text">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div class="col-md-12 col-xs-12">
+                                                                <div class="col-xs-4">
+                                                                    <label class="form-label">Status</label>
+                                                                </div>
+                                                                <div class="col-xs-8 col-md-8">
+                                                                    <select name="status" class="form-control select2" id="status" style="width: 100%">
+                                                                        <option></option>
+                                                                        <option value="draft">Draft</option>
+                                                                        <option value="confirm">Confirm</option>
+                                                                    </select>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-4">
-                                                                <label class="form-label">Prioritas</label>
-                                                            </div>
-                                                            <div class="col-xs-8 col-md-8">
-                                                                <select name="prio" class="form-control select2" id="prio" style="width: 100%">
-                                                                    <option></option>
-                                                                    <option value="urgent">Urgent</option>
-                                                                    <option value="normal">Normal</option>
-                                                                </select>
-                                                            </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <button type="reset" class="btn btn-sm btn-warning" name="btn-reset" id="reset" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Reset </button>
                                                         </div>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <div class="col-md-12 col-xs-12">
-                                                            <div class="col-xs-4">
-                                                                <label class="form-label">Status</label>
-                                                            </div>
-                                                            <div class="col-xs-8 col-md-8">
-                                                                <select name="status" class="form-control select2" id="status" style="width: 100%">
-                                                                    <option></option>
-                                                                    <option value="draft">Draft</option>
-                                                                    <option value="confirm">Confirm</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
-                                                </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -137,7 +142,7 @@
 
                             </div>
                             <div class="col-xs-12 table-responsive">
-                                <table id="tbl-cfb" class="table">
+                                <table id="tbl-cfb" class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th class="no">#</th>
@@ -179,18 +184,18 @@
                 $('#advancedSearch').on('shown.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-bottom").addClass("glyphicon-triangle-top");
                 });
+
                 //* Hide collapse advanced search
                 $('#advancedSearch').on('hidden.bs.collapse', function () {
                     $(".showAdvanced").removeClass("glyphicon-triangle-top").addClass("glyphicon-triangle-bottom");
                 });
+
                 $(".select2").select2({
                     allowClear: true,
                     placeholder: "pilih"
                 });
+
                 const table = $('#tbl-cfb').DataTable({
-                    "fixedHeader": {
-                        header: true,
-                    },
                     "iDisplayLength": 50,
                     "processing": true,
                     "serverSide": true,
@@ -206,9 +211,13 @@
                         "type": "POST",
                         "data": function (d) {
                             d.depth = $("#dpt").val();
+                            d.depth_name = $("#dpt :selected").text();
                             d.kode = $("#kode").val();
                             d.prio = $("#prio").val();
                             d.status = $("#status").val();
+                        },
+                        dataSrc: function (data) {
+                            return data.data;
                         }
                     },
                     "columnDefs": [
@@ -252,7 +261,8 @@
                                 document.getElementsByClassName("add-fpt")[0].setAttribute("data-request", "fpt");
                                 $(".add-fpt").trigger("click");
                             }
-                        },
+                        }
+
 //                        {
 //                            "text": 'Mark As Done',
 //                            "className": "btn btn-success as-done",
@@ -263,6 +273,7 @@
 
                     ]
                 });
+
                 $("#search").on("click", function () {
                     table.ajax.reload();
                 });
@@ -305,8 +316,10 @@
                     }).catch(e => {
                         alert_notify("fa fa-warning", e.message, "danger", function () {});
                     });
+
                     //    });
                 });
+
                 $(".confirm-order").on("click", function (e) {
                     e.preventDefault();
                     var rows_selected = table.column(0).checkboxes.selected();
@@ -328,6 +341,7 @@
                         });
                         resolve(dt);
                     });
+
                     dataStatus.then((rsp) => {
 //                            table.ajax.reload();
                         $.ajax({
@@ -349,8 +363,10 @@
                     }).catch(e => {
                         alert_notify("fa fa-warning", e.message, "danger", function () {});
                     });
+
                     //  });
                 });
+
                 $(".add-rfq").on("click", function (e) {
                     var rows_selected = table.column(0).checkboxes.selected();
                     if (rows_selected.length < 1) {
@@ -388,6 +404,7 @@
                     });
                     $(".add-rfq-btn").button("reset");
                 });
+
                 $(".add-fpt").on("click", function (e) {
                     var rows_selected = table.column(0).checkboxes.selected();
                     if (rows_selected.length < 1) {
@@ -426,6 +443,7 @@
                     });
                     $(".add-fpt-btn").button("reset");
                 });
+
             });
 
         </script>

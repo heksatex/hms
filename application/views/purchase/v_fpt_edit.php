@@ -181,29 +181,29 @@
                                                                                         </div>
                                                                                     </div>-->
                                             <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">Supplier</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <?php
-                                                    if ($po->status === 'draft') {
-                                                        ?>
-                                                    <select class="form-control input-sm select2" name="supplier" id="supplier" required>
-                                                            <option value='<?= $po->supplier ?>' selected><?= $po->supp ?></option>
-                                                        </select>
+                                                <div class="col-md-12 col-xs-12">
+                                                    <div class="col-xs-4">
+                                                        <label class="form-label">Supplier</label>
+                                                    </div>
+                                                    <div class="col-xs-8 col-md-8 text-uppercase">
                                                         <?php
-                                                    } else {
+                                                        if ($po->status === 'draft') {
+                                                            ?>
+                                                            <select class="form-control input-sm select2" name="supplier" id="supplier" required>
+                                                                <option value='<?= $po->supplier ?>' selected><?= $po->supp ?></option>
+                                                            </select>
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                            <span><?= $po->supp ?></span>
+                                                            <input type="hidden" value="<?= $po->supplier ?>">
+                                                            <?php
+                                                        }
                                                         ?>
-                                                        <span><?= $po->supp ?></span>
-                                                        <input type="hidden" value="<?= $po->supplier ?>">
-                                                        <?php
-                                                    }
-                                                    ?>
 
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
                                             <div class="form-group">
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4">
@@ -334,11 +334,12 @@
                                         <thead>
                                         <th class="style" width="10px">No</th>
                                         <th class="style" style="width:10%">Kode CFB</th>
-                                        <th class="style" style="width:20%">Produk</th>
-                                        <th class="style" style="width:20%">Deskripsi</th>
-                                        <th class="style" style="width:20%">Qty / Uom Beli</th>
-                                        <td class="style text-right" style="width:20%">Harga Satuan Beli</td>
-                                        <td class="style text-right" style="width:20%">Tax</td>
+                                        <th class="style" style="width:10%" >Produk</th>
+                                        <th class="style" style="width:15%">Deskripsi</th>
+                                        <th class="style" style="width:10%">Schedule Date</th>
+                                        <th class="style"style="width:15%" >Qty / Uom Beli</th>
+                                        <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
+                                        <td class="style text-right" >Tax</td>
                                         <td class="style" >Reff Note</td>
                                         </thead>
                                         <tbody>
@@ -380,11 +381,15 @@
                                                         <?= "[{$value->kode_produk}] {$value->nama_produk }" ?>
                                                     </td>
                                                     <td>
-                                                        <div class="form-group">
+                                                        <div class="form-group" style="width:100%">
                                                             <input class="form-control pull-right input-sm" name="deskripsi[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                   value="<?= $value->deskripsi ?>">
+                                                                   value="<?= htmlentities($value->deskripsi) ?>">
 
                                                         </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <?= $value->schedule_date ?>
                                                     </td>
                                                     <td style="width: 15%">
                                                         <div class="form-group">
@@ -452,10 +457,10 @@
                                                         <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" value="0" readonly>
                                                     </td>
                                                     <td>
-                                                                    <div class="form-text">
-                                                                        <?= $value->reff_note ?>
-                                                                    </div>
-                                                                </td>
+                                                        <div class="form-text">
+                                                            <?= $value->reff_note ?>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                                 <?php
                                                 if (!empty($value->catatan)) {
@@ -600,7 +605,7 @@
 
             });
             $(function () {
-                
+
                 $("#supplier").select2({
                     allowClear: true,
                     placeholder: "Supplier",
@@ -643,11 +648,11 @@
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
                 });
-                
+
                 $(".harga_satuan").on("input", function () {
                     var row = $(this).attr("data-row");
-                    var number = $(".harga_satuan_"+row).val();
-                    var formatVal = new Intl.NumberFormat(["ban", "id"],{ maximumSignificantDigits: 3 }).format(number);
+                    var number = $(".harga_satuan_" + row).val();
+                    var formatVal = new Intl.NumberFormat(["ban", "id"], {maximumSignificantDigits: 3}).format(number);
                     $(".note_harga_" + row).html(formatVal);
                 });
 
