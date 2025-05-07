@@ -125,6 +125,7 @@ class Fpt extends MY_Controller {
             $nilai_currency = $this->input->post("nilai_currency");
             $dpplain = $this->input->post("dpplain");
             $foot_note = $this->input->post("foot_note");
+            $supplier = $this->input->post("supplier");
 
             $this->form_validation->set_rules($validation);
             if ($this->form_validation->run() == FALSE) {
@@ -171,7 +172,7 @@ class Fpt extends MY_Controller {
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
             $update = ["currency" => $currency, "nilai_currency" => $nilai_currency,'foot_note'=>$foot_note,
-                'note' => $note, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date];
+                'note' => $note, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date,"supplier"=>$supplier];
             $po->setWheres(["no_po" => $kode_decrypt])->update($update);
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit',"Header -> ".logArrayToString('; ', $update, " : ")."<br> Detail -> ". logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)

@@ -14,7 +14,7 @@
             #btn-approve {
                 display: none;
             }
-            <?php if (!in_array($po->status ,['purchase_confirmed','done'])) { ?>
+            <?php if (!in_array($po->status, ['purchase_confirmed', 'done'])) { ?>
 
                 #btn-simpan {
                     display: none;
@@ -433,7 +433,7 @@
                                             </div>
                                             <br>
                                             <div class="col-md-12">
-                                                <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                                <table class="table table-condesed table-hover rlstable  over" style="width:100%">
                                                     <thead>
                                                     <th class="style" width="5px">
                                                         <input type="checkbox" class="check-all-retur" id="checkall">
@@ -444,7 +444,8 @@
                                                     <th class="style" style="width:20%">Deskripsi</th>
                                                     <th class="style" style="width:20%">Qty Beli</th>
                                                     <th class="style text-right" style="width:20%">Harga Satuan Beli</th>
-                                                    <th class="style text-right" style="width:30%">Tax</th>
+                                                    <th class="style text-right" style="width:15%">Tax</th>
+                                                    <th class="style" style="width:10%">reff Note</th>
                                                     </thead>
                                                     <tbody>
                                                         <?php
@@ -489,7 +490,7 @@
                                                                             <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
                                                                         </a>
                                                                     <?php } ?>
-                                                                      <?= "[{$value->kode_produk}] {$value->nama_produk}" ?>
+                                                                    <?= "[{$value->kode_produk}] {$value->nama_produk}" ?>
                                                                 </td>
                                                                 <td>
                                                                     <?= $value->deskripsi ?>
@@ -522,7 +523,7 @@
                                                                 <td>
                                                                     <div class="form-group">
                                                                         <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
-                                                                                value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                               value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
                                                                     </div>
                                                                 </td>
                                                                 <td>
@@ -539,8 +540,13 @@
                                                                             ?>
                                                                         </select>
                                                                     </div>
-                                                                     <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]"
-                                                                            value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" >
+                                                                    <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]"
+                                                                           value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>" >
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-text">
+                                                                        <?= $value->reff_note ?>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                             <?php
@@ -955,7 +961,7 @@
                             status: status,
                             totals: $("#totals").val(),
                             item: "<?= count($po_items) ?>",
-                            default_total:$("#default_total").val()
+                            default_total: $("#default_total").val()
                         },
                         error: function (req, error) {
                             unblockUI(function () {
