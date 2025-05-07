@@ -117,7 +117,7 @@
             .tbl-catatan {
                 font-size: 11px
             }
-            
+
             #btn-approve {
                 display: none;
             }
@@ -181,15 +181,29 @@
                                                                                         </div>
                                                                                     </div>-->
                                             <div class="form-group">
-                                                <div class="col-md-12 col-xs-12">
-                                                    <div class="col-xs-4">
-                                                        <label class="form-label">Supplier</label>
-                                                    </div>
-                                                    <div class="col-xs-8 col-md-8 text-uppercase">
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Supplier</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <?php
+                                                    if ($po->status === 'draft') {
+                                                        ?>
+                                                    <select class="form-control input-sm select2" name="supplier" id="supplier" required>
+                                                            <option value='<?= $po->supplier ?>' selected><?= $po->supp ?></option>
+                                                        </select>
+                                                        <?php
+                                                    } else {
+                                                        ?>
                                                         <span><?= $po->supp ?></span>
-                                                    </div>
+                                                        <input type="hidden" value="<?= $po->supplier ?>">
+                                                        <?php
+                                                    }
+                                                    ?>
+
                                                 </div>
                                             </div>
+                                        </div>
                                             <div class="form-group">
                                                 <div class="col-md-12 col-xs-12">
                                                     <div class="col-xs-4">
@@ -299,10 +313,10 @@
                                                 <span class="glyphicon glyphicon-transfer"></span>            
                                                 <span class="glyphicon-class"></strong> In Shipment</span>
                                             </li>
-<!--                                            <li class="pointer invoice">
-                                                <span class="glyphicon glyphicon-list-alt"></span>
-                                                <span class="glyphicon-class"><strong id="invoice"></strong> Invoice</span>
-                                            </li>-->
+                                            <!--                                            <li class="pointer invoice">
+                                                                                            <span class="glyphicon glyphicon-list-alt"></span>
+                                                                                            <span class="glyphicon-class"><strong id="invoice"></strong> Invoice</span>
+                                                                                        </li>-->
                                         </ul>
                                     </div>
                                 <?php } ?>
@@ -325,6 +339,7 @@
                                         <th class="style" style="width:20%">Qty / Uom Beli</th>
                                         <td class="style text-right" style="width:20%">Harga Satuan Beli</td>
                                         <td class="style text-right" style="width:20%">Tax</td>
+                                        <td class="style" >Reff Note</td>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -399,13 +414,16 @@
                                                     <td>
                                                         <div class="form-group">
                                                             <?php if ($po->no_value === "1") { ?>
-                                                                <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" readonly
-                                                                       style="width: 70%" value="0">
+                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" readonly
+                                                                       value="0">
                                                                    <?php } else { ?>
-                                                                <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                       style="width: 70%" value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
+                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                       value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" data-row="<?= $key ?>" required>
                                                                    <?php } ?>
 
+                                                            <small class="form-text text-muted note_harga_<?= $key ?>">
+                                                                <?= number_format(($value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0), 2, ".", ",") ?>
+                                                            </small>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -433,6 +451,11 @@
                                                         </div>
                                                         <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" value="0" readonly>
                                                     </td>
+                                                    <td>
+                                                                    <div class="form-text">
+                                                                        <?= $value->reff_note ?>
+                                                                    </div>
+                                                                </td>
                                                 </tr>
                                                 <?php
                                                 if (!empty($value->catatan)) {
@@ -577,6 +600,25 @@
 
             });
             $(function () {
+                
+                $("#supplier").select2({
+                    allowClear: true,
+                    placeholder: "Supplier",
+                    ajax: {
+                        url: "<?= site_url('purchase/requestforquotation/get_supp') ?>",
+                        data: function (params) {
+                            var query = {
+                                search: params.term
+                            }
+                            return query;
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data.data
+                            };
+                        }
+                    }
+                });
 
                 $(".shipment").off("click").unbind("click").on("click", function () {
                     $("#view_data").modal({
@@ -600,6 +642,13 @@
                 $(".tax").on("change", function () {
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
+                });
+                
+                $(".harga_satuan").on("input", function () {
+                    var row = $(this).attr("data-row");
+                    var number = $(".harga_satuan_"+row).val();
+                    var formatVal = new Intl.NumberFormat(["ban", "id"],{ maximumSignificantDigits: 3 }).format(number);
+                    $(".note_harga_" + row).html(formatVal);
                 });
 
                 $(".uom_beli").select2({
@@ -772,17 +821,17 @@
                         }
                     });
                 });
-                
+
                 const getRcv = (() => {
-                        $.ajax({
-                            type: "POST",
-                            url: "<?= base_url('purchase/purchaseorder/get_rcv/' . $id) ?>",
-                            success: function (data) {
-                                $("#invoice").html(data.in_inv);
-                            }
-                        });
+                    $.ajax({
+                        type: "POST",
+                        url: "<?= base_url('purchase/purchaseorder/get_rcv/' . $id) ?>",
+                        success: function (data) {
+                            $("#invoice").html(data.in_inv);
+                        }
                     });
-                    getRcv();
+                });
+                getRcv();
 
             });
 

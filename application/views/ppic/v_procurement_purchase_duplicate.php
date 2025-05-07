@@ -472,13 +472,20 @@
         var i = r.parentNode.parentNode.rowIndex;
         document.getElementById("table_items").deleteRow(i);
     }
-
+    
+    
+    //html entities javascript
+    function htmlentities_script(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
     <?php 
         $no = 1;
         foreach($details as $val){
+        $note = str_replace(array("","\n"), '', $val->reff_notes);
+        $nama_produk = $val->nama_produk;
     ?>
-            tambah_baris(true,'<?php echo $val->kode_produk?>', '<?php echo $val->nama_produk?>', '<?php echo $val->schedule_date?>', '<?php echo $val->qty?>', '<?php echo $val->uom?>', '<?php echo $val->reff_notes?>');
+            tambah_baris(true,'<?php echo $val->kode_produk?>', `<?php echo htmlentities($nama_produk)?>`, '<?php echo $val->schedule_date?>', '<?php echo $val->qty?>', '<?php echo $val->uom?>', `<?php echo $note?>`);
     <?php 
             $no++;
         }
@@ -492,7 +499,6 @@
         }else{
             row  = parseInt($("#table_items tbody[id='tbody_items'] tr:last-child td .row").val());
         }
-
         var tambah  = true;
         var tbl     = "#table_items tbody[id='tbody_items'] ";       
         var np      = $(tbl+" td input[name='Product']");
