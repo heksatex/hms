@@ -188,13 +188,15 @@ class M_produk extends CI_Model {
     public function save_produk($kode_produk, $nama_produk, $uom, $uom_2, $create_date, $route_produksi, $type, $dapat_dibeli,
             $dapat_dijual, $id_category, $note, $bom, $lebargreige, $uom_lebargreige, $lebarjadi,
             $uom_lebarjadi, $statusproduk, $product_parent, $sub_parent, $jenis_kain, $uom_beli = null) {
-        return $this->db->query("INSERT INTO mst_produk(kode_produk,nama_produk,uom,uom_2,create_date,route_produksi,"
+         $this->db->query("INSERT INTO mst_produk(kode_produk,nama_produk,uom,uom_2,create_date,route_produksi,"
                         . "type,dapat_dibeli,dapat_dijual,id_category,note,bom,lebar_greige,uom_lebar_greige,"
                         . "lebar_jadi,uom_lebar_jadi,status_produk,id_parent,id_sub_parent,id_jenis_kain,uom_beli) "
                         . "VALUES ('$kode_produk','$nama_produk','$uom','$uom_2','$create_date','$route_produksi',"
                         . "'$type','$dapat_dibeli','$dapat_dijual','$id_category','$note', '$bom','$lebargreige',"
                         . "'$uom_lebargreige','$lebarjadi','$uom_lebarjadi','$statusproduk',"
                         . "'$product_parent','$sub_parent','$jenis_kain','{$uom_beli}')");
+                        
+                        return $this->db->insert_id() ?? null;
     }
 
     public function get_qty_onhand($kodeproduk) {
