@@ -455,6 +455,9 @@ class Produk extends MY_Controller {
         $data['id_dept'] = 'MPROD';
         $data['mms'] = $this->_module->get_data_mms_for_log_history('MPROD'); // get mms by dept untuk log history
         $produk = $this->m_produk->get_produk_by_kode($kode_decrypt); //id auto increment
+        if(empty($produk)) {
+            redirect("/warehouse/produk/");
+        }
         $data['produk'] = $produk;
         $data["catatan"] = $this->m_produk->getCatatan($kode_decrypt);
         $data['uom'] = $this->m_produk->get_list_uom();
