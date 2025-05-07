@@ -101,7 +101,7 @@
                                 </div>
                             </div>
                             <div class="col-xs-12 table-responsive">
-                                <table id="tbl-po" class="table">
+                                <table id="tbl-po" class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th></th>

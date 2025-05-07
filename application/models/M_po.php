@@ -16,6 +16,7 @@ class M_po extends CI_Model {
     protected $orders = [];
     protected $search = [];
     protected $order = [];
+    protected $group = [];
     protected $table = "purchase_order";
     protected $wheres = [];
     protected $selects = [];
@@ -65,6 +66,11 @@ class M_po extends CI_Model {
         $this->table = $table;
         return $this;
     }
+    
+    public function setGroups(array $groups) {
+        $this->group = array_merge($this->group, $groups);
+        return $this;
+    }
 
     public function setJoins(string $table, string $kondisi, $posisi = "inner") {
         $this->joins["table"][] = $table;
@@ -92,6 +98,9 @@ class M_po extends CI_Model {
             foreach ($this->whereIn as $key => $value) {
                 $this->db->where_in($key, $value);
             }
+        }
+        if (count($this->group) > 0) {
+            $this->db->group_by($this->group);
         }
 
         foreach ($this->search as $key => $value) {
@@ -147,6 +156,11 @@ class M_po extends CI_Model {
                 $this->db->where_in($key, $value);
             }
         }
+        
+        if (count($this->group) > 0) {
+            $this->db->group_by($this->group);
+        }
+        
         return $this->db->count_all_results();
     }
 
@@ -162,6 +176,10 @@ class M_po extends CI_Model {
             foreach ($this->wheresRaw as $key => $value) {
                 $this->db->where($value, null, false);
             }
+        }
+        
+        if (count($this->group) > 0) {
+            $this->db->group_by($this->group);
         }
 
         $result = $this->db->select(implode(",", $this->selects))->get();
@@ -206,6 +224,11 @@ class M_po extends CI_Model {
                 $this->db->where_in($key, $value);
             }
         }
+        
+        if (count($this->group) > 0) {
+            $this->db->group_by($this->group);
+        }
+        
         $this->db->update($this->table);
     }
 }

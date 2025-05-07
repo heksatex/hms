@@ -101,6 +101,7 @@
                                 <input type="hidden" name="prio[]" value="<?= $datas[7] ?>">
                                 <input type="hidden" name="harga[]" value="<?= $datas[8] ?>">
                                 <input type="hidden" name="warehouse[]" value="<?= $datas[14] ?? "" ?>">
+                                <input type="hidden" name="schedule_date[]" value="<?= $datas[15] ?? "" ?>">
                                 <?= $datas[4] . " " . $datas[5] ?>
                             </td>
                             <td>
