@@ -372,13 +372,13 @@ class Produk extends MY_Controller {
                         $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'icon' => 'fa fa-check', 'type' => 'success', 'id' => $sub_parent, 'nama' => $nama_sub_parent);
                     } else {
                         //insert/add produk
-                        $id_new = $this->m_produk->get_last_id_mst_produk();
-                        $ids = $id_new;
-                        $this->m_produk->save_produk($kodeproduk, $namaproduk, $uomproduk, $uomproduk2, $tanggaldibuat, $routeproduksi,
+//                        $id_new = $this->m_produk->get_last_id_mst_produk();
+//                        $ids = $id_new;
+                        $id_new = $this->m_produk->save_produk($kodeproduk, $namaproduk, $uomproduk, $uomproduk2, $tanggaldibuat, $routeproduksi,
                                 $typeproduk, $dapatdibeli, $dapatdijual, $kategoribarang, $note, $bom, $lebargreige, $uom_lebargreige, $lebarjadi,
                                 $uom_lebarjadi, $statusproduk, $product_parent, $sub_parent, $jenis_kain, $uom_beli);
+                        $ids = $id_new;
                         $kodeproduk_encr = encrypt_url($id_new);
-
                         if (!empty($sql_insert_mst_sub_parent)) {
                             $sql_insert_mst_sub_parent = rtrim($sql_insert_mst_sub_parent, ', ');
                             $this->m_produk->simpan_mst_sub_parent_batch($sql_insert_mst_sub_parent);
@@ -455,6 +455,9 @@ class Produk extends MY_Controller {
         $data['id_dept'] = 'MPROD';
         $data['mms'] = $this->_module->get_data_mms_for_log_history('MPROD'); // get mms by dept untuk log history
         $produk = $this->m_produk->get_produk_by_kode($kode_decrypt); //id auto increment
+        if(empty($produk)) {
+            redirect("/warehouse/produk/");
+        }
         $data['produk'] = $produk;
         $data["catatan"] = $this->m_produk->getCatatan($kode_decrypt);
         $data['uom'] = $this->m_produk->get_list_uom();
