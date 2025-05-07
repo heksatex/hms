@@ -45,12 +45,9 @@
             </small>
         </div>
     </td>
-<!--    <td style="width: 80px">
-        <select class="form-control input-sm select2 prio"  style="width: 70%" name="prio[]">
-            <option value="normal" selected>Normal</option>
-            <option value="urgent">Urgent</option>
-        </select>
-    </td>-->
+    <td style="width: 80px">
+          <input type="datetime-local" class="form-control schedule_date_<?= $index ?>" name="schedule_date[]">
+    </td>
     <td style="width: 100px">
         <select class="form-control input-sm select2" name="warehouse[]" style="width: 100%" id="warehouse" required>
             <?php foreach ($warehouse as $key => $value) {
@@ -59,6 +56,9 @@
             <?php }
             ?>
         </select>
+    </td>
+    <td>
+        <textarea name="reff_note[]" class="form-control reff_note_<?= $index ?>" rows="2" cols="10"></textarea>
     </td>
     <td style="width: 20px">
         &nbsp;

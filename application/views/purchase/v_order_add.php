@@ -74,8 +74,9 @@
                                             <th>Satuan</th>
                                             <th>Qty Beli</th>
                                             <th>Satuan Beli</th>
-                                            <!--<th>Prioritas</th>-->
+                                            <th>Schedule Date</th>
                                             <th>Warehouse</th>
+                                            <th style="width: 12%">Reff Note</th>
                                             <th>#</th>
                                             </thead>
                                             <tbody>

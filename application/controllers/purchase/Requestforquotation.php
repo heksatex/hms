@@ -186,6 +186,7 @@ class Requestforquotation extends MY_Controller {
             $reffNotes = $this->input->post("reff_note");
             $createDokumen = date("Y-m-d H:i:d");
             $nilai = $this->input->post("nilai");
+            $schedule_date = $this->input->post("schedule_date");
             if (count($kod_pro) < 1) {
                 throw new \Exception("Item Produk Belum dipilih", 500);
             }
@@ -263,7 +264,8 @@ class Requestforquotation extends MY_Controller {
                     "created_at" => $createDokumen,
                     "deskripsi" => html_entity_decode($nm_pro[$key]),
                     "reff_note" => html_entity_decode($reffNotes[$key]),
-                    "warehouse" => $warehouse[$key]
+                    "warehouse" => $warehouse[$key],
+                    "schedule_date"=>$schedule_date[$key] ?? ""
                 );
                 $updatePP = new $this->m_po;
                 $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => ($v[1] ?? 0), "kode_produk" => $kod_pro[$key]])->update(["status" => "cfb"]);
@@ -582,7 +584,9 @@ class Requestforquotation extends MY_Controller {
                             'row_order' => $row,
                             'kode_pp' => $value->kode_pp,
                             'qty_beli' => $value->qty_beli,
-                            'uom_beli' => $value->uom_beli
+                            'uom_beli' => $value->uom_beli,
+                            'id_konversiuom'=>$value->id_konversiuom,
+                            'nilai_konversiuom'=>$value->nilai
                         ];
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
@@ -624,7 +628,7 @@ class Requestforquotation extends MY_Controller {
                 $detailProduk = [];
                 foreach ($produk as $keys => $values) {
                     $clone = $values;
-                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"]);
+                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"], $clone["id_konversiuom"], $clone["nilai_konversiuom"]);
                     $smProduk[] = array_merge($clone, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
                     unset($values["status"]);
                     $detailProduk[] = array_merge($values, ['kode' => $kodeRcv, 'lot' => '', 'status_barang' => 'ready']);

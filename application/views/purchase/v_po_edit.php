@@ -440,12 +440,13 @@
                                                     </th>
                                                     <th class="style" width="10px">No</th>
                                                     <th class="style" style="width:10%">Kode CFB</th>
-                                                    <th class="style" style="width:20%">Produk</th>
-                                                    <th class="style" style="width:20%">Deskripsi</th>
-                                                    <th class="style" style="width:20%">Qty Beli</th>
-                                                    <th class="style text-right" style="width:20%">Harga Satuan Beli</th>
-                                                    <th class="style text-right" style="width:15%">Tax</th>
-                                                    <th class="style" style="width:10%">reff Note</th>
+                                                    <th class="style" style="width:10%" >Produk</th>
+                                                    <th class="style" style="width:15%">Deskripsi</th>
+                                                    <th class="style" style="width:10%">Schedule Date</th>
+                                                    <th class="style"style="width:15%" >Qty / Uom Beli</th>
+                                                    <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
+                                                    <td class="style text-right" >Tax</td>
+                                                    <td class="style" >Reff Note</td>
                                                     </thead>
                                                     <tbody>
                                                         <?php
@@ -494,6 +495,9 @@
                                                                 </td>
                                                                 <td>
                                                                     <?= $value->deskripsi ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $value->schedule_date ?>
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group">
