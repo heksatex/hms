@@ -5,7 +5,13 @@ foreach ($data as $key => $value) {
     $harga = $value->nilai_currency * $value->harga_per_uom_beli;
     $diskon = $value->nilai_currency * $value->diskon;
     $subsubtotal = ($value->qty_beli * $harga) - $diskon;
-    $pajak = $subsubtotal * $value->amount_tax;
+    if($dpp !== null){
+         $pajak = (($subsubtotal * 11) / 12) *  $value->amount_tax;
+    }
+    else{
+        $pajak = $subsubtotal * $value->amount_tax;
+    }
+    
     $total_group += $subsubtotal + $pajak;
     ?>
     <tr>
