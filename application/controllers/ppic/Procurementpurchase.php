@@ -24,7 +24,8 @@ class Procurementpurchase extends MY_Controller
 	function get_data()
     {	
         $sub_menu  = $this->uri->segment(2);
-    	$kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+        $id_dept = 'PP';
+        $kode    = $this->_module->get_kode_sub_menu_deptid($sub_menu, $id_dept)->row_array();
         $username  = addslashes($this->session->userdata('username'));
         $level = $this->session->userdata('nama')["level"];
         if($level === "Entry Data") {
@@ -180,7 +181,9 @@ class Procurementpurchase extends MY_Controller
                         $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Reff Notes Harus Diisi !', 'icon' =>'fa fa-warning', 
                           'type' => 'danger' ); 
                     }elseif(empty($type_arr) AND empty($kode_pp)){
-                            $callback = array('status' => 'failed', 'field' => 'mto', 'message' => 'Type Procurement Harus Diisi !', 'icon' => 'fa fa-warning','type' => 'danger');
+                        $callback = array('status' => 'failed', 'field' => 'mto', 'message' => 'Type Procurement Harus Diisi !', 'icon' => 'fa fa-warning','type' => 'danger');
+                    }elseif(empty($show_sc) AND empty($kode_pp)) {
+                        $callback = array('status' => 'failed', 'field' => 'sc_true', 'message' => 'Pilih salah satu Sales Order Yes/No !', 'icon' => 'fa fa-warning','type' => 'danger');
                     }elseif(empty($sales_order) AND $show_sc == 'yes' AND empty($kode_pp)){
                         $callback = array('status' => 'failed', 'field' => 'sales_order', 'message' => 'Sales Order  Harus Diisi !', 'icon' =>'fa fa-warning', 'type' => 'danger' );    
                     }elseif(empty($kode_prod) AND $show_sc == 'yes' ){

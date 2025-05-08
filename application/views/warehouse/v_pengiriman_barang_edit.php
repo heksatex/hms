@@ -262,7 +262,7 @@
                                 <td><?php echo $row->kode_produk;?></td>
                                 <td> <?php echo $row->nama_produk?></a>
                                   <?php if($row->status_barang == 'done' OR $row->status_barang == 'cancel' OR $akses_menu == 0){echo "";}else{?>
-                                   <a href="javascript:void(0)" onclick="tambah_quant('<?php echo htmlentities($row->nama_produk); ?>','<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>','<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
+                                   <a href="javascript:void(0)" onclick="tambah_quant(`<?php echo htmlentities($row->nama_produk); ?>`,'<?php echo $row->kode_produk ?>','<?php echo $list->move_id ?>','<?php echo $row->origin_prod?>')" data-toggle="tooltip" title="Tambah Quant">
                                      <span class="glyphicon  glyphicon-share"></span></a>
                                   <?php }?>
                                 </td>
