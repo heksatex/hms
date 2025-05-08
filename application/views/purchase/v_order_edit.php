@@ -822,7 +822,7 @@
                                     alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                                 }, 100);
                                 if (response.status === 200) {
-//                                    location.reload();
+                                    location.reload();
                                 }
                             }).catch(err => {
                         unblockUI(function () {});
