@@ -143,6 +143,9 @@
                 /* Colors */
                 background-color: rgba(0, 0, 0, .3);
             }
+            #btn-simpan {
+                        display: inline;
+                    }
         </style>
         <?php $this->load->view("admin/_partials/js.php") ?>
 
@@ -255,7 +258,7 @@
                                                     <?php
                                                     if ($po->status === 'draft') {
                                                         ?>
-                                                    <select class="form-control input-sm select2" name="supplier" id="supplier" required>
+                                                        <select class="form-control input-sm select2" name="supplier" id="supplier" required>
                                                             <option value='<?= $po->supplier ?>' selected><?= $po->supp ?></option>
                                                         </select>
                                                         <?php
@@ -396,6 +399,7 @@
                                     <button type="submit" id="form-cfq-submit" style="display: none"></button>
                                     <table class="table table-condesed table-hover rlstable  over" style="width:100%">
                                         <thead>
+                                        <th class="style" width="10px">#</th>
                                         <th class="style" width="10px">No</th>
                                         <th class="style" style="width:10%">Kode CFB</th>
                                         <th class="style" style="width:10%" >Produk</th>
@@ -428,6 +432,13 @@
                                                 ?>
                                                 <tr>
                                                     <td>
+                                                        <?php
+                                                        if (count($po_items) > 1) {
+//                                                           echo ($po->status === "draft") ?  "<button type='button' class='btn btn-danger btn-sm delete_item' data-ids='{$value->id}'><fa class='fa fa-trash'></fa></button>" :  '';
+                                                        }
+                                                        ?>
+                                                    </td>
+                                                    <td>
                                                         <?= $no ?>
                                                     </td>
                                                     <td>
@@ -458,7 +469,7 @@
                                                     <td>
                                                         <div class="form-group">
                                                             <div class="input-group">
-                                                                <div class="input-group-addon"><?= $value->qty_beli ?></div>
+                                                                <div class="input-group-addon"><?= number_format($value->qty_beli, 2) ?> </div>
                                                                 <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                 <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
                                                                 <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
@@ -528,10 +539,10 @@
     <!--                                                    <td>
                                             <div class="form-group">
                                                     <?php if ($po->no_value === "1") { ?>
-                                                                                <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
+                                                                                            <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
                                                     <?php } else { ?>
-                                                                                <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                                       style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
+                                                                                            <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                                                   style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
                                                     <?php } ?>
                                             </div>
                                         </td>-->
@@ -555,19 +566,19 @@
                                                 ?>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Subtotal 1</td>
-                                                    <td class="style text-center totalan"> 
+                                                    <td colspan="2" class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Discount</td>
-                                                    <td class="style text-center totalan"> 
+                                                    <td colspan="2" class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                         </strong></td>
                                                 </tr>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Subtotal 2</td>
-                                                    <td class="style text-center totalan"> 
+                                                    <td colspan="2" class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                         </strong></td>
                                                 </tr>
@@ -576,7 +587,7 @@
                                                     ?>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">DPP Nilai Lain</td>
-                                                        <td class="style text-center totalan"> 
+                                                        <td colspan="2" class="style text-center totalan"> 
                                                             <input name="dpplain" type="hidden" value="1">
                                                             <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
                                                             </strong>
@@ -586,14 +597,14 @@
                                                 ?>
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Taxes</td>
-                                                    <td class="style text-center totalan"> 
+                                                    <td colspan="2" class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                         </strong></td>
                                                 </tr>
 
                                                 <tr>    
                                                     <td colspan="8" class="style text-right">Total</td>
-                                                    <td class="style text-center totalan"> 
+                                                    <td colspan="2" class="style text-center totalan"> 
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                         </strong></td>
                                                 </tr>
@@ -604,20 +615,20 @@
                                                     ?> 
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Subtotal 1</td>
-                                                        <td class="style text-center totalan"> 
+                                                        <td colspan="2" class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                             </strong></td>
                                                     </tr>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Discount</td>
-                                                        <td class="style text-center totalan"> 
+                                                        <td colspan="2" class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                             </strong></td>
                                                     </tr>
 
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Subtotal 2</td>
-                                                        <td class="style text-center totalan"> 
+                                                        <td colspan="2" class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                             </strong></td>
                                                     </tr>
@@ -625,7 +636,7 @@
                                                         ?>
                                                         <tr>    
                                                             <td colspan="8" class="style text-right">DPP Nilai Lain</td>
-                                                            <td class="style text-center totalan"> 
+                                                            <td colspan="2" class="style text-center totalan"> 
                                                                 <input name="dpplain" type="hidden" value="1">
                                                                 <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
                                                                 </strong>
@@ -635,14 +646,14 @@
                                                     ?>
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Taxes</td>
-                                                        <td class="style text-center totalan"> 
+                                                        <td colspan="2" class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                             </strong></td>
                                                     </tr>
 
                                                     <tr>    
                                                         <td colspan="8" class="style text-right">Total</td>
-                                                        <td class="style text-center totalan"> 
+                                                        <td colspan="2" class="style text-center totalan"> 
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                             </strong></td>
                                                     </tr>
@@ -811,7 +822,7 @@
                                     alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
                                 }, 100);
                                 if (response.status === 200) {
-                                    location.reload();
+//                                    location.reload();
                                 }
                             }).catch(err => {
                         unblockUI(function () {});
@@ -841,7 +852,12 @@
                             if (data.redirect !== "") {
                                 location.href = "<?= site_url('purchase/purchaseorder/edit') ?>/" + data.redirect;
                             } else {
-                                location.reload();
+                                if (status === "cancel") {
+                                    location.href = "<?= site_url('purchase/requestforquotation') ?>";
+                                } else
+                                {
+                                    location.reload();
+                                }
                             }
                         }
 
@@ -877,6 +893,34 @@
                                 items: "<?php count($po_items) ?>",
                                 totals: 0,
                                 default_total: 1
+                            },
+                            error: function (req, error) {
+                                unblockUI(function () {
+                                    setTimeout(function () {
+                                        alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                    }, 500);
+                                });
+                            },
+                            success: function (data) {
+                                location.reload();
+                            }
+
+                        });
+                    });
+                });
+
+                $(".delete_item").off("click").unbind("click").on("click", function () {
+                    var ids = $(this).data("ids");
+                    confirmRequest("Request For Quotation", "Hapus Item ", function () {
+                        $.ajax({
+                            url: "<?= base_url('purchase/requestforquotation/delete_item/' . $id) ?>",
+                            type: "POST",
+                            beforeSend: function (xhr) {
+                                please_wait(function () {});
+                            },
+                            data: {
+                                ids: ids,
+                                dpplain: $("#dpplain").val()
                             },
                             error: function (req, error) {
                                 unblockUI(function () {

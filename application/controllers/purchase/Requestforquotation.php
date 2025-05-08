@@ -50,7 +50,7 @@ class Requestforquotation extends MY_Controller {
             $model1 = new $this->m_po;
             $model2 = clone $model1;
             $model3 = clone $model2;
-            $model4= clone $model2;
+            $model4 = clone $model2;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
@@ -62,14 +62,14 @@ class Requestforquotation extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data tidak ditemukan', 500);
             }
-            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt,])->setOrder(["id" => "asc"])
+            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt, "pod.status <>" => "cancel"])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
                             ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 //        $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
-            $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
+            $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
 
             $this->load->view('purchase/v_order_edit', $data);
@@ -87,13 +87,12 @@ class Requestforquotation extends MY_Controller {
 
             $data = array();
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "create_date", "order_date", "po.status"])
-                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode","coalesce(poe.status,'') as poe_status"])->setOrder(['create_date' => 'desc'])
+                    ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode", "coalesce(poe.status,'') as poe_status"])->setOrder(['create_date' => 'desc'])
                     ->setSearch(["p.nama", "no_po", "po.status", "note"])
                     ->setJoins("currency_kurs ck", "ck.id = po.currency", "left")
                     ->setJoins("partner p", "(p.id = po.supplier and p.supplier = 1)")
                     ->setJoins("mst_status", "mst_status.kode = po.status", "left")
-                    ->setJoins("purchase_order_edited poe","(poe.po_id = po.no_po and poe.status not in ('cancel','done'))","left")
-                    
+                    ->setJoins("purchase_order_edited poe", "(poe.po_id = po.no_po and poe.status not in ('cancel','done'))", "left")
                     ->setWheres(["jenis" => $jenis]);
             if (strtolower($level) === "direksi") {
                 $list->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
@@ -114,20 +113,20 @@ class Requestforquotation extends MY_Controller {
             foreach ($list->getData() as $field) {
                 $no++;
                 $status = ($field->nama_status ?? $field->status);
-                if(strtolower($status) === 'exception') {
-                    $status.=" ({$field->poe_status})";
+                if (strtolower($status) === 'exception') {
+                    $status .= " ({$field->poe_status})";
                 }
                 if (strtolower($level) === "direksi") {
                     $poenc = encrypt_url($field->no_po);
                     $no = "{$field->id}|{$poenc}|{$field->status}|{$field->poe_status}";
                 }
-                
+
                 $data [] = [
                     $no,
                     '<a href="' . base_url('purchase/' . $sub . '/edit/' . encrypt_url($field->no_po)) . '">' . $field->no_po . '</a>',
                     $field->nama_supplier,
                     $field->create_date,
-                    number_format($field->total, 2) . " " . ( ($field->total === null) ? "" : $field->curr_kode),
+                    number_format($field->total, 4) . " " . ( ($field->total === null) ? "" : $field->curr_kode),
                     $status,
                     $field->note,
                     $field->poe_status
@@ -242,7 +241,7 @@ class Requestforquotation extends MY_Controller {
                 }
                 $v = explode(".", $value);
                 $kode_cfb[] = $v[0] ?? 0;
-                if($qty[$key] === "") {
+                if ($qty[$key] === "") {
                     $qty[$key] = $qty_beli[$key] * ($nilai[$key] ?? 1);
                 }
                 $items [] = array(
@@ -265,7 +264,7 @@ class Requestforquotation extends MY_Controller {
                     "deskripsi" => html_entity_decode($nm_pro[$key]),
                     "reff_note" => html_entity_decode($reffNotes[$key]),
                     "warehouse" => $warehouse[$key],
-                    "schedule_date"=>$schedule_date[$key] ?? ""
+                    "schedule_date" => $schedule_date[$key] ?? ""
                 );
                 $updatePP = new $this->m_po;
                 $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => ($v[1] ?? 0), "kode_produk" => $kod_pro[$key]])->update(["status" => "cfb"]);
@@ -295,6 +294,70 @@ class Requestforquotation extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
+        }
+    }
+
+    public function delete_item($id) {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+
+            $kode_decrypt = decrypt_url($id);
+            $ids = $this->input->post("ids");
+            $dpplain = $this->input->post("dpplain");
+
+            $model = new $this->m_global;
+            $model1 = clone $model;
+            $model2 = clone $model;
+
+            $check = $model->setTables("purchase_order_detail")->setWheres(["id" => $ids, "po_no_po" => $kode_decrypt])->getDetail();
+            if (!$check) {
+                throw new \Exception('Gagal hapus item', 500);
+            }
+            $this->_module->startTransaction();
+
+            $model->update(["status" => "cancel"]);
+            $spltkodePP = explode("_", $check->kode_cfb);
+            if (isset($spltkodePP[1])) {
+                $model1->setTables("cfb_items")->setWheres(["cfb_items.id" => $check->cfb_items_id])->update(["status" => "confirm"]);
+                $model2->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $spltkodePP[1], "kode_produk" => $check->kode_produk])->update(["status" => "generated"]);
+            }
+            $datas = $model->setWheres(["purchase_order_detail.status" => "draft", "po_no_po" => $kode_decrypt], true)
+//                            ->setJoins("purchase_order", "purchase_order_detail.po_id = purchase_order.id")
+                            ->setJoins("tax", "tax_id = tax.id", "left")
+                            ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax"])->getData();
+            $totals = 0.00;
+            $diskons = 0.00;
+            $taxes = 0.00;
+            $nilaiDppLain = 0;
+            foreach ($datas as $key => $value) {
+                $total = ($value->qty_beli * $value->harga_per_uom_beli);
+                $diskon = ($value->diskon ?? 0);
+                $totals += $total;
+                $diskons += $diskon;
+                if ($dpplain === "1") {
+                    $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
+                } else {
+                    $taxes += ($total - $diskon) * $value->amount_tax;
+                }
+            }
+            $grandTotal = ($totals - $diskons) + $taxes;
+            $po = new $this->m_po;
+            $update = ["total" => $grandTotal, 'dpp_lain' => $nilaiDppLain];
+            $po->setWheres(["no_po" => $kode_decrypt])->update($update);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal update Data', 500);
+            }
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Hapus Item dengan kode CFB {$check->kode_cfb}", $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            $this->output->set_status_header(($ex->getCode() ?? 500))
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 
@@ -347,7 +410,7 @@ class Requestforquotation extends MY_Controller {
             $amount_tax = $this->input->post("amount_tax");
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
-            $dpplain = $this->input->post("dpplain");
+//            $dpplain = $this->input->post("dpplain");
             $foot_note = $this->input->post("foot_note");
             $supplier = $this->input->post("supplier");
 
@@ -364,6 +427,8 @@ class Requestforquotation extends MY_Controller {
             $diskons = 0.00;
             $taxes = 0.00;
             $nilaiDppLain = 0;
+            $model3 = new $this->m_global;
+            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             foreach ($harga as $key => $value) {
                 $no++;
                 if ($noVal === "0") {
@@ -385,7 +450,7 @@ class Requestforquotation extends MY_Controller {
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
-                if ($dpplain === "1") {
+                if ($setDpp !== null) {
                     $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                     $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                 } else {
@@ -402,12 +467,12 @@ class Requestforquotation extends MY_Controller {
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
             $update = ["currency" => $currency, "nilai_currency" => $nilai_currency, 'note' => $note,
-                "no_value" => $noVal, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date,'foot_note'=>$foot_note,'supplier'=>$supplier];
+                "no_value" => $noVal, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date, 'foot_note' => $foot_note, 'supplier' => $supplier];
             $po->setWheres(["no_po" => $kode_decrypt])->update($update);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit',"Header -> ".logArrayToString('; ', $update, " : ")."<br> Detail -> ". logArrayToString('; ', $log_update, " : "), $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Header -> " . logArrayToString('; ', $update, " : ") . "<br> Detail -> " . logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -585,8 +650,8 @@ class Requestforquotation extends MY_Controller {
                             'kode_pp' => $value->kode_pp,
                             'qty_beli' => $value->qty_beli,
                             'uom_beli' => $value->uom_beli,
-                            'id_konversiuom'=>$value->id_konversiuom,
-                            'nilai_konversiuom'=>$value->nilai
+                            'id_konversiuom' => $value->id_konversiuom,
+                            'nilai_konversiuom' => $value->nilai
                         ];
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
@@ -671,7 +736,7 @@ class Requestforquotation extends MY_Controller {
             $data["index"] = $this->input->post("index");
             $data["uom_jual"] = $this->m_produk->get_list_uom(['jual' => 'yes']);
             $model = new $this->m_global;
-            $warehouse = $model->setTables("departemen")->setSelects(["kode","nama"])->setOrder(["nama"])->setWheres(["type_dept"=>"gudang","show_dept"=>true])->getData();
+            $warehouse = $model->setTables("departemen")->setSelects(["kode", "nama"])->setOrder(["nama"])->setWheres(["type_dept" => "gudang", "show_dept" => true])->getData();
 //            $data['warehouse'] = $this->_module->get_list_departement();
             $data['warehouse'] = $warehouse;
             $item = $this->load->view('purchase/v_order_item_manual', $data, true);
@@ -700,7 +765,7 @@ class Requestforquotation extends MY_Controller {
 
     public function get_tax() {
         try {
-            $kurs = $this->m_po->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
+            $kurs = $this->m_po->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode($kurs));
@@ -732,14 +797,51 @@ class Requestforquotation extends MY_Controller {
         $_POST['length'] = 50;
         $_POST['start'] = 0;
         $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])
-                ->setJoins("mst_category","id_category = mst_category.id")
-                ->setJoins("departemen","(departemen.kode = mst_category.dept_id and departemen.type_dept='gudang')")
-                ->setJoins("nilai_konversi nk","nk.id = uom_beli" , "left")
-                ->setGroups(["mst_produk.kode_produk"])
-                ->setSelects(["mst_produk.*","coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai"])
-                ->setOrder(["kode_produk" => "asc"])->getData();
+                        ->setJoins("mst_category", "id_category = mst_category.id")
+                        ->setJoins("departemen", "(departemen.kode = mst_category.dept_id and departemen.type_dept='gudang')")
+                        ->setJoins("nilai_konversi nk", "nk.id = uom_beli", "left")
+                        ->setGroups(["mst_produk.kode_produk"])
+                        ->setSelects(["mst_produk.*", "coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai"])
+                        ->setOrder(["kode_produk" => "asc"])->getData();
         $this->output->set_status_header(200)
                 ->set_content_type('application/json', 'utf-8')
                 ->set_output(json_encode(['data' => $datas]));
     }
+
+//    public function hitung_total() {
+//        try {
+//            $model = new $this->m_global;
+//            $model2 = clone $model;
+//            $model3 = clone $model;
+//            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
+//
+//            $headers = $model->setTables("purchase_order")->getData();
+//            foreach ($headers as $key => $values) {
+//                $model2 = new $this->m_global;
+//                $totals = 0.00;
+//                $diskons = 0.00;
+//                $taxes = 0.00;
+//                $nilaiDppLain = 0;
+//                $body = $model2->setTables("purchase_order_detail")->setWheres(["po_id" => $values->id], true)
+//                                ->setJoins("tax", "tax_id = tax.id", "left")
+//                                ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax"])->getData();
+//                foreach ($body as $key => $value) {
+//                    $total = ($value->qty_beli * $value->harga_per_uom_beli);
+//                    $diskon = ($value->diskon ?? 0);
+//                    $totals += $total;
+//                    $diskons += $diskon;
+//                    if ($setDpp !== null) {
+//                        $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+//                        $nilaiDppLain += ((($total - $diskon) * 11) / 12);
+//                    } else {
+//                        $taxes += ($total - $diskon) * $value->amount_tax;
+//                    }
+//                }
+//                $grandTotal = ($totals - $diskons) + $taxes;
+//                $model->setWheres(["id" => $values->id], true)->update(["total" => $grandTotal, "dpp_lain" => $nilaiDppLain]);
+//            }
+//        } catch (Exception $ex) {
+//            
+//        }
+//    }
 }

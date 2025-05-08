@@ -63,7 +63,7 @@
                                     <div class="panel panel-default" style="margin-bottom: 0px;">
                                         <div id="advancedSearch" class="panel-collapse collapse" role="tabpanel" aria-labelledby="advanced" >
                                             <div class="panel-body" style="padding: 5px">
-                                                <form>
+                                                <form id="form-search">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <div class="col-md-12 col-xs-12">
@@ -130,7 +130,7 @@
                                                             <button type="button" class="btn btn-sm btn-default" name="btn-generate" id="search" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Filter </button>
                                                         </div>
                                                         <div class="form-group">
-                                                            <button type="reset" class="btn btn-sm btn-warning" name="btn-reset" id="reset" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Reset </button>
+                                                            <button type="button" class="btn btn-sm btn-warning" id="btn-reset" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing..."> Reset </button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -273,7 +273,15 @@
 
                     ]
                 });
-
+                
+                
+                $("#btn-reset").on("click", function () {
+                    $("#prio").val('').trigger('change');
+                    $("#dpt").val('').trigger('change');
+                    $("#status").val('').trigger('change');
+                    document.getElementById("form-search").reset();
+                    table.ajax.reload();
+                });
                 $("#search").on("click", function () {
                     table.ajax.reload();
                 });
@@ -307,7 +315,8 @@
                             },
                             success: function (data) {
                                 alert_notify(data.icon, data.message, data.type, function () {});
-                                location.reload();
+//                                location.reload();
+                                table.ajax.reload(null, false);
                             },
                             error: function (err) {
                                 alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
@@ -333,7 +342,7 @@
                     const dataStatus = new Promise((resolve, reject) => {
                         let dt = [];
                         $.each(rows_selected, function (index, rowId) {
-                            var splt = rowId.split("#");
+                            var splt = rowId.split("|^");
                             if ("draft" !== splt[splt.length - 1]) {
                                 throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status Draft");
                             }
@@ -354,7 +363,8 @@
                             },
                             success: function (data) {
                                 alert_notify(data.icon, data.message, data.type, function () {});
-                                location.reload();
+//                                location.reload();
+                                table.ajax.reload(null, false);
                             },
                             error: function (err) {
                                 alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
@@ -375,30 +385,50 @@
                     }
                     $(".add-rfq-btn").button("loading");
                     const data = new Promise((resolve, reject) => {
-                        let dt = [];
+                        let dt = {ids: [], data: []};
                         $.each(rows_selected, function (index, rowId) {
-                            var splt = rowId.split("#");
-                            if ("confirm" !== splt[splt.length - 1]) {
-                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status confirm");
-                            }
-                            dt.push(rowId);
+                            var splt = rowId.split("|^");
+//                            if ("confirm" !== splt[splt.length - 1]) {
+//                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status confirm");
+//                            }
+                            dt.ids.push(splt[0]);
+                            dt.data.push(rowId);
                         });
                         resolve(dt);
                     });
                     e.preventDefault();
                     data.then((rsp) => {
-                        $("#tambah_data").modal({
-                            show: true,
-                            backdrop: 'static'
+                        $.ajax({
+                            url: "<?= base_url('purchase/callforbids/create_rfq/') ?>",
+                            type: "POST",
+                            data: {
+                                data: JSON.stringify(rsp), jenis: "RFQ"
+                            },
+                            success: function (data) {
+                                $("#tambah_data").modal({
+                                    show: true,
+                                    backdrop: 'static'
+                                });
+                                $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                                $('.modal-title').text('Create RFQ');
+
+                                setTimeout(function () {
+                                    $(".tambah_data").html(data.data);
+                                    $("#btn-tambah").html("Tambahkan");
+                                }, 500);
+                            },
+                            error: function (err) {
+                                alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                            }
                         });
-                        $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-                        $('.modal-title').text('Create RFQ');
-                        $.post("<?= base_url('purchase/callforbids/create_rfq/') ?>", {data: JSON.stringify(rsp), jenis: "RFQ"}, function (data) {
-                            setTimeout(function () {
-                                $(".tambah_data").html(data.data);
-                                $("#btn-tambah").html("Tambahkan");
-                            }, 500);
-                        });
+//                        $.post("<?= base_url('purchase/callforbids/create_rfq/') ?>", {data: JSON.stringify(rsp), jenis: "RFQ"}).done(function (data) {
+//                            setTimeout(function () {
+//                                $(".tambah_data").html(data.data);
+//                                $("#btn-tambah").html("Tambahkan");
+//                            }, 500);
+//                        }).fail(function (rsp) {
+//                            alert_notify("fa fa-warning", rsp.message, "danger", function () {});
+//                        });
                     }).catch(e => {
                         alert_notify("fa fa-warning", e.message, "danger", function () {});
                     });
@@ -413,30 +443,41 @@
                     }
                     $(".add-fpt-btn").button("loading");
                     const data = new Promise((resolve, reject) => {
-                        let dt = [];
+                        let dt = {ids: [], data: []};
                         $.each(rows_selected, function (index, rowId) {
-                            var splt = rowId.split("#");
-                            if ("confirm" !== splt[splt.length - 1]) {
-                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status confirm");
-                            }
-                            dt.push(rowId);
+                            var splt = rowId.split("|^");
+//                            if ("confirm" !== splt[splt.length - 1]) {
+//                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status confirm");
+//                            }
+                            dt.ids.push(splt[0]);
+                            dt.data.push(rowId);
                         });
                         resolve(dt);
                     });
                     e.preventDefault();
                     data.then((rsp) => {
-                        $("#tambah_data").modal({
-                            show: true,
-                            backdrop: 'static'
-                        });
-                        $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-                        $('.modal-title').text('Create FPT');
-                        $.post("<?= base_url('purchase/callforbids/create_rfq/') ?>", {data: JSON.stringify(rsp), jenis: "FPT"}, function (data) {
-                            setTimeout(function () {
-                                $(".tambah_data").html(data.data);
-                                $("#btn-tambah").html("Tambahkan");
-                                $("#jenis").val("FPT");
-                            }, 500);
+                        $.ajax({
+                            url: "<?= base_url('purchase/callforbids/create_rfq/') ?>",
+                            type: "POST",
+                            data: {
+                                data: JSON.stringify(rsp), jenis: "FPT"
+                            },
+                            success: function (data) {
+                                $("#tambah_data").modal({
+                                    show: true,
+                                    backdrop: 'static'
+                                });
+                                $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                                $('.modal-title').text('Create FPT');
+                                setTimeout(function () {
+                                    $(".tambah_data").html(data.data);
+                                    $("#btn-tambah").html("Tambahkan");
+                                    $("#jenis").val("FPT");
+                                }, 500);
+                            },
+                            error: function (err) {
+                                alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
+                            }
                         });
                     }).catch(e => {
                         alert_notify("fa fa-warning", e.message, "danger", function () {});
