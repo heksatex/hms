@@ -190,6 +190,12 @@ class M_global extends CI_Model {
         if (count($this->group) > 0) {
             $this->db->group_by($this->group);
         }
+        
+        if (count($this->whereIn) > 0) {
+            foreach ($this->whereIn as $key => $value) {
+                $this->db->where_in($key, $value);
+            }
+        }
 
         $result = $this->db->select(implode(",", $this->selects))->get();
         return $result->row();

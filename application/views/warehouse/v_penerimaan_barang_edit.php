@@ -150,6 +150,9 @@
                                             <div class="col-xs-4">
                                                 <button class="btn btn-primary" id="btn-print-pdf" type="button">Print PDF</button>
                                             </div>
+                                            <div class="col-xs-4">
+                                                <!--<button class="btn btn-danger" id="btn-crt-inv" type="button">Create Invoice</button>-->
+                                            </div>
                                         </div>
                                     <?php } ?>
                                 </div>
@@ -204,14 +207,14 @@
                                                                             echo $row->nama_produk;
                                                                         } else {
                                                                         ?>
-                                                                            <a href="javascript:void(0)" onclick="tambah('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>', '<?php echo $list->move_id ?>')"><?php echo $row->nama_produk ?></a>
+                                                                            <a href="javascript:void(0)" onclick="tambah(`<?php echo htmlentities($row->nama_produk); ?>`, '<?php echo $row->kode_produk ?>', '<?php echo $list->move_id ?>')"><?php echo $row->nama_produk ?></a>
                                                                         <?php } ?>
                                                                         <?php
                                                                         if ($row->status_barang == 'done' or $row->status_barang == 'cancel' or $akses_menu == 0 or $list->status == 'done') {
                                                                             echo "";
                                                                         } else {
                                                                         ?>
-                                                                            <a href="javascript:void(0)" onclick="tambah_quant('<?php echo htmlentities($row->nama_produk); ?>', '<?php echo $row->kode_produk ?>', '<?php echo $list->move_id ?>', '<?php echo $row->origin_prod ?>')" data-toggle="tooltip" title="Tambah Quant">
+                                                                            <a href="javascript:void(0)" onclick="tambah_quant(`<?php echo htmlentities($row->nama_produk); ?>`, '<?php echo $row->kode_produk ?>', '<?php echo $list->move_id ?>', '<?php echo $row->origin_prod ?>')" data-toggle="tooltip" title="Tambah Quant">
                                                                                 <span class="glyphicon  glyphicon-share"></span></a>
                                                                         <?php
                                                                         }
@@ -907,6 +910,33 @@
                     unblockUI(function() {});
                     window.open(data.url, "_blank").focus();
 
+                },
+                error: function(req, error) {
+                    unblockUI(function() {
+                        setTimeout(function() {
+                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function() {});
+                        }, 500);
+                    });
+                }
+            });
+        });
+        
+        
+        
+        $("#btn-crt-inv").unbind("click").off("click").on("click",function(){
+            $.ajax({
+                url: "<?= base_url('warehouse/penerimaanbarang/create_invoice') ?>",
+                type: "POST",
+                data: {
+                    id: "<?= $list->kode ?>",
+                    departemen: "RCV",
+                    origin:$("#origin").val()
+                },
+                beforeSend: function(xhr) {
+                    please_wait(function() {});
+                },
+                success: function(data) {
+                    unblockUI(function() {});
                 },
                 error: function(req, error) {
                     unblockUI(function() {

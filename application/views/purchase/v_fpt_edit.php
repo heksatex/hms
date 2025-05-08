@@ -337,9 +337,9 @@
                                         <th class="style" style="width:10%" >Produk</th>
                                         <th class="style" style="width:15%">Deskripsi</th>
                                         <th class="style" style="width:10%">Schedule Date</th>
-                                        <th class="style"style="width:15%" >Qty / Uom Beli</th>
-                                        <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
-                                        <td class="style text-right" >Tax</td>
+                                        <th class="style"style="width:13%" >Qty / Uom Beli</th>
+                                        <td class="style text-right" style="width:13%">Harga Satuan Beli</td>
+                                        <td class="style text-right" style="width:10%" >Tax</td>
                                         <td class="style" >Reff Note</td>
                                         </thead>
                                         <tbody>
