@@ -58,7 +58,7 @@ class Callforbids extends MY_Controller {
                 $list->setWheres(["cfb.warehouse" => $depth]);
             }
             if ($kode !== "") {
-                $list->setWhereRaw("cfb.kode_pp LIKE '%{$kode}%' or ci.kode_cfb LIKE '%{$kode}%'");
+                $list->setWhereRaw("cfb.kode_pp LIKE '%{$kode}%'");
             }
             if ($prio !== "") {
                 $list->setWheres(["cfb.priority" => $prio]);
@@ -71,8 +71,8 @@ class Callforbids extends MY_Controller {
                 $kode_encrypt = encrypt_url($field->kode_cfb);
 //                $ids = $no;
 //                if (strtolower($field->status) != "cancel") {
-                $ids = $field->id . "#" . $field->kode_cfb . "." . $field->kode_pp . "#" . $field->kode_produk . "#" .
-                        $field->qty . "#" . $field->uom . "#" . $field->priority . "#" . $field->reff_notes . "#" . $field->warehouse . "#" . $field->schedule_date . "#" . $field->status;
+                $ids = $field->id . "|^" . $field->kode_cfb . "." . $field->kode_pp . "|^" . $field->kode_produk . "|^" .
+                        $field->qty . "|^" . $field->uom . "|^" . $field->priority . "|^" . $field->reff_notes . "|^" . $field->warehouse . "|^" . $field->schedule_date . "|^" . $field->status;
 //                }
                 $data [] = array(
                     $ids,
@@ -165,16 +165,26 @@ class Callforbids extends MY_Controller {
         try {
             $datas = $this->input->post("data");
             $data["jenis"] = $this->input->post("jenis");
+            $dd = json_decode($datas);
+            $model = new $this->m_global;
+             $this->_module->lock_tabel("mst_produk WRITE,cfb_items WRITE,mst_produk_harga mph read,nilai_konversi nk read,nilai_konversi read");
+            $checkStatus = $model->setTables("cfb_items")->setSelects(["kode_produk,nama_produk"])->setWhereIn("id", $dd->ids)->setWheres(["status <>"=>"confirm"])->getDetail();
+            if($checkStatus){
+                throw new \Exception("Produk [{$checkStatus->kode_produk}] {$checkStatus->nama_produk} Tidak dalam status CONFRIM", 500);
+            }
             $produk = $this->m_cfb->setTables("mst_produk")->setSelects(["mst_produk.kode_produk,nama_produk,uom_beli,mph.harga,nilai,dari,catatan,uom"])
                     ->setJoins("mst_produk_harga mph", "(mph.kode_produk = mst_produk.kode_produk and mph.jenis = 'pembelian')", "left")
                     ->setJoins("nilai_konversi nk", "nk.id = uom_beli", "left");
             $items = [];
-            foreach (json_decode($datas) as $key => $value) {
-                $datas_ = explode("#", $value);
+            $temid = [];
+            foreach ($dd->data as $key => $value) {
+                $datas_ = explode("|^", $value);
+                if(isset($temid[$datas_[0]])) {
+                    continue;
+                }
                 if (count($datas_) > 1) {
                     $prod = $produk->setWheres(["mst_produk.kode_produk" => $datas_[2]], true)->getDetail();
                     if ($prod) {
-
                         if (is_null($prod->uom_beli) || ($prod->uom !== $datas_[4])) {
                             $dari = $datas_[4];
                             $nilai = 1;
@@ -204,8 +214,8 @@ class Callforbids extends MY_Controller {
                             $datas_[4], ($uom_beli ?? null), $datas_[5], $prod->harga, $dari, $nilai, $catatan, $qtyBeli, $datas_[6], $datas_[7], $datas_[8]]);
                     }
                 }
+                $temid[$datas_[0]] ="" ;
             }
-            log_message("error", json_encode($items));
             $data["item"] = $items;
             $data["supp"] = $this->input->post("supp") ?? "";
             $data["prio"] = $this->input->post("prio") ?? "";
@@ -218,6 +228,8 @@ class Callforbids extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 

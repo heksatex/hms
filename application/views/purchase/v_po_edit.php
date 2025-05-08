@@ -571,29 +571,29 @@
                                                         if (strtolower($po->status) !== "draft") {
                                                             ?>
                                                             <tr>    
-                                                                <td colspan="6" class="style text-right">Subtotal 1</td>
-                                                                <td class="style text-center totalan"> 
+                                                                <td colspan="8" class="style text-right">Subtotal 1</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
                                                                     </strong>
                                                                 </td>
                                                             </tr>
                                                             <tr>    
-                                                                <td colspan="6" class="style text-right">Discount</td>
-                                                                <td class="style text-center totalan"> 
+                                                                <td colspan="8" class="style text-right">Discount</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
                                                                     </strong></td>
                                                             </tr>
                                                             <tr>    
-                                                                <td colspan="6" class="style text-right">Subtotal 2</td>
-                                                                <td class="style text-center totalan"> 
+                                                                <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                                     </strong></td>
                                                             </tr>
                                                             <?php if ($setting !== null) {
                                                                 ?>
                                                                 <tr>    
-                                                                    <td colspan="6" class="style text-right">DPP Nilai Lain</td>
-                                                                    <td class="style text-center totalan"> 
+                                                                    <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                                    <td colspan="2" class="style text-center totalan"> 
                                                                         <input name="dpplain" type="hidden" value="1">
                                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) * (11 / 12), 4) ?>
                                                                         </strong>
@@ -602,15 +602,15 @@
                                                             <?php }
                                                             ?>
                                                             <tr>    
-                                                                <td colspan="6" class="style text-right">Taxes</td>
-                                                                <td class="style text-center totalan"> 
+                                                                <td colspan="8" class="style text-right">Taxes</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
                                                                     </strong></td>
                                                             </tr>
 
                                                             <tr>    
-                                                                <td colspan="6" class="style text-right">Total</td>
-                                                                <td class="style text-center totalan"> 
+                                                                <td colspan="8" class="style text-right">Total</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
                                                                     <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                                     </strong></td>
                                                             </tr>

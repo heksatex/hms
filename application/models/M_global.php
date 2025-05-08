@@ -51,12 +51,18 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setWhereRaw(string $where) {
+    public function setWhereRaw(string $where,$clearBefore = false) {
+        if ($clearBefore) {
+            $this->wheresRaw = [];
+        }
         $this->wheresRaw[] = $where;
         return $this;
     }
 
-    public function setWhereIn(string $sa, array $in) {
+    public function setWhereIn(string $sa, array $in,$clearBefore = false) {
+        if ($clearBefore) {
+            $this->whereIn = [];
+        }
         $this->whereIn[$sa] = $in;
         return $this;
     }
