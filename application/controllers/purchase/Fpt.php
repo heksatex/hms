@@ -140,7 +140,8 @@ class Fpt extends MY_Controller {
             $diskons = 0.00;
             $taxes = 0.00;
             $nilaiDppLain = 0;
-
+            $model3 = new $this->m_global;
+            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             foreach ($harga as $key => $value) {
                 $no++;
                 $checkKonversi = $this->m_konversiuom->wheres(["id" => $id_konversiuom[$key], "ke" => $uom_jual[$key], "dari" => $uom_beli[$key]])->getDetail();
@@ -156,7 +157,7 @@ class Fpt extends MY_Controller {
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
-                if ($dpplain === "1") {
+                if ($dpplain !== null) {
                     $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                     $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                 } else {
