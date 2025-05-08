@@ -63,7 +63,7 @@ class Purchaseorder extends MY_Controller {
                 ->setJoins("partner", "partner.id = po.supplier", "left")->SetJoins("tax", "tax.id = pod.tax_id", "left")
                 ->setJoins("departemen", "departemen.kode = pod.warehouse", "left")
                 ->setSelects(["pod.*,nilai_currency,IF(jenis = 'rfq','PO','FPT') as jenis", "partner.nama as nama_supp", "coalesce(tax.amount,0) as amount_tax", "departemen.nama as gudang",
-                    "po.order_date","currency_kurs.currency as nama_curr"])->setOrder(["order_date" => "asc"])
+                    "po.order_date", "currency_kurs.currency as nama_curr"])->setOrder(["order_date" => "asc"])
                 ->setWheres(["po.order_date >=" => $tanggalAwal, "po.order_date <=" => $tanggalAkhir])->setWhereIn("po.status", ["purchase_confirmed", "done"]);
         if ($jenis !== "") {
             $model->setWheres(["po.jenis" => $jenis]);
@@ -75,7 +75,7 @@ class Purchaseorder extends MY_Controller {
             $model->setWhereIn("pod.warehouse", $warehouse);
         }
         if ($group !== "") {
-            $model->setGroups([$group, "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id"])->setOrder([$group=>"asc","order_date" => "asc"]);
+            $model->setGroups([$group, "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id"])->setOrder([$group => "asc", "order_date" => "asc"]);
         }
 
         return $model;
@@ -93,7 +93,9 @@ class Purchaseorder extends MY_Controller {
                 }
             }
             $model = $this->getdata();
-            $data['data'] = $this->load->view('report/v_purchase_order_detail', ['data' => $model->getData(), 'group' => $groups], true);
+            $model3 = new $this->m_global;
+            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
+            $data['data'] = $this->load->view('report/v_purchase_order_detail', ['data' => $model->getData(), 'group' => $groups, 'dpp' => $setDpp], true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Data ditemukan', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $data)));
@@ -146,10 +148,18 @@ class Purchaseorder extends MY_Controller {
             $total_group = 0;
             $row = 2;
             $data = $model->getData();
+            $model3 = new $this->m_global;
+            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             foreach ($data as $key => $value) {
                 $harga = $value->nilai_currency * $value->harga_per_uom_beli;
                 $diskon = $value->nilai_currency * $value->diskon;
                 $subsubtotal = ($value->qty_beli * $harga) - $diskon;
+                if ($setDpp !== null) {
+                    $pajak = (($subsubtotal * 11) / 12) * $value->amount_tax;
+                } else {
+                    $pajak = $subsubtotal * $value->amount_tax;
+                }
+
                 $pajak = $subsubtotal * $value->amount_tax;
                 $total_group += $subsubtotal + $pajak;
 
@@ -164,22 +174,21 @@ class Purchaseorder extends MY_Controller {
                 $sheet->setCellValue('I' . $row, number_format($value->qty_beli, 2));
                 $sheet->setCellValue('J' . $row, $value->uom_beli);
                 $sheet->setCellValue('K' . $row, $value->nama_curr);
-                $sheet->setCellValue('L' . $row, (string)$value->nilai_currency);
+                $sheet->setCellValue('L' . $row, (string) $value->nilai_currency);
                 $sheet->setCellValue('M' . $row, number_format($value->harga_per_uom_beli, 2));
                 $sheet->setCellValue('N' . $row, number_format($value->diskon, 2));
                 $sheet->setCellValue('O' . $row, number_format($pajak, 2));
                 $sheet->setCellValue('P' . $row, number_format(($subsubtotal + $pajak), 2));
                 $row++;
                 if ($groups !== "") {
-                        $cek1 = (array) $value;
-                        $cek2 = (array) ($data[$key + 1] ?? [$groups=>"--"]);
-                        if ($cek1[$groups] !== $cek2[$groups]) {
-                            $sheet->setCellValue('O' . $row, "Total");
-                            $sheet->setCellValue('P' . $row, number_format($total_group, 2));
-                            $total_group = 0;
-                            $row++;
-                        }
-                    
+                    $cek1 = (array) $value;
+                    $cek2 = (array) ($data[$key + 1] ?? [$groups => "--"]);
+                    if ($cek1[$groups] !== $cek2[$groups]) {
+                        $sheet->setCellValue('O' . $row, "Total");
+                        $sheet->setCellValue('P' . $row, number_format($total_group, 2));
+                        $total_group = 0;
+                        $row++;
+                    }
                 }
                 $no++;
             }
