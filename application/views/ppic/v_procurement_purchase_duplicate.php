@@ -485,7 +485,7 @@
         $note = str_replace(array("","\n"), '', $val->reff_notes);
         $nama_produk = $val->nama_produk;
     ?>
-            tambah_baris(true,'<?php echo $val->kode_produk?>', `<?php echo htmlentities($nama_produk)?>`, '<?php echo $val->schedule_date?>', '<?php echo $val->qty?>', '<?php echo $val->uom?>', `<?php echo $note?>`);
+            tambah_baris(true,'<?php echo $val->kode_produk?>', `<?php echo ($nama_produk)?>`, '<?php echo $val->schedule_date?>', '<?php echo $val->qty?>', '<?php echo $val->uom?>', `<?php echo $note?>`);
     <?php 
             $no++;
         }
@@ -610,9 +610,13 @@
             var datetomorrow=new Date();
             datetomorrow.setDate(datetomorrow.getDate() + 1);  
             $('.sch_date').datetimepicker({
-            minDate : datetomorrow,
-            format : 'YYYY-MM-DD HH:mm:ss',
-            ignoreReadonly: true,
+              minDate : datetomorrow,
+              format : 'YYYY-MM-DD HH:mm:ss',
+              ignoreReadonly: true,
+            }).on('dp.show', function() {
+              $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+            }).on('dp.hide', function() {
+              $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
             });
 
             //select 2 product

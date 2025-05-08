@@ -269,7 +269,7 @@
                               $no = 1;
                               foreach ($details as $row) {
                               ?>
-                                <tr class="num">
+                                <tr class="">
                                   <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"></td>
                                   <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk; ?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk) ?>"><?php echo '[' . $row->kode_produk . '] ' . $row->nama_produk; ?></a></td>
                                   <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date; ?>"><?php echo $row->schedule_date ?></td>
@@ -418,6 +418,10 @@
         minDate: datetomorrow,
         format: 'YYYY-MM-DD HH:mm:ss',
         ignoreReadonly: true,
+      }).on('dp.show', function() {
+          $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function() {
+          $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
       });
 
 
@@ -762,6 +766,10 @@
             minDate: datetomorrow,
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true,
+          }).on('dp.show', function() {
+              $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+          }).on('dp.hide', function() {
+              $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
           });
         } else if ($(this).attr('data-id') == 'qty_beli') {
           $(this).html('<input type="text"  class="form-control input-sm qty_beli" value="' + htmlentities_script($(this).attr('data-isi')) + '" id="' + $(this).attr('data-id') + '" name="' + $(this).attr('data-name') + '" onkeyup="validAngka(this)"> ');
