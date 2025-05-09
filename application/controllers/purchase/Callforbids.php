@@ -79,7 +79,7 @@ class Callforbids extends MY_Controller {
                     '<a href="' . base_url('purchase/callforbids/edit/' . $kode_encrypt) . '">' . $field->kode_cfb . '</a>',
                     $field->kode_produk,
                     $field->nama_produk,
-                    $field->qty . " " . $field->uom,
+                    number_format($field->qty,2) . " " . $field->uom,
                     $field->sales_order,
                     $field->priority,
                     $field->nama_warehouse,
