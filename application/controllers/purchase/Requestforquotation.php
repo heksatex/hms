@@ -441,21 +441,26 @@ class Requestforquotation extends MY_Controller {
                     $diskon[$key] = 0;
                     $tax[$key] = null;
                 }
-                $log_update ["item ke " . $no] = logArrayToString(";", ['harga' => $value, 'uom beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
-                    "diskon" => $dsk[$key]]);
-                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
-                    'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key]];
 
                 $total = ($qty_beli[$key] * $value);
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
+                $taxe = 0;
+                $nilai_dpp = 0;
                 if ($setDpp !== null) {
-                    $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
-                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
+                    $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                    $nilai_dpp = ((($total - $diskon) * 11) / 12);
                 } else {
-                    $taxes += ($total - $diskon) * $amount_tax[$key];
+                    $taxe += ($total - $diskon) * $amount_tax[$key];
                 }
+                $taxes += $taxe;
+                $total = ($total - $diskon) + $taxe;
+                $nilaiDppLain += $nilai_dpp;
+                $log_update ["item ke " . $no] = logArrayToString(";", ['harga' => $value, 'uom beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
+                    "diskon" => $dsk[$key]]);
+                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
+                    'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key], "pajak" => $taxe, "total" => $total, "nilai_dpp" => $nilai_dpp];
             }
 //            if ($dpplain === "1") {
 //                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
@@ -807,6 +812,37 @@ class Requestforquotation extends MY_Controller {
                 ->set_content_type('application/json', 'utf-8')
                 ->set_output(json_encode(['data' => $datas]));
     }
+
+//    public function hitung_total_detail() {
+//        try {
+//            $model = new $this->m_global;
+//            $model2 = clone $model;
+//            $model3 = clone $model;
+//            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
+//            $datas = $model->setTables("purchase_order_detail")->setJoins("tax", "tax_id = tax.id", "left")
+//                            ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax"])->getData();
+//            $update = [];
+//            foreach ($datas as $key => $value) {
+//                $total = ($value->qty_beli * $value->harga_per_uom_beli);
+//                $diskon = ($value->diskon ?? 0);
+//                $taxes = 0;
+//                $nilaiDppLain = 0;
+//                if ($setDpp !== null) {
+//                    $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+//                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
+//                } else {
+//                    $taxes += ($total - $diskon) * $value->amount_tax;
+//                }
+//                $total = ($total - $diskon) + $taxes;
+//                $update[] = ["id" => $value->id, "pajak" => $taxes, "nilai_dpp" => $nilaiDppLain, "total" => $total];
+//            }
+//            if (count($update) > 0) {
+//                $model2->setTables("purchase_order_detail")->updateBatch($update, "id");
+//            }
+//        } catch (Exception $ex) {
+//            
+//        }
+//    }
 
 //    public function hitung_total() {
 //        try {
