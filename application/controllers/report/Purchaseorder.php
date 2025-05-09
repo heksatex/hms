@@ -160,7 +160,7 @@ class Purchaseorder extends MY_Controller {
                     $pajak = $subsubtotal * $value->amount_tax;
                 }
 
-                $pajak = $subsubtotal * $value->amount_tax;
+//                $pajak = $subsubtotal * $value->amount_tax;
                 $total_group += $subsubtotal + $pajak;
 
                 $sheet->setCellValue('A' . $row, $no);
