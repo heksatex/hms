@@ -315,8 +315,8 @@
                             },
                             success: function (data) {
                                 alert_notify(data.icon, data.message, data.type, function () {});
-//                                location.reload();
-                                table.ajax.reload(null, false);
+                                location.reload();
+//                                table.ajax.reload(null, false);
                             },
                             error: function (err) {
                                 alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
@@ -363,8 +363,8 @@
                             },
                             success: function (data) {
                                 alert_notify(data.icon, data.message, data.type, function () {});
-//                                location.reload();
-                                table.ajax.reload(null, false);
+                                location.reload();
+//                                table.ajax.reload(null, false);
                             },
                             error: function (err) {
                                 alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
