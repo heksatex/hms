@@ -149,20 +149,24 @@ class Fpt extends MY_Controller {
                     throw new \Exception("<strong>Data No {$no}, Uom dan Uom Beli Tidak ada dalam data konversi</strong>", 500);
                 }
 
-                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),]);
-                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
-                    'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key]];
-
                 $total = ($qty_beli[$key] * $value);
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
-                if ($dpplain !== null) {
-                    $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
-                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
+                $taxe = 0;
+                $nilai_dpp = 0;
+                if ($setDpp !== null) {
+                    $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                    $nilai_dpp = ((($total - $diskon) * 11) / 12);
                 } else {
-                    $taxes += ($total - $diskon) * $amount_tax[$key];
+                    $taxe += ($total - $diskon) * $amount_tax[$key];
                 }
+                $taxes += $taxe;
+                $total = ($total - $diskon) + $taxe;
+                $nilaiDppLain += $nilai_dpp;
+                $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),]);
+                $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
+                    'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key],"pajak" => $taxe, "total" => $total, "nilai_dpp" => $nilai_dpp];
             }
 //            if ($dpplain === "1") {
 //                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
