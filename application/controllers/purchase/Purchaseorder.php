@@ -871,6 +871,7 @@ class Purchaseorder extends MY_Controller {
          </table>";
 
             $mpdf->WriteHTML($html);
+            if($form !== 'fpt')
             $mpdf->SetHTMLFooter($footer);
             $pathFile = $url . "/" . str_replace("/", "_", $data["po"]->no_po) . ".pdf";
             $mpdf->Output(FCPATH . $pathFile, "F");
