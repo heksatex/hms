@@ -55,6 +55,9 @@
             #btn-print {
                 display: none;
             }
+            .prio-urgent {
+                color: red;
+            }
             <?php
             switch ($po->status) {
                 case "draft":
@@ -271,7 +274,7 @@
                                                         <?php
                                                         if ($po->status === "draft") {
                                                             ?>
-                                                            <input type="datetime-local" class="form-control" name="order_date" id="order_date" max="<?= date("Y-m-d H:m:s") ?>" value="<?= $po->order_date ?>">
+                                                            <input type="datetime-local" class="form-control" name="order_date" id="order_date" value="<?= $po->order_date ?>">
                                                             <?php
                                                         } else {
                                                             ?>
@@ -370,7 +373,7 @@
                                                     <td>
                                                         <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
                                                     </td>
-                                                    <td>
+                                                    <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
                                                         <?php
                                                         $image = "/upload/product/" . $value->kode_produk . ".jpg";
                                                         $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";

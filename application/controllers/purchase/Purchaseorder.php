@@ -69,7 +69,7 @@ class Purchaseorder extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
+            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
@@ -316,9 +316,9 @@ class Purchaseorder extends MY_Controller {
             }
             $po = new $this->m_po;
             $pod = clone $po;
-            $po->setWheres(["no_po" => $kode_decrypt])->update(["status" => $status]);
+            $po->setWheres(["no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->update(["status" => $status]);
             if (count($updateDataDetail) > 0) {
-                $pod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->updateBatch($updateDataDetail, "id");
+                $pod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->updateBatch($updateDataDetail, "id");
             }
 
             if (!$this->_module->finishTransaction()) {
@@ -849,7 +849,7 @@ class Purchaseorder extends MY_Controller {
                             ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
                             ->setSelects(["po.*", "p.nama as supp,concat(delivery_street,' ',delivery_city) as alamat_kirim", "currency_kurs.currency as matauang"])
                             ->setWheres(["po.no_po" => $kode_decrypt])->setWhereRaw("po.status in ('done','cancel','purchase_confirmed')")->getDetail();
-            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
+            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")

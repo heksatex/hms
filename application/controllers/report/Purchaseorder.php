@@ -75,7 +75,12 @@ class Purchaseorder extends MY_Controller {
             $model->setWhereIn("pod.warehouse", $warehouse);
         }
         if ($group !== "") {
-            $model->setGroups([$group, "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id"])->setOrder([$group => "asc", "order_date" => "asc"]);
+            if($group=== "po.supplier") {
+            $model->setGroups(["partner.nama", "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id"])->setOrder(["partner.nama" => "asc", "order_date" => "asc"]);
+            }
+            else {
+                 $model->setGroups(["departemen.nama", "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id"])->setOrder(["departemen.nama" => "asc", "order_date" => "asc"]);
+            }
         }
 
         return $model;

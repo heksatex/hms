@@ -43,13 +43,12 @@
                                 <div class="col-md-4">
                                     <?php
                                     if (strtolower($level) === 'direksi') {
-                                        
                                         ?>
-                                    <style>
-                                        #btn-tambah {
-                                            display:none;
-                                        }
-                                    </style>
+                                        <style>
+                                            #btn-tambah {
+                                                display:none;
+                                            }
+                                        </style>
                                         <div class="pull-right text-right">
                                             <button class="btn btn-success btn-sm" id="btn-update-status"  data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                                 <i class="fa fa-check">Approve Selected</i>
@@ -144,6 +143,8 @@ if (strtolower($level) === 'direksi') {
                         "processing": true,
                         "serverSide": true,
                         "stateSave": false,
+                        "scrollX": true,
+                        "scrollY": "400",
                         "paging": true,
                         "lengthChange": true,
                         "searching": true,

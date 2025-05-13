@@ -14,6 +14,9 @@
             #btn-approve {
                 display: none;
             }
+            .prio-urgent {
+                color: red;
+            }
             <?php if (!in_array($po->status, ['purchase_confirmed', 'done'])) { ?>
 
                 #btn-simpan {
@@ -384,7 +387,7 @@
                                                                     ?>
                                                                 </td>
                                                                 <td><?= $noo ?></td>
-                                                                <td>
+                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
                                                                     <?php
                                                                     $image = "/upload/product/" . $value->kode_produk . ".jpg";
                                                                     $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";

@@ -200,6 +200,8 @@
                     "processing": true,
                     "serverSide": true,
                     "order": [],
+                    "scrollX": true,
+                    "scrollY": "400",
                     "paging": true,
                     "lengthChange": true,
                     "searching": true,
@@ -273,8 +275,8 @@
 
                     ]
                 });
-                
-                
+
+
                 $("#btn-reset").on("click", function () {
                     $("#prio").val('').trigger('change');
                     $("#dpt").val('').trigger('change');
