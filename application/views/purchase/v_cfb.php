@@ -200,6 +200,8 @@
                     "processing": true,
                     "serverSide": true,
                     "order": [],
+                    "scrollX": true,
+                    "scrollY": "400",
                     "paging": true,
                     "lengthChange": true,
                     "searching": true,
@@ -247,7 +249,7 @@
                             }
                         },
                         {
-                            "text": 'Add RFQ',
+                            "text": 'Confirm & Add RFQ',
                             "className": "btn btn-success add-rfq-btn",
                             "action": function (e, dt, node, config) {
                                 document.getElementsByClassName("add-rfq")[0].setAttribute("data-request", "rfq");
@@ -273,8 +275,8 @@
 
                     ]
                 });
-                
-                
+
+
                 $("#btn-reset").on("click", function () {
                     $("#prio").val('').trigger('change');
                     $("#dpt").val('').trigger('change');
@@ -446,9 +448,9 @@
                         let dt = {ids: [], data: []};
                         $.each(rows_selected, function (index, rowId) {
                             var splt = rowId.split("|^");
-//                            if ("confirm" !== splt[splt.length - 1]) {
-//                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status confirm");
-//                            }
+                            if ("confirm" !== splt[splt.length - 1]) {
+                                throw new Error("Kode Produk <strong>" + splt[2] + "</strong> Tidak Dalam Status confirm");
+                            }
                             dt.ids.push(splt[0]);
                             dt.data.push(rowId);
                         });

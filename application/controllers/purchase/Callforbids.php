@@ -79,7 +79,7 @@ class Callforbids extends MY_Controller {
                     '<a href="' . base_url('purchase/callforbids/edit/' . $kode_encrypt) . '">' . $field->kode_cfb . '</a>',
                     $field->kode_produk,
                     $field->nama_produk,
-                    number_format($field->qty,2) . " " . $field->uom,
+                    number_format($field->qty, 2) . " " . $field->uom,
                     $field->sales_order,
                     $field->priority,
                     $field->nama_warehouse,
@@ -92,10 +92,10 @@ class Callforbids extends MY_Controller {
                 "recordsTotal" => $list->getDataCountAll(),
                 "recordsFiltered" => $list->getDataCountFiltered(),
                 "data" => $data,
-                "depth"=>$depth,
-                "depth_name"=>$depth_name,
-                "kode"=>$kode,
-                "stat"=>$stat
+                "depth" => $depth,
+                "depth_name" => $depth_name,
+                "kode" => $kode,
+                "stat" => $stat
             ));
             exit();
         } catch (Exception $ex) {
@@ -163,14 +163,28 @@ class Callforbids extends MY_Controller {
 
     public function create_rfq() {
         try {
+            $sub_menu = $this->uri->segment(2);
+            $users = $this->session->userdata('nama');
             $datas = $this->input->post("data");
             $data["jenis"] = $this->input->post("jenis");
             $dd = json_decode($datas);
             $model = new $this->m_global;
-             $this->_module->lock_tabel("mst_produk WRITE,cfb_items WRITE,mst_produk_harga mph read,nilai_konversi nk read,nilai_konversi read");
-            $checkStatus = $model->setTables("cfb_items")->setSelects(["kode_produk,nama_produk"])->setWhereIn("id", $dd->ids)->setWheres(["status <>"=>"confirm"])->getDetail();
-            if($checkStatus){
-                throw new \Exception("Produk [{$checkStatus->kode_produk}] {$checkStatus->nama_produk} Tidak dalam status CONFRIM", 500);
+            $model2 = clone $model;
+            $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+            $this->_module->lock_tabel("mst_produk WRITE,cfb_items WRITE,mst_produk_harga mph read,nilai_konversi nk read,nilai_konversi read,log_history WRITE,main_menu_sub READ");
+            $checkStatus = $model->setTables("cfb_items")->setSelects(["GROUP_CONCAT(id) as ids,GROUP_CONCAT(kode_cfb) as kode"])->setWhereIn("id", $dd->ids)->setWheres(["status" => "draft"])->getDetail();
+            $listLog = [];
+            if ($checkStatus) {
+                $model2->setTables("cfb_items")->setWhereIn("id", explode(",", $checkStatus->ids))->update(["status" => "confirm"]);
+                foreach (explode(",", $checkStatus->kode) as $key => $value) {
+                    $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $value, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                        "jenis_log" => "edit", "note" => "Merubah Ke status confirm", "nama_user" => $users["nama"], "ip_address" => ""];
+                }
+                if (count($listLog) > 0) {
+                    $model2->setTables("log_history")->saveBatch($listLog);
+                }
+
+//                throw new \Exception("Produk [{$checkStatus->kode_produk}] {$checkStatus->nama_produk} Tidak dalam status CONFRIM", 500);
             }
             $produk = $this->m_cfb->setTables("mst_produk")->setSelects(["mst_produk.kode_produk,nama_produk,uom_beli,mph.harga,nilai,dari,catatan,uom"])
                     ->setJoins("mst_produk_harga mph", "(mph.kode_produk = mst_produk.kode_produk and mph.jenis = 'pembelian')", "left")
@@ -179,7 +193,7 @@ class Callforbids extends MY_Controller {
             $temid = [];
             foreach ($dd->data as $key => $value) {
                 $datas_ = explode("|^", $value);
-                if(isset($temid[$datas_[0]])) {
+                if (isset($temid[$datas_[0]])) {
                     continue;
                 }
                 if (count($datas_) > 1) {
@@ -214,7 +228,7 @@ class Callforbids extends MY_Controller {
                             $datas_[4], ($uom_beli ?? null), $datas_[5], $prod->harga, $dari, $nilai, $catatan, $qtyBeli, $datas_[6], $datas_[7], $datas_[8]]);
                     }
                 }
-                $temid[$datas_[0]] ="" ;
+                $temid[$datas_[0]] = "";
             }
             $data["item"] = $items;
             $data["supp"] = $this->input->post("supp") ?? "";

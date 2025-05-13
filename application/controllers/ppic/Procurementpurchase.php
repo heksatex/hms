@@ -458,7 +458,8 @@ class Procurementpurchase extends MY_Controller
     {   
         if(!isset($id)) show_404();
         $kode_decrypt      = decrypt_url($id);
-        $data['id_dept']   ='PP';
+        $id_dept           = 'PP';
+        $data['id_dept']   = $id_dept;
         $data["procurementpurchase"] = $this->m_procurementPurchase->get_data_by_code($kode_decrypt);
         $data['details']    = $this->m_procurementPurchase->get_data_detail_by_code($kode_decrypt);
         $data['warehouse']  = $this->_module->get_list_departement();

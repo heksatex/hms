@@ -7,6 +7,9 @@
             .totalan {
                 font-size: 14px;
             }
+            .prio-urgent {
+                color: red;
+            }
             <?php
             switch ($po->status) {
                 case "draft":
@@ -63,7 +66,6 @@
                     break;
                 case "exception":
                     ?>
-
                     #btn-simpan {
                         display: none;
                     }
@@ -79,7 +81,6 @@
             #btn-approve {
                 display: none;
             }
-
             .tbl-catatan {
                 font-size: 11px
             }
@@ -143,9 +144,6 @@
                 /* Colors */
                 background-color: rgba(0, 0, 0, .3);
             }
-            #btn-simpan {
-                        display: inline;
-                    }
         </style>
         <?php $this->load->view("admin/_partials/js.php") ?>
 
@@ -390,280 +388,301 @@
                                 </div>
                             </div>
                             <div class="box-footer">
+                                <button type="submit" id="form-cfq-submit" style="display: none"></button>
                                 <div class="col-md-12 table-responsive over">
                                     <ul class="nav nav-tabs " >
                                         <li class="active"><a href="#tab_1" data-toggle="tab">Produk</a></li>
                                         <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
                                     </ul>
+                                    <div class="tab-content"><br>
+                                        <div class="tab-pane active" id="tab_1">
+                                            <div class="col-md-3 col-xs-12">
+                                                <div class="pull-left">
+                                                    <?php if ($po->status === "draft") { ?>
 
-                                    <button type="submit" id="form-cfq-submit" style="display: none"></button>
-                                    <table class="table table-condesed table-hover rlstable  over" style="width:100%">
-                                        <thead>
-                                        <th class="style" width="10px">#</th>
-                                        <th class="style" width="10px">No</th>
-                                        <th class="style" style="width:10%">Kode CFB</th>
-                                        <th class="style" style="width:10%" >Produk</th>
-                                        <th class="style" style="width:15%">Deskripsi</th>
-                                        <th class="style" style="width:10%">Schedule Date</th>
-                                        <th class="style"style="width:15%" >Qty / Uom Beli</th>
-                                        <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
-                                        <td class="style text-right" >Tax</td>
-                                        <td class="style" >Reff Note</td>
-                                        <!--<td class="style text-right" width="20px">Diskon</td>-->
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $no = 0;
-                                            $amountTaxes = 0;
-                                            foreach ($po_items as $key => $value) {
-                                                $no += 1;
-                                                $total = ($value->qty_beli * $value->harga_per_uom_beli);
-                                                $totals += $total;
-                                                $diskon = ($value->diskon ?? 0);
-                                                $diskons += $diskon;
-                                                if ($setting !== null) {
-                                                    $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
-                                                } else {
-                                                    $taxes += ($total - $diskon) * $value->amount_tax;
-                                                }
-                                                if ($value->amount_tax > 0) {
-                                                    $amountTaxes = $value->amount_tax;
-                                                }
-                                                ?>
-                                                <tr>
-                                                    <td>
+                                                        <!--<button class="btn btn-success btn-sm btn-add_item" type="button">Tambahkan Item</button>-->
+                                                    <?php } ?>
+                                                </div>
+
+                                            </div>
+                                            <br>
+                                            <div class="col-md-12">
+                                                <table class="table table-condesed table-hover rlstable  over" style="width:100%">
+                                                    <thead>
+                                                    <th class="style" width="10px">#</th>
+                                                    <th class="style" width="10px">No</th>
+                                                    <th class="style" style="width:10%">Kode CFB</th>
+                                                    <th class="style" style="width:10%" >Produk</th>
+                                                    <th class="style" style="width:15%">Deskripsi</th>
+                                                    <th class="style" style="width:10%">Schedule Date</th>
+                                                    <th class="style"style="width:15%" >Qty / Uom Beli</th>
+                                                    <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
+                                                    <td class="style text-right" >Tax</td>
+                                                    <td class="style" >Reff Note</td>
+                                                    <!--<td class="style text-right" width="20px">Diskon</td>-->
+                                                    </thead>
+                                                    <tbody>
                                                         <?php
-                                                        if (count($po_items) > 1) {
-//                                                           echo ($po->status === "draft") ?  "<button type='button' class='btn btn-danger btn-sm delete_item' data-ids='{$value->id}'><fa class='fa fa-trash'></fa></button>" :  '';
+                                                        $no = 0;
+                                                        $amountTaxes = 0;
+                                                        $nilaiDppLain = 0;
+                                                        foreach ($po_items as $key => $value) {
+                                                            $no += 1;
+                                                            $total = ($value->qty_beli * $value->harga_per_uom_beli);
+                                                            $totals += $total;
+                                                            $diskon = ($value->diskon ?? 0);
+                                                            $diskons += $diskon;
+                                                            if ($setting !== null) {
+                                                                $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                                $nilaiDppLain += ((($total - $diskon) * 11) / 12);
+                                                            } else {
+                                                                $taxes += ($total - $diskon) * $value->amount_tax;
+                                                            }
+                                                            if ($value->amount_tax > 0) {
+                                                                $amountTaxes = $value->amount_tax;
+                                                            }
+                                                            ?>
+                                                            <tr>
+                                                                <td>
+                                                                    <?php
+                                                                    if (count($po_items) > 1) {
+                                                                        echo ($po->status === "draft") ? "<button type='button' class='btn btn-danger btn-sm delete_item' data-ids='{$value->id}'><fa class='fa fa-trash'></fa></button>" : '';
+                                                                    }
+                                                                    ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $no ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
+                                                                </td>
+                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
+                                                                    <?php
+                                                                    $image = "/upload/product/" . $value->kode_produk . ".jpg";
+                                                                    $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
+                                                                    if (is_file(FCPATH . $image)) {
+                                                                        ?>
+                                                                        <a href="<?= base_url($image) ?>" class="pop-image">
+                                                                            <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
+                                                                        </a>
+                                                                    <?php } ?>
+                                                                    <?= "[{$value->kode_produk }] {$value->nama_produk }" ?>
+                                                                </td>
+                                                                <td >
+                                                                    <div class="form-group" style="width:100%">
+                                                                        <input class="form-control pull-right input-sm" name="deskripsi[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                               value="<?= htmlentities($value->deskripsi) ?>">
+
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <?= $value->schedule_date ?>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group">
+                                                                        <div class="input-group">
+                                                                            <div class="input-group-addon"><?= number_format($value->qty_beli, 2) ?> </div>
+                                                                            <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
+                                                                            <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
+                                                                            <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" data-uom="<?= $value->uom ?>" style="width: 70%" data-row="<?= $key ?>"
+                                                                                    name="id_konversiuom[<?= $value->id ?>]"  required <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
+                                                                                <option></option>
+                                                                                <?php
+                                                                                if (!is_null($value->id_konversiuom)) {
+                                                                                    ?>
+                                                                                    <option value="<?= $value->id_konversiuom ?>" data-catatan="<?= $value->catatan_nk ?>" selected><?= $value->dari ?></option>   
+                                                                                    <?php
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                            <input type="hidden" class="" name="uom_beli[<?= $value->id ?>]" value="<?= $value->dari ?>">
+                                                                        </div>
+
+                                                                        <small class="form-text text-muted note_uom_beli_<?= $key ?>">
+                                                                            <?= $value->catatan_nk ?? "" ?>
+                                                                        </small>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group" style="width: 100%" >
+                                                                        <?php if ($po->no_value === "1") { ?>
+                                                                            <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" readonly
+                                                                                   value="0">
+                                                                               <?php } else { ?>
+                                                                            <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                                   value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" data-row="<?= $key ?>" required>
+                                                                               <?php } ?>
+
+                                                                        <small class="form-text text-muted note_harga_<?= $key ?>">
+                                                                            <?= number_format(($value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0), 2, ".", ",") ?>
+                                                                        </small>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group text-right">
+                                                                        <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                                        <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
+                                                                        <?php if ($po->no_value === "1") { ?>
+                                                                            <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                                    name="tax[<?= $value->id ?>]"  disabled>
+                                                                                <option></option>
+                                                                            </select>
+                                                                        <?php } else { ?>
+
+                                                                            <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
+                                                                                    name="tax[<?= $value->id ?>]"  <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
+                                                                                <option></option>
+                                                                                <?php
+                                                                                foreach ($tax as $key => $taxs) {
+                                                                                    ?>
+                                                                                    <option value='<?= $taxs->id ?>' data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                    <?php
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                        <?php } ?>
+                                                                        <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]"value="0" readonly>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-text">
+                                                                        <?= $value->reff_note ?>
+                                                                    </div>
+                                                                </td>
+                <!--                                                    <td>
+                                                        <div class="form-group">
+                                                                <?php if ($po->no_value === "1") { ?>
+                                                                                                                                        <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
+                                                                <?php } else { ?>
+                                                                                                                                        <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                                                                                               style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
+                                                                <?php } ?>
+                                                        </div>
+                                                    </td>-->
+                                                            </tr>
+                                                            <?php
+                                                            if (!empty($value->catatan)) {
+                                                                $catatan = explode("#", $value->catatan);
+                                                                foreach ($catatan as $keys => $catt) {
+                                                                    ?>
+                                                                    <tr>
+                                                                        <td class="text-right tbl-catatan"><?= $no . "." . ($keys + 1) ?></td>
+                                                                        <td class="tbl-catatan" colspan="8" style="vertical-align: top; color:red;">
+                                                                            <?= $catt ?>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <?php
+                                                                }
+                                                            }
+                                                        }
+                                                        if (strtolower($po->status) !== "draft") {
+                                                            ?>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Subtotal 1</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Discount</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+
+                                                            <?php if ($setting !== null) {
+                                                                ?>
+                                                                <tr>    
+                                                                    <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                                    <td colspan="2" class="style text-center totalan"> 
+                                                                        <input name="dpplain" type="hidden" value="1">
+                                                                        <strong><?= $po->symbol ?> <?= number_format($nilaiDppLain, 4) ?>
+                                                                        </strong>
+                                                                    </td>
+                                                                </tr>
+                                                            <?php }
+                                                            ?>
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Taxes</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+
+                                                            <tr>    
+                                                                <td colspan="8" class="style text-right">Total</td>
+                                                                <td colspan="2" class="style text-center totalan"> 
+                                                                    <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
+                                                                    </strong></td>
+                                                            </tr>
+
+                                                            <?php
+                                                        } else {
+                                                            if ($po->nilai_currency !== null) {
+                                                                ?> 
+                                                                <tr>    
+                                                                    <td colspan="8" class="style text-right">Subtotal 1</td>
+                                                                    <td colspan="2" class="style text-center totalan"> 
+                                                                        <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
+                                                                        </strong></td>
+                                                                </tr>
+                                                                <tr>    
+                                                                    <td colspan="8" class="style text-right">Discount</td>
+                                                                    <td colspan="2" class="style text-center totalan"> 
+                                                                        <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
+                                                                        </strong></td>
+                                                                </tr>
+
+                                                                <tr>    
+                                                                    <td colspan="8" class="style text-right">Subtotal 2</td>
+                                                                    <td colspan="2" class="style text-center totalan"> 
+                                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
+                                                                        </strong></td>
+                                                                </tr>
+                                                                <?php if ($setting !== null) {
+                                                                    ?>
+                                                                    <tr>    
+                                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
+                                                                        <td colspan="2" class="style text-center totalan"> 
+                                                                            <input name="dpplain" type="hidden" value="1">
+                                                                            <strong><?= $po->symbol ?> <?= number_format($nilaiDppLain, 4) ?>
+                                                                            </strong>
+                                                                        </td>
+                                                                    </tr>
+                                                                <?php }
+                                                                ?>
+                                                                <tr>    
+                                                                    <td colspan="8" class="style text-right">Taxes</td>
+                                                                    <td colspan="2" class="style text-center totalan"> 
+                                                                        <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
+                                                                        </strong></td>
+                                                                </tr>
+
+                                                                <tr>    
+                                                                    <td colspan="8" class="style text-right">Total</td>
+                                                                    <td colspan="2" class="style text-center totalan"> 
+                                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
+                                                                        </strong></td>
+                                                                </tr>
+                                                                <?php
+                                                            }
                                                         }
                                                         ?>
-                                                    </td>
-                                                    <td>
-                                                        <?= $no ?>
-                                                    </td>
-                                                    <td>
-                                                        <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php
-                                                        $image = "/upload/product/" . $value->kode_produk . ".jpg";
-                                                        $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
-                                                        if (is_file(FCPATH . $image)) {
-                                                            ?>
-                                                            <a href="<?= base_url($image) ?>" class="pop-image">
-                                                                <img src="<?= is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image) ?>" height="30">
-                                                            </a>
-                                                        <?php } ?>
-                                                        <?= "[{$value->kode_produk }] {$value->nama_produk }" ?>
-                                                    </td>
-                                                    <td >
-                                                        <div class="form-group" style="width:100%">
-                                                            <input class="form-control pull-right input-sm" name="deskripsi[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                   value="<?= htmlentities($value->deskripsi) ?>">
-
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <?= $value->schedule_date ?>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group">
-                                                            <div class="input-group">
-                                                                <div class="input-group-addon"><?= number_format($value->qty_beli, 2) ?> </div>
-                                                                <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
-                                                                <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
-                                                                <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
-                                                                        name="id_konversiuom[<?= $value->id ?>]"  required <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
-                                                                    <option></option>
-                                                                    <?php
-                                                                    if (!is_null($value->id_konversiuom)) {
-                                                                        ?>
-                                                                        <option value="<?= $value->id_konversiuom ?>" data-catatan="<?= $value->catatan_nk ?>" selected><?= $value->dari ?></option>   
-                                                                        <?php
-                                                                    }
-                                                                    ?>
-                                                                </select>
-                                                                <input type="hidden" class="" name="uom_beli[<?= $value->id ?>]" value="<?= $value->dari ?>">
-                                                            </div>
-
-                                                            <small class="form-text text-muted note_uom_beli_<?= $key ?>">
-                                                                <?= $value->catatan_nk ?? "" ?>
-                                                            </small>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group" style="width: 100%" >
-                                                            <?php if ($po->no_value === "1") { ?>
-                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" readonly
-                                                                       value="0">
-                                                                   <?php } else { ?>
-                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                       value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" data-row="<?= $key ?>" required>
-                                                                   <?php } ?>
-
-                                                            <small class="form-text text-muted note_harga_<?= $key ?>">
-                                                                <?= number_format(($value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0), 2, ".", ",") ?>
-                                                            </small>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-group text-right">
-                                                            <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
-                                                            <?php if ($po->no_value === "1") { ?>
-                                                                <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
-                                                                        name="tax[<?= $value->id ?>]"  disabled>
-                                                                    <option></option>
-                                                                </select>
-                                                            <?php } else { ?>
-
-                                                                <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
-                                                                        name="tax[<?= $value->id ?>]"  <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
-                                                                    <option></option>
-                                                                    <?php
-                                                                    foreach ($tax as $key => $taxs) {
-                                                                        ?>
-                                                                        <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
-                                                                        <?php
-                                                                    }
-                                                                    ?>
-                                                                </select>
-                                                            <?php } ?>
-                                                            <input type="hidden" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]"value="0" readonly>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="form-text">
-                                                            <?= $value->reff_note ?>
-                                                        </div>
-                                                    </td>
-    <!--                                                    <td>
-                                            <div class="form-group">
-                                                    <?php if ($po->no_value === "1") { ?>
-                                                                                            <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
-                                                    <?php } else { ?>
-                                                                                            <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                                                   style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
-                                                    <?php } ?>
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                        </td>-->
-                                                </tr>
-                                                <?php
-                                                if (!empty($value->catatan)) {
-                                                    $catatan = explode("#", $value->catatan);
-                                                    foreach ($catatan as $keys => $catt) {
-                                                        ?>
-                                                        <tr>
-                                                            <td class="text-right tbl-catatan"><?= $no . "." . ($keys + 1) ?></td>
-                                                            <td class="tbl-catatan" colspan="8" style="vertical-align: top; color:red;">
-                                                                <?= $catt ?>
-                                                            </td>
-                                                        </tr>
-                                                        <?php
-                                                    }
-                                                }
-                                            }
-                                            if (strtolower($po->status) !== "draft") {
-                                                ?>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal 1</td>
-                                                    <td colspan="2" class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
-                                                        </strong></td>
-                                                </tr>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Discount</td>
-                                                    <td colspan="2" class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
-                                                        </strong></td>
-                                                </tr>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Subtotal 2</td>
-                                                    <td colspan="2" class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
-                                                        </strong></td>
-                                                </tr>
 
-                                                <?php if ($setting !== null) {
-                                                    ?>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">DPP Nilai Lain</td>
-                                                        <td colspan="2" class="style text-center totalan"> 
-                                                            <input name="dpplain" type="hidden" value="1">
-                                                            <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                <?php }
-                                                ?>
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Taxes</td>
-                                                    <td colspan="2" class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
-                                                        </strong></td>
-                                                </tr>
+                                            <input type="hidden" name="totals" id="totals" value="<?= ($totals - $diskons) + $taxes ?>">
+                                        </div>
+                                    </div>
 
-                                                <tr>    
-                                                    <td colspan="8" class="style text-right">Total</td>
-                                                    <td colspan="2" class="style text-center totalan"> 
-                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
-                                                        </strong></td>
-                                                </tr>
 
-                                                <?php
-                                            } else {
-                                                if ($po->nilai_currency !== null) {
-                                                    ?> 
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">Subtotal 1</td>
-                                                        <td colspan="2" class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($totals, 4) ?>
-                                                            </strong></td>
-                                                    </tr>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">Discount</td>
-                                                        <td colspan="2" class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($diskons, 4) ?>
-                                                            </strong></td>
-                                                    </tr>
-
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">Subtotal 2</td>
-                                                        <td colspan="2" class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
-                                                            </strong></td>
-                                                    </tr>
-                                                    <?php if ($setting !== null) {
-                                                        ?>
-                                                        <tr>    
-                                                            <td colspan="8" class="style text-right">DPP Nilai Lain</td>
-                                                            <td colspan="2" class="style text-center totalan"> 
-                                                                <input name="dpplain" type="hidden" value="1">
-                                                                <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
-                                                                </strong>
-                                                            </td>
-                                                        </tr>
-                                                    <?php }
-                                                    ?>
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">Taxes</td>
-                                                        <td colspan="2" class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format($taxes, 4) ?>
-                                                            </strong></td>
-                                                    </tr>
-
-                                                    <tr>    
-                                                        <td colspan="8" class="style text-right">Total</td>
-                                                        <td colspan="2" class="style text-center totalan"> 
-                                                            <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
-                                                            </strong></td>
-                                                    </tr>
-                                                    <?php
-                                                }
-                                            }
-                                            ?>
-                                        </tbody>
-                                    </table>
-                                    <input type="hidden" name="totals" id="totals" value="<?= ($totals - $diskons) + $taxes ?>">
 
                                 </div>
                             </div>
@@ -713,7 +732,7 @@
                         }
                     }
                 });
-
+                var uomStock = "0";
                 $(".uom_beli").select2({
                     allowClear: true,
                     placeholder: "Satuan Beli",
@@ -725,7 +744,7 @@
                         data: function (params) {
                             return{
                                 nama: params.term,
-                                ke: 0
+                                ke: uomStock
                             };
                         },
                         processResults: function (data) {
@@ -753,15 +772,21 @@
                 $(".tax").on("select2:select", function () {
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
+                    var dpp_tax = $(".tax" + row + " :selected").data().dpp_tax;
+                    $(".dpp_tax_" + row).val(dpp_tax);
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
                 });
 
                 $(".tax").on("change", function () {
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
+                    $(".dpp_tax_" + row).val("1");
                 });
 
-
+                $(".uom_beli").on("select2:open", function () {
+                    var row = $(this).attr("data-uom");
+                    uomStock = row;
+                });
 
                 $(".uom_beli").on("select2:select", function () {
                     var row = $(this).attr("data-row");
@@ -934,6 +959,22 @@
                             }
 
                         });
+                    });
+                });
+
+                $(".btn-add_item").on('click', function (e) {
+                    e.preventDefault();
+                    $("#tambah_data").modal({
+                        show: true,
+                        backdrop: 'static'
+                    });
+                    $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+                    $('.modal-title').text('Add Item');
+                    $.post("<?= base_url('purchase/requestforquotation/tambahkan_item/') ?>", {"id":"<?= $id ?>"}, function (data) {
+                        setTimeout(function () {
+                            $(".tambah_data").html(data.data);
+                            $("#btn-tambah").html("Tambahkan");
+                        }, 1000);
                     });
                 });
             });
