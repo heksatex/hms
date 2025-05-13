@@ -65,7 +65,7 @@ class Fpt extends MY_Controller {
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
-                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 //        $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
             $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
@@ -123,7 +123,7 @@ class Fpt extends MY_Controller {
             $amount_tax = $this->input->post("amount_tax");
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
-            $dpplain = $this->input->post("dpplain");
+            $dpp_tax = $this->input->post("dpp_tax");
             $foot_note = $this->input->post("foot_note");
             $supplier = $this->input->post("supplier");
 
@@ -157,7 +157,7 @@ class Fpt extends MY_Controller {
                 $nilai_dpp = 0;
                 if ($setDpp !== null) {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
-                    $nilai_dpp = ((($total - $diskon) * 11) / 12);
+                    $nilai_dpp = ((($total - $diskon) * 11) / 12) ;
                 } else {
                     $taxe += ($total - $diskon) * $amount_tax[$key];
                 }

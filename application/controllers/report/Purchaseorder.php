@@ -62,7 +62,7 @@ class Purchaseorder extends MY_Controller {
                 ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
                 ->setJoins("partner", "partner.id = po.supplier", "left")->SetJoins("tax", "tax.id = pod.tax_id", "left")
                 ->setJoins("departemen", "departemen.kode = pod.warehouse", "left")
-                ->setSelects(["pod.*,nilai_currency,IF(jenis = 'rfq','PO','FPT') as jenis", "partner.nama as nama_supp", "coalesce(tax.amount,0) as amount_tax", "departemen.nama as gudang",
+                ->setSelects(["pod.*,nilai_currency,IF(jenis = 'rfq','PO','FPT') as jenis", "partner.nama as nama_supp", "coalesce(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "departemen.nama as gudang",
                     "po.order_date", "currency_kurs.currency as nama_curr"])->setOrder(["order_date" => "asc"])
                 ->setWheres(["po.order_date >=" => $tanggalAwal, "po.order_date <=" => $tanggalAkhir])->setWhereIn("po.status", ["purchase_confirmed", "done"]);
         if ($jenis !== "") {

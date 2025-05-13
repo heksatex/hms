@@ -144,8 +144,8 @@
                 background-color: rgba(0, 0, 0, .3);
             }
             #btn-simpan {
-                        display: inline;
-                    }
+                display: inline;
+            }
         </style>
         <?php $this->load->view("admin/_partials/js.php") ?>
 
@@ -415,6 +415,7 @@
                                             <?php
                                             $no = 0;
                                             $amountTaxes = 0;
+                                            $nilaiDppLain = 0;
                                             foreach ($po_items as $key => $value) {
                                                 $no += 1;
                                                 $total = ($value->qty_beli * $value->harga_per_uom_beli);
@@ -423,6 +424,7 @@
                                                 $diskons += $diskon;
                                                 if ($setting !== null) {
                                                     $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                                                 } else {
                                                     $taxes += ($total - $diskon) * $value->amount_tax;
                                                 }
@@ -434,7 +436,7 @@
                                                     <td>
                                                         <?php
                                                         if (count($po_items) > 1) {
-//                                                           echo ($po->status === "draft") ?  "<button type='button' class='btn btn-danger btn-sm delete_item' data-ids='{$value->id}'><fa class='fa fa-trash'></fa></button>" :  '';
+                                                           echo ($po->status === "draft") ?  "<button type='button' class='btn btn-danger btn-sm delete_item' data-ids='{$value->id}'><fa class='fa fa-trash'></fa></button>" :  '';
                                                         }
                                                         ?>
                                                     </td>
@@ -472,7 +474,7 @@
                                                                 <div class="input-group-addon"><?= number_format($value->qty_beli, 2) ?> </div>
                                                                 <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                 <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
-                                                                <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
+                                                                <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" data-uom="<?= $value->uom ?>" style="width: 70%" data-row="<?= $key ?>"
                                                                         name="id_konversiuom[<?= $value->id ?>]"  required <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
                                                                     <option></option>
                                                                     <?php
@@ -509,6 +511,7 @@
                                                     <td>
                                                         <div class="form-group text-right">
                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                            <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
                                                             <?php if ($po->no_value === "1") { ?>
                                                                 <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                         name="tax[<?= $value->id ?>]"  disabled>
@@ -522,7 +525,7 @@
                                                                     <?php
                                                                     foreach ($tax as $key => $taxs) {
                                                                         ?>
-                                                                        <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                        <option value='<?= $taxs->id ?>' data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                         <?php
                                                                     }
                                                                     ?>
@@ -539,10 +542,10 @@
     <!--                                                    <td>
                                             <div class="form-group">
                                                     <?php if ($po->no_value === "1") { ?>
-                                                                                            <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
+                                                                                                <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
                                                     <?php } else { ?>
-                                                                                            <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                                                   style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
+                                                                                                <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                                                       style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
                                                     <?php } ?>
                                             </div>
                                         </td>-->
@@ -589,7 +592,7 @@
                                                         <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                         <td colspan="2" class="style text-center totalan"> 
                                                             <input name="dpplain" type="hidden" value="1">
-                                                            <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($nilaiDppLain, 4) ?>
                                                             </strong>
                                                         </td>
                                                     </tr>
@@ -638,7 +641,7 @@
                                                             <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                             <td colspan="2" class="style text-center totalan"> 
                                                                 <input name="dpplain" type="hidden" value="1">
-                                                                <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
+                                                                <strong><?= $po->symbol ?> <?= number_format($nilaiDppLain, 4) ?>
                                                                 </strong>
                                                             </td>
                                                         </tr>
@@ -713,7 +716,7 @@
                         }
                     }
                 });
-
+                var uomStock = "0";
                 $(".uom_beli").select2({
                     allowClear: true,
                     placeholder: "Satuan Beli",
@@ -725,7 +728,7 @@
                         data: function (params) {
                             return{
                                 nama: params.term,
-                                ke: 0
+                                ke: uomStock
                             };
                         },
                         processResults: function (data) {
@@ -753,15 +756,21 @@
                 $(".tax").on("select2:select", function () {
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
+                    var dpp_tax = $(".tax" + row + " :selected").data().dpp_tax;
+                    $(".dpp_tax_" + row).val(dpp_tax);
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
                 });
 
                 $(".tax").on("change", function () {
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
+                    $(".dpp_tax_" + row).val("1");
                 });
 
-
+                $(".uom_beli").on("select2:open", function () {
+                    var row = $(this).attr("data-uom");
+                    uomStock = row;
+                });
 
                 $(".uom_beli").on("select2:select", function () {
                     var row = $(this).attr("data-row");

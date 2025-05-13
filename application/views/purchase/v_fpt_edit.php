@@ -346,6 +346,7 @@
                                             <?php
                                             $no = 0;
                                             $amountTaxes = 0;
+                                            $nilaiDppLain = 0;
                                             foreach ($po_items as $key => $value) {
                                                 $no += 1;
                                                 $total = ($value->qty_beli * $value->harga_per_uom_beli);
@@ -354,6 +355,7 @@
                                                 $diskons += $diskon;
                                                 if ($setting !== null) {
                                                     $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                    $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                                                 } else {
                                                     $taxes += ($total - $diskon) * $value->amount_tax;
                                                 }
@@ -397,7 +399,7 @@
                                                                 <div class="input-group-addon"><?= $value->qty_beli ?></div>
                                                                 <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                 <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
-                                                                <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
+                                                                <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>"  data-uom="<?= $value->uom ?>" style="width: 70%" data-row="<?= $key ?>"
                                                                         name="id_konversiuom[<?= $value->id ?>]"  required <?= ($po->status === 'draft') ? '' : 'disabled' ?>>
                                                                     <option></option>
                                                                     <?php
@@ -434,6 +436,7 @@
                                                     <td>
                                                         <div class="form-group text-right">
                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                            <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
                                                             <?php if ($po->no_value === "1") { ?>
                                                                 <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                         name="tax[<?= $value->id ?>]"  disabled>
@@ -447,7 +450,7 @@
                                                                     <?php
                                                                     foreach ($tax as $key => $taxs) {
                                                                         ?>
-                                                                        <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                        <option value='<?= $taxs->id ?>' data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                         <?php
                                                                     }
                                                                     ?>
@@ -503,7 +506,7 @@
                                                         <td colspan="7" class="style text-right">DPP Nilai Lain</td>
                                                         <td colspan="2" class="style text-center totalan"> 
                                                             <input name="dpplain" type="hidden" value="1">
-                                                            <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
+                                                            <strong><?= $po->symbol ?> <?= number_format($nilaiDppLain, 4) ?>
                                                             </strong>
                                                         </td>
                                                     </tr>
@@ -544,13 +547,13 @@
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                             </strong></td>
                                                     </tr>
-                                                    <?php if ($setting !== null) {
+                                                    <?php if ($setting !== null ) {
                                                         ?>
                                                         <tr>    
                                                             <td colspan="7" class="style text-right">DPP Nilai Lain</td>
                                                             <td colspan="2" class="style text-center totalan"> 
                                                                 <input name="dpplain" type="hidden" value="1">
-                                                                <strong><?= $po->symbol ?> <?= number_format((($totals - $diskons) * 11) / 12, 4) ?>
+                                                                <strong><?= $po->symbol ?> <?= number_format($nilaiDppLain, 4) ?>
                                                                 </strong>
                                                             </td>
                                                         </tr>
@@ -624,7 +627,8 @@
                         }
                     }
                 });
-
+                var uomStock = "0";
+                
                 $(".shipment").off("click").unbind("click").on("click", function () {
                     $("#view_data").modal({
                         show: true,
@@ -641,12 +645,15 @@
                 $(".tax").on("select2:select", function () {
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
+                    var dpp_tax = $(".tax" + row + " :selected").data().dpp_tax;
+                    $(".dpp_tax_" + row).val(dpp_tax);
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
                 });
 
                 $(".tax").on("change", function () {
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
+                    $(".dpp_tax_" + row).val("1");
                 });
 
                 $(".harga_satuan").on("input", function () {
@@ -655,7 +662,8 @@
                     var formatVal = new Intl.NumberFormat(["ban", "id"], {maximumSignificantDigits: 3}).format(number);
                     $(".note_harga_" + row).html(formatVal);
                 });
-
+                
+                
                 $(".uom_beli").select2({
                     allowClear: true,
                     placeholder: "Satuan Beli",
@@ -667,7 +675,7 @@
                         data: function (params) {
                             return{
                                 nama: params.term,
-                                ke: 0
+                                ke: uomStock
                             };
                         },
                         processResults: function (data) {
@@ -703,6 +711,11 @@
                     var row = $(this).attr("data-row");
                     $(".note_uom_beli_" + row).html("");
                     $(".nama_uom_" + row).val("");
+                });
+                
+                $(".uom_beli").on("select2:open", function () {
+                    var row = $(this).attr("data-uom");
+                    uomStock = row;
                 });
 
                 $(".currency").on("select2:select", function () {
@@ -807,7 +820,8 @@
                         url: "<?= base_url('purchase/purchaseorder/print') ?>",
                         type: "POST",
                         data: {
-                            id: "<?= $id ?>"
+                            id: "<?= $id ?>",
+                            form:"fpt"
                         },
                         beforeSend: function (xhr) {
                             please_wait(function () {});

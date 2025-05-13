@@ -25,23 +25,23 @@
         </style>
     </head>
     <body>
-        <div id="row" style="margin-top: -15px;">
-            <div style="margin: 10px;
-                 padding: 10px;
-                 min-height: 200px;" >
-                <img style="height:50px;
-                     float:left;
-                     margin:0 5px 10px 0;" src="http://10.10.0.8/hms_staging_2/dist/img/static/heksatex.jpg">
-                <p style="line-height:1.5;font-size: 10px">
-                    <span>PT. Heksatex Indah</span><br/>
-                    <span>Jl. Nanjung KM 2</span><br/>
-                    <span>Cimahi 40533</span><br/>
-                    <span>Indonesia</span>
-                </p>
-            </div>
+        <div id="row">
+                <div style="margin: 10px;
+                     padding: 10px;
+                     min-height: 200px;" >
+                    <img style="height:50px;
+                         float:left;
+                         margin:0 20px 10px 0;" src="http://10.10.0.8/hms_staging_2/dist/img/static/heksatex.jpg">
+                    <p style="line-height:1.5;font-size: 10px">
+                        <span>PT. Heksatex Indah</span><br/>
+                        <span>Jl. Nanjung KM 2</span><br/>
+                        <span>Cimahi 40533</span><br/>
+                        <span>Indonesia</span>
+                    </p>
+                </div>
         </div>
-        <hr style="border: 2px solid black;margin-top: -15px;">
-        <div id="row" style="margin-top: -15px;">
+        <hr style="border: 2px solid black">
+        <div id="row">
             <div id="columnmd">
 
             </div>
@@ -51,7 +51,7 @@
             </div>
         </div>
         <div id="row" style="font-size: 15px;">
-            <p>Purchase Order Confirmation <?= $po->no_po ?></p>
+            <p>Form Pembelian Tunai <?= $po->no_po ?></p>
         </div>
 
         <!--        <div id="row">
@@ -76,12 +76,13 @@
             <table style="width: 100%;font-size: 12px;">
                 <thead>
                     <tr>
-                        <th style="text-align: left;border-bottom: 1px solid black;width: 130px;">Description</th>
-                        <th style="border-bottom: 1px solid black;width: 60px;">Taxes</th>
-                        <th style="border-bottom: 1px solid black;width: 90px;">Date Req</th>
-                        <th style="border-bottom: 1px solid black;width: 100px;">Qty</th>
-                        <th style="text-align: right;border-bottom: 1px solid black;">Unit Price&nbsp;</th>
-                        <th style="text-align: right;border-bottom: 1px solid black;">Net Price</th>
+                        <th style="text-align: left;border-bottom: 1px solid black">Description</th>
+                        <th style="border-bottom: 1px solid black">Taxes</th>
+                        <th style="border-bottom: 1px solid black">Date Req</th>
+                        <th style="border-bottom: 1px solid black">Qty</th>
+                        <th style="text-align: right;border-bottom: 1px solid black">Unit Price&nbsp;</th>
+                        <th style="text-align: right;border-bottom: 1px solid black">Discount</th>
+                        <th style="text-align: right;border-bottom: 1px solid black">Net Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -110,11 +111,12 @@
                                 <?= $value->deskripsi ?>
                             </td>
                             <td><?= $value->tax_name ?></td>
-                            <td style="text-align: center;"><?= ($value->schedule_date) ? date("Y-m-d", strtotime($value->schedule_date)) : "" ?></td>
+                            <td style="text-align: center;"><?= $value->schedule_date ?? "" ?></td>
                             <td style="text-align: center;">
                                 <?= number_format($value->qty_beli, 2) . " " . $value->uom_beli ?>
                             </td>
-                            <td style="text-align: right;"><?= number_format($value->harga_per_uom_beli, 2) . " " . $po->matauang ?>&nbsp;</td>
+                            <td style="text-align: right;"><?= number_format($value->harga_per_uom_beli, 2) ?>&nbsp;</td>
+                            <td style="text-align: right;"><?= number_format($value->diskon, 2) . " " . $po->matauang ?></td>
                             <td style="text-align: right;">&nbsp;<?= number_format($jumlah, 2) . " " . $po->matauang ?></td>
                         </tr>
                         <?php
@@ -129,8 +131,16 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td style="text-align: right;border-top: 1px solid black;"><strong>Total Without Taxes</strong></td>
+                        <td colspan="2" style="text-align: right;border-top: 1px solid black;"><strong>Total Without Taxes</strong></td>
                         <td style="text-align: right;"><?= number_format($subtotal1, 2) . " " . $po->matauang ?></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td colspan="2" style="text-align: right;border-top: 1px solid black;">Discount</td>
+                        <td style="text-align: right;"><?= number_format($totalDiskon, 2) . " " . $po->matauang ?></td>
                     </tr>
                     <?php
                     if ($setting !== null) {
@@ -140,7 +150,7 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td style="text-align: right;border-top: 1px solid grey;">DPP Nilai Lain</td>
+                            <td colspan="2" style="text-align: right;border-top: 1px solid grey;">DPP Nilai Lain</td>
                             <td style="text-align: right;"><?= number_format($nilaiDppLain, 2) . " " . $po->matauang ?></td>
                         </tr>
                         <?php
@@ -151,7 +161,7 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td style="text-align: right;border-top: 1px solid grey;">Taxes</td>
+                        <td colspan="2" style="text-align: right;border-top: 1px solid grey;">Taxes</td>
                         <td style="text-align: right;"><?= number_format($totalTax, 2) . " " . $po->matauang ?></td>
                     </tr>
                     <tr>
@@ -159,7 +169,7 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td style="text-align: right;border-top: 1px solid black;"><strong>Total</strong></td>
+                        <td colspan="2" style="text-align: right;border-top: 1px solid black;"><strong>Total</strong></td>
                         <td style="text-align: right;"><?= number_format($subtotal2 + $totalTax, 2) . " " . $po->matauang ?></td>
                     </tr>
                 </tbody>

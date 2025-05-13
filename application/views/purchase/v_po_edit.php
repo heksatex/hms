@@ -452,6 +452,7 @@
                                                         <?php
                                                         $no = 0;
                                                         $amountTaxes = 0;
+                                                        $nilaiDppLain = 0;
                                                         foreach ($po_items as $key => $value) {
                                                             $no += 1;
                                                             $total = ($value->qty_beli * $value->harga_per_uom_beli);
@@ -460,6 +461,7 @@
                                                             $diskons += $diskon;
                                                             if ($setting !== null) {
                                                                 $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                                $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                                                             } else {
                                                                 $taxes += ($total - $diskon) * $value->amount_tax;
                                                             }
@@ -507,6 +509,7 @@
                                                                             <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                             <input type="hidden" name="id_konversiuom[<?= $value->id ?>]"  value="<?= $value->id_konversiuom ?>">
                                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                                            <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
                                                                             <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>" disabled>
                                                                                 <option></option>
                                                                                 <?php
@@ -538,7 +541,7 @@
                                                                             <?php
                                                                             foreach ($tax as $key => $taxs) {
                                                                                 ?>
-                                                                                <option data-nilai_tax="<?= $taxs->amount ?>" value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                <option data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                                 <?php
                                                                             }
                                                                             ?>
@@ -595,7 +598,7 @@
                                                                     <td colspan="8" class="style text-right">DPP Nilai Lain</td>
                                                                     <td colspan="2" class="style text-center totalan"> 
                                                                         <input name="dpplain" type="hidden" value="1">
-                                                                        <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) * (11 / 12), 4) ?>
+                                                                        <strong><?= $po->symbol ?> <?= number_format($nilaiDppLain, 4) ?>
                                                                         </strong>
                                                                     </td>
                                                                 </tr>
@@ -841,7 +844,8 @@
                         url: "<?= base_url('purchase/purchaseorder/print') ?>",
                         type: "POST",
                         data: {
-                            id: "<?= $id ?>"
+                            id: "<?= $id ?>",
+                            form: "purchase_order"
                         },
                         beforeSend: function (xhr) {
                             please_wait(function () {});
@@ -923,6 +927,8 @@
                 $(".tax").on("select2:select", function () {
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
+                    var dpp_tax = $(".tax" + row + " :selected").data().dpp_tax;
+                    $(".dpp_tax_" + row).val(dpp_tax);
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
                 });
 

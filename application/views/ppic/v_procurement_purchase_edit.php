@@ -82,6 +82,7 @@
       <section class="content-header">
         <div id="status_bar">
           <?php
+          $data['deptid'] = $id_dept;
           $data['jen_status'] =  $procurementpurchase->status;
           $this->load->view("admin/_partials/statusbar.php", $data);
           ?>
@@ -107,7 +108,7 @@
 
                 <div class="col-md-6">
                   <div class="col-md-12 col-xs-12">
-                    <div class="col-xs-4"><label>Procurement Purchase </label></div>
+                    <div class="col-xs-4"><label>Procurement Purchase</label></div>
                     <div class="col-xs-8">
                       <input type="text" class="form-control input-sm" name="kode_pp" id="kode_pp" readonly="readonly" value="<?php echo $procurementpurchase->kode_pp ?>" />
                     </div>
@@ -270,7 +271,7 @@
                               foreach ($details as $row) {
                               ?>
                                 <tr class="">
-                                  <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"></td>
+                                  <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"><?php echo $no++;?></td>
                                   <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk; ?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk) ?>"><?php echo '[' . $row->kode_produk . '] ' . $row->nama_produk; ?></a></td>
                                   <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date; ?>"><?php echo $row->schedule_date ?></td>
                                   <td data-content="edit" data-id="qty_beli" data-name="Qty Beli" data-isi="<?php echo $row->qty_beli; ?>" align="right"><?php echo number_format($row->qty_beli, 2) ?></td>
@@ -414,10 +415,14 @@
       //set schedule date
       var datetomorrow = new Date();
       datetomorrow.setDate(datetomorrow.getDate() + 1);
+      var datetomorrow3 = new Date();
+      datetomorrow3.setDate(datetomorrow3.getDate() + 3);
       $('#sch_date').datetimepicker({
-        minDate: datetomorrow,
-        format: 'YYYY-MM-DD HH:mm:ss',
-        ignoreReadonly: true,
+            useCurrent: false,
+            minDate: datetomorrow,
+            defaultDate: datetomorrow3,
+            format: 'YYYY-MM-DD HH:mm:ss',
+            ignoreReadonly: true,
       }).on('dp.show', function() {
           $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
         }).on('dp.hide', function() {
@@ -762,8 +767,12 @@
           $(this).html('<div class="input-group date" id="sch_date2" ><input type="text" class="form-control input-sm " value="' + htmlentities_script($(this).attr('data-isi')) + '" id="' + $(this).attr('data-id') + '" name="' + $(this).attr('data-id') + '" readonly="readonly"  /><span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span></div> ');
           var datetomorrow = new Date();
           datetomorrow.setDate(datetomorrow.getDate() + 1);
+          var datetomorrow3 = new Date();
+          datetomorrow3.setDate(datetomorrow3.getDate() + 1);
           $('#sch_date2').datetimepicker({
+            useCurrent: false,
             minDate: datetomorrow,
+            defaultDate: datetomorrow3,
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true,
           }).on('dp.show', function() {

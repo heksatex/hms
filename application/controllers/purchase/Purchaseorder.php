@@ -56,6 +56,7 @@ class Purchaseorder extends MY_Controller {
             $model2 = new $this->m_po;
             $model3 = clone $model2;
             $model4 = clone $model3;
+            $model5 = clone $model2;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
@@ -73,13 +74,13 @@ class Purchaseorder extends MY_Controller {
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
-                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
             $data["po_retur"] = $model4->setTables("purchase_order_retur por")
                             ->setJoins("purchase_order_detail pod", "pod.id = pod_id")
                             ->setWheres(["pod.po_no_po" => $kode_decrypt])
                             ->setSelects(["por.*", "kode_produk,nama_produk,deskripsi"])->setOrder(["por.retur_date" => "desc"])->getData();
 //            $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
-            $data["tax"] = $this->m_po->setTables("tax")->setOrder(["id" => "asc"])->getData();
+            $data["tax"] = $model5->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
             $data["status"] = $this->status;
             $getSetting = new m_global;
@@ -838,6 +839,7 @@ class Purchaseorder extends MY_Controller {
     public function print() {
         try {
             $id = $this->input->post("id");
+            $form= $this->input->post("form");
             $kode_decrypt = decrypt_url($id);
             $model1 = new $this->m_po;
             $model2 = clone $model1;
@@ -852,14 +854,14 @@ class Purchaseorder extends MY_Controller {
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
-                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.nama as tax_name", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.nama as tax_name,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 
             $url = "dist/storages/print/po";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
             }
             ini_set("pcre.backtrack_limit", "50000000");
-            $html = $this->load->view("print/purchase_order", $data, true);
+            $html = $this->load->view("print/{$form}", $data, true);
             $mpdf = new Mpdf(['tempDir' => FCPATH . '/tmp']);
 
             $footer = "<table name='footer' width=\"1000\">

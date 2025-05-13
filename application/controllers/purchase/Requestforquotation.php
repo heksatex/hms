@@ -67,7 +67,7 @@ class Requestforquotation extends MY_Controller {
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
-                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 //        $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
             $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
@@ -304,7 +304,6 @@ class Requestforquotation extends MY_Controller {
 
             $kode_decrypt = decrypt_url($id);
             $ids = $this->input->post("ids");
-            $dpplain = $this->input->post("dpplain");
 
             $model = new $this->m_global;
             $model1 = clone $model;
@@ -325,17 +324,19 @@ class Requestforquotation extends MY_Controller {
             $datas = $model->setWheres(["purchase_order_detail.status" => "draft", "po_no_po" => $kode_decrypt], true)
 //                            ->setJoins("purchase_order", "purchase_order_detail.po_id = purchase_order.id")
                             ->setJoins("tax", "tax_id = tax.id", "left")
-                            ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax"])->getData();
+                            ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax,tax.dpp as dpp_tax"])->getData();
             $totals = 0.00;
             $diskons = 0.00;
             $taxes = 0.00;
             $nilaiDppLain = 0;
+             $model3 = new $this->m_global;
+            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             foreach ($datas as $key => $value) {
                 $total = ($value->qty_beli * $value->harga_per_uom_beli);
                 $diskon = ($value->diskon ?? 0);
                 $totals += $total;
                 $diskons += $diskon;
-                if ($dpplain === "1") {
+                if ($setDpp !== null) {
                     $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
                     $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                 } else {
@@ -410,7 +411,7 @@ class Requestforquotation extends MY_Controller {
             $amount_tax = $this->input->post("amount_tax");
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
-//            $dpplain = $this->input->post("dpplain");
+            $dpp_tax = $this->input->post("dpp_tax");
             $foot_note = $this->input->post("foot_note");
             $supplier = $this->input->post("supplier");
 
@@ -820,7 +821,7 @@ class Requestforquotation extends MY_Controller {
 //            $model3 = clone $model;
 //            $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
 //            $datas = $model->setTables("purchase_order_detail")->setJoins("tax", "tax_id = tax.id", "left")
-//                            ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax"])->getData();
+//                            ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax,tax.dpp as dpp_tax"])->getData();
 //            $update = [];
 //            foreach ($datas as $key => $value) {
 //                $total = ($value->qty_beli * $value->harga_per_uom_beli);
@@ -860,7 +861,7 @@ class Requestforquotation extends MY_Controller {
 //                $nilaiDppLain = 0;
 //                $body = $model2->setTables("purchase_order_detail")->setWheres(["po_id" => $values->id], true)
 //                                ->setJoins("tax", "tax_id = tax.id", "left")
-//                                ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax"])->getData();
+//                                ->setSelects(["purchase_order_detail.*", "coalesce(tax.amount,0) as amount_tax,tax.dpp as dpp_tax"])->getData();
 //                foreach ($body as $key => $value) {
 //                    $total = ($value->qty_beli * $value->harga_per_uom_beli);
 //                    $diskon = ($value->diskon ?? 0);
