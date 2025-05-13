@@ -127,7 +127,8 @@
             "processing": true,
             "serverSide": true,
             "order": [],
-
+            "scrollX":true,
+            "scrollY":"400",
             "paging": true,
             "lengthChange": true,
             "searching": true,

@@ -62,7 +62,12 @@
   <div class="content-wrapper">
     <!-- Content Header (Status - Bar) -->
     <section class="content-header">
-     <?php $this->load->view("admin/_partials/statusbar.php") ?>
+      <div id ="status_bar">
+       <?php 
+         $data['deptid']     = $id_dept;
+         $this->load->view("admin/_partials/statusbar.php", $data); 
+       ?>
+      </div>
     </section>
 
     <!-- Main content -->
@@ -609,8 +614,12 @@
 
             var datetomorrow=new Date();
             datetomorrow.setDate(datetomorrow.getDate() + 1);  
+            var datetomorrow1=new Date();
+            datetomorrow1.setDate(datetomorrow1.getDate() + 3);  
             $('.sch_date').datetimepicker({
-              minDate : datetomorrow,
+              useCurrent: false,
+              minDate :  moment().startOf('day').add(1, 'd'),
+              defaultDate: datetomorrow1,
               format : 'YYYY-MM-DD HH:mm:ss',
               ignoreReadonly: true,
             }).on('dp.show', function() {

@@ -60,12 +60,12 @@ class Fpt extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
+            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt,"pod.status <>" => "cancel"])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
-                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 //        $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
             $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
@@ -123,7 +123,7 @@ class Fpt extends MY_Controller {
             $amount_tax = $this->input->post("amount_tax");
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
-            $dpplain = $this->input->post("dpplain");
+            $dpp_tax = $this->input->post("dpp_tax");
             $foot_note = $this->input->post("foot_note");
             $supplier = $this->input->post("supplier");
 
@@ -157,7 +157,7 @@ class Fpt extends MY_Controller {
                 $nilai_dpp = 0;
                 if ($setDpp !== null) {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
-                    $nilai_dpp = ((($total - $diskon) * 11) / 12);
+                    $nilai_dpp = ((($total - $diskon) * 11) / 12) ;
                 } else {
                     $taxe += ($total - $diskon) * $amount_tax[$key];
                 }
@@ -234,12 +234,12 @@ class Fpt extends MY_Controller {
                     $podd = new $this->m_po;
                     $checkPod = clone $podd;
 
-                    $checkPod_data = $checkPod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])
+                    $checkPod_data = $checkPod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
                                     ->setWhereRaw("(harga_per_uom_beli <=0 or qty_beli <= 0)")->getDetail();
                     if ($checkPod_data) {
                         throw new \Exception('Harga satuan / QTY beli belum ditentukan', 500);
                     }
-                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])
+                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
                                     ->setSelects(['group_CONCAT("\'",cfb_items_id,"\'") as items', 'group_CONCAT("\'",kode_cfb,"\'") cfb'])->getDetail();
                     if ($podd && $podd->cfb !== null) {
                         $cfbDetail = new $this->m_cfb;
@@ -249,7 +249,7 @@ class Fpt extends MY_Controller {
                         $cfbDetail->setTables("cfb_items")->setWhereRaw("id in ({$podd->items})")->update(["status" => "done"]);
 
                         $produk = [];
-                        $dataItemOrder = $listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt])->getData();
+                        $dataItemOrder = $listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])->getData();
                         foreach ($dataItemOrder as $key => $value) {
                             $updatePP = new $this->m_po;
                             $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "fpt"]);
@@ -286,7 +286,7 @@ class Fpt extends MY_Controller {
                     }
 
 
-                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])
+                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
                                     ->setSelects(['group_CONCAT("\'",cfb_items_id,"\'") as items', 'group_CONCAT("\'",kode_cfb,"\'") cfb'])->getDetail();
                     if ($podd && $podd->cfb !== null) {
                         $cfbDetail = new $this->m_cfb;
@@ -295,7 +295,7 @@ class Fpt extends MY_Controller {
                         $cfb->setWhereRaw("kode_cfb in ({$podd->cfb})")->update(["status" => "confirm"]);
                         $cfbDetail->setTables("cfb_items")->setWhereRaw("id in ({$podd->items})")->update(["status" => "confirm"]);
 
-                        foreach ($listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt])->getData() as $key => $value) {
+                        foreach ($listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])->getData() as $key => $value) {
                             $updatePP = new $this->m_po;
                             $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "confirm"]);
                         }
@@ -311,7 +311,7 @@ class Fpt extends MY_Controller {
                 $dataItemOrder = $listCfb->setTables('purchase_order_detail')
                                 ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")->setOrder(["id" => "asc"])
                                 ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
-                                ->setWheres(["po_no_po" => $kode_decrypt])
+                                ->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
                                 ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa"])->getData();
                 $produk = [];
 
@@ -342,10 +342,10 @@ class Fpt extends MY_Controller {
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
                     }
-                    if ($data->cfb_manual === "0") {
-                        $updatePP = new $this->m_po;
-                        $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "po"]);
-                    }
+//                    if ($data->cfb_manual === "0") {
+//                        $updatePP = new $this->m_po;
+//                        $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "po"]);
+//                    }
                 }
 
                 $method_dept = "RCV";
@@ -403,7 +403,7 @@ class Fpt extends MY_Controller {
             $po = new $this->m_po;
             $pod = clone $po;
             $po->setWheres(["no_po" => $kode_decrypt])->update($updatePO);
-            $pod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->update(["status" => $listStatus[$status]]);
+            $pod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->update(["status" => $listStatus[$status]]);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }

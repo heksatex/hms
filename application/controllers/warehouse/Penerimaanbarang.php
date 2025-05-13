@@ -1123,7 +1123,7 @@ class Penerimaanbarang extends MY_Controller {
             if ($deptid === 'RCV') {
                 $orig = $this->input->post('origin');
                 $po = new m_po;
-                $dataPO = $po->setWheres(["no_po" => $orig])
+                $dataPO = $po->setWheres(["no_po" => $orig,])->setWhereRaw("purchase_order_detail.status not in ('cancel','retur')")
                         ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
                         ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and penerimaan_barang_items.status_barang='done' "
                                 . "and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk)")
