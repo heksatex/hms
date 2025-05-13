@@ -486,7 +486,7 @@
                                                                 <td>
                                                                     <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
                                                                 </td>
-                                                                <td>
+                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
                                                                     <?php
                                                                     $image = "/upload/product/" . $value->kode_produk . ".jpg";
                                                                     $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
