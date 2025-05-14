@@ -399,8 +399,7 @@
                                             <div class="col-md-3 col-xs-12">
                                                 <div class="pull-left">
                                                     <?php if ($po->status === "draft") { ?>
-
-                                                        <!--<button class="btn btn-success btn-sm btn-add_item" type="button">Tambahkan Item</button>-->
+                                                        <button class="btn btn-success btn-sm btn-add_item" type="button">Tambahkan Item</button>
                                                     <?php } ?>
                                                 </div>
 
