@@ -283,16 +283,18 @@ class Invoice extends MY_Controller {
                     $tax += $nominal * $value->tax_amount;
                     $totalNominal += $nominal;
                 }
+                    $model = new $this->m_global;
                 if ($tax > 0) {
                     if($dataItems[0]->dpp_lain > 0) {
                         $tax = $dataItems[0]->dpp_lain * $dataItems[0]->tax_amount;
                     }
+                    $defaultPpn = $model->setTables("setting")->setWheres(["setting_name"=>"pajak_default_ppn"])->setSelects(["value"])->getDetail();
                     $jurnalItems[] = array(
                         "kode" => $jurnal,
                         "nama" => "{$dataItems[0]->tax_nama}",
                         "reff_note" => "",
                         "partner" => $dataItems[0]->id_supplier,
-                        "kode_coa" => "1193.05",
+                        "kode_coa" => ($defaultPpn->value ?? 0),
                         "posisi" => "D",
                         "nominal_curr" => $tax,
                         "kurs" => $dataItems[0]->kurs,
@@ -301,12 +303,13 @@ class Invoice extends MY_Controller {
                         "row_order" => count($dataItems) + 1
                     );
                 }
+                $defaultPpn = $model->setTables("setting")->setWheres(["setting_name"=>"pajak_hutang_dagang_lokal",true])->setSelects(["value"])->getDetail();
                 $jurnalItems[] = array(
                     "kode" => $jurnal,
                     "nama" => "",
                     "reff_note" => "",
                     "partner" => $dataItems[0]->id_supplier,
-                    "kode_coa" => "2112.01",
+                    "kode_coa" => ($defaultPpn->value ?? 0),
                     "posisi" => "C",
                     "nominal_curr" =>$totalNominal + $tax,
                     "kurs" => $dataItems[0]->kurs,
