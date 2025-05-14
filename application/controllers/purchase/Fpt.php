@@ -60,14 +60,14 @@ class Fpt extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt,"pod.status <>" => "cancel"])->setOrder(["id" => "asc"])
+            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
                             ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 //        $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
-            $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv"=>"purchase"])->setOrder(["id" => "asc"])->getData();
+            $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
             $this->load->view('purchase/v_fpt_edit', $data);
         } catch (Exception $ex) {
@@ -157,7 +157,7 @@ class Fpt extends MY_Controller {
                 $nilai_dpp = 0;
                 if ($setDpp !== null) {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
-                    $nilai_dpp = ((($total - $diskon) * 11) / 12) ;
+                    $nilai_dpp = ((($total - $diskon) * 11) / 12);
                 } else {
                     $taxe += ($total - $diskon) * $amount_tax[$key];
                 }
@@ -166,7 +166,7 @@ class Fpt extends MY_Controller {
                 $nilaiDppLain += $nilai_dpp;
                 $log_update ["item ke " . $no] = logArrayToString(";", ['harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'diskon' => $dsk[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),]);
                 $data[] = ['id' => $key, 'harga_per_uom_beli' => $value, 'uom_beli' => $uom_beli[$key], 'deskripsi' => html_entity_decode($deskripsi[$key]),
-                    'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key],"pajak" => $taxe, "total" => $total, "nilai_dpp" => $nilai_dpp];
+                    'tax_id' => $tax[$key], 'diskon' => $dsk[$key], 'id_konversiuom' => $id_konversiuom[$key], "pajak" => $taxe, "total" => $total, "nilai_dpp" => $nilai_dpp];
             }
 //            if ($dpplain === "1") {
 //                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
@@ -176,10 +176,10 @@ class Fpt extends MY_Controller {
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
-            $update = ["currency" => $currency, "nilai_currency" => $nilai_currency,'foot_note'=>$foot_note,
-                'note' => $note, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date,"supplier"=>$supplier];
+            $update = ["currency" => $currency, "nilai_currency" => $nilai_currency, 'foot_note' => $foot_note,
+                'note' => $note, "total" => $grandTotal, 'dpp_lain' => $nilaiDppLain, "order_date" => $order_date, "supplier" => $supplier];
             $po->setWheres(["no_po" => $kode_decrypt])->update($update);
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit',"Header -> ".logArrayToString('; ', $update, " : ")."<br> Detail -> ". logArrayToString('; ', $log_update, " : "), $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "Header -> " . logArrayToString('; ', $update, " : ") . "<br> Detail -> " . logArrayToString('; ', $log_update, " : "), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -234,12 +234,12 @@ class Fpt extends MY_Controller {
                     $podd = new $this->m_po;
                     $checkPod = clone $podd;
 
-                    $checkPod_data = $checkPod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
+                    $checkPod_data = $checkPod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])
                                     ->setWhereRaw("(harga_per_uom_beli <=0 or qty_beli <= 0)")->getDetail();
                     if ($checkPod_data) {
                         throw new \Exception('Harga satuan / QTY beli belum ditentukan', 500);
                     }
-                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
+                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])
                                     ->setSelects(['group_CONCAT("\'",cfb_items_id,"\'") as items', 'group_CONCAT("\'",kode_cfb,"\'") cfb'])->getDetail();
                     if ($podd && $podd->cfb !== null) {
                         $cfbDetail = new $this->m_cfb;
@@ -249,7 +249,7 @@ class Fpt extends MY_Controller {
                         $cfbDetail->setTables("cfb_items")->setWhereRaw("id in ({$podd->items})")->update(["status" => "done"]);
 
                         $produk = [];
-                        $dataItemOrder = $listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])->getData();
+                        $dataItemOrder = $listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])->getData();
                         foreach ($dataItemOrder as $key => $value) {
                             $updatePP = new $this->m_po;
                             $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "fpt"]);
@@ -286,7 +286,7 @@ class Fpt extends MY_Controller {
                     }
 
 
-                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
+                    $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])
                                     ->setSelects(['group_CONCAT("\'",cfb_items_id,"\'") as items', 'group_CONCAT("\'",kode_cfb,"\'") cfb'])->getDetail();
                     if ($podd && $podd->cfb !== null) {
                         $cfbDetail = new $this->m_cfb;
@@ -295,7 +295,7 @@ class Fpt extends MY_Controller {
                         $cfb->setWhereRaw("kode_cfb in ({$podd->cfb})")->update(["status" => "confirm"]);
                         $cfbDetail->setTables("cfb_items")->setWhereRaw("id in ({$podd->items})")->update(["status" => "confirm"]);
 
-                        foreach ($listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])->getData() as $key => $value) {
+                        foreach ($listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])->getData() as $key => $value) {
                             $updatePP = new $this->m_po;
                             $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "confirm"]);
                         }
@@ -311,7 +311,7 @@ class Fpt extends MY_Controller {
                 $dataItemOrder = $listCfb->setTables('purchase_order_detail')
                                 ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")->setOrder(["id" => "asc"])
                                 ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
-                                ->setWheres(["po_no_po" => $kode_decrypt,"status <>"=>"cancel"])
+                                ->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])
                                 ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa"])->getData();
                 $produk = [];
 
@@ -336,8 +336,8 @@ class Fpt extends MY_Controller {
                             'kode_pp' => $value->kode_pp,
                             'qty_beli' => $value->qty_beli,
                             'uom_beli' => $value->uom_beli,
-                            'id_konversiuom'=>$value->id_konversiuom,
-                            'nilai_konversiuom'=>$value->nilai
+                            'id_konversiuom' => $value->id_konversiuom,
+                            'nilai_konversiuom' => $value->nilai
                         ];
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
@@ -434,6 +434,50 @@ class Fpt extends MY_Controller {
             $this->output->set_status_header(500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode([]));
+        }
+    }
+
+    public function add_layanan() {
+        try {
+            $model = new $this->m_global;
+            $data["index"] = $this->input->post("index");
+            $data["uom_juals"] = $this->m_produk->get_list_uom(['jual' => 'yes']);
+            $data["taxss"] = $model->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
+            $item = $this->load->view('purchase/v_order_add_layanan', $data, true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' => $item]));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode([]));
+        }
+    }
+
+    public function get_produk_layanan() {
+        try {
+            $search = $this->input->get("search");
+            $datas = new $this->m_global;
+            if ($search !== "") {
+//                $datas = $datas->setWhereRaw("kode_produk LIKE '%{$search}%' or nama_produk LIKE '%{$search}%'");
+                $_POST['search']['value'] = $search;
+            }
+            $_POST['length'] = 50;
+            $_POST['start'] = 0;
+            $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])
+                            ->setSearch(["kode_produk", "nama_produk"])
+                            ->setJoins("mst_category", "id_category = mst_category.id")
+//                            ->setJoins("departemen", "(departemen.kode = mst_category.dept_id and departemen.type_dept='gudang')")
+                            ->setJoins("nilai_konversi nk", "nk.id = uom_beli", "left")
+                            ->setGroups(["mst_produk.kode_produk"])
+                            ->setSelects(["mst_produk.*", "coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai","mst_category.dept_id as wrhs"])
+                            ->setOrder(["kode_produk" => "asc"])
+                            ->setWheres(["status_produk" => "t", "type" => "consumable"])->getData();
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' => $datas]));
+        } catch (Exception $ex) {
+            
         }
     }
 }

@@ -69,7 +69,7 @@ class Purchaseorder extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setWhereRaw("status not in ('cancel','retur')")->setOrder(["id" => "asc"])
+            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
@@ -205,7 +205,7 @@ class Purchaseorder extends MY_Controller {
                         $listCfb = clone $cfbDetail;
                         $cfb->setWhereRaw("kode_cfb in ({$podd->cfb})")->update(["status" => "confirm"]);
                         $cfbDetail->setTables("cfb_items")->setWhereRaw("id in ({$podd->items})")->update(["status" => "confirm"]);
-
+//                        $pod = 
                         foreach ($listCfb->setTables('purchase_order_detail')->setOrder(["id" => "asc"])->setWhereRaw("status not in('cancel','retur')")
                                 ->setWheres(["po_no_po" => $kode_decrypt])->getData() as $key => $value) {
                             $updatePP = new $this->m_po;

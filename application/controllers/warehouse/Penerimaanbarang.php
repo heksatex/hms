@@ -1225,7 +1225,7 @@ class Penerimaanbarang extends MY_Controller {
                 }
                 //status done PO
                 $model = new $this->m_global;
-                $cek = $model->setTables("purchase_order_detail")->setWheres(["po_no_po" => $orig, "status <>" => "done"])->getDetail();
+                $cek = $model->setTables("penerimaan_barang pb")->setWheres(["pb.origin" => $orig])->setWhereRaw("status not in ('done','cancel')")->getDetail();
                 if (!$cek) {
                     $model->setTables("purchase_order")->setWheres(["no_po" => $orig], true)->update(["status" => "done"]);
 //                    $this->_module->gen_history('invoice', $idInsert, 'edit', logArrayToString(";", $dataInvoice), $username);
@@ -2173,7 +2173,7 @@ class Penerimaanbarang extends MY_Controller {
                     $lot[$key] = $value;
                 }
 
-                
+
                 $item->qty = $item->qty / $item->nilai;
                 $qty = str_split(number_format($item->qty, 2), 8);
                 foreach ($qty as $key => $value) {
@@ -2250,6 +2250,7 @@ class Penerimaanbarang extends MY_Controller {
                 if ($key === 0) {
                     $linesTtd .= str_pad("(__________)", 12) . str_pad("(__________) ", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
                 } else {
+                    $linesTtd .= "\n";
                     $linesTtd .= str_pad("", 12) . str_pad("", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
                 }
             }
