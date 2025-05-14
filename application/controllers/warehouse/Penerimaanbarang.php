@@ -2173,7 +2173,7 @@ class Penerimaanbarang extends MY_Controller {
                     $lot[$key] = $value;
                 }
 
-                
+
                 $item->qty = $item->qty / $item->nilai;
                 $qty = str_split(number_format($item->qty, 2), 8);
                 foreach ($qty as $key => $value) {
@@ -2250,6 +2250,7 @@ class Penerimaanbarang extends MY_Controller {
                 if ($key === 0) {
                     $linesTtd .= str_pad("(__________)", 12) . str_pad("(__________) ", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
                 } else {
+                    $linesTtd .= "\n";
                     $linesTtd .= str_pad("", 12) . str_pad("", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
                 }
             }
