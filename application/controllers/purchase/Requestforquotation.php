@@ -62,7 +62,7 @@ class Requestforquotation extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data tidak ditemukan', 500);
             }
-            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt, "pod.status <>" => "cancel"])->setOrder(["id" => "asc"])
+            $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
@@ -315,7 +315,7 @@ class Requestforquotation extends MY_Controller {
             }
             $this->_module->startTransaction();
 
-            $model->update(["status" => "cancel"]);
+            $model->delete();
             $spltkodePP = explode("_", $check->kode_cfb);
             if (isset($spltkodePP[1])) {
                 $model1->setTables("cfb_items")->setWheres(["cfb_items.id" => $check->cfb_items_id])->update(["status" => "confirm"]);
@@ -499,7 +499,7 @@ class Requestforquotation extends MY_Controller {
 //            $users = $this->session->userdata('nama');
             $kode_decrypt = decrypt_url($id);
             $checkData = new $this->m_global;
-            if ($checkData->setTables("purchase_order_edited")->setWhereRaw("po_id = '{$kode_decrypt}' and status not in ('cancael','done')")->getDetail() === null) {
+            if ($checkData->setTables("purchase_order_edited")->setWhereRaw("po_id = '{$kode_decrypt}' and status not in ('cancel','done')")->getDetail() === null) {
                 throw new \Exception('Data tidak ditemukan', 500);
             }
             $checkData->update(["status" => "approve"]);
@@ -937,17 +937,19 @@ class Requestforquotation extends MY_Controller {
         $search = $this->input->get("search");
         $datas = new $this->m_global;
         if ($search !== "") {
-            $datas = $datas->setWhereRaw("kode_produk LIKE '%{$search}%' or nama_produk LIKE '%{$search}%'");
+//            $datas = $datas->setWhereRaw("kode_produk LIKE '%{$search}%' or nama_produk LIKE '%{$search}%'");
+             $_POST['search']['value'] = $search;
         }
         $_POST['length'] = 50;
         $_POST['start'] = 0;
         $datas = $datas->setTables("mst_produk")->setSelects(["kode_produk,nama_produk,uom"])
+                        ->setSearch(["kode_produk", "nama_produk"])
                         ->setJoins("mst_category", "id_category = mst_category.id")
                         ->setJoins("departemen", "(departemen.kode = mst_category.dept_id and departemen.type_dept='gudang')")
                         ->setJoins("nilai_konversi nk", "nk.id = uom_beli", "left")
                         ->setGroups(["mst_produk.kode_produk"])
                         ->setSelects(["mst_produk.*", "coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai"])
-                        ->setOrder(["kode_produk" => "asc"])->getData();
+                        ->setOrder(["kode_produk" => "asc"]) ->setWheres(["status_produk" => "t"])->getData();
         $this->output->set_status_header(200)
                 ->set_content_type('application/json', 'utf-8')
                 ->set_output(json_encode(['data' => $datas]));

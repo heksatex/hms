@@ -1225,7 +1225,7 @@ class Penerimaanbarang extends MY_Controller {
                 }
                 //status done PO
                 $model = new $this->m_global;
-                $cek = $model->setTables("purchase_order_detail")->setWheres(["po_no_po" => $orig, "status <>" => "done"])->getDetail();
+                $cek = $model->setTables("penerimaan_barang pb")->setWheres(["pb.origin" => $orig])->setWhereRaw("status not in ('done','cancel')")->getDetail();
                 if (!$cek) {
                     $model->setTables("purchase_order")->setWheres(["no_po" => $orig], true)->update(["status" => "done"]);
 //                    $this->_module->gen_history('invoice', $idInsert, 'edit', logArrayToString(";", $dataInvoice), $username);
