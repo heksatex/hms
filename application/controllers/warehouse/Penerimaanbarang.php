@@ -844,7 +844,9 @@ class Penerimaanbarang extends MY_Controller {
                                         "qty_beli" => $row->qty_beli,
                                         "uom_beli" => $row->uom_beli,
                                         "kode_pp" => $row->kode_pp,
-                                        "row_order" => $in_row
+                                        "row_order" => $in_row,
+                                        "id_konversiuom" => $row->id_konversiuom,
+                                        "nilai_konversiuom" => $row->nilai_konversiuom
                                     );
 
                                     //simpan ke stock move produk 
@@ -870,7 +872,9 @@ class Penerimaanbarang extends MY_Controller {
                                     "qty_beli" => $row->qty_beli,
                                     "uom_beli" => $row->uom_beli,
                                     "kode_pp" => $row->kode_pp,
-                                    "row_order" => $in_row
+                                    "row_order" => $in_row,
+                                    "id_konversiuom" => $row->id_konversiuom,
+                                    "nilai_konversiuom" => $row->nilai_konversiuom
                                 );
                                 //simpan ke stock move produk 
                                 $sql_stock_move_produk_batch .= "('" . $move_id . "','" . addslashes($row->kode_produk) . "','" . addslashes($row->nama_produk) . "','" . $qty_back . "','" . addslashes($row->uom) . "','" . $status_back_order . "','" . $in_row . "','" . addslashes($origin_prod) . "'), ";
@@ -920,7 +924,7 @@ class Penerimaanbarang extends MY_Controller {
                                 "status" => $status_back_order,
                                 "dept_id" => $method_dept,
                                 "partner_id" => $partner_id,
-                                "nama_partner" => $nama_partner,
+                                "nama_partner" => $nama_partner
                                     // "no_sj"        => $no_sj,
                                     // "tanggal_sj"   => $tanggal_sj
                             );
@@ -2142,11 +2146,12 @@ class Penerimaanbarang extends MY_Controller {
                             ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
                             ->setJoins("stock_quant sq", "smi.quant_id = sq.quant_id")
                             ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode")
+//                            ->setJoins("nilai_konversi nk", "nk.id = pbi.id_konversiuom", "left")
                             ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
                             ->setOrder(["smi.row_order"])
                             ->setSelects(["GROUP_CONCAT(DISTINCT kode_pp) as kode_pp",
                                 "smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty",
-                                "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note"])
+                                "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note", "nilai_konversiuom as nilai,pbi.uom_beli"])
                             ->setGroups(["smi.quant_id"])->getData();
             foreach ($items as $keyss => $item) {
                 $kodeProduk = str_split($item->kode_produk, 11);
@@ -2168,13 +2173,15 @@ class Penerimaanbarang extends MY_Controller {
                     $lot[$key] = $value;
                 }
 
+                
+                $item->qty = $item->qty / $item->nilai;
                 $qty = str_split(number_format($item->qty, 2), 8);
                 foreach ($qty as $key => $value) {
                     $value = trim($value);
                     $qty[$key] = $value;
                 }
 
-                $uom = str_split($item->uom, 5);
+                $uom = str_split((($item->nilai !== null || $item->nilai !== "") ? $item->uom_beli : $item->uom), 5);
                 foreach ($uom as $key => $value) {
                     $value = trim($value);
                     $uom[$key] = $value;
@@ -2672,7 +2679,7 @@ class Penerimaanbarang extends MY_Controller {
             ini_set("pcre.backtrack_limit", "1000000");
         }
     }
-    
+
 //    public function create_invoice(){
 //        try {
 //            $sub_menu = $this->uri->segment(2);
