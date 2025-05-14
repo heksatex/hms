@@ -1180,9 +1180,9 @@ class m_marketing extends CI_Model
     		$this->db->where('sq.corak_remark',$this->input->post('product'));
         }
 
-		if($this->input->post('lebar_jadi')){
-    		$this->db->where('sq.lebar_jadi',$this->input->post('lebar_jadi'));
-        }
+		$this->db->where('sq.lebar_jadi',$this->input->post('lebar_jadi'));
+		// if($this->input->post('lebar_jadi')){
+        // }
 
 		if($this->input->post('uom_lebar_jadi')){
     		$this->db->where('sq.uom_lebar_jadi',$this->input->post('uom_lebar_jadi'));
@@ -1385,9 +1385,9 @@ class m_marketing extends CI_Model
     		$this->db->where('sq.warna_remark',$this->input->post('color'));
         }
 
-		if($this->input->post('lebar_jadi')){
-    		$this->db->where('sq.lebar_jadi',$this->input->post('lebar_jadi'));
-        }
+		$this->db->where('sq.lebar_jadi',$this->input->post('lebar_jadi'));
+		// if($this->input->post('lebar_jadi')){
+        // }
 
 		if($this->input->post('uom_lebar_jadi')){
     		$this->db->where('sq.uom_lebar_jadi',$this->input->post('uom_lebar_jadi'));
