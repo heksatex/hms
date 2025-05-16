@@ -76,10 +76,10 @@ class Purchaseorder extends MY_Controller {
         }
         if ($group !== "") {
             if($group=== "po.supplier") {
-            $model->setGroups(["partner.nama", "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id"])->setOrder(["partner.nama" => "asc", "order_date" => "asc"]);
+            $model->setGroups(["partner.nama", "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id","po.currency"])->setOrder(["partner.nama" => "asc", "order_date" => "asc"]);
             }
             else {
-                 $model->setGroups(["departemen.nama", "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id"])->setOrder(["departemen.nama" => "asc", "order_date" => "asc"]);
+                 $model->setGroups(["departemen.nama", "kode_produk", "uom_beli", "harga_per_uom_beli", "tax_id","po.currency"])->setOrder(["departemen.nama" => "asc", "order_date" => "asc"]);
             }
         }
 
@@ -156,8 +156,8 @@ class Purchaseorder extends MY_Controller {
             $model3 = new $this->m_global;
             $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             foreach ($data as $key => $value) {
-                $harga = $value->nilai_currency * $value->harga_per_uom_beli;
-                $diskon = $value->nilai_currency * $value->diskon;
+                $harga =  $value->harga_per_uom_beli;
+                $diskon =  $value->diskon;
                 $subsubtotal = ($value->qty_beli * $harga) - $diskon;
                 if ($setDpp !== null) {
                     $pajak = (($subsubtotal * 11) / 12) * $value->amount_tax;
@@ -197,6 +197,7 @@ class Purchaseorder extends MY_Controller {
                 }
                 $no++;
             }
+            $spreadsheet->getActiveSheet()->getColumnDimension('L')->setVisible(false);
             $writer = new Xlsx($spreadsheet);
             $filename = "purchase_order_periode {$period[0]} {$period[1]}";
             $url = "dist/storages/report/po";

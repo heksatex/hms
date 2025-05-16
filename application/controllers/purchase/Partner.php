@@ -131,7 +131,7 @@ class Partner extends MY_Controller {
             $check_customer = $this->input->post('customer');
             $check_supplier = $this->input->post('supplier');
 
-            $this->_module->lock_tabel('partner WRITE, log_history WRITE, main_menu_sub WRITE, user WRITE');
+            $this->_module->lock_tabel('partner WRITE, log_history WRITE, main_menu_sub READ, user READ');
 
             $model = new $this->m_global;
 

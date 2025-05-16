@@ -2,9 +2,9 @@
 $no = 1;
 $total_group = 0;
 foreach ($data as $key => $value) {
-    $harga = $value->nilai_currency * $value->harga_per_uom_beli;
-    $diskon = $value->nilai_currency * $value->diskon;
-    $subsubtotal = $value->nilai_currency * $value->total;
+    $harga = $value->harga_per_uom_beli;
+    $diskon =  $value->diskon;
+    $subsubtotal = $value->total;
     $pajak = $value->pajak;
 //    if($dpp !== null){
 //         $pajak = (($subsubtotal * 11) / 12) *  $value->amount_tax;
@@ -24,7 +24,7 @@ foreach ($data as $key => $value) {
         <td><?= $value->jenis ?></td>
         <td><?= "[{$value->kode_produk}] {$value->nama_produk}" ?></td>
         <td><?= number_format($value->qty_beli, 2) . " " . $value->uom_beli ?></td>
-        <td><?= $value->nama_curr ?></td>
+        <!--<td><?= $value->nama_curr ?></td>-->
         <td><?= $value->nilai_currency ?></td>
         <td><?= number_format($value->harga_per_uom_beli, 2) ?></td>
         <td><?= number_format($value->diskon, 2) ?></td>

@@ -172,7 +172,7 @@ class Fpt extends MY_Controller {
 //                $nilaiDppLain = (($totals - $diskons) * 11) / 12;
 //            }
             $grandTotal = ($totals - $diskons) + $taxes;
-            $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
+            $this->_module->lock_tabel("user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,"
                     . "purchase_order_detail write,purchase_order write");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
@@ -220,7 +220,7 @@ class Fpt extends MY_Controller {
             }
 
             $this->_module->startTransaction();
-            $lockTable = "user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
+            $lockTable = "user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
                     . "purchase_order_detail write,purchase_order write, penerimaan_barang WRITE, penerimaan_barang_items WRITE";
             if ($listStatus[$status] === 'purchase_confirmed') {
                 $lockTable .= ",stock_move_produk WRITE,stock_move WRITE,nilai_konversi WRITE";
@@ -277,6 +277,13 @@ class Fpt extends MY_Controller {
 
                     $podd = new $this->m_po;
                     $rcv = clone $podd;
+                    $model1 = clone $rcv;
+
+                    $check = $model1->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt, "payment" => "1"])->getDetail();
+                    if ($check) {
+                        throw new \Exception("PO {$kode_decrypt} Sudah dibayarkan.", 500);
+                    }
+
                     $inshipment = $rcv->setTables('penerimaan_barang')
                                     ->setJoins("penerimaan_barang_items", "penerimaan_barang.kode = penerimaan_barang_items.kode")
                                     ->setWheres(['status_barang <>' => 'cancel'])
@@ -306,7 +313,7 @@ class Fpt extends MY_Controller {
             }
 
             if ($listStatus[$status] === "purchase_confirmed") {
-                $orderDate = date("Y-m-d H:i:s");
+//                $orderDate = date("Y-m-d H:i:s");
                 $listCfb = new $this->m_po;
                 $dataItemOrder = $listCfb->setTables('purchase_order_detail')
                                 ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")->setOrder(["id" => "asc"])
@@ -442,6 +449,7 @@ class Fpt extends MY_Controller {
             $model = new $this->m_global;
             $data["index"] = $this->input->post("index");
             $data["uom_juals"] = $this->m_produk->get_list_uom(['jual' => 'yes']);
+            $data["po"]=$this->input->post("po");
             $data["taxss"] = $model->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $item = $this->load->view('purchase/v_order_add_layanan', $data, true);
             $this->output->set_status_header(200)
@@ -470,7 +478,7 @@ class Fpt extends MY_Controller {
 //                            ->setJoins("departemen", "(departemen.kode = mst_category.dept_id and departemen.type_dept='gudang')")
                             ->setJoins("nilai_konversi nk", "nk.id = uom_beli", "left")
                             ->setGroups(["mst_produk.kode_produk"])
-                            ->setSelects(["mst_produk.*", "coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai","mst_category.dept_id as wrhs"])
+                            ->setSelects(["mst_produk.*", "coalesce(dari,'') as dari,nk.id as dari_id,coalesce(nilai,'1') as nilai", "mst_category.dept_id as wrhs"])
                             ->setOrder(["kode_produk" => "asc"])
                             ->setWheres(["status_produk" => "t", "type" => "consumable"])->getData();
             $this->output->set_status_header(200)
@@ -478,6 +486,181 @@ class Fpt extends MY_Controller {
                     ->set_output(json_encode(['data' => $datas]));
         } catch (Exception $ex) {
             
+        }
+    }
+
+    public function save_layanan() {
+        try {
+            $validation = [
+                [
+                    'field' => 'kode_produk',
+                    'label' => 'Produk',
+                    'rules' => ['required'],
+                    'errors' => [
+                        'required' => '{field} Harus dipilih'
+                    ]
+                ],
+                [
+                    'field' => 'harga',
+                    'label' => 'Harga Satuan Beli',
+                    'rules' => ['regex_match[/^\d*\.?\d*$/]', 'required'],
+                    'errors' => [
+                        'required' => '{field} Harus diisi',
+                        "regex_match" => "{field} harus berupa number / desimal"
+                    ]
+                ],
+                [
+                    'field' => 'qty_beli',
+                    'label' => 'Qty',
+                    'rules' => ['required'],
+                    'errors' => [
+                        'required' => '{field} Harus diisi'
+                    ]
+                ],
+                [
+                    'field' => 'id_konversi',
+                    'label' => 'Konversi QTY',
+                    'rules' => ['required'],
+                    'errors' => [
+                        'required' => 'Konversi QTY Belum ditentukan dimaster produk',
+                    ]
+                ]
+            ];
+
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+
+            $amount_tax = $this->input->post("amount_tax");
+            $deskripsi = $this->input->post("deskripsi");
+            $id_konversi = $this->input->post("id_konversi");
+            $kode_produk = $this->input->post("kode_produk");
+            $nama_produk = $this->input->post("nama_produk");
+            $nilai = $this->input->post("nilai");
+            $qty_beli = $this->input->post("qty_beli");
+            $reff_note = $this->input->post("reff_note");
+            $schedule_date = $this->input->post("schedule_date");
+            $tax = $this->input->post("tax");
+            $uom = $this->input->post("uom");
+            $uom_qty_beli = $this->input->post("uom_qty_beli");
+            $warehouse = $this->input->post("warehouse");
+            $harga = $this->input->post("harga");
+            $id = $this->input->post("po");
+            $kode_decrypt = decrypt_url($id);
+
+            $model = new $this->m_global;
+            $setDpp = $model->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->getDetail();
+            
+            $this->_module->lock_tabel("user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,"
+                    . "purchase_order_detail write,purchase_order write");
+            $getPo = $model->setTables("purchase_order")->setWheres(["no_po"=>$kode_decrypt,"status"=>"draft"],true)->getDetail();
+            if(!$getPo) {
+                throw new \Exception("Data PO Tidak ditemukan dalam status draft", 500);
+            }
+            $total = ($qty_beli * $harga);
+            $nilai_dpp = 0;
+            $pajak = 0;
+            if ($setDpp !== null) {
+                $pajak = (($total * 11) / 12) * $amount_tax;
+                $nilai_dpp = (($total * 11) / 12);
+            } else {
+                $pajak = $total * $amount_tax;
+            }
+            $total += $pajak;
+            $grandTotal = $getPo->total + $total;
+            $grandDpp = $getPo->dpp_lain + $nilai_dpp;
+            
+            $insert = [
+                "po_id" => $getPo->id,
+                "po_no_po" => $kode_decrypt,
+                "cfb_items_id" => 0,
+                "kode_cfb" => "",
+                "kode_produk" => html_entity_decode($kode_produk),
+                "nama_produk" => html_entity_decode($nama_produk),
+                "qty" => $qty_beli * $nilai,
+                "uom" => $uom,
+                "qty_beli" => $qty_beli,
+                "uom_beli" => $uom_qty_beli,
+                'id_konversiuom' => $id_konversi,
+                "pritoritas" => "Normal",
+                "status" => "draft",
+                "kode_pp" => 0,
+                'harga_per_uom_beli' => $harga,
+                "created_at" => date("Y-m-d H:i:s"),
+                "deskripsi" => html_entity_decode($deskripsi),
+                "reff_note" => html_entity_decode($reff_note),
+                "warehouse" => $warehouse,
+                "schedule_date" => $schedule_date,
+                "tax_id"=>$tax,
+                "total"=>$total,
+                "pajak"=>$pajak,
+                "nilai_dpp"=>$nilai_dpp,
+                "deleting"=>1
+            ];
+            $this->_module->startTransaction();
+            $model->update(["total"=>$grandTotal,"dpp_lain"=>$grandDpp]);
+            $model->setTables("purchase_order_detail")->save($insert);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "tambah Layanan -> " . logArrayToString('; ', $insert, " : "), $username);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Tambah layanan',500);
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            log_message('error', json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
+        }
+    }
+    
+    public function delete_layanan($id) {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = $this->session->userdata('username');
+            $ids = $this->input->post("ids");
+            $kode_decrypt = decrypt_url($id);
+            $model = new $this->m_global;
+            $this->_module->lock_tabel("user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,"
+                    . "purchase_order_detail write,purchase_order write");
+            
+            $getPO = $model->setTables("purchase_order")->setWheres(["no_po"=>$kode_decrypt],true)->getDetail();
+            if(!$getPO) {
+                throw new \Exception("Data PO Tidak ditemukan dalam status draft", 500);
+            }
+            $getPOD = $model->setTables("purchase_order_detail")->setWheres(["id"=>$ids,"po_no_po"=>$getPO->no_po,"deleting"=>"1"],true)->getDetail();
+            
+            if(!$getPOD) {
+                throw new \Exception("Data Item PO Tidak ditemukan dalam status draft", 500);
+            }
+            
+            $grandTotal = $getPO->total - $getPOD->total;
+            $grandDpp = $getPO->dpp_lain - $getPOD->nilai_dpp;
+            
+            $this->_module->startTransaction();
+            $model->delete();
+            $model->setTables("purchase_order")->setWheres(["no_po"=>$kode_decrypt],true)->update(["total"=>$grandTotal,"dpp_lain"=>$grandDpp]);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "hapus Layanan -> " . logArrayToString('; ', (array)$getPOD, " : "), $username);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Tambah layanan',500);
+            }
+            
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            log_message('error', json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 }
