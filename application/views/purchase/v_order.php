@@ -144,7 +144,7 @@ if (strtolower($level) === 'direksi') {
                         "serverSide": true,
                         "stateSave": false,
                         "scrollX": true,
-                        "scrollY": "400",
+                        "scrollY": "calc(85vh - 250px)",
                         "paging": true,
                         "lengthChange": true,
                         "searching": true,

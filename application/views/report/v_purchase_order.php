@@ -191,7 +191,7 @@
                                                 <th class="style bb ws no" >Produk</th>
                                                 <th class="style bb ws no" >Qty Beli</th>
                                                 <th class="style bb ws no" >Mata Uang</th>
-                                                <th class="style bb ws no" >Kurs</th>
+                                                <!--<th class="style bb ws no" >Kurs</th>-->
                                                 <th class="style bb ws no" >Harga perQty</th>
                                                 <th class="style bb ws no" >Diskon</th>
                                                 <th class="style bb ws no" >Pajak</th>

@@ -62,12 +62,11 @@
                                                             <label class="form-label">Status</label>
                                                         </div>
                                                         <div class="col-xs-8 col-md-8">
-                                                            <select name="status" class="form-control select2" id="status" style="width: 100%">
-                                                                <option></option>
-                                                                <option value="purchase_confirmed">Purchase Confirmed</option>
-                                                                <option value="done">Done</option>
+                                                            <select name="status" class="form-control select2" id="status" multiple style="width: 100%">
+                                                                <option value="purchase_confirmed" selected>Purchase Confirmed</option>
+                                                                <option value="done" selected>Done</option>
                                                                 <option value="cancel">Cancel</option>
-                                                                <option value="exception">Exception</option>
+                                                                <option value="exception" selected>Exception</option>
                                                             </select>
                                                         </div>
                                                     </div>
@@ -128,7 +127,7 @@
             "serverSide": true,
             "order": [],
             "scrollX":true,
-            "scrollY":"400",
+            "scrollY":"calc(85vh - 250px)",
             "paging": true,
             "lengthChange": true,
             "searching": true,

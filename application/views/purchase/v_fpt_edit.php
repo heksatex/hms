@@ -333,7 +333,7 @@
                                     </ul>
 
                                     <button type="submit" id="form-cfq-submit" style="display: none"></button>
-                                    <table class="table table-condesed table-hover rlstable  over" width="100%">
+                                    <table id="tbl-fpt" class="table table-condesed table-hover rlstable  over" width="100%">
                                         <thead>
                                         <th class="style" width="10px">No</th>
                                         <th class="style" style="width:10%">Kode CFB</th>
@@ -369,11 +369,13 @@
                                                 <tr>
                                                     <td>
                                                         <?= $no ?>
+                                                        
+                                                        <?= ($value->deleting === "1" && $po->status ==="draft") ? '<a style="color:red" class="delete-layanan" data-ids="' . $value->id . '"><i class="fa fa-trash"></i></a>' : '' ?>
                                                     </td>
                                                     <td>
                                                         <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
                                                     </td>
-                                                    <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
+                                                    <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent' : '' ?>">
                                                         <?php
                                                         $image = "/upload/product/" . $value->kode_produk . ".jpg";
                                                         $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
@@ -483,6 +485,22 @@
                                                     }
                                                 }
                                             }
+                                            ?>
+
+                                        </tbody>
+
+                                        <tfoot>
+                                            <?php
+                                            if ($po->status === 'draft') {
+                                                ?>
+                                                <tr>
+                                                    <td colspan="10">
+                                                        <a class="add-layanan"><i class="fa fa-plus"></i> Tambah Layanan </a>
+                                                    </td>
+                                                </tr>
+                                                <?php
+                                            }
+
                                             if (strtolower($po->status) !== "draft") {
                                                 ?>
                                                 <tr>    
@@ -527,7 +545,6 @@
                                                         <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                         </strong></td>
                                                 </tr>
-
                                                 <?php
                                             } else {
                                                 if ($po->nilai_currency !== null) {
@@ -550,7 +567,7 @@
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons), 4) ?>
                                                             </strong></td>
                                                     </tr>
-                                                    <?php if ($setting !== null ) {
+                                                    <?php if ($setting !== null) {
                                                         ?>
                                                         <tr>    
                                                             <td colspan="7" class="style text-right">DPP Nilai Lain</td>
@@ -574,11 +591,12 @@
                                                             <strong><?= $po->symbol ?> <?= number_format(($totals - $diskons) + $taxes, 4) ?>
                                                             </strong></td>
                                                     </tr>
+
                                                     <?php
                                                 }
                                             }
                                             ?>
-                                        </tbody>
+                                        </tfoot>
                                     </table>
                                     <input type="hidden" name="totals" id="totals" value="<?= ($totals - $diskons) + $taxes ?>">
                                 </div>
@@ -631,7 +649,7 @@
                     }
                 });
                 var uomStock = "0";
-                
+
                 $(".shipment").off("click").unbind("click").on("click", function () {
                     $("#view_data").modal({
                         show: true,
@@ -665,8 +683,8 @@
                     var formatVal = new Intl.NumberFormat(["ban", "id"], {maximumSignificantDigits: 3}).format(number);
                     $(".note_harga_" + row).html(formatVal);
                 });
-                
-                
+
+
                 $(".uom_beli").select2({
                     allowClear: true,
                     placeholder: "Satuan Beli",
@@ -715,7 +733,7 @@
                     $(".note_uom_beli_" + row).html("");
                     $(".nama_uom_" + row).val("");
                 });
-                
+
                 $(".uom_beli").on("select2:open", function () {
                     var row = $(this).attr("data-uom");
                     uomStock = row;
@@ -824,7 +842,7 @@
                         type: "POST",
                         data: {
                             id: "<?= $id ?>",
-                            form:"fpt"
+                            form: "fpt"
                         },
                         beforeSend: function (xhr) {
                             please_wait(function () {});
@@ -855,8 +873,70 @@
                 });
                 getRcv();
 
-            });
+                var index = 0;
+                $(".add-layanan").off('click').on("click", function () {
+                    $(this).hide();
+                    var url_item = "<?= base_url('purchase/fpt/add_layanan') ?>";
+                    $.post(url_item, {index: index, po: "<?= $id ?>"}, function (success) {
+                        $('#tbl-fpt tbody').append(success.data);
+                        index++;
+//                        $(".add-new").hide();
+                    });
+                });
 
+
+
+                $(".delete-layanan").off("click").unbind("click").on("click", function () {
+
+                    const item = $(this).data();
+                    confirmRequest("FPT", "Batalkan FPT ? ", function () {
+
+                        $.ajax({
+                            url: "<?= base_url('purchase/fpt/delete_layanan/'. $id) ?>",
+                            type: "POST",
+                            data: item,
+                            beforeSend: function (xhr) {
+                                please_wait(function () {});
+                            },
+                            success: function (data) {
+                                location.reload();
+                            },
+                            error: function (req, error) {
+                                unblockUI(function () {
+                                    setTimeout(function () {
+                                        alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                    }, 500);
+                                });
+                            }
+                        });
+
+
+                    });
+
+
+                });
+
+            });
+            const saveLayanan = ((item) => {
+                $.ajax({
+                    url: "<?= base_url('purchase/fpt/save_layanan') ?>",
+                    type: "POST",
+                    data: item,
+                    beforeSend: function (xhr) {
+                        please_wait(function () {});
+                    },
+                    success: function (data) {
+                        location.reload();
+                    },
+                    error: function (req, error) {
+                        unblockUI(function () {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                            }, 500);
+                        });
+                    }
+                });
+            });
         </script>
     </body>
 </html>
