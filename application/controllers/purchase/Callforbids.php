@@ -28,7 +28,6 @@ class Callforbids extends MY_Controller {
     public function index() {
         $data['id_dept'] = 'CFB';
         $depth = new $this->m_cfb;
-        $username = $this->session->userdata('username');
         $data['user'] = (object) $this->session->userdata('nama'); //$this->m_user->get_user_by_username($username);
         $data["dept"] = $depth->setTables("departemen")->setSelects(["kode", "nama"])->setOrder(["kode" => "asc"])->getData();
         $this->load->view('purchase/v_cfb', $data);
@@ -264,18 +263,29 @@ class Callforbids extends MY_Controller {
             $listCfb = clone $updt;
             $log = new $this->m_global;
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("mst_produk WRITE,cfb_items ci write,cfb write,procurement_purchase_items write,log_history WRITE,main_menu_sub WRITE");
-            $updt->setTables('cfb_items ci')->setWhereRaw("id in (" . implode(",", $ids) . ")")->setWheres(['status' => $before_status])->update(['status' => $status]);
+            $this->_module->lock_tabel("mst_produk WRITE,cfb_items ci write,cfb write,procurement_purchase_items write,log_history WRITE,main_menu_sub READ");
+            if($status === "cancel") {
+                $updt->setTables('cfb_items ci')->setWhereRaw("id in (" . implode(",", $ids) . ")")->update(['status' => $status]);
+            }
+            else {
+                $updt->setTables('cfb_items ci')->setWhereRaw("id in (" . implode(",", $ids) . ")")->setWheres(['status' => $before_status])->update(['status' => $status]);
+            }
             $listLog = [];
             if ($before_status === "confirm") {
                 $status = "generated";
             }
             $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
-            foreach ($listCfb->setJoins('cfb_items ci', "ci.kode_cfb = cfb.kode_cfb")->setOrder(["ci.id" => "asc"])->setSelects(['kode_pp', "kode_produk", "ci.kode_cfb"])->setWhereRaw("ci.id in (" . implode(",", $ids) . ")")->getData() as $key => $value) {
+            $cid = [];
+            foreach ($listCfb->setJoins('cfb_items ci', "ci.kode_cfb = cfb.kode_cfb")->setOrder(["ci.id" => "asc"])->setSelects(['kode_pp', "kode_produk", "ci.kode_cfb","cfb.id as cid"])->setWhereRaw("ci.id in (" . implode(",", $ids) . ")")->getData() as $key => $value) {
                 $updatePP = new $this->m_cfb;
+                $cid[] = $value->cid;
                 $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => $status]);
                 $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $value->kode_cfb, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
                     "jenis_log" => "edit", "note" => "Merubah Ke status {$status}", "nama_user" => $users["nama"], "ip_address" => ""];
+            }
+            if(count($cid) > 0) {
+                $u =new $this->m_cfb;
+                $u->setWhereRaw("id in (". implode(",", $cid) .")")->update(['status' => $status]);
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);

@@ -185,7 +185,7 @@ class Debitnote extends MY_Controller {
             $head = new $this->m_global;
             $this->_module->startTransaction();
             $lock = "invoice WRITE,jurnal_entries WRITE,jurnal_entries_items WRITE,token_increment WRITE,partner WRITE,invoice_retur WRITE,"
-                    . "currency_kurs WRITE,currency WRITE,tax WRITE,invoice_retur_detail WRITE,user WRITE, main_menu_sub WRITE, log_history WRITE";
+                    . "currency_kurs WRITE,currency WRITE,tax WRITE,invoice_retur_detail WRITE,user READ, main_menu_sub READ, log_history WRITE";
             $this->_module->lock_tabel($lock);
             if ($status === 'cancel') {
                 $cekJurnal = clone $head;

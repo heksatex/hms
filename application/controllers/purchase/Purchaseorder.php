@@ -30,6 +30,7 @@ class Purchaseorder extends MY_Controller {
         $this->load->library("token");
         $this->config->load('additional');
         $this->load->model("m_global");
+        $this->load->library('database/purchase_order',null,'db_purchase_order');
     }
 
 //4833 2650
@@ -59,7 +60,7 @@ class Purchaseorder extends MY_Controller {
             $model5 = clone $model2;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
-            $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
+            $data["po"] = $model1->setTables($this->db_purchase_order::table." po")->setJoins("partner p", "p.id = po.supplier")
                             ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
                             ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
                             ->setJoins("purchase_order_edited poe", "(po.no_po = poe.po_id and poe.status not in ('done','cancel') )", "left")
@@ -98,6 +99,7 @@ class Purchaseorder extends MY_Controller {
             $status = $this->input->post("status");
             $nama_produk = $this->input->post("nama_produk");
             $level = $this->input->post("level");
+            $showCancel = $this->input->post("statusCancel");
             $list = $this->m_po->setTables("purchase_order po")->setOrders([null, "no_po", "nama_supplier", "order_date", "create_date", "po.status"])
                     ->setSelects(["po.*", "p.nama as nama_supplier", "nama_status", "ck.currency as curr_kode", "poe.status as poe_status"])->setOrder(['create_date' => 'desc'])
                     ->setSearch(["p.nama", "no_po", "prioritas", "po.status"])
@@ -108,12 +110,15 @@ class Purchaseorder extends MY_Controller {
 //            if (strtolower($level) === 'direksi')
 //                $list->setWhereRaw("jenis <>'FPT'");
 //            else
-            $list->setWhereRaw("po.status in ('done','cancel','purchase_confirmed','exception') and jenis <>'FPT'");
+            $list->setWhereRaw("jenis <>'FPT'");
 
             $no = $_POST['start'];
 
-            if ($status !== "")
-                $list->setWheres(["po.status" => $status]);
+            if (gettype($status) === 'string')
+                $list->setWhereRaw("po.status in ('done','cancel','purchase_confirmed','exception')");
+            else
+                if(count($status) > 0)
+                    $list->setWhereIn("po.status",$status);
 
             if ($nama_produk !== "")
                 $list->setWhereRaw("po.no_po in (select po_no_po from purchase_order_detail where nama_produk LIKE '%{$nama_produk}%')");
@@ -178,7 +183,7 @@ class Purchaseorder extends MY_Controller {
             }
             $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
             $this->_module->startTransaction();
-            $lockTable = "user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
+            $lockTable = "user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
                     . "purchase_order_detail write,purchase_order write,penerimaan_barang WRITE,penerimaan_barang_items WRITE";
             if ($status === 'done' || $status === "purchase_confirmed") {
                 $lockTable .= ",stock_move_produk WRITE,stock_move WRITE,token_increment WRITE,nilai_konversi nk WRITE,invoice WRITE,invoice_detail write,jurnal_entries WRITE"
@@ -190,6 +195,7 @@ class Purchaseorder extends MY_Controller {
                 case "cancel":
                     $podd = new $this->m_po;
                     $rcv = clone $podd;
+                    
                     $inshipment = $rcv->setTables('penerimaan_barang')
                                     ->setJoins("penerimaan_barang_items", "penerimaan_barang.kode = penerimaan_barang_items.kode")
                                     ->setWheres(['status_barang <>' => 'cancel'])
@@ -197,6 +203,7 @@ class Purchaseorder extends MY_Controller {
                     if ((int) $inshipment > 0) {
                         throw new \Exception("Produk Pada RCV In dengan Origin {$kode_decrypt} Tidak dalam status <strong>CANCEL</strong> semua.", 500);
                     }
+                    
                     $podd = $podd->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt])
                                     ->setSelects(['group_CONCAT("\'",cfb_items_id,"\'") as items', 'group_CONCAT("\'",kode_cfb,"\'") cfb'])->getDetail();
                     if ($podd && $podd->cfb !== null) {
@@ -400,7 +407,7 @@ class Purchaseorder extends MY_Controller {
 //            }
             $grandTotal = ($totals - $diskons) + $taxes;
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("user WRITE, main_menu_sub WRITE, log_history WRITE,mst_produk WRITE,"
+            $this->_module->lock_tabel("user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,"
                     . "purchase_order_detail write,purchase_order write,purchase_order_edited WRITE");
             $this->m_po->setTables("purchase_order_detail")->updateBatch($data, 'id');
             $po = new $this->m_po;
@@ -539,7 +546,7 @@ class Purchaseorder extends MY_Controller {
             }
             $this->_module->startTransaction();
             $locktabel = "purchase_order_detail Write, purchase_order WRITE, purchase_order_edited WRITE,"
-                    . "user WRITE, main_menu_sub WRITE, log_history WRITE,purchase_order_retur WRITE,tax WRITE,"
+                    . "user WRITE, main_menu_sub READ, log_history WRITE,purchase_order_retur WRITE,tax WRITE,"
                     . "jurnal_entries write,token_increment WRITE,nilai_konversi WRITE";
             $this->_module->lock_tabel($locktabel);
             $logProduk = [];
@@ -604,7 +611,7 @@ class Purchaseorder extends MY_Controller {
 
             $this->_module->startTransaction();
             $locktabel = "purchase_order_detail pod Write, purchase_order WRITE,"
-                    . "user WRITE, main_menu_sub WRITE, log_history WRITE,purchase_order_retur por WRITE";
+                    . "user WRITE, main_menu_sub READ, log_history WRITE,purchase_order_retur por WRITE";
             $this->_module->lock_tabel($locktabel);
 
             $checkData = $model->setTables("purchase_order_retur por")
@@ -678,7 +685,7 @@ class Purchaseorder extends MY_Controller {
 
                 $this->_module->startTransaction();
                 $locktabel = "purchase_order_detail pod Write, purchase_order WRITE,"
-                        . "user WRITE, main_menu_sub WRITE, log_history WRITE,purchase_order_retur por WRITE,tax WRITE,invoice write,"
+                        . "user WRITE, main_menu_sub READ, log_history WRITE,purchase_order_retur por WRITE,tax WRITE,invoice write,"
                         . "invoice_detail write,token_increment WRITE,invoice_retur WRITE,invoice_retur_detail WRITE,"
                         . "stock_move WRITE, stock_move_produk WRITE, departemen d WRITE,"
                         . "pengiriman_barang WRITE, pengiriman_barang_items WRITE, departemen WRITE, mst_produk WRITE";
