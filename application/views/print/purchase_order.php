@@ -80,7 +80,7 @@
                         <th style="border-bottom: 1px solid black;width: 60px;">Taxes</th>
                         <th style="border-bottom: 1px solid black;width: 90px;">Date Req</th>
                         <th style="border-bottom: 1px solid black;width: 100px;">Qty</th>
-                        <th style="text-align: right;border-bottom: 1px solid black;">Unit Price&nbsp;</th>
+                        <th style="text-align: right;border-bottom: 1px solid black; width: 140px">Unit Price&nbsp;</th>
                         <th style="text-align: right;border-bottom: 1px solid black;">Net Price</th>
                     </tr>
                 </thead>
