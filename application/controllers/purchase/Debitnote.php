@@ -237,7 +237,10 @@ class Debitnote extends MY_Controller {
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
                 $jurnalDB->setTables("jurnal_entries")->save($jurnalData);
                 $pajakLain = [];
-
+                    
+                $jurnalItems = [];
+                $tax = 0;
+                $totalNominal = 0;
                 foreach ($dataItems as $key => $value) {
                     if ($value->account === null) {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
@@ -258,7 +261,7 @@ class Debitnote extends MY_Controller {
                     );
 //                    $tax += $nominal * $value->tax_amount;
                     $totalNominal += $nominal;
-                    if ($value->tax_id !== null || $value->tax_id !== "0") {
+                    if ($value->tax_id !== "0") {
                         $pajakLain[] = array(
                             "nominal" => $nominal,
                             "tax_lain" => $value->tax_lain_id,
@@ -275,18 +278,12 @@ class Debitnote extends MY_Controller {
                 $model2 = clone $model;
                 $model2->setTables("tax");
                 $rowCount = count($dataItems);
-                $jurnalItems = [];
-                $tax = 0;
-                $totalNominal = 0;
                 $checkDpp = $dataItems[0]->dpp_lain > 0;
                 $model->setTables("setting");
                 if (count($pajakLain) > 0) {
                     $dataPajak = [];
                     foreach ($pajakLain as $kk => $value) {
                         $value = (object) $value;
-                        if ($value->tax === "0") {
-                            continue;
-                        }
                         $rowCount++;
                         $taxx = 0;
                         $base = 0;
