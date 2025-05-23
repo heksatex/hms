@@ -196,6 +196,7 @@
                                                 <th class="style bb ws no" >Diskon</th>
                                                 <th class="style bb ws no" >Pajak</th>
                                                 <th class="style bb ws no" >Subtotal</th>
+                                                <th class="style bb ws no">Footnote</th>
                                             </tr>
                                             <tbody id="tBody" class="ws">
 

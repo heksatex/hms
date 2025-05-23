@@ -30,6 +30,7 @@ foreach ($data as $key => $value) {
         <td><?= number_format($value->diskon, 2) ?></td>
         <td><?= number_format($pajak, 2) ?></td>
         <td><?= number_format(($subsubtotal), 2) ?></td>
+        <td><?= nl2br($value->foot_note ?? "") ?></td>
     </tr>
     <?php
     if ($group !== "") {
