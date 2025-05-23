@@ -683,24 +683,22 @@ class Requestforquotation extends MY_Controller {
                 foreach ($dataItemOrder as $key => $value) {
                     $row = count($produk) + 1;
                     $updateDataDetail[] = ['id' => $value->id, 'status' => $status, 'nilai_konversi' => $value->nilai];
-                    if (!isset($produk[$value->kode_produk])) {
-                        $produk[$value->kode_produk] = [
-                            'nama_produk' => $value->nama_produk,
-                            'kode_produk' => $value->kode_produk,
-                            'qty' => ($value->qty_beli * $value->nilai),
-                            'uom' => $value->uom_stock,
-                            'status' => 'ready',
-                            'origin_prod' => $value->kode_produk . "_" . $row,
-                            'row_order' => $row,
-                            'kode_pp' => $value->kode_pp,
-                            'qty_beli' => $value->qty_beli,
-                            'uom_beli' => $value->uom_beli,
-                            'id_konversiuom' => $value->id_konversiuom,
-                            'nilai_konversiuom' => $value->nilai
-                        ];
-                    } else {
-                        $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
-                    }
+                    $produk[] = [
+                        'nama_produk' => $value->nama_produk,
+                        'kode_produk' => $value->kode_produk,
+                        'qty' => ($value->qty_beli * $value->nilai),
+                        'uom' => $value->uom_stock,
+                        'status' => 'ready',
+                        'origin_prod' => $value->kode_produk . "_" . $row,
+                        'row_order' => $row,
+                        'kode_pp' => $value->kode_pp,
+                        'qty_beli' => $value->qty_beli,
+                        'uom_beli' => $value->uom_beli,
+                        'id_konversiuom' => $value->id_konversiuom,
+                        'nilai_konversiuom' => $value->nilai,
+                        "reff_note" => $value->reff_note
+                    ];
+
                     if ($data->cfb_manual === "0") {
                         $updatePP = new $this->m_po;
                         $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => "po"]);
@@ -738,7 +736,7 @@ class Requestforquotation extends MY_Controller {
                 $detailProduk = [];
                 foreach ($produk as $keys => $values) {
                     $clone = $values;
-                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"], $clone["id_konversiuom"], $clone["nilai_konversiuom"]);
+                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"], $clone["id_konversiuom"], $clone["nilai_konversiuom"], $clone["reff_note"]);
                     $smProduk[] = array_merge($clone, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
                     unset($values["status"]);
                     $detailProduk[] = array_merge($values, ['kode' => $kodeRcv, 'lot' => '', 'status_barang' => 'ready']);

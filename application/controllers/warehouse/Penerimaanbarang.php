@@ -846,7 +846,8 @@ class Penerimaanbarang extends MY_Controller {
                                         "kode_pp" => $row->kode_pp,
                                         "row_order" => $in_row,
                                         "id_konversiuom" => $row->id_konversiuom,
-                                        "nilai_konversiuom" => $row->nilai_konversiuom
+                                        "nilai_konversiuom" => $row->nilai_konversiuom,
+                                        "reff_note" => $row->reff_note
                                     );
 
                                     //simpan ke stock move produk 
@@ -874,7 +875,8 @@ class Penerimaanbarang extends MY_Controller {
                                     "kode_pp" => $row->kode_pp,
                                     "row_order" => $in_row,
                                     "id_konversiuom" => $row->id_konversiuom,
-                                    "nilai_konversiuom" => $row->nilai_konversiuom
+                                    "nilai_konversiuom" => $row->nilai_konversiuom,
+                                    "reff_note" => $row->reff_note
                                 );
                                 //simpan ke stock move produk 
                                 $sql_stock_move_produk_batch .= "('" . $move_id . "','" . addslashes($row->kode_produk) . "','" . addslashes($row->nama_produk) . "','" . $qty_back . "','" . addslashes($row->uom) . "','" . $status_back_order . "','" . $in_row . "','" . addslashes($origin_prod) . "'), ";
@@ -1130,7 +1132,7 @@ class Penerimaanbarang extends MY_Controller {
                 $dataPO = $po->setWheres(["no_po" => $orig,])->setWhereRaw("purchase_order_detail.status not in ('cancel','retur')")
                         ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
                         ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and penerimaan_barang_items.status_barang='done' "
-                                . "and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk)")
+                                . "and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk and penerimaan_barang_items.kode_pp = purchase_order_detail.kode_pp)")
                         ->setJoins("penerimaan_barang", "penerimaan_barang_items.kode = penerimaan_barang.kode")
                         ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
                         ->setJoins("tax", "tax.id = purchase_order_detail.tax_id", "left")
