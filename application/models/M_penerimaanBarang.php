@@ -198,7 +198,7 @@ class M_penerimaanBarang extends CI_Model
 
 	public function get_list_penerimaan_barang($kode)
 	{
-		return $this->db->query("SELECT pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,pbi.kode_pp, pbi.qty_beli, pbi.uom_beli,
+		return $this->db->query("SELECT pbi.reff_note,pbi.lot,pbi.nama_produk, pbi.qty, pbi.kode_produk, pbi.nama_produk, pbi.uom, pbi.qty, pbi.status_barang, pbi.origin_prod,pbi.kode_pp, pbi.qty_beli, pbi.uom_beli,
 									((SELECT IFNULL(sum(smi.qty),'') FROM stock_move_items smi 	WHERE  smi.move_id = pb.move_id And smi.kode_produk = pbi.kode_produk AND smi.origin_prod = pbi.origin_prod) +
 									(SELECT IFNULL(sum(tmp.qty),'') FROM penerimaan_barang_tmpp_add_quant tmp 	WHERE  tmp.kode = pbi.kode And tmp.kode_produk = pbi.kode_produk AND tmp.origin_prod = pbi.origin_prod)) as sum_qty
 								FROM penerimaan_barang_items pbi

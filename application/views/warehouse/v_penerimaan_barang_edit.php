@@ -180,10 +180,11 @@
                                                             <th class="style" style="text-align: right;">Qty</th>
                                                             <th class="style">uom</th>
                                                             <th class="style" style="text-align: right;">Tersedia</th>
-                                                            <?php if ($list->dept_id == 'RCV') { ?>
+                                                            <?php if ($list->dept_id === 'RCV') { ?>
                                                                 <th class="style">Kode PP</th>
                                                                 <th class="style" style="text-align: right;">Qty Beli</th>
                                                                 <th class="style">uom Beli</th>
+                                                                <th class="style">Reff Note</th>
                                                             <?php } ?>
                                                             <th class="style">Status</th>
                                                         </tr>
@@ -227,6 +228,9 @@
                                                                         <td><?= $row->kode_pp ?></td>
                                                                         <td align="right"><?= number_format($row->qty_beli, 2) ?></td>
                                                                         <td><?= $row->uom_beli ?></td>
+                                                                        <td>
+                                                                            <?= nl2br($row->reff_note ?? "") ?>
+                                                                        </td>
                                                                     <?php } ?>
                                                                     <td><?php
                                                                         if ($row->status_barang == 'cancel') echo 'Batal';

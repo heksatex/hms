@@ -197,10 +197,10 @@ class Purchaseorder extends MY_Controller {
                 $sheet->setCellValue('J' . $row, $value->uom_beli);
                 $sheet->setCellValue('K' . $row, $value->nama_curr);
                 $sheet->setCellValue('L' . $row, (string) $value->nilai_currency);
-                $sheet->setCellValue('M' . $row, number_format($value->harga_per_uom_beli, 2));
-                $sheet->setCellValue('N' . $row, number_format($value->diskon, 2));
-                $sheet->setCellValue('O' . $row, number_format($value->pajak, 2));
-                $sheet->setCellValue('P' . $row, number_format($value->total, 2));
+                $sheet->setCellValue('M' . $row, (float)$value->harga_per_uom_beli);
+                $sheet->setCellValue('N' . $row, $value->diskon);
+                $sheet->setCellValue('O' . $row, $value->pajak);
+                $sheet->setCellValue('P' . $row, $value->total);
                 $sheet->setCellValue('q' . $row, nl2br($value->foot_note));
                 $row++;
                 if ($groups !== "") {
