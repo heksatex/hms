@@ -846,7 +846,8 @@ class Penerimaanbarang extends MY_Controller {
                                         "kode_pp" => $row->kode_pp,
                                         "row_order" => $in_row,
                                         "id_konversiuom" => $row->id_konversiuom,
-                                        "nilai_konversiuom" => $row->nilai_konversiuom
+                                        "nilai_konversiuom" => $row->nilai_konversiuom,
+                                        "reff_note" => $row->reff_note
                                     );
 
                                     //simpan ke stock move produk 
@@ -874,7 +875,8 @@ class Penerimaanbarang extends MY_Controller {
                                     "kode_pp" => $row->kode_pp,
                                     "row_order" => $in_row,
                                     "id_konversiuom" => $row->id_konversiuom,
-                                    "nilai_konversiuom" => $row->nilai_konversiuom
+                                    "nilai_konversiuom" => $row->nilai_konversiuom,
+                                    "reff_note" => $row->reff_note
                                 );
                                 //simpan ke stock move produk 
                                 $sql_stock_move_produk_batch .= "('" . $move_id . "','" . addslashes($row->kode_produk) . "','" . addslashes($row->nama_produk) . "','" . $qty_back . "','" . addslashes($row->uom) . "','" . $status_back_order . "','" . $in_row . "','" . addslashes($origin_prod) . "'), ";
