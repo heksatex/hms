@@ -60,9 +60,12 @@ class Purchaseorder extends MY_Controller {
         $model = new $this->m_global;
         $model->setTables("purchase_order po")->setJoins("purchase_order_detail pod", "pod.po_id = po.id")
                 ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
-                ->setJoins("partner", "partner.id = po.supplier", "left")->SetJoins("tax", "tax.id = pod.tax_id", "left")
+                ->setJoins("partner", "partner.id = po.supplier", "left")
+                ->SetJoins("tax", "tax.id = pod.tax_id", "left")
                 ->setJoins("departemen", "departemen.kode = pod.warehouse", "left")
-                ->setSelects(["pod.*,nilai_currency,IF(jenis = 'rfq','PO','FPT') as jenis", "partner.nama as nama_supp", "coalesce(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "departemen.nama as gudang",
+                ->setSelects(["pod.*,nilai_currency,IF(jenis = 'rfq','PO','FPT') as jenis", "partner.nama as nama_supp",
+                    "coalesce(tax.amount,0) as amount_tax,tax.dpp as dpp_tax,coalesce(tax.tax_lain_id,0) as tax_lain_id",
+                    "departemen.nama as gudang",
                     "po.order_date", "currency_kurs.currency as nama_curr"])->setOrder(["order_date" => "asc"])
                 ->setWheres(["po.order_date >=" => $tanggalAwal, "po.order_date <=" => $tanggalAkhir])->setWhereIn("po.status", ["purchase_confirmed", "done"]);
         if ($jenis !== "") {
@@ -154,19 +157,33 @@ class Purchaseorder extends MY_Controller {
             $row = 2;
             $data = $model->getData();
             $model3 = new $this->m_global;
+            $models = clone $model3;
+            $models->setTables("tax");
             $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             foreach ($data as $key => $value) {
-                $harga =  $value->harga_per_uom_beli;
-                $diskon =  $value->diskon;
-                $subsubtotal = ($value->qty_beli * $harga) - $diskon;
-                if ($setDpp !== null) {
-                    $pajak = (($subsubtotal * 11) / 12) * $value->amount_tax;
-                } else {
-                    $pajak = $subsubtotal * $value->amount_tax;
-                }
+//                $harga =  $value->harga_per_uom_beli;
+//                $diskon =  $value->diskon;
+//                $subsubtotal = ($value->qty_beli * $harga) - $diskon;
+//                
+//                if ($setDpp !== null && $value->dpp_tax !== "1") {
+//                    $pajak = (($subsubtotal * 11) / 12) * $value->amount_tax;
+//                } else {
+//                    $pajak = $subsubtotal * $value->amount_tax;
+//                }
+//                
+//                 if ($value->tax_lain_id !== "0") {
+//                     $dataTax = $models->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+//                     foreach ($dataTax as $kkk => $datas) {
+//                        if ($setDpp !== null && $datas->dpp === "1") {
+//                            $pajak += (($subsubtotal * 11) / 12) * $datas->amount;
+//                            continue;
+//                        }
+//                        $pajak += $subsubtotal * $datas->amount;
+//                    }
+//                 }
 
 //                $pajak = $subsubtotal * $value->amount_tax;
-                $total_group += $subsubtotal + $pajak;
+                $total_group += $value->total;
 
                 $sheet->setCellValue('A' . $row, $no);
                 $sheet->setCellValue('B' . $row, $value->po_no_po);
@@ -182,8 +199,8 @@ class Purchaseorder extends MY_Controller {
                 $sheet->setCellValue('L' . $row, (string) $value->nilai_currency);
                 $sheet->setCellValue('M' . $row, number_format($value->harga_per_uom_beli, 2));
                 $sheet->setCellValue('N' . $row, number_format($value->diskon, 2));
-                $sheet->setCellValue('O' . $row, number_format($pajak, 2));
-                $sheet->setCellValue('P' . $row, number_format(($subsubtotal + $pajak), 2));
+                $sheet->setCellValue('O' . $row, number_format($value->pajak, 2));
+                $sheet->setCellValue('P' . $row, number_format($value->total, 2));
                 $row++;
                 if ($groups !== "") {
                     $cek1 = (array) $value;

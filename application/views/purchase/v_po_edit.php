@@ -387,7 +387,7 @@
                                                                     ?>
                                                                 </td>
                                                                 <td><?= $noo ?></td>
-                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
+                                                                <td class="<?= (($value->pritoritas ?? "") === 'Urgent') ? 'prio-urgent' : '' ?>">
                                                                     <?php
                                                                     $image = "/upload/product/" . $value->kode_produk . ".jpg";
                                                                     $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
@@ -448,7 +448,7 @@
                                                     <th class="style" style="width:10%">Schedule Date</th>
                                                     <th class="style"style="width:15%" >Qty / Uom Beli</th>
                                                     <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
-                                                    <td class="style text-right" >Tax</td>
+                                                    <td class="style text-right" style="min-width: 100px">Tax</td>
                                                     <td class="style" >Reff Note</td>
                                                     </thead>
                                                     <tbody>
@@ -456,21 +456,36 @@
                                                         $no = 0;
                                                         $amountTaxes = 0;
                                                         $nilaiDppLain = 0;
+                                                        $getTax = new $this->m_global;
+                                                        $getTax->setTables("tax");
                                                         foreach ($po_items as $key => $value) {
                                                             $no += 1;
                                                             $total = ($value->qty_beli * $value->harga_per_uom_beli);
                                                             $totals += $total;
                                                             $diskon = (($value->diskon ?? 0));
                                                             $diskons += $diskon;
-                                                            if ($setting !== null) {
-                                                                $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                            $taxe = 0;
+                                                            if ($setting !== null && $value->dpp_tax === "1") {
+                                                                $taxe += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
                                                                 $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                                                             } else {
-                                                                $taxes += ($total - $diskon) * $value->amount_tax;
+                                                                $taxe += ($total - $diskon) * $value->amount_tax;
                                                             }
                                                             if ($value->amount_tax > 0) {
                                                                 $amountTaxes = $value->amount_tax;
                                                             }
+
+                                                            if ($value->tax_lain_id !== "0") {
+                                                                $dataTax = $getTax->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                                                                foreach ($dataTax as $kkk => $data) {
+                                                                    if ($setting !== null && $data->dpp === "1") {
+                                                                        $taxe += ((($total - $diskon) * 11) / 12) * $data->amount;
+                                                                        continue;
+                                                                    }
+                                                                    $taxe += ($total - $diskon) * $data->amount;
+                                                                }
+                                                            }
+                                                            $taxes += $taxe;
                                                             ?>
                                                             <tr>
                                                                 <td>
@@ -486,7 +501,7 @@
                                                                 <td>
                                                                     <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
                                                                 </td>
-                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
+                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent' : '' ?>">
                                                                     <?php
                                                                     $image = "/upload/product/" . $value->kode_produk . ".jpg";
                                                                     $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
@@ -507,11 +522,12 @@
                                                                 <td>
                                                                     <div class="form-group">
                                                                         <div class="input-group">
-                                                                            <div class="input-group-addon"><?= $value->qty_beli ?></div>
+                                                                            <div class="input-group-addon"><?= number_format($value->qty_beli,2) ?></div>
                                                                             <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
                                                                             <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                             <input type="hidden" name="id_konversiuom[<?= $value->id ?>]"  value="<?= $value->id_konversiuom ?>">
                                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                                            <input type="hidden" class="tax_lain_id_<?= $key ?>" name="tax_lain_id[<?= $value->id ?>]" value="<?= $value->tax_lain_id ?>">
                                                                             <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
                                                                             <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>" disabled>
                                                                                 <option></option>
@@ -544,7 +560,7 @@
                                                                             <?php
                                                                             foreach ($tax as $key => $taxs) {
                                                                                 ?>
-                                                                                <option data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                <option data-dpp_tax="<?= $taxs->dpp ?>" data-tax_lain_id="<?= $taxs->tax_lain_id ?>" data-nilai_tax="<?= $taxs->amount ?>" value='<?= $taxs->id . "|" . $taxs->amount ?>' <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                                 <?php
                                                                             }
                                                                             ?>
@@ -931,8 +947,10 @@
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
                     var dpp_tax = $(".tax" + row + " :selected").data().dpp_tax;
+                    var tax_lain = $(".tax" + row + " :selected").data().tax_lain_id;
                     $(".dpp_tax_" + row).val(dpp_tax);
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
+                    $(".tax_lain_id_" + row).val(tax_lain);
                 });
 
                 $("#currency").on("select2:select", function () {

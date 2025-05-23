@@ -347,6 +347,8 @@
                                         </thead>
                                         <tbody>
                                             <?php
+                                            $getTax = new $this->m_global;
+                                            $getTax->setTables("tax");
                                             $no = 0;
                                             $amountTaxes = 0;
                                             $nilaiDppLain = 0;
@@ -356,21 +358,33 @@
                                                 $totals += $total;
                                                 $diskon = ($value->diskon ?? 0);
                                                 $diskons += $diskon;
-                                                if ($setting !== null) {
-                                                    $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                $taxe = 0;
+                                                if ($setting !== null && $value->dpp_tax === "1") {
+                                                    $taxe += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
                                                     $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                                                 } else {
-                                                    $taxes += ($total - $diskon) * $value->amount_tax;
+                                                    $taxe += ($total - $diskon) * $value->amount_tax;
                                                 }
                                                 if ($value->amount_tax > 0) {
                                                     $amountTaxes = $value->amount_tax;
                                                 }
+                                                if ($value->tax_lain_id !== "0") {
+                                                    $dataTax = $getTax->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                                                    foreach ($dataTax as $kkk => $data) {
+                                                        if ($setting !== null && $data->dpp === "1") {
+                                                            $taxe += ((($total - $diskon) * 11) / 12) * $data->amount;
+                                                            continue;
+                                                        }
+                                                        $taxe += ($total - $diskon) * $data->amount;
+                                                    }
+                                                }
+                                                $taxes += $taxe;
                                                 ?>
                                                 <tr>
                                                     <td>
                                                         <?= $no ?>
-                                                        
-                                                        <?= ($value->deleting === "1" && $po->status ==="draft") ? '<a style="color:red" class="delete-layanan" data-ids="' . $value->id . '"><i class="fa fa-trash"></i></a>' : '' ?>
+
+                                                        <?= ($value->deleting === "1" && $po->status === "draft") ? '<a style="color:red" class="delete-layanan" data-ids="' . $value->id . '"><i class="fa fa-trash"></i></a>' : '' ?>
                                                     </td>
                                                     <td>
                                                         <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
@@ -401,7 +415,7 @@
                                                     <td style="width: 15%">
                                                         <div class="form-group">
                                                             <div class="input-group">
-                                                                <div class="input-group-addon"><?= $value->qty_beli ?></div>
+                                                                <div class="input-group-addon"><?= number_format($value->qty_beli,2) ?></div>
                                                                 <input type="hidden" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>">
                                                                 <input type="hidden" name="uom_jual[<?= $value->id ?>]" value="<?= $value->uom ?>">
                                                                 <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>"  data-uom="<?= $value->uom ?>" style="width: 70%" data-row="<?= $key ?>"
@@ -442,6 +456,7 @@
                                                         <div class="form-group text-right">
                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
                                                             <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
+                                                            <input type="hidden" class="tax_lain_id_<?= $key ?>" name="tax_lain_id[<?= $value->id ?>]" value="<?= $value->tax_lain_id ?>">
                                                             <?php if ($po->no_value === "1") { ?>
                                                                 <select style="width: 70%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                         name="tax[<?= $value->id ?>]"  disabled>
@@ -455,7 +470,7 @@
                                                                     <?php
                                                                     foreach ($tax as $key => $taxs) {
                                                                         ?>
-                                                                        <option value='<?= $taxs->id ?>' data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                        <option value='<?= $taxs->id ?>' data-tax_lain_id="<?= $taxs->tax_lain_id ?>" data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                         <?php
                                                                     }
                                                                     ?>
@@ -667,14 +682,17 @@
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
                     var dpp_tax = $(".tax" + row + " :selected").data().dpp_tax;
+                    var tax_lain = $(".tax" + row + " :selected").data().tax_lain_id;
                     $(".dpp_tax_" + row).val(dpp_tax);
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
+                    $(".tax_lain_id_" + row).val(tax_lain);
                 });
 
                 $(".tax").on("change", function () {
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
                     $(".dpp_tax_" + row).val("1");
+                    $(".tax_lain_id_" + row).val("0");
                 });
 
                 $(".harga_satuan").on("input", function () {
@@ -889,10 +907,9 @@
                 $(".delete-layanan").off("click").unbind("click").on("click", function () {
 
                     const item = $(this).data();
-                    confirmRequest("FPT", "Batalkan FPT ? ", function () {
-
+                    confirmRequest("FPT", "Hapus Layanan ? ", function () {
                         $.ajax({
-                            url: "<?= base_url('purchase/fpt/delete_layanan/'. $id) ?>",
+                            url: "<?= base_url('purchase/fpt/delete_layanan/' . $id) ?>",
                             type: "POST",
                             data: item,
                             beforeSend: function (xhr) {

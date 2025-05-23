@@ -38,8 +38,8 @@ foreach ($data as $key => $value) {
         if ($cek1[$group] !== $cek2[$group]) {
             ?>
             <tr>
-                <td colspan="13" style="text-align: right"><strong>Total</strong></td>
-                <td><?= number_format($total_group, 2) ?></td>
+                <td colspan="12" style="text-align: right"><strong>Total</strong></td>
+                <td><strong><?= number_format($total_group, 2) ?></strong></td>
             </tr>        
             <?php
             $total_group = 0;

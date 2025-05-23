@@ -422,6 +422,8 @@
                                                     </thead>
                                                     <tbody>
                                                         <?php
+                                                        $getTax = new $this->m_global;
+                                                        $getTax->setTables("tax");
                                                         $no = 0;
                                                         $amountTaxes = 0;
                                                         $nilaiDppLain = 0;
@@ -431,15 +433,27 @@
                                                             $totals += $total;
                                                             $diskon = ($value->diskon ?? 0);
                                                             $diskons += $diskon;
-                                                            if ($setting !== null) {
-                                                                $taxes += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
+                                                            $taxe = 0;
+                                                            if ($setting !== null && $value->dpp_tax === "1") {
+                                                                $taxe += ((($total - $diskon) * 11) / 12) * $value->amount_tax;
                                                                 $nilaiDppLain += ((($total - $diskon) * 11) / 12);
                                                             } else {
-                                                                $taxes += ($total - $diskon) * $value->amount_tax;
+                                                                $taxe += ($total - $diskon) * $value->amount_tax;
                                                             }
                                                             if ($value->amount_tax > 0) {
                                                                 $amountTaxes = $value->amount_tax;
                                                             }
+                                                            if ($value->tax_lain_id !== "0") {
+                                                                $dataTax = $getTax->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                                                                foreach ($dataTax as $kkk => $data) {
+                                                                    if ($setting !== null && $data->dpp === "1") {
+                                                                        $taxe += ((($total - $diskon) * 11) / 12) * $data->amount;
+                                                                        continue;
+                                                                    }
+                                                                    $taxe += ($total - $diskon) * $data->amount;
+                                                                }
+                                                            }
+                                                            $taxes += $taxe;
                                                             ?>
                                                             <tr>
                                                                 <td>
@@ -455,7 +469,7 @@
                                                                 <td>
                                                                     <?= ($value->kode_cfb === "") ? "" : $value->kode_cfb ?>
                                                                 </td>
-                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent':'' ?>">
+                                                                <td class="<?= ($value->pritoritas === 'Urgent') ? 'prio-urgent' : '' ?>">
                                                                     <?php
                                                                     $image = "/upload/product/" . $value->kode_produk . ".jpg";
                                                                     $imageThumb = "/upload/product/thumb-" . $value->kode_produk . ".jpg";
@@ -521,6 +535,7 @@
                                                                     <div class="form-group text-right">
                                                                         <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
                                                                         <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
+                                                                        <input type="hidden" class="tax_lain_id_<?= $key ?>" name="tax_lain_id[<?= $value->id ?>]" value="<?= $value->tax_lain_id ?>">
                                                                         <?php if ($po->no_value === "1") { ?>
                                                                             <select style="width: 100%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                                     name="tax[<?= $value->id ?>]"  disabled>
@@ -534,7 +549,7 @@
                                                                                 <?php
                                                                                 foreach ($tax as $key => $taxs) {
                                                                                     ?>
-                                                                                    <option value='<?= $taxs->id ?>' data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                    <option value='<?= $taxs->id ?>' data-tax_lain_id="<?= $taxs->tax_lain_id ?>" data-dpp_tax="<?= $taxs->dpp ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                                     <?php
                                                                                 }
                                                                                 ?>
@@ -551,10 +566,10 @@
                 <!--                                                    <td>
                                                         <div class="form-group">
                                                                 <?php if ($po->no_value === "1") { ?>
-                                                                                                                                        <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
+                                                                                                                                                            <input type="text" class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" style="width: 70%" value="0" readonly>
                                                                 <?php } else { ?>
-                                                                                                                                        <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
-                                                                                                                                               style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
+                                                                                                                                                            <input class="form-control pull-right input-sm" name="diskon[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                                                                                                                   style="width: 70%" value="<?= $value->diskon > 0 ? $value->diskon : 0 ?>"  required>
                                                                 <?php } ?>
                                                         </div>
                                                     </td>-->
@@ -772,14 +787,17 @@
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
                     var dpp_tax = $(".tax" + row + " :selected").data().dpp_tax;
+                    var tax_lain = $(".tax" + row + " :selected").data().tax_lain_id;
                     $(".dpp_tax_" + row).val(dpp_tax);
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
+                    $(".tax_lain_id_" + row).val(tax_lain);
                 });
 
                 $(".tax").on("change", function () {
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
                     $(".dpp_tax_" + row).val("1");
+                    $(".tax_lain_id_" + row).val("0");
                 });
 
                 $(".uom_beli").on("select2:open", function () {
@@ -969,7 +987,7 @@
                     });
                     $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
                     $('.modal-title').text('Add Item');
-                    $.post("<?= base_url('purchase/requestforquotation/tambahkan_item/') ?>", {"id":"<?= $id ?>"}, function (data) {
+                    $.post("<?= base_url('purchase/requestforquotation/tambahkan_item/') ?>", {"id": "<?= $id ?>"}, function (data) {
                         setTimeout(function () {
                             $(".tambah_data").html(data.data);
                             $("#btn-tambah").html("Tambahkan");
