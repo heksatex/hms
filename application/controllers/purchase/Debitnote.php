@@ -103,7 +103,7 @@ class Debitnote extends MY_Controller {
             $data["invDetail"] = $detail->setTables("invoice_retur_detail")->setWheres(["invoice_retur_id" => $datas->id])
                             ->setJoins("tax", "tax.id = tax_id", "left")
                             ->setJoins("coa", "coa.kode_coa = account", "left")
-                            ->setSelects(["invoice_retur_detail.*", "tax.nama as pajak,tax.ket as pajak_ket,amount", "kode_coa,coa.nama as nama_coa"])
+                            ->setSelects(["invoice_retur_detail.*", "tax.nama as pajak,tax.ket as pajak_ket,amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax", "kode_coa,coa.nama as nama_coa"])
                             ->setOrder(["id"])->getData();
             $this->load->view('purchase/v_invoice_retur_edit', $data);
         } catch (Exception $ex) {
@@ -130,6 +130,7 @@ class Debitnote extends MY_Controller {
             $dsk = $this->input->post("diskon");
             $matauang = $this->input->post("nilai_matauang");
             $tanggal_sj = $this->input->post("tanggal_sj");
+            $tax_lain = $this->input->post("tax_lain_id");
 
             $item = [];
             $totals = 0.00;
@@ -137,17 +138,32 @@ class Debitnote extends MY_Controller {
             $taxes = 0.00;
             $nilaiDppLain = 0;
 
+            $model = new $this->m_global;
+            $model->setTables("tax");
+
             foreach ($harga as $key => $value) {
                 $item[] = ["id" => $key, "harga_satuan" => $value, "account" => $coa[$key], "tax_id" => $tax[$key], 'amount_tax' => $amount_tax[$key], "diskon" => $dsk[$key]];
                 $total = ($qty_beli[$key] * $value);
                 $totals += $total;
                 $diskon = ($dsk[$key] ?? 0);
                 $diskons += $diskon;
-                if ($dpplain === "1") {
-                    $taxes += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
+                $taxe = 0;
+                if ($dpplain === "1" && $tax_lain[$key] === "1") {
+                    $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                 } else {
-                    $taxes += ($total - $diskon) * $amount_tax[$key];
+                    $taxe += ($total - $diskon) * $amount_tax[$key];
                 }
+                if ($tax_lain[$key] !== "0") {
+                    $dataTax = $model->setWhereIn("id", explode(",", $tax_lain[$key]), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                    foreach ($dataTax as $kkk => $datas) {
+                        if ($dpplain === "1" && $datas->dpp === "1") {
+                            $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
+                            continue;
+                        }
+                        $taxe += ($total - $diskon) * $datas->amount;
+                    }
+                }
+                $taxes += $taxe;
             }
             if ($dpplain === "1") {
                 $nilaiDppLain = (($totals - $diskons) * 11) / 12;
@@ -184,7 +200,7 @@ class Debitnote extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $head = new $this->m_global;
             $this->_module->startTransaction();
-            $lock = "invoice WRITE,jurnal_entries WRITE,jurnal_entries_items WRITE,token_increment WRITE,partner WRITE,invoice_retur WRITE,"
+            $lock = "invoice WRITE,jurnal_entries WRITE,jurnal_entries_items WRITE,token_increment WRITE,partner WRITE,invoice_retur WRITE,setting read,"
                     . "currency_kurs WRITE,currency WRITE,tax WRITE,invoice_retur_detail WRITE,user READ, main_menu_sub READ, log_history WRITE";
             $this->_module->lock_tabel($lock);
             if ($status === 'cancel') {
@@ -212,17 +228,15 @@ class Debitnote extends MY_Controller {
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
                                 ->setSelects(["invoice_retur_detail.*", "invoice_retur.id_supplier,invoice_retur.journal as jurnal,dpp_lain,nilai_matauang",
                                     "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
-                                    "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama", "partner.nama as nama_supp"])
+                                    "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
+                                    "partner.nama as nama_supp,tax.ket"])
                                 ->setOrder(["invoice_retur_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => date('y', strtotime($now)) . '/' . date('m', strtotime($now)),
                     "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => date("Y-m-d H:i:s"), "tipe" => ($dataItems[0]->jurnal ?? ""),
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
                 $jurnalDB->setTables("jurnal_entries")->save($jurnalData);
-
-                $jurnalItems = [];
-                $tax = 0;
-                $totalNominal = 0;
+                $pajakLain = [];
 
                 foreach ($dataItems as $key => $value) {
                     if ($value->account === null) {
@@ -242,30 +256,114 @@ class Debitnote extends MY_Controller {
                         "nominal" => ($nominal * $value->nilai_matauang),
                         "row_order" => ($key + 1)
                     );
-                    $tax += $nominal * $value->tax_amount;
+//                    $tax += $nominal * $value->tax_amount;
                     $totalNominal += $nominal;
-                }
-                $model = new $this->m_global;
-                if ($tax > 0) {
-                    if ($dataItems[0]->dpp_lain > 0) {
-                        $tax = $dataItems[0]->dpp_lain * $dataItems[0]->tax_amount;
+                    if ($value->tax_id !== null || $value->tax_id !== "0") {
+                        $pajakLain[] = array(
+                            "nominal" => $nominal,
+                            "tax_lain" => $value->tax_lain_id,
+                            "tax" => $value->tax_id,
+                            "dpp_tax" => $value->dpp_tax,
+                            "ket_tax" => $value->ket,
+                            "amount" => $value->tax_amount,
+                            "tax_nama" => $value->tax_nama
+                        );
                     }
-                    $defaultPpn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_default_ppn"])->setSelects(["value"])->getDetail();
-                    $jurnalItems[] = array(
-                        "kode" => $jurnal,
-                        "nama" => "{$dataItems[0]->tax_nama}",
-                        "reff_note" => "",
-                        "partner" => $dataItems[0]->id_supplier,
-                        "kode_coa" => ($defaultPpn->value ?? 0),
-                        "posisi" => "C",
-                        "nominal_curr" => ($tax / $dataItems[0]->kurs),
-                        "kurs" => $dataItems[0]->kurs,
-                        "kode_mua" => $dataItems[0]->name_curr,
-                        "nominal" => ($tax * $dataItems[0]->nilai_matauang),
-                        "row_order" => count($dataItems) + 1
-                    );
                 }
-                $defaultPpn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"])->setSelects(["value"])->getDetail();
+
+                $model = new $this->m_global;
+                $model2 = clone $model;
+                $model2->setTables("tax");
+                $rowCount = count($dataItems);
+                $jurnalItems = [];
+                $tax = 0;
+                $totalNominal = 0;
+                $checkDpp = $dataItems[0]->dpp_lain > 0;
+                $model->setTables("setting");
+                if (count($pajakLain) > 0) {
+                    $dataPajak = [];
+                    foreach ($pajakLain as $kk => $value) {
+                        $value = (object) $value;
+                        if ($value->tax === "0") {
+                            continue;
+                        }
+                        $rowCount++;
+                        $taxx = 0;
+                        $base = 0;
+                        if ($checkDpp && $value->dpp_tax === "1") {
+                            $base = (($value->nominal * 11) / 12);
+                            $taxx = $base * $value->amount;
+                        } else {
+                            $base = $value->nominal;
+                            $taxx = $base * $value->amount;
+                        }
+                        $taxNominal = ($taxx * $dataItems[0]->nilai_matauang);
+                        $taxName = explode(",", $value->tax_nama);
+                        if (isset($dataPajak[$value->ket_tax])) {
+                            $dataPajak[$value->ket_tax]["nominal_curr"] += $taxx;
+                            $dataPajak[$value->ket_tax]["nominal"] += $taxNominal;
+                        } else {
+                            $coaPpn = $model->setWheres(["setting_name" => "pajak_" . str_replace(" ", "", $taxName[0])], true)->setSelects(["value"])->getDetail();
+                            $dataPajak[$value->ket_tax] = [
+                                "kode" => $jurnal,
+                                "nama" => $taxName[0],
+                                "reff_note" => "",
+                                "partner" => $dataItems[0]->id_supplier,
+                                "kode_coa" => ($coaPpn->value ?? 0),
+                                "posisi" => "C",
+                                "nominal_curr" => $taxx,
+                                "kurs" => $dataItems[0]->kurs,
+                                "kode_mua" => $dataItems[0]->name_curr,
+                                "nominal" => $taxNominal,
+                                "row_order" => $rowCount
+                            ];
+                            $rowCount++;
+                        }
+                        $tax += $taxNominal;
+                        if ($value->tax_lain !== "0") {
+                            $dataTax = $model2->setWhereIn("id", explode(",", $value->tax_lain), true)->setOrder(["id"])->getData();
+                            foreach ($dataTax as $kkk => $datass) {
+                                $taxx = 0;
+                                $base = 0;
+                                if ($checkDpp && $datass->dpp === "1") {
+                                    $base = (($value->nominal * 11) / 12);
+                                    $taxx = $base * $datass->amount;
+                                } else {
+                                    $base = $value->nominal;
+                                    $taxx = $base * $datass->amount;
+                                }
+
+                                $taxNominal = ($taxx * $dataItems[0]->nilai_matauang);
+                                if (isset($dataPajak[$datass->ket])) {
+                                    $dataPajak[$datass->ket]["nominal_curr"] += $taxx;
+                                    $dataPajak[$datass->ket]["nominal"] += $taxNominal;
+                                } else {
+                                    $taxName = explode(",", $datass->nama);
+                                    $coaPpn = $model->setWheres(["setting_name" => "pajak_" . str_replace(" ", "", $taxName[0])], true)->setSelects(["value"])->getDetail();
+                                    $dataPajak[$datass->ket] = [
+                                        "kode" => $jurnal,
+                                        "nama" => $taxName[0],
+                                        "reff_note" => "",
+                                        "partner" => $dataItems[0]->id_supplier,
+                                        "kode_coa" => ($coaPpn->value ?? 0),
+                                        "posisi" => "C",
+                                        "nominal_curr" => $taxx,
+                                        "kurs" => $dataItems[0]->kurs,
+                                        "kode_mua" => $dataItems[0]->name_curr,
+                                        "nominal" => $taxNominal,
+                                        "row_order" => $rowCount
+                                    ];
+                                    $rowCount++;
+                                }
+                            }
+                            $tax += $taxNominal;
+                        }
+                    }
+                    foreach ($dataPajak as $a => $vv) {
+                        $jurnalItems[] = $vv;
+                    }
+                }
+                $defaultPpn = $model->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
                 $jurnalItems[] = array(
                     "kode" => $jurnal,
                     "nama" => "",

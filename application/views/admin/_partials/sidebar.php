@@ -41,8 +41,9 @@
       
       foreach ($menu as $menus): 
      
-        $sub_menu = $this->db->JOIN('user_priv as up','mms.kode = up.main_menu_sub_kode','INNER')->get_where('main_menu_sub as mms', array('mms.is_menu_sub' => $menus->kode, 'up.username' => $username));
-        $this->db->order_by('mms.row_order','ASC');
+        $sub_menu = $this->db->order_by('mms.row_order','ASC')->JOIN('user_priv as up','mms.kode = up.main_menu_sub_kode','INNER')
+              ->get_where('main_menu_sub as mms', array('mms.is_menu_sub' => $menus->kode, 'up.username' => $username));
+//        $this->db->order_by('mms.row_order','ASC');
         $child    = '';
 
         // jika terdapat is_menu_sub by mms

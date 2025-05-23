@@ -617,8 +617,8 @@
             var datetomorrow1=new Date();
             datetomorrow1.setDate(datetomorrow1.getDate() + 3);  
             $('.sch_date').datetimepicker({
-              useCurrent: false,
-              minDate :  moment().startOf('day').add(1, 'd'),
+              // useCurrent: false,
+              minDate :  moment().startOf('day').add(0, 'd'),
               defaultDate: datetomorrow1,
               format : 'YYYY-MM-DD HH:mm:ss',
               ignoreReadonly: true,

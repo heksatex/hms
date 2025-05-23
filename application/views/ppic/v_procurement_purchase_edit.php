@@ -271,7 +271,7 @@
                               foreach ($details as $row) {
                               ?>
                                 <tr class="">
-                                  <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"><?php echo $no++;?></td>
+                                  <td data-content="edit" data-id="row_order" data-isi="<?php echo $row->row_order; ?>"><?php echo $no.".";?></td>
                                   <td data-content="edit" data-id="kode_produk" data-isi="<?php echo $row->kode_produk; ?>" data-id2="prodhidd" data-isi2="<?php echo htmlentities($row->nama_produk) ?>"><?php echo '[' . $row->kode_produk . '] ' . $row->nama_produk; ?></a></td>
                                   <td data-content="edit" data-id="schedule_date" data-isi="<?php echo $row->schedule_date; ?>"><?php echo $row->schedule_date ?></td>
                                   <td data-content="edit" data-id="qty_beli" data-name="Qty Beli" data-isi="<?php echo $row->qty_beli; ?>" align="right"><?php echo number_format($row->qty_beli, 2) ?></td>
@@ -418,8 +418,8 @@
       var datetomorrow3 = new Date();
       datetomorrow3.setDate(datetomorrow3.getDate() + 3);
       $('#sch_date').datetimepicker({
-            useCurrent: false,
-            minDate: datetomorrow,
+            // useCurrent: false,
+            minDate :  moment().startOf('day').add(0, 'd'),
             defaultDate: datetomorrow3,
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true,
@@ -770,8 +770,8 @@
           var datetomorrow3 = new Date();
           datetomorrow3.setDate(datetomorrow3.getDate() + 1);
           $('#sch_date2').datetimepicker({
-            useCurrent: false,
-            minDate: datetomorrow,
+            // useCurrent: false,
+            minDate :  moment().startOf('day').add(0, 'd'),
             defaultDate: datetomorrow3,
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true,

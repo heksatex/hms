@@ -1140,7 +1140,7 @@ class Penerimaanbarang extends MY_Controller {
                         ->setSelects([
                             "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
                             "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value", "smi.qty as qty_dtg",
-                            "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency",
+                            "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency,purchase_order.total as po_total",
                             "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain", "nilai_konversi.nilai", "purchase_order.jenis as jenis_po"
                         ])->setGroups(["smi.quant_id"])
                         ->getData();
@@ -1169,8 +1169,8 @@ class Penerimaanbarang extends MY_Controller {
                             "matauang" => $dataPO[0]->currency,
                             'nilai_matauang' => $dataPO[0]->nilai_currency,
                             "journal" => "PB",
-                            "total" => 0,
-                            "dpp_lain" => 0,
+                            "total" => $dataPO[0]->po_total,
+                            "dpp_lain" => $dataPO[0]->dpp_lain,
                             "origin" => $kode,
                             "no_sj_supp" => $head->no_sj,
                             "tanggal_invoice_supp" => $head->tanggal_sj,
@@ -1204,22 +1204,22 @@ class Penerimaanbarang extends MY_Controller {
                                 'diskon' => $value->diskon,
                                 "amount_tax" => $value->amount
                             ];
-                            $total = ($qty * $value->harga_per_uom_beli);
-                            $totals += $total;
-                            $diskon = ($value->diskon ?? 0);
-                            $diskons += $diskon;
-
-                            if ($value->dpp_lain > 0) {
-                                $dpp = $value->dpp_lain;
-                                $taxes += ((($total - $diskon) * 11) / 12) * $value->amount;
-                            } else {
-                                $taxes += ($total - $diskon) * $value->amount;
-                            }
+//                            $total = ($qty * $value->harga_per_uom_beli);
+//                            $totals += $total;
+//                            $diskon = ($value->diskon ?? 0);
+//                            $diskons += $diskon;
+//
+//                            if ($value->dpp_lain > 0) {
+//                                $dpp = $value->dpp_lain;
+//                                $taxes += ((($total - $diskon) * 11) / 12) * $value->amount;
+//                            } else {
+//                                $taxes += ($total - $diskon) * $value->amount;
+//                            }
                         }
-                        $grandTotal = ($totals - $diskons) + $taxes;
+//                        $grandTotal = ($totals - $diskons) + $taxes;
                         //create Invoice_detail
                         $inserInvoice->setTables("invoice_detail")->saveBatch($invoiceDetail);
-                        $inserInvoice->setTables("invoice")->setWheres(["id" => $idInsert])->update(["total" => $grandTotal, "dpp_lain" => $dpp]);
+//                        $inserInvoice->setTables("invoice")->setWheres(["id" => $idInsert])->update(["total" => $grandTotal, "dpp_lain" => $dpp]);
                         $this->_module->gen_history('invoice', $idInsert, 'create', logArrayToString(";", $dataInvoice), $username);
                     }
                 }

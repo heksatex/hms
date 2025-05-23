@@ -48,15 +48,7 @@ class M_stock extends CI_Model
 	{
 		return $this->db->query("SELECT $groupBy as nama_field, concat($groupBy,' (',count(*),')') as grouping, sum(qty) as tot_qty, sum(qty2) as tot_qty2
 								FROM stock_quant as sq 
-								LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group 
-								INNER JOIN mst_produk mp ON sq.kode_produk = mp.kode_produk
-								LEFT JOIN (SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
-											FROM join_lot jl	WHERE jl.status = 'done' 
-											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
-											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot ON kp_lot.quant_id = sq.quant_id
-								LEFT JOIN mst_category cat ON mp.id_category = cat.id
-								LEFT JOIN (SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') ) pl ON pl.quant_id = sq.quant_id
+								
 								WHERE $where_lokasi $where 
 								group by $groupBy $order_by_in_group
 								LIMIT $rowno, $recordPerPage ")->result();
@@ -67,15 +59,6 @@ class M_stock extends CI_Model
 		$query = $this->db->query("SELECT count(count1) as allcount 
 								FROM ( SELECT count(sq.quant_id) as count1
 									FROM stock_quant as sq 
-									LEFT JOIN mst_sales_group sg ON sq.sales_group = sg.kode_sales_group 
-									INNER JOIN mst_produk mp ON sq.kode_produk = mp.kode_produk
-									LEFT JOIN (SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
-											UNION SELECT (SELECT GROUP_CONCAT(lot) as lot FROM join_lot_items where kode_join = jl.kode_join) as lot, jl.quant_id
-											FROM join_lot jl	WHERE jl.status = 'done' 
-											UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
-											UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi ) as  kp_lot ON kp_lot.quant_id = sq.quant_id
-									LEFT JOIN mst_category cat ON mp.id_category = cat.id
-									LEFT JOIN (SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') ) pl ON pl.quant_id = sq.quant_id
 									WHERE $where_lokasi $where 
 									group by $groupBy
 								) gp

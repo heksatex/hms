@@ -54,6 +54,7 @@
                 ?>
             </select>
             <input type="hidden" class="form-control lay_amount_tax_<?= $index ?>"  name="lay_amount_tax" id="lay_amount_tax" value="0">
+            <input type="hidden" class="form-control lay_dpp_tax_<?= $index ?>"  name="lay_dpp_tax" id="lay_dpp_tax" value="1">
         </div>
     </td>
     <td>
@@ -145,6 +146,7 @@
                 reff_note: $("#lay_reff_note").val(),
                 amount_tax:$("#lay_amount_tax").val(),
                 harga:$("#lay_harga").val(),
+                dpp_tax:$("#lay_dpp_tax").val(),
                 po:"<?= $po ?>"
             };
             saveLayanan(data);
@@ -153,13 +155,16 @@
         $(".lay_tax").on("select2:select", function () {
             var row = $(this).attr("data-row");
             var tax = $(".lay_tax_" + row + " :selected").data().nilai_tax;
+            var dpptax = $(".lay_tax_" + row + " :selected").data().dpp_tax;
             $(".lay_amount_tax_" + row).val(tax);
+            $(".lay_dpp_tax_" + row).val(dpptax);
         });
 
         $(".lay_tax").on("change", function () {
             var row = $(this).attr("data-row");
             $(".lay_amount_tax_" + row).val("0");
-//            $(".dpp_tax_" + row).val("1");
+            $(".lay_dpp_tax_" + row).val("1");
+
         });
 
         $(".batal").unbind("click").off("click").on("click", function () {
