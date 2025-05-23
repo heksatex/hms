@@ -66,7 +66,7 @@ class Purchaseorder extends MY_Controller {
                 ->setSelects(["pod.*,nilai_currency,IF(jenis = 'rfq','PO','FPT') as jenis", "partner.nama as nama_supp",
                     "coalesce(tax.amount,0) as amount_tax,tax.dpp as dpp_tax,coalesce(tax.tax_lain_id,0) as tax_lain_id",
                     "departemen.nama as gudang",
-                    "po.order_date", "currency_kurs.currency as nama_curr"])->setOrder(["order_date" => "asc"])
+                    "po.order_date", "currency_kurs.currency as nama_curr","foot_note"])->setOrder(["order_date" => "asc"])
                 ->setWheres(["po.order_date >=" => $tanggalAwal, "po.order_date <=" => $tanggalAkhir])->setWhereIn("po.status", ["purchase_confirmed", "done"]);
         if ($jenis !== "") {
             $model->setWheres(["po.jenis" => $jenis]);
@@ -151,7 +151,7 @@ class Purchaseorder extends MY_Controller {
             $sheet->setCellValue('N1', 'Diskon');
             $sheet->setCellValue('O1', 'Pajak');
             $sheet->setCellValue('P1', 'Subtotal');
-
+            $sheet->setCellValue('Q1', 'Footnote');
             $no = 1;
             $total_group = 0;
             $row = 2;
@@ -201,6 +201,7 @@ class Purchaseorder extends MY_Controller {
                 $sheet->setCellValue('N' . $row, number_format($value->diskon, 2));
                 $sheet->setCellValue('O' . $row, number_format($value->pajak, 2));
                 $sheet->setCellValue('P' . $row, number_format($value->total, 2));
+                $sheet->setCellValue('q' . $row, nl2br($value->foot_note));
                 $row++;
                 if ($groups !== "") {
                     $cek1 = (array) $value;
