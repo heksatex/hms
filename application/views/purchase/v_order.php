@@ -10,7 +10,7 @@
                 color: green;
             }
             .class_exception{
-                color: #440668;
+                color: #8f0461;
             }
         </style>
     </head>

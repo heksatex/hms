@@ -4,33 +4,33 @@
         <?php $this->load->view("admin/_partials/head.php") ?>
         <link href="<?= base_url('dist/css/popup_img.css') ?>" rel="stylesheet">
         <style>
-            #btn-print{
-                display : none
-            }
-            <?php
-            if ($inv->status === "cancel") {
-                ?>
+<?php
+if ($inv->status === "cancel") {
+    ?>
                 #btn-simpan,#btn-cancel,#btn-approve{
                     display : none
                 }
 
-                <?php
-            }
-            if ($inv->status === "done") {
-                ?>
+    <?php
+}
+if ($inv->status === "done") {
+    ?>
                 #btn-simpan,#btn-approve{
                     display : none
                 }
                 #btn-print{
                     display : inline
                 }
-                <?php
-            }
-            ?>
+    <?php
+}
+?>
             #btn-cancel{
                 display : none
             }
 
+            #btn-print{
+                display : none
+            }
 
             .no{
                 width: 0.5% !important;
@@ -228,22 +228,67 @@
                                             <tbody>
                                                 <?php
                                                 if (count($invDetail) > 0) {
+                                                    $getTax = new $this->m_global;
+                                                    $getTax->setTables("tax");
                                                     $dataPajak = [];
                                                     $subtotal1 = 0;
                                                     $totalDiskon = 0;
                                                     $totalTax = 0;
+                                                    $pajakLain = [];
                                                     foreach ($invDetail as $key => $value) {
-                                                        if (count($dataPajak) < 1) {
-                                                            $dataPajak["ket"] = $value->pajak_ket;
-                                                        }
+                                                        $taxe = 0;
+                                                        $base = 0;
                                                         $jumlah = $value->harga_satuan * $value->qty_beli;
                                                         $subtotal1 += $jumlah;
                                                         $totalDiskon += $value->diskon;
-                                                        if ($setting !== null) {
-                                                            $totalTax += ((($jumlah - $value->diskon) * 11) / 12) * $value->amount_tax;
+                                                        if ($setting !== null && $value->dpp_tax === "1") {
+                                                            $base = ((($jumlah - $value->diskon) * 11) / 12);
+                                                            $taxe += $base * $value->amount_tax;
                                                         } else {
-                                                            $totalTax += ($jumlah - $value->diskon) * $value->amount_tax;
+                                                            $base = ($jumlah - $value->diskon);
+                                                            $taxe += $base * $value->amount_tax;
                                                         }
+                                                        if ($value->tax_id !== "0") {
+                                                            if (isset($dataPajak[$value->pajak_ket])) {
+                                                                $dataPajak[$value->pajak_ket]["base"] += $base;
+                                                                $dataPajak[$value->pajak_ket]["nominal"] += $taxe;
+                                                            } else {
+                                                                $dataPajak[$value->pajak_ket] = [
+                                                                    "nama" => $value->pajak,
+                                                                    "ket" => $value->pajak_ket,
+                                                                    "base" => $base,
+                                                                    "nominal" => $taxe
+                                                                ];
+                                                            }
+
+                                                            if ($value->tax_lain_id !== "0") {
+                                                                $dataTax = $getTax->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setOrder(["id"])->getData();
+                                                                foreach ($dataTax as $kkk => $datass) {
+                                                                    $taxx = 0;
+                                                                    $bases = 0;
+                                                                    if ($setting !== null && $datass->dpp === "1") {
+                                                                        $bases = ((($jumlah - $value->diskon) * 11) / 12);
+                                                                        $taxx += $bases * $datass->amount;
+                                                                    } else {
+                                                                        $bases = ($jumlah - $value->diskon);
+                                                                        $taxx += $bases * $datass->amount;
+                                                                    }
+                                                                    $taxe += $taxx;
+                                                                    if (isset($dataPajak[$datass->ket])) {
+                                                                        $dataPajak[$datass->ket]["base"] += $bases;
+                                                                        $dataPajak[$datass->ket]["nominal"] += $taxx;
+                                                                    } else {
+                                                                        $dataPajak[$datass->ket] = [
+                                                                            "nama" => $datass->nama,
+                                                                            "ket" => $datass->ket,
+                                                                            "base" => $bases,
+                                                                            "nominal" => $taxx
+                                                                        ];
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        $totalTax += $taxe;
                                                         ?>
                                                         <tr>
                                                             <td class="no"><?= $key + 1 ?></td>
@@ -285,6 +330,7 @@
                                                                 <div class="form-group ">
                                                                     <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
                                                                     <input type="hidden" class="form-control" name="tax[<?= $value->id ?>]" value="<?= $value->tax_id ?>">
+                                                                    <input type="hidden" class="tax_lain_id_<?= $key ?>" name="tax_lain_id[<?= $value->id ?>]" value="<?= $value->tax_lain_id ?>">
                                                                     <select style="width: 90%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                             name="tax_[<?= $value->id ?>]"  disabled>
                                                                         <option></option>
@@ -339,22 +385,34 @@
                                                                     Jumlah
                                                                 </td>
                                                             </tr>
-                                                            <?php if ($totalTax > 0) { ?>
-                                                                <tr>
-                                                                    <td>1</td>
-                                                                    <td><?= $dataPajak["ket"] ?? "" ?></td>
-                                                                    <td>1193.05 - Pajak Dibayar Muka PPN</td>
-                                                                    <td>IDR <?php
-                                                                        if ($setting !== null) {
-                                                                            print( number_format(((($subtotal1 - $totalDiskon) * 11) / 12) * $inv->nilai_matauang, 4));
-                                                                        } else {
-                                                                            print(number_format(($subtotal2 * $inv->nilai_matauang), 4));
-                                                                        }
-                                                                        ?>
-                                                                    </td>
-                                                                    <td>IDR <?= number_format(($totalTax * $inv->nilai_matauang), 4) ?></td>
-                                                                </tr>
-                                                            <?php } ?>
+                                                            <?php
+                                                            $noo = 0;
+                                                            if ($totalTax > 0) {
+                                                                foreach ($dataPajak as $k => $v) {
+                                                                    $v = (object) $v;
+                                                                    $noo++;
+                                                                    ?>
+                                                                    <tr>
+                                                                        <td>
+                                                                            <?= $noo ?>
+                                                                        </td>
+                                                                        <td>
+                                                                            <?= $v->ket ?>
+                                                                        </td>
+                                                                        <td>
+
+                                                                        </td>
+                                                                        <td>
+                                                                            IDR <?= number_format(($v->base * $inv->nilai_matauang), 4) ?>
+                                                                        </td>
+                                                                        <td>
+                                                                            IDR <?= number_format(($v->nominal * $inv->nilai_matauang), 4) ?>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <?php
+                                                                }
+                                                            }
+                                                            ?>
 
                                                         <?php }
                                                         ?>
@@ -421,7 +479,7 @@
 
                             $(".tax").select2({
                                 allowClear: true,
-                                placeholder: "Pajak",
+                                placeholder: "Pajak"
 
                             });
                             $('.kode_coa').select2({

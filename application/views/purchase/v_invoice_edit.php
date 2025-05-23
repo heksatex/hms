@@ -233,41 +233,95 @@
                                             <div class="table-responsive over">
                                                 <table id="tbl-inv" class="table table-condesed table-hover rlstable  over" style="min-width: 150%">
                                                     <thead>
-                                                        <tr>
-                                                            <th class="no">#</th>
-                                                            <th>Produk</th>
-                                                            <!--<th>Deskripsi</th>-->
-                                                            <th>Reff Note</th>
-                                                            <th>Account</th>
-                                                            <th>Qty Beli</th>
-                                                            <th>UOM</th>
-                                                            <th>Harga Satuan</th>
-                                                            <th>Tax</th>
-                                                            <th>Diskon</th>
-                                                            <!--<th>#</th>-->
-                                                        </tr>
+                                                    <th class="no">#</th>
+                                                    <th class="no">No</th>
+                                                    <th>Produk</th>
+                                                    <!--<th>Deskripsi</th>-->
+                                                    <th>Reff Note</th>
+                                                    <th>Account</th>
+                                                    <th>Qty Beli</th>
+                                                    <th>UOM</th>
+                                                    <th>Harga Satuan</th>
+                                                    <th>Tax</th>
+                                                    <th>Diskon</th>
+                                                    <!--<th>#</th>-->
                                                     </thead>
                                                     <tbody>
                                                         <?php
                                                         if (count($invDetail) > 0) {
+                                                            $getTax = new $this->m_global;
+                                                            $getTax->setTables("tax");
                                                             $dataPajak = [];
                                                             $subtotal1 = 0;
                                                             $totalDiskon = 0;
                                                             $totalTax = 0;
+                                                            $pajakLain = [];
                                                             foreach ($invDetail as $key => $value) {
-                                                                if (count($dataPajak) < 1) {
-                                                                    $dataPajak["ket"] = $value->pajak_ket;
-                                                                }
+                                                                $taxe = 0;
+                                                                $base = 0;
                                                                 $jumlah = $value->harga_satuan * $value->qty_beli;
                                                                 $subtotal1 += $jumlah;
                                                                 $totalDiskon += $value->diskon;
-                                                                if ($setting !== null) {
-                                                                    $totalTax += ((($jumlah - $value->diskon) * 11) / 12) * $value->amount_tax;
+                                                                if ($setting !== null && $value->dpp_tax === "1") {
+                                                                    $base = ((($jumlah - $value->diskon) * 11) / 12);
+                                                                    $taxe += $base * $value->amount_tax;
                                                                 } else {
-                                                                    $totalTax += ($jumlah - $value->diskon) * $value->amount_tax;
+                                                                    $base = ($jumlah - $value->diskon);
+                                                                    $taxe += $base * $value->amount_tax;
                                                                 }
+
+                                                                if ($value->tax_id !== "0") {
+
+                                                                    if (isset($dataPajak[$value->pajak_ket])) {
+                                                                        $dataPajak[$value->pajak_ket]["base"] += $base;
+                                                                        $dataPajak[$value->pajak_ket]["nominal"] += $taxe;
+                                                                    } else {
+                                                                        $dataPajak[$value->pajak_ket] = [
+                                                                            "nama" => $value->pajak,
+                                                                            "ket" => $value->pajak_ket,
+                                                                            "base" => $base,
+                                                                            "nominal" => $taxe
+                                                                        ];
+                                                                    }
+                                                                    if ($value->tax_lain_id !== "0") {
+                                                                        $dataTax = $getTax->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setOrder(["id"])->getData();
+                                                                        foreach ($dataTax as $kkk => $datass) {
+                                                                            $taxx = 0;
+                                                                            $bases = 0;
+                                                                            if ($setting !== null && $datass->dpp === "1") {
+                                                                                $bases = ((($jumlah - $value->diskon) * 11) / 12);
+                                                                                $taxx += $bases * $datass->amount;
+                                                                            } else {
+                                                                                $bases = ($jumlah - $value->diskon);
+                                                                                $taxx += $bases * $datass->amount;
+                                                                            }
+                                                                            $taxe += $taxx;
+                                                                            if (isset($dataPajak[$datass->ket])) {
+                                                                                $dataPajak[$datass->ket]["base"] += $bases;
+                                                                                $dataPajak[$datass->ket]["nominal"] += $taxx;
+                                                                            } else {
+                                                                                $dataPajak[$datass->ket] = [
+                                                                                    "nama" => $datass->nama,
+                                                                                    "ket" => $datass->ket,
+                                                                                    "base" => $bases,
+                                                                                    "nominal" => $taxx
+                                                                                ];
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                $totalTax += $taxe;
                                                                 ?>
                                                                 <tr>
+                                                                    <td class="no">
+                                                                        <?php
+                                                                        if ($inv->status === 'draft') {
+                                                                            ?>
+                                                                            <a class="split-item" data-ids="<?= $value->id ?>" data-produk="<?= $value->kode_produk . " - " . $value->nama_produk ?>"><i class="fa fa-copy">&nbsp</i>Split</a>
+                                                                            <?php
+                                                                        }
+                                                                        ?>
+                                                                    </td>
                                                                     <td class="no"><?= $key + 1 ?></td>
                                                                     <td class="td-produk"><?= $value->kode_produk . " - " . $value->nama_produk ?></td>
                                                                     <!--<td class="td-deskripsi" ><?= $value->deskripsi ?></td>-->
@@ -290,7 +344,7 @@
                                                                     </td>
                                                                     <td class="td-beli" >
                                                                         <input type="hidden"  class="form-control input-sm qty_<?= $value->id ?>" name="qty_beli[<?= $value->id ?>]" value="<?= $value->qty_beli ?>" readonly>
-                                                                        <input type="text"  class="form-control input-sm" value="<?= number_format($value->qty_beli, 3) ?>" disabled>
+                                                                        <input type="text"  class="form-control input-sm" value="<?= number_format($value->qty_beli, 2) ?>" disabled>
                                                                     </td>
                                                                     <td class="td-uom"><?= $value->uom_beli ?></td>
                                                                     <td class="td-harga">
@@ -306,6 +360,7 @@
                                                                     <td class="td-tax">
                                                                         <div class="form-group ">
                                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
+                                                                            <input type="hidden" class="tax_lain_id_<?= $key ?>" name="tax_lain_id[<?= $value->id ?>]" value="<?= $value->tax_lain_id ?>">
                                                                             <input type="hidden" class="form-control" name="tax[<?= $value->id ?>]" value="<?= $value->tax_id ?>">
                                                                             <select style="width: 90%" class="form-control tax tax<?= $key ?> input-xs"  data-row="<?= $key ?>" 
                                                                                     name="tax_[<?= $value->id ?>]"  disabled>
@@ -313,7 +368,7 @@
                                                                                 <?php
                                                                                 foreach ($taxss as $key => $taxs) {
                                                                                     ?>
-                                                                                    <option value='<?= $taxs->id ?>' data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
+                                                                                    <option value='<?= $taxs->id ?>' data-tax_lain_id="<?= $taxs->tax_lain_id ?>" data-nilai_tax="<?= $taxs->amount ?>" <?= ($taxs->id === $value->tax_id) ? 'selected' : '' ?>><?= $taxs->nama ?></option>
                                                                                     <?php
                                                                                 }
                                                                                 ?>
@@ -324,9 +379,6 @@
                                                                         <input type="hidden" class="form-control" name="diskon[<?= $value->id ?>]" value="<?= $value->diskon ?>">
                                                                         <input type="text" class="form-control" value="<?= $value->diskon ?>" disabled>
                                                                     </td>
-        <!--                                                                    <td class="td-aksi">
-                                                                        <a class="add_duplicate" data-id="<?= $value->id ?>" data-toggle="tooltip" data-placement="top" title="Split"><i class="fa fa-copy"></i></a>
-                                                                    </td>-->
                                                                 </tr>
                                                                 <?php
                                                             }
@@ -361,22 +413,34 @@
                                                                             Jumlah
                                                                         </td>
                                                                     </tr>
-                                                                    <?php if ($totalTax > 0) { ?>
-                                                                        <tr>
-                                                                            <td>1</td>
-                                                                            <td><?= $dataPajak["ket"] ?? "" ?></td>
-                                                                            <td>1193.05 - Pajak Dibayar Muka PPN</td>
-                                                                            <td>IDR <?php
-                                                                                if ($setting !== null) {
-                                                                                    print( number_format(((($subtotal1 - $totalDiskon) * 11) / 12) * $inv->nilai_matauang, 4));
-                                                                                } else {
-                                                                                    print(number_format(($subtotal2 * $inv->nilai_matauang), 4));
-                                                                                }
-                                                                                ?>
-                                                                            </td>
-                                                                            <td>IDR <?= number_format(($totalTax * $inv->nilai_matauang), 4) ?></td>
-                                                                        </tr>
-                                                                    <?php } ?>
+                                                                    <?php
+                                                                    $noo = 0;
+                                                                    if ($totalTax > 0) {
+                                                                        foreach ($dataPajak as $k => $v) {
+                                                                            $v = (object) $v;
+                                                                            $noo++;
+                                                                            ?>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <?= $noo ?>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <?= $v->ket ?>
+                                                                                </td>
+                                                                                <td>
+
+                                                                                </td>
+                                                                                <td>
+                                                                                    IDR <?= number_format(($v->base * $inv->nilai_matauang), 4) ?>
+                                                                                </td>
+                                                                                <td>
+                                                                                    IDR <?= number_format(($v->nominal * $inv->nilai_matauang), 4) ?>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <?php
+                                                                        }
+                                                                    }
+                                                                    ?>
 
                                                                 <?php }
                                                                 ?>
@@ -478,13 +542,15 @@
                 $(".tax").on("select2:select", function () {
                     var row = $(this).attr("data-row");
                     var selectedSelect2OptionSource = $(".tax" + row + " :selected").data().nilai_tax;
-                    console.log(selectedSelect2OptionSource);
+                    var tax_lain = $(".tax" + row + " :selected").data().tax_lain_id;
                     $(".amount_tax_" + row).val(selectedSelect2OptionSource);
+                    $(".tax_lain_id_" + row).val(tax_lain);
                 });
 
                 $(".tax").on("change", function () {
                     var row = $(this).attr("data-row");
                     $(".amount_tax_" + row).val("0");
+                    $(".tax_lain_id_" + row).val("0");
                 });
 
 
@@ -550,7 +616,7 @@
                 });
 
                 $("#btn-approve").off("click").unbind("click").on("click", function () {
-                    confirmRequest("Purchase Order", "Approve Purchase Invoice ? ", function () {
+                    confirmRequest("Invoice", "Approve Purchase Invoice ? ", function () {
                         please_wait(function () {});
                         $.ajax({
                             url: "<?= base_url('purchase/invoice/update_status/') ?>",
@@ -576,7 +642,7 @@
                 });
 
                 $("#btn-cancel").off("click").unbind("click").on("click", function () {
-                    confirmRequest("Purchase Order", "Cancel Purchase Invoice ? ", function () {
+                    confirmRequest("Invoice", "Cancel Purchase Invoice ? ", function () {
                         please_wait(function () {});
                         $.ajax({
                             url: "<?= base_url('purchase/invoice/update_status/') ?>",
@@ -620,7 +686,74 @@
                     });
                 });
 
+                $(".split-item").unbind("click").off("click").on("click", function () {
+                    const tt = $(this);
+                    const data = $(this).data();
+                    $.ajax({
+                        url: "<?= base_url('purchase/invoice/split/' . $id) ?>",
+                        type: "POST",
+                        data: data,
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }, success: function (data) {
+                            var html = data.data;
+                            var newRow = $(html);
+                            var counterSplit = $("#tbl-inv tbody tr").length - 2;
+                            newRow.insertAfter(tt.parents().closest('tr'));
+                            counterSplit++;
+                            $(".split-item").hide();
 
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {});
+                        }
+                    });
+
+                });
+
+
+            });
+            var counterSplit = 0;
+
+            const cancelSplit = ((e) => {
+                $(".split-item").show();
+                counterSplit++;
+                $(e).closest("tr").remove();
+            });
+            const saveSplit = (() => {
+                confirmRequest("Invoice", "Simpan Split Produk? ", function () {
+                    $.ajax({
+                        url: "<?= base_url('purchase/invoice/save_split/' . $id) ?>",
+                        type: "POST",
+                        data: {
+                            ids: $("#ids").val(),
+                            qty: $("#qty_dup").val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait(function () {});
+                        },
+                        error: function (req, error) {
+                            unblockUI(function () {
+                                setTimeout(function () {
+                                    alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                                }, 500);
+                            });
+                        }, success: function (data) {
+                            location.reload();
+
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            unblockUI(function () {});
+                        }
+                    });
+                })
             });
         </script>
     </body>

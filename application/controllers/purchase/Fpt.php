@@ -65,7 +65,7 @@ class Fpt extends MY_Controller {
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
-                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax,coalesce(tax.tax_lain_id,0) as tax_lain_id", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 //        $data["uom_beli"] = $this->m_produk->get_list_uom(['beli' => 'yes']);
             $data["tax"] = $model4->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $data["kurs"] = $this->m_po->setTables("currency_kurs")->setOrder(["id" => "asc"])->getData();
@@ -123,9 +123,10 @@ class Fpt extends MY_Controller {
             $amount_tax = $this->input->post("amount_tax");
             $currency = $this->input->post("currency");
             $nilai_currency = $this->input->post("nilai_currency");
-            $dpp_tax = $this->input->post("dpp_tax");
+            $tax_lain = $this->input->post("tax_lain_id");
             $foot_note = $this->input->post("foot_note");
             $supplier = $this->input->post("supplier");
+            $dppTax = $this->input->post("dpp_tax");
 
             $this->form_validation->set_rules($validation);
             if ($this->form_validation->run() == FALSE) {
@@ -141,6 +142,8 @@ class Fpt extends MY_Controller {
             $taxes = 0.00;
             $nilaiDppLain = 0;
             $model3 = new $this->m_global;
+            $models = clone $model3;
+            $models->setTables("tax");
             $setDpp = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             foreach ($harga as $key => $value) {
                 $no++;
@@ -155,12 +158,24 @@ class Fpt extends MY_Controller {
                 $diskons += $diskon;
                 $taxe = 0;
                 $nilai_dpp = 0;
-                if ($setDpp !== null) {
+                if ($setDpp !== null && $dppTax[$key] === "1") {
                     $taxe += ((($total - $diskon) * 11) / 12) * $amount_tax[$key];
                     $nilai_dpp = ((($total - $diskon) * 11) / 12);
                 } else {
                     $taxe += ($total - $diskon) * $amount_tax[$key];
                 }
+
+                if ($tax_lain[$key] !== "0") {
+                    $dataTax = $models->setWhereIn("id", explode(",", $tax_lain[$key]), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                    foreach ($dataTax as $kkk => $datas) {
+                        if ($setDpp !== null && $datas->dpp === "1") {
+                            $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
+                            continue;
+                        }
+                        $taxe += ($total - $diskon) * $datas->amount;
+                    }
+                }
+
                 $taxes += $taxe;
                 $total = ($total - $diskon) + $taxe;
                 $nilaiDppLain += $nilai_dpp;
@@ -449,7 +464,7 @@ class Fpt extends MY_Controller {
             $model = new $this->m_global;
             $data["index"] = $this->input->post("index");
             $data["uom_juals"] = $this->m_produk->get_list_uom(['jual' => 'yes']);
-            $data["po"]=$this->input->post("po");
+            $data["po"] = $this->input->post("po");
             $data["taxss"] = $model->setTables("tax")->setWheres(["type_inv" => "purchase"])->setOrder(["id" => "asc"])->getData();
             $item = $this->load->view('purchase/v_order_add_layanan', $data, true);
             $this->output->set_status_header(200)
@@ -545,6 +560,7 @@ class Fpt extends MY_Controller {
             $reff_note = $this->input->post("reff_note");
             $schedule_date = $this->input->post("schedule_date");
             $tax = $this->input->post("tax");
+            $dppTax = $this->input->post("dpp_tax");
             $uom = $this->input->post("uom");
             $uom_qty_beli = $this->input->post("uom_qty_beli");
             $warehouse = $this->input->post("warehouse");
@@ -554,17 +570,17 @@ class Fpt extends MY_Controller {
 
             $model = new $this->m_global;
             $setDpp = $model->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->getDetail();
-            
+
             $this->_module->lock_tabel("user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,"
                     . "purchase_order_detail write,purchase_order write");
-            $getPo = $model->setTables("purchase_order")->setWheres(["no_po"=>$kode_decrypt,"status"=>"draft"],true)->getDetail();
-            if(!$getPo) {
+            $getPo = $model->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt, "status" => "draft"], true)->getDetail();
+            if (!$getPo) {
                 throw new \Exception("Data PO Tidak ditemukan dalam status draft", 500);
             }
             $total = ($qty_beli * $harga);
             $nilai_dpp = 0;
             $pajak = 0;
-            if ($setDpp !== null) {
+            if ($setDpp !== null && $dppTax ==="1") {
                 $pajak = (($total * 11) / 12) * $amount_tax;
                 $nilai_dpp = (($total * 11) / 12);
             } else {
@@ -573,7 +589,7 @@ class Fpt extends MY_Controller {
             $total += $pajak;
             $grandTotal = $getPo->total + $total;
             $grandDpp = $getPo->dpp_lain + $nilai_dpp;
-            
+
             $insert = [
                 "po_id" => $getPo->id,
                 "po_no_po" => $kode_decrypt,
@@ -595,18 +611,18 @@ class Fpt extends MY_Controller {
                 "reff_note" => html_entity_decode($reff_note),
                 "warehouse" => $warehouse,
                 "schedule_date" => $schedule_date,
-                "tax_id"=>$tax,
-                "total"=>$total,
-                "pajak"=>$pajak,
-                "nilai_dpp"=>$nilai_dpp,
-                "deleting"=>1
+                "tax_id" => $tax,
+                "total" => $total,
+                "pajak" => $pajak,
+                "nilai_dpp" => $nilai_dpp,
+                "deleting" => 1
             ];
             $this->_module->startTransaction();
-            $model->update(["total"=>$grandTotal,"dpp_lain"=>$grandDpp]);
+            $model->update(["total" => $grandTotal, "dpp_lain" => $grandDpp]);
             $model->setTables("purchase_order_detail")->save($insert);
             $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "tambah Layanan -> " . logArrayToString('; ', $insert, " : "), $username);
             if (!$this->_module->finishTransaction()) {
-                throw new \Exception('Gagal Tambah layanan',500);
+                throw new \Exception('Gagal Tambah layanan', 500);
             }
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -621,7 +637,7 @@ class Fpt extends MY_Controller {
             $this->_module->unlock_tabel();
         }
     }
-    
+
     public function delete_layanan($id) {
         try {
             $sub_menu = $this->uri->segment(2);
@@ -631,28 +647,27 @@ class Fpt extends MY_Controller {
             $model = new $this->m_global;
             $this->_module->lock_tabel("user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,"
                     . "purchase_order_detail write,purchase_order write");
-            
-            $getPO = $model->setTables("purchase_order")->setWheres(["no_po"=>$kode_decrypt],true)->getDetail();
-            if(!$getPO) {
+
+            $getPO = $model->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt], true)->getDetail();
+            if (!$getPO) {
                 throw new \Exception("Data PO Tidak ditemukan dalam status draft", 500);
             }
-            $getPOD = $model->setTables("purchase_order_detail")->setWheres(["id"=>$ids,"po_no_po"=>$getPO->no_po,"deleting"=>"1"],true)->getDetail();
-            
-            if(!$getPOD) {
+            $getPOD = $model->setTables("purchase_order_detail")->setWheres(["id" => $ids, "po_no_po" => $getPO->no_po, "deleting" => "1"], true)->getDetail();
+
+            if (!$getPOD) {
                 throw new \Exception("Data Item PO Tidak ditemukan dalam status draft", 500);
             }
-            
+
             $grandTotal = $getPO->total - $getPOD->total;
             $grandDpp = $getPO->dpp_lain - $getPOD->nilai_dpp;
-            
+
             $this->_module->startTransaction();
             $model->delete();
-            $model->setTables("purchase_order")->setWheres(["no_po"=>$kode_decrypt],true)->update(["total"=>$grandTotal,"dpp_lain"=>$grandDpp]);
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "hapus Layanan -> " . logArrayToString('; ', (array)$getPOD, " : "), $username);
+            $model->setTables("purchase_order")->setWheres(["no_po" => $kode_decrypt], true)->update(["total" => $grandTotal, "dpp_lain" => $grandDpp]);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "hapus Layanan -> " . logArrayToString('; ', (array) $getPOD, " : "), $username);
             if (!$this->_module->finishTransaction()) {
-                throw new \Exception('Gagal Tambah layanan',500);
+                throw new \Exception('Gagal Tambah layanan', 500);
             }
-            
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
             log_message('error', json_encode($ex));

@@ -91,20 +91,66 @@
                 <tbody>
                     <?php
                     if (count($invDetail) > 0) {
+                        $getTax = new $this->m_global;
+                        $getTax->setTables("tax");
                         $dataPajak = [];
-                        $jumlah = 0;
                         $subtotal1 = 0;
                         $totalDiskon = 0;
                         $totalTax = 0;
+                        $pajakLain = [];
                         foreach ($invDetail as $key => $value) {
-                            if (count($dataPajak) < 1) {
-                                $dataPajak["ket"] = $value->pajak_ket;
-                            }
+                            $taxe = 0;
+                            $base = 0;
                             $jumlah = $value->harga_satuan * $value->qty_beli;
                             $subtotal1 += $jumlah;
                             $totalDiskon += $value->diskon;
-                            $tax = ($jumlah - $value->diskon) * $value->amount;
-                            $totalTax += $tax;
+                            if ($setting !== null && $value->dpp_tax === "1") {
+                                $base = ((($jumlah - $value->diskon) * 11) / 12);
+                                $taxe += $base * $value->amount_tax;
+                            } else {
+                                $base = ($jumlah - $value->diskon);
+                                $taxe += $base * $value->amount_tax;
+                            }
+                            if (isset($dataPajak[$value->pajak_ket])) {
+                                $dataPajak[$value->pajak_ket]["base"] += $base;
+                                $dataPajak[$value->pajak_ket]["nominal"] += $taxe;
+                            } else {
+                                $dataPajak[$value->pajak_ket] = [
+                                    "nama" => $value->pajak,
+                                    "ket" => $value->pajak_ket,
+                                    "base" => $base,
+                                    "nominal" => $taxe
+                                ];
+                            }
+
+                            if ($value->tax_lain_id !== "0") {
+                                $dataTax = $getTax->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setOrder(["id"])->getData();
+                                foreach ($dataTax as $kkk => $datass) {
+                                    $taxx = 0;
+                                    $bases = 0;
+                                    if ($setting !== null && $datass->dpp === "1") {
+                                        $bases = ((($jumlah - $value->diskon) * 11) / 12);
+                                        $taxx += $bases * $datass->amount;
+                                    } else {
+                                        $bases = ($jumlah - $value->diskon);
+                                        $taxx += $bases * $datass->amount;
+                                    }
+                                    $taxe += $taxx;
+                                    if (isset($dataPajak[$datass->ket])) {
+                                        $dataPajak[$datass->ket]["base"] += $bases;
+                                        $dataPajak[$datass->ket]["nominal"] += $taxx;
+                                    } else {
+                                        $dataPajak[$datass->ket] = [
+                                            "nama" => $datass->nama,
+                                            "ket" => $datass->ket,
+                                            "base" => $bases,
+                                            "nominal" => $taxx
+                                        ];
+                                    }
+                                }
+                            }
+
+                            $totalTax += $taxe;
                             ?>
                             <tr>
                                 <td>
@@ -127,37 +173,43 @@
                         <tr>
                             <td></td>
                             <td></td>
-                            <td></td>
                             <td style="border-top: 1px solid black;"><strong>Subtotal</strong></td>
-                            <td style="border-top: 1px solid black;text-align: right;"><?= number_format($subtotal1, 2) ?></td>
+                            <td colspan="2" style="border-top: 1px solid black;text-align: right;"><?= number_format($subtotal1, 2) ?></td>
                         </tr>
                         <tr>
-                            <td></td>
                             <td></td>
                             <td></td>
                             <td style="border-bottom: 1px solid black;"><strong>Diskon</strong></td>
-                            <td style="border-bottom: 1px solid black;text-align: right;"><?= number_format($totalDiskon, 2) ?></td>
+                            <td colspan="2" style="border-bottom: 1px solid black;text-align: right;"><?= number_format($totalDiskon, 2) ?></td>
                         </tr>
                         <tr>
                             <td></td>
                             <td></td>
-                            <td></td>
-                            <td><strong>Subtotal</strong></td>
-                            <td style="text-align: right;"><?= number_format($subtotal2, 2) ?></td>
+                            <td><strong>Subtotal 2</strong></td>
+                            <td colspan="2" style="text-align: right;"><?= number_format($subtotal2, 2) ?></td>
                         </tr>
+                        <?php if ($setting !== null) {
+                            ?>
+                            <tr> 
+                                <td></td>
+                                <td></td>
+                                <td style="border-bottom: 1px solid black">DPP Nilai Lain</td>
+                                <td colspan="2" style="border-bottom: 1px solid black;text-align: right;"><?= number_format(((($subtotal1 - $totalDiskon) * 11) / 12) * $inv->nilai_matauang, 2) ?></td>
+
+                            </tr>
+                        <?php }
+                        ?>
                         <tr>
-                            <td></td>
                             <td></td>
                             <td></td>
                             <td style="border-bottom: 1px solid black">Taxes</td>
-                            <td style="border-bottom: 1px solid black;text-align: right;"><?= number_format($totalTax, 2) ?></td>
+                            <td colspan="2" style="border-bottom: 1px solid black;text-align: right;"><?= number_format($totalTax, 2) ?></td>
                         </tr>
                         <tr>
                             <td></td>
                             <td></td>
-                            <td></td>
                             <td style="border-bottom: 1px solid black;font-weight: 600"><strong>Total</strong></td>
-                            <td style="border-bottom: 1px solid black;text-align: right;"><?= number_format($subtotal2 + $totalTax, 2) ?></td>
+                            <td colspan="2" style="border-bottom: 1px solid black;text-align: right;"><?= number_format($subtotal2 + $totalTax, 2) ?></td>
                         </tr>
                         <?php
                     }
@@ -169,21 +221,38 @@
                 ?>
                 <div id="row">
                     <div id="columnmd">
-                        <div id="row" style="margin-top: -30px;font-size: 12px;" >
-                            <div id="column" style="text-align: left">
-                                <p style="font-weight: 600; border-bottom: 1px solid black"><strong>Tax</strong></p>
-                                <p><?= $dataPajak["ket"] ?? "" ?></p>
-                            </div>
-                            <div id="column" style="text-align: right">
-                                <p style="font-weight: 600;border-bottom: 1px solid black"><strong>Base</strong></p>
-                                <p><?= number_format($subtotal2, 2) ?></p>
-                            </div>
-                            <div id="column" style="text-align: right">
-                                <p style="font-weight: 600;border-bottom: 1px solid black"><strong>Amount</strong></p>
-                                <p><?= number_format($totalTax, 2) ?></p>
-                            </div>
-                        </div>
+                        <table style="width: 100%;font-size: 12px;">
+                            <thead >
+                                <tr>
+                                    <th style="text-align: left;border-bottom: 1px solid black">Tax</th>
+                                    <th style="border-bottom: 1px solid black">Base</th>
+                                    <th style="border-bottom: 1px solid black">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($totalTax > 0) { 
+                                    foreach ($dataPajak as $k => $v) {
+                                        $v = (object)$v;
+                                        ?>
+                                        <tr>
+                                            <td>
+                                                <?= $v->ket ?>
+                                            </td>
+                                            <td style="text-align: right">
+                                                IDR <?= number_format(($v->base * $inv->nilai_matauang), 4) ?>
+                                            </td>
+                                            <td style="text-align: right">
+                                                IDR <?= number_format(($v->nominal * $inv->nilai_matauang), 4) ?>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </tbody>
+                        </table>
                     </div>
+
                 </div>
                 <?php
             }
