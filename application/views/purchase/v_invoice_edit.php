@@ -517,7 +517,8 @@
 
 
             });
-
+            
+            var counterSplit = 0;
             $(function () {
                 var editable = false;
 
@@ -720,11 +721,10 @@
 
 
             });
-            var counterSplit = 0;
 
             const cancelSplit = ((e) => {
                 $(".split-item").show();
-                counterSplit++;
+                counterSplit--;
                 $(e).closest("tr").remove();
             });
             const saveSplit = (() => {
