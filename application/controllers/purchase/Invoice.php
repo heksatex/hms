@@ -230,6 +230,7 @@ class Invoice extends MY_Controller {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
+            $users = $this->session->userdata('nama');
 
             $kodeJurnal = $this->input->post("jurnal");
             $status = $this->input->post("status");
@@ -260,6 +261,7 @@ class Invoice extends MY_Controller {
                                 ->generate("{$kodeJurnal}/", '/%05d')->get()) {
                     throw new \Exception("No jurnal tidak terbuat", 500);
                 }
+                $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
                 $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $kode_decrypt])
                                 ->setJoins("invoice", "invoice.id = invoice_detail.invoice_id")
                                 ->setJoins("tax", "tax.id = invoice_detail.tax_id", "left")
@@ -277,7 +279,19 @@ class Invoice extends MY_Controller {
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
                 $jurnalDB->setTables("jurnal_entries")->save($jurnalData);
 
+                $jurnalDB->setTables("log_history")->save(
+                        [
+                            "datelog" => date("Y-m-d H:i:s"),
+                            "kode" => $jurnal,
+                            "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                            "jenis_log" => "create",
+                            "note" => logArrayToString(";", $jurnalData),
+                            "nama_user" => $users["nama"],
+                            "ip_address" => ""
+                        ]
+                );
                 $jurnalItems = [];
+                $jurnalItemsLog = [];
                 $tax = 0;
                 $totalNominal = 0;
                 $pajakLain = [];
@@ -287,7 +301,7 @@ class Invoice extends MY_Controller {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
                     }
                     $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
-                    $jurnalItems[] = array(
+                    $item = array(
                         "kode" => $jurnal,
                         "nama" => "[{$value->kode_produk}] {$value->nama_produk} (" . number_format($value->qty_beli, 2) . " {$value->uom_beli})",
                         "reff_note" => $value->reff_note,
@@ -300,6 +314,7 @@ class Invoice extends MY_Controller {
                         "nominal" => ($nominal * $value->nilai_matauang),
                         "row_order" => ($key + 1)
                     );
+                    $jurnalItems[] = $item;
 //                    $tax += $nominal * $value->tax_amount;
                     $totalNominal += $nominal;
                     if ($value->tax_id !== "0") {
@@ -313,6 +328,15 @@ class Invoice extends MY_Controller {
                             "tax_nama" => $value->tax_nama
                         );
                     }
+                    $jurnalItemsLog[] = [
+                        "datelog" => date("Y-m-d H:i:s"),
+                        "kode" => $jurnal,
+                        "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                        "jenis_log" => "edit",
+                        "note" => logArrayToString(";", $item),
+                        "nama_user" => $users["nama"],
+                        "ip_address" => ""
+                    ];
                 }
 
                 $model = new $this->m_global;
@@ -399,10 +423,19 @@ class Invoice extends MY_Controller {
 
                     foreach ($dataPajak as $a => $vv) {
                         $jurnalItems[] = $vv;
+                        $jurnalItemsLog[] = [
+                            "datelog" => date("Y-m-d H:i:s"),
+                            "kode" => $jurnal,
+                            "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                            "jenis_log" => "create",
+                            "note" => logArrayToString(";", $vv),
+                            "nama_user" => $users["nama"],
+                            "ip_address" => ""
+                        ];
                     }
                 }
                 $defaultPpn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
-                $jurnalItems[] = array(
+                $item = array(
                     "kode" => $jurnal,
                     "nama" => "",
                     "reff_note" => "",
@@ -415,8 +448,19 @@ class Invoice extends MY_Controller {
                     "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
                     "row_order" => count($jurnalItems) + 1
                 );
+                $jurnalItems[] = $item;
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("jurnal_entries_items")->saveBatch($jurnalItems);
+                $jurnalItemsLog[] = [
+                    "datelog" => date("Y-m-d H:i:s"),
+                    "kode" => $jurnal,
+                    "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                    "jenis_log" => "edit",
+                    "note" => logArrayToString(";", $item),
+                    "nama_user" => $users["nama"],
+                    "ip_address" => ""
+                ];
+                $jurnalDB->setTables("log_history")->saveBatch($jurnalItemsLog);
             }
             $head->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update(["status" => $status]);
 
