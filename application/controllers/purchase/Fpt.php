@@ -359,7 +359,8 @@ class Fpt extends MY_Controller {
                             'qty_beli' => $value->qty_beli,
                             'uom_beli' => $value->uom_beli,
                             'id_konversiuom' => $value->id_konversiuom,
-                            'nilai_konversiuom' => $value->nilai
+                            'nilai_konversiuom' => $value->nilai,
+                            "reff_note" => $value->reff_note
                         ];
                     } else {
                         $produk[$value->kode_produk]["qty"] += ($value->qty_beli * $value->nilai);
@@ -402,7 +403,7 @@ class Fpt extends MY_Controller {
                 $detailProduk = [];
                 foreach ($produk as $keys => $values) {
                     $clone = $values;
-                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"], $clone["id_konversiuom"], $clone["nilai_konversiuom"]);
+                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"], $clone["id_konversiuom"], $clone["nilai_konversiuom"],$clone["reff_note"]);
                     $smProduk[] = array_merge($clone, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
                     unset($values["status"]);
                     $detailProduk[] = array_merge($values, ['kode' => $kodeRcv, 'lot' => '', 'status_barang' => 'ready']);
