@@ -1718,6 +1718,7 @@ class MO extends MY_Controller
                 $case11     = "";
                 $where11    = "";
                 $consume    = "yes";              
+                
 
                 // start transaction
                 // $this->_module->startTransaction();
@@ -1732,12 +1733,20 @@ class MO extends MY_Controller
                 //cek status mrp_production = hold
                 $cek3  = $this->m_mo->cek_status_mrp_production($kode,'hold')->row_array();
         
+                $sl    = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get ,copy_bahanbaku true/false
+                $copy_bahan_baku = $sl['copy_bahan_baku'] ?? '';
+
+                $get_type_mo    = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
+                $type_mo = $get_type_mo['type_mo'] ?? '';
+
                 if(!empty($cek1['status'])){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else if(!empty($cek2['status'])){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else if(!empty($cek3['status'])){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else if($copy_bahan_baku == 'true' AND $type_mo == 'colouring' AND  !empty($array_fg) AND empty($array_rm)){
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Bahan Baku Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else{
 
                     //get last quant id
@@ -1767,6 +1776,7 @@ class MO extends MY_Controller
                     $list_lot_fg    = '';
                     $list_lot_waste = '';
                     $tmp_lot_fg     = '';
+                    $list_lot_cons  = '';
 
                     if(!empty($array_fg) ){
 
@@ -2045,10 +2055,13 @@ class MO extends MY_Controller
                         //lokasi tujuan rm
                         $lokasi_rm = $this->_module->get_location_by_move_id($move_id_rm)->row_array();
 
-                        $dept  = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get dept stock
+                        $dept  = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get dept stock 
                         
                         $get_ro      = $this->m_mo->get_row_order_rm_hasil($kode)->row_array();
                         $row_order_rm= $get_ro['row']+1;
+                        $row_rm_cons = 1;
+                        $cek_qty_konsum = 0;
+                        $tmp_qty_smi    = 0;
                         foreach ($array_rm as $row) {
 
                             $get_sq = $this->_module->get_stock_quant_by_id($row['quant_id'])->row_array();
@@ -2056,8 +2069,10 @@ class MO extends MY_Controller
                             if($get_sq['lokasi'] == $dept['stock_location']){// cek lokasi rm
 
                                 if($get_sq['qty'] == $row['qty_smi'] AND $get_sq['qty2'] == $row['qty2']){
-
-                                    if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){                     
+                                    
+                                    $tmp_qty_smi = $tmp_qty_smi + $row['qty_smi'];
+                                    if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){        
+                                        
                                         
                                         if($row['qty_konsum']<$row['qty_smi']){//jika qty_konsum kurang dari qty stock_move_items
 
@@ -2113,8 +2128,12 @@ class MO extends MY_Controller
                                             $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".round($row['qty_konsum'],2)."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$row['quant_id']."','".$row['additional']."'), ";
 
                                         }
+                                        $list_lot_cons .= '('.$row_rm_cons.') '.$row['nama_produk'].' '.$row['lot']." <br>";
+                                        $row_rm_cons++;
                                         $row_order_rm++;
-                                    }
+
+                                    } 
+                                    $cek_qty_konsum = $cek_qty_konsum + $row['qty_konsum'];
 
                                 }else{
                                     $rm_not_valid = true;
@@ -2125,6 +2144,11 @@ class MO extends MY_Controller
                             }
                         
                         }//foreach array_rm
+
+                        if(!empty($tmp_qty_smi) AND ((double)$cek_qty_konsum <= 0 || empty($cek_qty_konsum))){
+                            throw new \Exception('Qty Konsumsi Bahan Baku harus terisi !', 200);
+                        }
+                        
                     }
 
                     if($rm_not_valid == false){
@@ -2404,10 +2428,16 @@ class MO extends MY_Controller
                                 $lost_waste = '';
                             }
 
+                            if(!empty($list_lot_cons)){
+                                $list_cons = " <br> List Lot Bahan Baku : <br> ".$list_lot_cons;
+                            }else{
+                                $list_cons = "";
+                            }
+
                             if(!empty($array_fg) AND !empty($array_waste)){
-                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' & Jumlah Waste :'.$jml_lot_waste.' '.$lot_fg.' '.$lot_waste;
+                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' & Jumlah Waste :'.$jml_lot_waste.' '.$lot_fg.' '.$lot_waste. ' ' . $list_cons;
                             }else if(!empty($array_fg)){
-                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' '.$lot_fg;
+                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' '.$lot_fg . ' ' . $list_cons;
                             }else{
                                 $note_log    = "Produksi Batch ". $kode.' | Jumlah Waste : '.$jml_lot_waste.' '.$lot_waste;;
                             }
