@@ -43,6 +43,7 @@ class Requestforquotation extends MY_Controller {
 
     public function edit($id) {
         try {
+            $level = $this->session->userdata('nama')['level'] ?? "";
             $kode_decrypt = decrypt_url($id);
             $data['id'] = $id;
             $data['id_dept'] = 'RFQ';
@@ -52,14 +53,30 @@ class Requestforquotation extends MY_Controller {
             $model4 = clone $model2;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = (object) $this->session->userdata('nama');
-            $data["po"] = $model1->setTables("purchase_order po")->setJoins("partner p", "p.id = po.supplier")
-                            ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
-                            ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
-                            ->setJoins("purchase_order_edited poe", "(poe.po_id = po.no_po and poe.status not in ('cancel','done'))", "left")
-                            ->setSelects(["po.*", "p.nama as supp", "currency.symbol,currency.nama as curr_name", "poe.status as poe_status"])
-                            ->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "RFQ"])->getDetail();
+            $model1->setTables("purchase_order po")
+                    ->setJoins("partner p", "p.id = po.supplier")
+                    ->setJoins("currency_kurs", "currency_kurs.id = po.currency", "left")
+                    ->setJoins("currency", "currency.nama = currency_kurs.currency", "left")
+                    ->setJoins("purchase_order_edited poe", "(poe.po_id = po.no_po and poe.status not in ('cancel','done'))", "left")
+                    ->setSelects(["po.*", "p.nama as supp", "currency.symbol,currency.nama as curr_name", "poe.status as poe_status"])
+                    ->setWheres(["po.no_po" => $kode_decrypt, "po.jenis" => "RFQ"]);
+            if (strtolower($level) === "direksi") {
+                $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
+            } else {
+                $model1->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
+            }
+            $data["po"] = $model1->getDetail();
             if (!$data["po"]) {
                 throw new \Exception('Data tidak ditemukan', 500);
+            }
+            $nextPage = $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            if ($nextPage) {
+                $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po));
+            }
+
+            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true)->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            if ($prevPage) {
+                $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po));
             }
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")

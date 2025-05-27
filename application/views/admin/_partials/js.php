@@ -45,6 +45,9 @@
             loginFunc('<?php echo base_url('login/aksi_login'); ?>');
 //            $('#form-login').submit(false);
         }
+        if (xhr.status === 403) {
+            alert_modal_warning("Akses Tidak diijinkan.")
+        }
 
     });</script>
 <script type="text/javascript">
@@ -151,11 +154,19 @@
     }
 
     let textarea = document.querySelector(".resize-ta");
-    if (textarea != null) {
+    if (textarea !== null) {
         textarea.addEventListener("keyup", () => {
             textarea.style.height = calcHeight(textarea.value) + "px";
         });
     }
+    
+    $(".np").on("click",function(){
+        var url = $(this).data("url");
+        if(url === "") {
+            return;
+        }
+        location.href = url;
+    });
 
 </script>
 

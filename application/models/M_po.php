@@ -42,22 +42,31 @@ class M_po extends CI_Model {
         return $this;
     }
 
-    public function setWheres(array $wheres) {
+    public function setWheres(array $wheres,$clear =false) {
+        if($clear) {
+            $this->wheres = [];
+        }
         $this->wheres = array_merge($this->wheres, $wheres);
         return $this;
     }
 
-    public function setWhereRaw(string $where) {
+    public function setWhereRaw(string $where,$clear = false) {
+        if($clear) {
+            $this->wheresRaw = [];
+        }
         $this->wheresRaw[] = $where;
         return $this;
     }
 
-    public function setWhereIn(string $sa, array $in) {
+    public function setWhereIn(string $sa, array $in,$clear = false) {
+        if($clear) {
+            $this->whereIn = [];
+        }
         $this->whereIn[$sa] = $in;
         return $this;
     }
 
-    public function setSelects(array $selects) {
+    public function setSelects(array $selects,$clear = false) {
         $this->selects = $selects;
         return $this;
     }
@@ -180,6 +189,16 @@ class M_po extends CI_Model {
         
         if (count($this->group) > 0) {
             $this->db->group_by($this->group);
+        }
+        
+        if (isset($this->order)) {
+            foreach ($this->order as $key => $value) {
+                if (gettype($key) === "integer") {
+                    $this->db->order_by($value, "asc");
+                } else {
+                    $this->db->order_by($key, $value);
+                }
+            }
         }
 
         $result = $this->db->select(implode(",", $this->selects))->get();

@@ -202,6 +202,16 @@ class M_global extends CI_Model {
                 $this->db->where_in($key, $value);
             }
         }
+        
+        if (isset($this->order)) {
+            foreach ($this->order as $key => $value) {
+                if (gettype($key) === "integer") {
+                    $this->db->order_by($value, "asc");
+                } else {
+                    $this->db->order_by($key, $value);
+                }
+            }
+        }
 
         $result = $this->db->select(implode(",", $this->selects))->get();
         return $result->row();
