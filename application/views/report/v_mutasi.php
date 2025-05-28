@@ -127,11 +127,11 @@
                     <div class="col-xs-12 col-sm-12 col-md-2">
                         <label>View </label>
                     </div>
-                    <div class="col-xs-6 col-sm-2 col-md-2">
+                    <div class="col-xs-6 col-sm-2 col-md-2" style="display: inline;"  id="dg_show">
                       <input type="radio" id="view" name="view[]" value="Global" checked="checked">
                       <label for="global">Global</label>
                     </div>
-                    <div class="col-xs-6 col-sm-3 col-md-3">
+                    <div class="col-xs-6 col-sm-3 col-md-3" >
                       <input type="radio" id="view" name="view[]" value="DetailProduk">
                       <label for="detail">Detail Produk</label>
                     </div>
@@ -281,7 +281,6 @@
             <!-- table -->
             <div class="box-body">
               
-
               <div class="col-sm-12 table-responsive">
                 <div class="form-group">
                     <div class="col-md-12">
@@ -471,21 +470,50 @@
       }else{
         $("#dd_show").hide();
       }
+      var arr_dept_gudang = `<?php echo $dept_gudang; ?>` ;
+      dept_gudang = JSON.parse(arr_dept_gudang);
+      for(i=0; i < dept_gudang.length; i++){
+        // alert(dept_gudang[i]);
+        if($(this).val() == dept_gudang[i]){
+          $("#dg_show").hide();
+          $('input[name="view[]"]').prop('checked',false);
+          $('input[value="DetailProduk"]').prop('checked',true);
+          break;
+        }else{
+          $("#dg_show").show();
+          $('input[name="view[]"]').prop('checked',false);
+          $('input[value="Global"]').prop('checked',true);
+        }
+      }
+
   });
 
   $('#btn-excel').click(function(){
 
-    tanggal    = $('#tanggal').val();
-    departemen = $('#departemen').val();
+     arr_filter = [];
+
+    tanggal         = $('#tanggal').val();
+    departemen      = $('#departemen').val();
+    kode_produk     = $('#kode_produk').val();
+    nama_produk     = $('#nama_produk').val();
+    kode_transaksi  = $('#kode_transaksi').val();
+    reff_picking    = '',
+    reff_note       = $('#reff_note').val();
+    lot             = $('#lot').val();
+    parent          = $('#parent').val();
+    warna           = $('#warna').val();
+    no_go           = $('#no_go').val();
+    route           = $('#route').val();
+    jenis_kain      = $('#jenis_kain').val();
 
     var radio_arr = new Array(); 
-
     var radio_arr = $('input[name="view[]"]').map(function(e, i) {
-            if(this.checked == true){
+          if(this.checked == true){
               return i.value;
-            }
+          }
 
     }).get();
+
 
     if(tanggal == ''){ 
       alert_modal_warning('Periode Tanggal Harus diisi !');
@@ -496,10 +524,12 @@
     }else if(radio_arr.length == 0) {
       alert_modal_warning('View Harus Dipilih !');
 
-    }else if(arr_filter.length == 0) {
-      alert_modal_warning('Silahkan Generate terlebih dahulu !');
+    // }else if(arr_filter.length == 0) {
+    //   alert_modal_warning('Silahkan Generate terlebih dahulu !');
 
     }else{
+
+      arr_filter.push({tanggal:tanggal, departemen:departemen, kode_produk:kode_produk, nama_produk:nama_produk, kode_transaksi:kode_transaksi, lot:lot, reff_picking:reff_picking, reff_note:reff_note, parent:parent,warna:warna,no_go:no_go,jenis_kain:jenis_kain,route:route,view_arr:radio_arr});
 
       $.ajax({
           "type":'POST',
@@ -664,7 +694,7 @@
                       $.each(data.result, function(key, value){ 
                         if(value.table_1 == "Yes"){
                           if(data.view == "Global" || data.view == "DetailProduk" ){
-                            create_table('example1',data.view, value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                            create_table('example1',data.view, value.head_table1,value.head_table2,value.record,value.count_in,value.count_out,data.gd_khusus);
                           }else if(data.view == "DetailLotDatar"){
                             create_table_detail_datar('example1',data.view, value.head_table1,value.head_table2,value.record,value.count_in,value.count_out, value.count_type_in, value.count_type_out);
                           }else{
@@ -677,7 +707,7 @@
 
                         if(value.table_2 == "Yes"){
                           if(data.view == "Global" || data.view == "DetailProduk"){
-                            create_table('example2',data.view,value.head_table1,value.head_table2,value.record,value.count_in,value.count_out);
+                            create_table('example2',data.view,value.head_table1,value.head_table2,value.record,value.count_in,value.count_out,data.gd_khusus);
                           }else{
                             create_table_detail('example2', value.head_table,value.record);
                           }
@@ -730,6 +760,17 @@
   }
   
   function create_table_detail(tableId,head_table,body){
+
+                    var arr_dept_gudang = `<?php echo $dept_gudang; ?>` ;
+                     dept_gudang = JSON.parse(arr_dept_gudang);
+                     show_qty_op = 'true';
+                    for(i=0; i < dept_gudang.length; i++){
+                      if($("#departemen").val() == dept_gudang[i]){
+                        show_qty_op = false;
+                        break;
+                      }
+                    }
+
                     let thead = $("<thead />");
                     let row   = '';
 
@@ -766,7 +807,9 @@
                         row2 += "<td class='white-space-nowrap'>"+value.lot+"</td>";
                         row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty)+" "+value.uom+"</td>";
                         row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty2)+" "+value.uom2+"</td>";
-                        row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty_opname)+" "+value.uom_opname+"</td>";
+                        if(show_qty_op == 'true'){
+                          row2 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.qty_opname)+" "+value.uom_opname+"</td>";
+                        }
                         row2 += "<td class='white-space-nowrap'>"+value.origin+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.method+"</td>";
                         row2 += "<td class='white-space-nowrap'>"+value.sc+"</td>";
@@ -1177,7 +1220,7 @@
                     return;
   }
 
-  function create_table(tableId,view,head_table1,head_table2,body,count_in,count_out){
+  function create_table(tableId,view,head_table1,head_table2,body,count_in,count_out,gd_khusus){
                     let thead = $("<thead />");
                     let row   = '';
                     let row2  = '';
@@ -1206,7 +1249,11 @@
                                 }
                             }else if(a == 'awal' || a == 'akhir' || a == 'in' || a== 'out' || a == 'adj_in' || a == 'adj_out' || a == 'count_in' || a == 'count_out' ){
                                 if(view == "DetailProduk" || view == "DetailLotDatar"){
-                                  colspan = "colspan='4'";                             
+                                  if(gd_khusus == true){
+                                    colspan = "colspan='3'";                             
+                                  }else{
+                                    colspan = "colspan='4'";                             
+                                  }
                                   if(view == "DetailLotDatar"){
                                     rowspan = "rowspan ='2' ";
                                   }else{
@@ -1378,7 +1425,7 @@
 
                           if(value.id_category != $id_category && $id_category != '' && (view == "DetailProduk" || view == "DetailLotDatar")){ 
 
-                            $result = create_total_in_body($nama_category,$cat_total_lot_s_awal,$cat_total_qty_s_awal,$cat_total_qty2_s_awal,$cat_total_qty_opname_s_awal,$cat_qty1_uom_s_awal,$cat_qty2_uom_s_awal,$cat_opname_uom_s_awal,count_in,$cat_total_lot_adj_in,$cat_total_qty_adj_in,$cat_total_qty2_adj_in,$cat_total_qty_opname_adj_in,$cat_qty1_uom_adj_in,$cat_qty2_uom_adj_in,$cat_opname_uom_adj_in,$cat_total_lot_in,$cat_total_qty_in,$cat_total_qty2_in,$cat_total_qty_opname_in,arr_in2,count_out,arr_tot_in,$cat_total_lot_adj_out,$cat_total_qty_adj_out,$cat_total_qty2_adj_out,$cat_total_qty_opname_adj_out,$cat_qty1_uom_adj_out,$cat_qty2_uom_adj_out,$cat_opname_uom_adj_out,$cat_total_lot_out,$cat_total_qty_out,$cat_total_qty2_out,$cat_total_qty_opname_out,$cat_total_lot_s_akhir,$cat_total_qty_s_akhir,$cat_total_qty2_s_akhir,$cat_total_qty_opname_s_akhir,arr_out2,arr_tot_out,$cat_qty1_uom_s_akhir,$cat_qty2_uom_s_akhir,$cat_opname_uom_s_akhir);
+                            $result = create_total_in_body($nama_category,$cat_total_lot_s_awal,$cat_total_qty_s_awal,$cat_total_qty2_s_awal,$cat_total_qty_opname_s_awal,$cat_qty1_uom_s_awal,$cat_qty2_uom_s_awal,$cat_opname_uom_s_awal,count_in,$cat_total_lot_adj_in,$cat_total_qty_adj_in,$cat_total_qty2_adj_in,$cat_total_qty_opname_adj_in,$cat_qty1_uom_adj_in,$cat_qty2_uom_adj_in,$cat_opname_uom_adj_in,$cat_total_lot_in,$cat_total_qty_in,$cat_total_qty2_in,$cat_total_qty_opname_in,arr_in2,count_out,arr_tot_in,$cat_total_lot_adj_out,$cat_total_qty_adj_out,$cat_total_qty2_adj_out,$cat_total_qty_opname_adj_out,$cat_qty1_uom_adj_out,$cat_qty2_uom_adj_out,$cat_opname_uom_adj_out,$cat_total_lot_out,$cat_total_qty_out,$cat_total_qty2_out,$cat_total_qty_opname_out,$cat_total_lot_s_akhir,$cat_total_qty_s_akhir,$cat_total_qty2_s_akhir,$cat_total_qty_opname_s_akhir,arr_out2,arr_tot_out,$cat_qty1_uom_s_akhir,$cat_qty2_uom_s_akhir,$cat_opname_uom_s_akhir,gd_khusus);
 
                             row3 +=  $result ;
 
@@ -1443,26 +1490,30 @@
                           // total saldo awal
                           $cat_total_lot_s_awal = $cat_total_lot_s_awal + parseInt(value.s_awal_lot);
                           $cat_total_qty_s_awal = $cat_total_qty_s_awal + parseFloat(value.s_awal_qty1);
-                          $cat_total_qty2_s_awal = $cat_total_qty2_s_awal + parseFloat(value.s_awal_qty2);
+                          $cat_total_qty2_s_awal = $cat_total_qty2_s_awal + parseFloat(value.s_awal_qty2);                       
                           $cat_total_qty_opname_s_awal = $cat_total_qty_opname_s_awal + parseFloat(value.s_awal_qty_opname);
+                          
 
                           //total adj in
                           $cat_total_lot_adj_in     = $cat_total_lot_adj_in + parseInt(value.adj_in_lot);
                           $cat_total_qty_adj_in     = $cat_total_qty_adj_in + parseFloat(value.adj_in_qty1);
-                          $cat_total_qty2_adj_in    = $cat_total_qty2_adj_in + parseFloat(value.adj_in_qty2);
+                          $cat_total_qty2_adj_in    = $cat_total_qty2_adj_in + parseFloat(value.adj_in_qty2);                      
                           $cat_total_qty_opname_adj_in = $cat_total_qty_opname_adj_in + parseFloat(value.adj_in_qty_opname);
+                          
 
                           //total adj out
                           $cat_total_lot_adj_out    = $cat_total_lot_adj_out + parseInt(value.adj_out_lot);
                           $cat_total_qty_adj_out    = $cat_total_qty_adj_out + parseFloat(value.adj_out_qty1);
                           $cat_total_qty2_adj_out   = $cat_total_qty2_adj_out + parseFloat(value.adj_out_qty2);
                           $cat_total_qty_opname_adj_out = $cat_total_qty_opname_adj_out + parseFloat(value.adj_out_qty_opname);
+                       
 
                           // total saldo akhir
                           $cat_total_lot_s_akhir = $cat_total_lot_s_akhir + parseInt(value.s_akhir_lot);
                           $cat_total_qty_s_akhir = $cat_total_qty_s_akhir + parseFloat(value.s_akhir_qty1);
-                          $cat_total_qty2_s_akhir = $cat_total_qty2_s_akhir + parseFloat(value.s_akhir_qty2);
+                          $cat_total_qty2_s_akhir = $cat_total_qty2_s_akhir + parseFloat(value.s_akhir_qty2);                        
                           $cat_total_qty_opname_s_akhir = $cat_total_qty_opname_s_akhir + parseFloat(value.s_akhir_qty_opname);
+                          
 
                           row3 += "<tr>";
                           row3 += "<td >"+ (no++) +"</td>";
@@ -1479,7 +1530,9 @@
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_lot)+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty1)+" "+value.s_awal_qty1_uom+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty2)+" "+value.s_awal_qty2_uom+"</td>";
-                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty_opname)+" "+value.s_awal_qty_opname_uom+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_awal_qty_opname)+" "+value.s_awal_qty_opname_uom+"</td>";
+                            }
                            
                           }else{// global
                             row3 += "<td class='white-space-nowrap' >"+value.nama_produk+"</td>";
@@ -1521,7 +1574,9 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_lot])+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty1])+" "+value[in_qty1_uom]+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_qty2])+" "+value[in_qty2_uom]+"</td>";
-                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_opname])+" "+value[in_opname_uom]+"</td>";
+                              if(gd_khusus == false){
+                                row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[in_opname])+" "+value[in_opname_uom]+"</td>";
+                              }
                               no_in++;
 
                               // info total++ in
@@ -1589,7 +1644,9 @@
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_lot)+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty1)+" "+value.adj_in_qty1_uom+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty2)+" "+value.adj_in_qty2_uom+"</td>";
-                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_in_qty_opname)+" "+value.adj_in_qty_opname_uom+"</td>";
+                            }
 
                             in_total_lot         = in_total_lot+parseInt(value.adj_in_lot);
                             in_total_qty1        = in_total_qty1+parseFloat(value.adj_in_qty1);
@@ -1615,7 +1672,9 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_lot)+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_qty1)+" "+qty1_uom+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_qty2)+" "+qty2_uom+"</td>";
-                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_qty_opname)+" "+qty_opname_uom+"</td>";
+                              if(gd_khusus == false){
+                                row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(in_total_qty_opname)+" "+qty_opname_uom+"</td>";
+                              }
                             // }
 
                             arr_tot_in.push({tot_lot:in_total_lot, tot_qty1:in_total_qty1, qty1_uom:qty1_uom, tot_qty2:in_total_qty2, qty2_uom:qty2_uom, tot_qty_opname:in_total_qty_opname, qty_opname_uom:qty_opname_uom});
@@ -1656,7 +1715,9 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_lot])+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty1])+" "+value[out_qty1_uom]+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_qty2])+" "+value[out_qty2_uom]+"</td>";
-                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
+                              if(gd_khusus == false){
+                                row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value[out_opname])+" "+value[out_opname_uom]+"</td>";
+                              }
                               no_out++;
 
                               // value_out_lot = Number.isInteger(value[out_lot]) ? parseInt(value[out_lot]) : 0;
@@ -1723,7 +1784,9 @@
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_lot)+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty1)+" "+value.adj_out_qty1_uom+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty2)+" "+value.adj_out_qty2_uom+"</td>";
-                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.adj_out_qty_opname)+" "+value.adj_out_qty_opname_uom+"</td>";
+                            }
                       
                             out_total_lot         = out_total_lot+parseInt(value.adj_out_lot);
                             out_total_qty1        = out_total_qty1+parseFloat(value.adj_out_qty1);
@@ -1750,7 +1813,9 @@
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_lot)+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_qty1)+" "+qty1_uom+"</td>";
                               row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_qty2)+" "+qty2_uom+"</td>";
-                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_qty_opname)+" "+qty_opname_uom+"</td>";
+                              if(gd_khusus == false){
+                                row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(out_total_qty_opname)+" "+qty_opname_uom+"</td>";
+                              }
                             // }
 
                             arr_tot_out.push({tot_lot:out_total_lot, tot_qty1:out_total_qty1, qty1_uom:qty1_uom, tot_qty2:out_total_qty2, qty2_uom:qty2_uom,tot_qty_opname:out_total_qty_opname, qty_opname_uom:qty_opname_uom,});
@@ -1759,7 +1824,9 @@
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_lot)+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty1)+" "+value.s_akhir_qty1_uom+"</td>";
                             row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty2)+" "+value.s_akhir_qty2_uom+"</td>";
-                            row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty_opname)+" "+value.s_akhir_qty_opname_uom+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.s_akhir_qty_opname)+" "+value.s_akhir_qty_opname_uom+"</td>";
+                            }
 
                             if(value.s_akhir_qty1_uom != ''){
                               $cat_qty1_uom_s_akhir   = value.s_akhir_qty1_uom;
@@ -1811,7 +1878,7 @@
                       row3 = $("<tr>").append($("<td colspan='20'>").text('Tidak ada Data'));
                     }else{
                       if(view == "DetailProduk"){
-                        $result = create_total_in_body($nama_category,$cat_total_lot_s_awal,$cat_total_qty_s_awal,$cat_total_qty2_s_awal,$cat_total_qty_opname_s_awal,$cat_qty1_uom_s_awal,$cat_qty2_uom_s_awal,$cat_opname_uom_s_awal,count_in,$cat_total_lot_adj_in,$cat_total_qty_adj_in,$cat_total_qty2_adj_in,$cat_total_qty_opname_adj_in,$cat_qty1_uom_adj_in,$cat_qty2_uom_adj_in,$cat_opname_uom_adj_in,$cat_total_lot_in,$cat_total_qty_in,$cat_total_qty2_in,$cat_total_qty_opname_in,arr_in2,count_out,arr_tot_in,$cat_total_lot_adj_out,$cat_total_qty_adj_out,$cat_total_qty2_adj_out,$cat_total_qty_opname_adj_out,$cat_qty1_uom_adj_out,$cat_qty2_uom_adj_out,$cat_opname_uom_adj_out,$cat_total_lot_out,$cat_total_qty_out,$cat_total_qty2_out,$cat_total_qty_opname_out,$cat_total_lot_s_akhir,$cat_total_qty_s_akhir,$cat_total_qty2_s_akhir,$cat_total_qty_opname_s_akhir,arr_out2,arr_tot_out,$cat_qty1_uom_s_akhir,$cat_qty2_uom_s_akhir,$cat_opname_uom_s_akhir);
+                        $result = create_total_in_body($nama_category,$cat_total_lot_s_awal,$cat_total_qty_s_awal,$cat_total_qty2_s_awal,$cat_total_qty_opname_s_awal,$cat_qty1_uom_s_awal,$cat_qty2_uom_s_awal,$cat_opname_uom_s_awal,count_in,$cat_total_lot_adj_in,$cat_total_qty_adj_in,$cat_total_qty2_adj_in,$cat_total_qty_opname_adj_in,$cat_qty1_uom_adj_in,$cat_qty2_uom_adj_in,$cat_opname_uom_adj_in,$cat_total_lot_in,$cat_total_qty_in,$cat_total_qty2_in,$cat_total_qty_opname_in,arr_in2,count_out,arr_tot_in,$cat_total_lot_adj_out,$cat_total_qty_adj_out,$cat_total_qty2_adj_out,$cat_total_qty_opname_adj_out,$cat_qty1_uom_adj_out,$cat_qty2_uom_adj_out,$cat_opname_uom_adj_out,$cat_total_lot_out,$cat_total_qty_out,$cat_total_qty2_out,$cat_total_qty_opname_out,$cat_total_lot_s_akhir,$cat_total_qty_s_akhir,$cat_total_qty2_s_akhir,$cat_total_qty_opname_s_akhir,arr_out2,arr_tot_out,$cat_qty1_uom_s_akhir,$cat_qty2_uom_s_akhir,$cat_opname_uom_s_akhir,gd_khusus);
                         row3 +=  $result ;
                       }
                     }
@@ -1823,7 +1890,7 @@
             return;
   }
 
-  function create_total_in_body($nama_category,$cat_total_lot_s_awal,$cat_total_qty_s_awal,$cat_total_qty2_s_awal,$cat_total_qty_opname_s_awal,$cat_qty1_uom_s_awal,$cat_qty2_uom_s_awal,$cat_opname_uom_s_awal,count_in,$cat_total_lot_adj_in,$cat_total_qty_adj_in,$cat_total_qty2_adj_in,$cat_total_qty_opname_adj_in,$cat_qty1_uom_adj_in,$cat_qty2_uom_adj_in,$cat_opname_uom_adj_in,$cat_total_lot_in,$cat_total_qty_in,$cat_total_qty2_in,$cat_total_qty_opname_in,arr_in2,count_out,arr_tot_in,$cat_total_lot_adj_out,$cat_total_qty_adj_out,$cat_total_qty2_adj_out,$cat_total_qty_opname_adj_out,$cat_qty1_uom_adj_out,$cat_qty2_uom_adj_out,$cat_opname_uom_adj_out,$cat_total_lot_out,$cat_total_qty_out,$cat_total_qty2_out,$cat_total_qty_opname_out,$cat_total_lot_s_akhir,$cat_total_qty_s_akhir,$cat_total_qty2_s_akhir,$cat_total_qty_opname_s_akhir,arr_out2,arr_tot_out,$cat_qty1_uom_s_akhir,$cat_qty2_uom_s_akhir,$cat_opname_uom_s_akhir)
+  function create_total_in_body($nama_category,$cat_total_lot_s_awal,$cat_total_qty_s_awal,$cat_total_qty2_s_awal,$cat_total_qty_opname_s_awal,$cat_qty1_uom_s_awal,$cat_qty2_uom_s_awal,$cat_opname_uom_s_awal,count_in,$cat_total_lot_adj_in,$cat_total_qty_adj_in,$cat_total_qty2_adj_in,$cat_total_qty_opname_adj_in,$cat_qty1_uom_adj_in,$cat_qty2_uom_adj_in,$cat_opname_uom_adj_in,$cat_total_lot_in,$cat_total_qty_in,$cat_total_qty2_in,$cat_total_qty_opname_in,arr_in2,count_out,arr_tot_in,$cat_total_lot_adj_out,$cat_total_qty_adj_out,$cat_total_qty2_adj_out,$cat_total_qty_opname_adj_out,$cat_qty1_uom_adj_out,$cat_qty2_uom_adj_out,$cat_opname_uom_adj_out,$cat_total_lot_out,$cat_total_qty_out,$cat_total_qty2_out,$cat_total_qty_opname_out,$cat_total_lot_s_akhir,$cat_total_qty_s_akhir,$cat_total_qty2_s_akhir,$cat_total_qty_opname_s_akhir,arr_out2,arr_tot_out,$cat_qty1_uom_s_akhir,$cat_qty2_uom_s_akhir,$cat_opname_uom_s_akhir,gd_khusus)
   {
                             let row3 = '';
                             row3 += "<tr>";
@@ -1831,7 +1898,9 @@
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_lot_s_awal)+" </td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_s_awal)+" "+$cat_qty1_uom_s_awal+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty2_s_awal)+" "+$cat_qty2_uom_s_awal+"</td>";
-                            row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_s_awal)+" "+$cat_opname_uom_s_awal+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_s_awal)+" "+$cat_opname_uom_s_awal+"</td>";
+                            }
                             let num_in = 0;
                             for (cin = count_in; num_in < cin; num_in++ ) {
                               tot_lot_in  = 0;
@@ -1859,13 +1928,17 @@
                               row3 += "<td class='style_total' >"+formatNumber(tot_lot_in)+"</td>";
                               row3 += "<td class='style_total' >"+formatNumber(tot_qty1_in)+" "+uom1_in+" </td>";
                               row3 += "<td class='style_total' >"+formatNumber(tot_qty2_in)+" "+uom2_in+" </td>";
-                              row3 += "<td class='style_total' >"+formatNumber(tot_qty_opname_in)+" "+uom_opname_in+" </td>";
+                              if(gd_khusus == false){
+                                row3 += "<td class='style_total' >"+formatNumber(tot_qty_opname_in)+" "+uom_opname_in+" </td>";
+                              }
                             }
                             // total  cat adj in 
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_lot_adj_in)+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_adj_in)+" "+$cat_qty1_uom_adj_in+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty2_adj_in)+" "+$cat_qty2_uom_adj_in+"</td>";
-                            row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_adj_in)+" "+$cat_opname_uom_adj_in+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_adj_in)+" "+$cat_opname_uom_adj_in+"</td>";
+                            }
 
                             qty1_uom_tot_in   = '';
                             qty2_uom_tot_in   = '';
@@ -1891,7 +1964,9 @@
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_lot_in)+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_in)+" "+qty1_uom_tot_in+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty2_in)+"  "+qty2_uom_tot_in+"</td>";
-                            row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_in)+"  "+opname_uom_tot_in+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_in)+"  "+opname_uom_tot_in+"</td>";
+                            }
 
                             // total out
                             let num_out = 0;
@@ -1921,14 +1996,18 @@
                               row3 += "<td class='style_total' >"+formatNumber(tot_lot_out)+" </td>";
                               row3 += "<td class='style_total' >"+formatNumber(tot_qty1_out)+"  "+uom1_out+"</td>";
                               row3 += "<td class='style_total' >"+formatNumber(tot_qty2_out)+"  "+uom2_out+"</td>";
-                              row3 += "<td class='style_total' >"+formatNumber(tot_qty_opname_out)+"  "+uom_opname_out+"</td>";
+                              if(gd_khusus == false){
+                                row3 += "<td class='style_total' >"+formatNumber(tot_qty_opname_out)+"  "+uom_opname_out+"</td>";
+                              }
                             }
 
                             // total  cat adj out
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_lot_adj_out)+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_adj_out)+" "+$cat_qty1_uom_adj_out+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty2_adj_out)+""+$cat_qty2_uom_adj_out+" </td>";
-                            row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_adj_out)+" "+$cat_opname_uom_adj_out+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_adj_out)+" "+$cat_opname_uom_adj_out+"</td>";
+                            }
 
                             qty1_uom_tot_out   = '';
                             qty2_uom_tot_out   = '';
@@ -1954,12 +2033,16 @@
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_lot_out)+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_out)+" "+qty1_uom_tot_out+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty2_out)+" "+qty2_uom_tot_out+"</td>";
-                            row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_out)+" "+opname_uom_tot_out+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_out)+" "+opname_uom_tot_out+"</td>";
+                            }
 
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_lot_s_akhir)+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_s_akhir)+" "+$cat_qty1_uom_s_akhir+"</td>";
                             row3 += "<td class='style_total' >"+formatNumber($cat_total_qty2_s_akhir)+" "+$cat_qty2_uom_s_akhir+"</td>";
-                            row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_s_akhir)+" "+$cat_opname_uom_s_akhir+"</td>";
+                            if(gd_khusus == false){
+                              row3 += "<td class='style_total' >"+formatNumber($cat_total_qty_opname_s_akhir)+" "+$cat_opname_uom_s_akhir+"</td>";
+                            }
                             
 
                             row3 += "</tr>";
