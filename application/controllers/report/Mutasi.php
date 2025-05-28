@@ -426,7 +426,7 @@ class Mutasi extends MY_Controller
 
     function cek_dept_mutasi($dept)
     {
-        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB','DYE2','FIN','DF','INS2','GJD','DF2','GUM','GSP','GATK','GIT');
+        $list_dept_mutasi = array('GDB','WRD','TWS','WRP','TRI','JAC','CS','INS1','GRG','DYE','GOB','DYE2','FIN','DF','INS2','GJD','DF2','GUM','GSP','GATK','GIT','GPM');
         $dept_status      = false;
         foreach($list_dept_mutasi as $list){
             if($list == $dept){
@@ -465,7 +465,7 @@ class Mutasi extends MY_Controller
 
     function cek_dept_mutasi_gudang($dept)
     {
-        $list_dept_mutasi=  array('GATK','GIT','GUM','GSP');
+        $list_dept_mutasi=  $this->list_dept_mutasi_gudang_khusus();
         $dept_status      = false;
         foreach($list_dept_mutasi as $list){
             if($list == $dept){
@@ -478,7 +478,7 @@ class Mutasi extends MY_Controller
     }
 
     function list_dept_mutasi_gudang_khusus(){
-        $list_dept = array('GATK','GIT','GUM','GSP');
+        $list_dept = array('GATK','GIT','GUM','GSP','GPM');
         // $list_dept[] = array('GATK');
         // $list_dept[] = array('GIT');
         // $list_dept[] = array('GUM');
@@ -510,6 +510,7 @@ class Mutasi extends MY_Controller
             array('kode' => 'GIT', 'nama'=>'Gudang IT'),
             array('kode' => 'GUM', 'nama'=>'Gudang Umum'),
             array('kode' => 'GSP', 'nama'=>'Gudang Sparepart'),
+            array('kode' => 'GPM', 'nama'=>'Gudang Packing Material'),
 
         );
 
@@ -2284,6 +2285,7 @@ class Mutasi extends MY_Controller
             $tahun      = date('Y', strtotime($tanggal)); // example 2022
             $bulan      = date('n', strtotime($tanggal)); // example 8
             $dept       = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
+            $tmp_gd_khusus  = false;
 
             ob_start();
             $object = new PHPExcel();
@@ -2317,7 +2319,13 @@ class Mutasi extends MY_Controller
             }else{
 
                 $table       = 'acc_mutasi_'.strtolower($departemen).'_detail';
-                $result      = $this->create_header_detail(true);
+                 $gd_khusus = $this->cek_dept_mutasi_gudang($departemen);
+                if($gd_khusus == true){
+                    $result     = $this->create_header_detail3(true);
+                    $tmp_gd_khusus = true;
+                } else {
+                    $result      = $this->create_header_detail(true);
+                }
                 $result_where= $this->create_where($kode_produk,$nama_produk,$kode_transaksi,$lot,$reff_picking,$reff_note);
                 $acc_mutasi  = $this->get_acc_mutasi_detail_by_kode($table,$tahun,$bulan,$result_where,'','',true);
                 
@@ -2408,13 +2416,21 @@ class Mutasi extends MY_Controller
                     $sheet->SetCellValue('L'.$rowCount, $row->uom);
                     $sheet->SetCellValue('M'.$rowCount, $row->qty2);
                     $sheet->SetCellValue('N'.$rowCount, $row->uom2);
-                    $sheet->SetCellValue('O'.$rowCount, $row->qty_opname);
-                    $sheet->SetCellValue('P'.$rowCount, $row->uom_opname);
-                    $sheet->SetCellValue('Q'.$rowCount, $row->origin);
-                    $sheet->SetCellValue('R'.$rowCount, $row->method);
-                    $sheet->SetCellValue('S'.$rowCount, $row->sc);
-                    $sheet->SetCellValue('T'.$rowCount, $row->nama_sales_group);
-                    $sheet->SetCellValue('U'.$rowCount, $row->reff_note);
+                    if($tmp_gd_khusus == false){
+                        $sheet->SetCellValue('O'.$rowCount, $row->qty_opname);
+                        $sheet->SetCellValue('P'.$rowCount, $row->uom_opname);
+                        $sheet->SetCellValue('Q'.$rowCount, $row->origin);
+                        $sheet->SetCellValue('R'.$rowCount, $row->method);
+                        $sheet->SetCellValue('S'.$rowCount, $row->sc);
+                        $sheet->SetCellValue('T'.$rowCount, $row->nama_sales_group);
+                    }else{
+
+                        $sheet->SetCellValue('O'.$rowCount, $row->origin);
+                        $sheet->SetCellValue('P'.$rowCount, $row->method);
+                        $sheet->SetCellValue('Q'.$rowCount, $row->sc);
+                        $sheet->SetCellValue('R'.$rowCount, $row->nama_sales_group);
+                        $sheet->SetCellValue('S'.$rowCount, $row->reff_note);
+                    }
                     if($rowCount == 10000){
                         // break;
                     }
