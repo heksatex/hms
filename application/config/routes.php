@@ -63,6 +63,7 @@ $route['lab'] = 'lab/lab';
 $route['sales'] = 'sales/sales';
 $route['setting'] = 'setting/setting';
 $route['report'] = 'report/report';
+$route['accounting'] = 'accounting/accounting';
 //WA Group
 $route['setting/wa_group']['GET'] = 'setting/WaGroup/index';
 $route['setting/wa_group/add']['GET'] = 'setting/WaGroup/add';
@@ -94,6 +95,7 @@ $route['setting/wa_schedule/simpan']['POST'] = 'setting/WaScheduleMessage/simpan
 $route['setting/wa_schedule/update']['POST'] = 'setting/WaScheduleMessage/update';
 $route['setting/wa_schedule/delete']['POST'] = 'setting/WaScheduleMessage/delete';
 $route['setting/wa_schedule/status']['POST'] = 'setting/WaScheduleMessage/disablePesan';
+$route['setting/wa_schedule/get_users']['GET'] = 'setting/WaScheduleMessage/getUsers';
 
 $route['print/check'] = 'warehouse/picklistvalidasi/check';
 $route['setting/wa_template/test']['GET'] = 'warehouse/picklistvalidasi/test';
