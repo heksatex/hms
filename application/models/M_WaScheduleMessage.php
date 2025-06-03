@@ -14,12 +14,14 @@ class M_WaScheduleMessage extends CI_Model {
     var $table = "wa_schedule_message";
 
     protected function getDataQuery() {
-        $this->db->select('wsm.*,day,groupid,groupname,tmp.template as footer');
+        $this->db->select('wsm.*,day,groupid,groupname,tmp.template as footer,username');
         $this->db->from($this->table . ' as wsm');
         $this->db->join('wa_template as tmp', 'tmp.nama = wsm.footer_nama', 'left');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(day) as day from wa_schedule_message_days GROUP BY wa_schedule_message_id) as b', 'b.wa_schedule_message_id = wsm.id', 'LEFT');
         $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(wa_group_id) as groupid,GROUP_CONCAT(d.wa_group) as groupname from wa_schedule_message_group as c '
                 . ' join wa_group as d on d.id = c.wa_group_id GROUP BY wa_schedule_message_id) d', 'd.wa_schedule_message_id = wsm.id', 'LEFT');
+        $this->db->join('(select wa_schedule_message_id, GROUP_CONCAT(f.username) as username,GROUP_CONCAT(f.nama) as nama_user from wa_schedule_message_user as e '
+                . ' join user as f on e.username = f.username GROUP BY wa_schedule_message_id) g', 'g.wa_schedule_message_id = wsm.id', 'LEFT');
         $this->db->group_by('wsm.id');
         foreach ($this->column_search as $key => $value) {
             if ($_POST["search"]["value"]) {

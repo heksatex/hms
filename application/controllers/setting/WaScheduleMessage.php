@@ -398,6 +398,7 @@ class WaScheduleMessage extends MY_Controller {
                     $field->message,
                     $field->footer,
                     $field->groupname,
+                    $field->username,
                     str_replace("_", " ", $field->day),
                     $field->send_time,
                     $disable . '&nbsp' .
@@ -433,8 +434,9 @@ class WaScheduleMessage extends MY_Controller {
             return implode(',', $day);
         }
         $days = explode(',', $day);
-        return implode(',', array_intersect($data, $days));
-        ;
+        return implode(",",$days);
+//        implode(',', array_intersect($data, $days));
+        
 //        return json_encode(array_intersect($data, $days));
     }
 }

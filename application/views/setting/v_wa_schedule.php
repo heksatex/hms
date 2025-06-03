@@ -36,6 +36,7 @@
                                             <th>Pesan</th>
                                             <th>Footer</th>
                                             <th>Group</th>
+                                            <th>User</th>
                                             <th>Setiap</th>
                                             <th>Waktu Kirim</th>
                                             <th>#</th>
@@ -66,14 +67,14 @@
                     "searching": true,
                     "ordering": true,
                     "info": true,
-                    "autoWidth": false,
+                    "autoWidth": true,
                     "ajax": {
                         "url": "<?php echo site_url('setting/wa_schedule/get_data') ?>",
                         "type": "POST"
                     },
                     "columnDefs": [
                         {
-                            "targets": [0, 2, 3, 7],
+                            "targets": [0, 2, 3,5, 7,8],
                             "orderable": false
                         }
                     ]
