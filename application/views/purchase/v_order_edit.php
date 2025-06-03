@@ -145,8 +145,6 @@
                 background-color: rgba(0, 0, 0, .3);
             }
         </style>
-        <?php $this->load->view("admin/_partials/js.php") ?>
-
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -167,6 +165,9 @@
                     <div id ="status_bar">
                         <?php
                         $data['jen_status'] = $po->status;
+                        $data["navigation_page"]=true;
+                        $data["next_page"]=$next_page ?? "";
+                        $data["prev_page"]=$prev_page ?? "";
                         $this->load->view("admin/_partials/statusbar.php", $data);
 //                        $statuss = [
 //                            'draft' => [
@@ -704,6 +705,7 @@
                     </div>
                 </section>
             </div>
+            <?php $this->load->view("admin/_partials/js.php") ?>
             <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
             <footer class="main-footer">
                 <?php

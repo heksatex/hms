@@ -61,7 +61,7 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required">Group</label></div>
                                                 <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="group[]" required multiple>
+                                                    <select class="form-control input-sm select2" name="group[]" multiple>
                                                         <?php
                                                         foreach ($group as $key => $value) {
                                                             $seleced = '';
@@ -69,6 +69,20 @@
                                                                 $seleced = in_array($value->id, $datas->groupid) ? 'selected' : '';
                                                             }
                                                             echo "<option value='$value->id' $seleced>$value->wa_group</option>";
+                                                        }
+                                                        ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">User</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm select2 users" name="users[]" multiple>
+                                                        <?php
+                                                        foreach ($datas->username as $key => $value) {
+                                                            if ($value === '')
+                                                                continue;
+                                                            echo "<option value='$value' selected> {$datas->nama_user[$key]} </option>";
                                                         }
                                                         ?>
                                                     </select>
@@ -112,15 +126,24 @@
                                                     <select class="form-control input-sm select2" name="custom[]" id="bycustom" multiple>
 
                                                         <?php
+                                                        foreach ($datas->day as $key => $value) {
+                                                             echo "<option value='$value' selected>$value</option>";
+                                                        }
                                                         foreach ($customSchedule as $key => $value) {
                                                             $seleced = '';
-                                                            if (!is_null($datas->day)) {
-                                                                $seleced = in_array($key, $datas->day) ? 'selected' : '';
-                                                            }
+//                                                            if (!is_null($datas->day)) {
+//                                                                $seleced = in_array($key, $datas->day) ? 'selected' : '';
+//                                                            }
                                                             echo "<option value='$key' $seleced>$value</option>";
                                                         }
                                                         ?>
                                                     </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Tanggal</label></div>
+                                                <div class="col-xs-6">
+                                                    <input type="date" class="form-control input-sm" name="date[]" id="date"/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -138,7 +161,7 @@
                                                         foreach ($template_footer as $key => $value) {
                                                             $seleced = '';
                                                             if (!is_null($datas->footer_nama)) {
-                                                                $seleced =($value->nama === $datas->footer_nama) ? 'selected' : '';
+                                                                $seleced = ($value->nama === $datas->footer_nama) ? 'selected' : '';
                                                             }
                                                             echo "<option value='$value->nama' $seleced>$value->nama</option>";
                                                         }
@@ -166,21 +189,29 @@
                 $(".time").datetimepicker({
                     format: 'HH:mm:ss'
                 });
-
+                
                 $('#bytanggal').on("select2:selecting", function (e) {
                     $('#byhari').val(null).trigger('change');
                     $('#bycustom').val(null).trigger('change');
+                    $('#date').val("").trigger('change');
                 });
 
                 $('#byhari').on("select2:selecting", function (e) {
                     $('#bytanggal').val(null).trigger('change');
                     $('#bycustom').val(null).trigger('change');
+                    $('#date').val("").trigger('change');
                 });
                 $('#bycustom').on("select2:selecting", function (e) {
                     $('#bytanggal').val(null).trigger('change');
                     $('#byhari').val(null).trigger('change');
+                    $('#date').val("").trigger('change');
                 });
-
+                $('#date').on("change", function (e) {
+                    $('#bytanggal').val(null).trigger('change');
+                    $('#byhari').val(null).trigger('change');
+                    $('#bycustom').val(null).trigger('change');
+                });
+                
                 $('#pesan').keyup();
                 const formschedule = document.forms.namedItem("form-wa-schedule");
                 formschedule.addEventListener(
@@ -188,12 +219,12 @@
                         (event) => {
                     const formData = new FormData($('#form-wa-schedule')[0]);
                     please_wait(function () {});
-
+                    
                     request("form-wa-schedule").then(
                             response => {
                                 if (response.status === 200)
                                     window.location.replace('<?php echo base_url('setting/wa_schedule') ?>');
-
+                                
                                 if (response.status === 401) {
                                     loginFunc('<?php echo base_url('login/aksi_login'); ?>');
                                     return
@@ -211,11 +242,37 @@
                 },
                         false
                         );
-
+                
                 $("#btn-simpan").on('click', function () {
                     $("#form_simpan").trigger("click");
                 });
-
+                
+                $(".users").select2({
+            allowClear: true,
+            placeholder: "User",
+            ajax: {
+                url: "<?= site_url('setting/wa_schedule/get_users') ?>",
+                data: function (params) {
+                    var query = {
+                        search: params.term
+                    };
+                    return query;
+                },
+                processResults: function (data) {
+                    var results = [];
+                    $.each(data.data, function (index, item) {
+                        results.push({
+                            id: item.username,
+                            text: item.nama
+                        });
+                    });
+                    return {
+                        results: results
+                    };
+                }
+            }
+        });
+                
             })
         </script>
     </body>

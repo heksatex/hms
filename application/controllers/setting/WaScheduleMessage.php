@@ -39,10 +39,12 @@ class WaScheduleMessage extends MY_Controller {
         [
             'field' => 'group[]',
             'label' => 'Group',
-            'rules' => ['required'],
-            'errors' => [
-                'required' => '{field} Harus Diisi',
-            ]
+            'rules' => ['callback_check_group_user'],
+        ],
+        [
+            'field' => 'users[]',
+            'label' => 'User',
+            'rules' => ['callback_check_group_user'],
         ],
         [
             'field' => 'hari[]',
@@ -52,8 +54,16 @@ class WaScheduleMessage extends MY_Controller {
     );
 
     public function check_berdasarkan($str, $tanggal): bool {
-        if (empty($str) && empty($this->input->post($tanggal)) && empty($this->input->post('custom'))) {
+        if (empty($str) && empty($this->input->post($tanggal)) && empty($this->input->post('custom')) && empty($this->input->post('date'))) {
             $this->form_validation->set_message('check_berdasarkan', 'Hari / Tanggal / Custom harap diisi salah satu');
+            return false;
+        }
+        return true;
+    }
+    
+    public function check_group_user(): bool {
+        if (empty($this->input->post('users')) && empty($this->input->post('group'))) {
+            $this->form_validation->set_message('check_group_user', 'Group / User harus dipilih salah satu');
             return false;
         }
         return true;
@@ -69,7 +79,7 @@ class WaScheduleMessage extends MY_Controller {
         'Sunday' => 'Sunday'
     );
     protected $customSchedule = array(
-        'last_month' => 'last_month'
+        'last_month' => 'last_month',
     );
 
     protected function dates(): array {
@@ -88,6 +98,7 @@ class WaScheduleMessage extends MY_Controller {
         $this->load->model("_module");
         $this->load->model("m_WaGroup");
         $this->load->model("m_WaTemplate");
+        $this->load->model("m_global");
     }
 
     public function index() {
@@ -122,6 +133,9 @@ class WaScheduleMessage extends MY_Controller {
             if (!is_null($data['datas']->day)) {
                 $data['datas']->day = explode(',', $data['datas']->day);
             }
+            $data['datas']->username = explode(',', $data['datas']->username);
+            $data['datas']->nama_user = explode(',', $data['datas']->nama_user);
+//            log_message("error",json_encode($data['datas']->username));
             $data['id_dept'] = 'MWSSM';
             return $this->load->view('setting/v_wa_schedule_edit', $data);
         } catch (Exception $ex) {
@@ -144,7 +158,9 @@ class WaScheduleMessage extends MY_Controller {
             $nama = $this->input->post('nama');
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
-            $group = $this->input->post('group');
+            $group = $this->input->post('group') ?? [];
+            $user = $this->input->post('users') ?? [];
+            $date = $this->input->post('date');
             $hari = (array) $this->input->post('hari');
             $footer = $this->input->post('footer');
             $setLastExe = ($waktu <= date("H:i:s")) ? false : true;
@@ -157,11 +173,28 @@ class WaScheduleMessage extends MY_Controller {
                         break;
                     }
                 }
-                foreach ($this->input->post('group') as $key => $value) {
+                foreach ($date as $key => $value) {
+                    if (!$this->m_WaScheduleMessage->simpanDays($status, $value)) {
+                        throw new Exception('Gagal Menyimpan Data,Tanggal Yang Dipilih', 500);
+                        break;
+                    }
+                }
+                foreach ($group as $key => $value) {
                     if (!$this->m_WaScheduleMessage->simpanGroup($status, $value)) {
                         throw new Exception('Gagal Menyimpan Data,Cek Group Yang Dipilih', 500);
                         break;
                     }
+                }
+                $dataUser = [];
+                foreach ($user as $key => $value) {
+                    $dataUser[] = [
+                        "wa_schedule_message_id" => $status,
+                        "username" => $value
+                    ];
+                }
+                if (count($dataUser) > 0) {
+                    $model = new $this->m_global;
+                    $model->setTables("wa_schedule_message_user")->saveBatch($dataUser);
                 }
             }
             if (!$this->_module->finishTransaction()) {
@@ -199,8 +232,10 @@ class WaScheduleMessage extends MY_Controller {
             $pesan = $this->input->post('pesan');
             $waktu = $this->input->post('waktu_kirim');
             $waktu_sblm = $this->input->post('waktu_kirim_sblm');
-            $group = $this->input->post('group');
+            $group = $this->input->post('group') ?? [];
             $hari = (array) $this->input->post('hari');
+            $user = $this->input->post('users') ?? [];
+            $date = $this->input->post('date');
             $footer = $this->input->post('footer');
             $berdasarkan = $this->data_berdasarkan([$hari, $this->input->post('tanggal'), $this->input->post('custom')]);
             $this->_module->startTransaction();
@@ -209,19 +244,42 @@ class WaScheduleMessage extends MY_Controller {
                 throw new \Exception("Gagal Mengubah Data", 500);
             }
             $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
-
             foreach ($berdasarkan as $key => $value) {
+                if ($value === "")
+                    continue;
                 if (!$this->m_WaScheduleMessage->simpanDays($kode_decrypt, $value)) {
                     throw new Exception('Gagal Mengubah Data,Cek Hari Yang Dipilih', 500);
                     break;
                 }
             }
+            foreach ($date as $key => $value) {
+                if ($value === "")
+                    continue;
+                if (!$this->m_WaScheduleMessage->simpanDays($kode_decrypt, $value)) {
+                    throw new Exception('Gagal Menyimpan Data,Tanggal Yang Dipilih', 500);
+                    break;
+                }
+            }
+
             $this->m_WaScheduleMessage->deleteGroup($kode_decrypt);
             foreach ($group as $key => $value) {
                 if (!$this->m_WaScheduleMessage->simpanGroup($kode_decrypt, $value)) {
                     throw new Exception('Gagal Mengubah Data,Cek Group Yang Dipilih', 500);
                     break;
                 }
+            }
+
+            $dataUser = [];
+            foreach ($user as $key => $value) {
+                $dataUser[] = [
+                    "wa_schedule_message_id" => $kode_decrypt,
+                    "username" => $value
+                ];
+            }
+            if (count($dataUser) > 0) {
+                $model = new $this->m_global;
+                $model->setTables("wa_schedule_message_user")->setWheres(["wa_schedule_message_id" => $kode_decrypt])->delete();
+                $model->saveBatch($dataUser);
             }
 
 
@@ -256,6 +314,8 @@ class WaScheduleMessage extends MY_Controller {
             $this->m_WaScheduleMessage->deleteSchedule($kode_decrypt);
             $this->m_WaScheduleMessage->deleteDays($kode_decrypt);
             $this->m_WaScheduleMessage->deleteGroup($kode_decrypt);
+            $model = new $this->m_global;
+            $model->setTables("wa_schedule_message_user")->setWheres(["wa_schedule_message_id" => $kode_decrypt])->delete();
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Mengubah Data', 500);
@@ -296,6 +356,28 @@ class WaScheduleMessage extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function getUsers() {
+        try {
+            $search = $this->input->get("search");
+            $model = new $this->m_global;
+            if ($search !== "") {
+                $_POST['search']['value'] = $search;
+            }
+            $_POST['length'] = 50;
+            $_POST['start'] = 0;
+            $data = $model->setTables("user")->setSelects(["username,nama,telepon_wa"])
+                            ->setSearch(["username", "nama"])
+                            ->setOrder(["username" => "asc"])->setWheres(["telepon_wa <>" => ""])->getData();
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' => $data]));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(['data' => []]));
         }
     }
 

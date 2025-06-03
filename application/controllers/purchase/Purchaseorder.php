@@ -57,10 +57,10 @@ class Purchaseorder extends MY_Controller {
             $data['id'] = $id;
             $data['id_dept'] = 'PO';
             $model1 = new $this->m_po;
-            $model2 = new $this->m_po;
+            $model2 = clone $model1;
             $model3 = clone $model2;
             $model4 = clone $model3;
-            $model5 = clone $model2;
+            $model5 = clone $model4;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $data['user'] = $this->m_user->get_user_by_username($username);
             $data["po"] = $model1->setTables($this->table_po . " po")->setJoins("partner p", "p.id = po.supplier")
@@ -73,6 +73,15 @@ class Purchaseorder extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
+            $nextPage = $model1->setWheres(["po.id >"=>$data["po"]->id,"jenis"=>"rfq"], true)->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            if ($nextPage) {
+                $data["next_page"] = base_url("purchase/purchaseorder/edit/".encrypt_url($nextPage->no_po));
+            }
+            $prevPage = $model1->setWheres(["po.id <"=>$data["po"]->id,"jenis"=>"rfq"], true)->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            if ($prevPage) {
+                $data["prev_page"] = base_url("purchase/purchaseorder/edit/".encrypt_url($prevPage->no_po));
+            }
+            
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
