@@ -58,12 +58,20 @@
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required">Group</label></div>
                                                 <div class="col-xs-6">
-                                                    <select class="form-control input-sm select2" name="group[]" required multiple>
+                                                    <select class="form-control input-sm select2 group" name="group[]" multiple>
                                                         <?php
                                                         foreach ($group as $key => $value) {
                                                             echo "<option value='$value->id'>$value->wa_group</option>";
                                                         }
                                                         ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Users</label></div>
+                                                <div class="col-xs-6">
+                                                    <select class="form-control input-sm users" name="users[]" multiple>
+                                                       
                                                     </select>
                                                 </div>
                                             </div>
@@ -106,6 +114,12 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-6"><label class="form-label required">Tanggal</label></div>
+                                                <div class="col-xs-6">
+                                                    <input type="date" class="form-control input-sm" name="date[]" id="date"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-6"><label class="form-label required" >Pesan</label></div>
                                                 <div class="col-xs-6">
                                                     <textarea type="text" class="form-control input-sm resize-ta" id="pesan" name="pesan" required></textarea>
@@ -142,21 +156,29 @@
                 });
                 $('.select2').select2({
                     allowClear: true,
-                    placeholder: 'Pilih',
+                    placeholder: 'Pilih'
 
                 });
                 $('#bytanggal').on("select2:selecting", function (e) {
                     $('#byhari').val(null).trigger('change');
                     $('#bycustom').val(null).trigger('change');
+                    $('#date').val("").trigger('change');
                 });
 
                 $('#byhari').on("select2:selecting", function (e) {
                     $('#bytanggal').val(null).trigger('change');
                     $('#bycustom').val(null).trigger('change');
+                    $('#date').val("").trigger('change');
                 });
                 $('#bycustom').on("select2:selecting", function (e) {
                     $('#bytanggal').val(null).trigger('change');
                     $('#byhari').val(null).trigger('change');
+                    $('#date').val("").trigger('change');
+                });
+                $('#date').on("change", function (e) {
+                    $('#bytanggal').val(null).trigger('change');
+                    $('#byhari').val(null).trigger('change');
+                    $('#bycustom').val(null).trigger('change');
                 });
                 $('#pesan').keyup();
                 const formschedule = document.forms.namedItem("form-wa-schedule");
@@ -190,6 +212,32 @@
                 $("#btn-simpan").on('click', function () {
                     $("#form_simpan").trigger("click");
                 });
+                
+                $(".users").select2({
+            allowClear: true,
+            placeholder: "User",
+            ajax: {
+                url: "<?= site_url('setting/wa_schedule/get_users') ?>",
+                data: function (params) {
+                    var query = {
+                        search: params.term
+                    };
+                    return query;
+                },
+                processResults: function (data) {
+                    var results = [];
+                    $.each(data.data, function (index, item) {
+                        results.push({
+                            id: item.username,
+                            text: item.nama
+                        });
+                    });
+                    return {
+                        results: results
+                    };
+                }
+            }
+        });
 
             })
         </script>

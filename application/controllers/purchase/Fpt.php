@@ -60,6 +60,16 @@ class Fpt extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
+            $nextPage = $model1->setWheres(["po.id >"=>$data["po"]->id,"jenis"=>"FPT"], true)->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            if ($nextPage) {
+                $data["next_page"] = base_url("purchase/fpt/edit/".encrypt_url($nextPage->no_po));
+            }
+            
+            $prevPage = $model1->setWheres(["po.id <"=>$data["po"]->id,"jenis"=>"FPT"], true)->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            if ($prevPage) {
+                $data["prev_page"] = base_url("purchase/fpt/edit/".encrypt_url($prevPage->no_po));
+            }
+            
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")

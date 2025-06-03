@@ -154,6 +154,9 @@
                     <div id ="status_bar">
                         <?php
                         $data['jen_status'] = $po->status;
+                        $data["navigation_page"]=true;
+                        $data["next_page"]=$next_page ?? "";
+                        $data["prev_page"]=$prev_page ?? "";
                         $this->load->view("admin/_partials/statusbar.php", $data);
                         $totals = 0.00;
                         $diskons = 0.00;

@@ -125,7 +125,6 @@
                 display: none;
             }
         </style>
-        <?php $this->load->view("admin/_partials/js.php") ?>
 
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -147,6 +146,9 @@
                     <div id ="status_bar">
                         <?php
                         $data['jen_status'] = $po->status;
+                        $data["navigation_page"]=true;
+                        $data["next_page"]=$next_page ?? "";
+                        $data["prev_page"]=$prev_page ?? "";
                         $this->load->view("admin/_partials/statusbar.php", $data);
                         $totals = 0.00;
                         $diskons = 0.00;
@@ -620,6 +622,7 @@
                     </div>
                 </section>
             </div>
+        <?php $this->load->view("admin/_partials/js.php") ?>
             <footer class="main-footer">
                 <script src="<?= base_url("dist/js/light-box.min.js") ?>"></script>
                 <?php
