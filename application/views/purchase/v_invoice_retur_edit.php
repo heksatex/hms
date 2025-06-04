@@ -403,10 +403,10 @@ if ($inv->status === "done") {
 
                                                                         </td>
                                                                         <td>
-                                                                            IDR <?= number_format(($v->base * $inv->nilai_matauang), 4) ?>
+                                                                            <?= $inv->symbol ?> <?= number_format(($v->base), 4) ?>
                                                                         </td>
                                                                         <td>
-                                                                            IDR <?= number_format(($v->nominal * $inv->nilai_matauang), 4) ?>
+                                                                            <?= $inv->symbol ?> <?= number_format(($v->nominal), 4) ?>
                                                                         </td>
                                                                     </tr>
                                                                     <?php
@@ -423,15 +423,15 @@ if ($inv->status === "done") {
                                                 <table class="table table-condesed table-hover rlstable  over">
                                                     <tr>
                                                         <td class="text-right"><strong>Subtotal 1</strong></td>
-                                                        <td>IDR <?= number_format(($subtotal1 * $inv->nilai_matauang), 4) ?></td>
+                                                        <td><?= $inv->symbol ?> <?= number_format(($subtotal1), 4) ?></td>
                                                     </tr>
                                                     <tr>
                                                         <td class="text-right">Diskon</td>
-                                                        <td>IDR <?= number_format(($totalDiskon * $inv->nilai_matauang), 4) ?></td>
+                                                        <td><?= $inv->symbol ?> <?= number_format(($totalDiskon), 4) ?></td>
                                                     </tr>
                                                     <tr>
                                                         <td class="text-right"><strong>Subtotal 2</strong></td>
-                                                        <td>IDR<?= number_format(($subtotal2 * $inv->nilai_matauang), 4) ?></td>
+                                                        <td><?= $inv->symbol ?> <?= number_format(($subtotal2), 4) ?></td>
                                                     </tr>
                                                     <?php if ($setting !== null) {
                                                         ?>
@@ -439,7 +439,7 @@ if ($inv->status === "done") {
                                                             <td class="style text-right">DPP Nilai Lain</td>
                                                             <td class="style totalan"> 
                                                                 <input name="dpplain" type="hidden" value="1">
-                                                                <strong>IDR<?= number_format(((($subtotal1 - $totalDiskon) * 11) / 12) * $inv->nilai_matauang, 4) ?>
+                                                                <strong><?= $inv->symbol ?> <?= number_format(((($subtotal1 - $totalDiskon) * 11) / 12), 4) ?>
                                                                 </strong>
                                                             </td>
                                                         </tr>
@@ -447,11 +447,11 @@ if ($inv->status === "done") {
                                                     ?>
                                                     <tr>
                                                         <td class="text-right">Tax</td>
-                                                        <td><?= $inv->symbol ?> <?= number_format(($totalTax * $inv->nilai_matauang), 4) ?></td>
+                                                        <td><?= $inv->symbol ?> <?= number_format(($totalTax), 4) ?></td>
                                                     </tr>
                                                     <tr>
                                                         <td class="text-right"><strong>Total</strong></td>
-                                                        <td><?= $inv->symbol ?> <?= number_format(($subtotal2 + $totalTax) * $inv->nilai_matauang, 4) ?></td>
+                                                        <td><?= $inv->symbol ?> <?= number_format(($subtotal2 + $totalTax), 4) ?></td>
                                                     </tr>
                                                 </table>
                                             </div>
