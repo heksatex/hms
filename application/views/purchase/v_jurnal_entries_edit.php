@@ -126,7 +126,7 @@
                                                     <label class="form-label">Reff Note</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <textarea class="form-control" id="reff_note" name="reff_note"><?= $jurnal->reff_note ?></textarea>
+                                                    <textarea class="form-control" id="reff_note" name="reff_note" readonly><?= $jurnal->reff_note ?></textarea>
                                                 </div>
                                             </div>
                                         </div>

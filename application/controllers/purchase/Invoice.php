@@ -309,7 +309,7 @@ class Invoice extends MY_Controller {
                         "kode_coa" => $value->account,
                         "posisi" => "D",
                         "nominal_curr" => $nominal,
-                        "kurs" => $value->kurs,
+                        "kurs" => $value->nilai_matauang,
                         "kode_mua" => $value->name_curr,
                         "nominal" => ($nominal * $value->nilai_matauang),
                         "row_order" => ($key + 1)
@@ -373,7 +373,7 @@ class Invoice extends MY_Controller {
                                 "kode_coa" => ($coaPpn->value ?? 0),
                                 "posisi" => "D",
                                 "nominal_curr" => $taxx,
-                                "kurs" => $dataItems[0]->kurs,
+                                "kurs" => $value->nilai_matauang,
                                 "kode_mua" => $dataItems[0]->name_curr,
                                 "nominal" => $taxNominal,
                                 "row_order" => $rowCount
@@ -409,7 +409,7 @@ class Invoice extends MY_Controller {
                                         "kode_coa" => ($coaPpn->value ?? 0),
                                         "posisi" => "D",
                                         "nominal_curr" => $taxx,
-                                        "kurs" => $dataItems[0]->kurs,
+                                        "kurs" => $value->nilai_matauang,
                                         "kode_mua" => $dataItems[0]->name_curr,
                                         "nominal" => $taxNominal,
                                         "row_order" => $rowCount
@@ -443,7 +443,7 @@ class Invoice extends MY_Controller {
                     "kode_coa" => ($defaultPpn->value ?? 0),
                     "posisi" => "C",
                     "nominal_curr" => $totalNominal + $tax,
-                    "kurs" => $dataItems[0]->kurs,
+                    "kurs" => $value->nilai_matauang,
                     "kode_mua" => $dataItems[0]->name_curr,
                     "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
                     "row_order" => count($jurnalItems) + 1
