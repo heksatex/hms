@@ -2147,17 +2147,16 @@ class Penerimaanbarang extends MY_Controller {
             $items = $modelItems->setTables("stock_move_items smi")
                             ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
                             ->setJoins("stock_quant sq", "smi.quant_id = sq.quant_id")
-                            ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode")
+                            ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode and pbi.origin_prod = smi.origin_prod")
 //                            ->setJoins("nilai_konversi nk", "nk.id = pbi.id_konversiuom", "left")
                             ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
                             ->setOrder(["smi.row_order"])
-                            ->setSelects(["GROUP_CONCAT(DISTINCT kode_pp) as kode_pp",
+                            ->setSelects([
                                 "smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty",
                                 "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note", "nilai_konversiuom as nilai,pbi.uom_beli"])
                             ->setGroups(["smi.quant_id"])->getData();
             foreach ($items as $keyss => $item) {
                 $kodeProduk = str_split($item->kode_produk, 11);
-                $kode_pp = $item->kode_pp;
                 foreach ($kodeProduk as $key => $value) {
                     $value = trim($value);
                     $kodeProduk[$key] = $value;
@@ -2225,6 +2224,13 @@ class Penerimaanbarang extends MY_Controller {
                     $printer->text($line . "\n");
                 }
             }
+            
+            $modelItemsKodePP = new $this->m_global;
+            $kodePP = $modelItemsKodePP->setTables("stock_move_items smi")
+                            ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
+                            ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode and pbi.origin_prod = smi.origin_prod")
+                            ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
+                            ->setOrder(["smi.row_order"])->setSelects(["group_concat(DISTINCT(pbi.kode_pp)) as kode_pp"])->getDetail();
             $printer->feed();
             $printer->feed();
 
@@ -2232,7 +2238,7 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad("kode PP : ", 12) . str_pad("", 32) . str_pad("Tgl.Cetak :" . date('Y-m-d H:i:s'), 35, " ", STR_PAD_RIGHT));
             // $printer->text("Tgl.Cetak :" . date("Y-m-d H:i:s"));
             $printer->feed();
-            $splitKodePP = str_split($kode_pp, 30);
+            $splitKodePP = str_split(($kodePP->kode_pp ?? "") , 30);
             foreach ($splitKodePP as $key => $value) {
                 $printer->text(str_pad($value, 30));
                 $printer->feed();
