@@ -51,7 +51,7 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setWhereRaw(string $where,$clearBefore = false) {
+    public function setWhereRaw(string $where, $clearBefore = false) {
         if ($clearBefore) {
             $this->wheresRaw = [];
         }
@@ -59,7 +59,7 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setWhereIn(string $sa, array $in,$clearBefore = false) {
+    public function setWhereIn(string $sa, array $in, $clearBefore = false) {
         if ($clearBefore) {
             $this->whereIn = [];
         }
@@ -196,13 +196,13 @@ class M_global extends CI_Model {
         if (count($this->group) > 0) {
             $this->db->group_by($this->group);
         }
-        
+
         if (count($this->whereIn) > 0) {
             foreach ($this->whereIn as $key => $value) {
                 $this->db->where_in($key, $value);
             }
         }
-        
+
         if (isset($this->order)) {
             foreach ($this->order as $key => $value) {
                 if (gettype($key) === "integer") {
@@ -273,8 +273,8 @@ class M_global extends CI_Model {
             return $ex->getMessage();
         }
     }
-    
-    public function delete(){
+
+    public function delete() {
         try {
             if (count($this->wheres) > 0) {
                 $this->db->where($this->wheres);
@@ -294,5 +294,19 @@ class M_global extends CI_Model {
         } catch (Exception $ex) {
             return $ex->getMessage();
         }
+    }
+
+    public function copy(string $new_table) {
+        $tbl = explode(" ", $this->table);
+        $this->db->query("CREATE TEMPORARY TABLE {$new_table} SELECT * FROM {$tbl[0]};");
+        $this->table = $new_table . " " . ($tbl[1] ?? "");
+        return $this;
+    }
+    public function copyExt(string $from,string $new_table) {
+        $this->db->query("CREATE TEMPORARY TABLE {$new_table} SELECT * FROM {$from};");
+    }
+    
+    public function excQuery(string $query) {
+        $this->db->query($query);
     }
 }
