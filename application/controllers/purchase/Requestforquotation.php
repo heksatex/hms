@@ -69,12 +69,31 @@ class Requestforquotation extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data tidak ditemukan', 500);
             }
-            $nextPage = $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq"], true)->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
+                    ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"]);
+
+            if (strtolower($level) === "direksi") {
+                $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
+            } else {
+                $model1->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
+            }
+
+            $nextPage = $model1->getDetail();
             if ($nextPage) {
                 $data["next_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($nextPage->no_po));
             }
 
-            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq"], true)->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
+                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
+
+            if (strtolower($level) === "direksi") {
+                $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
+            } else {
+                $model1->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
+            }
+            
+            $prevPage = $model1->getDetail();
+
             if ($prevPage) {
                 $data["prev_page"] = base_url("purchase/requestforquotation/edit/" . encrypt_url($prevPage->no_po));
             }

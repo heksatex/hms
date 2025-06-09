@@ -291,11 +291,12 @@
 
 
                 $("#btn-reset").on("click", function () {
-                    $("#prio").val('').trigger('change');
-                    $("#dpt").val('').trigger('change');
-                    $("#status").val('').trigger('change');
-                    document.getElementById("form-search").reset();
-                    table.ajax.reload();
+                    location.reload();
+//                    $("#prio").val('').trigger('change');
+//                    $("#dpt").val('').trigger('change');
+//                    $("#status").val('').trigger('change');
+//                    document.getElementById("form-search").reset();
+//                    table.ajax.reload();
                 });
                 $("#search").on("click", function () {
                     table.ajax.reload();
@@ -351,7 +352,7 @@
                         alert_notify("fa fa-warning", "Pilihan Item masih kosong", "danger", function () {});
                         return;
                     }
-                    
+
                     const dataStatus = new Promise((resolve, reject) => {
                         let dt = [];
                         $.each(rows_selected, function (index, rowId) {
@@ -420,8 +421,8 @@
                             },
                             success: function (data) {
                                 alert_notify(data.icon, data.message, data.type, function () {});
-                                location.reload();
-//                                table.ajax.reload(null, false);
+//                                location.reload();
+                                table.ajax.reload(null, false);
                             },
                             error: function (err) {
                                 alert_notify("fa fa-warning", err.responseJSON.message, "danger", function () {});
