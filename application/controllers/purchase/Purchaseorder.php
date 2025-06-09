@@ -46,7 +46,7 @@ class Purchaseorder extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'PO';
-        $data['user'] = (object) $this->session->userdata('nama'); //$this->m_user->get_user_by_username($username);
+        $data['user'] = (object) $this->session->userdata('nama'); 
         $this->load->view('purchase/v_po', $data);
     }
 
@@ -73,11 +73,15 @@ class Purchaseorder extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $nextPage = $model1->setWheres(["po.id >"=>$data["po"]->id,"jenis"=>"rfq"], true)->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            $nextPage = $model1->setWheres(["po.id >"=>$data["po"]->id,"jenis"=>"rfq","po.supplier"=>$data["po"]->supplier], true)
+                    ->setWhereIn("po.status", ["done","purchase_confirmed","exception"],true)
+                    ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
             if ($nextPage) {
                 $data["next_page"] = base_url("purchase/purchaseorder/edit/".encrypt_url($nextPage->no_po));
             }
-            $prevPage = $model1->setWheres(["po.id <"=>$data["po"]->id,"jenis"=>"rfq"], true)->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            $prevPage = $model1->setWheres(["po.id <"=>$data["po"]->id,"jenis"=>"rfq","po.supplier"=>$data["po"]->supplier], true)
+                    ->setWhereIn("po.status", ["done","purchase_confirmed","exception"],true)
+                    ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
             if ($prevPage) {
                 $data["prev_page"] = base_url("purchase/purchaseorder/edit/".encrypt_url($prevPage->no_po));
             }

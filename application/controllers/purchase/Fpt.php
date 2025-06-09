@@ -60,16 +60,18 @@ class Fpt extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $nextPage = $model1->setWheres(["po.id >"=>$data["po"]->id,"jenis"=>"FPT"], true)->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            $nextPage = $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "FPT", "po.supplier" => $data["po"]->supplier], true)
+                            ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/fpt/edit/".encrypt_url($nextPage->no_po));
+                $data["next_page"] = base_url("purchase/fpt/edit/" . encrypt_url($nextPage->no_po));
             }
-            
-            $prevPage = $model1->setWheres(["po.id <"=>$data["po"]->id,"jenis"=>"FPT"], true)->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+
+            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "FPT", "po.supplier" => $data["po"]->supplier], true)
+                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/fpt/edit/".encrypt_url($prevPage->no_po));
+                $data["prev_page"] = base_url("purchase/fpt/edit/" . encrypt_url($prevPage->no_po));
             }
-            
+
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
@@ -413,7 +415,7 @@ class Fpt extends MY_Controller {
                 $detailProduk = [];
                 foreach ($produk as $keys => $values) {
                     $clone = $values;
-                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"], $clone["id_konversiuom"], $clone["nilai_konversiuom"],$clone["reff_note"]);
+                    unset($clone["kode_pp"], $clone["qty_beli"], $clone["uom_beli"], $clone["id_konversiuom"], $clone["nilai_konversiuom"], $clone["reff_note"]);
                     $smProduk[] = array_merge($clone, ['move_id' => $sm, 'origin_prod' => $values["origin_prod"]]);
                     unset($values["status"]);
                     $detailProduk[] = array_merge($values, ['kode' => $kodeRcv, 'lot' => '', 'status_barang' => 'ready']);
@@ -591,7 +593,7 @@ class Fpt extends MY_Controller {
             $total = ($qty_beli * $harga);
             $nilai_dpp = 0;
             $pajak = 0;
-            if ($setDpp !== null && $dppTax ==="1") {
+            if ($setDpp !== null && $dppTax === "1") {
                 $pajak = (($total * 11) / 12) * $amount_tax;
                 $nilai_dpp = (($total * 11) / 12);
             } else {

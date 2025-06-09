@@ -298,15 +298,19 @@ class M_global extends CI_Model {
 
     public function copy(string $new_table) {
         $tbl = explode(" ", $this->table);
-        $this->db->query("CREATE TEMPORARY TABLE {$new_table} SELECT * FROM {$tbl[0]};");
+        $this->db->query("CREATE TABLE {$new_table} SELECT * FROM {$tbl[0]};");
         $this->table = $new_table . " " . ($tbl[1] ?? "");
         return $this;
     }
     public function copyExt(string $from,string $new_table) {
-        $this->db->query("CREATE TEMPORARY TABLE {$new_table} SELECT * FROM {$from};");
+        $this->db->query("CREATE TABLE {$new_table} SELECT * FROM {$from};");
     }
     
     public function excQuery(string $query) {
-        $this->db->query($query);
+       if(!$this->db->query($query)) {
+           return  $this->db->error();
+       }
+       return null;
+       
     }
 }
