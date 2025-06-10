@@ -590,6 +590,7 @@ class Procurementorder extends MY_Controller {
                 $route_empty = TRUE;
                 $insert_log = array();
                 $ip = $this->input->ip_address();
+                $kode_mo_tmp = '';
 
                 if (empty($jen_route['route_produksi'])) {//cek route produksi apakah ada ?
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Route Produksi Produk Kosong !', 'icon' => 'fa fa-warning', 'type' => 'danger');
@@ -897,7 +898,7 @@ class Procurementorder extends MY_Controller {
                                         'note' => $note_log,
                                         'nama_user' => $nama_user ?? '',
                                         'ip_address' => $ip);
-
+                                    $kode_mo_tmp .= $kode_mo.',';
                                     $rm_row = 1;
                                     foreach ($arr_bi2 as $rm) {
                                         //sql simpan mrp production rm target
@@ -1103,7 +1104,7 @@ class Procurementorder extends MY_Controller {
                                         'note' => $note_log,
                                         'nama_user' => $nama_user ?? '',
                                         'ip_address' => $ip);
-
+                                    $kode_mo_tmp .= $kode_mo.',';
                                     $rm_row = 1;
                                     foreach ($arr_bi2 as $rm) {
                                         //sql simpan mrp production rm target
@@ -1442,10 +1443,15 @@ class Procurementorder extends MY_Controller {
                         $note_log = "Generated | " . $kode . " | " . $nama_produk . " | " . $row_order;
                         $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
 
-                        $callback = array('status' => 'success', 'message' => 'Generate Data Berhasil !', 'icon' => 'fa fa-check', 'type' => 'success');
-                        if ($kode_mo !== "") {
-                            $pesan = ["{mo}" => ($kode_mo ?? ""), "{origin}" => ($origin ?? "")];
-                            $this->sendWa($kode, $row_order, $head->warehouse, $pesan);
+                        $callback = array('status' => 'success', 'message' => 'Generate Data Berhasil !'.$kode_mo_tmp, 'icon' => 'fa fa-check', 'type' => 'success');
+                        if($type_proc == 'mts' || $type_proc == 'mto'){
+                            $kode_mo_tmp_ex = explode(',',rtrim($kode_mo_tmp,','));
+                            foreach($kode_mo_tmp_ex as $kmo){
+                                $pesan = ["{mo}" => ($kmo ?? ""), "{origin}" => ($origin ?? "")];
+                                $this->sendWa($kode, $row_order, $head->warehouse, $pesan);
+                                $pesan = [];
+                            }
+
                         }
                     }// end if cek produk generate
 
