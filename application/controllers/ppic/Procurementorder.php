@@ -1443,7 +1443,7 @@ class Procurementorder extends MY_Controller {
                         $note_log = "Generated | " . $kode . " | " . $nama_produk . " | " . $row_order;
                         $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
 
-                        $callback = array('status' => 'success', 'message' => 'Generate Data Berhasil !'.$kode_mo_tmp, 'icon' => 'fa fa-check', 'type' => 'success');
+                        $callback = array('status' => 'success', 'message' => 'Generate Data Berhasil !', 'icon' => 'fa fa-check', 'type' => 'success');
                         if($type_proc == 'mts' || $type_proc == 'mto'){
                             $kode_mo_tmp_ex = explode(',',rtrim($kode_mo_tmp,','));
                             foreach($kode_mo_tmp_ex as $kmo){
