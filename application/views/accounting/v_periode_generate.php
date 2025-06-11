@@ -1,9 +1,9 @@
 <table class="table table-condesed table-hover rlstable over" width="100%">
     <thead>
     <th>No</th>
-    <th>Periode</th>
-    <th>Start Periode</th>
-    <th>End Periode</th>
+    <th>Periode ACC</th>
+    <th>Start Periode ACC</th>
+    <th>End Periode ACC</th>
     </thead>
     <tbody>
         <?php 
