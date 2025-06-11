@@ -50,7 +50,7 @@ class Jurnalmemorial extends MY_Controller {
                 ->setJoins("mst_jurnal mj", "mj.kode = je.tipe", "left")
                 ->setJoins("coa", "jei.kode_coa = coa.kode_coa", "left")
                 ->setJoins("partner", "partner.id = jei.partner", "left")
-                ->setOrder(["jei.kode_coa"])
+                ->setOrder(["jei.posisi"=>"desc","jei.kode_coa"=>"asc"])
                 ->setWheres(["tanggal_posting >=" => $tanggalAwal, "tanggal_posting <=" => $tanggalAkhir, "je.status" => "posted","je.tipe"=>$jurnal])
                 ->setSelects(["mj.nama as nama_jurnal", "coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
                     "origin,tanggal_posting"]);

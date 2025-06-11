@@ -483,9 +483,12 @@
                                                                 foreach ($dataTax as $kkk => $data) {
                                                                     if ($setting !== null && $data->dpp === "1") {
                                                                         $taxe += ((($total - $diskon) * 11) / 12) * $data->amount;
-                                                                        continue;
+//                                                                        continue;
                                                                     }
-                                                                    $taxe += ($total - $diskon) * $data->amount;
+                                                                    else {
+                                                                        $taxe += ($total - $diskon) * $data->amount;
+                                                                    }
+                                                                    
                                                                 }
                                                             }
                                                             $taxes += $taxe;

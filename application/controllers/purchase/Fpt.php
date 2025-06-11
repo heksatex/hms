@@ -182,9 +182,11 @@ class Fpt extends MY_Controller {
                     foreach ($dataTax as $kkk => $datas) {
                         if ($setDpp !== null && $datas->dpp === "1") {
                             $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
-                            continue;
+                            $nilai_dpp += ((($total - $diskon) * 11) / 12);
                         }
+                        else {
                         $taxe += ($total - $diskon) * $datas->amount;
+                        }
                     }
                 }
 
@@ -346,7 +348,7 @@ class Fpt extends MY_Controller {
                                 ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")->setOrder(["id" => "asc"])
                                 ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
                                 ->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])
-                                ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa"])->getData();
+                                ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa","konversi_aktif", "pembilang", "penyebut"])->getData();
                 $produk = [];
 
                 $inserInvoice = new $this->m_global;
@@ -358,11 +360,17 @@ class Fpt extends MY_Controller {
                 foreach ($dataItemOrder as $key => $value) {
                     $row = count($produk) + 1;
                     $updateDataDetail[] = ['id' => $value->id, 'status' => $status, 'nilai_konversi' => $value->nilai];
+                    if($value->konversi_aktif === "1") {
+                        $qtyy = ($value->qty_beli / $value->pembilang) * $value->penyebut;
+                    }
+                    else {
+                        $qtyy = $value->qty_beli * $value->nilai;
+                    }
                     if (!isset($produk[$value->kode_produk])) {
                         $produk[$value->kode_produk] = [
                             'nama_produk' => $value->nama_produk,
                             'kode_produk' => $value->kode_produk,
-                            'qty' => ($value->qty_beli * $value->nilai),
+                            'qty' => $qtyy,
                             'uom' => $value->uom,
                             'status' => 'ready',
                             'origin_prod' => $value->kode_produk . "_" . $row,

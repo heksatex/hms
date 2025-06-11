@@ -92,17 +92,30 @@
                     $totalDiskon = 0;
                     $totalTax = 0;
                     $nilaiDppLain = 0;
+                    $getTax = new $this->m_global;
+                    $getTax->setTables("tax");
                     foreach ($po_items as $key => $value) {
                         $jumlah = $value->harga_per_uom_beli * $value->qty_beli;
                         $subtotal1 += $jumlah;
                         $totalDiskon += $value->diskon;
-//                        $tax = ($jumlah - $value->diskon) * $value->amount_tax;
-//                        $totalTax += $tax;
-                        if ($setting !== null) {
-                            $totalTax += ((($jumlah - $value->diskon) * 11) / 12) * $value->amount_tax;
+                        $taxe = 0;
+                        if ($setting !== null && $value->dpp_tax === "1") {
+                            $taxe += ((($jumlah - $value->diskon) * 11) / 12) * $value->amount_tax;
                             $nilaiDppLain += ((($jumlah - $value->diskon) * 11) / 12);
                         } else {
-                            $totalTax += ($jumlah - $value->diskon) * $value->amount_tax;
+                            $taxe += ($jumlah - $value->diskon) * $value->amount_tax;
+                        }
+
+                        if ($value->tax_lain_id !== "0") {
+                            $dataTax = $getTax->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                            foreach ($dataTax as $kkk => $data) {
+                                if ($setting !== null && $data->dpp === "1") {
+                                    $taxe += ((($jumlah - $value->diskon) * 11) / 12) * $data->amount;
+                                    $nilaiDppLain += ((($jumlah - $value->diskon) * 11) / 12);
+                                } else {
+                                    $taxe += ($jumlah - $value->diskon) * $data->amount;
+                                }
+                            }
                         }
                         ?>
                         <tr>
@@ -118,6 +131,7 @@
                             <td style="text-align: right;">&nbsp;<?= number_format($jumlah, 2) . " " . $po->matauang ?></td>
                         </tr>
                         <?php
+                        $totalTax += $taxe;
                     }
                     $subtotal2 = $subtotal1 - $totalDiskon;
                     ?>

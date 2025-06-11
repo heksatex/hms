@@ -72,12 +72,41 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
+                                                <label for="tanggal" class="col-sm-2 control-label">Penyebut</label>
+                                                <div class="col-sm-8">
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
+                                                        <input type="text" name="penyebut" id="penyebut" class="form-control" id="nilai" value="1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="tanggal" class="col-sm-2 control-label">Pembilang</label>
+                                                <div class="col-sm-8">
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
+                                                        <input type="text" name="pembilang" id="pembilang" class="form-control" id="nilai" value="1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
                                                 <label for="tanggal" class="col-sm-2 required control-label">Catatan</label>
                                                 <div class="col-sm-8">
                                                     <div class="input-group">
                                                         <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
                                                         <input type="text" name="catatan" class="form-control" id="catatan" required>
                                                     </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="tanggal" class="col-sm-2 control-label">Perhitungan Konversi</label>
+                                                <div class="col-sm-8">
+                                                    <label class="btn btn-default">
+                                                        <input type="radio"  name="konversi_aktif" id="konv_nilai" value="0" checked/> Dengan Nilai
+                                                    </label> 
+                                                    <label class="btn btn-default">
+                                                        <input type="radio"  name="konversi_aktif" id="konv_pembanding" value="1" /> Dengan Pembanding
+                                                    </label> 
                                                 </div>
                                             </div>
                                         </div>
@@ -101,6 +130,9 @@
                                             <th>Dari</th>
                                             <th>Ke</th>
                                             <th>Nilai</th>
+                                            <th>Penyebut</th>
+                                            <th>Pembilang</th>
+                                            <th>Perhitungan</th>
                                             <th>Catatan</th>
                                             <th>#</th>
                                         </tr>
@@ -113,14 +145,14 @@
             </div>
         </div>
         <footer class="main-footer">
-        <?php $this->load->view("admin/_partials/footer.php") ?>
+            <?php $this->load->view("admin/_partials/footer.php") ?>
         </footer>
-<?php $this->load->view("admin/_partials/js.php") ?>
+        <?php $this->load->view("admin/_partials/js.php") ?>
         <script>
             $(function () {
                 $(".select2").select2({
-                    allowClear:true,
-                    placeholder:"pilih"
+                    allowClear: true,
+                    placeholder: "pilih"
                 });
                 const formKonversi = document.forms.namedItem("input");
                 formKonversi.addEventListener(
@@ -167,12 +199,21 @@
                     "fnDrawCallback": function () {
                         $(".edit_item").on('click', function () {
                             var data = $(this).data();
+                            console.log(data);
                             $("#posisi").val("edit");
                             $("#ids").val(data.id);
                             $("#ke").val(data.ke).trigger("change");
                             $("#dari").val(data.dari);
                             $("#nilai").val(data.nilai);
                             $("#catatan").val(data.catatan);
+                            $("#penyebut").val(data.penyebut);
+                            $("#pembilang").val(data.pembilang);
+                            if(data.konversi_aktif === 0) {
+                                $("#konv_nilai").prop("checked", true);
+                            }
+                            else {
+                                $("#konv_pembanding").prop("checked", true);
+                            }
                         });
                     }
                 });

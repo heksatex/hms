@@ -1143,7 +1143,8 @@ class Penerimaanbarang extends MY_Controller {
                             "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
                             "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value", "smi.qty as qty_dtg",
                             "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency,purchase_order.total as po_total",
-                            "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain", "nilai_konversi.nilai", "purchase_order.jenis as jenis_po"
+                            "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain", "tax.dpp as dpp_tax", "tax_lain_id", "nilai_konversi.nilai", "purchase_order.jenis as jenis_po",
+                            "konversi_aktif", "pembilang", "penyebut"
                         ])->setGroups(["smi.quant_id"])
                         ->getData();
                 if (is_null($dataPO)) {
@@ -1187,11 +1188,16 @@ class Penerimaanbarang extends MY_Controller {
                         $diskons = 0.00;
                         $taxes = 0.00;
                         $nilaiDppLain = 0;
-//                    $modelDpp = new $this->m_global;
-                        $dpp = 0;
+                        $models = new $this->m_global;
+                        $models->setTables("tax");
                         $qty = 0;
                         foreach ($dataPO as $key => $value) {
-                            $qty = $value->qty_dtg / $value->nilai;
+                            $nilai_dpp = 0;
+                            if ($value->konversi_aktif === "1") {
+                                $qty = ($value->pembilang/ $value->penyebut) * $value->qty_dtg ;
+                            } else {
+                                $qty = $value->qty_dtg / $value->nilai;
+                            }
                             $invoiceDetail[] = [
                                 'invoice_id' => $idInsert,
                                 'nama_produk' => $value->nama_produk,
@@ -1206,22 +1212,37 @@ class Penerimaanbarang extends MY_Controller {
                                 'diskon' => $value->diskon,
                                 "amount_tax" => $value->amount
                             ];
-//                            $total = ($qty * $value->harga_per_uom_beli);
-//                            $totals += $total;
-//                            $diskon = ($value->diskon ?? 0);
-//                            $diskons += $diskon;
-//
-//                            if ($value->dpp_lain > 0) {
-//                                $dpp = $value->dpp_lain;
-//                                $taxes += ((($total - $diskon) * 11) / 12) * $value->amount;
-//                            } else {
-//                                $taxes += ($total - $diskon) * $value->amount;
-//                            }
+                            $total = ($qty * $value->harga_per_uom_beli);
+                            $totals += $total;
+                            $diskon = ($value->diskon ?? 0);
+                            $diskons += $diskon;
+                            $taxe = 0;
+
+                            if ($value->dpp_lain > 0 && $value->dpp_tax === "1") {
+                                $nilai_dpp = ((($total - $diskon) * 11) / 12);
+                                $taxe += ((($total - $diskon) * 11) / 12) * $value->amount;
+                            } else {
+                                $taxe += ($total - $diskon) * $value->amount;
+                            }
+
+                            if ($value->tax_lain_id !== "0") {
+                                $dataTax = $models->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                                foreach ($dataTax as $kkk => $datas) {
+                                    if ($value->dpp_lain > 0 && $datas->dpp === "1") {
+                                        $nilai_dpp += ((($total - $diskon) * 11) / 12);
+                                        $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
+                                    } else {
+                                        $taxe += ($total - $diskon) * $datas->amount;
+                                    }
+                                }
+                            }
+                            $taxes += $taxe;
+                            $nilaiDppLain += $nilai_dpp;
                         }
-//                        $grandTotal = ($totals - $diskons) + $taxes;
+                        $grandTotal = ($totals - $diskons) + $taxes;
                         //create Invoice_detail
                         $inserInvoice->setTables("invoice_detail")->saveBatch($invoiceDetail);
-//                        $inserInvoice->setTables("invoice")->setWheres(["id" => $idInsert])->update(["total" => $grandTotal, "dpp_lain" => $dpp]);
+                        $inserInvoice->setTables("invoice")->setWheres(["id" => $idInsert], true)->update(["total" => $grandTotal, "dpp_lain" => $nilaiDppLain]);
                         $this->_module->gen_history('invoice', $idInsert, 'create', logArrayToString(";", $dataInvoice), $username);
                     }
                 }
@@ -2140,7 +2161,7 @@ class Penerimaanbarang extends MY_Controller {
             $printer->setUnderline(Printer::UNDERLINE_NONE);
 
             $printer->feed();
-            $kode_pp = '';
+//            $kode_pp = '';
             // products
 //            $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
             $modelItems = new $this->m_global;
@@ -2148,12 +2169,13 @@ class Penerimaanbarang extends MY_Controller {
                             ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
                             ->setJoins("stock_quant sq", "smi.quant_id = sq.quant_id")
                             ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode and pbi.origin_prod = smi.origin_prod")
-//                            ->setJoins("nilai_konversi nk", "nk.id = pbi.id_konversiuom", "left")
+                            ->setJoins("nilai_konversi nk", "nk.id = pbi.id_konversiuom", "left")
                             ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
                             ->setOrder(["smi.row_order"])
                             ->setSelects([
                                 "smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty",
-                                "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note", "nilai_konversiuom as nilai,pbi.uom_beli"])
+                                "smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order, sq.reff_note", "nilai_konversiuom as nilai,pbi.uom_beli",
+                                "konversi_aktif", "pembilang", "penyebut"])
                             ->setGroups(["smi.quant_id"])->getData();
             foreach ($items as $keyss => $item) {
                 $kodeProduk = str_split($item->kode_produk, 11);
@@ -2174,8 +2196,11 @@ class Penerimaanbarang extends MY_Controller {
                     $lot[$key] = $value;
                 }
 
-
-                $item->qty = $item->qty / $item->nilai;
+                if ($item->konversi_aktif === "1") {
+                    $item->qty = ($item->pembilang / $item->penyebut) * $item->qty;
+                } else {
+                    $item->qty = $item->qty / $item->nilai;
+                }
                 $qty = str_split(number_format($item->qty, 2), 8);
                 foreach ($qty as $key => $value) {
                     $value = trim($value);
@@ -2224,7 +2249,7 @@ class Penerimaanbarang extends MY_Controller {
                     $printer->text($line . "\n");
                 }
             }
-            
+
             $modelItemsKodePP = new $this->m_global;
             $kodePP = $modelItemsKodePP->setTables("stock_move_items smi")
                             ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
@@ -2238,7 +2263,7 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad("kode PP : ", 12) . str_pad("", 32) . str_pad("Tgl.Cetak :" . date('Y-m-d H:i:s'), 35, " ", STR_PAD_RIGHT));
             // $printer->text("Tgl.Cetak :" . date("Y-m-d H:i:s"));
             $printer->feed();
-            $splitKodePP = str_split(($kodePP->kode_pp ?? "") , 30);
+            $splitKodePP = str_split(($kodePP->kode_pp ?? ""), 30);
             foreach ($splitKodePP as $key => $value) {
                 $printer->text(str_pad($value, 30));
                 $printer->feed();
@@ -2665,12 +2690,21 @@ class Penerimaanbarang extends MY_Controller {
             }
             $items = $this->m_penerimaanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
 
+            $modelItemsKodePP = new $this->m_global;
+            $kodePP = $modelItemsKodePP->setTables("stock_move_items smi")
+                            ->setJoins("penerimaan_barang pb", "smi.move_id = pb.move_id")
+                            ->setJoins("penerimaan_barang_items pbi", "pbi.kode = pb.kode and pbi.origin_prod = smi.origin_prod")
+                            ->setWheres(["pb.kode" => $kode, "pb.dept_id" => $dept_id])
+                            ->setOrder(["smi.row_order"])->setSelects(["group_concat(DISTINCT(pbi.kode_pp)) as kode_pp"])->getDetail();
+
+            $splitKodePP = str_split(($kodePP->kode_pp ?? ""), 30);
+
             $url = "dist/storages/print/rcv";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
             }
             ini_set("pcre.backtrack_limit", "50000000");
-            $html = $this->load->view("print/penerimaan_rcv", ["head" => $head, "item" => $items, 'users' => $users], true);
+            $html = $this->load->view("print/penerimaan_rcv", ["head" => $head, "item" => $items, 'users' => $users, 'kode_pp' => $splitKodePP], true);
             $mpdf = new Mpdf(['tempDir' => FCPATH . '/tmp']);
 
             $mpdf->WriteHTML($html);
