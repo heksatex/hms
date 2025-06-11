@@ -144,9 +144,15 @@
                 </thead>
                 <tbody>
                     <?php
-                    $kode_pp = "";
+                    // $kode_pp = "";
                     foreach ($item as $key => $value) {
-                        $kode_pp = $value->kode_pp;
+                        // $kode_pp = $value->kode_pp;
+                        if($value->konversi_aktif == '1'){
+                            $valueqty = ($value->pembilang / $value->penyebut) * $value->qty;
+                        } else {
+                            $valueqty = $value->qty * $value->nilai; 
+                        }
+                        ?>
                         ?>
                         <tr>
                             <td>
@@ -156,19 +162,19 @@
                                 <?= substr($value->kode_produk,0,11) ?>
                             </td>
                             <td>
-                                <?= substr($value->nama_produk,0,18) ?>
+                                <?= ($value->nama_produk) ?>
                             </td>
                             <td>
-                                <?= substr($value->lot,0,20) ?>
+                                <?= ($value->lot) ?>
                             </td>
                             <td>
-                                <?= $value->qty ?>
+                                <?= $valueqty ?>
                             </td>
                             <td>
-                                <?= $value->uom ?>
+                                <?= $value->uom_beli ?>
                             </td>
                             <td>
-                                <?= substr($value->reff_note,0,15) ?>
+                                <?= $value->reff_note ?>
                             </td>
                         </tr>
                         <?php
@@ -182,7 +188,14 @@
             <div id="columnmd" style="text-align: left">
                 <div id="row">
                     <p>Kode PP :</p>
-                    <p><?= $kode_pp ?></p>
+                    <p>
+                    <?php 
+                        foreach($kode_pp as $pp){
+                            echo $pp;
+                        }
+                        
+                    ?>
+                    </p>
                 </div>
             </div>
           

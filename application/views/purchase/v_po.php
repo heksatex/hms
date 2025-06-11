@@ -157,6 +157,7 @@
         });
         $("#search").on("click", function () {
             table.ajax.reload();
+            console.log(table.settings()[0].sDom);
         });
 
     });

@@ -344,6 +344,7 @@ class Invoice extends MY_Controller {
                 $model2->setTables("tax");
                 $rowCount = count($dataItems);
                 $model->setTables("setting");
+                $defaultPpn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_default_ppn"], true)->setSelects(["value"])->getDetail();
                 if (count($pajakLain) > 0) {
                     $dataPajak = [];
                     foreach ($pajakLain as $kk => $value) {
@@ -370,10 +371,10 @@ class Invoice extends MY_Controller {
                                 "nama" => $taxName[0],
                                 "reff_note" => "",
                                 "partner" => $dataItems[0]->id_supplier,
-                                "kode_coa" => ($coaPpn->value ?? 0),
+                                "kode_coa" => ($coaPpn->value ?? $defaultPpn->value),
                                 "posisi" => "D",
                                 "nominal_curr" => $taxx,
-                                "kurs" => $value->nilai_matauang,
+                                "kurs" => $dataItems[0]->nilai_matauang,
                                 "kode_mua" => $dataItems[0]->name_curr,
                                 "nominal" => $taxNominal,
                                 "row_order" => $rowCount
@@ -406,10 +407,10 @@ class Invoice extends MY_Controller {
                                         "nama" => $taxName[0],
                                         "reff_note" => "",
                                         "partner" => $dataItems[0]->id_supplier,
-                                        "kode_coa" => ($coaPpn->value ?? 0),
+                                        "kode_coa" => ($coaPpn->value ?? $defaultPpn->value),
                                         "posisi" => "D",
                                         "nominal_curr" => $taxx,
-                                        "kurs" => $value->nilai_matauang,
+                                        "kurs" => $dataItems[0]->nilai_matauang,
                                         "kode_mua" => $dataItems[0]->name_curr,
                                         "nominal" => $taxNominal,
                                         "row_order" => $rowCount
@@ -443,7 +444,7 @@ class Invoice extends MY_Controller {
                     "kode_coa" => ($defaultPpn->value ?? 0),
                     "posisi" => "C",
                     "nominal_curr" => $totalNominal + $tax,
-                    "kurs" => $value->nilai_matauang,
+                    "kurs" => $dataItems[0]->kurs,
                     "kode_mua" => $dataItems[0]->name_curr,
                     "nominal" => ($totalNominal + $tax) * $dataItems[0]->nilai_matauang,
                     "row_order" => count($jurnalItems) + 1

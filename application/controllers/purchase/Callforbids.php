@@ -170,7 +170,7 @@ class Callforbids extends MY_Controller {
             $model = new $this->m_global;
             $model2 = clone $model;
             $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
-            $this->_module->lock_tabel("mst_produk WRITE,cfb_items WRITE,mst_produk_harga mph read,nilai_konversi nk read,nilai_konversi read,log_history WRITE,main_menu_sub READ");
+            $this->_module->lock_tabel("mst_produk WRITE,cfb_items WRITE,mst_produk_harga mph read,nilai_konversi nk read,nilai_konversi write,log_history WRITE,main_menu_sub READ");
             $checkStatus = $model->setTables("cfb_items")->setSelects(["GROUP_CONCAT(id) as ids,GROUP_CONCAT(kode_cfb) as kode"])->setWhereIn("id", $dd->ids)->setWheres(["status" => "draft"])->getDetail();
             $listLog = [];
             if ($checkStatus) {
@@ -185,7 +185,7 @@ class Callforbids extends MY_Controller {
 
 //                throw new \Exception("Produk [{$checkStatus->kode_produk}] {$checkStatus->nama_produk} Tidak dalam status CONFRIM", 500);
             }
-            $produk = $this->m_cfb->setTables("mst_produk")->setSelects(["mst_produk.kode_produk,nama_produk,uom_beli,mph.harga,nilai,dari,catatan,uom"])
+            $produk = $this->m_cfb->setTables("mst_produk")->setSelects(["mst_produk.kode_produk,nama_produk,uom_beli,mph.harga,nilai,dari,catatan,uom,konversi_aktif,pembilang,penyebut"])
                     ->setJoins("mst_produk_harga mph", "(mph.kode_produk = mst_produk.kode_produk and mph.jenis = 'pembelian')", "left")
                     ->setJoins("nilai_konversi nk", "nk.id = uom_beli", "left");
             $items = [];
@@ -203,6 +203,9 @@ class Callforbids extends MY_Controller {
                             $nilai = 1;
                             $ke = $datas_[4];
                             $catatan = "1:1";
+                            $konv_aktif = "0";
+                            $pembilang = 1;
+                            $penyebut = 1;
                             $datakonversi = ["ke" => $ke, "dari" => $dari, "nilai" => $nilai];
                             $getDataKonv = $this->m_konversiuom->wheres($datakonversi)->getDetail();
                             if (!$getDataKonv) {
@@ -214,15 +217,25 @@ class Callforbids extends MY_Controller {
                                 $dari = $getDataKonv->dari;
                                 $nilai = $getDataKonv->nilai;
                                 $catatan = $getDataKonv->catatan;
+                                $konv_aktif = $getDataKonv->konversi_aktif;
+                                $pembilang = $getDataKonv->pembilang;
+                                $penyebut = $getDataKonv->penyebut;
                             }
                         } else {
                             $uom_beli = $prod->uom_beli;
                             $dari = $prod->dari;
                             $nilai = ($prod->nilai ?? 1);
                             $catatan = $prod->catatan;
+                            $konv_aktif = $prod->konversi_aktif;
+                            $pembilang = $prod->pembilang;
+                            $penyebut = $prod->penyebut;
                         }
 //                        $qtyBeli = ceil($datas_[3] / $nilai);
-                        $qtyBeli = $datas_[3] / $nilai;
+                        if ($konv_aktif === "1") {
+                            $qtyBeli = ($pembilang / $penyebut) * $datas_[3];
+                        } else {
+                            $qtyBeli = $datas_[3] / $nilai;
+                        }
                         array_push($items, [$datas_[0], $datas_[1], $prod->kode_produk, $prod->nama_produk, $datas_[3],
                             $datas_[4], ($uom_beli ?? null), $datas_[5], $prod->harga, $dari, $nilai, $catatan, $qtyBeli, $datas_[6], $datas_[7], $datas_[8]]);
                     }
@@ -264,10 +277,9 @@ class Callforbids extends MY_Controller {
             $log = new $this->m_global;
             $this->_module->startTransaction();
             $this->_module->lock_tabel("mst_produk WRITE,cfb_items ci write,cfb write,procurement_purchase_items write,log_history WRITE,main_menu_sub READ");
-            if($status === "cancel") {
+            if ($status === "cancel") {
                 $updt->setTables('cfb_items ci')->setWhereRaw("id in (" . implode(",", $ids) . ")")->update(['status' => $status]);
-            }
-            else {
+            } else {
                 $updt->setTables('cfb_items ci')->setWhereRaw("id in (" . implode(",", $ids) . ")")->setWheres(['status' => $before_status])->update(['status' => $status]);
             }
             $listLog = [];
@@ -276,16 +288,16 @@ class Callforbids extends MY_Controller {
             }
             $kodes = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
             $cid = [];
-            foreach ($listCfb->setJoins('cfb_items ci', "ci.kode_cfb = cfb.kode_cfb")->setOrder(["ci.id" => "asc"])->setSelects(['kode_pp', "kode_produk", "ci.kode_cfb","cfb.id as cid"])->setWhereRaw("ci.id in (" . implode(",", $ids) . ")")->getData() as $key => $value) {
+            foreach ($listCfb->setJoins('cfb_items ci', "ci.kode_cfb = cfb.kode_cfb")->setOrder(["ci.id" => "asc"])->setSelects(['kode_pp', "kode_produk", "ci.kode_cfb", "cfb.id as cid"])->setWhereRaw("ci.id in (" . implode(",", $ids) . ")")->getData() as $key => $value) {
                 $updatePP = new $this->m_cfb;
                 $cid[] = $value->cid;
                 $updatePP->setTables("procurement_purchase_items")->setWheres(["kode_pp" => $value->kode_pp, "kode_produk" => $value->kode_produk])->update(["status" => $status]);
                 $listLog[] = ["datelog" => date("Y-m-d H:i:s"), "kode" => $value->kode_cfb, "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
                     "jenis_log" => "edit", "note" => "Merubah Ke status {$status}", "nama_user" => $users["nama"], "ip_address" => ""];
             }
-            if(count($cid) > 0) {
-                $u =new $this->m_cfb;
-                $u->setWhereRaw("id in (". implode(",", $cid) .")")->update(['status' => $status]);
+            if (count($cid) > 0) {
+                $u = new $this->m_cfb;
+                $u->setWhereRaw("id in (" . implode(",", $cid) . ")")->update(['status' => $status]);
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);

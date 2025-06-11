@@ -85,6 +85,8 @@
                             <thead>
                                 <tr>
                                     <th class="style " width="20px  ">No.</th>
+                                    <th class="style nowrap" width="100px" style="text-align: right;">Qty Beli</th>
+                                    <th class="style nowrap" width="80px">Uom Beli</th>
                                     <th class="style nowrap" width="200px">Lot</th>
                                     <th class="style nowrap" width="50px">Grade</th>
                                     <th class="style nowrap" width="100px" style="text-align: right;">Qty</th>
@@ -104,8 +106,7 @@
                             <tbody id="tbody_items"></tbody>
                             <tfoot>
                                 <tr>
-                                    <th></th>
-                                    <th></th>
+                                    <th colspan='4'></th>
                                     <th>Total</th>
                                     <th style="text-align: right;" id="total_tqty1">0</th>
                                     <th></th>
@@ -310,6 +311,15 @@
         var hidden_field = `<?php echo $hidden_field; ?>`;
         var category_benang = `<?php echo $category_benang; ?>`;
         var nama_category = '<?= $data_produk->nama_category ?>';
+        var catatan_beli  = `<?= $data_produk->catatan; ?>`;
+        var nilai_konversi = '<?= $data_produk->nilai_konversiuom; ?>';
+        var uom_beli       = `<?= $data_produk->uom_beli; ?>`
+        var qty            = (qty == '')? 0 : qty;
+        var qty2           = (qty2 == '')? 0 : qty2;
+        var konversi_aktif = `<?= $data_produk->konversi_aktif;?>`;
+        var penyebut       = `<?= $data_produk->penyebut; ?>`;
+        var pembilang      = `<?= $data_produk->pembilang; ?>`;
+
         //cek Lot apa ada yg kosong
         if(lot === "") {
             if(nama_category.toLowerCase() === 'sparepart')
@@ -384,15 +394,21 @@
             // uom1_default = `<?php echo $data_produk->uom; ?>`;
             // uom2_default = `<?php echo $data_produk->uom_2; ?>`;
             // uomlbrjadi  = `<?php echo  $data_produk->uom_lebar_jadi; ?>`;
+            if(konversi_aktif == '1'){
+                qty_beli = (parseFloat(pembilang) / parseFloat(penyebut)) * qty;
+            }else{
+                qty_beli    = qty / nilai_konversi;
+            }
             html = '<tr class="num">' +
                 '<td></td>'
                 //+ '<td></td>'
-                +
+                +'<td class="min-width-80"><input type="text" name="txtqtybeli[]"  id="txtqtybeli" class="form-control input-sm min-width-80 text-right txtqtybeli"   onkeypress="enter(event);"   onkeyup="validAngka(this)" oninput="hitung_konversi(this,'+nilai_konversi+')"; data-decimal="2" value="'+qty_beli+'" ><p><small id="uom_beli_note" class="form-text text-muted">' + catatan_beli  + '</small></p></td>' +
+                '<td class="min-width-80"><input type="text" name="txtuombeli"  id="txtuombeli" class="form-control input-sm min-width-80 txtuombeli" value="' + uom_beli + '" readonly style="width:100% !important;"></td>' +
                 '<td class="min-width-150"><input type="text" name="txtlot[]"  id="txtlot" class="form-control input-sm txtlot min-width-150" onkeypress="enter(event);" value="' + lot + '"></td>' +
                 '<td class="min-width-100"><select class="form-control input-sm grade min-width-100" name="grade" id="grade" style="width:100% !important;"></select></td>' +
-                '<td class="min-width-80"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm min-width-80 text-right txtqty"   onkeypress="enter(event);"  onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)" value="' + Math.round(qty, 2) + '" ></td>' +
+                '<td class="min-width-80"><input type="text" name="txtqty[]"  id="txtqty" class="form-control input-sm min-width-80 text-right txtqty"   onkeypress="enter(event);"  onkeyup="validAngka(this)" data-decimal="2" oninput="enforceNumberValidation(this)" value="' + Number.parseFloat(qty).toFixed(2) + '" ></td>' +
                 '<td class="min-width-80"><input type="text" name="txtuom"  id="txtuom" class="form-control input-sm min-width-80 txtuom" value="" readonly style="width:100% !important;"></td>' +
-                '<td class="min-width-80"><input type="text" name="txtqty2[]" id="txtqty2" class="form-control input-sm min-width-80 text-right txtqty2"  onkeypress="enter(event);"   onkeyup="validAngka(this)"  data-decimal="2" oninput="enforceNumberValidation(this)" value="' + Math.round(qty2, 2) + '" ></td>' +
+                '<td class="min-width-80"><input type="text" name="txtqty2[]" id="txtqty2" class="form-control input-sm min-width-80 text-right txtqty2"  onkeypress="enter(event);"   onkeyup="validAngka(this)"  data-decimal="2" oninput="enforceNumberValidation(this)" value="' + Number.parseFloat(qty2).toFixed(2) + '" ></td>' +
                 '<td class="min-width-80"><input type="text" name="txtuom2"  id="txtuom2" class="form-control input-sm min-width-80 txtuom2"  readonly style="width:100% !important;"></td>' +
                 <?php if($hidden_field == 'No') {?>
                 '<td class="min-width-100"><input type="text" name="txt_lebar_greige"  id="txt_lebar_greige" class="form-control input-sm min-width-100 txt_lebar_greige" style="width:100% !important;" onkeypress="enter(event);" value="' + lebar_greige + '" ></td>' +
@@ -440,6 +456,8 @@
             $newOption = new Option(satuan_lbr_grg, satuan_lbr_grg, true, true);
             $(".txt_uom_lebar_greige").eq(inx_uom_lebar_greige).append($newOption).trigger('change');
 
+            total();
+
         }
     }
 
@@ -447,6 +465,23 @@
         var i = r.parentNode.parentNode.rowIndex;
         document.getElementById("items").deleteRow(i);
         total();
+    }
+
+    function hitung_konversi(el,nilai) {
+        var konversi_aktif = `<?= $data_produk->konversi_aktif;?>`;
+        var penyebut       = `<?= $data_produk->penyebut; ?>`;
+        var pembilang      = `<?= $data_produk->pembilang; ?>`;
+        let sum = 0;
+        qty_beli = $(el).val();
+        if(qty_beli!= ''){
+            if(konversi_aktif == '1'){
+                sum = (parseFloat(qty_beli) / parseFloat(pembilang) ) * parseFloat(penyebut) ;
+            }else{
+            
+                sum = parseFloat(qty_beli) * parseFloat(nilai);
+            }
+        }
+        $(el).parents("tr").find("#txtqty").val(sum);
     }
 
     // validasi decimal

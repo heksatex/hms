@@ -84,14 +84,14 @@ class Requestforquotation extends MY_Controller {
             }
 
             $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
-                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
+                    ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"]);
 
             if (strtolower($level) === "direksi") {
                 $model1->setWhereRaw("(po.status in ('waiting_approval','exception') or poe.status in ('waiting_approve'))");
             } else {
                 $model1->setWhereRaw("po.status in ('draft','rfq','waiting_approval','exception')");
             }
-            
+
             $prevPage = $model1->getDetail();
 
             if ($prevPage) {
@@ -523,10 +523,11 @@ class Requestforquotation extends MY_Controller {
                     $dataTax = $models->setWhereIn("id", explode(",", $tax_lain[$key]), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
                     foreach ($dataTax as $kkk => $datas) {
                         if ($setDpp !== null && $datas->dpp === "1") {
+                            $nilai_dpp += ((($total - $diskon) * 11) / 12);
                             $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
-                            continue;
+                        } else {
+                            $taxe += ($total - $diskon) * $datas->amount;
                         }
-                        $taxe += ($total - $diskon) * $datas->amount;
                     }
                 }
                 $taxes += $taxe;
@@ -709,7 +710,8 @@ class Requestforquotation extends MY_Controller {
                                 ->setJoins('nilai_konversi nk', "id_konversiuom = nk.id", "left")
 //                                ->setJoins('nilai_konversi nk', "id_konversiuom = mst_produk.uom_beli", "left")
                                 ->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])->setOrder(["id" => "asc"])
-                                ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa", "mst_produk.uom as uom_stock"])->getData();
+                                ->setSelects(["purchase_order_detail.*", "nk.nilai", "kode_coa", "mst_produk.uom as uom_stock",
+                                    "konversi_aktif", "pembilang", "penyebut"])->getData();
                 $produk = [];
                 $inserInvoice = new $this->m_global;
                 $checkInvoice = clone $inserInvoice;
@@ -719,10 +721,15 @@ class Requestforquotation extends MY_Controller {
                 foreach ($dataItemOrder as $key => $value) {
                     $row = count($produk) + 1;
                     $updateDataDetail[] = ['id' => $value->id, 'status' => $status, 'nilai_konversi' => $value->nilai];
+                    if ($value->konversi_aktif === "1") {
+                        $qtyy = ($value->qty_beli / $value->pembilang) * $value->penyebut;
+                    } else {
+                        $qtyy = $value->qty_beli * $value->nilai;
+                    }
                     $produk[] = [
                         'nama_produk' => $value->nama_produk,
                         'kode_produk' => $value->kode_produk,
-                        'qty' => ($value->qty_beli * $value->nilai),
+                        'qty' => $qtyy,
                         'uom' => $value->uom_stock,
                         'status' => 'ready',
                         'origin_prod' => $value->kode_produk . "_" . $row,

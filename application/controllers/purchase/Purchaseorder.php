@@ -46,7 +46,7 @@ class Purchaseorder extends MY_Controller {
 
     public function index() {
         $data['id_dept'] = 'PO';
-        $data['user'] = (object) $this->session->userdata('nama'); 
+        $data['user'] = (object) $this->session->userdata('nama');
         $this->load->view('purchase/v_po', $data);
     }
 
@@ -73,19 +73,19 @@ class Purchaseorder extends MY_Controller {
             if (!$data["po"]) {
                 throw new \Exception('Data PO tidak ditemukan', 500);
             }
-            $nextPage = $model1->setWheres(["po.id >"=>$data["po"]->id,"jenis"=>"rfq","po.supplier"=>$data["po"]->supplier], true)
-                    ->setWhereIn("po.status", ["done","purchase_confirmed","exception"],true)
-                    ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
+            $nextPage = $model1->setWheres(["po.id >" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
+                            ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
+                            ->setOrder(['po.create_date' => 'asc'])->setSelects(["po.no_po"])->getDetail();
             if ($nextPage) {
-                $data["next_page"] = base_url("purchase/purchaseorder/edit/".encrypt_url($nextPage->no_po));
+                $data["next_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($nextPage->no_po));
             }
-            $prevPage = $model1->setWheres(["po.id <"=>$data["po"]->id,"jenis"=>"rfq","po.supplier"=>$data["po"]->supplier], true)
-                    ->setWhereIn("po.status", ["done","purchase_confirmed","exception"],true)
-                    ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
+            $prevPage = $model1->setWheres(["po.id <" => $data["po"]->id, "jenis" => "rfq", "po.supplier" => $data["po"]->supplier], true)
+                            ->setWhereIn("po.status", ["done", "purchase_confirmed", "exception"], true)
+                            ->setOrder(['po.create_date' => 'desc'])->setSelects(["po.no_po"])->getDetail();
             if ($prevPage) {
-                $data["prev_page"] = base_url("purchase/purchaseorder/edit/".encrypt_url($prevPage->no_po));
+                $data["prev_page"] = base_url("purchase/purchaseorder/edit/" . encrypt_url($prevPage->no_po));
             }
-            
+
             $data["po_items"] = $model2->setTables("purchase_order_detail pod")->setWheres(["po_no_po" => $kode_decrypt])->setOrder(["id" => "asc"])
                             ->setJoins('tax', "tax.id = tax_id", "left")
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
@@ -441,10 +441,10 @@ class Purchaseorder extends MY_Controller {
                                         "posisi" => "C",
                                         "kurs" => $dataItems[0]->kurs,
                                         "kode_mua" => $dataItems[0]->name_curr,
-                                        "row_order" => $rowCount+1
+                                        "row_order" => $rowCount + 1
                                     ];
-                                    $modelJurnal->setTables("jurnal_entries_items")->setWheres(["kode"=>$cekJurnal->kode],true)->delete();
-                                   $cekUpdateIn =  $modelJurnal->saveBatch($jurnalItems);
+                                    $modelJurnal->setTables("jurnal_entries_items")->setWheres(["kode" => $cekJurnal->kode], true)->delete();
+                                    $cekUpdateIn = $modelJurnal->saveBatch($jurnalItems);
                                     $logJurnal [] = "nominal Kurs {$ttmax} nominal {$nttmax} Untuk Hutang Dagang";
 //                                    $cekUpdateIn = $modelPO->query($updateQueryJurnal);
 //                                    if ($cekUpdateIn !== "") {
@@ -555,9 +555,11 @@ class Purchaseorder extends MY_Controller {
                     foreach ($dataTax as $kkk => $datas) {
                         if ($dpplain === "1" && $datas->dpp === "1") {
                             $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
-                            continue;
+                            $nilaiDppLain += (($total - $diskon) * 11) / 12;
+//                            continue;
+                        } else {
+                            $taxe += ($total - $diskon) * $datas->amount;
                         }
-                        $taxe += ($total - $diskon) * $datas->amount;
                     }
                 }
                 $taxes += $taxe;
@@ -719,7 +721,8 @@ class Purchaseorder extends MY_Controller {
                         ->setJoins("nilai_konversi", "nilai_konversi.id = id_konversiuom", "left")
                         ->setWheres(["purchase_order_detail.po_no_po" => $kode_decrypt, "purchase_order_detail.id" => $value], true)
                         ->setGroups(["purchase_order_detail.id"])
-                        ->setSelects(["COALESCE(SUM(qty_beli_retur),0) as total_retur", "purchase_order_detail.*", "nilai_konversi.nilai as konversi"])
+                        ->setSelects(["COALESCE(SUM(qty_beli_retur),0) as total_retur", "purchase_order_detail.*", "nilai_konversi.nilai as konversi",
+                            "konversi_aktif", "pembilang", "penyebut"])
                         ->getDetail();
                 if ($checkData === null) {
                     throw new \Exception("Produk Item Produk tidak ditemukan", 500);
@@ -727,12 +730,17 @@ class Purchaseorder extends MY_Controller {
                 if ($checkData->qty_beli < ($qtys[$key] + $checkData->total_retur)) {
                     throw new \Exception("Retur Produk [{$checkData->kode_produk}] {$checkData->nama_produk} Melebihi Qty Beli", 500);
                 }
+                if ($checkData->konversi_aktif === "1") {
+                    $qtyRetur = ($checkData->pembilang * $checkData->penyebut) / $qtys[$key];
+                } else {
+                    $qtyRetur = $qtys[$key] * $checkData->konversi;
+                }
                 $dataRetur[] = [
                     "pod_id" => $value,
                     "po_no_po" => $kode_decrypt,
                     "qty_beli_retur" => $qtys[$key],
                     "uom_beli_retur" => $checkData->uom_beli,
-                    "qty_retur" => $qtys[$key] * $checkData->konversi,
+                    "qty_retur" => $qtyRetur,
                     "uom_retur" => $checkData->uom,
                     "konversi_beli_stok" => $checkData->konversi,
                     "retur_date" => date("Y-m-d H:i:s")
@@ -920,9 +928,12 @@ class Purchaseorder extends MY_Controller {
                         foreach ($dataTax as $kkk => $datas) {
                             if ($checkInv->dpp_lain > 0 && $datas->dpp === "1") {
                                 $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
-                                continue;
+                                $dpp += ((($total - $diskon) * 11) / 12);
                             }
-                            $taxe += ($total - $diskon) * $datas->amount;
+                            else {
+                                $taxe += ($total - $diskon) * $datas->amount;
+                            }
+                            
                         }
                     }
                     $logProduk[] = $value->kode_produk . " " . $value->nama_produk;
@@ -1035,7 +1046,7 @@ class Purchaseorder extends MY_Controller {
                             ->setJoins('mst_produk', "mst_produk.kode_produk = pod.kode_produk")
                             ->setJoins('nilai_konversi nk', "pod.id_konversiuom = nk.id", "left")
                             ->setJoins('(select kode_produk as kopro,GROUP_CONCAT(catatan SEPARATOR "#") as catatan from mst_produk_catatan where jenis_catatan = "pembelian" group by kode_produk) as catatan', "catatan.kopro = pod.kode_produk", "left")
-                            ->setSelects(["pod.*", "COALESCE(tax.amount,0) as amount_tax,tax.nama as tax_name,tax.dpp as dpp_tax", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
+                            ->setSelects(["pod.*", "tax.nama as tax_name,COALESCE(tax.amount,0) as amount_tax,tax.dpp as dpp_tax,coalesce(tax.tax_lain_id,0) as tax_lain_id", "catatan.catatan", "mst_produk.image", "nk.dari,nk.ke,nk.catatan as catatan_nk"])->getData();
 
             $url = "dist/storages/print/po";
             if (!is_dir(FCPATH . $url)) {

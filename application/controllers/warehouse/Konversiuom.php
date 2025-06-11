@@ -33,6 +33,24 @@ class Konversiuom extends MY_Controller {
             ]
         ],
         [
+            'field' => 'penyebut',
+            'label' => 'Penyebut',
+            'rules' => ['trim', 'regex_match[/^\d*\.?\d*$/]'],
+            'errors' => [
+                "regex_match" => "{field} harus berupa number / desimal"
+            ]
+        ]
+        ,
+        [
+            'field' => 'pembilang',
+            'label' => 'Pembilang',
+            'rules' => ['trim', 'regex_match[/^\d*\.?\d*$/]'],
+            'errors' => [
+                "regex_match" => "{field} harus berupa number / desimal"
+            ]
+        ]
+        ,
+        [
             'field' => 'nilai',
             'label' => 'Nilai Konversi',
             'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
@@ -66,11 +84,34 @@ class Konversiuom extends MY_Controller {
             $ke = $this->input->post("ke");
             $nilai = $this->input->post("nilai");
             $catatan = $this->input->post("catatan");
+            $aktif = $this->input->post("konversi_aktif");
+            $penyebut = $this->input->post("penyebut");
+            $pembilang = $this->input->post("pembilang");
 
             if ($this->input->post("posisi") !== '') {
-                $insert = $this->m_konversiuom->wheres(["id" => $this->input->post("ids")])->update(["dari" => $dari, "ke" => $ke, "nilai" => $nilai,"catatan" => $catatan]);
+                $insert = $this->m_konversiuom->wheres(["id" => $this->input->post("ids")])->update(
+                        [
+                            "dari" => $dari,
+                            "ke" => $ke,
+                            "nilai" => $nilai,
+                            "catatan" => $catatan,
+                            "konversi_aktif" => $aktif,
+                            "pembilang" => $pembilang,
+                            "penyebut" => $penyebut
+                        ]
+                );
             } else {
-                $insert = $this->m_konversiuom->save(["dari" => $dari, "ke" => $ke, "nilai" => $nilai,"catatan" => $catatan]);
+                $insert = $this->m_konversiuom->save(
+                        [
+                            "dari" => $dari,
+                            "ke" => $ke,
+                            "nilai" => $nilai,
+                            "catatan" => $catatan,
+                            "konversi_aktif" => $aktif,
+                            "pembilang" => $pembilang,
+                            "penyebut" => $penyebut
+                        ]
+                );
             }
             if ($insert !== "") {
                 throw new \Exception($insert, 500);
@@ -102,9 +143,13 @@ class Konversiuom extends MY_Controller {
                     $value->dari,
                     $value->ke,
                     $value->nilai,
+                    $value->penyebut,
+                    $value->pembilang,
+                    ($value->konversi_aktif === "0") ? "Dengan Nilai" : "Dengan Pembanding",
                     $value->catatan,
                     "<button class='btn btn-default btn-sm edit_item' data-nilai='{$value->nilai}' data-id='{$value->id}' data-ke='{$value->ke}' "
-                    . "data-dari='{$value->dari}' data-catatan='{$value->catatan}'><i class='fa fa-edit'></i> Edit</button>"
+                    . "data-dari='{$value->dari}' data-catatan='{$value->catatan}' data-penyebut='{$value->penyebut}'"
+                    . "data-pembilang='{$value->pembilang}' data-konversi_aktif='{$value->konversi_aktif}'> <i class='fa fa-edit'></i> Edit</button>"
                 );
             }
             echo json_encode(array("draw" => $_POST['draw'],
