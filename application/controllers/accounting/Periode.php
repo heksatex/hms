@@ -83,7 +83,7 @@ class Periode extends MY_Controller {
 
             $startDate = "{$tahun}-01-01";
             $endDate = "{$tahun}-12-31";
-            $startYear = date("y", strtotime($startDate));
+            $startYear = date("Y", strtotime($startDate));
             $list = [];
             $list[] = array(
                 $this->fields->periode => $startYear . "/00",
