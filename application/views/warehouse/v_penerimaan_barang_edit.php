@@ -184,6 +184,7 @@
                                                                 <th class="style">Kode PP</th>
                                                                 <th class="style" style="text-align: right;">Qty Beli</th>
                                                                 <th class="style">uom Beli</th>
+                                                                <th class="style" style="text-align: right;">Tersedia Qty Beli</th>
                                                                 <th class="style">Reff Note</th>
                                                             <?php } ?>
                                                             <th class="style">Status</th>
@@ -198,6 +199,15 @@
                                                                     $color = 'blue';
                                                                 else
                                                                     $color = "black";
+                                                                if($row->konversi_aktif == '1'){
+                                                                    $qty_beli_tersedia = ($row->pembilang / $row->penyebut) * $row->sum_qty;
+                                                                }else{
+                                                                   if($row->nilai > 0){
+                                                                        $qty_beli_tersedia = $row->sum_qty / $row->nilai;
+                                                                    } else{
+                                                                        $qty_beli_tersedia = 0;
+                                                                    }
+                                                                }
                                                             ?>
                                                                 <tr class="num">
                                                                     <td></td>
@@ -228,6 +238,7 @@
                                                                         <td><?= $row->kode_pp ?></td>
                                                                         <td align="right"><?= number_format($row->qty_beli, 2) ?></td>
                                                                         <td><?= $row->uom_beli ?></td>
+                                                                        <td align="right"><?= number_format($qty_beli_tersedia, 2) ?></td>
                                                                         <td>
                                                                             <?= nl2br($row->reff_note ?? "") ?>
                                                                         </td>

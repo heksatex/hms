@@ -40,12 +40,41 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label for="tanggal" class="col-sm-2 control-label">Penyebut</label>
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
+                                    <input type="text" name="penyebut" id="penyebut" class="form-control" id="nilai" value="1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tanggal" class="col-sm-2 control-label">Pembilang</label>
+                            <div class="col-sm-8">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
+                                    <input type="text" name="pembilang" id="pembilang" class="form-control" id="nilai" value="1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label for="tanggal" class="col-sm-2 required control-label">Catatan</label>
                             <div class="col-sm-8">
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
                                     <input type="text" name="catatan" class="form-control" id="catatan" required>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tanggal" class="col-sm-2 control-label">Perhitungan Konversi</label>
+                            <div class="col-sm-8">
+                                <label class="btn btn-default">
+                                    <input type="radio"  name="konversi_aktif" id="konv_nilai" value="0" checked/> Dengan Nilai
+                                </label> 
+                                <label class="btn btn-default">
+                                    <input type="radio"  name="konversi_aktif" id="konv_pembanding" value="1" /> Dengan Pembanding
+                                </label> 
                             </div>
                         </div>
                     </div>
@@ -66,6 +95,9 @@
                         <th>Dari</th>
                         <th>Ke</th>
                         <th>Nilai</th>
+                        <th>Penyebut</th>
+                        <th>Pembilang</th>
+                        <th>Perhitungan</th>
                         <th>Catatan</th>
                     </tr>
                 </thead>
@@ -77,8 +109,8 @@
 <script>
     $(function () {
         $(".select2-uom").select2({
-            allowClear:true,
-            placeholder:"Pilih",
+            allowClear: true,
+            placeholder: "Pilih",
             minimumResultsForSearch: -1
         });
         const table = $('#konversi').DataTable({

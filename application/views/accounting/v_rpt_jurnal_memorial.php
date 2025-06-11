@@ -123,17 +123,17 @@
                                     <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
                                         <table id="tabelMemorial" class="table table-condesed table-hover detail" border="1">
                                             <tr>
-                                                <th class="style bb ws no">No</th>
-                                                <th class="style bb ws no" >Tanggal Posting</th>
-                                                <th class="style bb ws no" >No Bukti</th>
-                                                <th class="style bb ws no" >Origin</th>
-                                                <th class="style bb ws no" >Kode ACC</th>
-                                                <th class="style bb ws no" >Nama ACC</th>
-                                                <th class="style bb ws no" >Kerangan</th>
-                                                <th class="style bb ws no" >Reff Note</th>
-                                                <th class="style bb ws no" >Partner</th>
-                                                <th class="style bb ws no" >Debet</th>
-                                                <th class="style bb ws no" >Kredit</th>
+                                                <th class="style bb ws no" >No</th>
+                                                <th class="style bb ws" >Tanggal Posting</th>
+                                                <th class="style bb ws" >No Bukti</th>
+                                                <th class="style bb ws" >Origin</th>
+                                                <th class="style bb ws" >Kode ACC</th>
+                                                <th class="style bb ws" >Nama ACC</th>
+                                                <th class="style bb ws" >Kerangan</th>
+                                                <th class="style bb ws" >Reff Note</th>
+                                                <th class="style bb ws" >Partner</th>
+                                                <th class="style bb ws" >Debit</th>
+                                                <th class="style bb ws" >Credit</th>
                                             </tr>
                                             <tbody id="tBody" class="ws">
 
