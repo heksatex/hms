@@ -168,7 +168,7 @@
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label required">Periode</label>
+                                                    <label class="form-label required">Periode ACC</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <select class="form-control select2" name="periode" id="periode">

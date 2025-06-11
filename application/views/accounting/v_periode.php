@@ -32,7 +32,7 @@
                                                 Tahun
                                             </th>
                                             <th>
-                                                Periode
+                                                Periode ACC
                                             </th>
                                             <th>
                                                 Status
