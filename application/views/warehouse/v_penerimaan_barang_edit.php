@@ -202,7 +202,11 @@
                                                                 if($row->konversi_aktif == '1'){
                                                                     $qty_beli_tersedia = ($row->pembilang / $row->penyebut) * $row->sum_qty;
                                                                 }else{
-                                                                    $qty_beli_tersedia = $row->sum_qty / $row->nilai;
+                                                                   if($row->nilai > 0){
+                                                                        $qty_beli_tersedia = $row->sum_qty / $row->nilai;
+                                                                    } else{
+                                                                        $qty_beli_tersedia = 0;
+                                                                    }
                                                                 }
                                                             ?>
                                                                 <tr class="num">

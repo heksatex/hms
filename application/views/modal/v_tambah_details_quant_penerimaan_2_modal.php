@@ -312,7 +312,7 @@
         var category_benang = `<?php echo $category_benang; ?>`;
         var nama_category = '<?= $data_produk->nama_category ?>';
         var catatan_beli  = `<?= $data_produk->catatan; ?>`;
-        var nilai_konversi = '<?= $data_produk->nilai_konversiuom; ?>';
+        var nilai_konversi =  '<?= ($data_produk->nilai_konversiuom == '')? 0 : $data_produk->nilai_konversiuom ; ?>';
         var uom_beli       = `<?= $data_produk->uom_beli; ?>`
         var qty            = (qty == '')? 0 : qty;
         var qty2           = (qty2 == '')? 0 : qty2;
@@ -397,7 +397,11 @@
             if(konversi_aktif == '1'){
                 qty_beli = (parseFloat(pembilang) / parseFloat(penyebut)) * qty;
             }else{
-                qty_beli    = qty / nilai_konversi;
+                if(nilai_konversi > 0){
+                    qty_beli    = qty / nilai_konversi;
+                } else {
+                    qty_beli    = 0;
+                }
             }
             html = '<tr class="num">' +
                 '<td></td>'
