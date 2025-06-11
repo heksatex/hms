@@ -151,7 +151,7 @@
                                                     <label class="form-label required">Kurs</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?> required>
+                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
                                                 </div>
                                             </div>
                                         </div>
@@ -162,6 +162,26 @@
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <span><?= $inv->no_po ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label required">Periode</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <select class="form-control select2" name="periode" id="periode">
+                                                        <?php
+                                                        $periodeNow = $inv->periode ?? date("Y/m");
+                                                        foreach ($periode as $kk => $val) {
+                                                            ?>
+                                                            <option value="<?= $val->periode ?>" <?= ($periodeNow === $val->periode) ? "selected" : "" ?> ><?= $val->periode ?></option>
+                                                            <?php
+                                                        }
+                                                        ?>
+
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -517,9 +537,14 @@
 
 
             });
-            
+
             var counterSplit = 0;
             $(function () {
+
+                $(".select2").select2({
+                    allowClear: true,
+                    placeholder: "Pilih"
+                });
                 var editable = false;
 
                 $(".add_duplicate").off("click").on("click", function () {
@@ -627,7 +652,8 @@
                                 status: "done",
                                 jurnal: "<?= $inv->journal ?>",
                                 inv: "<?= $inv->no_invoice ?>",
-                                origin: "<?= $inv->origin ?>"
+                                origin: "<?= $inv->origin ?>",
+                                periode:"<?= $inv->periode ?>"
                             },
                             error: function (req, error) {
                                 unblockUI(function () {
@@ -713,7 +739,7 @@
 
                         },
                         complete: function (jqXHR, textStatus) {
-                            unblockUI(function () {},200);
+                            unblockUI(function () {}, 200);
                         }
                     });
 

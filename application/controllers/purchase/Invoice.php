@@ -90,6 +90,7 @@ class Invoice extends MY_Controller {
             $detail = clone $head;
             $tax = clone $head;
             $model3 = clone $head;
+            $model4 = clone $head;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $datas = $head->setTables("invoice")->setJoins("partner", "partner.id = id_supplier", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")
@@ -108,6 +109,7 @@ class Invoice extends MY_Controller {
                             ->setSelects(["invoice_detail.*", "tax.id as tax_id,tax.nama as pajak,tax.ket as pajak_ket,amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
                                 "kode_coa,coa.nama as nama_coa", "coalesce(tax_id,'0') as tax_id"])
                             ->setOrder(["id"])->getData();
+            $data["periode"] = $model4->setTables("acc_periode")->setWheres(["status" => "open"], true)->setOrder(["tahun_fiskal" => "desc", "periode" => "asc"])->getData();
             $this->load->view('purchase/v_invoice_edit', $data);
         } catch (Exception $ex) {
             return show_404();
@@ -151,7 +153,33 @@ class Invoice extends MY_Controller {
 //    }
 
     public function update($id) {
+        $val = [
+            [
+                'field' => 'nilai_matauang',
+                'label' => 'Kurs',
+                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ],
+            [
+                'field' => 'periode',
+                'label' => 'Periode',
+                'rules' => ['required'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih'
+                ]
+            ]
+                ]
+        ;
         try {
+
+            $this->form_validation->set_rules($val);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
 
@@ -170,6 +198,7 @@ class Invoice extends MY_Controller {
             $matauang = $this->input->post("nilai_matauang");
             $tanggal_sj = $this->input->post("tanggal_sj");
             $tax_lain = $this->input->post("tax_lain_id");
+            $periode = $this->input->post("periode");
 
             $item = [];
             $totals = 0.00;
@@ -211,7 +240,7 @@ class Invoice extends MY_Controller {
             $head = new $this->m_global;
             $bd = clone $head;
             $dataUpdate = ["no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain,
-                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj];
+                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode];
             $head->setTables('invoice')->setWheres(["id" => $kode_decrypt])
                     ->update($dataUpdate);
             $bd->setTables("invoice_detail")->updateBatch($item, 'id');
@@ -227,6 +256,17 @@ class Invoice extends MY_Controller {
     }
 
     public function update_status() {
+        $val = [
+            [
+                'field' => 'periode',
+                'label' => 'Periode',
+                'rules' => ['required'],
+                'errors' => [
+                    'required' => '{field} Belum diupdate'
+                ]
+            ]
+                ]
+        ;
         try {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
@@ -237,6 +277,8 @@ class Invoice extends MY_Controller {
             $id = $this->input->post("id");
             $inv = $this->input->post("inv");
             $origin = $this->input->post("origin");
+            $periode = $this->input->post("periode");
+            
             $kode_decrypt = decrypt_url($id);
             $head = new $this->m_global;
             $this->_module->startTransaction();
@@ -250,6 +292,10 @@ class Invoice extends MY_Controller {
                     throw new \Exception('Jurnal Tidak Ada', 500);
                 }
             } else if ($status === 'done') {
+                $this->form_validation->set_rules($val);
+                if ($this->form_validation->run() == FALSE) {
+                    throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+                }
                 $now = date("Y-m-d H:i:s");
                 if ($kodeJurnal === "") {
                     throw new \Exception('Jurnal Tidak Ada', 500);
@@ -274,7 +320,7 @@ class Invoice extends MY_Controller {
                                     "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id"])
                                 ->setOrder(["invoice_id"])->getData();
 
-                $jurnalData = ["kode" => $jurnal, "periode" => date('y', strtotime($now)) . '/' . date('m', strtotime($now)),
+                $jurnalData = ["kode" => $jurnal, "periode" => $periode,
                     "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => date("Y-m-d H:i:s"), "tipe" => ($dataItems[0]->jurnal ?? ""),
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
                 $jurnalDB->setTables("jurnal_entries")->save($jurnalData);
