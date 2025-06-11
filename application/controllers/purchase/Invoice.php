@@ -165,7 +165,7 @@ class Invoice extends MY_Controller {
             ],
             [
                 'field' => 'periode',
-                'label' => 'Periode',
+                'label' => 'Periode ACC',
                 'rules' => ['required'],
                 'errors' => [
                     'required' => '{field} Harus dipilih'
@@ -259,7 +259,7 @@ class Invoice extends MY_Controller {
         $val = [
             [
                 'field' => 'periode',
-                'label' => 'Periode',
+                'label' => 'Periode ACC',
                 'rules' => ['required'],
                 'errors' => [
                     'required' => '{field} Belum diupdate'
