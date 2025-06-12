@@ -35,23 +35,29 @@ class Jurnalmemorial extends MY_Controller {
 
     protected function getData() {
 //        try {
-        $periodes = $this->input->post("periode");
+        $periode = $this->input->post("periode");
         $jurnal = $this->input->post("jurnal");
-
-        $periode = explode(" - ", $periodes);
-        if (count($periode) < 2) {
-            throw new \Exception("Tentukan dahulu periodenya", 500);
+        $filter = $this->input->post("filter");
+        $tanggal_postings = $this->input->post("tanggal_posting");
+        if ($filter === "1") {
+            $tanggal_posting = explode(" - ", $tanggal_postings);
+            if (count($tanggal_posting) < 2) {
+                throw new \Exception("Tentukan dahulu periodenya", 500);
+            }
+            $tanggalAwal = date("Y-m-d H:i:s", strtotime($tanggal_posting[0] . " 00:00:00"));
+            $tanggalAkhir = date("Y-m-d H:i:s", strtotime($tanggal_posting[1] . " 23:59:59"));
+            $where = ["tanggal_posting >=" => $tanggalAwal, "tanggal_posting <=" => $tanggalAkhir];
+        } else {
+            $where = ["je.periode" => $periode];
         }
-        $tanggalAwal = date("Y-m-d H:i:s", strtotime($periode[0] . " 00:00:00"));
-        $tanggalAkhir = date("Y-m-d H:i:s", strtotime($periode[1] . " 23:59:59"));
 
         $this->data->setTables("jurnal_entries je")
                 ->setJoins("jurnal_entries_items jei", "je.kode = jei.kode")
                 ->setJoins("mst_jurnal mj", "mj.kode = je.tipe", "left")
                 ->setJoins("coa", "jei.kode_coa = coa.kode_coa", "left")
                 ->setJoins("partner", "partner.id = jei.partner", "left")
-                ->setOrder(["jei.posisi"=>"desc","jei.kode_coa"=>"asc"])
-                ->setWheres(["tanggal_posting >=" => $tanggalAwal, "tanggal_posting <=" => $tanggalAkhir, "je.status" => "posted","je.tipe"=>$jurnal])
+                ->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
+                ->setWheres(array_merge(["je.status" => "posted", "je.tipe" => $jurnal], $where))
                 ->setSelects(["mj.nama as nama_jurnal", "coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
                     "origin,tanggal_posting"]);
 //        } catch (Exception $ex) {
@@ -59,11 +65,21 @@ class Jurnalmemorial extends MY_Controller {
 //        }
     }
 
+    public function check_berdasarkan($str, $periode): bool {
+        if (empty($str) && empty($this->input->post($periode))) {
+            $this->form_validation->set_message('check_berdasarkan', 'Pilih Salah satu Tanggal Posting / Periode');
+            return false;
+        }
+        return true;
+    }
+
     public function index() {
         $data['id_dept'] = 'ACCJM';
         $data['date'] = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d")))) . ' - ' . date('Y-m-d');
         $model = new $this->m_global;
+        $model2 = clone $model;
         $data['jurnal'] = $model->setTables("mst_jurnal")->setOrder(["nama" => "asc"])->getData();
+        $data["periode"] = $model2->setTables("acc_periode")->setOrder(["tahun_fiskal" => "desc", "periode" => "asc"])->getData();
         $this->load->view('accounting/v_rpt_jurnal_memorial', $data);
     }
 
@@ -80,10 +96,7 @@ class Jurnalmemorial extends MY_Controller {
             [
                 'field' => 'periode',
                 'label' => 'periode',
-                'rules' => ['required'],
-                'errors' => [
-                    'required' => '{field} Harus dipilih',
-                ]
+                'rules' => ['callback_check_berdasarkan[tanggal_posting]'],
             ]
         ];
         try {
@@ -122,10 +135,7 @@ class Jurnalmemorial extends MY_Controller {
                 [
                     'field' => 'periode',
                     'label' => 'periode',
-                    'rules' => ['required'],
-                    'errors' => [
-                        'required' => '{field} Harus dipilih',
-                    ]
+                    'rules' => ['callback_check_berdasarkan[tanggal_posting]'],
                 ]
             ];
 
@@ -136,11 +146,13 @@ class Jurnalmemorial extends MY_Controller {
 
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-            
+
             $detail = $this->input->post("detail") ?? "0";
             $jurnal_nm = $this->input->post("jurnal_nm");
             $periodes = $this->input->post("periode");
-            
+            $tanggal = $this->input->post("tanggal_posting");
+            $filter = $this->input->post("filter");
+
             $this->getData();
             if ($detail === "0") {
                 $this->data->setGroups(["jei.kode_coa", "jei.posisi"])->setSelects(["sum(jei.nominal) as nominal"]);
@@ -150,13 +162,17 @@ class Jurnalmemorial extends MY_Controller {
 //                $spreadsheet->getActiveSheet()->removeColumn('E');
 //                $spreadsheet->getActiveSheet()->removeColumn('F');
 //                $spreadsheet->getActiveSheet()->removeColumn('G');
-                
             }
             $data = $this->data->getData();
             $sheet->setCellValue("A1", "Jurnal Memorial {$jurnal_nm}");
-            $sheet->setCellValue("A2", "Periode {$periodes}");
+            if ($filter === "1") {
+                $sheet->setCellValue("A2", "Tanggal Posting {$tanggal}");
+            }
+            else {
+                $sheet->setCellValue("A2", "Periode {$periodes}");
+            }
             $row = 4;
-            
+
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Tanggal Posting');
             $sheet->setCellValue("C{$row}", 'No Bukti');
@@ -166,8 +182,8 @@ class Jurnalmemorial extends MY_Controller {
             $sheet->setCellValue("G{$row}", 'Keterangan');
             $sheet->setCellValue("H{$row}", 'Reff Note');
             $sheet->setCellValue("I{$row}", 'Partner');
-            $sheet->setCellValue("J{$row}", 'Debet');
-            $sheet->setCellValue("K{$row}", 'Kredit');
+            $sheet->setCellValue("J{$row}", 'Debit');
+            $sheet->setCellValue("K{$row}", 'Credit');
 
             $no = 0;
             $kredits = 0;
@@ -184,34 +200,36 @@ class Jurnalmemorial extends MY_Controller {
                     $kredit = $value->nominal;
                     $kredits += $kredit;
                 }
-                
-            $sheet->setCellValue("A{$row}", $no);
-            $sheet->setCellValue("B{$row}", $value->tanggal_posting);
-            $sheet->setCellValue("C{$row}", $value->kode);
-            $sheet->setCellValue("D{$row}", $value->origin);
-            $sheet->setCellValue("E{$row}", $value->kode_coa);
-            $sheet->setCellValue("F{$row}", $value->nama_coa);
-            $sheet->setCellValue("G{$row}", $value->nama);
-            $sheet->setCellValue("H{$row}", $value->reff_note);
-            $sheet->setCellValue("I{$row}", $value->nama_partner);
-            $sheet->setCellValue("J{$row}", $debet);
-            $sheet->setCellValue("K{$row}", $kredit);
+
+                $sheet->setCellValue("A{$row}", $no);
+                $sheet->setCellValue("B{$row}", $value->tanggal_posting);
+                $sheet->setCellValue("C{$row}", $value->kode);
+                $sheet->setCellValue("D{$row}", $value->origin);
+                $sheet->setCellValue("E{$row}", $value->kode_coa);
+                $sheet->setCellValue("F{$row}", $value->nama_coa);
+                $sheet->setCellValue("G{$row}", $value->nama);
+                $sheet->setCellValue("H{$row}", $value->reff_note);
+                $sheet->setCellValue("I{$row}", $value->nama_partner);
+                $sheet->setCellValue("J{$row}", $debet);
+                $sheet->setCellValue("K{$row}", $kredit);
             }
-            
-            if($no > 0) {
+
+            if ($no > 0) {
                 $row += 2;
                 $sheet->setCellValue("J{$row}", $debets);
                 $sheet->setCellValue("K{$row}", $kredits);
             }
 //            $periodes = $this->input->post("periode");
-            
+
             if ($detail === "0") {
-                  $reloadedSheet = $spreadsheet->getActiveSheet();
-                  $reloadedSheet->removeColumnByIndex(2, 3);
-                  $reloadedSheet->removeColumnByIndex(4, 3);
+                $reloadedSheet = $spreadsheet->getActiveSheet();
+                $reloadedSheet->removeColumnByIndex(2, 3);
+                $reloadedSheet->removeColumnByIndex(4, 3);
             }
+            $nm = $periodes ?? $tanggal;
+            $nm = str_replace("/", "_", $nm);
             $writer = new Xlsx($spreadsheet);
-            $filename = "jurnal_memorial_{$periodes}";
+            $filename = "jurnal_memorial_{$nm}";
             $url = "dist/storages/report/jurnal_memorial";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
@@ -222,7 +240,6 @@ class Jurnalmemorial extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
                         'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
-            
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
