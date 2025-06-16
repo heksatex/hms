@@ -45,9 +45,9 @@
                 background-color: #fff;
                 border: 1px solid #ddd;
             }
-            #tabelMemorial.detail tr > *:nth-child(2),#tabelMemorial.detail tr > *:nth-child(3),
-            #tabelMemorial.detail tr > *:nth-child(4),#tabelMemorial.detail tr > *:nth-child(7),
-            #tabelMemorial.detail tr > *:nth-child(8),#tabelMemorial.detail tr > *:nth-child(9){
+            #tabelMemorial.detail tr > *:nth-child(3),#tabelMemorial.detail tr > *:nth-child(4),
+            #tabelMemorial.detail tr > *:nth-child(5),#tabelMemorial.detail tr > *:nth-child(8),
+            #tabelMemorial.detail tr > *:nth-child(9),#tabelMemorial.detail tr > *:nth-child(10){
                 display: none;
             }
 
@@ -158,6 +158,7 @@
                                         <table id="tabelMemorial" class="table table-condesed table-hover detail" border="1">
                                             <tr>
                                                 <th class="style bb ws no" >No</th>
+                                                <th class="style bb ws" >Periode</th>
                                                 <th class="style bb ws" >Tanggal Posting</th>
                                                 <th class="style bb ws" >No Bukti</th>
                                                 <th class="style bb ws" >Origin</th>

@@ -174,16 +174,17 @@ class Jurnalmemorial extends MY_Controller {
             $row = 4;
 
             $sheet->setCellValue("A{$row}", 'No');
-            $sheet->setCellValue("B{$row}", 'Tanggal Posting');
-            $sheet->setCellValue("C{$row}", 'No Bukti');
-            $sheet->setCellValue("D{$row}", 'Origin');
-            $sheet->setCellValue("E{$row}", 'Kode ACC');
-            $sheet->setCellValue("F{$row}", 'Nama ACC');
-            $sheet->setCellValue("G{$row}", 'Keterangan');
-            $sheet->setCellValue("H{$row}", 'Reff Note');
-            $sheet->setCellValue("I{$row}", 'Partner');
-            $sheet->setCellValue("J{$row}", 'Debit');
-            $sheet->setCellValue("K{$row}", 'Credit');
+            $sheet->setCellValue("B{$row}", 'Periode');
+            $sheet->setCellValue("C{$row}", 'Tanggal Posting');
+            $sheet->setCellValue("D{$row}", 'No Bukti');
+            $sheet->setCellValue("E{$row}", 'Origin');
+            $sheet->setCellValue("F{$row}", 'Kode ACC');
+            $sheet->setCellValue("G{$row}", 'Nama ACC');
+            $sheet->setCellValue("H{$row}", 'Keterangan');
+            $sheet->setCellValue("I{$row}", 'Reff Note');
+            $sheet->setCellValue("J{$row}", 'Partner');
+            $sheet->setCellValue("K{$row}", 'Debit');
+            $sheet->setCellValue("L{$row}", 'Credit');
 
             $no = 0;
             $kredits = 0;
@@ -202,28 +203,29 @@ class Jurnalmemorial extends MY_Controller {
                 }
 
                 $sheet->setCellValue("A{$row}", $no);
-                $sheet->setCellValue("B{$row}", $value->tanggal_posting);
-                $sheet->setCellValue("C{$row}", $value->kode);
-                $sheet->setCellValue("D{$row}", $value->origin);
-                $sheet->setCellValue("E{$row}", $value->kode_coa);
-                $sheet->setCellValue("F{$row}", $value->nama_coa);
-                $sheet->setCellValue("G{$row}", $value->nama);
-                $sheet->setCellValue("H{$row}", $value->reff_note);
-                $sheet->setCellValue("I{$row}", $value->nama_partner);
-                $sheet->setCellValue("J{$row}", $debet);
-                $sheet->setCellValue("K{$row}", $kredit);
+                $sheet->setCellValue("B{$row}", $value->periode);
+                $sheet->setCellValue("C{$row}", $value->tanggal_posting);
+                $sheet->setCellValue("D{$row}", $value->kode);
+                $sheet->setCellValue("E{$row}", $value->origin);
+                $sheet->setCellValue("F{$row}", $value->kode_coa);
+                $sheet->setCellValue("G{$row}", $value->nama_coa);
+                $sheet->setCellValue("H{$row}", $value->nama);
+                $sheet->setCellValue("I{$row}", $value->reff_note);
+                $sheet->setCellValue("J{$row}", $value->nama_partner);
+                $sheet->setCellValue("K{$row}", $debet);
+                $sheet->setCellValue("L{$row}", $kredit);
             }
 
             if ($no > 0) {
                 $row += 2;
-                $sheet->setCellValue("J{$row}", $debets);
-                $sheet->setCellValue("K{$row}", $kredits);
+                $sheet->setCellValue("K{$row}", $debets);
+                $sheet->setCellValue("L{$row}", $kredits);
             }
 //            $periodes = $this->input->post("periode");
 
             if ($detail === "0") {
                 $reloadedSheet = $spreadsheet->getActiveSheet();
-                $reloadedSheet->removeColumnByIndex(2, 3);
+                $reloadedSheet->removeColumnByIndex(3, 3);
                 $reloadedSheet->removeColumnByIndex(4, 3);
             }
             $nm = $periodes ?? $tanggal;
