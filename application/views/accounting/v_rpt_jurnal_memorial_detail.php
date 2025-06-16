@@ -16,6 +16,7 @@ foreach ($data as $key => $value) {
     ?>
     <tr>
         <td><?= $no ?></td>
+        <td><?= $value->periode ?></td>
         <td><?= $value->tanggal_posting ?></td>
         <td><?= $value->kode ?></td>
         <td><?= $value->origin ?></td>
@@ -33,6 +34,7 @@ if ($no > 0) {
     ?>
     <tr>
         <td></td>
+        <td></td>
         <td></td> 
         <td></td> 
         <td></td>
@@ -45,6 +47,7 @@ if ($no > 0) {
         <td></td> 
     </tr>
     <tr>
+        <td></td>
         <td></td> 
         <td></td> 
         <td></td>
