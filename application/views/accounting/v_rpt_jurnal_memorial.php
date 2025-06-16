@@ -45,9 +45,9 @@
                 background-color: #fff;
                 border: 1px solid #ddd;
             }
-            #tabelMemorial.detail tr > *:nth-child(2),#tabelMemorial.detail tr > *:nth-child(3),
-            #tabelMemorial.detail tr > *:nth-child(4),#tabelMemorial.detail tr > *:nth-child(7),
-            #tabelMemorial.detail tr > *:nth-child(8),#tabelMemorial.detail tr > *:nth-child(9){
+            #tabelMemorial.detail tr > *:nth-child(3),#tabelMemorial.detail tr > *:nth-child(4),
+            #tabelMemorial.detail tr > *:nth-child(5),#tabelMemorial.detail tr > *:nth-child(8),
+            #tabelMemorial.detail tr > *:nth-child(9),#tabelMemorial.detail tr > *:nth-child(10){
                 display: none;
             }
 
@@ -73,13 +73,47 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-jm" id="form-jm" action="<?= base_url('accounting/jurnalmemorial/export') ?>">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
-                                    <div class="form-group">
+                                    <div class="form-group tanggal_posting" style="display: none;">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                                <label class="form-label required">Tanggal Posting</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <input type="text" name="tanggal_posting" id="tanggal_posting" value="<?= $date ?>" class="form-control"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group periode" >
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="form-label required">Periode</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
-                                                <input type="text" name="periode" id="periode" value="<?= $date ?>" class="form-control" required/>
+                                                <select class="form-control select2" name="periode" id="periode" style="width: 100%">
+                                                    <?php
+                                                    $periodeNow = date("Y/m");
+                                                    foreach ($periode as $k => $val) {
+                                                        ?>
+                                                        <option value="<?= $val->periode ?>"  <?= ($periodeNow === $val->periode) ? "selected" : "" ?> ><?= $val->periode ?></option>
+                                                        <?php
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" >
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+
+                                            </div>
+                                            <div class="col-xs-8">
+                                                <label class="btn btn-default">
+                                                    <input type="radio" value="0" class="filter" name="filter" checked/> Dengan Periode
+                                                </label> 
+                                                <label class="btn btn-default">
+                                                    <input type="radio" class="filter" name="filter" value="1" /> Dengan Tanggal Posting
+                                                </label> 
                                             </div>
                                         </div>
                                     </div>
@@ -124,6 +158,7 @@
                                         <table id="tabelMemorial" class="table table-condesed table-hover detail" border="1">
                                             <tr>
                                                 <th class="style bb ws no" >No</th>
+                                                <th class="style bb ws" >Periode</th>
                                                 <th class="style bb ws" >Tanggal Posting</th>
                                                 <th class="style bb ws" >No Bukti</th>
                                                 <th class="style bb ws" >Origin</th>
@@ -151,8 +186,18 @@
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script>
             $(function () {
+
+                $(".filter").on("click", function () {
+                    if ($(this).val() === "1") {
+                        $(".periode").hide();
+                        $(".tanggal_posting").show();
+                        return;
+                    }
+                    $(".periode").show();
+                    $(".tanggal_posting").hide();
+                });
                 var cek = 0;
-                $('input[name="periode"]').daterangepicker({
+                $('input[name="tanggal_posting"]').daterangepicker({
                     endDate: moment().endOf('month'),
                     startDate: moment().startOf('month'),
                     locale: {
@@ -183,9 +228,11 @@
                         type: "POST",
                         data: {
                             periode: $("#periode").val(),
+                            tanggal_posting: $("#tanggal_posting").val(),
                             jurnal: $("#jurnal").val(),
                             detail: $("#detail").is(":checked") ? 1 : 0,
-                            jurnal_nm: $("#jurnal :selected").text()
+                            jurnal_nm: $("#jurnal :selected").text(),
+                            filter: $("input[name='filter']:checked").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {
