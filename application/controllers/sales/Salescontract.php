@@ -1183,7 +1183,7 @@ class Salescontract extends MY_Controller
                         if($cods->status == 'generated'){
                             $origin_go    = $sales_order.'|'.$cods->kode_co.'|'.$cods->row_order.'|'.$ow;
                             $cek_go_aktif = $this->m_sales->cek_color_order_go_by_ow($origin_go)->num_rows();
-                            if($cek_go_aktif > 1){
+                            if($cek_go_aktif > 0){
                               throw new \Exception('Sales Contract '.$ow.' ini sudah terdapat GO, Harap Koordinasi dengan PPIC DF !', 200);
                             }
                         }

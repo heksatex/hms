@@ -579,6 +579,7 @@ class M_sales extends CI_Model
 	public function cek_color_order_go_by_ow($origin)
 	{
 		$this->db->where('origin',$origin);
+		$this->db->where('dept_id','GRG');
 		$this->db->where_in('status',array('done'));
 		$this->db->select('*');
 		$this->db->from('pengiriman_barang');
