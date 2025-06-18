@@ -2163,7 +2163,7 @@ class Penerimaanbarang extends MY_Controller {
 
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 11, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 40, " ", STR_PAD_BOTH) . str_pad("LOT", 25, " ", STR_PAD_RIGHT)
+            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 11, " ", STR_PAD_RIGHT) . str_pad("Nama Produk", 40, " ", STR_PAD_BOTH) . str_pad("LOT", 25, " ", STR_PAD_RIGHT)
                     . str_pad("Qty", 12, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 41));
             $printer->setUnderline(Printer::UNDERLINE_NONE);
 
@@ -2191,13 +2191,13 @@ class Penerimaanbarang extends MY_Controller {
                     $kodeProduk[$key] = $value;
                 }
 
-                $namaProduk = str_split($item->nama_produk, 40);
+                $namaProduk = str_split(" ".$item->nama_produk, 40);
                 foreach ($namaProduk as $key => $value) {
                     $value = trim($value);
                     $namaProduk[$key] = $value;
                 }
 
-                $lot = str_split($item->lot, 25);
+                $lot = str_split(" {$item->lot}", 25);
                 foreach ($lot as $key => $value) {
                     $value = trim($value);
                     $lot[$key] = $value;
@@ -2208,19 +2208,19 @@ class Penerimaanbarang extends MY_Controller {
                 } else {
                     $item->qty = $item->qty / $item->nilai;
                 }
-                $qty = str_split(number_format($item->qty, 2), 12);
+                $qty = str_split(" ".number_format($item->qty, 2), 12);
                 foreach ($qty as $key => $value) {
                     $value = trim($value);
                     $qty[$key] = $value;
                 }
 
-                $uom = str_split((($item->nilai !== null || $item->nilai !== "") ? $item->uom_beli : $item->uom), 5);
+                $uom = str_split(" ".(($item->nilai !== null || $item->nilai !== "") ? $item->uom_beli : $item->uom), 5);
                 foreach ($uom as $key => $value) {
                     $value = trim($value);
                     $uom[$key] = $value;
                 }
 
-                $reff = str_split($item->reff_note, 41);
+                $reff = str_split(" ".$item->reff_note, 41);
                 foreach ($reff as $key => $value) {
                     $value = trim($value);
                     $reff[$key] = $value;
