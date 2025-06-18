@@ -1194,7 +1194,7 @@ class Penerimaanbarang extends MY_Controller {
                         foreach ($dataPO as $key => $value) {
                             $nilai_dpp = 0;
                             if ($value->konversi_aktif === "1") {
-                                $qty = ($value->pembilang/ $value->penyebut) * $value->qty_dtg ;
+                                $qty = ($value->pembilang / $value->penyebut) * $value->qty_dtg;
                             } else {
                                 $qty = $value->qty_dtg / $value->nilai;
                             }
@@ -1816,7 +1816,7 @@ class Penerimaanbarang extends MY_Controller {
 
                     if ($kebutuhan_qty > 0) { //jika kebutuhan_qty > 0
                         $ceK_quant = $this->_module->get_cek_stok_quant_by_prod(addslashes($kode_produk), $lokasi['lokasi_dari'], $origin, $deptid)->result_array();
-                        log_message('error', json_encode($ceK_quant));
+//                        log_message('error', json_encode($ceK_quant));
 
                         foreach ($ceK_quant as $stock) {
                             $kosong = false;
@@ -2112,52 +2112,59 @@ class Penerimaanbarang extends MY_Controller {
             }
             //            $nama_dept = strtoupper($dept['nama']);
             //            $printer->setTextSize(2, 2);
+            $buff = $printer->getPrintConnector();
+
             $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $buff->write("\x1bE" . chr(1));
             $printer->text("BUKTI TERIMA BARANG (BTB)\n");
+            $buff->write("\x1bF" . chr(0));
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             //            $printer->feed();
+            $buff->write("\x1bX" . chr(15));
             $printer->text(str_pad("Kode", 12));
-            $printer->text(str_pad(":{$kode}", 25));
-            $printer->text(str_pad("No.SJ", 10));
-            $printer->text(str_pad(":{$head->no_sj}", 25));
+            $printer->text(str_pad(":{$kode}", 50));
+            $printer->text(str_pad("No.SJ", 12));
+            $printer->text(str_pad(":{$head->no_sj}", 50));
             $printer->feed();
             $printer->text(str_pad("Tgl.Terima", 12));
-            $printer->text(str_pad(":{$head->tanggal_transaksi}", 25));
-            $printer->text(str_pad("Tgl.SJ", 10));
-            $printer->text(str_pad(":{$head->tanggal_sj}", 25));
+            $printer->text(str_pad(":{$head->tanggal_transaksi}", 50));
+            $printer->text(str_pad("Tgl.SJ", 12));
+            $printer->text(str_pad(":{$head->tanggal_sj}", 50));
             $printer->feed();
             $printer->text(str_pad("Origin", 12));
-            $printer->text(str_pad(":{$head->origin}", 25));
-            $printer->text(str_pad("Supplier", 10));
-            $printer->text(str_pad(":$head->nama_partner", 25));
+            $printer->text(str_pad(":{$head->origin}", 50));
+            $printer->text(str_pad("Supplier", 12));
+            $printer->text(str_pad(":$head->nama_partner", 50));
             $printer->feed();
             $printer->text(str_pad("Tgl.Dibuat", 12));
-            $printer->text(str_pad(":{$head->tanggal}", 25));
-            $printer->text(str_pad("", 10));
-            $splitAlamat = str_split($head->alamat, 30);
+            $printer->text(str_pad(":{$head->tanggal}", 50));
+            $printer->text(str_pad("", 12));
+            $splitAlamat = str_split($head->alamat, 50);
 //            $splitAlamat = str_split("TES PRNT UNTUK ALAMT DI BANDUNG TES BANDUNG", 30);
             foreach ($splitAlamat as $key => $value) {
-                $printer->text(str_pad($value, 30));
-                $printer->feed();
-                $printer->text(str_pad("", 47));
+                $printer->text(str_pad($value, 50));
+                if (count($splitAlamat) > ($key + 1)) {
+                    $printer->feed();
+                    $printer->text(str_pad("", 62));
+                }
             }
             $printer->feed();
 
             $printer->text(str_pad("", 12));
-            $printer->text(str_pad("", 25));
-            $printer->text(str_pad("Reff Note :", 10));
-            $splitNotes = str_split($head->reff_note, 30);
+            $printer->text(str_pad("", 50));
+            $printer->text(str_pad("Reff Note :", 12));
+            $splitNotes = str_split($head->reff_note, 50);
 
             foreach ($splitNotes as $key => $value) {
-                $printer->text(str_pad($value, 30));
+                $printer->text(str_pad($value, 50));
                 $printer->feed();
-                $printer->text(str_pad("", 47));
+                $printer->text(str_pad("", 50));
             }
 
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 11, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 18, " ", STR_PAD_BOTH) . str_pad("LOT", 20, " ", STR_PAD_BOTH)
-                    . str_pad("Qty", 8, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 15));
+            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 11, " ", STR_PAD_BOTH) . str_pad("Nama Produk", 40, " ", STR_PAD_BOTH) . str_pad("LOT", 25, " ", STR_PAD_RIGHT)
+                    . str_pad("Qty", 12, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 41));
             $printer->setUnderline(Printer::UNDERLINE_NONE);
 
             $printer->feed();
@@ -2184,13 +2191,13 @@ class Penerimaanbarang extends MY_Controller {
                     $kodeProduk[$key] = $value;
                 }
 
-                $namaProduk = str_split($item->nama_produk, 18);
+                $namaProduk = str_split($item->nama_produk, 40);
                 foreach ($namaProduk as $key => $value) {
                     $value = trim($value);
                     $namaProduk[$key] = $value;
                 }
 
-                $lot = str_split($item->lot, 20);
+                $lot = str_split($item->lot, 25);
                 foreach ($lot as $key => $value) {
                     $value = trim($value);
                     $lot[$key] = $value;
@@ -2201,7 +2208,7 @@ class Penerimaanbarang extends MY_Controller {
                 } else {
                     $item->qty = $item->qty / $item->nilai;
                 }
-                $qty = str_split(number_format($item->qty, 2), 8);
+                $qty = str_split(number_format($item->qty, 2), 12);
                 foreach ($qty as $key => $value) {
                     $value = trim($value);
                     $qty[$key] = $value;
@@ -2213,7 +2220,7 @@ class Penerimaanbarang extends MY_Controller {
                     $uom[$key] = $value;
                 }
 
-                $reff = str_split($item->reff_note, 15);
+                $reff = str_split($item->reff_note, 41);
                 foreach ($reff as $key => $value) {
                     $value = trim($value);
                     $reff[$key] = $value;
@@ -2239,12 +2246,12 @@ class Penerimaanbarang extends MY_Controller {
                 for ($i = 0; $i < $counter; $i++) {
                     $line = (isset($noo[$i])) ? str_pad($noo[$i], 3) : str_pad("", 3);
 
-                    $line .= (isset($kodeProduk[$i])) ? str_pad($kodeProduk[$i], 11, " ", STR_PAD_BOTH) : str_pad("", 11, " ", STR_PAD_BOTH);
-                    $line .= (isset($namaProduk[$i])) ? str_pad($namaProduk[$i], 18, " ", STR_PAD_BOTH) : str_pad("", 18, " ", STR_PAD_BOTH);
-                    $line .= (isset($lot[$i])) ? str_pad($lot[$i], 20, " ", STR_PAD_BOTH) : str_pad("", 20, " ", STR_PAD_BOTH);
-                    $line .= (isset($qty[$i])) ? str_pad($qty[$i], 8, " ", STR_PAD_RIGHT) : str_pad("", 8, " ", STR_PAD_RIGHT);
+                    $line .= (isset($kodeProduk[$i])) ? str_pad($kodeProduk[$i], 11, " ", STR_PAD_RIGHT) : str_pad("", 11, " ", STR_PAD_RIGHT);
+                    $line .= (isset($namaProduk[$i])) ? str_pad($namaProduk[$i], 40, " ", STR_PAD_RIGHT) : str_pad("", 40, " ", STR_PAD_RIGHT);
+                    $line .= (isset($lot[$i])) ? str_pad($lot[$i], 25, " ", STR_PAD_RIGHT) : str_pad("", 25, " ", STR_PAD_RIGHT);
+                    $line .= (isset($qty[$i])) ? str_pad($qty[$i], 12, " ", STR_PAD_RIGHT) : str_pad("", 12, " ", STR_PAD_RIGHT);
                     $line .= (isset($uom[$i])) ? str_pad($uom[$i], 5) : str_pad("", 5);
-                    $line .= (isset($reff[$i])) ? str_pad($reff[$i], 15, " ", STR_PAD_BOTH) : str_pad("", 15, " ", STR_PAD_BOTH);
+                    $line .= (isset($reff[$i])) ? str_pad($reff[$i], 41, " ", STR_PAD_RIGHT) : str_pad("", 41, " ", STR_PAD_RIGHT);
 
                     $printer->text($line . "\n");
                 }
@@ -2260,20 +2267,20 @@ class Penerimaanbarang extends MY_Controller {
             $printer->feed();
 
             // kode pp
-            $printer->text(str_pad("kode PP : ", 12) . str_pad("", 32) . str_pad("Tgl.Cetak :" . date('Y-m-d H:i:s'), 35, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("kode PP : ", 70) . str_pad("Tgl.Cetak :" . date('Y-m-d H:i:s'), 50, " ", STR_PAD_RIGHT));
             // $printer->text("Tgl.Cetak :" . date("Y-m-d H:i:s"));
             $printer->feed();
-            $splitKodePP = str_split(($kodePP->kode_pp ?? ""), 30);
+            $splitKodePP = str_split(($kodePP->kode_pp ?? ""), 70);
             foreach ($splitKodePP as $key => $value) {
-                $printer->text(str_pad($value, 30));
+                $printer->text(str_pad($value, 70));
                 $printer->feed();
-                $printer->text(str_pad("", 30));
+//                $printer->text(str_pad("", 70));
             }
-            $splitRcv = str_split($users["nama"], 14);
+            $splitRcv = str_split($users["nama"], 30);
             $printer->setJustification(Printer::JUSTIFY_RIGHT);
             $printer->feed();
             $printer->feed();
-            $printer->text(str_pad("Pembelian", 12) . " " . str_pad("Gudang", 12) . " " . str_pad("Receiveing", 14));
+            $printer->text(str_pad("Pembelian", 20) . " " . str_pad("Gudang", 20) . " " . str_pad("Receiveing", 30));
             $printer->feed();
             $printer->feed();
             $printer->feed();
@@ -2281,10 +2288,10 @@ class Penerimaanbarang extends MY_Controller {
             $linesTtd = "";
             foreach ($splitRcv as $key => $value) {
                 if ($key === 0) {
-                    $linesTtd .= str_pad("(__________)", 12) . str_pad("(__________) ", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
+                    $linesTtd .= str_pad("(__________________)", 20) . str_pad("(__________________) ", 20) . " " . str_pad($value, 30, " ", STR_PAD_RIGHT);
                 } else {
                     $linesTtd .= "\n";
-                    $linesTtd .= str_pad("", 12) . str_pad("", 12) . " " . str_pad($value, 14, " ", STR_PAD_RIGHT);
+                    $linesTtd .= str_pad("", 20) . str_pad("", 20) . " " . str_pad($value, 30, " ", STR_PAD_RIGHT);
                 }
             }
             $printer->text($linesTtd . "\n");
