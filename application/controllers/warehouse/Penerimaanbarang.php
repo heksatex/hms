@@ -2139,13 +2139,13 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad("Tgl.Dibuat", 12));
             $printer->text(str_pad(":{$head->tanggal}", 50));
             $printer->text(str_pad("", 12));
-            $splitAlamat = str_split($head->alamat, 50);
+            $splitAlamat = str_split(trim(preg_replace('/\s+/', ' ', $head->alamat)), 50);
 //            $splitAlamat = str_split("TES PRNT UNTUK ALAMT DI BANDUNG TES BANDUNG", 30);
             foreach ($splitAlamat as $key => $value) {
                 $printer->text(str_pad($value, 50));
                 if (count($splitAlamat) > ($key + 1)) {
                     $printer->feed();
-                    $printer->text(str_pad("", 62));
+                    $printer->text(str_pad("", 74));
                 }
             }
             $printer->feed();
@@ -2153,12 +2153,14 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad("", 12));
             $printer->text(str_pad("", 50));
             $printer->text(str_pad("Reff Note :", 12));
-            $splitNotes = str_split($head->reff_note, 50);
+            $splitNotes = str_split(trim(preg_replace('/\s+/', ' ', $head->reff_note)), 50);
 
             foreach ($splitNotes as $key => $value) {
                 $printer->text(str_pad($value, 50));
-                $printer->feed();
-                $printer->text(str_pad("", 50));
+                if (count($splitNotes) > ($key + 1)) {
+                    $printer->feed();
+                    $printer->text(str_pad("", 74));
+                }
             }
 
             $printer->feed();
@@ -2191,7 +2193,7 @@ class Penerimaanbarang extends MY_Controller {
                     $kodeProduk[$key] = $value;
                 }
 
-                $namaProduk = str_split(" ".$item->nama_produk, 40);
+                $namaProduk = str_split(" " . $item->nama_produk, 40);
                 foreach ($namaProduk as $key => $value) {
                     $value = trim($value);
                     $namaProduk[$key] = $value;
@@ -2208,19 +2210,19 @@ class Penerimaanbarang extends MY_Controller {
                 } else {
                     $item->qty = $item->qty / $item->nilai;
                 }
-                $qty = str_split(" ".number_format($item->qty, 2), 12);
+                $qty = str_split(" " . number_format($item->qty, 2), 12);
                 foreach ($qty as $key => $value) {
                     $value = trim($value);
                     $qty[$key] = $value;
                 }
 
-                $uom = str_split(" ".(($item->nilai !== null || $item->nilai !== "") ? $item->uom_beli : $item->uom), 5);
+                $uom = str_split(" " . (($item->nilai !== null || $item->nilai !== "") ? $item->uom_beli : $item->uom), 5);
                 foreach ($uom as $key => $value) {
                     $value = trim($value);
                     $uom[$key] = $value;
                 }
 
-                $reff = str_split(" ".$item->reff_note, 40);
+                $reff = str_split(" " . $item->reff_note, 40);
                 foreach ($reff as $key => $value) {
                     $value = trim($value);
                     $reff[$key] = $value;
