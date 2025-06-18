@@ -1816,7 +1816,7 @@ class Penerimaanbarang extends MY_Controller {
 
                     if ($kebutuhan_qty > 0) { //jika kebutuhan_qty > 0
                         $ceK_quant = $this->_module->get_cek_stok_quant_by_prod(addslashes($kode_produk), $lokasi['lokasi_dari'], $origin, $deptid)->result_array();
-                        log_message('error', json_encode($ceK_quant));
+//                        log_message('error', json_encode($ceK_quant));
 
                         foreach ($ceK_quant as $stock) {
                             $kosong = false;
