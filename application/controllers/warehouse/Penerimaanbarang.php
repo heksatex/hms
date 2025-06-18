@@ -2163,8 +2163,8 @@ class Penerimaanbarang extends MY_Controller {
 
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 11, " ", STR_PAD_RIGHT) . str_pad("Nama Produk", 40, " ", STR_PAD_BOTH) . str_pad("LOT", 25, " ", STR_PAD_RIGHT)
-                    . str_pad("Qty", 12, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 41));
+            $printer->text(str_pad("NO", 3) . str_pad("Kode Produk", 12, " ", STR_PAD_RIGHT) . str_pad("Nama Produk", 40, " ", STR_PAD_BOTH) . str_pad("LOT", 25, " ", STR_PAD_RIGHT)
+                    . str_pad("Qty", 12, " ", STR_PAD_RIGHT) . str_pad("Uom", 5) . str_pad("Reff Note", 40));
             $printer->setUnderline(Printer::UNDERLINE_NONE);
 
             $printer->feed();
@@ -2185,7 +2185,7 @@ class Penerimaanbarang extends MY_Controller {
                                 "konversi_aktif", "pembilang", "penyebut"])
                             ->setGroups(["smi.quant_id"])->getData();
             foreach ($items as $keyss => $item) {
-                $kodeProduk = str_split($item->kode_produk, 11);
+                $kodeProduk = str_split($item->kode_produk, 12);
                 foreach ($kodeProduk as $key => $value) {
                     $value = trim($value);
                     $kodeProduk[$key] = $value;
@@ -2220,7 +2220,7 @@ class Penerimaanbarang extends MY_Controller {
                     $uom[$key] = $value;
                 }
 
-                $reff = str_split(" ".$item->reff_note, 41);
+                $reff = str_split(" ".$item->reff_note, 40);
                 foreach ($reff as $key => $value) {
                     $value = trim($value);
                     $reff[$key] = $value;
@@ -2246,12 +2246,12 @@ class Penerimaanbarang extends MY_Controller {
                 for ($i = 0; $i < $counter; $i++) {
                     $line = (isset($noo[$i])) ? str_pad($noo[$i], 3) : str_pad("", 3);
 
-                    $line .= (isset($kodeProduk[$i])) ? str_pad($kodeProduk[$i], 11, " ", STR_PAD_RIGHT) : str_pad("", 11, " ", STR_PAD_RIGHT);
+                    $line .= (isset($kodeProduk[$i])) ? str_pad($kodeProduk[$i], 12, " ", STR_PAD_RIGHT) : str_pad("", 12, " ", STR_PAD_RIGHT);
                     $line .= (isset($namaProduk[$i])) ? str_pad($namaProduk[$i], 40, " ", STR_PAD_RIGHT) : str_pad("", 40, " ", STR_PAD_RIGHT);
                     $line .= (isset($lot[$i])) ? str_pad($lot[$i], 25, " ", STR_PAD_RIGHT) : str_pad("", 25, " ", STR_PAD_RIGHT);
                     $line .= (isset($qty[$i])) ? str_pad($qty[$i], 12, " ", STR_PAD_RIGHT) : str_pad("", 12, " ", STR_PAD_RIGHT);
                     $line .= (isset($uom[$i])) ? str_pad($uom[$i], 5) : str_pad("", 5);
-                    $line .= (isset($reff[$i])) ? str_pad($reff[$i], 41, " ", STR_PAD_RIGHT) : str_pad("", 41, " ", STR_PAD_RIGHT);
+                    $line .= (isset($reff[$i])) ? str_pad($reff[$i], 40, " ", STR_PAD_RIGHT) : str_pad("", 40, " ", STR_PAD_RIGHT);
 
                     $printer->text($line . "\n");
                 }
