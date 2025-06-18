@@ -1614,10 +1614,10 @@ class Colororder extends MY_Controller
 
                 $cek_details = $this->m_colorOrder->cek_status_color_order_items($kode_co,'')->num_rows();
 
-                $where_status       = "AND status NOT IN ('generated','ng')";
+                $where_status       = "AND status NOT IN ('generated','ng','f')";
                 $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
       
-                $where_status2       = "AND status NOT IN ('draft','generated','ng')";
+                $where_status2       = "AND status NOT IN ('draft','generated','ng','f')";
                 $cek_details_status2 = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status2)->num_rows();
       
                 if($cek_details == 0  ){

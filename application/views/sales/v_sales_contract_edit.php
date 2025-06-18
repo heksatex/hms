@@ -644,7 +644,7 @@
                                             label    : "Yes ",
                                             className: "btn-primary btn-sm",
                                             callback : function() {
-                                                  please_wait(function(){});
+                                                  // please_wait(function(){});
                                                   $.ajax({
                                                         type: 'POST',
                                                         dataType : 'json',
@@ -666,7 +666,7 @@
                                                   .done(function(response){
                                                     if(response.status == 'failed'){//jika session habis
                                                       $("#tab_2").load(location.href + " #tab_2");
-                                                      alert_modal_warning(data.message);
+                                                      alert_modal_warning(response.message);
                                                       unblockUI( function() {});
                                                     }else{
                                                       $("#tab_2").load(location.href + " #tab_2");
