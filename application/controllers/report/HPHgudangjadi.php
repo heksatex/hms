@@ -682,7 +682,7 @@ class HPHgudangjadi extends MY_Controller
                 $object->getActiveSheet()->SetCellValue('S'.$rowCount, $val['grade']);
                 $object->getActiveSheet()->SetCellValue('T'.$rowCount, $val['grade_produksi']);
                 $object->getActiveSheet()->SetCellValue('U'.$rowCount, $val['lbr_jadi']);
-                $object->getActiveSheet()->SetCellValue('P'.$rowCount, $val['uom_lbr_jadi']);
+                $object->getActiveSheet()->SetCellValue('v'.$rowCount, $val['uom_lbr_jadi']);
                 $object->getActiveSheet()->SetCellValue('W'.$rowCount, $val['jenis_kain']);
                 $object->getActiveSheet()->SetCellValue('X'.$rowCount, $val['gramasi']);
                 $object->getActiveSheet()->SetCellValue('Y'.$rowCount, $val['berat']);
