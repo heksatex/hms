@@ -573,8 +573,18 @@ class M_sales extends CI_Model
 		$this->db->from('color_order co');
 		$this->db->join('color_order_detail cod','co.kode_co = cod.kode_co','inner');
 		$query = $this->db->get();
-		return $query->num_rows();
-		
+		return $query;		
+	}
+
+	public function cek_color_order_go_by_ow($origin)
+	{
+		$this->db->where('origin',$origin);
+		$this->db->where('dept_id','GRG');
+		$this->db->where_in('status',array('done'));
+		$this->db->select('*');
+		$this->db->from('pengiriman_barang');
+		$query = $this->db->get();
+		return $query;
 	}
 
 	/* COLOR LINES << */

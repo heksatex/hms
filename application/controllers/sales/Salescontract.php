@@ -1135,7 +1135,7 @@ class Salescontract extends MY_Controller
             // start transaction
             $this->_module->startTransaction();
 
-            $this->_module->lock_tabel("sales_contract_items WRITE, sales_contract WRITE, sales_color_line WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group WRITE, mst_sales_group as mst WRITE, wa_template WRITE, wa_group as  a WRITE, wa_group_departemen as b WRITE, wa_send_message WRITE, color_order as co WRITE, color_order_detail as cod WRITE");
+            $this->_module->lock_tabel("sales_contract_items WRITE, sales_contract WRITE, sales_color_line WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group WRITE, mst_sales_group as mst WRITE, wa_template WRITE, wa_group as  a WRITE, wa_group_departemen as b WRITE, wa_send_message WRITE, color_order as co WRITE, color_order_detail as cod WRITE, pengiriman_barang WRITE");
 
             $items = $this->m_sales->cek_item_color_lines_by_kode($sales_order,$row_order)->row_array();
 
@@ -1169,11 +1169,28 @@ class Salescontract extends MY_Controller
 
               if($value == 'f' and $approve == 'no' and !empty($ow) ) {
                 // cek ow sudah terbentuk color order atau belum
-                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow);
+                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow)->num_rows();
                 if($cek_cod > 0){
                   throw new \Exception('Sales Contract OW ini sudah terbentuk Color Order !', 200);
                 }
               }
+
+              // cek GO jika approve = Yes
+              if($value == 'f' and $approve == 'yes' and !empty($ow) ) {
+                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow)->result();
+                if($cek_cod){
+                    foreach($cek_cod as $cods){
+                        if($cods->status == 'generated'){
+                            $origin_go    = $sales_order.'|'.$cods->kode_co.'|'.$cods->row_order.'|'.$ow;
+                            $cek_go_aktif = $this->m_sales->cek_color_order_go_by_ow($origin_go)->num_rows();
+                            if($cek_go_aktif > 0){
+                              throw new \Exception('Sales Contract '.$ow.' ini sudah terdapat GO, Harap Koordinasi dengan PPIC DF !', 200);
+                            }
+                        }
+                    }
+                }
+              }
+              
 
               $lebih_target = false;
               if($value == 't' or $value =='ng' ){
@@ -1190,7 +1207,7 @@ class Salescontract extends MY_Controller
 
                 // tambah qty yg akan di aktifkan
                 $tot_qty_color_line_new = $cq_color_lines + $qty;
-                if($tot_qty_color_line_new > $cq_contract_lines ){ 
+                if(round($tot_qty_color_line_new,2) > round($cq_contract_lines,2) ){ 
                   $lebih_target = true;  
                   $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }

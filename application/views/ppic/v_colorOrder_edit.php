@@ -162,7 +162,7 @@
                             <?php
                               $no = 1;
                               foreach ($detail as $row) {
-                                if($row->status == 'cancel') $color = 'red';
+                                if($row->status == 'cancel' || $row->status == 'f') $color = 'red';
                                 else if($row->status == 'ng') $color = 'blue';
                                 else $color = '';
                             ?>
@@ -186,11 +186,11 @@
                                 <td><?php echo $row->reff_notes?></td>
                                 <td><?php echo $row->reff_notes_mkt?></td>
                                 <td style="min-width:100px;"><?php 
-                                    if($row->status == 'ng' or $row->status == 'generated'){
+                                    if($row->status == 'ng' or $row->status == 'generated' or $row->status =='f'){
                                         ?>
                                     <select class="form-control input-sm status_cod" id="status_cod" name="status_cod" cod="<?php echo $row->kode_co;?>" row_order="<?php echo $row->row_order;?>">
                                           <?php 
-                                                $list_status_cod = array( array('kode' => 'generated', 'nama'=> 'Generated'), array( 'kode'=>'ng', 'nama'=>'Not Good'));
+                                                $list_status_cod = array( array('kode' => 'generated', 'nama'=> 'Generated'), array( 'kode'=>'ng', 'nama'=>'Not Good'), array('kode'=>'f', 'nama'=>'Tidak Aktif'));
                                                 foreach($list_status_cod as $stats){
                                                   if($row->status == $stats['kode']){
                                                     echo '<option value="'.$stats['kode'].'" selected>'.$stats['nama'].'</option>';
@@ -210,7 +210,7 @@
                                 <td  align="center" >
                             
                                 <?php
-                                      if($row->status == 'generated' OR $row->status == 'cancel' or $row->status == 'ng'){?>
+                                      if($row->status == 'generated' OR $row->status == 'cancel' or $row->status == 'ng' or $row->status == 'f'){?>
                                  <!--View Detail yang terbentuk-->
                                        <a href="javascript:void(0)" data-toggle="tooltip" title="Details" onclick="view_detail('<?php echo $colororder->kode_sc; ?>','<?php echo $row->kode_co; ?>','<?php echo $row->kode_produk; ?>','<?php echo htmlentities($row->nama_produk); ?>','<?php echo $row->row_order?>','<?php echo $row->ow?>','<?php echo $row->route_co?>')"><span class="glyphicon  glyphicon-share"></span></a>
 
