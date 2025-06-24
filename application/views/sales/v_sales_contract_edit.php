@@ -358,7 +358,9 @@
 	                            <th class="style" width="80px" style="text-align: right;">Qty</th>
 	                            <th class="style" width="80px" >Uom</th>
 	                            <th class="style" width="150px" >Piece Info</th>
-	                            <th class="style" width="120px">Lebar Jadi</th>
+	                            <th class="style" width="120px">Lbr Greige</th>
+	                            <th class="style" width="100px">Uom Lbr Greige</th>
+                              <th class="style" width="120px">Lbr Jadi</th>
 	                            <th class="style" width="100px">Uom Lbr Jadi</th>
 	                            <th class="style" width="150px">Reff Notes</th>
 	                            <th class="style" width="100px" >Delivery Date</th>
@@ -394,6 +396,8 @@
                                     <td align="right" data-content="edit" data-id="qty" data-name="Qty" data-isi="<?php echo $row->qty;?>"><?php echo number_format($row->qty,2)?></td>
                                     <td ><?php echo $row->uom?></td>
                                     <td class="text-wrap width-150" data-content="edit" data-name="Piece Info" data-id="piece_info" data-isi="<?php echo $row->piece_info;?>"><?php echo htmlentities($row->piece_info)?></td>
+                                    <td class="text-wrap" data-content="edit" data-name="Lebar Greige" data-id="lebar_greige"  data-isi="<?php echo $row->lebar_greige;?>"><?php echo $row->lebar_greige?></td>
+                                    <td class="text-wrap width-80"  data-content="edit" data-name="Uom Lebar Greige" data-id="uom_lebar_greige" data-isi="<?php echo $row->uom_lebar_greige;?>" ><?php echo $row->uom_lebar_greige?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Lebar Jadi" data-id="lebar_jadi"  data-isi="<?php echo $row->lebar_jadi;?>"><?php echo $row->lebar_jadi?></td>
                                     <td class="text-wrap width-80"  data-content="edit" data-name="Uom Lebar Jadi" data-id="uom_lebar_jadi" data-isi="<?php echo $row->uom_lebar_jadi;?>" ><?php echo $row->uom_lebar_jadi?></td>
                                     <td class="text-wrap" data-content="edit" data-name="Reff Note" data-id="reff_notes"  data-isi="<?php echo htmlentities($row->reff_notes);?>"><?php echo $row->reff_notes?></td>
@@ -437,7 +441,7 @@
                           </tbody>
                           <tfoot>
                             <tr>
-                              <td colspan="13">
+                              <td colspan="15">
                                 <a href="javascript:void(0)" class="add-new-color-lines"><i class="fa fa-plus"></i> Tambah Data</a>
                               </td>
                             </tr>
@@ -1199,6 +1203,9 @@
           + '<td><input type="text" class="form-control input-sm width-100" name="Qty" id="qty" onkeyup="validAngka(this)"></td>'
           + '<td><input type="text" class="form-control input-sm uom_color width-50" name="Uom" id="uom" readonly></td>'
           + '<td><textarea type="text" class="form-control  input-sm width-100 set_textarea" onkeyup="textAreaAdjust(this)"  name="Piece Info" id="piece_info"></textarea></td>'
+          + '<td class=""><input type="text" class="form-control input-sm width-100 lebar_greige" name="Lebar Greige" id="lebar_greige" ></td>'
+          + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_greige" name="Uom Lebar Greige" id="uom_lebar_greige"><option value=""></option><?php 
+          foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
           + '<td class=""><input type="text" class="form-control input-sm width-100 lebar_jadi" name="Lebar Jadi" id="lebar_jadi" ></td>'
           + '<td class=""><select type="text" class="form-control input-sm width-80 uom_lebar_jadi" name="Uom Lebar Jadi" id="uom_lebar_jadi"><option value=""></option><?php 
           foreach($list_uom as $row){?><option value="<?php echo $row->short; ?>"><?php echo $row->short;?></option>"<?php }?></select></td>'
@@ -1219,7 +1226,9 @@
         $('.handling').select2({});
 
         // select 2 handling/finishing
-         $('.uom_lebar_jadi').select2({});
+        $('.uom_lebar_jadi').select2({});
+        
+        $('.uom_lebar_greige').select2({});
 
         // select 2 route co
          $('.route_co').select2({});
@@ -1271,9 +1280,12 @@
                   $('.description_color').val(data.nama_produk);
                   $('.uom_color').val(data.uom);
                   $('.lebar_jadi').val(data.lebar_jadi);
+                  $('.lebar_greige').val(data.lebar_greige);
                   //$('.uom_lebar_jadi').val(data.uom_lebar_jadi);
                   var $newOptionuom = $("<option></option>").val(data.uom_lebar_jadi).text(data.uom_lebar_jadi);
                   $(".uom_lebar_jadi").empty().append($newOptionuom).trigger('change');
+                  var $newOptionuom = $("<option></option>").val(data.uom_lebar_greige).text(data.uom_lebar_greige);
+                  $(".uom_lebar_greige").empty().append($newOptionuom).trigger('change');
 
                 },
                 error: function (xhr, ajaxOptions, thrownError){
@@ -1318,6 +1330,39 @@
           }
         }); 
 
+
+        //select 2 uom lebar greige
+        $('.uom_lebar_greige').select2({
+          allowClear: true,
+          placeholder: "",
+          ajax:{
+                dataType: 'JSON',
+                type : "POST",
+                url : "<?php echo base_url();?>sales/salescontract/get_uom_select2",
+                data : function(params){
+
+                  return{
+                    prod:params.term,
+                  };
+                }, 
+                processResults:function(data){
+                  var results = [];
+                  $.each(data, function(index,item){
+                    results.push({
+                        id:item.short,
+                        text:item.short
+                    });
+                  });
+                  return {
+                    results:results
+                  };
+                },
+                error: function (xhr, ajaxOptions, thrownError){
+                //  alert('Error data');
+                //  alert(xhr.responseText);
+                }
+          }
+        });
 
         //select 2 uom lebar jadi
         $('.uom_lebar_jadi').select2({
@@ -1430,6 +1475,8 @@
         var piece_info  = $(this).parents("tr").find("#piece_info").val();
         var lebar_jadi  = $(this).parents("tr").find("#lebar_jadi").val();
         var uom_lebar_jadi  = $(this).parents("tr").find("#uom_lebar_jadi").val();
+        var lebar_greige  = $(this).parents("tr").find("#lebar_greige").val();
+        var uom_lebar_greige = $(this).parents("tr").find("#uom_lebar_greige").val();
         var reff_note   = $(this).parents("tr").find("#reff_notes").val();
         var delivery_date = $(this).parents("tr").find("#delivery_date_items").val();
         var row_order   = $(this).parents("tr").find("#row_order").val();
@@ -1452,6 +1499,8 @@
                 qty         : qty,
                 uom         : uom,
                 piece_info  : piece_info,
+                lebar_greige  : lebar_greige,
+                uom_lebar_greige  : uom_lebar_greige,
                 lebar_jadi  : lebar_jadi,
                 uom_lebar_jadi  : uom_lebar_jadi,
                 reff_note   : reff_note,
@@ -1702,7 +1751,7 @@
 
             $('.'+route_co_row).select2({});
 
-          }else if($(this).attr('data-id') == 'uom_lebar_jadi'){
+          }else if($(this).attr('data-id') == 'uom_lebar_jadi' || $(this).attr('data-id') == 'uom_lebar_greige'){
 
             var value_option  = $(this).attr('data-isi');
             uom_lbr_row       = $(this).attr('data-id')+row_order;
