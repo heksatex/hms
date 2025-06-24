@@ -316,7 +316,7 @@ class Salescontract extends MY_Controller
     {
 	    $kode_produk = addslashes($this->input->post('kode_produk'));
    		$result      = $this->m_sales->get_produk_byid($kode_produk)->row_array();
-      $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'], 'lebar_jadi'=>$result['lebar_jadi'], 'uom_lebar_jadi'=>$result['uom_lebar_jadi'] );
+      $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'], 'lebar_jadi'=>$result['lebar_jadi'], 'uom_lebar_jadi'=>$result['uom_lebar_jadi'], 'lebar_greige'=>$result['lebar_greige'], 'uom_lebar_greige'=>$result['uom_lebar_greige'] );
         echo json_encode($callback);
     }
 
@@ -708,6 +708,8 @@ class Salescontract extends MY_Controller
           $handling     = $this->input->post('handling');
           $route_co     = $this->input->post('route_co');
           $gramasi      = $this->input->post('gramasi');
+          $lebar_greige   = $this->input->post('lebar_greige');
+          $uom_lebar_greige   = $this->input->post('uom_lebar_greige');
           $lebar_jadi   = $this->input->post('lebar_jadi');
           $uom_lebar_jadi   = $this->input->post('uom_lebar_jadi');
           $reff_note    = addslashes($this->input->post('reff_note'));
@@ -790,9 +792,9 @@ class Salescontract extends MY_Controller
                 
                 if(round($tot_qty_color_line_new,2) <= round($cq_contract_lines,2) OR $cek_uom > 0){
                   
-                  $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date);
+                  $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$lebar_greige,$uom_lebar_greige);
                   $jenis_log   = "edit";
-                  $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling."| ".$nama_route." | ".$gramasi." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date;
+                  $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling."| ".$nama_route." | ".$gramasi." | ".$qty." | ".$lebar_greige." ".$uom_lebar_greige." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date;
                   $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                   $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                 }else{
@@ -824,7 +826,7 @@ class Salescontract extends MY_Controller
 
                     $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
                     $row_order = $ro['row_order']+1;
-                    $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date, $status_ow);
+                    $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date, $status_ow,$lebar_greige,$uom_lebar_greige);
 
                     // cek status sales_contract
                     $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
@@ -834,7 +836,7 @@ class Salescontract extends MY_Controller
                     }
 
                     $jenis_log   = "edit";
-                    $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date." | ".$status_ow_;
+                    $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_greige." ".$uom_lebar_greige." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date." | ".$status_ow_;
                     $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                     $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 
