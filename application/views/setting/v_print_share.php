@@ -35,7 +35,16 @@
                                     <div class="col-md-8">
                                         <div class="fields-group">
                                             <div class="form-group">
-                                                <label for="tanggal" class="col-sm-2 required control-label">Nama Printer Share</label>
+                                                <label for="tanggal" class="col-sm-2 control-label">Printer Alias</label>
+                                                <div class="col-sm-8">
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
+                                                        <input type="text" name="alias_printer" class="form-control" id="alias_printer">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="tanggal" class="col-sm-2 required control-label">Printer Share</label>
                                                 <div class="col-sm-8">
                                                     <div class="input-group">
                                                         <span class="input-group-addon"><i class="fa fa-pencil"></i></span>
@@ -71,6 +80,7 @@
                                     <thead>
                                         <tr>
                                             <th class="no">No</th>
+                                            <th>Alias Printer</th>
                                             <th>Nama Printer</th>
                                             <th>IP Printer</th>
                                             <th>#</th>
@@ -120,7 +130,7 @@
                     "paging": true,
                     "lengthChange": true,
                     "searching": true,
-                    "ordering": true,
+                    "ordering": false,
                     "info": true,
                     "stateSave": false,
                     "ajax": {
@@ -138,6 +148,7 @@
                             var data = $(this).data();
                             $("#posisi").val("edit");
                             $("#ids").val(data.id);
+                            $("#alias_printer").val(data.alias);
                             $("#nama_printer_share").val(data.print);
                             $("#ip_share").val(data.ip);
                         });
@@ -147,6 +158,7 @@
                 $("#btn-clear").on("click", function () {
                     $("#posisi").val("");
                     $("#ids").val("");
+                    $("#alias_printer").val("");
                     $("#input").trigger('reset');
                 });
                 
