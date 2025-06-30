@@ -92,6 +92,7 @@ class M_deliveryorderdetail extends CI_Model {
         $this->db->join("picklist_detail pd", "pd.id = dod.picklist_detail_id");
         $this->db->select("pd.*,dod.do_id as nodo");
         $this->db->group_by("dod.barcode_id");
+//        $this->db->group_by("dod.picklist_detail_id");
         foreach ($this->column_search as $key => $value) {
             if ($_POST['search']['value']) {
                 if ($key === 0) {
