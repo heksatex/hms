@@ -3,7 +3,8 @@
         <table class="table table-condesed table-hover rlstable  over" width="100%">
             <thead>
             <th class="style" width="10px">No</th>
-            <th class="style" width="20px">Nama Printer</th>
+            <th class="style" width="20px">Printer Alias</th>
+            <th class="style" width="20px">Printer Share</th>
             <th class="style" width="20px">Alamat</th>
             <th class="style" width="20px">#</th>
             </thead>
@@ -13,6 +14,7 @@
                     ?>
                     <tr>
                         <td><?= ($key + 1) ?></td>
+                        <td><?= $value->alias_printer ?></td>
                         <td><?= $value->nama_printer_share ?></td>
                         <td><?= $value->ip_share ?></td>
                         <td>

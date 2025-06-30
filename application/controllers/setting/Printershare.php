@@ -79,11 +79,12 @@ class Printershare extends MY_Controller {
             }
             $printer = $this->input->post("nama_printer_share");
             $ip = $this->input->post("ip_share");
+            $alias = $this->input->post("alias_printer");
 
             if ($this->input->post("posisi") !== '') {
-                $this->m_global->setTables("share_printer")->setWheres(["id" => $this->input->post("ids")])->update(["nama_printer_share" => $printer, "ip_share" => $ip]);
+                $this->m_global->setTables("share_printer")->setWheres(["id" => $this->input->post("ids")])->update(["nama_printer_share" => $printer, "ip_share" => $ip,"alias_printer"=>$alias]);
             } else {
-                $this->m_global->setTables("share_printer")->save(["nama_printer_share" => $printer, "ip_share" => $ip]);
+                $this->m_global->setTables("share_printer")->save(["nama_printer_share" => $printer, "ip_share" => $ip,"alias_printer"=>$alias]);
             }
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -98,16 +99,17 @@ class Printershare extends MY_Controller {
 
     public function get_data() {
         try {
-            $list = $this->m_global->setTables("share_printer")->setOrder(["id" => "asc"]);
+            $list = $this->m_global->setTables("share_printer")->setOrder(["id" => "asc"])->setSearch(["nama_printer_share","alias_printer"]);
             $no = $_POST['start'];
             $data = array();
             foreach ($list->getData() as $field) {
                 $no++;
                 $data [] = [
                     $no,
+                    $field->alias_printer,
                     $field->nama_printer_share,
                     $field->ip_share,
-                    "<button class='btn btn-default btn-sm edit_item' data-print='{$field->nama_printer_share}' data-id='{$field->id}' data-ip='{$field->ip_share}' "
+                    "<button class='btn btn-default btn-sm edit_item' data-alias='{$field->alias_printer}' data-print='{$field->nama_printer_share}' data-id='{$field->id}' data-ip='{$field->ip_share}' "
                     . "><i class='fa fa-edit'></i> Edit</button>"
                 ];
             }
