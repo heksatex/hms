@@ -117,7 +117,8 @@ class M_bulkdetail extends CI_Model {
 //        $this->db->join("picklist_detail pd", "pd.id = bd.picklist_detail_id", "right");
 
         $this->db->from("picklist_detail pd");
-        $this->db->join("(select bulk_no_bulk,bulk.no_pl,picklist_detail_id,barcode from bulk_detail join bulk on bulk.no_bulk = bulk_detail.bulk_no_bulk ) b", "b.barcode = pd.barcode_id", "left");
+//        $this->db->join("(select bulk_no_bulk,bulk.no_pl,picklist_detail_id,barcode from bulk_detail join bulk on bulk.no_bulk = bulk_detail.bulk_no_bulk ) b", "b.barcode = pd.barcode_id", "left");
+        $this->db->join("(select bulk_no_bulk,bulk.no_pl,picklist_detail_id,barcode from bulk_detail join bulk on bulk.no_bulk = bulk_detail.bulk_no_bulk ) b", "b.picklist_detail_id = pd.id", "left");
         $this->db->select("bulk_no_bulk,barcode_id,corak_remark,warna_remark,qty");
         foreach ($columnSearch as $key => $value) {
             if ($_POST['search']['value']) {
