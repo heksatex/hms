@@ -27,7 +27,14 @@ class M_global extends CI_Model {
     ];
     protected $whereIn = [];
     protected $wheresRaw = [];
-
+    
+    protected $db_debug;
+    
+    public function __construct() {
+        $this->db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+    }
+    
     public function setOrders(array $orders) {
         $this->orders = $orders;
         return $this;
@@ -303,7 +310,8 @@ class M_global extends CI_Model {
         return $this;
     }
     public function copyExt(string $from,string $new_table) {
-        $this->db->query("CREATE TABLE {$new_table} SELECT * FROM {$from};");
+        $this->db->query("CREATE TEMPORARY TABLE {$new_table} LIKE {$from};");
+        $this->db->query("insert into {$new_table} SELECT * FROM {$from};");
     }
     
     public function excQuery(string $query) {
@@ -312,5 +320,9 @@ class M_global extends CI_Model {
        }
        return null;
        
+    }
+    
+    public function __destruct() {
+        $this->db->db_debug = $this->db_debug;
     }
 }

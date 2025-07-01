@@ -72,7 +72,7 @@
                         </div>
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-rd" id="form-rd" action="<?= base_url('report/analisacacatkain/export') ?>">
-                                <div class="col-md-8" style="padding-right: 0px !important;">
+                                <div class="col-md-6" style="padding-right: 0px !important;">
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
@@ -102,6 +102,42 @@
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
+                                                <label class="form-label">Marketing</label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <select name="marketing" class="form-control" id="marketing">
+                                                    <option value="">All</option>
+                                                    <?php
+                                                    foreach ($sales as $key => $value) {
+                                                        if ($this->session->userdata('nama')['sales_group'] === $value->kode_sales_group) {
+                                                            echo '<option value="' . $value->kode_sales_group . '" selected>' . $value->nama_sales_group . '</option>';
+                                                        } else {
+                                                            echo '<option value="' . $value->kode_sales_group . '">' . $value->nama_sales_group . '</option>';
+                                                        }
+                                                    }
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
+                                            <input id="detail" name="detail" type="checkbox" value="1"><strong>Detail</strong></label>
+                                            </div>
+                                            <div class="col-xs-8 col-md-8">
+                                                <select name="detail_group" class="form-control" id="detail_group" style="display: none;">
+                                                    <option value="kp">KP</option>
+                                                    <option value="barcode">Bacode</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" style="padding-right: 0px !important;">
+                                    <div class="form-group">
+                                        <div class="col-md-12 col-xs-12">
+                                            <div class="col-xs-4">
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <button class="btn btn-success btn-sm" type="submit">Export</button>
@@ -110,63 +146,8 @@
                                         </div>
                                     </div>
                                 </div>
+
                             </form>
-<!--                            <div class="row">
-                                <div class="col-md-12 table-responsive example1 divListviewHead">
-                                    <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
-                                        <table id="tabelDelivery" class="table table-condesed table-hover" border="1">
-                                            <tr>
-                                                <th class="style bb ws">Produk</th>
-                                                <th class="style bb ws">Total HPH GJD</th>
-                                                <th class="style bb ws">total : grade A kain gjd</th>
-                                                <th class="style bb ws">total :
-                                                    - grade A kain jadi
-                                                    cacat dyeing (D)
-                                                    finishing (F)</th>
-                                                <th class="style bb ws">persen :
-                                                    - Σ A PRODUKSI thd Σ    </th>
-                                                <th class="style bb ws">total :
-                                                    - grade A kain jadi
-                                                    cacat Prodduksi (T)
-                                                    finishing (F)</th>
-                                                <th class="style bb ws">persen :
-                                                    - Σ A DYEING thd Σ</th>
-                                                <th class="style bb ws">total :
-                                                    - grade A kain jadi
-                                                    -cacat produksi (T)
-                                                    -cacat dyeing (D)</th>
-                                                <th class="style bb ws">persen :
-                                                    - Σ A FINISHING thd Σ   </th>
-                                            </tr>
-                                            <tbody id="tBody" class="ws">
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12 table-responsive example1 divListviewHead">
-                                    <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
-                                        <table id="tabelDelivery" class="table table-condesed table-hover" border="1">
-                                            <tr>
-                                                <th class="style bb ws">master cacat</th>
-                                                <th class="style bb ws">Jumlah Point Cacat Grade B Prod</th>
-                                                <th class="style bb ws">Jumlah Point Cacat Grade B Dye</th>
-                                                <th class="style bb ws">Jumlah Point Cacat Grade B Fin</th>
-                                                <th class="style bb ws">Persen B</th>
-                                                <th class="style bb ws">Jumlah Point Cacat Grade C Pot , BS</th>
-                                                <th class="style bb ws">Jumlah Point Cacat BS Dying</th>
-                                                <th class="style bb ws">Jumlah Point Cacat BS Fin</th>
-                                                <th class="style bb ws">Persen C</th>
-                                            </tr>
-                                            <tbody id="tBody2" class="ws">
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>-->
                         </div>
                     </div>
                 </section>
@@ -183,6 +164,20 @@
                         format: 'YYYY-MM-DD'
                     }
                 });
+                
+                $("#detail").on("change", function () {
+                    if (!$(this).prop('checked')) {
+                        $("#detail_group").hide();
+                        $("#detail_group").val("kp").trigger("change");
+                        return;
+                    }
+                    $("#detail_group").show();
+                });
+
+                $("#marketing").select2({
+                    placeholder: "Pilih Marketing",
+                    allowClear: true
+                });
 
                 $("#jenis_kain").select2({
                     placeholder: "Pilih Jenis Kain",
@@ -193,6 +188,7 @@
                     $('#jenis_kain').val(null).trigger('change');
                     $("#tBody").html("");
                     $("#tBody2").html("");
+                    $("#detail_group").hide();
                 });
 
                 const formrd = document.forms.namedItem("form-rd");
@@ -202,9 +198,11 @@
                     please_wait(function () {});
                     request("form-rd").then(
                             response => {
-                                alert_notify(response.data.icon, response.data.message, response.data.type, function () {
+                                unblockUI(function () {
+                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {
 
-                                });
+                                    });
+                                }, 100);
                                 if (response.status === 200) {
 //                                    $("#tBody").html(response.data.data);
 //                                    $("#tBody2").html(response.data.datas);
