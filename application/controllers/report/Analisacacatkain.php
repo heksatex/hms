@@ -145,7 +145,7 @@ class Analisacacatkain extends MY_Controller {
     }
 
     public function export() {
-        $uniqid = uniqid("_copy_");
+        $uniqid = "";//uniqid("_copy_");
         $tbl_mrp_production = "mrp_production";
         $tbl_mrp_production_fg_hasil = "mrp_production_fg_hasil";
         $tbl_mst_produk = "mst_produk";
@@ -169,16 +169,19 @@ class Analisacacatkain extends MY_Controller {
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $model = new $this->m_global;
             $jk = "('" . implode(',', $jenis_kain) . "')";
-            $model->copyExt($tbl_mrp_production_fg_hasil, $uniqid . $tbl_mrp_production_fg_hasil);
-            $model->copyExt($tbl_mst_produk, $uniqid . $tbl_mst_produk);
-            $model->copyExt($tbl_mst_produk_parent, $uniqid . $tbl_mst_produk_parent);
-            $model->copyExt($tbl_mrp_production_cacat, $uniqid . $tbl_mrp_production_cacat);
-            $model->copyExt($tbl_mrp_inlet, $uniqid . $tbl_mrp_inlet);
-            $model->copyExt($tbl_mrp_production, $uniqid . $tbl_mrp_production);
+//            $model->copyExt($tbl_mrp_production_fg_hasil, $uniqid . $tbl_mrp_production_fg_hasil);
+//            $model->copyExt($tbl_mst_produk, $uniqid . $tbl_mst_produk);
+//            $model->copyExt($tbl_mst_produk_parent, $uniqid . $tbl_mst_produk_parent);
+//            $model->copyExt($tbl_mrp_production_cacat, $uniqid . $tbl_mrp_production_cacat);
+//            $model->copyExt($tbl_mrp_inlet, $uniqid . $tbl_mrp_inlet);
+//            $model->copyExt($tbl_mrp_production, $uniqid . $tbl_mrp_production);
 
             $this->_module->startTransaction();
 
-            $this->_module->lock_tabel("analisa_cacat_kain WRITE,analisa_cacat_kain_defect WRITE,analisa_cacat_kain a WRITE,mst_sales_group msg READ ,mst_cacat MC READ");
+            $this->_module->lock_tabel("analisa_cacat_kain WRITE,analisa_cacat_kain_defect WRITE,analisa_cacat_kain a WRITE,mst_sales_group msg READ ,mst_cacat MC READ,{$uniqid}{$tbl_mrp_inlet} mi READ,"
+            . "{$uniqid}{$tbl_mst_produk} mp READ,{$uniqid}{$tbl_mst_produk_parent} mpsp READ,{$uniqid}{$tbl_mrp_production_cacat} mpc READ, mrp_production_cacat READ,"
+                    . "{$uniqid}{$tbl_mrp_production} mrpp READ,{$uniqid}{$tbl_mrp_production_fg_hasil} mrppfghs READ");
+                    
             $this->m_analisa_kain_cacat->getQuery("TRUNCATE TABLE analisa_cacat_kain;", false);
             $queryAwal = "INSERT INTO analisa_cacat_kain (nama_parent, kp, barcode, nama_grade, tgl, corak, warna, qty_all) ";
             $queryAwal .= "SELECT mpsp.nama, mi.lot as kp, mrppfghs.lot as barcode, mrppfghs.nama_grade, mrppfghs.create_date, mi.corak_remark, mi.warna_remark, mrppfghs.qty ";
@@ -209,7 +212,7 @@ class Analisacacatkain extends MY_Controller {
 
             foreach ($grade as $key => $val) {
                 $query = "UPDATE analisa_cacat_kain a join ";
-                $query .= "(SELECT lot, GROUP_CONCAT(kode_cacat) as kodes FROM {$uniqid}{$tbl_mrp_production_cacat} ";
+                $query .= "(SELECT lot, GROUP_CONCAT(kode_cacat) as kodes FROM {$uniqid}{$tbl_mrp_production_cacat} mpc ";
                 $query .= "WHERE lot IN (SELECT barcode FROM analisa_cacat_kain) GROUP BY lot) b ";
                 $query .= "ON a.barcode=b.lot SET ";
                 $query .= "a.{$val}_prod= CASE WHEN b.kodes LIKE 'T%' THEN a.qty_all ELSE 0 END, ";
@@ -435,29 +438,30 @@ class Analisacacatkain extends MY_Controller {
                     $sheet->setCellValue("N" . $start_row_2, $value->b_dye);
                     $sheet->setCellValue("O" . $start_row_2, $value->b_fin);
                     $sheet->setCellValue("P" . $start_row_2, $value->b_lain);
-                    $sheet->setCellValue("Q" . $start_row_2, ($b > 0) ? $b / $totalAll * 100 : 0);
+                    $sheet->setCellValue("Q" . $start_row_2, ($b > 0) ? round(($b / $totalAll * 100),2) : 0);
                     $sheet->setCellValue("R" . $start_row_2, $value->c_prod);
                     $sheet->setCellValue("S" . $start_row_2, $value->c_dye);
                     $sheet->setCellValue("T" . $start_row_2, $value->c_fin);
                     $sheet->setCellValue("U" . $start_row_2, $value->c_lain);
-                    $sheet->setCellValue("V" . $start_row_2, ($c > 0) ? $c / $totalAll * 100 : 0);
+                    $sheet->setCellValue("V" . $start_row_2, ($c > 0) ? round(($c / $totalAll * 100),2) : 0);
                 }
             } else {
                 $detail_group = $this->input->post("detail_group");
                 $ModelDetail = new $this->m_global;
                 $ModelDetail->setTables("analisa_cacat_kain")->setSelects([
-                    "kp, tgl, nama_parent, warna,mkt",
+                    "kp, tgl, nama_parent,warna,mkt",
                     "sum(qty_all) as `all`, sum(a_gjd) as a_gjd,sum(a_prod) as a_prod",
                     "sum(a_dye) as a_dye, sum(a_fin) as a_fin, sum(b_prod) as b_prod",
                     "sum(b_dye) as b_dye, sum(b_fin) as b_fin, sum(b_lain) as b_lain",
                     "sum(c_dye) as c_dye, sum(c_fin) as c_fin, sum(c_lain) as c_lain,sum(c_prod) as c_prod"
                 ])->setOrder(["nama_parent"]);
                 $barcode = "";
-                if ($detail_group === "kp") {
+                if ($detail_group === "kp") { 
                     $dataDetail = $ModelDetail->setSelects(["count(barcode) as barcode"])->setGroups([$detail_group])->getData();
+                     $barcode.="Total ";
                 } else {
                     $dataDetail = $ModelDetail->setSelects(["barcode"])->setGroups([$detail_group])->getData();
-                    $barcode.="Total ";
+                   
                 }
                 $sheet->setCellValue("A{$start_row}", "No");
                 $sheet->mergeCells("A{$start_row}:A" . ($start_row + 2));
@@ -561,37 +565,39 @@ class Analisacacatkain extends MY_Controller {
                     $sheet->setCellValue("F{$start_row}", $value->warna);
                     $sheet->setCellValue("G{$start_row}", $value->all);
                     $sheet->setCellValue("H{$start_row}", $value->a_gjd);
-                    $sheet->setCellValue("I{$start_row}", ($value->a_gjd > 0) ? $value->a_gjd / $value->all * 100 : 0);
+                    $sheet->setCellValue("I{$start_row}", ($value->a_gjd > 0) ? round(($value->a_gjd / $value->all * 100),2) : 0);
                     $sheet->setCellValue("J{$start_row}", $value->a_prod);
-                    $sheet->setCellValue("K{$start_row}", ($value->a_prod > 0) ? $value->a_prod / $value->all * 100 : 0);
+                    $sheet->setCellValue("K{$start_row}", ($value->a_prod > 0) ? round(($value->a_prod / $value->all * 100),2) : 0);
                     $sheet->setCellValue("L{$start_row}", $value->a_dye);
-                    $sheet->setCellValue("M{$start_row}", ($value->a_dye > 0) ? $value->a_dye / $value->all * 100 : 0);
+                    $sheet->setCellValue("M{$start_row}", ($value->a_dye > 0) ? round(($value->a_dye / $value->all * 100),2) : 0);
                     $sheet->setCellValue("N{$start_row}", $value->a_fin);
-                    $sheet->setCellValue("O{$start_row}", ($value->a_fin > 0) ? $value->a_fin / $value->all * 100 : 0);
+                    $sheet->setCellValue("O{$start_row}", ($value->a_fin > 0) ? round(($value->a_fin / $value->all * 100),2) : 0);
                     $sheet->setCellValue("P{$start_row}", $value->b_prod);
-                    $sheet->setCellValue("Q{$start_row}", ($value->b_prod > 0) ? $value->b_prod / $value->all * 100 : 0);
+                    $sheet->setCellValue("Q{$start_row}", ($value->b_prod > 0) ? round(($value->b_prod / $value->all * 100),2) : 0);
                     $sheet->setCellValue("R{$start_row}", $value->b_dye);
-                    $sheet->setCellValue("S{$start_row}", ($value->b_dye > 0) ? $value->b_dye / $value->all * 100 : 0);
+                    $sheet->setCellValue("S{$start_row}", ($value->b_dye > 0) ? round(($value->b_dye / $value->all * 100),2) : 0);
                     $sheet->setCellValue("T{$start_row}", $value->b_fin);
-                    $sheet->setCellValue("U{$start_row}", ($value->b_fin > 0) ? $value->b_fin / $value->all * 100 : 0);
+                    $sheet->setCellValue("U{$start_row}", ($value->b_fin > 0) ? round(($value->b_fin / $value->all * 100),2) : 0);
                     $sheet->setCellValue("V{$start_row}", $value->b_lain);
-                    $sheet->setCellValue("W{$start_row}", ($value->b_lain > 0) ? $value->b_lain / $value->all * 100 : 0);
+                    $sheet->setCellValue("W{$start_row}", ($value->b_lain > 0) ? round(($value->b_lain / $value->all * 100),2) : 0);
 
                     $sheet->setCellValue("X{$start_row}", $value->c_prod);
-                    $sheet->setCellValue("Y{$start_row}", ($value->c_prod > 0) ? $value->c_prod / $value->all * 100 : 0);
+                    $sheet->setCellValue("Y{$start_row}", ($value->c_prod > 0) ? round(($value->c_prod / $value->all * 100),2) : 0);
                     $sheet->setCellValue("Z{$start_row}", $value->c_dye);
-                    $sheet->setCellValue("AA{$start_row}", ($value->c_dye > 0) ? $value->c_dye / $value->all * 100 : 0);
+                    $sheet->setCellValue("AA{$start_row}", ($value->c_dye > 0) ? round(($value->c_dye / $value->all * 100),2) : 0);
                     $sheet->setCellValue("AB{$start_row}", $value->c_fin);
-                    $sheet->setCellValue("aC{$start_row}", ($value->c_fin > 0) ? $value->c_fin / $value->all * 100 : 0);
+                    $sheet->setCellValue("aC{$start_row}", ($value->c_fin > 0) ? round(($value->c_fin / $value->all * 100),2) : 0);
                     $sheet->setCellValue("aD{$start_row}", $value->c_lain);
-                    $sheet->setCellValue("aE{$start_row}", ($value->c_lain > 0) ? $value->c_lain / $value->all * 100 : 0);
+                    $sheet->setCellValue("aE{$start_row}", ($value->c_lain > 0) ? round(($value->c_lain / $value->all * 100),2) : 0);
                 }
 
 //                $sheet->setCellValue("A{$start_row}",$value->);
             }
 
             $writer = new Xlsx($spreadsheet);
-            $filename = "Lap_kain_cacat_periode_" . $period[0] . ' - ' . $period[1];
+            $ttt = is_null($detail) ? "":"Detail ";
+//            $mrkt = ($marketing !== "") ? "({$marketing})":"";
+            $filename = "{$ttt}laporan kain cacat periode {$period[0]} - {$period[1]}" ;
             $url = "dist/storages/report/cacat kain";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
@@ -609,271 +615,10 @@ class Analisacacatkain extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
-            $this->m_analisa_kain_cacat->getQuery("DROP TABLE IF EXISTS {$uniqid}{$tbl_mrp_production},{$uniqid}{$tbl_mrp_production_fg_hasil},"
-                    . "{$uniqid}{$tbl_mrp_production_cacat},{$uniqid}{$tbl_mst_produk},{$uniqid}{$tbl_mst_produk_parent},{$uniqid}{$tbl_stock_quant},{$uniqid}{$tbl_mrp_inlet};", false);
+//            $this->m_analisa_kain_cacat->getQuery("DROP TABLE IF EXISTS {$uniqid}{$tbl_mrp_production},{$uniqid}{$tbl_mrp_production_fg_hasil},"
+//                    . "{$uniqid}{$tbl_mrp_production_cacat},{$uniqid}{$tbl_mst_produk},{$uniqid}{$tbl_mst_produk_parent},{$uniqid}{$tbl_stock_quant},{$uniqid}{$tbl_mrp_inlet};", false);
         }
     }
 
-    public function export_() {
-        $uniqid = uniqid("_copy_");
-        $tbl_mrp_production = "mrp_production";
-        $tbl_mrp_production_fg_hasil = "mrp_production_fg_hasil";
-        $tbl_mst_produk = "mst_produk";
-        $tbl_mst_produk_parent = "mst_produk_parent";
-        $tbl_mrp_production_cacat = "mrp_production_cacat";
-        $tbl_stock_quant = "stock_quant";
-        try {
-            $periode = $this->input->post("periode");
-            $jenis_kain = $this->input->post("jenis_kain");
-            $period = explode(" - ", $periode);
-            if (count($period) < 2) {
-                throw new \Exception("Tentukan dahulu periodenya", 500);
-            }
-            $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
-            $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
-            $wheres = ["mrpp.dept_id" => 'GJD', "mrppfghs.create_date >=" => $tanggalAwal, 'mrppfghs.create_date <=' => $tanggalAkhir, "mrppfghs.lokasi LIKE" => "%Stock"];
-            $model = new $this->m_global;
-            $model->copyExt($tbl_mrp_production_fg_hasil, $uniqid . $tbl_mrp_production_fg_hasil);
-            $model->copyExt($tbl_mst_produk, $uniqid . $tbl_mst_produk);
-            $model->copyExt($tbl_mst_produk_parent, $uniqid . $tbl_mst_produk_parent);
-            $model->copyExt($tbl_mrp_production_cacat, $uniqid . $tbl_mrp_production_cacat);
 
-            $dataAwal = $model->setTables("{$tbl_mrp_production} mrpp")->copy($uniqid . $tbl_mrp_production)
-                            ->setWheres($wheres)->setWhereIn("id_jenis_kain", $jenis_kain)
-                            ->setGroups(["mp.id_parent"])
-                            ->setSelects(["mpsp.nama as nama_produk,mrpp.kode_produk,sum(mrppfghs.qty) as total_qty,GROUP_CONCAT(DISTINCT(mrpp.kode)) as kodes"])
-                            ->setJoins("{$uniqid}{$tbl_mrp_production_fg_hasil} mrppfghs", "(mrppfghs.kode = mrpp.kode and mrppfghs.lokasi LIKE '%Stock')")
-                            ->setJoins("{$uniqid}{$tbl_mst_produk} mp", "mp.kode_produk = mrpp.kode_produk")
-                            ->setJoins("{$uniqid}{$tbl_mst_produk_parent} mpsp", "mpsp.id = mp.id_parent")->getData();
-
-            $queryDetail = [];
-            $querysDetail = [];
-            $select = [];
-            $totalHphGjd = 0;
-            foreach ($dataAwal as $key => $value) {
-                $totalHphGjd += $value->total_qty;
-                foreach ($this->where as $keys => $values) {
-                    $join = false;
-                    $persen = "";
-                    $setSelect = "sum(qty) as total_qty";
-                    if (isset($values["join"])) {
-                        $join = true;
-                        unset($values["join"]);
-                    }
-                    if (isset($values["persen"])) {
-                        $persen = ",ROUND(((COALESCE(tbl_{$keys}.total_qty,0)*100)/{$value->total_qty}),2)  as persen_{$keys}";
-                        unset($values["persen"]);
-                    }
-                    if (isset($values["select"])) {
-                        $setSelect = $values["select"];
-                        unset($values["select"]);
-                    }
-
-                    $query = $this->m_analisa_kain_cacat->detailTableAwal(array_merge($values, [
-                        "mpfh.kode" => [
-                            "type" => "in",
-                            "data" => explode(",", $value->kodes)
-                        ],
-                        "mpfh.create_date" => [
-                            "type" => "raw",
-                            "data" => "mpfh.create_date >= '{$tanggalAwal}' and mpfh.create_date <= '{$tanggalAkhir}'"
-                        ]
-                            ]), "tbl_{$keys}", $join, $setSelect, "{$uniqid}{$tbl_mrp_production_fg_hasil}", "{$uniqid}{$tbl_mrp_production_cacat}");
-                    $queryDetail[] = $query;
-                    $select[] = "COALESCE(tbl_{$keys}.total_qty,0)  as qty_{$keys} {$persen}";
-                }
-                $queries = "select " . implode(",", $select) . " from " . implode(",", $queryDetail);
-                $querysDetail[] = $queries;
-                $queryDetail = [];
-                $select = [];
-            }
-
-            throw new \Exception("Tentukan dahulu periodenya", 500);
-            $querydataKedua = '(' . implode(" ) UNION ALL ( ", $querysDetail) . ')';
-            $dataKedua = $this->m_analisa_kain_cacat->getQuery($querydataKedua);
-
-//          
-            $datas = $this->m_analisa_kain_cacat->getDataCacat();
-            $queryDetails = [];
-            $querysDetails = [];
-            $selectss = [];
-
-            $model->copyExt($tbl_stock_quant, $uniqid . $tbl_stock_quant);
-            foreach ($datas as $key => $value) {
-                foreach ($this->where2 as $keys => $values) {
-                    $select = $values["select"];
-                    $join = false;
-                    if (isset($values["join"])) {
-                        $join = true;
-                        unset($values["join"]);
-                    }
-                    unset($values["select"]);
-                    $val = array_merge($values, ["mpfh.create_date >=" => $tanggalAwal, 'mpfh.create_date <=' => $tanggalAkhir,
-                        "mpc.kode_cacat" => ["type" => "in", "data" => explode(",", $value->kc)], "mp.id_jenis_kain" => ["type" => "in", "data" => $jenis_kain]]);
-                    $query = $this->m_analisa_kain_cacat->getQueryTable2($val, "tbl_{$keys}", $select, $join, "{$uniqid}{$tbl_mrp_production_fg_hasil}", "{$uniqid}{$tbl_mrp_production_cacat}",
-                            "{$uniqid}{$tbl_mst_produk}", "{$uniqid}{$tbl_stock_quant}");
-                    $queryDetails[] = $query;
-                    $selectss[] = "COALESCE(tbl_{$keys}.total_qty,0)  as qty_{$keys}";
-                }
-                $queries = "select " . implode(",", $selectss) . " from " . implode(",", $queryDetails);
-                $querysDetails[] = $queries;
-                $queryDetails = [];
-                $selectss = [];
-            }
-            $querydataKeduas = '(' . implode(" ) UNION ALL ( ", $querysDetails) . ')';
-            $dataKeduas = $this->m_analisa_kain_cacat->getQuery($querydataKeduas);
-
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-            $start_row = 2;
-            $start_row += 1;
-
-            $sheet->setCellValue('A' . $start_row, 'Corak');
-            $sheet->setCellValue('B' . $start_row, 'Σ');
-            $sheet->setCellValue('C' . $start_row, 'Σ A');
-            $sheet->setCellValue('D' . $start_row, '%A');
-            $sheet->setCellValue('E' . $start_row, 'Σ A');
-            $sheet->setCellValue('F' . $start_row, '%A');
-            $sheet->setCellValue('G' . $start_row, 'Σ A');
-            $sheet->setCellValue('H' . $start_row, '%A');
-            $sheet->setCellValue('I' . $start_row, 'Σ A');
-            $sheet->setCellValue('J' . $start_row, '%A');
-
-            $sheet->setCellValue("L" . $start_row, "Defect");
-            $sheet->setCellValue("M" . $start_row, "Σ");
-            $sheet->setCellValue("N" . $start_row, "Σ");
-            $sheet->setCellValue("O" . $start_row, "Σ");
-            $sheet->setCellValue("P" . $start_row, "%B");
-            $sheet->setCellValue("Q" . $start_row, "Σ");
-            $sheet->setCellValue("R" . $start_row, "Σ");
-            $sheet->setCellValue("S" . $start_row, "Σ");
-            $sheet->setCellValue("T" . $start_row, "Σ");
-            $sheet->setCellValue("U" . $start_row, "%C");
-
-            $start_row += 1;
-            $sheet->setCellValue("C{$start_row}", "All");
-            $sheet->mergeCells("C{$start_row}:D{$start_row}");
-            $sheet->setCellValue("E{$start_row}", "Produksi");
-            $sheet->mergeCells("E{$start_row}:F{$start_row}");
-            $sheet->setCellValue("G{$start_row}", "DYEING");
-            $sheet->mergeCells("G{$start_row}:H{$start_row}");
-            $sheet->setCellValue("I{$start_row}", "FINISHING");
-            $sheet->mergeCells("I{$start_row}:J{$start_row}");
-            $sheet->setCellValue("M" . $start_row, "PRODUKSI");
-            $sheet->setCellValue("N" . $start_row, "DYEING");
-            $sheet->setCellValue("O" . $start_row, "FINISHING");
-            $sheet->setCellValue("Q" . $start_row, "PRODUKSI");
-            $sheet->setCellValue("R" . $start_row, "DYEING");
-            $sheet->setCellValue("S" . $start_row, "FINISHING");
-            $sheet->setCellValue("T" . $start_row, "Lain2");
-            $start_row += 2;
-
-            $persenProd = 0;
-            $persenDye = 0;
-            $persenFin = 0;
-            $persenAll = 0;
-            $start_row_2 = $start_row;
-            $totalGradeA = 0;
-            $totalGradeADF = 0;
-            $totalGradeATF = 0;
-            $totalGradeADT = 0;
-            foreach ($dataAwal as $key => $value) {
-                $gradeADF = $dataKedua[$key]["qty_cacat_grade_a_DF"];
-                $gradeATF = $dataKedua[$key]["qty_cacat_grade_a_TF"];
-                $gradeATD = $dataKedua[$key]["qty_cacat_grade_a_TD"];
-                $persenProd = ($gradeADF / ($value->total_qty ?? 0)) * 100;
-                $persenDye = ($gradeATF / ($value->total_qty ?? 0)) * 100;
-                $persenFin = ($gradeATD / ($value->total_qty ?? 0)) * 100;
-                $persenAll = ($dataKedua[$key]["qty_total_grade_a_GJD"] / ($value->total_qty ?? 0)) * 100;
-
-                $totalGradeA += $dataKedua[$key]["qty_total_grade_a_GJD"];
-                $totalGradeADF += $gradeADF;
-                $totalGradeATF += $gradeATF;
-                $totalGradeADT += $gradeATD;
-
-                $sheet->setCellValue("A" . $start_row, $value->nama_produk);
-                $sheet->setCellValue('B' . $start_row, $value->total_qty ?? 0);
-                $sheet->setCellValue('C' . $start_row, $dataKedua[$key]["qty_total_grade_a_GJD"]);
-                $sheet->setCellValue('D' . $start_row, round($persenAll, 2));
-                $sheet->setCellValue('E' . $start_row, $gradeADF);
-                $sheet->setCellValue('F' . $start_row, round($persenProd, 2));
-                $sheet->setCellValue('G' . $start_row, $gradeATF);
-                $sheet->setCellValue('H' . $start_row, round($persenDye, 2));
-                $sheet->setCellValue('I' . $start_row, $gradeATD);
-                $sheet->setCellValue('J' . $start_row, round($persenFin, 2));
-                $start_row++;
-            }
-            $start_row += 1;
-            $sheet->setCellValue("A" . $start_row, "Σ");
-            $sheet->setCellValue("B" . $start_row, $totalHphGjd);
-            $sheet->setCellValue("C" . $start_row, $totalGradeA);
-            $sheet->setCellValue("D" . $start_row, (($totalGradeA / $totalHphGjd) * 100));
-            $sheet->setCellValue("E" . $start_row, $totalGradeADF);
-            $sheet->setCellValue("F" . $start_row, (($totalGradeADF / $totalHphGjd) * 100));
-            $sheet->setCellValue("G" . $start_row, $totalGradeATF);
-            $sheet->setCellValue("H" . $start_row, (($totalGradeATF / $totalHphGjd) * 100));
-            $sheet->setCellValue("I" . $start_row, $totalGradeADT);
-            $sheet->setCellValue("J" . $start_row, (($totalGradeADT / $totalHphGjd) * 100));
-
-            $totalBAll = 0;
-            $totalCAll = 0;
-            foreach ($datas as $key => $value) {
-                $gradeBt = $dataKeduas[$key]["qty_produksi_b_t"] ?? 0;
-                $gradeBd = $dataKeduas[$key]["qty_produksi_b_d"] ?? 0;
-                $gradeBf = $dataKeduas[$key]["qty_produksi_b_f"] ?? 0;
-
-                $gradeCt = $dataKeduas[$key]["produksi_c_t_bs_pot"] ?? 0;
-                $gradeCd = $dataKeduas[$key]["produksi_c_d_bs"] ?? 0;
-                $gradeCf = $dataKeduas[$key]["produksi_c_f_bs"] ?? 0;
-                $gradeCtali = $dataKeduas[$key]["produksi_c_tali"] ?? 0;
-
-                $totalB = $gradeBt + $gradeBd + $gradeBf;
-                $totalC = $gradeCt + $gradeCd + $gradeCf + $gradeCtali;
-
-                $totalBAll += $totalB;
-                $totalCAll += $totalC;
-                $sheet->setCellValue("L" . $start_row_2, $value->nama_cacat);
-                $sheet->setCellValue("M" . $start_row_2, $gradeBt);
-                $sheet->setCellValue("N" . $start_row_2, $gradeBd);
-                $sheet->setCellValue("O" . $start_row_2, $gradeBf);
-                $sheet->setCellValue("p" . $start_row_2, round(($totalB / $totalHphGjd) * 100, 2));
-                $sheet->setCellValue("Q" . $start_row_2, $gradeCt);
-                $sheet->setCellValue("R" . $start_row_2, $gradeCd);
-                $sheet->setCellValue("S" . $start_row_2, $gradeCf);
-                $sheet->setCellValue("T" . $start_row_2, $gradeCtali);
-                $sheet->setCellValue("U" . $start_row_2, round(($totalC / $totalHphGjd) * 100, 2));
-                $start_row_2++;
-            }
-            $start_row_2 += 1;
-            $sheet->setCellValue("L" . $start_row_2, "Σ");
-            $sheet->setCellValue("M" . $start_row_2, $totalBAll);
-            $sheet->setCellValue("p" . $start_row_2, round(($totalBAll / $totalHphGjd) * 100, 2));
-            $sheet->setCellValue("Q" . $start_row_2, $totalCAll);
-            $sheet->setCellValue("U" . $start_row_2, round(($totalCAll / $totalHphGjd) * 100, 2));
-
-            $sheet->setCellValue("A1", "Laporan Kain Cacat Periode Tanggal " . $period[0] . ' - ' . $period[1]);
-            $sheet->mergeCells("A1:U1");
-            $sheet->getStyle('A1:U1')->getAlignment()->setHorizontal('center');
-            $writer = new Xlsx($spreadsheet);
-            $filename = "Lap_kain_cacat_periode_" . $period[0] . ' - ' . $period[1];
-            $url = "dist/storages/report/cacat kain";
-            if (!is_dir(FCPATH . $url)) {
-                mkdir(FCPATH . $url, 0775, TRUE);
-            }
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
-            $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
-                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
-        } catch (Exception $ex) {
-            $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
-        } finally {
-            
-            $this->m_analisa_kain_cacat->getQuery("DROP TABLE IF EXISTS {$uniqid}{$tbl_mrp_production},{$uniqid}{$tbl_mrp_production_fg_hasil},"
-                    . "{$uniqid}{$tbl_mrp_production_cacat},{$uniqid}{$tbl_mst_produk},{$uniqid}{$tbl_mst_produk_parent},{$uniqid}{$tbl_stock_quant};", false);
-        }
-    }
 }
