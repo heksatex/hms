@@ -167,8 +167,8 @@
                                                 <th class="style bb ws" >Kerangan</th>
                                                 <th class="style bb ws" >Reff Note</th>
                                                 <th class="style bb ws" >Partner</th>
-                                                <th class="style bb ws" >Debit</th>
-                                                <th class="style bb ws" >Credit</th>
+                                                <th class="style bb ws text-right" >Debit</th>
+                                                <th class="style bb ws text-right" >Credit</th>
                                             </tr>
                                             <tbody id="tBody" class="ws">
 

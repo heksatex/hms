@@ -25,8 +25,8 @@ foreach ($data as $key => $value) {
         <td><?= $value->nama ?></td>
         <td><?= $value->reff_note ?></td>
         <td><?= $value->nama_partner ?></td>
-        <td><?= number_format($debet,2) ?></td>
-        <td><?= number_format($kredit,2) ?></td>
+        <td class="text-right"><?= number_format($debet,2) ?></td>
+        <td class="text-right"><?= number_format($kredit,2) ?></td>
     </tr>
     <?php
 }
@@ -57,8 +57,8 @@ if ($no > 0) {
         <td></td> 
         <td></td> 
         <td></td> 
-        <td><?= number_format($debets,2) ?></td> 
-        <td><?= number_format($kredits,2) ?></td> 
+        <td class="text-right"><?= number_format($debets,2) ?></td> 
+        <td class="text-right"><?= number_format($kredits,2) ?></td> 
     </tr>
     <?php
 }
