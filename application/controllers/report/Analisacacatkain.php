@@ -266,7 +266,7 @@ class Analisacacatkain extends MY_Controller {
                 $query .= " and mi.sales_group = '{$marketing}' ";
             }
             else {
-                 $queryAwal .= " and mi.view = '1' ";
+                 $queryAwal .= " and msg.view = '1' ";
             }
             $query .= "AND mrppfghs.nama_grade IN ('B') GROUP by mrppfghs.lot, mpc.kode_cacat; ";
 
@@ -303,6 +303,9 @@ class Analisacacatkain extends MY_Controller {
             $query .= "AND mrppfghs.lokasi LIKE '%Stock' AND mrpp.dept_id='GJD' and mp.id_jenis_kain in {$jk} ";
             if ($marketing !== "") {
                 $query .= " and mi.sales_group = '{$marketing}' ";
+            }
+            else {
+                 $query .= " and msg.view = '1' ";
             }
             $query .= "AND mrppfghs.nama_grade IN ('C') GROUP by mrppfghs.lot, mpc.kode_cacat; ";
 
@@ -444,6 +447,7 @@ class Analisacacatkain extends MY_Controller {
                     $sheet->setCellValue("T" . $start_row_2, $value->c_fin);
                     $sheet->setCellValue("U" . $start_row_2, $value->c_lain);
                     $sheet->setCellValue("V" . $start_row_2, ($c > 0) ? round(($c / $totalAll * 100),2) : 0);
+                    $start_row_2++;
                 }
             } else {
                 $detail_group = $this->input->post("detail_group");
@@ -454,14 +458,13 @@ class Analisacacatkain extends MY_Controller {
                     "sum(a_dye) as a_dye, sum(a_fin) as a_fin, sum(b_prod) as b_prod",
                     "sum(b_dye) as b_dye, sum(b_fin) as b_fin, sum(b_lain) as b_lain",
                     "sum(c_dye) as c_dye, sum(c_fin) as c_fin, sum(c_lain) as c_lain,sum(c_prod) as c_prod"
-                ])->setOrder(["nama_parent"]);
+                ]);
                 $barcode = "";
                 if ($detail_group === "kp") { 
-                    $dataDetail = $ModelDetail->setSelects(["count(barcode) as barcode"])->setGroups([$detail_group])->getData();
+                    $dataDetail = $ModelDetail->setSelects(["count(barcode) as barcode"])->setGroups([$detail_group])->setOrder(["nama_parent"=>"asc","kp"=>"asc"])->getData();
                      $barcode.="Total ";
                 } else {
-                    $dataDetail = $ModelDetail->setSelects(["barcode"])->setGroups([$detail_group])->getData();
-                   
+                    $dataDetail = $ModelDetail->setSelects(["barcode"])->setGroups([$detail_group])->setOrder(["nama_parent"=>"asc","kp"=>"asc","barcode"=>"asc"])->getData();
                 }
                 $sheet->setCellValue("A{$start_row}", "No");
                 $sheet->mergeCells("A{$start_row}:A" . ($start_row + 2));

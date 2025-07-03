@@ -965,16 +965,16 @@ class Stockquants extends MY_Controller
 
 
             $pdf->SetFont('Arial','B',20,'C');
-            $pdf->setXY(0,8);
-            $pdf->Multicell(82,48,$barcode,0,'R');// Nama LOT 1
+            $pdf->setXY(3,8);
+            $pdf->Multicell(95,48,$barcode,0,'C');// Nama LOT 1
             //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
 
             $pdf->SetFont('Arial','B',30);
-            $pdf->setXY(82,6);
+            $pdf->setXY(95,6);
             $pdf->Multicell(20,48,$nama_grade,0,'L'); // grade
             //$pdf->Cell(0,3,$nama_grade,0,1);//grade
             
-            $pdf->Code128(5,40,$barcode,90,15,'C');//barcode 1
+            $pdf->Code128(5,40,$barcode,92,15,'C');//barcode 1
 
             $pdf->Output();
 
