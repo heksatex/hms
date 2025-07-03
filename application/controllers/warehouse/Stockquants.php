@@ -117,7 +117,7 @@ class Stockquants extends MY_Controller
         
                         $jenis_log   = "edit";        
                         $note_log    = $note_before.'<br> <b> -> </b>'. $sq->kode_produk.' '.$nama_produk.'  '.$corak_remark.'  '.$warna_remark.'  '.$lot.'  '.$nama_grade.' '.$qty_jual.' '.$uom_jual.' '.$qty2_jual.' '.$uom2_jual.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
-                        $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
+                        $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, addslashes($note_log), $username);
         
                         $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan ! ', 'icon' =>'fa fa-check', 'type' => 'success');
                     }
