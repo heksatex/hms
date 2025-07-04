@@ -171,17 +171,30 @@
                                                     <label class="form-label required">Periode ACC</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <select class="form-control select2" name="periode" id="periode">
-                                                        <?php
-                                                        $periodeNow = $inv->periode ?? date("Y/m");
-                                                        foreach ($periode as $kk => $val) {
-                                                            ?>
-                                                            <option value="<?= $val->periode ?>" <?= ($periodeNow === $val->periode) ? "selected" : "" ?> ><?= $val->periode ?></option>
-                                                            <?php
-                                                        }
+                                                    <?php
+                                                    if ($inv->status !== "draft") {
                                                         ?>
+                                                        <span><?= $inv->periode ?></span>
+                                                        <?php
+                                                    } else {
+                                                        ?>
+                                                        <select class="form-control select2" name="periode" id="periode">
+                                                            <?php
+                                                            $periodeNow = $inv->periode ?? date("Y/m");
+                                                            $selected = "selected";
 
-                                                    </select>
+                                                            foreach ($periode as $kk => $val) {
+                                                                ?>
+                                                                <option value="<?= $val->periode ?>" <?= ($periodeNow === $val->periode) ? "selected" : "" ?> ><?= $val->periode ?></option>
+                                                                <?php
+                                                            }
+                                                            ?>
+
+                                                        </select>
+                                                        <?php
+                                                    }
+                                                    ?>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -653,7 +666,7 @@
                                 jurnal: "<?= $inv->journal ?>",
                                 inv: "<?= $inv->no_invoice ?>",
                                 origin: "<?= $inv->origin ?>",
-                                periode:"<?= $inv->periode ?>"
+                                periode: "<?= $inv->periode ?>"
                             },
                             error: function (req, error) {
                                 unblockUI(function () {
