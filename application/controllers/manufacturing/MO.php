@@ -80,9 +80,21 @@ class MO extends MY_Controller
         $this->load->view('manufacturing/v_mo', $data);
     }
 
+    public function Dyeingreproses()
+    {
+        $data['id_dept']='DYE-R';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
     public function Finishing()
     {
         $data['id_dept']='FIN';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
+    public function Finishingreproses()
+    {
+        $data['id_dept']='FIN-R';
         $this->load->view('manufacturing/v_mo', $data);
     }
 
@@ -679,7 +691,7 @@ class MO extends MY_Controller
                         
                         }
                         
-                    }else if($deptid == 'DYE'){
+                    }else if($deptid == 'DYE' || $deptid == 'DYE-R'){
 
                         $orgn_set   = $origin_mo."|".$kode."|ADD|OBAT"; // ex SO18|CO7|2|OW210300001|MG210300004|ADD|OBAT
 
@@ -708,7 +720,11 @@ class MO extends MY_Controller
                         $sql_log_history_in         = "";
                         $sql_log_history_out        = "";
 
-                        $route  = $this->m_mo->get_route_warna('obat_dyeing');
+                        if($deptid == 'DYE-R'){
+                            $route  = $this->m_mo->get_route_warna('obat_dyeing_reproses');
+                        } else {
+                            $route  = $this->m_mo->get_route_warna('obat_dyeing');
+                        }
                         $sm_row = 1;///stock move row_order
                         $empty_item = TRUE;
 
@@ -4671,7 +4687,11 @@ class MO extends MY_Controller
                             $sql_log_history_in         = "";
                             $sql_log_history_out        = "";
 
-                            $route = $this->m_mo->get_route_warna('obat_dyeing');
+                            if($deptid == 'DYE-R'){
+                                $route = $this->m_mo->get_route_warna('obat_dyeing_reproses');
+                            } else {
+                                $route = $this->m_mo->get_route_warna('obat_dyeing');
+                            }
                             $kode_warna  = $this->m_mo->get_warna_items_by_warna($warna,$varian);
                             $get_row = $this->m_mo->get_row_order_rm_target($kode)->row_array();//get last_order di mrp rm target
                             //$rm_row  = $get_row['row']+1;
