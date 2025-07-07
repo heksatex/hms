@@ -991,7 +991,11 @@ class Joinlot extends MY_Controller
 
                     // get kode adj
                     $get_kode_adjustment   = $this->_module->get_kode_adj();  
-                    $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
+                    // $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);      
+                    $kode_adjustment       = substr($get_kode_adjustment, -5) + 1;
+                    $kode_adjustment_tmp   = substr($get_kode_adjustment, -5);
+                    $kode_adjustment      = substr("00000" . $kode_adjustment,-5);     
+                    $kode_adjustment_tmp2 = $kode_adjustment;
                     $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
 
                     $items_join     = $this->m_joinLot->get_data_join_lot_items_by_kode($kode_join);
@@ -1336,7 +1340,7 @@ class Joinlot extends MY_Controller
                             //create log history adjustment 
                             $ip         = $this->input->ip_address();
 
-                            $note_log_adj = $kode_adjustment." ini dibuat dari Fitur Join Lot";
+                            $note_log_adj = $kode_adjustment." ini dibuat dari Fitur Join Lot  <br> No. ".$kode_adjustment_tmp." => ".$kode_adjustment_tmp2;
                             $date_log        = date('Y-m-d H:i:s');
                             $insert_log_adj[] = array(
                                                     'datelog'   => $date_log,
