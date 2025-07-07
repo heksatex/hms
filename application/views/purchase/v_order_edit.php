@@ -207,7 +207,7 @@
                                 <?php if (!in_array($po->status, ["cancel", "done", "purchase_confirmed"])) { ?>
                                     <?php
                                     if (($po->status === 'waiting_approval')) {
-                                        if (in_array($user->level, ["Super Administrator", "Administrator", "Direksi"])) {
+                                        if (in_array($user->level, ["Super Administrator", "Direksi"])) {
                                             ?>
                                             <button class="btn btn-success btn-sm" id="btn-update-status" data-status="<?= $statuss[$po->status]["value"] ?? "-" ?>"  data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">
                                                 <i class="fa fa-check">&nbsp; <?= $statuss[$po->status]["text"] ?? "-" ?></i>
