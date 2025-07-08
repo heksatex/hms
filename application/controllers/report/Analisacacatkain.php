@@ -168,7 +168,7 @@ class Analisacacatkain extends MY_Controller {
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($period[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($period[1] . " 23:59:59"));
             $model = new $this->m_global;
-            $jk = "('" . implode(',', $jenis_kain) . "')";
+            $jk = "('" . implode("','", $jenis_kain) . "')";
 //            $model->copyExt($tbl_mrp_production_fg_hasil, $uniqid . $tbl_mrp_production_fg_hasil);
 //            $model->copyExt($tbl_mst_produk, $uniqid . $tbl_mst_produk);
 //            $model->copyExt($tbl_mst_produk_parent, $uniqid . $tbl_mst_produk_parent);
@@ -199,7 +199,6 @@ class Analisacacatkain extends MY_Controller {
             else {
                  $queryAwal .= " and mi.view = '1' ";
             }
-
             $rst = $model->excQuery($queryAwal);
             if (is_array($rst)) {
                 throw new \Exception("{$rst['message']}", 500);

@@ -172,13 +172,13 @@
                                 <?php
                                 if (in_array($po->status, ["purchase_confirmed", "done", "exception"])) {
                                     if ($po->edited_status === null) {
-                                        if (in_array(strtolower($user->level), ["super administrator", 'supervisor'])) {
+                                        if (in_array(strtolower($user->level), ["super administrator", 'administrator'])) {
                                             ?>
                                             <button class="btn btn-default btn-sm request_edit" data-status="approve"> Request Edit </button>
                                             <?php
                                         }
                                     } else {
-                                        if (in_array(strtolower($user->level), ["super administrator", 'supervisor'])) {
+                                        if (in_array(strtolower($user->level), ["super administrator", 'administrator'])) {
                                             if ($po->edited_status === "request") {
                                                 ?>
                                                 <button class="btn btn-primary btn-sm approve_edit" data-status="approve"> Approve Edit Harga </button>
