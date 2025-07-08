@@ -22,12 +22,19 @@
                 display: none !important;
             }
             <?php
-            if (in_array($user->level, ["Super Administrator", "Administrator","Supervisor"])) {
+            if (in_array($user->level, ["Super Administrator", "Administrator", "Supervisor"])) {
                 ?>
                 .confirm-as, .reject-btn{
                     display: inline-block !important;
                 }
                 <?php
+                if ($user->level == "Supervisor") {
+                    ?>
+                    .add-fpt-btn {
+                        display: none !important;
+                    }
+                    <?php
+                }
             }
             ?>
         </style>
