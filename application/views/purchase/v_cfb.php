@@ -22,7 +22,7 @@
                 display: none !important;
             }
             <?php
-            if (in_array($user->level, ["Super Administrator", "Administrator", "Supervisor"])) {
+            if (in_array($user->level, ["Super Administrator", "Administrator"])) {
                 ?>
                 .confirm-as, .reject-btn{
                     display: inline-block !important;
