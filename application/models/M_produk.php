@@ -125,7 +125,7 @@ class M_produk extends CI_Model {
 
     public function get_list_coa($coa) {
         return $this->db->query("SELECT kode_coa, CONCAT(kode_coa,' | ',nama) as nama_coa
-								FROM  coa
+								FROM  acc_coa
 								WHERE kode_coa LIKE '%$coa%' OR nama LIKE '%$coa%'
 								ORDER BY kode_coa LIMIT 10")->result_array();
     }
