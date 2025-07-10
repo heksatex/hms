@@ -105,9 +105,9 @@ class Invoice extends MY_Controller {
             $data['mms'] = $this->_module->get_data_mms_for_log_history('PINV');
             $data["invDetail"] = $detail->setTables("invoice_detail")->setWheres(["invoice_id" => $kode_decrypt])
                             ->setJoins("tax", "tax.id = tax_id", "left")
-                            ->setJoins("coa", "coa.kode_coa = account", "left")
+                            ->setJoins("acc_coa", "acc_coa.kode_coa = account", "left")
                             ->setSelects(["invoice_detail.*", "tax.id as tax_id,tax.nama as pajak,tax.ket as pajak_ket,amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                "kode_coa,coa.nama as nama_coa", "coalesce(tax_id,'0') as tax_id"])
+                                "kode_coa,acc_coa.nama as nama_coa", "coalesce(tax_id,'0') as tax_id"])
                             ->setOrder(["id"])->getData();
             $data["periode"] = $model4->setTables("acc_periode")->setWheres(["status" => "open"], true)->setOrder(["tahun_fiskal" => "desc", "periode" => "asc"])->getData();
             $this->load->view('purchase/v_invoice_edit', $data);
@@ -282,13 +282,13 @@ class Invoice extends MY_Controller {
             $kode_decrypt = decrypt_url($id);
             $head = new $this->m_global;
             $this->_module->startTransaction();
-            $lock = "invoice WRITE,jurnal_entries WRITE,jurnal_entries_items WRITE,token_increment WRITE,partner READ,"
+            $lock = "invoice WRITE,acc_jurnal_entries WRITE,acc_jurnal_entries_items WRITE,token_increment WRITE,partner READ,"
                     . "currency_kurs READ,currency READ,tax READ,invoice_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ";
             $this->_module->lock_tabel($lock);
             if ($status === 'cancel') {
                 $cekJurnal = clone $head;
 
-                if ($cekJurnal->setTables("jurnal_entries")->setWheres(["origin" => "{$inv}|{$origin}", "status <>" => $status])->getDetail() !== "null") {
+                if ($cekJurnal->setTables("acc_jurnal_entries")->setWheres(["origin" => "{$inv}|{$origin}", "status <>" => $status])->getDetail() !== "null") {
                     throw new \Exception('Jurnal Tidak Ada', 500);
                 }
             } else if ($status === 'done') {
@@ -323,7 +323,7 @@ class Invoice extends MY_Controller {
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
                     "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => date("Y-m-d H:i:s"), "tipe" => ($dataItems[0]->jurnal ?? ""),
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
-                $jurnalDB->setTables("jurnal_entries")->save($jurnalData);
+                $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
 
                 $jurnalDB->setTables("log_history")->save(
                         [
@@ -497,7 +497,7 @@ class Invoice extends MY_Controller {
                 );
                 $jurnalItems[] = $item;
                 $jurnalDBItems = new $this->m_global;
-                $jurnalDBItems->setTables("jurnal_entries_items")->saveBatch($jurnalItems);
+                $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
                 $jurnalItemsLog[] = [
                     "datelog" => date("Y-m-d H:i:s"),
                     "kode" => $jurnal,

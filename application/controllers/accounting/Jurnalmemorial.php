@@ -51,14 +51,14 @@ class Jurnalmemorial extends MY_Controller {
             $where = ["je.periode" => $periode];
         }
 
-        $this->data->setTables("jurnal_entries je")
-                ->setJoins("jurnal_entries_items jei", "je.kode = jei.kode")
+        $this->data->setTables("acc_jurnal_entries je")
+                ->setJoins("acc_jurnal_entries_items jei", "je.kode = jei.kode")
                 ->setJoins("mst_jurnal mj", "mj.kode = je.tipe", "left")
-                ->setJoins("coa", "jei.kode_coa = coa.kode_coa", "left")
+                ->setJoins("acc_coa", "jei.kode_coa = acc_coa.kode_coa", "left")
                 ->setJoins("partner", "partner.id = jei.partner", "left")
                 ->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
                 ->setWheres(array_merge(["je.status" => "posted", "je.tipe" => $jurnal], $where))
-                ->setSelects(["mj.nama as nama_jurnal", "coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
+                ->setSelects(["mj.nama as nama_jurnal", "acc_coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
                     "origin,tanggal_posting"]);
 //        } catch (Exception $ex) {
 //            
