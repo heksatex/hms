@@ -466,7 +466,7 @@ class Produk extends MY_Controller {
         $data['route'] = $this->m_produk->get_list_route();
         $data["id"] = $id;
         $harga = new $this->m_coa;
-        $data["coa"] = $this->m_coa->setJoins("mst_produk_coa", "(mst_produk_coa.kode_coa = coa.kode_coa and level = 5)")->setWheres(['jenis' => 'pembelian', 'kode_produk' => $produk->kode_produk])
+        $data["coa"] = $this->m_coa->setJoins("mst_produk_coa", "(mst_produk_coa.kode_coa = acc_coa.kode_coa and level = 5)")->setWheres(['jenis' => 'pembelian', 'kode_produk' => $produk->kode_produk])
                         ->setSelects(['acc_coa.*'])->getDetail();
 
         $data["harga"] = $harga->setTables("mst_produk_harga")->setWheres(['jenis' => 'pembelian', 'kode_produk' => $produk->kode_produk])->getDetail();
