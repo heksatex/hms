@@ -202,8 +202,8 @@ class Purchaseorder extends MY_Controller {
             $lockTable = "user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,cfb_items write,cfb write,procurement_purchase_items write,"
                     . "purchase_order_detail write,purchase_order write,penerimaan_barang WRITE,penerimaan_barang_items WRITE,setting READ";
             if ($status === 'done' || $status === "purchase_confirmed") {
-                $lockTable .= ",stock_move_produk WRITE,stock_move WRITE,token_increment WRITE,nilai_konversi nk WRITE,invoice WRITE,invoice_detail write,jurnal_entries WRITE"
-                        . ",jurnal_entries_items WRITE,currency write,currency_kurs write,tax write,partner write,purchase_order_edited WRITE";
+                $lockTable .= ",stock_move_produk WRITE,stock_move WRITE,token_increment WRITE,nilai_konversi nk WRITE,invoice WRITE,invoice_detail write,acc_jurnal_entries WRITE"
+                        . ",acc_jurnal_entries_items WRITE,currency write,currency_kurs write,tax write,partner write,purchase_order_edited WRITE";
             }
             $this->_module->lock_tabel($lockTable);
             $updateDataDetail = [];
@@ -279,7 +279,7 @@ class Purchaseorder extends MY_Controller {
                                         "update dpp lain " . number_format($data->dpp_lain, 4) . ", total " . number_format($data->total, 4) . ", " . logArrayToString(";", $logInvDetail),
                                         $username);
                             }
-                            $cekJurnal = $modelJurnal->setTables("jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
+                            $cekJurnal = $modelJurnal->setTables("acc_jurnal_entries")->setWheres(["origin LIKE" => "{$cekInv->no_invoice}|%", "status <>" => 'cancel'])->getDetail();
                             if ($cekJurnal !== null) {
                                 $items = new $this->m_global;
                                 $dataItems = $items->setTables("invoice_detail")->setWheres(["invoice_id" => $cekInv->id])
@@ -298,7 +298,7 @@ class Purchaseorder extends MY_Controller {
                                 $totalNominal = 0;
                                 $pajakLain = [];
                                 $modelJurnal = new $this->m_global;
-                                $modelJurnal->setTables("jurnal_entries_items");
+                                $modelJurnal->setTables("acc_jurnal_entries_items");
                                 $jurnal_items = [];
                                 $rowCount = 0;
                                 foreach ($dataItems as $key => $value) {
@@ -306,7 +306,7 @@ class Purchaseorder extends MY_Controller {
                                     $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
                                     $ttls = ($nominal * $value->nilai_matauang);
                                     $nm = "[{$value->kode_produk}] {$value->nama_produk} (" . number_format($value->qty_beli, 2) . " {$value->uom_beli})";
-//                                    $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$nominal}',nominal='{$ttls}' where kode = '{$cekJurnal->kode}' and nama LIKE '{$nm}'";
+//                                    $updateQueryJurnal[] = "update acc_jurnal_entries_items set nominal_curr ='{$nominal}',nominal='{$ttls}' where kode = '{$cekJurnal->kode}' and nama LIKE '{$nm}'";
 //                                    $tax += $nominal * $value->tax_amount;
                                     $totalNominal += $nominal;
                                     $logJurnal [] = "nominal Kurs {$nominal} nominal {$ttls} untuk produk {$value->kode_produk} {$value->nama_produk}";
@@ -418,7 +418,7 @@ class Purchaseorder extends MY_Controller {
                                             }
                                         }
                                         foreach ($dataPajakLain as $kk => $valueee) {
-//                                            $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$valueee['nominal_curr']}', nominal='{$valueee['nominal']}' where kode='{$cekJurnal->kode}' and nama='{$kk}'";
+//                                            $updateQueryJurnal[] = "update acc_jurnal_entries_items set nominal_curr ='{$valueee['nominal_curr']}', nominal='{$valueee['nominal']}' where kode='{$cekJurnal->kode}' and nama='{$kk}'";
                                             $jurnalItems[] = $valueee;
                                             $logJurnal [] = "{$kk} update nominal Kurs {$valueee['nominal_curr']} nominal {$valueee['nominal']}";
                                         }
@@ -429,7 +429,7 @@ class Purchaseorder extends MY_Controller {
                                     $defaultPpn = $modelSetting->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
                                     $ttmax = $totalNominal + $tax + $taxLain;
                                     $nttmax = $ttmax * $dataItems[0]->nilai_matauang;
-//                                    $updateQueryJurnal[] = "update jurnal_entries_items set nominal_curr ='{$ttmax}',nominal='{$nttmax}' where kode = '{$cekJurnal->kode}' and kode_coa = '{$defaultPpn->value}'";
+//                                    $updateQueryJurnal[] = "update acc_jurnal_entries_items set nominal_curr ='{$ttmax}',nominal='{$nttmax}' where kode = '{$cekJurnal->kode}' and kode_coa = '{$defaultPpn->value}'";
                                     $jurnalItems[] = [
                                         "nominal_curr" => $ttmax,
                                         "nominal" => $nttmax,
@@ -443,7 +443,7 @@ class Purchaseorder extends MY_Controller {
                                         "kode_mua" => $dataItems[0]->name_curr,
                                         "row_order" => $rowCount + 1
                                     ];
-                                    $modelJurnal->setTables("jurnal_entries_items")->setWheres(["kode" => $cekJurnal->kode], true)->delete();
+                                    $modelJurnal->setTables("acc_jurnal_entries_items")->setWheres(["kode" => $cekJurnal->kode], true)->delete();
                                     $cekUpdateIn = $modelJurnal->saveBatch($jurnalItems);
                                     $logJurnal [] = "nominal Kurs {$ttmax} nominal {$nttmax} Untuk Hutang Dagang";
 //                                    $cekUpdateIn = $modelPO->query($updateQueryJurnal);
@@ -709,7 +709,7 @@ class Purchaseorder extends MY_Controller {
             $this->_module->startTransaction();
             $locktabel = "purchase_order_detail Write, purchase_order WRITE, purchase_order_edited WRITE,"
                     . "user WRITE, main_menu_sub READ, log_history WRITE,purchase_order_retur WRITE,tax WRITE,"
-                    . "jurnal_entries write,token_increment WRITE,nilai_konversi WRITE";
+                    . "acc_jurnal_entries write,token_increment WRITE,nilai_konversi WRITE";
             $this->_module->lock_tabel($locktabel);
             $logProduk = [];
             $dataRetur = [];

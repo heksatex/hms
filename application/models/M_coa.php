@@ -17,7 +17,7 @@ class M_coa extends CI_Model {
     protected $orders = [];
     protected $search = [];
     protected $order = [];
-    protected $table = "coa";
+    protected $table = "acc_coa";
     protected $wheres = [];
     protected $selects = [];
     protected $joins = ["table" => [],
