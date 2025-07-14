@@ -447,11 +447,11 @@
                                                     <th class="style" width="10px">No</th>
                                                     <th class="style" style="width:10%">Kode CFB</th>
                                                     <th class="style" style="width:10%" >Produk</th>
-                                                    <th class="style" style="width:15%">Deskripsi</th>
+                                                    <th class="style" style="width:10%">Deskripsi</th>
                                                     <th class="style" style="width:10%">Schedule Date</th>
                                                     <th class="style"style="width:15%" >Qty / Uom Beli</th>
-                                                    <td class="style text-right" style="width:15%">Harga Satuan Beli</td>
-                                                    <td class="style text-right" style="min-width: 100px">Tax</td>
+                                                    <td class="style text-right" style="width:13%">Harga Satuan Beli</td>
+                                                    <td class="style text-right" style="width: 10%">Tax</td>
                                                     <td class="style" >Reff Note</td>
                                                     </thead>
                                                     <tbody>
@@ -535,7 +535,7 @@
                                                                             <input type="hidden" class="amount_tax_<?= $key ?>" name="amount_tax[<?= $value->id ?>]" value="<?= $value->amount_tax ?>">
                                                                             <input type="hidden" class="tax_lain_id_<?= $key ?>" name="tax_lain_id[<?= $value->id ?>]" value="<?= $value->tax_lain_id ?>">
                                                                             <input type="hidden" class="dpp_tax_<?= $key ?>" name="dpp_tax[<?= $value->id ?>]" value="<?= $value->dpp_tax ?>">
-                                                                            <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>" disabled>
+                                                                            <select class="form-control uom_beli input-xs uom_beli_data_<?= $key ?>" style="width: 100%" data-row="<?= $key ?>" disabled>
                                                                                 <option></option>
                                                                                 <?php
                                                                                 if (!is_null($value->id_konversiuom)) {
@@ -553,10 +553,10 @@
                                                                     </div>
                                                                 </td>
                                                                 <td>
-                                                                    <div class="form-group">
-                                                                        <input class="form-control pull-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
+                                                                    
+                                                                        <input class="form-control pull-right text-right input-sm" name="harga[<?= $value->id ?>]" <?= ($po->status === 'exception' && (!in_array($value->status, ["cancel", "retur"]))) ? '' : 'readonly' ?>
                                                                                value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" required>
-                                                                    </div>
+                                                                   
                                                                 </td>
                                                                 <td>
                                                                     <div class="form-group text-right">
