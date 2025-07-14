@@ -340,11 +340,11 @@
                                         <th class="style" width="10px">No</th>
                                         <th class="style" style="width:10%">Kode CFB</th>
                                         <th class="style" style="width:10%" >Produk</th>
-                                        <th class="style" style="width:15%">Deskripsi</th>
+                                        <th class="style" style="width:10%">Deskripsi</th>
                                         <th class="style" style="width:10%">Schedule Date</th>
-                                        <th class="style"style="width:13%" >Qty / Uom Beli</th>
+                                        <th class="style"style="width:15%" >Qty / Uom Beli</th>
                                         <td class="style text-right" style="width:13%">Harga Satuan Beli</td>
-                                        <td class="style text-right" style="width:10%" >Tax</td>
+                                        <td class="style text-right" style="width:15%" >Tax</td>
                                         <td class="style" >Reff Note</td>
                                         </thead>
                                         <tbody>
@@ -442,14 +442,14 @@
                                                     <td>
                                                         <div class="form-group">
                                                             <?php if ($po->no_value === "1") { ?>
-                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" readonly
+                                                                <input class="form-control pull-right text-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" readonly
                                                                        value="0">
                                                                    <?php } else { ?>
-                                                                <input class="form-control pull-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
+                                                                <input class="form-control pull-right text-right input-sm harga_satuan harga_satuan_<?= $key ?>" name="harga[<?= $value->id ?>]" <?= ($po->status === 'draft') ? '' : 'disabled' ?>
                                                                        value="<?= $value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0 ?>" data-row="<?= $key ?>" required>
                                                                    <?php } ?>
 
-                                                            <small class="form-text text-muted note_harga_<?= $key ?>">
+                                                            <small class="form-text text-right text-muted note_harga_<?= $key ?>">
                                                                 <?= number_format(($value->harga_per_uom_beli > 0 ? (float) $value->harga_per_uom_beli : 0), 2, ".", ",") ?>
                                                             </small>
                                                         </div>
