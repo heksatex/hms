@@ -465,7 +465,7 @@
   });
 
   $("#departemen").on('change', function (e) {
-      if($(this).val() == 'GRG'){
+      if($(this).val() == 'GRG' || $(this).val() == 'GRG-R'){
         $("#dd_show").show();
       }else{
         $("#dd_show").hide();
@@ -2177,6 +2177,9 @@
               row4 += "<td class='white-space-nowrap'>"+value.nama_jenis_kain+"</td>";
             }else{ // detail
               row4 += "<td class='white-space-nowrap'>"+value.lot+"</td>";
+              if(departement == 'INS2'){
+                row4 += "<td class='white-space-nowrap'>"+value.lot_masking+"</td>";
+              }
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.go_qty1)+" "+value.go_qty1_uom+"</td>";
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.go_qty2)+" "+value.go_qty2_uom+"</td>";
               row4 += "<td class='white-space-nowrap'>"+value.no_go+"</td>";
@@ -2254,7 +2257,7 @@
               row4 += "<td class='white-space-nowrap' align='right'>"+formatNumber(value.prod_qty_opname)+" "+value.prod_qty_opname_uom+" </td>";
             }
 
-            if(view == "DetailLot" && (departement == 'FIN' || departemen == 'DF' || departement == 'DF2'))
+            if(view == "DetailLot" && (departement == 'FIN' || departemen == 'DF' || departement == 'DF2' || departement == 'DFR' || departement == 'FINR'))
             // process
             $.each(field_view, function(a,b){
                   for (var i = 0, l = b.in.length; i<l; i++){

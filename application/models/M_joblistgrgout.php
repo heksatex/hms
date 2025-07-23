@@ -90,7 +90,7 @@ class M_joblistgrgout extends CI_Model
 	function get_datatables($id_dept,$mmss)
 	{
 		$this->_get_datatables_query();
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where_in('dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		$this->db->where_in('pb.status',array('ready','draft'));
 		if(isset($_POST["length"]) && $_POST["length"] != -1)
@@ -101,7 +101,7 @@ class M_joblistgrgout extends CI_Model
 
 	function count_filtered($id_dept,$mmss)
 	{
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where_in('dept_id',$id_dept);
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
 		$this->db->where_in('pb.status',array('ready','draft'));
 		$this->_get_datatables_query();
@@ -120,7 +120,7 @@ class M_joblistgrgout extends CI_Model
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
 		$this->db->join("stock_move sm", "sm.move_id=pb.move_id", "inner");
 		$this->db->where("mmss.main_menu_sub_kode", $mmss);
-		$this->db->where('dept_id',$id_dept);
+		$this->db->where_in('dept_id',$id_dept);
 		$this->db->where_in('pb.status',array('ready','draft'));
 		return $this->db->count_all_results();
 	}
