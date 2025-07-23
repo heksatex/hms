@@ -91,8 +91,18 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Dyeingreproses() {
+        $data['id_dept'] = 'DYE-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Finishing() {
         $data['id_dept'] = 'FIN';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+    
+    public function Finishingreproses() {
+        $data['id_dept'] = 'FIN-R';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
@@ -101,8 +111,18 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Brushingreproses() {
+        $data['id_dept'] = 'BRS-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Finbrushing() {
         $data['id_dept'] = 'FBR';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
+    public function Finbrushingreproses() {
+        $data['id_dept'] = 'FBR-R';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
@@ -111,13 +131,28 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Paddingreproses() {
+        $data['id_dept'] = 'PAD-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Setting() {
         $data['id_dept'] = 'SET';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Settingreproses() {
+        $data['id_dept'] = 'SET-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Inspecting2() {
         $data['id_dept'] = 'INS2';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
+    public function Inspecting2reproses() {
+        $data['id_dept'] = 'INS2-R';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 

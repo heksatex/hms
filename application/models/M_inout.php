@@ -178,6 +178,8 @@ class M_inout extends CI_Model
         if(!empty($sales_group)){
             $mkt     .= " AND sg.kode_sales_group LIKE '%".$sales_group."%' ";
         }
+
+        $dept = $this->arr_to_string($dept_id);
         
 
         return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, 
@@ -191,10 +193,16 @@ class M_inout extends CI_Model
                                 INNER JOIN (SELECT w.nama_warna, cod.kode_co, cod.row_order FROM color_order_detail as cod
                                             INNER JOIN  warna as w ON cod.id_warna = w.id ) as dti ON dti.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(origin,'|',3) ,'|',-2),'|',1) AND dti.row_order = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(origin,'|',3) ,'|',-2),'|',-1)
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND pb.dept_id = '$dept_id'  $reff_picking $status $kode_out $nama_produk $nama_warna $mkt
+                                AND pb.dept_id IN  ('".$dept."')  $reff_picking $status $kode_out $nama_produk $nama_warna $mkt
                                 ORDER BY pb.tanggal_transaksi, smi.row_order")->result();
 
     }
+
+
+    function arr_to_string($id_dept)
+	{
+		return implode("','",$id_dept);
+	}
 
 
     public function get_list_pengiriman_greige_by_group($tgldari,$tglsampai,$dept_id,$dept_tujuan,$status1,$kode,$warna,$corak,$sales_group)
@@ -227,6 +235,8 @@ class M_inout extends CI_Model
             $mkt     .= " AND sg.kode_sales_group LIKE '%".$sales_group."%' ";
         }
 
+        $dept = $this->arr_to_string($dept_id);
+
         return $this->db->query("SELECT pb.kode, pb.origin, pb.reff_picking,pb.tanggal_transaksi, pb.move_id, smi.kode_produk, smi.nama_produk,  
                                         count(smi.lot) as tot_lot, sum(smi.qty) as tot_qty, smi.uom, sum(smi.qty2) as tot_qty2, smi.uom2, pb.reff_note,  pb.status,
                                 sg.nama_sales_group as mkt,dti.nama_warna
@@ -239,7 +249,7 @@ class M_inout extends CI_Model
                                 INNER JOIN (SELECT w.nama_warna, cod.kode_co, cod.row_order FROM color_order_detail as cod
                                             INNER JOIN  warna as w ON cod.id_warna = w.id ) as dti ON dti.kode_co = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(origin,'|',3) ,'|',-2),'|',1) AND dti.row_order = SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING_INDEX(origin,'|',3) ,'|',-2),'|',-1)
                                 WHERE pb.tanggal_transaksi >= '$tgldari' AND pb.tanggal_transaksi <= '$tglsampai'
-                                AND pb.dept_id = '$dept_id' $reff_picking $status $kode_out $nama_produk $nama_warna $mkt
+                                AND pb.dept_id IN  ('".$dept."') $reff_picking $status $kode_out $nama_produk $nama_warna $mkt
                                 GROUP BY pb.kode
                                 ORDER BY pb.tanggal_transaksi")->result();
 
