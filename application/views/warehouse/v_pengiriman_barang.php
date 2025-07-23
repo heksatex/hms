@@ -70,11 +70,11 @@
                     </div>                                    
                 </div>
                 <div class="col-md-12 col-xs-12">
-                  <div class="col-xs-4"><label>Reff Picking</label></div>
-                   <div class="col-xs-8">
-                      <input type="text" class="form-control input-sm" name="reff_picking" id="reff_picking" />
-                    </div>                                    
-                </div>
+                    <div class="col-xs-4"><label>Kode/Nama Produk<label></div>
+                    <div class="col-xs-8">
+                      <input type="text" class="form-control input-sm" name="nama_produk" id="nama_produk" placeholder="Kode/Nama Produk"/>
+                    </div>
+                  </div>
               </div>
             </div>
             <div class="col-md-6">
@@ -151,7 +151,7 @@
                     data.kode = $('#kode').val();
                     data.status = $('#status').val();
                     data.reff = $('#reff').val();
-                    data.reff_picking = $('#reff_picking').val();
+                    data.nama_produk = $('#nama_produk').val();
                 },
                 //"data":{"id_dept" : "<?php echo $id_dept;?>", "kode" : kode, "status" : status, "reff":status }
             },
