@@ -27,7 +27,7 @@ class Pengirimangreige extends MY_Controller
 	{
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
-		$departemen  = 'GRG';
+		$departemen  = array('GRG','GRG-R');
 		$dept_tujuan = $this->input->post('tujuan');
 		$kode   		= addslashes($this->input->post('kode'));
 		$warna   		= addslashes($this->input->post('warna'));
@@ -120,7 +120,7 @@ class Pengirimangreige extends MY_Controller
 		ob_start();
 		$tgldari     = date('Y-m-d H:i:s', strtotime($this->input->post('tgldari')));
 		$tglsampai   = date('Y-m-d H:i:s', strtotime($this->input->post('tglsampai')));
-		$departemen  = 'GRG';
+		$departemen  = array('GRG','GRG-R');
 		$dept_tujuan = $this->input->post('tujuan');
 		$kode   		= addslashes($this->input->post('kode'));
 		$warna   		= addslashes($this->input->post('warna'));
@@ -144,7 +144,7 @@ class Pengirimangreige extends MY_Controller
 		}
 
 
-		$dept = $this->_module->get_nama_dept_by_kode($departemen)->row_array();
+		$dept = $this->_module->get_nama_dept_by_kode('GRG')->row_array();
 		$dept_tuj = $this->_module->get_nama_dept_by_kode($dept_tujuan)->row_array();
 		
 		$status      = '';
