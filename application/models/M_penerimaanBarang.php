@@ -27,8 +27,12 @@ class M_penerimaanBarang extends CI_Model
 		if ($this->input->post('reff')) {
 			$this->db->like('reff_note', $this->input->post('reff'));
 		}
-		if ($this->input->post('reff_picking')) {
-			$this->db->like('reff_picking', $this->input->post('reff_picking'));
+
+		if ($this->input->post('nama_produk')) {
+			$this->db->group_start();
+			$this->db->like('pbi.nama_produk', $this->input->post('nama_produk'));
+			$this->db->or_like('pbi.kode_produk', $this->input->post('nama_produk'));
+			$this->db->group_end(); 
 		}
 
 		//$this->db->from($this->table);
@@ -36,6 +40,10 @@ class M_penerimaanBarang extends CI_Model
 		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status, pb.origin, pb.nama_partner");
 		$this->db->from("penerimaan_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
+
+		if ($this->input->post('nama_produk')) {
+			$this->db->join('penerimaan_barang_items as pbi', "pb.kode = pbi.kode", "LEFT");
+		}
 
 		$i = 0;
 

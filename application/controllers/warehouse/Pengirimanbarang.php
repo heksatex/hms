@@ -83,8 +83,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Greigereproses() {
+        $data['id_dept'] = 'GRG-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
     public function Dyeing() {
         $data['id_dept'] = 'DYE';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
+    public function Dyeingreproses() {
+        $data['id_dept'] = 'DYE-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -93,8 +103,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Finishingreproses() {
+        $data['id_dept'] = 'FIN-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+  
     public function Brushing() {
         $data['id_dept'] = 'BRS';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
+    public function Brushingreproses() {
+        $data['id_dept'] = 'BRS-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -103,8 +123,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Finbrushingreproses() {
+        $data['id_dept'] = 'FBR-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
     public function Padding() {
         $data['id_dept'] = 'PAD';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+    
+    public function Paddingreproses() {
+        $data['id_dept'] = 'PAD-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -113,8 +143,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Settingreproses() {
+        $data['id_dept'] = 'SET-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
     public function Inspecting2() {
         $data['id_dept'] = 'INS2';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
+    public function Inspecting2reproses() {
+        $data['id_dept'] = 'INS2-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -337,7 +377,7 @@ class Pengirimanbarang extends MY_Controller {
         $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username, $kode['kode'])->num_rows();
 
         // get warna untuk greige out()
-        if ($list->dept_id == 'GRG' AND $list->origin != '') {
+        if (($list->dept_id == 'GRG' OR $list->dept_id == 'GRG-R') AND $list->origin != '') {
             $origin = $list->origin;
             $origin_ex = explode("|", $origin);
             $kode_co = $origin_ex[1];
@@ -727,7 +767,7 @@ class Pengirimanbarang extends MY_Controller {
                     $where .= "'" . $quantid . "',";
 
                     $get_jml_qty = $get_jml_qty + $qty;
-                    if (round($get_jml_qty, 2) > round($qty_produk, 2) AND $deptid == 'GRG') {
+                    if (round($get_jml_qty, 2) > round($qty_produk, 2) AND ($deptid == 'GRG' || $deptid == 'GRG-R')) {
                         $qty_quant_lebih = true;
                         break;
                     }
@@ -772,7 +812,7 @@ class Pengirimanbarang extends MY_Controller {
                 $note_log = "Tambah Data Details -> <br>" . $list_product;
                 $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, addslashes($note_log), $username, $deptid);
                 $callback = array('status' => 'success', 'message' => 'Detail Product Berhasil Ditambahkan !', 'icon' => 'fa fa-check', 'type' => 'success');
-            } else if ($qty_quant_lebih == true AND $deptid == 'GRG') {
+            } else if ($qty_quant_lebih == true AND ($deptid == 'GRG' || $deptid == 'GRG-R')) {
                 $callback = array('status' => 'failed', 'message' => 'Maaf, Qty Melebih target !', 'icon' => 'fa fa-check', 'type' => 'danger');
             } else {
                 $callback = array('status' => 'kosong', 'message' => 'Maaf, Product Sudah ada yang terpakai !', 'icon' => 'fa fa-check', 'type' => 'danger');
@@ -1141,7 +1181,7 @@ class Pengirimanbarang extends MY_Controller {
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else if ($cek_tmp == 0 AND $mode == 'scan') {
                     $callback = array('status' => 'failed', 'message' => 'Barcode belum di Scan, Silahkan Scan Barcode terlebih dahulu !', 'icon' => 'fa fa-warning', 'type' => 'danger');
-                } else if ($count_all_lot != $count_lot_scan AND $mode == 'scan' AND $method == 'GRG|OUT') {
+                } else if ($count_all_lot != $count_lot_scan AND $mode == 'scan' AND ($method == 'GRG|OUT' || $method == 'GRG-R|OUT')) {
                     $callback = array('status' => 'failed', 'message' => 'Barcode Harus di Scan Semua  !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else if ($cek_qc_dept > 0 AND $qc_out == 'false') {
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Data tidak bisa Dikirim, sebelum dilakukan Quality Control (QC) " ' . $nama_qc . ' " !', 'icon' => 'fa fa-warning', 'type' => 'danger');
@@ -1382,7 +1422,7 @@ class Pengirimanbarang extends MY_Controller {
 
                     if (!empty($where7)) {
                         $where7 = rtrim($where7, ','); // update reserve origin di hapus
-                        if ($method == 'GRG|OUT') {
+                        if ($method == 'GRG|OUT' OR $method == 'GRG-R|OUT') {
                             $reserve_origin = " reserve_origin =(case " . $case7 . " end), ";
                         } else {
                             $reserve_origin = "";
@@ -1666,7 +1706,7 @@ class Pengirimanbarang extends MY_Controller {
                         $callback = array('status' => 'success', 'message' => 'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type' => 'success');
                     }
 
-                    if ($deptid == 'GRG' AND $origin != '') {
+                    if (($deptid == 'GRG' OR $deptid == 'GRG-R') AND $origin != '') {
 
                         // insert to  tabel print greige out
                         $arr_insert = [];
@@ -2509,7 +2549,7 @@ class Pengirimanbarang extends MY_Controller {
             $dept_id = $this->input->get('departemen');
             $kode = $this->input->get('kode');
 
-            if ($dept_id == 'GRG') {
+            if ($dept_id == 'GRG' || $dept_id == 'GRG-R') {
                 $jenis_log = "print";
                 $note_log = "Print Pengiriman Barang Greige (GREIGE OUT)";
                 $sub_menu = $this->uri->segment(2);
@@ -2818,8 +2858,8 @@ class Pengirimanbarang extends MY_Controller {
 
         // info no Greige Out
         $pdf->SetFont('Arial', 'B', 20, 'C');
-        $pdf->setXY(130, 13);
-        $pdf->Multicell(75, 5, $kode, 0, 'R');
+        $pdf->setXY(115, 13);
+        $pdf->Multicell(90, 5, $kode, 0, 'R');
 
         // get warna by origin
         $get_w = $this->m_pengirimanBarang->get_nama_warna_by_origin($kode_co, $row_co)->row_array();
@@ -3131,7 +3171,7 @@ class Pengirimanbarang extends MY_Controller {
         $pdf->SetXY($xPos + 5, $yPos);
         $pdf->Multicell(72, $cellHeight, 'Route Color Order : ', 0, 'L');
 
-        $pdf->SetFont('Arial', 'B', 9, 'C');
+        $pdf->SetFont('Arial', 'B', 8, 'C');
 
         $xx = 5;
         $var_yPost = true;
