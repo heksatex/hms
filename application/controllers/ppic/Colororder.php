@@ -471,6 +471,8 @@ class Colororder extends MY_Controller
                       $reff_picking_out = "";
                       $move_id_rm       = "";
                       $move_id_fg       = "";
+                      $dept_empty_val   = "";
+                      $dept_empty       = FALSE;
                       $sm_row           = 1;
                       $nama_prod_rm     = $nama_produk;
 
@@ -494,6 +496,12 @@ class Colororder extends MY_Controller
                         $method_action = trim($mthd[1]);
 
                         $nama_dept        = $this->m_colorOrder->get_nama_dept_by_kode($method_dept)->row_array();
+                        if(!isset($nama_dept)){
+                          $dept_empty_val .= $method_dept.' <br> ';
+                          $dept_empty = TRUE;
+                          break;
+                        }
+                        
                         if($method_dept == 'GJD'){
                           $product_fullname = $product_warna;
                         }else{
@@ -852,7 +860,7 @@ class Colororder extends MY_Controller
 
                     } //end foreach color order details / COD
                     
-                    if($id_parent_empty == FALSE AND $id_sub_parent_empty == FALSE AND $id_jenis_kain_empty == FALSE AND $produk_aktif == TRUE AND $jenis_kain_same == TRUE AND $parent_produk_same == TRUE AND $parent_produk_same == TRUE AND $satuan_produk_new_empty == FALSE AND $satuan_produk_empty == FALSE){
+                    if($id_parent_empty == FALSE AND $id_sub_parent_empty == FALSE AND $id_jenis_kain_empty == FALSE AND $produk_aktif == TRUE AND $jenis_kain_same == TRUE AND $parent_produk_same == TRUE AND $parent_produk_same == TRUE AND $satuan_produk_new_empty == FALSE AND $satuan_produk_empty == FALSE AND $dept_empty == FALSE){
 
                       if(!empty($sql_insert_batch)){
                         $sql_insert_batch = rtrim($sql_insert_batch, ', ');
@@ -1006,13 +1014,16 @@ class Colororder extends MY_Controller
                         $nama_jenis_kain_not_same = rtrim($nama_jenis_kain_not_same,', ');
                         $callback = array('status' => 'failed','message' => 'Maaf, Jenis Kain Tidak Sama ! <b>'.$nama_jenis_kain_not_same.'</b> </br>  Harap samakan terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
 
+                      }else if($dept_empty == TRUE){
+                        $callback = array('status' => 'failed','message' => 'Maaf, Departemen tidak ada  ! </br>  <b>' .$dept_empty_val, 'icon' =>'fa fa-check', 'type' => 'danger');
+
                       }else if( $satuan_produk_new_empty == TRUE){
                         $satuan_produk_new_empty_departemen = rtrim($satuan_produk_new_empty_departemen,', ');
                         $callback = array('status' => 'failed','message' => 'Maaf, Master Uom atau Uom 2 di departemen tersebut Kosong ! <b>'.$satuan_produk_new_empty_departemen.'</b> </br>  Harap isi terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
                       }else if( $satuan_produk_empty == TRUE){
                         $nama_satuan_produk_empty = rtrim($nama_satuan_produk_empty,', ');
                         $callback = array('status' => 'failed','message' => 'Maaf, Uom atau Uom2 kosong ! <b>'.$nama_satuan_produk_empty.'</b> </br>  Harap isi terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
-                        
                       }else{
                         $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-check', 'type' => 'danger');
                       }

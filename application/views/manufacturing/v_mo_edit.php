@@ -631,7 +631,7 @@
 
                             <div  class="row">
                             <?php 
-                            if($type_mo['type_mo']=='knitting') {//cek type_mo 
+                            if($type_mo['type_mo']=='knitting' || $list->dept_id == 'GJD') {//cek type_mo 
                             ?>
                               <!-- Tabel Kiri -->
                               <div class="col-md-6 table-responsive">
