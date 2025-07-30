@@ -639,7 +639,7 @@ class MO extends MY_Controller
                     $this->_module->unlock_tabel();
                 }else{
 
-                    if($tp['type_mo'] == 'knitting'){
+                    if($tp['type_mo'] == 'knitting' || $deptid == 'GJD'){
                         $orgn_set   = $origin_mo."|".$kode."|ADD"; // ex ORIGIN MO|MO|ADD
 
                         $last_move   = $this->_module->get_kode_stock_move();
