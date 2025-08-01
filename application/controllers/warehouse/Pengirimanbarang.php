@@ -2768,7 +2768,7 @@ class Pengirimanbarang extends MY_Controller {
                 }
             }
             
-            $printer->feed();
+            $buff->write("\x0c");
             $datas = $connector->getData();
             $printer->close();
             $client = new GuzzleHttp\Client();
