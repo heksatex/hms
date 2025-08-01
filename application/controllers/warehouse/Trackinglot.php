@@ -309,7 +309,7 @@ class Trackinglot extends MY_Controller
             if ($picklists->valid == 'cancel') {
               $get_p = $this->m_trackingLot->cek_log_history($picklists->no_pl, ['menghapus', $txtlot]);
               $result_record[] = array(
-                'tanggal' => $picklists->valid_date ?? $get_p->datelog,
+                'tanggal' => $get_p->datelog,
                 'kode'        => $picklists->no_pl,
                 'link'        => '',
                 'keterangan'  => 'Barcode ini keluar dari Picklist / dihapus ',
