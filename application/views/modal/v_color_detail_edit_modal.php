@@ -152,11 +152,17 @@
 
 <script type="text/javascript">
 
+  $(document).on('select2:open', () => {
+      document.querySelector('.select2-search__field').focus();
+  });
+
   <?php if($status=="generated" || $status=='cancel'){?>
       $("#btn-ubah").attr("disabled", true);
   <?php }else if($status =='draft'){?>
       $("#btn-ubah").attr("disabled", false);
   <?php }?>
+
+  $('#route_co').select2({});
     
   // validasi qty
   function validAngka(a){

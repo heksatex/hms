@@ -478,7 +478,12 @@ class Reproses extends MY_Controller
           $note_adj_in  = 'ADJ | Mengadakan. Dibuat dari Fitur Reproses. No.'.$kode_reproses.' Jenis '.$jenis_reproses;
 
           // get dept id GRG
-          $dept_grg        = $this->_module->get_nama_dept_by_kode('GRG')->row_array();
+          if($head->id_jenis == 3){ // ex setting
+            $dept_id = 'GRG';
+          }else {
+            $dept_id         = 'GRG-R';
+          }
+          $dept_grg        = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
           $nama_dept_grg   = $dept_grg['nama'];
           $stock_location_greige   = $dept_grg['stock_location'];
 
@@ -629,7 +634,7 @@ class Reproses extends MY_Controller
                       // insert stock_quant
                       $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($cek_prod['kode_produk'])."','".addslashes($cek_prod['nama_produk'])."','".addslashes(trim($lot_new))."','".addslashes($sq['nama_grade'])."','".$row->qty."','".$row->uom."','".$row->qty2."','".$row->uom2."','".$stock_location_greige."','".addslashes($sq['reff_note'])."','','','".$tanggal."','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."','".addslashes($sq['sales_order'])."','".addslashes($sq['sales_group'])."'), ";
 
-                      $method         = 'GRG|ADJ';
+                      $method         = $dept_id.'|ADJ';
                       $lokasi_dari    = $dept_grg['adjustment_location'];
                       $lokasi_tujuan  = $stock_location_greige;
                       $origin_in      = $kode_adjustment_in.'|'.$row_order_adj_in;

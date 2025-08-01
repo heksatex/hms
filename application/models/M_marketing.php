@@ -129,7 +129,7 @@ class m_marketing extends CI_Model
 		return $this->db->count_all_results();
 	} 
 
-	var $column_order2 = array(null, 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order', 'pl.no_pl', 'umur');
+	var $column_order2 = array(null, 'sq.lot','sq.kode_produk','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order', 'pl.no_pl', 'umur');
 	var $column_search2= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik', 'kp_lot.lot', 'sq.sales_order' ,'pl.no_pl');
 	var $order2  	  = array('sq.lot' => 'asc');
 
@@ -156,7 +156,7 @@ class m_marketing extends CI_Model
         }
 
 
-		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
+		$this->db->SELECT("sq.lot, sq.kode_produk, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
 							kp_lot.lot as lot_asal, pl.no_pl, (datediff(now(), sq.create_date) ) as umur  ");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("

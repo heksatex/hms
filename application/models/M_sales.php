@@ -569,7 +569,7 @@ class M_sales extends CI_Model
 	{
 		$this->db->where('co.kode_sc',$sales_order);
 		$this->db->where('cod.ow',$ow);
-		$this->db->select('*');
+		$this->db->select('cod.*');
 		$this->db->from('color_order co');
 		$this->db->join('color_order_detail cod','co.kode_co = cod.kode_co','inner');
 		$query = $this->db->get();
@@ -579,7 +579,7 @@ class M_sales extends CI_Model
 	public function cek_color_order_go_by_ow($origin)
 	{
 		$this->db->where('origin',$origin);
-		$this->db->where('dept_id','GRG');
+		$this->db->where_in('dept_id',array('GRG','GRG-R'));
 		$this->db->where_in('status',array('done'));
 		$this->db->select('*');
 		$this->db->from('pengiriman_barang');
