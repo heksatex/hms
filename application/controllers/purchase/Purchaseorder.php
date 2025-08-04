@@ -336,11 +336,12 @@ class Purchaseorder extends MY_Controller {
                                     }
                                 }
                                 $checkDpp = $dataItems[0]->dpp_lain > 0;
+                                $modelSetting = new $this->m_global;
+                                $model2 = clone $modelSetting;
+                                $modelSetting->setTables("setting");
                                 if (count($pajakLain) > 0) {
                                     $rowCount++;
-                                    $modelSetting = new $this->m_global;
-                                    $model2 = clone $modelSetting;
-                                    $modelSetting->setTables("setting");
+
                                     if (count($pajakLain) > 0) {
                                         $dataPajakLain = [];
                                         $model2->setTables("tax");
@@ -929,11 +930,9 @@ class Purchaseorder extends MY_Controller {
                             if ($checkInv->dpp_lain > 0 && $datas->dpp === "1") {
                                 $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
                                 $dpp += ((($total - $diskon) * 11) / 12);
-                            }
-                            else {
+                            } else {
                                 $taxe += ($total - $diskon) * $datas->amount;
                             }
-                            
                         }
                     }
                     $logProduk[] = $value->kode_produk . " " . $value->nama_produk;
