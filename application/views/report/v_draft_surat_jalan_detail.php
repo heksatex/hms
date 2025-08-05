@@ -72,8 +72,10 @@
             <th>Total PCS</th>
             <th>Total Qty</th>
             <th>UOM</th>
-            <th>N.W[KGS]</th>
-            <th>G.W[KGS]</th>
+            <?php if ($picklist->type_bulk_id === "1") { ?>
+                <th>N.W[KGS]</th>
+                <th>G.W[KGS]</th>
+            <?php } ?>
         </tr>
 
     </thead>
@@ -88,59 +90,100 @@
         $total_net = 0;
         $total_groos = 0;
         $tempBulk = null;
+        $join = [];
+        $where = [];
+
         foreach ($picklist_detail as $key => $value) {
             $no++;
+            $where = [];
             $jml_qty += $value->jml_qty;
             $total_qty += $value->total_qty;
-            $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', "bd.bulk_no_bulk" => $value->no_bulk, 'corak_remark' => $value->corak_remark,
-                'warna_remark' => $value->warna_remark, 'uom' => $value->uom, 'no_pl' => $value->no_pl, 'uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi,], "qty,uom", ["BULK"]);
+            if ($picklist->type_bulk_id === "1") {
+                $where = array_merge($where, ["bd.bulk_no_bulk" => $value->no_bulk]);
+                $join = ["BULK"];
+            }
+            $wheres = array_merge($where, ['valid !=' => 'cancel', 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark,
+                'uom' => $value->uom, 'no_pl' => $value->no_pl, 'uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi]);
+            $detailQty = $this->m_PicklistDetail->detailReportQty($wheres, "qty,uom", $join);
             $perpage = 10;
             $totalData = count($detailQty);
             $totalPage = ceil($totalData / $perpage);
+            if ($picklist->type_bulk_id === "1") {
+                for ($nn = 0; $nn < $totalPage; $nn++) {
+                    $page = $nn * $perpage;
+                    $satuan = $detailQty[0]->uom;
+                    $tempID = $value->no_bulk . $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
+                    $showNoUrut = "";
+                    $showNet = "";
+                    $showGross = "";
+                    if ($tempBulk !== $value->no_bulk) {
+                        $nourut++;
+                        $total_net += $value->net_weight;
+                        $total_groos += $value->gross_weight;
 
-            for ($nn = 0; $nn < $totalPage; $nn++) {
-                $page = $nn * $perpage;
-                $satuan = $detailQty[0]->uom;
-                $tempID = $value->no_bulk . $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
-                $showNoUrut = "";
-                $showNet = "";
-                $showGross = "";
-                if ($tempBulk !== $value->no_bulk) {
-                    $nourut++;
-                    $total_net += $value->net_weight;
-                    $total_groos += $value->gross_weight;
+                        $showGross = $value->gross_weight;
+                        $showNet = $value->net_weight;
+                        $showNoUrut = $nourut;
+                    }
+                    ?>
+                    <tr>
+                        <td class="text-kanan"><?= $showNoUrut ?></td>
+                        <td class="text-kanan"><?= ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk ?></td>
+                        <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi) ?></td>
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
 
-                    $showGross = $value->gross_weight;
-                    $showNet = $value->net_weight;
-                    $showNoUrut = $nourut;
+                        <td class="text-kanan"><?= isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
+
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : $value->jml_qty ?></td>
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : $value->total_qty ?></td>
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : $satuan ?></td>
+                        <?php if ($picklist->type_bulk_id === "1") { ?>
+                            <td class="text-kanan"><?= $showNet ?></td>
+                            <td class="text-kanan"><?= $showGross ?></td>
+                        <?php } ?>
+                    </tr>
+                    <?php
+                    $id = $tempID;
+                    $tempBulk = $value->no_bulk;
                 }
-                ?>
-                <tr>
-                    <td class="text-kanan"><?= ($picklist->type_bulk_id === "1") ? $showNoUrut : $no ?></td>
-                    <td class="text-kanan"><?= ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk ?></td>
-                    <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi) ?></td>
-                    <td class="text-kanan"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
+            } else {
+                for ($nn = 0; $nn < $totalPage; $nn++) {
+                    $page = $nn * $perpage;
+                    $satuan = $detailQty[0]->uom;
+                    $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
+                    ?>
+                    <tr>
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : $no ?></td>
+                        <td style="text-align: left;"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi) ?></td>
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark) ?></td>
 
-                    <td class="text-kanan"><?= isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "" ?></td>
-                    <td class="text-kanan"><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "" ?></td>
+                        <td class="text-kanan"><?= isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "" ?></td>
 
-                    <td class="text-kanan"><?= ($id === $tempID) ? '' : $value->jml_qty ?></td>
-                    <td class="text-kanan"><?= ($id === $tempID) ? '' : $value->total_qty ?></td>
-                    <td class="text-kanan"><?= ($id === $tempID) ? '' : $satuan ?></td>
-                    <td class="text-kanan"><?= $showNet ?></td>
-                    <td class="text-kanan"><?= $showGross ?></td>
-                </tr>
-                <?php
-                $id = $tempID;
-                $tempBulk = $value->no_bulk;
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : $value->jml_qty ?></td>
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : $value->total_qty ?></td>
+                        <td class="text-kanan"><?= ($id === $tempID) ? '' : $satuan ?></td>
+                    </tr>
+                    <?php
+                    $id = $tempID;
+                }
             }
         }
         ?>
@@ -148,7 +191,12 @@
         <tr>
             <td></td>
             <td></td>
-            <td>TOTAL : <?= $nourut ?> CARTONS</td>
+
+            <td>
+                <?php if ($picklist->type_bulk_id === "1") { ?>
+
+                    TOTAL : <?= $nourut ?> CARTONS
+                <?php } ?></td>
             <td></td>
             <td></td>
             <td></td>
@@ -163,8 +211,10 @@
             <td class="text-kanan"><?= $jml_qty ?></td>
             <td class="text-kanan"><?= $total_qty ?></td>
             <td></td>
-            <td class="text-kanan"><?= $total_net ?></td>
-            <td class="text-kanan"><?= $total_groos ?></td>
+            <?php if ($picklist->type_bulk_id === "1") { ?>
+                <td class="text-kanan"><?= $total_net ?></td>
+                <td class="text-kanan"><?= $total_groos ?></td>
+            <?php } ?>
         </tr>
     </tbody>
 </table>
