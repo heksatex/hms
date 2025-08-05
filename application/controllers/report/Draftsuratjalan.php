@@ -42,6 +42,7 @@ class Draftsuratjalan extends MY_Controller {
 
             $nopl = $this->input->post("no_pl");
             $pkl = $this->m_Picklist->draftSuratJalan(['picklist.no' => $nopl]);
+            $picklist = $pkl;
             if (empty($pkl)) {
                 throw new Exception("No Picklist Tidak ditemukan", 500);
             }
@@ -81,9 +82,10 @@ class Draftsuratjalan extends MY_Controller {
             $sheet->setCellValue('O5', 'Total PCS');
             $sheet->setCellValue('P5', 'Total Qty');
             $sheet->setCellValue('Q5', 'UOM');
-            $sheet->setCellValue('R5', 'N.W[KGS]');
-            $sheet->setCellValue('S5', 'G.W[KGS]');
-
+            if ($picklist->type_bulk_id === "1") {
+                $sheet->setCellValue('R5', 'N.W[KGS]');
+                $sheet->setCellValue('S5', 'G.W[KGS]');
+            }
             $no = 0;
             $jml_qty = 0;
             $total_qty = 0;
@@ -93,6 +95,8 @@ class Draftsuratjalan extends MY_Controller {
             $total_net = 0;
             $total_groos = 0;
             $tempBulk = null;
+            $join = [];
+            $where = [];
             if ($pkl->type_bulk_id === "1") {
                 $picklist_detail = $this->m_PicklistDetail->detailDraftReport(
                         ['picklist_detail.no_pl' => $nopl, 'picklist_detail.valid !=' => 'cancel'],
@@ -108,62 +112,107 @@ class Draftsuratjalan extends MY_Controller {
             $rowStartData = 5;
             foreach ($picklist_detail as $key => $value) {
                 $no++;
+                $where = [];
                 $jml_qty += $value->jml_qty;
                 $total_qty += $value->total_qty;
-                $detailQty = $this->m_PicklistDetail->detailReportQty(['valid !=' => 'cancel', "bd.bulk_no_bulk" => $value->no_bulk, 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark,
-                    'uom' => $value->uom, 'no_pl' => $value->no_pl,'uom_lebar_jadi'=>$value->uom_lebar_jadi,'lebar_jadi'=>$value->lebar_jadi], "qty,uom", ["BULK"]);
+                if ($picklist->type_bulk_id === "1") {
+                    $where = array_merge($where, ["bd.bulk_no_bulk" => $value->no_bulk]);
+                    $join = ["BULK"];
+                }
+                $wheres = array_merge($where, ['valid !=' => 'cancel', 'corak_remark' => $value->corak_remark, 'warna_remark' => $value->warna_remark,
+                    'uom' => $value->uom, 'no_pl' => $value->no_pl, 'uom_lebar_jadi' => $value->uom_lebar_jadi, 'lebar_jadi' => $value->lebar_jadi]);
+
+                $detailQty = $this->m_PicklistDetail->detailReportQty($wheres, "qty,uom", $join);
                 $perpage = 10;
                 $totalData = count($detailQty);
                 $totalPage = ceil($totalData / $perpage);
-                for ($nn = 0; $nn < $totalPage; $nn++) {
-                    $page = $nn * $perpage;
-                    $satuan = $detailQty[0]->uom;
-                    $tempID = $value->no_bulk . $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
-                    $showNoUrut = "";
-                    $showNet = "";
-                    $showGross = "";
-                    if ($tempBulk !== $value->no_bulk) {
-                        $nourut++;
-                        $total_net += $value->net_weight;
-                        $total_groos += $value->gross_weight;
+                if ($picklist->type_bulk_id === "1") {
 
-                        $showGross = $value->gross_weight;
-                        $showNet = $value->net_weight;
-                        $showNoUrut = $nourut;
+                    for ($nn = 0; $nn < $totalPage; $nn++) {
+                        $page = $nn * $perpage;
+                        $satuan = $detailQty[0]->uom;
+                        $tempID = $value->no_bulk . $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
+                        $showNoUrut = "";
+                        $showNet = "";
+                        $showGross = "";
+                        if ($tempBulk !== $value->no_bulk) {
+                            $nourut++;
+                            $total_net += $value->net_weight;
+                            $total_groos += $value->gross_weight;
+
+                            $showGross = $value->gross_weight;
+                            $showNet = $value->net_weight;
+                            $showNoUrut = $nourut;
+                        }
+
+                        $sheet->setCellValue("A" . $rowStartData, $showNoUrut);
+                        $sheet->setCellValue('B' . $rowStartData, ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk);
+                        $sheet->setCellValue("C" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
+                        $sheet->setCellValue("D" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark));
+                        $sheet->setCellValue("E" . $rowStartData, isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "");
+                        $sheet->setCellValue("F" . $rowStartData, isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "");
+                        $sheet->setCellValue("G" . $rowStartData, isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "");
+                        $sheet->setCellValue("H" . $rowStartData, isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "");
+                        $sheet->setCellValue("I" . $rowStartData, isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "");
+                        $sheet->setCellValue("J" . $rowStartData, isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "");
+                        $sheet->setCellValue("K" . $rowStartData, isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "");
+                        $sheet->setCellValue("L" . $rowStartData, isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "");
+                        $sheet->setCellValue("M" . $rowStartData, isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "");
+                        $sheet->setCellValue("N" . $rowStartData, isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "");
+
+                        $sheet->setCellValue('O' . $rowStartData, ($id === $tempID) ? '' : $value->jml_qty);
+                        $sheet->setCellValue('P' . $rowStartData, ($id === $tempID) ? '' : $value->total_qty);
+                        $sheet->setCellValue('Q' . $rowStartData, ($id === $tempID) ? '' : $satuan);
+                        $sheet->setCellValue('R' . $rowStartData, $showNet);
+                        $sheet->setCellValue('S' . $rowStartData, $showGross);
+
+                        $id = $tempID;
+                        $tempBulk = $value->no_bulk;
+                        $rowStartData++;
                     }
+                } else {
+                    for ($nn = 0; $nn < $totalPage; $nn++) {
+                        $page = $nn * $perpage;
+                        $satuan = $detailQty[0]->uom;
+                        $tempID = $value->warna_remark . $value->corak_remark . $value->uom . $value->uom_lebar_jadi . $value->lebar_jadi;
 
-                    $sheet->setCellValue("A" . $rowStartData, ($pkl->type_bulk_id === "1") ? $showNoUrut : $no);
-                    $sheet->setCellValue('B' . $rowStartData, ($tempBulk === $value->no_bulk) ? '' : $value->no_bulk);
-                    $sheet->setCellValue("C" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
-                    $sheet->setCellValue("D" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark));
-                    $sheet->setCellValue("E" . $rowStartData, isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "");
-                    $sheet->setCellValue("F" . $rowStartData, isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "");
-                    $sheet->setCellValue("G" . $rowStartData, isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "");
-                    $sheet->setCellValue("H" . $rowStartData, isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "");
-                    $sheet->setCellValue("I" . $rowStartData, isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "");
-                    $sheet->setCellValue("J" . $rowStartData, isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "");
-                    $sheet->setCellValue("K" . $rowStartData, isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "");
-                    $sheet->setCellValue("L" . $rowStartData, isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "");
-                    $sheet->setCellValue("M" . $rowStartData, isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "");
-                    $sheet->setCellValue("N" . $rowStartData, isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "");
+                        $sheet->setCellValue("A" . $rowStartData, ($id === $tempID) ? '' : $no);
+                        $sheet->setCellValue('B' . $rowStartData, "");
+                        $sheet->setCellValue("C" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->corak_remark . ' ' . $value->lebar_jadi . ' ' . $value->uom_lebar_jadi));
+                        $sheet->setCellValue("D" . $rowStartData, ($id === $tempID) ? '' : str_replace('|', ' ', $value->warna_remark));
+                        $sheet->setCellValue("E" . $rowStartData, isset($detailQty[$page + 0]) ? (float) $detailQty[$page + 0]->qty : "");
+                        $sheet->setCellValue("F" . $rowStartData, isset($detailQty[$page + 1]) ? (float) $detailQty[$page + 1]->qty : "");
+                        $sheet->setCellValue("G" . $rowStartData, isset($detailQty[$page + 2]) ? (float) $detailQty[$page + 2]->qty : "");
+                        $sheet->setCellValue("H" . $rowStartData, isset($detailQty[$page + 3]) ? (float) $detailQty[$page + 3]->qty : "");
+                        $sheet->setCellValue("I" . $rowStartData, isset($detailQty[$page + 4]) ? (float) $detailQty[$page + 4]->qty : "");
+                        $sheet->setCellValue("J" . $rowStartData, isset($detailQty[$page + 5]) ? (float) $detailQty[$page + 5]->qty : "");
+                        $sheet->setCellValue("K" . $rowStartData, isset($detailQty[$page + 6]) ? (float) $detailQty[$page + 6]->qty : "");
+                        $sheet->setCellValue("L" . $rowStartData, isset($detailQty[$page + 7]) ? (float) $detailQty[$page + 7]->qty : "");
+                        $sheet->setCellValue("M" . $rowStartData, isset($detailQty[$page + 8]) ? (float) $detailQty[$page + 8]->qty : "");
+                        $sheet->setCellValue("N" . $rowStartData, isset($detailQty[$page + 9]) ? (float) $detailQty[$page + 9]->qty : "");
 
-                    $sheet->setCellValue('O' . $rowStartData, ($id === $tempID) ? '' : $value->jml_qty);
-                    $sheet->setCellValue('P' . $rowStartData, ($id === $tempID) ? '' : $value->total_qty);
-                    $sheet->setCellValue('Q' . $rowStartData, ($id === $tempID) ? '' : $satuan);
-                    $sheet->setCellValue('R' . $rowStartData, $showNet);
-                    $sheet->setCellValue('S' . $rowStartData, $showGross);
+                        $sheet->setCellValue('O' . $rowStartData, ($id === $tempID) ? '' : $value->jml_qty);
+                        $sheet->setCellValue('P' . $rowStartData, ($id === $tempID) ? '' : $value->total_qty);
+                        $sheet->setCellValue('Q' . $rowStartData, ($id === $tempID) ? '' : $satuan);
 
-                    $id = $tempID;
-                    $tempBulk = $value->no_bulk;
-                    $rowStartData++;
+                        $id = $tempID;
+                        $rowStartData++;
+                    }
                 }
             }
+            
+            $carton = "";
+            if ($picklist->type_bulk_id === "1") {
+                $carton = "TOTAL : {$nourut} CARTONS";
+            }
 
-            $sheet->setCellValue("C" . ($rowStartData + 2), "TOTAL : " . $nourut . " CARTONS");
+            $sheet->setCellValue("C" . ($rowStartData + 2), $carton);
             $sheet->setCellValue('O' . ($rowStartData + 2), $jml_qty);
             $sheet->setCellValue('P' . ($rowStartData + 2), $total_qty);
-            $sheet->setCellValue('R' . ($rowStartData + 2), $total_net);
-            $sheet->setCellValue('S' . ($rowStartData + 2), $total_groos);
+            if ($picklist->type_bulk_id === "1") {
+                $sheet->setCellValue('R' . ($rowStartData + 2), $total_net);
+                $sheet->setCellValue('S' . ($rowStartData + 2), $total_groos);
+            }
 
             $spreadsheet->getActiveSheet()->getStyle("B1")->applyFromArray($style);
             $spreadsheet->getActiveSheet()->getStyle("B2")->applyFromArray($style);
@@ -226,16 +275,6 @@ class Draftsuratjalan extends MY_Controller {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
-        }
-    }
-
-    public function testMemory() {
-        try {
-            $tanggal = "";
-            $tahun = date('Y', strtotime($tanggal));
-            $bulan = date('n', strtotime($tanggal));
-        } catch (Exception $ex) {
-            
         }
     }
 }
