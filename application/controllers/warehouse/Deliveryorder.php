@@ -517,7 +517,7 @@ class Deliveryorder extends MY_Controller {
                     throw new \Exception("ada Duplikat Barcode di Picklist", 500);
                 }
                 $insertDetail[] = ['do_id' => $data_do->id, 'barcode_id' => $value->barcode_id, 'picklist_detail_id' => $value->picklist_detail_id, 'status' => 'done'];
-                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
+                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . addslashes($value->nama_produk). "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','" . $value->lebar_greige . "','" . $value->uom_lebar_greige . "','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
                 $updateStokQuant [] = ["move_date" => date('Y-m-d H:i:s'), "lokasi_fisik" => "", "lokasi" => "CST/Stock", 'quant_id' => $value->quant_id];
@@ -528,7 +528,7 @@ class Deliveryorder extends MY_Controller {
                     $smproduk[$value->kode_produk] = array(
                         'qty' => $value->qty,
                         'uom' => $value->uom,
-                        'nama' => $value->nama_produk,
+                        'nama' => addslashes($value->nama_produk),
                         'order' => count($smproduk) + 1
                     );
                 }
@@ -672,7 +672,7 @@ class Deliveryorder extends MY_Controller {
                     throw new \Exception($check, 500);
                 }
                 $updateIn['barcode_id'][] = $value->barcode_id;
-                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
+                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . addslashes($value->nama_produk) . "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','','','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
 
@@ -683,7 +683,7 @@ class Deliveryorder extends MY_Controller {
                     $smproduk[$value->kode_produk] = array(
                         'qty' => $value->qty,
                         'uom' => $value->uom,
-                        'nama' => $value->nama_produk,
+                        'nama' => addslashes($value->nama_produk),
                         'order' => count($smproduk) + 1
                     );
                 }
@@ -1144,7 +1144,7 @@ class Deliveryorder extends MY_Controller {
                     throw new \Exception($check, 500);
                 }
                 $updateIn['barcode_id'][] = $value->barcode_id;
-                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . $value->nama_produk . "','" .
+                $insertStokMvItem[] = "('" . $nosm . "','" . $value->quant_id . "','" . $value->kode_produk . "','" . addslashes($value->nama_produk) . "','" .
                         $value->barcode_id . "','" . $value->qty . "','" . $value->uom . "','" . $value->qty2 . "','" . $value->uom2 . "','done','" . $rowMoveItem . "','','" . date("Y-m-d H:i:s") . "','" .
                         $value->lokasi_fisik . "','','','" . $value->lebar_jadi . "','" . $value->uom_lebar_jadi . "')";
 
@@ -1155,7 +1155,7 @@ class Deliveryorder extends MY_Controller {
                     $smproduk[$value->kode_produk] = array(
                         'qty' => $value->qty,
                         'uom' => $value->uom,
-                        'nama' => $value->nama_produk,
+                        'nama' => addslashes($value->nama_produk),
                         'order' => count($smproduk) + 1
                     );
                 }
