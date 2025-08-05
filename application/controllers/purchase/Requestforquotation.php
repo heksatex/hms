@@ -201,7 +201,7 @@ class Requestforquotation extends MY_Controller {
 
             $supp = $this->input->post("supplier");
             $prio = $this->input->post("prio");
-//            $order_date = $this->input->post("order_date");
+            $order_date = $this->input->post("order_date");
             $note = $this->input->post("note");
             $cfb = $this->input->post("cfb");
             $kod_pro = $this->input->post("kod_pro");
@@ -218,7 +218,7 @@ class Requestforquotation extends MY_Controller {
             $novalue = $this->input->post("no_value") ?? "0";
             $warehouse = $this->input->post("warehouse");
             $reffNotes = $this->input->post("reff_note");
-            $createDokumen = date("Y-m-d H:i:d");
+            $createDokumen = date("Y-m-d H:i:s");
             $nilai = $this->input->post("nilai");
             $schedule_date = $this->input->post("schedule_date");
             if (count($kod_pro) < 1) {
@@ -237,6 +237,7 @@ class Requestforquotation extends MY_Controller {
 //                }
 //                $tempKodPro[$value] = "";
 //            }
+            $order_date .= " " . date("H:i:s");
 
             $this->_module->startTransaction();
             $this->_module->lock_tabel("user WRITE, main_menu_sub READ, log_history WRITE,mst_produk WRITE,token_increment WRITE,cfb WRITE,cfb_items WRITE,procurement_purchase_items WRITE,"
@@ -246,18 +247,18 @@ class Requestforquotation extends MY_Controller {
                 if ($novalue === "1") {
                     $nv = "NV/";
                 }
-                if (!$nopo = $this->token->noUrut('purchase_order', date('y', strtotime($createDokumen)) . '/' . date('m', strtotime($createDokumen)), true)
+                if (!$nopo = $this->token->noUrut('purchase_order', date('y', strtotime($order_date)) . '/' . date('m', strtotime($order_date)), true)
                                 ->generate("PO/{$nv}", '/%05d')->get()) {
                     throw new \Exception("No PO tidak terbuat", 500);
                 }
             } else {
-                if (!$nopo = $this->token->noUrut('purchase_order_fpt', date('y', strtotime($createDokumen)) . '/' . date('m', strtotime($createDokumen)), true)
+                if (!$nopo = $this->token->noUrut('purchase_order_fpt', date('y', strtotime($order_date)) . '/' . date('m', strtotime($order_date)), true)
                                 ->generate('FPT/', '/%05d')->get()) {
                     throw new \Exception("No PO tidak terbuat", 500);
                 }
             }
 
-            $dataPO = ["no_po" => $nopo, 'supplier' => $supp, 'note' => $note, 'order_date' => date("Y-m-d H:i:s"), 'create_date' => $createDokumen, 'status' => 'draft', "jenis" => $jenis];
+            $dataPO = ["no_po" => $nopo, 'supplier' => $supp, 'note' => $note, 'order_date' => $order_date, 'create_date' => $createDokumen, 'status' => 'draft', "jenis" => $jenis];
             $id_rfq = $this->m_po->save(array_merge($dataPO, ['cfb_manual' => ($cfb_manual ?? '0'), 'no_value' => $novalue]));
             if (is_null($id_rfq)) {
                 throw new \Exception('Gagal Menyimpan ' . $jenis, 500);
@@ -636,7 +637,7 @@ class Requestforquotation extends MY_Controller {
                     $checkPod = clone $podd;
 
                     $checkPod_data = $checkPod->setTables("purchase_order_detail")->setWheres(["po_no_po" => $kode_decrypt, "status <>" => "cancel"])
-                                    ->setWhereRaw("(harga_per_uom_beli <= 0 or qty_beli <= 0)")->getDetail();
+                                    ->setWhereRaw("(harga_per_uom_beli < 0 or qty_beli <= 0)")->getDetail();
                     if ($checkPod_data) {
                         throw new \Exception('Harga satuan / QTY beli belum ditentukan', 500);
                     }

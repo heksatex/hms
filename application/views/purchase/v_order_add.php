@@ -37,6 +37,7 @@
                                 <button type="submit" id="btnSubmit" style="display: none"></button>
                                 <input type="hidden" name="jenis" value="<?= $jenis ?>">
                                 <input type="hidden" name="cfb_manual" value="1">
+                                <input type="hidden" class="form-control input-sm" name="order_date" value="<?= date("Y-m-d") ?>" required>
                                 <div class="col-md-6 col-xs-12">
                                     <div class="field-group">
                                         <div class="form-group">
