@@ -345,7 +345,7 @@
         $.ajax({
             "type":'POST',
             "url": "<?php echo site_url('report/Marketing/export_excel_view_by_product')?>",
-            "data":  {"product": "<?php echo $product;?>", "color":"<?php echo $color; ?>", "marketing":"<?php echo $mkt?>", "lebar_jadi" : "<?php echo $lebar_jadi;?>", "uom_jual":"<?php echo $uom_jual?>"},
+            "data":  {"product": "<?php echo $product;?>", "color":"<?php echo $color; ?>", "marketing":"<?php echo $mkt?>", "lebar_jadi" : "<?php echo $lebar_jadi;?>", "uom_jual":"<?php echo $uom_jual?>", "lot_asal" : $("#cek_asal").is(':checked')},
             "dataType":'json',
             beforeSend: function() {
               $('#btn-excel').button('loading');
