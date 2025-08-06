@@ -181,7 +181,7 @@ class Goodstopush extends MY_Controller {
                     ];
                 }
             } else {
-                $list->setOrder(["qty" => "desc", "corak_remark,warna_remark" => "asc"])->setWheres(["corak_remark" => $corak,'concat(lebar_jadi," ",uom_lebar_jadi) = ' => $lebar]);
+                $list->setOrder(["qty" => "desc", "corak_remark,warna_remark" => "asc"])->setWheres(["corak_remark" => $corak, 'concat(lebar_jadi," ",uom_lebar_jadi) = ' => $lebar]);
                 foreach ($list->getData() as $key => $field) {
                     $no++;
                     $data [] = [
@@ -214,17 +214,17 @@ class Goodstopush extends MY_Controller {
             ));
         }
     }
-    
+
     public function excel() {
         try {
             $sales = $this->input->post("sales");
             $report_date = $this->input->post("report_date");
             $lokasi = $this->input->post("lokasi");
             $model = new $this->m_gtp;
-            
-           $model->setTables("goods_to_push_detail")->setOrder(["qty" => "desc", "corak_remark,uom" => "asc"])
-                            ->setWheres(["qty >=" => 50,"DATE(report_date)" => $report_date]);
-            
+
+            $model->setTables("goods_to_push")->setOrder(["qty" => "desc", "corak,uom" => "asc"])
+                    ->setWheres(["qty >=" => 50, "DATE(report_date)" => $report_date]);
+
             if ($sales !== "") {
                 $model->setWheres(["nama_sales_group" => $sales]);
             }
@@ -232,51 +232,40 @@ class Goodstopush extends MY_Controller {
                 $model->setWheres(["lokasi" => $lokasi]);
             }
             $list = $model->getData();
-            if(count($list) < 1) {
-                throw new \Exception("Data Tidak ditemukan",500);
+            if (count($list) < 1) {
+                throw new \Exception("Data Tidak ditemukan", 500);
             }
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setCellValue('A1', 'No');
-            $sheet->setCellValue('B1', 'Kode Produk');
-            $sheet->setCellValue('C1', 'Nama Produk');
-            $sheet->setCellValue('D1', 'Corak Remark');
-            $sheet->setCellValue('E1', 'Warna Remark');
-            $sheet->setCellValue('F1', 'LOT');
-            $sheet->setCellValue('G1', 'Grade');
-            $sheet->setCellValue('H1', 'QTY Jual');
-            $sheet->setCellValue('I1', 'Satuan');
-            $sheet->setCellValue('J1', 'QTY Jual 2');
-            $sheet->setCellValue('K1', 'Satuan 2');
-            $sheet->setCellValue('L1', 'Lebar Jadi');
-            $sheet->setCellValue('M1', 'Uom Lebar Jadi');
-            $sheet->setCellValue('N1', 'Lokasi');
-            $sheet->setCellValue('O1', 'Lokasi Fisik');
-            $sheet->setCellValue('P1', 'SC');
-            $sheet->setCellValue('Q1', 'Customer');
-            $sheet->setCellValue('R1', 'Sales');
+            $sheet->setCellValue('B1', 'Corak Remark');
+            $sheet->setCellValue('C1', 'Jumlah Warna');
+            $sheet->setCellValue('D1', 'Jumlah LOT');
+            $sheet->setCellValue('E1', 'QTY');
+            $sheet->setCellValue('f1', 'Satuan');
+            $sheet->setCellValue('g1', 'QTY 2');
+            $sheet->setCellValue('h1', 'Satuan 2');
+            $sheet->setCellValue('i1', 'Lebar Jadi');
+            $sheet->setCellValue('j1', 'Lokasi');
+            $sheet->setCellValue('k1', 'Customer');
+            $sheet->setCellValue('l1', 'Sales');
             $rowStartData = 1;
             $no = 0;
             foreach ($list as $key => $value) {
-                $rowStartData ++;$no++;
-                $sheet->setCellValue("A" . $rowStartData, $no++);
-                $sheet->setCellValue("B" . $rowStartData, $value->kode_produk);
-                $sheet->setCellValue("C" . $rowStartData, $value->nama_produk);
-                $sheet->setCellValue('D' . $rowStartData, $value->corak_remark);
-                $sheet->setCellValue('E' . $rowStartData, $value->warna_remark);
-                $sheet->setCellValue('F' . $rowStartData, $value->lot);
-                $sheet->setCellValue('G' . $rowStartData, $value->nama_grade);
-                $sheet->setCellValue('H' . $rowStartData,$value->qty_jual);
-                $sheet->setCellValue('I' . $rowStartData, $value->uom_jual);
-                $sheet->setCellValue('J' . $rowStartData, $value->qty2_jual);
-                $sheet->setCellValue('K' . $rowStartData, $value->uom2_jual);
-                $sheet->setCellValue('L' . $rowStartData, $value->lebar_jadi);
-                $sheet->setCellValue('M' . $rowStartData, $value->uom_lebar_jadi);
-                $sheet->setCellValue('N' . $rowStartData, $value->lokasi);
-                $sheet->setCellValue('O' . $rowStartData, $value->lokasi_fisik);
-                $sheet->setCellValue('P' . $rowStartData, $value->sales_order);
-                $sheet->setCellValue('Q' . $rowStartData, $value->customer_name);
-                $sheet->setCellValue('R' . $rowStartData, $value->nama_sales_group);
+                $rowStartData++;
+                $no++;
+                $sheet->setCellValue("A" . $rowStartData, $no);
+                $sheet->setCellValue("B" . $rowStartData, $value->corak);
+                $sheet->setCellValue("C" . $rowStartData, $value->jml_warna);
+                $sheet->setCellValue('D' . $rowStartData, $value->lot);
+                $sheet->setCellValue('E' . $rowStartData, $value->qty);
+                $sheet->setCellValue('F' . $rowStartData, $value->uom);
+                $sheet->setCellValue('G' . $rowStartData, $value->qty2);
+                $sheet->setCellValue('H' . $rowStartData, $value->uom2);
+                $sheet->setCellValue('I' . $rowStartData, $value->lebar_jadi);
+                $sheet->setCellValue('j' . $rowStartData, $value->lokasi);
+                $sheet->setCellValue('k' . $rowStartData, $value->customer_name);
+                $sheet->setCellValue('l' . $rowStartData, $value->nama_sales_group);
             }
             $writer = new Xlsx($spreadsheet);
             $filename = "gtp_report_date_{$report_date}";
