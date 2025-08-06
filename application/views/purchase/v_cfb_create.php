@@ -37,14 +37,14 @@
     </div>
     <div class="col-md-6 col-xs-12">
         <div class="field-group">
-            <!--                <div class="form-group">
-                                <div class="col-xs-12">
-                                    <div class="col-xs-4"><label class="form-label required">Tanggal Order</label></div>
-                                    <div class="col-xs-8 col-md-8">
-                                        <input type="date" class="form-control input-sm" name="order_date" value="<?= ($tanggal === "") ? date("Y-m-d") : $tanggal ?>" required>
-                                    </div>
-                                </div>
-                            </div>-->
+            <div class="form-group <?= ($jenis === "RFQ") ? "hide" : "" ?>">
+                <div class="col-xs-12">
+                    <div class="col-xs-4"><label class="form-label required">Tanggal Order</label></div>
+                    <div class="col-xs-8 col-md-8">
+                        <input type="date" class="form-control input-sm" name="order_date" value="<?= ($tanggal === "") ? date("Y-m-d") : $tanggal ?>" required>
+                    </div>
+                </div>
+            </div>
             <div class="form-group">
                 <div class="col-xs-12">
                     <div class="col-xs-4"><label class="form-label" >Note</label></div>
