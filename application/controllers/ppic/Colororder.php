@@ -475,6 +475,7 @@ class Colororder extends MY_Controller
                       $dept_empty       = FALSE;
                       $sm_row           = 1;
                       $nama_prod_rm     = $nama_produk;
+                      $kode_tmp_out     = "";
 
                       //generate produk + color
                       $produk_exp      = explode('"',$nama_produk);
@@ -710,6 +711,10 @@ class Colororder extends MY_Controller
                           }
                           $dgt=substr("00000" . $arr_kode[$rp->method],-5);            
                           $kode_out = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
+
+                          if(in_array($method_dept, ['GRG','GRG-R'])){
+                            $kode_tmp_out = $kode_out;
+                          }
                             
                           $sql_out_batch  .= "('".$kode_out."','".$tgl."','".$tgl."','".$tgl."','".addslashes($reff_notes)."','draft','".$method_dept."','".$origin."','".$move_id."','".$rp->lokasi_dari."','".$rp->lokasi_tujuan."'), ";
                           $sql_out_items_batch .= "('".$kode_out."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','draft','1',''), ";
@@ -898,6 +903,11 @@ class Colororder extends MY_Controller
     
                         // $sql_log_history_out = rtrim($sql_log_history_out, ', ');
                         // $this->_module->simpan_log_history_batch($sql_log_history_out);
+
+                        if(!empty($kode_tmp_out)){
+                          $data_update = array('gramasi' => $gramasi);
+                          $this->m_colorOrder->update_pengiriman_barang($kode_tmp_out,$data_update);
+                        }
                       }
 
                       if(!empty($sql_in_batch)){
