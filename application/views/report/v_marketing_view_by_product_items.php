@@ -87,6 +87,10 @@
                                   <div class="col-xs-4"><label>Uom</label></div>
                                   <div class="col-xs-8"><label>:</label> <?php echo $uom_jual; ?></div>
                               </div>
+                              <div class="col-md-12 col-xs-12">
+                                  <div class="col-xs-4"><label>Lot/KP Asal</label></div>
+                                  <div class="col-xs-8"><label></label> <input type="checkbox" name="lot_asal" id="cek_asal" ></div>
+                              </div>
                           </div>
                         </div>
                       </div>
@@ -177,7 +181,14 @@
             "ajax": {
                 "url": "<?php echo site_url('report/marketing/get_data_stock_by_product_items')?>",
                 "type": "POST",
-                "data": {"product": "<?php echo $product;?>", "color":"<?php echo $color; ?>", "marketing":"<?php echo $mkt?>", "lebar_jadi" : "<?php echo $lebar_jadi;?>", "uom_jual":"<?php echo $uom_jual?>"}
+                "data": function (d) {
+                        d.product = "<?php echo $product;?>";
+                        d.color   = "<?php echo $color; ?>";
+                        d.marketing = "<?php echo $mkt?>";
+                        d.lebar_jadi =  "<?php echo $lebar_jadi;?>";
+                        d.uom_jual = "<?php echo $uom_jual?>";
+                        d.lot_asal =  $("#cek_asal").is(':checked')
+                }
             },
            
             "columnDefs": [
@@ -318,6 +329,10 @@
                 $(this).css("zoom", zoom_percent+"%");
             });
         }
+        
+        $('#cek_asal').change(function(){ //button filter event click
+          table.ajax.reload( function(){ });  //just reload table
+        });
  
     });
 
