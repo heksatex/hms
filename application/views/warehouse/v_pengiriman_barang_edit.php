@@ -169,6 +169,14 @@
                                             <input type='text' class="form-control input-sm" name="tgl_jt" id="tgl_jt" readonly="readonly" value="<?php echo $list->tanggal_jt; ?>" />
                                         </div>
                                     </div>
+                                    <?php if (in_array($list->dept_id,['GRG','GRG-R']) ) { ?>
+                                    <div class="col-md-12 col-xs-12">
+                                        <div class="col-xs-4"><label>Gramasi </label></div>
+                                        <div class="col-xs-8">
+                                            <input type='text' class="form-control input-sm" name="gramasi" id="gramasi" readonly="readonly" value="<?php echo $list->gramasi; ?>" />
+                                        </div>
+                                    </div>
+                                    <?php } ?>
                                     <div class="col-md-12 col-xs-12">
                                         <div class="col-xs-4"><label>Reff Note </label></div>
                                         <div id="ta" class="col-xs-8">
