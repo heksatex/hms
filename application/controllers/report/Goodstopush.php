@@ -222,7 +222,7 @@ class Goodstopush extends MY_Controller {
             $lokasi = $this->input->post("lokasi");
             $model = new $this->m_gtp;
 
-            $model->setTables("goods_to_push")->setOrder(["qty" => "desc", "corak,uom" => "asc"])
+            $model->setTables("goods_to_push")->setOrder(["lokasi" => "asc", "category" => "asc", "qty" => "desc", "corak,uom" => "asc"])
                     ->setWheres(["qty >=" => 50, "DATE(report_date)" => $report_date]);
 
             if ($sales !== "") {
@@ -239,7 +239,7 @@ class Goodstopush extends MY_Controller {
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setCellValue('A1', 'No');
             $sheet->setCellValue('B1', 'Kategori');
-            $sheet->setCellValue('c1', 'Corak Remark');
+            $sheet->setCellValue('c1', 'Corak');
             $sheet->setCellValue('d1', 'Jumlah Warna');
             $sheet->setCellValue('e1', 'Jumlah LOT');
             $sheet->setCellValue('f1', 'QTY');
