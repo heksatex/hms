@@ -28,6 +28,7 @@ class Goodstopush extends MY_Controller {
         parent::__construct();
         $this->is_loggedin();
         $this->load->model("m_gtp");
+        $this->load->model("m_global");
     }
 
     public function index() {
@@ -220,8 +221,7 @@ class Goodstopush extends MY_Controller {
             $sales = $this->input->post("sales");
             $report_date = $this->input->post("report_date");
             $lokasi = $this->input->post("lokasi");
-            $model = new $this->m_gtp;
-
+            $model = new $this->m_global;
             $model->setTables("goods_to_push")->setOrder(["lokasi" => "asc", "category" => "asc", "qty" => "desc", "corak,uom" => "asc"])
                     ->setWheres(["qty >=" => 50, "DATE(report_date)" => $report_date]);
 
