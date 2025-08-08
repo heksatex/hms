@@ -68,7 +68,7 @@ class Service extends CI_Controller {
                     ],
                     "group" => ["corak", "customer_name", "lebar_jadi"]]
             ];
-//            $now = "2024-11-25";
+//            $now = "2025-08-04";
             $now = date("Y-m-d");
             $model = new $this->m_gtp;
             $sales = $model->setSelects(["nama_sales_group,report_date"])->setOrder(["report_date" => "desc"])
@@ -94,7 +94,7 @@ class Service extends CI_Controller {
                     $qr = new $this->m_gtp;
                     $datas[$values->nama_sales_group][$key] = $qr->setOrder(["qty" => "desc", "corak,uom" => "asc"])->setWheres($value["where"])
                             ->setWheres(["nama_sales_group" => $values->nama_sales_group, "qty >=" => 50])->setWhereRaw("DATE(report_date) = '{$now}'")
-                            ->setSelects(["corak,uom,uom2,qty as total_qty,qty2 as total_qty2,lot as total_data,jml_warna as total_warna,customer_name,lebar_jadi"])
+                            ->setSelects(["corak,uom,uom2,qty as total_qty,qty2 as total_qty2,lot as total_data,jml_warna as total_warna,customer_name,lebar_jadi,lokasi"])
                             ->getData();
                 }
                 $footer = "<table name='footer' width=\"1000\">
@@ -156,14 +156,14 @@ class Service extends CI_Controller {
                 }
             }
             $html = $this->load->view("admin/_partials/footer_new_item.php", ["list" => $list], true);
-            
+
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(['data' =>$html]));
+                    ->set_output(json_encode(['data' => $html]));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger',"data"=>"")));
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
         }
     }
 }
