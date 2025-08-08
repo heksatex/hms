@@ -265,7 +265,7 @@ class Purchaseorder extends MY_Controller {
                             $query = [];
                             foreach ($dataDetail as $key => $value) {
                                 $query [] = "update invoice_detail set harga_satuan='{$value->harga_per_uom_beli}',tax_id='{$value->tax_id}',amount_tax='{$value->tax_amount}',diskon='{$value->diskon}' "
-                                        . " where invoice_id={$cekInv->id} and kode_produk='{$value->kode_produk}'";
+                                        . " where invoice_id={$cekInv->id} and kode_produk='{$value->kode_produk}' and reff_note='{$value->reff_note}'";
                                 $logInvDetail [] = "kode produk {$value->kode_produk}, harga satuan " . number_format($value->harga_per_uom_beli, 4) . "Nilai Pajak " . ($value->tax_amount * 100) . "% ,"
                                         . "diskon {$value->diskon}";
                             }
