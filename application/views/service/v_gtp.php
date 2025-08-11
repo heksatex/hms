@@ -76,7 +76,24 @@
                             ?>
                             <tr>
                                 <td style="text-align: center"><?= $no ?></td>
-                                <td style="text-align: left"><?= substr($datas->corak, 0, 25) ?></td>
+                                <td style="text-align: left">
+                                    <?php
+                                    if ($datas->lokasi === "GJD/Stock") {
+                                        $lbrjd = explode(" ", $datas->lebar_jadi);
+                                        array_pop($lbrjd);
+                                        $lbrjd = implode(" ", $lbrjd);
+                                        ?>
+                                        <a href="<?= getIpPubic("hms/report/marketing/stockbyproductitems?id=" . urlencode($datas->corak) . "&lebar_jadi=" . urlencode($lbrjd) . "&uom=" . urlencode($datas->uom) . "&product=" . urlencode($datas->corak) . "&cmbMarketing=All") ?>"
+                                           target="_blank"><?= substr($datas->corak, 0, 25) ?></a>
+                                           <?php
+                                       } else {
+                                           ?>
+                                           <?= substr($datas->corak, 0, 25) ?>
+                                           <?php
+                                       }
+                                       ?>
+
+                                </td>
                                 <?php
                                 if ($go)
                                     echo "<td style='text-align: right'>{$datas->total_warna}</td>";
