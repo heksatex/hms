@@ -31,7 +31,7 @@
                 if ($user->level == "Supervisor") {
                     ?>
                     .add-fpt-btn {
-                        display: none !important;
+                        /*display: none !important;*/
                     }
                     <?php
                 }
