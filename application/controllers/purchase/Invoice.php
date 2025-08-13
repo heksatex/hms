@@ -244,9 +244,7 @@ class Invoice extends MY_Controller {
             $head->setTables('invoice')->setWheres(["id" => $kode_decrypt])
                     ->update($dataUpdate);
             $bd->setTables("invoice_detail")->updateBatch($item, 'id');
-            $log = "Header -> " . logArrayToString("; ", $dataUpdate);
-            $log .= "\nDETAIL -> " . logArrayToString("; ", $item);
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit',$log, $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', logArrayToString('; ', $dataUpdate), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -280,13 +278,13 @@ class Invoice extends MY_Controller {
             $inv = $this->input->post("inv");
             $origin = $this->input->post("origin");
             $periode = $this->input->post("periode");
+            
             $kode_decrypt = decrypt_url($id);
             $head = new $this->m_global;
             $this->_module->startTransaction();
             $lock = "invoice WRITE,acc_jurnal_entries WRITE,acc_jurnal_entries_items WRITE,token_increment WRITE,partner READ,"
                     . "currency_kurs READ,currency READ,tax READ,invoice_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ";
             $this->_module->lock_tabel($lock);
-            $jurnalData = [];
             if ($status === 'cancel') {
                 $cekJurnal = clone $head;
 
@@ -319,26 +317,25 @@ class Invoice extends MY_Controller {
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
                                 ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,tax.ket, coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id","invoice.created_at as invoice_create"])
+                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id"])
                                 ->setOrder(["invoice_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
-                    "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => ($dataItems[0]->invoice_create ?? date("Y-m-d H:i:s")), "tipe" => ($dataItems[0]->jurnal ?? ""),
+                    "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => date("Y-m-d H:i:s"), "tipe" => ($dataItems[0]->jurnal ?? ""),
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
                 $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
-                
-                
-//                $jurnalDB->setTables("log_history")->save(
-//                        [
-//                            "datelog" => date("Y-m-d H:i:s"),
-//                            "kode" => $jurnal,
-//                            "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
-//                            "jenis_log" => "create",
-//                            "note" => logArrayToString(";", $jurnalData),
-//                            "nama_user" => $users["nama"],
-//                            "ip_address" => ""
-//                        ]
-//                );
+
+                $jurnalDB->setTables("log_history")->save(
+                        [
+                            "datelog" => date("Y-m-d H:i:s"),
+                            "kode" => $jurnal,
+                            "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                            "jenis_log" => "create",
+                            "note" => logArrayToString(";", $jurnalData),
+                            "nama_user" => $users["nama"],
+                            "ip_address" => ""
+                        ]
+                );
                 $jurnalItems = [];
                 $jurnalItemsLog = [];
                 $tax = 0;
@@ -377,9 +374,17 @@ class Invoice extends MY_Controller {
                             "tax_nama" => $value->tax_nama
                         );
                     }
-                    $jurnalItemsLog[] = $item;
+                    $jurnalItemsLog[] = [
+                        "datelog" => date("Y-m-d H:i:s"),
+                        "kode" => $jurnal,
+                        "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                        "jenis_log" => "edit",
+                        "note" => logArrayToString(";", $item),
+                        "nama_user" => $users["nama"],
+                        "ip_address" => ""
+                    ];
                 }
-                
+
                 $model = new $this->m_global;
                 $model2 = clone $model;
                 $model2->setTables("tax");
@@ -465,7 +470,15 @@ class Invoice extends MY_Controller {
 
                     foreach ($dataPajak as $a => $vv) {
                         $jurnalItems[] = $vv;
-                        $jurnalItemsLog[] = $vv;
+                        $jurnalItemsLog[] = [
+                            "datelog" => date("Y-m-d H:i:s"),
+                            "kode" => $jurnal,
+                            "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                            "jenis_log" => "create",
+                            "note" => logArrayToString(";", $vv),
+                            "nama_user" => $users["nama"],
+                            "ip_address" => ""
+                        ];
                     }
                 }
                 $defaultPpn = $model->setTables("setting")->setWheres(["setting_name" => "pajak_hutang_dagang_lokal"], true)->setSelects(["value"])->getDetail();
@@ -485,18 +498,24 @@ class Invoice extends MY_Controller {
                 $jurnalItems[] = $item;
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
-                $jurnalItemsLog[] = $item;
+                $jurnalItemsLog[] = [
+                    "datelog" => date("Y-m-d H:i:s"),
+                    "kode" => $jurnal,
+                    "main_menu_sub_kode" => ($kodes["kode"] ?? ""),
+                    "jenis_log" => "edit",
+                    "note" => logArrayToString(";", $item),
+                    "nama_user" => $users["nama"],
+                    "ip_address" => ""
+                ];
+                $jurnalDB->setTables("log_history")->saveBatch($jurnalItemsLog);
             }
             $head->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update(["status" => $status]);
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
-            
-            $log = "Header -> " . logArrayToString("; ", $jurnalData);
-            $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItemsLog);
-            
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'create', $log, $username);
+
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'update', logArrayToString('; ', ["status" => $status]), $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
