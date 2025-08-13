@@ -83,7 +83,7 @@
                                             <th>TGL Inv Supp</th>
                                             <th>No SJ Supplier</th>
                                             <th>No PO</th>
-                                            <th>Order Date</th>
+                                            <th>Tgl dibuat</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
