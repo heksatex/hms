@@ -1212,7 +1212,8 @@ class Penerimaanbarang extends MY_Controller {
                             "origin" => $kode,
                             "no_sj_supp" => $head->no_sj,
                             "tanggal_invoice_supp" => $head->tanggal_sj,
-                            "tanggal_sj" => $head->tanggal_sj
+                            "tanggal_sj" => $head->tanggal_sj,
+                            "periode"=>date("Y/m")
                         ];
 
                         $idInsert = $inserInvoice->setTables("invoice")->save($dataInvoice);
