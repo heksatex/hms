@@ -6,9 +6,9 @@ class M_pengirimanBarang extends CI_Model
 {
 	
 	//var $table 		  = 'pengiriman_barang';
-	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'origin','lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'origin', 'lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
-	var $order  	  = array('kode' => 'desc');
+	var $column_order = array(null, 'pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin','pb.lokasi_tujuan', 'pb.reff_picking','pb.reff_note', 'mmss.nama_status');
+	var $column_search= array( 'pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin','pb.lokasi_tujuan', 'pb.reff_picking','pb.reff_note', 'mmss.nama_status');
+	var $order  	  = array('pb.kode' => 'desc');
 
 	var $table2  	    = 'stock_kain_greige';
 	var $column_order2  = array(null, 'corak', 'barcode_id', 'panjang', 'berat');
@@ -33,15 +33,15 @@ class M_pengirimanBarang extends CI_Model
 		  //add custom filter here
         if($this->input->post('kode'))
         {
-            $this->db->like('kode', $this->input->post('kode'));
+            $this->db->like('pb.kode', $this->input->post('kode'));
         }
         if($this->input->post('status'))
         {
-            $this->db->like('status', $this->input->post('status'));
+            $this->db->like('pb.status', $this->input->post('status'));
         }
         if($this->input->post('reff'))
         {
-            $this->db->like('reff_note', $this->input->post('reff'));
+            $this->db->like('pb.reff_note', $this->input->post('reff'));
         }
        	if ($this->input->post('nama_produk')) {
 			$this->db->group_start();
