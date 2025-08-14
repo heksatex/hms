@@ -861,6 +861,7 @@ class Purchaseorder extends MY_Controller {
                         . "stock_move WRITE, stock_move_produk WRITE, departemen d WRITE,"
                         . "pengiriman_barang WRITE, pengiriman_barang_items WRITE, departemen WRITE, mst_produk WRITE";
                 $this->_module->lock_tabel($locktabel);
+                $now = date("Y-m-d H:i:s");
                 $invRetur = [
                     "no_inv_retur" => $noDeb,
                     "id_supplier" => $checkInv->id_supplier,
@@ -875,7 +876,8 @@ class Purchaseorder extends MY_Controller {
                     "origin" => $checkInv->origin,
                     "total" => 0,
                     "dpp_lain" => 0,
-                    "created_at" => date("Y-m-d H:i:s"),
+                    "created_at" => $now,
+                    "periode"=>date("Y/m", strtotime(now)),
                     "tanggal_sj" => $checkInv->tanggal_sj,
                     "status" => "draft"
                 ];
