@@ -1953,7 +1953,7 @@ class Mutasi extends MY_Controller
 
         }else{
 
-            if($departemen == 'DYE2'or $departemen == 'FIN' OR $departemen == 'DF' || $departemen == 'INS2' || $departemen == 'DF2' || $departemen == 'DYE2R' || $departemen == 'FINR' || $departemen == 'DFR'){
+            if($departemen == 'DYE2'or $departemen == 'FIN' OR $departemen == 'DF' || $departemen == 'INS2' || $departemen == 'DF2' || $departemen == 'DYE2R' || $departemen == 'FINR' || $departemen == 'DFR' || $departemen == 'INS2R'){
                 $this->export_excel_mutasi_format2($view,$tanggal,$departemen,$parent,$nama_produk,$warna,$lot,$no_go,$route,$jenis_kain);
             }else{
 
