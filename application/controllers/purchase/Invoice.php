@@ -246,7 +246,7 @@ class Invoice extends MY_Controller {
             $bd->setTables("invoice_detail")->updateBatch($item, 'id');
             $log = "Header -> " . logArrayToString("; ", $dataUpdate);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $item);
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit',$log, $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', $log, $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -319,15 +319,14 @@ class Invoice extends MY_Controller {
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
                                 ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,tax.ket, coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id","invoice.created_at as invoice_create"])
+                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id", "invoice.created_at as invoice_create"])
                                 ->setOrder(["invoice_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
                     "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => ($dataItems[0]->invoice_create ?? date("Y-m-d H:i:s")), "tipe" => ($dataItems[0]->jurnal ?? ""),
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
                 $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
-                
-                
+
 //                $jurnalDB->setTables("log_history")->save(
 //                        [
 //                            "datelog" => date("Y-m-d H:i:s"),
@@ -379,7 +378,7 @@ class Invoice extends MY_Controller {
                     }
                     $jurnalItemsLog[] = $item;
                 }
-                
+
                 $model = new $this->m_global;
                 $model2 = clone $model;
                 $model2->setTables("tax");
@@ -486,17 +485,16 @@ class Invoice extends MY_Controller {
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
                 $jurnalItemsLog[] = $item;
+                $log = "Header -> " . logArrayToString("; ", $jurnalData);
+                $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItemsLog);
+                $this->_module->gen_history(($kodes["kode"] ?? ""), $jurnal, 'create', $log, $username);
             }
             $head->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update(["status" => $status]);
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
-            
-            $log = "Header -> " . logArrayToString("; ", $jurnalData);
-            $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItemsLog);
-            
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'create', $log, $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'edit', "status menjadi {$status}", $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
