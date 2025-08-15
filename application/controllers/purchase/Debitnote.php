@@ -105,6 +105,7 @@ class Debitnote extends MY_Controller {
                             ->setJoins("acc_coa", "acc_coa.kode_coa = account", "left")
                             ->setSelects(["invoice_retur_detail.*", "tax.nama as pajak,tax.ket as pajak_ket,amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax", "kode_coa,acc_coa.nama as nama_coa"])
                             ->setOrder(["id"])->getData();
+            $data["periode"] = $model3->setTables("acc_periode")->setWheres(["status" => "open"], true)->setOrder(["tahun_fiskal" => "desc", "periode" => "asc"])->getData();
             $this->load->view('purchase/v_invoice_retur_edit', $data);
         } catch (Exception $ex) {
             return show_404();
@@ -112,7 +113,31 @@ class Debitnote extends MY_Controller {
     }
 
     public function update($id) {
+        $val = [
+            [
+                'field' => 'nilai_matauang',
+                'label' => 'Kurs',
+                'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                    "regex_match" => "{field} harus berupa number / desimal"
+                ]
+            ],
+            [
+                'field' => 'periode',
+                'label' => 'Periode ACC',
+                'rules' => ['required'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih'
+                ]
+            ]
+                ]
+        ;
         try {
+            $this->form_validation->set_rules($val);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
 
@@ -131,6 +156,7 @@ class Debitnote extends MY_Controller {
             $matauang = $this->input->post("nilai_matauang");
             $tanggal_sj = $this->input->post("tanggal_sj");
             $tax_lain = $this->input->post("tax_lain_id");
+            $periode = $this->input->post("periode");
 
             $item = [];
             $totals = 0.00;
@@ -172,7 +198,7 @@ class Debitnote extends MY_Controller {
             $head = new $this->m_global;
             $bd = clone $head;
             $dataUpdate = ["no_sj_supp" => $noSjSupp, "no_invoice_supp" => $noInvSupp, "tanggal_invoice_supp" => $tglInvSupp, 'dpp_lain' => $nilaiDppLain,
-                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj];
+                'total' => $grandTotal, 'nilai_matauang' => $matauang, "tanggal_sj" => $tanggal_sj, "periode" => $periode];
             $head->setTables('invoice_retur')->setWheres(["no_inv_retur" => $kode_decrypt])
                     ->update($dataUpdate);
             $bd->setTables("invoice_retur_detail")->updateBatch($item, 'id');
@@ -181,6 +207,7 @@ class Debitnote extends MY_Controller {
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
+            log_message("error", json_encode($ex));
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
@@ -188,6 +215,17 @@ class Debitnote extends MY_Controller {
     }
 
     public function update_status() {
+        $val = [
+            [
+                'field' => 'periode',
+                'label' => 'Periode ACC',
+                'rules' => ['required'],
+                'errors' => [
+                    'required' => '{field} Belum diupdate'
+                ]
+            ]
+                ]
+        ;
         try {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
@@ -197,6 +235,7 @@ class Debitnote extends MY_Controller {
             $id = $this->input->post("id");
             $inv = $this->input->post("inv");
             $origin = $this->input->post("origin");
+            $periode = $this->input->post("periode");
             $kode_decrypt = decrypt_url($id);
             $head = new $this->m_global;
             $this->_module->startTransaction();
@@ -209,6 +248,11 @@ class Debitnote extends MY_Controller {
                     throw new \Exception('Jurnal Tidak Ada', 500);
                 }
             } else if ($status === 'done') {
+                $this->form_validation->set_rules($val);
+                if ($this->form_validation->run() == FALSE) {
+                    throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+                }
+
                 $now = date("Y-m-d H:i:s");
                 if ($kodeJurnal === "") {
                     throw new \Exception('Jurnal Tidak Ada', 500);
@@ -229,15 +273,16 @@ class Debitnote extends MY_Controller {
                                 ->setSelects(["invoice_retur_detail.*", "invoice_retur.id_supplier,invoice_retur.journal as jurnal,dpp_lain,nilai_matauang",
                                     "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,tax.ket"])
+                                    "partner.nama as nama_supp,tax.ket", "invoice_retur.created_at as invoice_retur_create"])
                                 ->setOrder(["invoice_retur_id"])->getData();
 
-                $jurnalData = ["kode" => $jurnal, "periode" => date('y', strtotime($now)) . '/' . date('m', strtotime($now)),
-                    "origin" => "{$inv}|{$origin}", "status" => "posted", "tanggal_dibuat" => date("Y-m-d H:i:s"), "tipe" => ($dataItems[0]->jurnal ?? ""),
+                $jurnalData = ["kode" => $jurnal, "periode" => $periode,
+                    "origin" => "{$inv}|{$origin}", "status" => "posted",
+                    "tanggal_dibuat" => ($dataItems[0]->invoice_retur_create ?? date("Y-m-d H:i:s")), "tipe" => ($dataItems[0]->jurnal ?? ""),
                     "tanggal_posting" => date("Y-m-d H:i:s"), "reff_note" => ($dataItems[0]->nama_supp ?? "")];
                 $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
                 $pajakLain = [];
-                    
+
                 $jurnalItems = [];
                 $tax = 0;
                 $totalNominal = 0;
@@ -376,12 +421,16 @@ class Debitnote extends MY_Controller {
                 );
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
+                
+                $log = "Header -> " . logArrayToString("; ", $jurnalData);
+                $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
+                $this->_module->gen_history("debitnote", $jurnal, 'create', $log, $username);
             }
             $head->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update(["status" => $status]);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
-            $this->_module->gen_history($sub_menu, $kode_decrypt, 'update', logArrayToString('; ', ["status" => $status]), $username);
+            $this->_module->gen_history($sub_menu, $kode_decrypt, 'update', "status menjadi {$status}", $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
