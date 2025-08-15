@@ -237,6 +237,7 @@ class Debitnote extends MY_Controller {
             $origin = $this->input->post("origin");
             $periode = $this->input->post("periode");
             $kode_decrypt = decrypt_url($id);
+            $updateInv = ["status" => $status];
             $head = new $this->m_global;
             $this->_module->startTransaction();
             $lock = "invoice WRITE,acc_jurnal_entries WRITE,acc_jurnal_entries_items WRITE,token_increment WRITE,partner WRITE,invoice_retur WRITE,setting read,"
@@ -425,8 +426,9 @@ class Debitnote extends MY_Controller {
                 $log = "Header -> " . logArrayToString("; ", $jurnalData);
                 $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                 $this->_module->gen_history("debitnote", $jurnal, 'create', $log, $username);
+                $updateInv = array_merge($updateInv,["jurnal_retur" => $jurnal]);
             }
-            $head->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update(["status" => $status]);
+            $head->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update($updateInv);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
