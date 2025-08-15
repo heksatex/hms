@@ -273,7 +273,7 @@ class Invoice extends MY_Controller {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
             $users = $this->session->userdata('nama');
-
+            
             $kodeJurnal = $this->input->post("jurnal");
             $status = $this->input->post("status");
             $id = $this->input->post("id");
@@ -282,6 +282,7 @@ class Invoice extends MY_Controller {
             $periode = $this->input->post("periode");
             $kode_decrypt = decrypt_url($id);
             $head = new $this->m_global;
+            $updateInv = ["status" => $status];
             $this->_module->startTransaction();
             $lock = "invoice WRITE,acc_jurnal_entries WRITE,acc_jurnal_entries_items WRITE,token_increment WRITE,partner READ,"
                     . "currency_kurs READ,currency READ,tax READ,invoice_detail WRITE,user READ, main_menu_sub READ, log_history WRITE,setting READ";
@@ -484,12 +485,13 @@ class Invoice extends MY_Controller {
                 $jurnalItems[] = $item;
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
-               
+
                 $log = "Header -> " . logArrayToString("; ", $jurnalData);
                 $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                 $this->_module->gen_history(($kodes["kode"] ?? ""), $jurnal, 'create', $log, $username);
+                $updateInv = array_merge($updateInv, ["jurnal" => $jurnal]);
             }
-            $head->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update(["status" => $status]);
+            $head->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update($updateInv);
 
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
