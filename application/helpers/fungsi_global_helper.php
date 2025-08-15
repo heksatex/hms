@@ -96,13 +96,22 @@ function bln_indo($tanggal) {
 }
 
 function logArrayToString(string $seperator, array $data, string $indikatorVal = "=") {
-    return implode($seperator, array_map(
-                    function ($v, $k) use ($indikatorVal) {
-                        return sprintf("%s{$indikatorVal}%s", $k, $v);
-                    },
-                    $data,
-                    array_keys($data)
-    ));
+    $hasil = "";
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+
+            $hasil .= " " .($key + 1) . " " . logArrayToString($seperator, $value, $indikatorVal);
+        } else {
+            $hasil = implode($seperator, array_map(
+                            function ($v, $k) use ($indikatorVal) {
+                                return sprintf("%s{$indikatorVal}%s", $k, $v);
+                            },
+                            $data,
+                            array_keys($data)
+            ));
+        }
+    }
+    return $hasil;
 }
 
 function getClientIP() {
@@ -204,6 +213,23 @@ function getRomawi($bln) {
 
 function getIpPubic(string $param) {
     return "http://202.150.151.163:8880/" . $param;
+}
+
+function searchOnArray(array $data, string $keySearch, string $valueSearch) {
+    $hasil = [];
+    foreach ($data as $key => $value) {
+        if (gettype($value) !== "string") {
+            $hasil = searchOnArray((array) $value, $keySearch, $valueSearch);
+            if (count($hasil) > 0)
+                break;
+        } else {
+            if (strtolower($key) === strtolower($keySearch) && strtolower($value) === strtolower($valueSearch)) {
+                $hasil = $data;
+                continue;
+            }
+        }
+    }
+    return $hasil;
 }
 
 ?>
