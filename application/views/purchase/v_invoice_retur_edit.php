@@ -106,49 +106,66 @@ if ($inv->status === "done") {
                                                     <label class="form-label">Supplier</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $inv->supplier ?></span>
+                                                    <input class="form-control" value="<?= $inv->supplier ?>" disabled>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Order Date</label>
+                                                    <label class="form-label">Origin</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= date("l, d M Y H:i:s", strtotime($inv->order_date)) ?></span>
+                                                  <input class="form-control" value="<?= $inv->origin ?>" disabled>
+                                                    <input type="hidden" class="form-control pull-right input-sm" name="origin" value="<?= $inv->origin ?>" readonly> 
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Mata Uang</label>
+                                                    <label class="form-label">Tgl dibuat</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $inv->mata_uang ?></span>
+                                                    <input class="form-control" value="<?= date("Y-m-d H:i:s", strtotime($inv->created_at)) ?>" disabled>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label required">Kurs</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?> required>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">No PO</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $inv->no_po ?></span>
+                                                    <input class="form-control" value="<?= $inv->no_po ?>" disabled>
                                                 </div>
                                             </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label required">Periode ACC</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <?php
+                                                    if ($inv->status !== "draft") {
+                                                        ?>
+                                                        <span><?= $inv->periode ?></span>
+                                                        <?php
+                                                    } else {
+                                                        ?>
+                                                        <select class="form-control select2" name="periode" id="periode">
+                                                            <?php
+                                                            $periodeNow = $inv->periode ?? date("Y/m", strtotime($inv->created_at));
+                                                            $selected = "selected";
+
+                                                            foreach ($periode as $kk => $val) {
+                                                                ?>
+                                                                <option value="<?= $val->periode ?>" <?= ($periodeNow === $val->periode) ? "selected" : "" ?> ><?= $val->periode ?></option>
+                                                                <?php
+                                                            }
+                                                            ?>
+
+                                                        </select>
+                                                        <?php
+                                                    }
+                                                    ?>
+
+                                                </div>
+                                            </div>
+                                            
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-xs-12">
@@ -161,8 +178,6 @@ if ($inv->status === "done") {
                                                     <input type="text" class="form-control pull-right input-sm" name="no_invoice_supp" value="<?= $inv->no_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">Tgl Invoice Supplier</label>
@@ -170,10 +185,8 @@ if ($inv->status === "done") {
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
                                                     <input type="datetime-local" class="form-control pull-right input-sm" name="tanggal_invoice_supp" value="<?= $inv->tanggal_invoice_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
                                                 </div>
-                                                <button type="submit" id="form-invr-submit" style="display: none"></button>
+                                                <button type="submit" id="form-inv-submit" style="display: none"></button>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">No SJ Supplier</label>
@@ -182,8 +195,6 @@ if ($inv->status === "done") {
                                                     <input type="text" class="form-control pull-right input-sm" name="no_sj_supp" value="<?= $inv->no_sj_supp ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">Tgl SJ</label>
@@ -192,14 +203,20 @@ if ($inv->status === "done") {
                                                     <input type="datetime-local" class="form-control pull-right input-sm" name="tanggal_sj" value="<?= $inv->tanggal_sj ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>> 
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
-                                                    <label class="form-label">Origin</label>
+                                                    <label class="form-label required">Kurs</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <input type="text" class="form-control pull-right input-sm" name="origin" value="<?= $inv->origin ?>" readonly> 
+                                                    <input type="text" class="form-control pull-right input-sm" name="nilai_matauang" value="<?= number_format($inv->nilai_matauang, 0, '', '') ?>" <?= ($inv->status === 'draft') ? '' : "readonly" ?>>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4">
+                                                    <label class="form-label">Mata Uang</label>
+                                                </div>
+                                                <div class="col-xs-8 col-md-8 text-uppercase">
+                                                    <span><?= $inv->mata_uang ?></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -457,6 +474,7 @@ if ($inv->status === "done") {
                                             </div>
                                         </div>
                                     </div>
+                                    <button type="submit" id="form-invr-submit" style="display: none"></button>
                                     </form>
                                 </div>
                                 </section>
@@ -551,7 +569,8 @@ if ($inv->status === "done") {
                                             status: "done",
                                             jurnal: "<?= $inv->journal ?>",
                                             inv: "<?= $inv->no_inv_retur ?>",
-                                            origin: "<?= $inv->origin ?>"
+                                            origin: "<?= $inv->origin ?>",
+                                            periode: "<?= $inv->periode ?>"
                                         },
                                         error: function (req, error) {
                                             unblockUI(function () {

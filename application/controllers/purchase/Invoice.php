@@ -39,7 +39,7 @@ class Invoice extends MY_Controller {
             $status = $this->input->post("status");
             $supplier = $this->input->post("supplier");
             $list->setTables("invoice")
-                    ->setOrders([null, "no_invoice", "partner.nama", "no_invoice_supp", "tanggal_invoice_supp", "no_sj_supp", "no_po", "order_date", "status"])
+                    ->setOrders([null, "no_invoice", "partner.nama", "no_invoice_supp", "tanggal_invoice_supp", "no_sj_supp", "no_po", "created_at", "status"])
                     ->setSearch(["partner.nama", "no_invoice_supp", "no_sj_supp", "no_po", "status", "no_invoice", "origin"])
                     ->setJoins("partner", "partner.id = invoice.id_supplier", "left")
                     ->setSelects(["invoice.*", "partner.nama as supplier"])->setOrder(['created_at' => 'desc']);
@@ -484,9 +484,9 @@ class Invoice extends MY_Controller {
                 $jurnalItems[] = $item;
                 $jurnalDBItems = new $this->m_global;
                 $jurnalDBItems->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
-                $jurnalItemsLog[] = $item;
+               
                 $log = "Header -> " . logArrayToString("; ", $jurnalData);
-                $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItemsLog);
+                $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                 $this->_module->gen_history(($kodes["kode"] ?? ""), $jurnal, 'create', $log, $username);
             }
             $head->setTables("invoice")->setWheres(["id" => $kode_decrypt])->update(["status" => $status]);
