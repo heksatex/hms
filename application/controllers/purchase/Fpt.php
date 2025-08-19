@@ -370,7 +370,7 @@ class Fpt extends MY_Controller {
                         'nama_produk' => $value->nama_produk,
                         'kode_produk' => $value->kode_produk,
                         'qty' => $qtyy,
-                        'uom' => $value->uom_stock,
+                        'uom' => $value->uom,
                         'status' => 'ready',
                         'origin_prod' => $value->kode_produk . "_" . $row,
                         'row_order' => $row,
