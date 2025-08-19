@@ -89,6 +89,7 @@ class Debitnote extends MY_Controller {
             $detail = clone $head;
             $tax = clone $head;
             $model3 = clone $head;
+            $model4 = clone $head;
             $data["setting"] = $model3->setTables("setting")->setWheres(["setting_name" => "dpp_lain", "status" => "1"])->setSelects(["value"])->getDetail();
             $datas = $head->setTables("invoice_retur")->setJoins("partner", "partner.id = id_supplier", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = matauang", "left")
@@ -105,7 +106,7 @@ class Debitnote extends MY_Controller {
                             ->setJoins("acc_coa", "acc_coa.kode_coa = account", "left")
                             ->setSelects(["invoice_retur_detail.*", "tax.nama as pajak,tax.ket as pajak_ket,amount,coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax", "kode_coa,acc_coa.nama as nama_coa"])
                             ->setOrder(["id"])->getData();
-            $data["periode"] = $model3->setTables("acc_periode")->setWheres(["status" => "open"], true)->setOrder(["tahun_fiskal" => "desc", "periode" => "asc"])->getData();
+            $data["periode"] = $model4->setTables("acc_periode")->setWheres(["status" => "open"], true)->setOrder(["tahun_fiskal" => "desc", "periode" => "asc"])->getData();
             $this->load->view('purchase/v_invoice_retur_edit', $data);
         } catch (Exception $ex) {
             return show_404();
@@ -237,6 +238,7 @@ class Debitnote extends MY_Controller {
             $origin = $this->input->post("origin");
             $periode = $this->input->post("periode");
             $kode_decrypt = decrypt_url($id);
+            $updateInv = ["status" => $status];
             $head = new $this->m_global;
             $this->_module->startTransaction();
             $lock = "invoice WRITE,acc_jurnal_entries WRITE,acc_jurnal_entries_items WRITE,token_increment WRITE,partner WRITE,invoice_retur WRITE,setting read,"
@@ -425,8 +427,9 @@ class Debitnote extends MY_Controller {
                 $log = "Header -> " . logArrayToString("; ", $jurnalData);
                 $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
                 $this->_module->gen_history("debitnote", $jurnal, 'create', $log, $username);
+                $updateInv = array_merge($updateInv,["jurnal_retur" => $jurnal]);
             }
-            $head->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update(["status" => $status]);
+            $head->setTables("invoice_retur")->setWheres(["no_inv_retur" => $kode_decrypt])->update($updateInv);
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
