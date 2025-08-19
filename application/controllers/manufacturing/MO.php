@@ -4518,7 +4518,7 @@ class MO extends MY_Controller
             //cek status mrp_production = hold
             $cek3  = $this->m_mo->cek_status_mrp_production($kode,'hold')->row_array();
 
-            if(!empty($cek1['status'])){
+            if(!empty($cek1['status']) AND $deptid != 'GJD'){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if(!empty($cek2['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
