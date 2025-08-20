@@ -307,15 +307,17 @@ class Trackinglot extends MY_Controller
 
           foreach ($picklist as $picklists) {
             if ($picklists->valid == 'cancel') {
-              $get_p = $this->m_trackingLot->cek_log_history($picklists->no_pl, ['menghapus', $txtlot]);
-              $result_record[] = array(
-                'tanggal' => $get_p->datelog,
-                'kode'        => $picklists->no_pl,
-                'link'        => '',
-                'keterangan'  => 'Barcode ini keluar dari Picklist / dihapus ',
-                'status'      => '-',
-                'user'        => $get_p->nama_user ?? '',
-              );
+              $get_pc = $this->m_trackingLot->cek_log_history($picklists->no_pl, ['menghapus', $txtlot]);
+              if($get_pc){
+                $result_record[] = array(
+                  'tanggal' => $get_pc->datelog,
+                  'kode'        => $picklists->no_pl,
+                  'link'        => '',
+                  'keterangan'  => 'Barcode ini keluar dari Picklist / dihapus ',
+                  'status'      => '-',
+                  'user'        => $get_pc->nama_user ?? '',
+                );
+              }
             }
           }
 
