@@ -242,6 +242,7 @@
     </div>
     <footer class="main-footer">
         <?php $this->load->view("admin/_partials/modal.php") ?>
+        <?php $this->load->view("admin/_partials/js.php") ?>
         <div id="foot">
             <?php
             $data['kode'] = $partner->id;
