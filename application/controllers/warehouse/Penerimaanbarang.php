@@ -2172,9 +2172,9 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad("Supplier", 12));
             $printer->text(str_pad(":$head->nama_partner", 50));
             $printer->feed();
-            $printer->text(str_pad("Tgl.Dibuat", 12));
-            $printer->text(str_pad(":{$head->tanggal}", 50));
-            $printer->text(str_pad("", 12));
+            // $printer->text(str_pad("Tgl.Dibuat", 12));
+            // $printer->text(str_pad(":{$head->tanggal}", 50));
+            $printer->text(str_pad("", 75));
             $splitAlamat = str_split(trim(preg_replace('/\s+/', ' ', $head->alamat)), 50);
 //            $splitAlamat = str_split("TES PRNT UNTUK ALAMT DI BANDUNG TES BANDUNG", 30);
             foreach ($splitAlamat as $key => $value) {
