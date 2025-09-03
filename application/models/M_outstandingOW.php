@@ -39,6 +39,11 @@ class M_outstandingOW extends CI_Model
             $this->db->like('w.nama_warna', $this->input->post('warna'));
         }
 
+        if($this->input->post('status_ow'))
+        {
+            $this->db->like('scl.status', $this->input->post('status_ow'));
+        }
+
         $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,scl.id_warna, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, scl.status as status_scl ");
         $this->db->from("sales_color_line scl");
         $this->db->join("sales_contract sc", "sc.sales_order = scl.sales_order", "inner");
@@ -84,7 +89,7 @@ class M_outstandingOW extends CI_Model
 		$this->_get_datatables_query();      
 		if($_POST['length'] != -1)
 		$this->db->limit($_POST['length'], $_POST['start']);
-        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done') )");
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id IN ('GRG','GRG-R') and status IN ('done') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $this->db->where("scl.ow <> ''");
@@ -96,7 +101,7 @@ class M_outstandingOW extends CI_Model
 	function count_filtered()
 	{
 		$this->_get_datatables_query();
-        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done') )");
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id IN ('GRG','GRG-R') and status IN ('done') )");
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
         $this->db->where("scl.ow <> ''");
@@ -138,16 +143,22 @@ class M_outstandingOW extends CI_Model
         {
             $this->db->like('w.nama_warna', $this->input->post('warna'));
         }
+
+        if($this->input->post('status_ow'))
+        {
+            $this->db->like('scl.status', $this->input->post('status_ow'));
+        }
+
         $status_scl = array('t','ng');
 		$this->db->where_in("scl.status", $status_scl);
-        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id= 'GRG' and status IN ('done') )");
+        $this->db->where("scl.ow not in (SELECT SUBSTRING_INDEX(origin,'|',-1) as ow FROM pengiriman_barang where  dept_id IN ('GRG','GRG-R') and status IN ('done') )");
         $this->db->where("scl.ow <> ''");
         $this->db->group_by("scl.ow");
        
 		return $this->db->count_all_results();
 	}
 
-    public function get_list_ow_by_kode($sc,$sales_group,$ow,$produk,$warna)
+    public function get_list_ow_by_kode($sc,$sales_group,$ow,$produk,$warna,$status_ow)
     {
         
         //add custom filter here
@@ -174,6 +185,11 @@ class M_outstandingOW extends CI_Model
         if(!empty($warna))
         {
             $this->db->like('w.nama_warna', $warna);
+        }
+
+        if(!empty($status_ow))
+        {
+            $this->db->like('scl.status', $status_ow);
         }
 
         $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,scl.id_warna, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, scl.status as status_scl ");
