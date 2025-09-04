@@ -91,8 +91,18 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Dyeingreproses() {
+        $data['id_dept'] = 'DYE-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Finishing() {
         $data['id_dept'] = 'FIN';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
+    public function Finishingreproses() {
+        $data['id_dept'] = 'FIN-R';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
@@ -101,8 +111,18 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Brushingreproses() {
+        $data['id_dept'] = 'BRS-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Finbrushing() {
         $data['id_dept'] = 'FBR';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
+    public function Finbrushingreproses() {
+        $data['id_dept'] = 'FBR-R';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
@@ -111,13 +131,28 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Paddingreproses() {
+        $data['id_dept'] = 'PAD-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Setting() {
         $data['id_dept'] = 'SET';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
+    public function Settingreproses() {
+        $data['id_dept'] = 'SET-R';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
     public function Inspecting2() {
         $data['id_dept'] = 'INS2';
+        $this->load->view('warehouse/v_penerimaan_barang', $data);
+    }
+
+    public function Inspecting2reproses() {
+        $data['id_dept'] = 'INS2-R';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
@@ -1127,131 +1162,136 @@ class Penerimaanbarang extends MY_Controller {
             } //else session
 
             if ($deptid === 'RCV') {
-                $orig = $this->input->post('origin');
-                $po = new m_po;
-                $dataPO = $po->setWheres(["no_po" => $orig,])->setWhereRaw("purchase_order_detail.status not in ('cancel','retur')")
-                        ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
-                        ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and penerimaan_barang_items.status_barang='done' "
-                                . "and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk and penerimaan_barang_items.kode_pp = purchase_order_detail.kode_pp)")
-                        ->setJoins("penerimaan_barang", "penerimaan_barang_items.kode = penerimaan_barang.kode")
-                        ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
-                        ->setJoins("tax", "tax.id = purchase_order_detail.tax_id", "left")
-                        ->setJoins("nilai_konversi", "nilai_konversi.id = purchase_order_detail.id_konversiuom", "left")
-                        ->setJoins("stock_move_items as smi", "(smi.move_id = penerimaan_barang.move_id and smi.origin_prod = penerimaan_barang_items.origin_prod)", "left")
-                        ->setOrder(["no_po"])
-                        ->setSelects([
-                            "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
-                            "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value", "smi.qty as qty_dtg",
-                            "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency,purchase_order.total as po_total",
-                            "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain", "tax.dpp as dpp_tax", "tax_lain_id", "nilai_konversi.nilai", "purchase_order.jenis as jenis_po",
-                            "konversi_aktif", "pembilang", "penyebut"
-                        ])->setGroups(["smi.quant_id"])
-                        ->getData();
-                if (is_null($dataPO)) {
-                    throw new \Exception("No PO {$orig} tidak ditemukan.", 500);
-                }
-                if ($dataPO[0]->jenis_po === "RFQ") {
-                    if ($dataPO[0]->no_value !== "1") {
-                        $orderDate = date("Y-m-d H:i:s");
-                        if (!$noinv = $this->token->noUrut('invoice_pembelian', date('y') . '/' . date('m'), true)
-                                        ->generate("PBINV/", '/%05d')->get()) {
-                            throw new \Exception("No Invoice tidak terbuat", 500);
-                        }
-                        $inserInvoice = new m_po;
-                        //                $item = clone $inserInvoice;
-                        $invoiceDetail = [];
-
-                        $head = $this->m_penerimaanBarang->get_data_by_code($kode);
-
-                        $dataInvoice = [
-                            "no_invoice" => $noinv,
-                            "id_supplier" => $dataPO[0]->supplier,
-                            "no_po" => $orig,
-                            "order_date" => $orderDate,
-                            "created_at" => date("Y-m-d H:i:s"),
-                            "matauang" => $dataPO[0]->currency,
-                            'nilai_matauang' => $dataPO[0]->nilai_currency,
-                            "journal" => "PB",
-                            "total" => $dataPO[0]->po_total,
-                            "dpp_lain" => $dataPO[0]->dpp_lain,
-                            "origin" => $kode,
-                            "no_sj_supp" => $head->no_sj,
-                            "tanggal_invoice_supp" => $head->tanggal_sj,
-                            "tanggal_sj" => $head->tanggal_sj
-                        ];
-
-                        $idInsert = $inserInvoice->setTables("invoice")->save($dataInvoice);
-                        //                $dataRCV = $item->setTables("penerimaan_barang_items")->setWheres(["kode"=>$kode])->setOrder(["row_order"])->getData();
-
-
-                        $totals = 0.00;
-                        $diskons = 0.00;
-                        $taxes = 0.00;
-                        $nilaiDppLain = 0;
-                        $models = new $this->m_global;
-                        $models->setTables("tax");
-                        $qty = 0;
-                        foreach ($dataPO as $key => $value) {
-                            $nilai_dpp = 0;
-                            if ($value->konversi_aktif === "1") {
-                                $qty = ($value->pembilang / $value->penyebut) * $value->qty_dtg;
-                            } else {
-                                $qty = $value->qty_dtg / $value->nilai;
+                $models = new $this->m_global;
+                $checkInv = $models->setTables("invoice")->setWheres(["status <>" => "cancel", "origin" => $kode])->getDetail();
+                if (!$checkInv) {
+                    $orig = $this->input->post('origin');
+                    $po = new m_po;
+                    $dataPO = $po->setWheres(["no_po" => $orig,])->setWhereRaw("purchase_order_detail.status not in ('cancel','retur')")
+                            ->setJoins("purchase_order_detail", "purchase_order_detail.po_id = purchase_order.id")
+                            ->setJoins("penerimaan_barang_items", "(penerimaan_barang_items.kode = '{$kode}' and penerimaan_barang_items.status_barang='done' "
+                                    . "and  purchase_order_detail.kode_produk = penerimaan_barang_items.kode_produk and penerimaan_barang_items.kode_pp = purchase_order_detail.kode_pp)")
+                            ->setJoins("penerimaan_barang", "penerimaan_barang_items.kode = penerimaan_barang.kode")
+                            ->setJoins("mst_produk_coa", "mst_produk_coa.kode_produk = purchase_order_detail.kode_produk", "left")
+                            ->setJoins("tax", "tax.id = purchase_order_detail.tax_id", "left")
+                            ->setJoins("nilai_konversi", "nilai_konversi.id = purchase_order_detail.id_konversiuom", "left")
+                            ->setJoins("stock_move_items as smi", "(smi.move_id = penerimaan_barang.move_id and smi.origin_prod = penerimaan_barang_items.origin_prod)", "left")
+                            ->setOrder(["no_po"])
+                            ->setSelects([
+                                "purchase_order_detail.harga_per_uom_beli,purchase_order_detail.tax_id,purchase_order_detail.diskon,purchase_order_detail.deskripsi",
+                                "purchase_order_detail.reff_note,mst_produk_coa.kode_coa,no_value", "smi.qty as qty_dtg",
+                                "purchase_order.supplier,purchase_order.currency,purchase_order.nilai_currency,purchase_order.total as po_total",
+                                "penerimaan_barang_items.*", "amount,tax.id as pajak_id", "dpp_lain", "tax.dpp as dpp_tax", "tax_lain_id", "nilai_konversi.nilai", "purchase_order.jenis as jenis_po",
+                                "konversi_aktif", "pembilang", "penyebut"
+                            ])->setGroups(["smi.quant_id"])
+                            ->getData();
+                    if (is_null($dataPO)) {
+                        throw new \Exception("No PO {$orig} tidak ditemukan.", 500);
+                    }
+                    if ($dataPO[0]->jenis_po === "RFQ") {
+                        if ($dataPO[0]->no_value !== "1") {
+                            $orderDate = date("Y-m-d H:i:s");
+                            if (!$noinv = $this->token->noUrut('invoice_pembelian', date('y') . '/' . date('m'), true)
+                                            ->generate("PBINV/", '/%05d')->get()) {
+                                throw new \Exception("No Invoice tidak terbuat", 500);
                             }
-                            $invoiceDetail[] = [
-                                'invoice_id' => $idInsert,
-                                'nama_produk' => $value->nama_produk,
-                                'kode_produk' => $value->kode_produk,
-                                'qty_beli' => $qty,
-                                'uom_beli' => $value->uom_beli,
-                                'deskripsi' => $value->deskripsi,
-                                'reff_note' => $value->reff_note,
-                                'account' => $value->kode_coa,
-                                'harga_satuan' => $value->harga_per_uom_beli,
-                                'tax_id' => $value->pajak_id,
-                                'diskon' => $value->diskon,
-                                "amount_tax" => $value->amount
+                            $inserInvoice = new m_po;
+                            //                $item = clone $inserInvoice;
+                            $invoiceDetail = [];
+
+                            $head = $this->m_penerimaanBarang->get_data_by_code($kode);
+
+                            $dataInvoice = [
+                                "no_invoice" => $noinv,
+                                "id_supplier" => $dataPO[0]->supplier,
+                                "no_po" => $orig,
+                                "order_date" => $orderDate,
+                                "created_at" => date("Y-m-d H:i:s"),
+                                "matauang" => $dataPO[0]->currency,
+                                'nilai_matauang' => $dataPO[0]->nilai_currency,
+                                "journal" => "PB",
+                                "total" => $dataPO[0]->po_total,
+                                "dpp_lain" => $dataPO[0]->dpp_lain,
+                                "origin" => $kode,
+                                "no_sj_supp" => $head->no_sj,
+                                "tanggal_invoice_supp" => $head->tanggal_sj,
+                                "tanggal_sj" => $head->tanggal_sj,
+                                "periode" => date("Y/m")
                             ];
-                            $total = ($qty * $value->harga_per_uom_beli);
-                            $totals += $total;
-                            $diskon = ($value->diskon ?? 0);
-                            $diskons += $diskon;
-                            $taxe = 0;
 
-                            if ($value->dpp_lain > 0 && $value->dpp_tax === "1") {
-                                $nilai_dpp = ((($total - $diskon) * 11) / 12);
-                                $taxe += ((($total - $diskon) * 11) / 12) * $value->amount;
-                            } else {
-                                $taxe += ($total - $diskon) * $value->amount;
-                            }
+                            $idInsert = $inserInvoice->setTables("invoice")->save($dataInvoice);
+                            //                $dataRCV = $item->setTables("penerimaan_barang_items")->setWheres(["kode"=>$kode])->setOrder(["row_order"])->getData();
 
-                            if ($value->tax_lain_id !== "0") {
-                                $dataTax = $models->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
-                                foreach ($dataTax as $kkk => $datas) {
-                                    if ($value->dpp_lain > 0 && $datas->dpp === "1") {
-                                        $nilai_dpp += ((($total - $diskon) * 11) / 12);
-                                        $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
-                                    } else {
-                                        $taxe += ($total - $diskon) * $datas->amount;
+
+                            $totals = 0.00;
+                            $diskons = 0.00;
+                            $taxes = 0.00;
+                            $nilaiDppLain = 0;
+                            $models = new $this->m_global;
+                            $models->setTables("tax");
+                            $qty = 0;
+                            foreach ($dataPO as $key => $value) {
+                                $nilai_dpp = 0;
+                                if ($value->konversi_aktif === "1") {
+                                    $qty = ($value->pembilang / $value->penyebut) * $value->qty_dtg;
+                                } else {
+                                    $qty = $value->qty_dtg / $value->nilai;
+                                }
+                                $invoiceDetail[] = [
+                                    'invoice_id' => $idInsert,
+                                    'nama_produk' => $value->nama_produk,
+                                    'kode_produk' => $value->kode_produk,
+                                    'qty_beli' => $qty,
+                                    'uom_beli' => $value->uom_beli,
+                                    'deskripsi' => $value->deskripsi,
+                                    'reff_note' => $value->reff_note,
+                                    'account' => $value->kode_coa,
+                                    'harga_satuan' => $value->harga_per_uom_beli,
+                                    'tax_id' => $value->pajak_id,
+                                    'diskon' => $value->diskon,
+                                    "amount_tax" => $value->amount
+                                ];
+                                $total = ($qty * $value->harga_per_uom_beli);
+                                $totals += $total;
+                                $diskon = ($value->diskon ?? 0);
+                                $diskons += $diskon;
+                                $taxe = 0;
+
+                                if ($value->dpp_lain > 0 && $value->dpp_tax === "1") {
+                                    $nilai_dpp = ((($total - $diskon) * 11) / 12);
+                                    $taxe += ((($total - $diskon) * 11) / 12) * $value->amount;
+                                } else {
+                                    $taxe += ($total - $diskon) * $value->amount;
+                                }
+
+                                if ($value->tax_lain_id !== "0") {
+                                    $dataTax = $models->setWhereIn("id", explode(",", $value->tax_lain_id), true)->setSelects(["amount,dpp"])->setOrder(["id"])->getData();
+                                    foreach ($dataTax as $kkk => $datas) {
+                                        if ($value->dpp_lain > 0 && $datas->dpp === "1") {
+                                            $nilai_dpp += ((($total - $diskon) * 11) / 12);
+                                            $taxe += ((($total - $diskon) * 11) / 12) * $datas->amount;
+                                        } else {
+                                            $taxe += ($total - $diskon) * $datas->amount;
+                                        }
                                     }
                                 }
+                                $taxes += $taxe;
+                                $nilaiDppLain += $nilai_dpp;
                             }
-                            $taxes += $taxe;
-                            $nilaiDppLain += $nilai_dpp;
+                            $grandTotal = ($totals - $diskons) + $taxes;
+                            //create Invoice_detail
+                            $inserInvoice->setTables("invoice_detail")->saveBatch($invoiceDetail);
+                            $inserInvoice->setTables("invoice")->setWheres(["id" => $idInsert], true)->update(["total" => $grandTotal, "dpp_lain" => $nilaiDppLain]);
+                            $this->_module->gen_history('invoice', $idInsert, 'create', logArrayToString(";", $dataInvoice), $username);
                         }
-                        $grandTotal = ($totals - $diskons) + $taxes;
-                        //create Invoice_detail
-                        $inserInvoice->setTables("invoice_detail")->saveBatch($invoiceDetail);
-                        $inserInvoice->setTables("invoice")->setWheres(["id" => $idInsert], true)->update(["total" => $grandTotal, "dpp_lain" => $nilaiDppLain]);
-                        $this->_module->gen_history('invoice', $idInsert, 'create', logArrayToString(";", $dataInvoice), $username);
                     }
-                }
-                //status done PO
-                $model = new $this->m_global;
-                $cek = $model->setTables("penerimaan_barang pb")->setWheres(["pb.origin" => $orig])->setWhereRaw("status not in ('done','cancel')")->getDetail();
-                if (!$cek) {
-                    $model->setTables("purchase_order")->setWheres(["no_po" => $orig], true)->update(["status" => "done"]);
+                    //status done PO
+                    $model = new $this->m_global;
+                    $cek = $model->setTables("penerimaan_barang pb")->setWheres(["pb.origin" => $orig])->setWhereRaw("status not in ('done','cancel')")->getDetail();
+                    if (!$cek) {
+                        $model->setTables("purchase_order")->setWheres(["no_po" => $orig], true)->update(["status" => "done"]);
 //                    $this->_module->gen_history('invoice', $idInsert, 'edit', logArrayToString(";", $dataInvoice), $username);
+                    }
                 }
             }
             if (!$this->_module->finishTransaction()) {
@@ -2136,9 +2176,9 @@ class Penerimaanbarang extends MY_Controller {
             $printer->text(str_pad("Supplier", 12));
             $printer->text(str_pad(":$head->nama_partner", 50));
             $printer->feed();
-            $printer->text(str_pad("Tgl.Dibuat", 12));
-            $printer->text(str_pad(":{$head->tanggal}", 50));
-            $printer->text(str_pad("", 12));
+            // $printer->text(str_pad("Tgl.Dibuat", 12));
+            // $printer->text(str_pad(":{$head->tanggal}", 50));
+            $printer->text(str_pad("", 75));
             $splitAlamat = str_split(trim(preg_replace('/\s+/', ' ', $head->alamat)), 50);
 //            $splitAlamat = str_split("TES PRNT UNTUK ALAMT DI BANDUNG TES BANDUNG", 30);
             foreach ($splitAlamat as $key => $value) {
