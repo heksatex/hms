@@ -106,11 +106,6 @@ class Penerimaanbarang extends MY_Controller {
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
 
-    public function Finishingreproses() {
-        $data['id_dept'] = 'FIN-R';
-        $this->load->view('warehouse/v_penerimaan_barang', $data);
-    }
-
     public function Brushing() {
         $data['id_dept'] = 'BRS';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
