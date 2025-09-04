@@ -5,8 +5,8 @@
 class M_listOW extends CI_Model
 {
 	
-    var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','ms.nama_status', 'jlb.status_resep','scl.piece_info','scl.reff_notes','scl.delivery_date_items ','co.kode_co',null);
-	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group', 'scl.piece_info','scl.reff_notes', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_jadi','sc.delivery_date','jlb.status_resep');
+    var $column_order = array(null, 'scl.sales_order', 'msg.nama_sales_group', 'scl.ow',  'scl.tanggal_ow', 'scl.status','scl.nama_produk','w.nama_warna',  'scl.qty', 'tot_qty1', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_greige', 'scl.lebar_jadi','ms.nama_status', 'jlb.status_resep','scl.piece_info','scl.reff_notes','scl.delivery_date_items ','co.kode_co',null);
+	var $column_search= array('scl.sales_order', 'scl.ow', 'scl.tanggal_ow', 'scl.nama_produk', 'w.nama_warna','scl.qty', 'co.kode_co',  'ms.nama_status','msg.nama_sales_group', 'scl.piece_info','scl.reff_notes', 'scl.gramasi', 'hdl.nama_handling', 'rc.nama', 'scl.lebar_greige', 'scl.lebar_jadi','sc.delivery_date','jlb.status_resep');
 	var $order  	  = array('scl.tanggal_ow' => 'asc');
 
     
@@ -75,10 +75,10 @@ class M_listOW extends CI_Model
         if($this->input->post('check_stock') == 'true'){
             $this->db->select(" '$ip' as ip, scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
             (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date, jlb.status_resep ");
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date, jlb.status_resep,scl.lebar_greige,scl.uom_lebar_greige ");
         }else{
             $this->db->select(" '$ip' as ip, scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status, scl.status as status_scl,
-            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date,jlb.status_resep ");
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date,jlb.status_resep,scl.lebar_greige,scl.uom_lebar_greige ");
         }
 
         $this->db->from("sales_color_line scl");
@@ -378,10 +378,10 @@ class M_listOW extends CI_Model
         if($check_stock == 'true'){
             $this->db->select(" '$ip' as ip, scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status,
             (select IFNULL(sum(qty),0) FROM stock_quant WHERE lokasi = 'GRG/Stock' AND kode_produk = scl.kode_produk ) as tot_qty1, scl.status as status_scl,
-            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date, jlb.status_resep");
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date, jlb.status_resep,scl.lebar_greige,scl.uom_lebar_greige");
         }else{
             $this->db->select(" scl.sales_order, scl.ow, msg.nama_sales_group, scl.tanggal_ow, scl.nama_produk, scl.qty, scl.uom, w.nama_warna,id_warna,ms.nama_status, scl.status as status_scl,
-            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date, jlb.status_resep");
+            co.kode_co, scl.piece_info, scl.lebar_jadi, scl.uom_lebar_jadi, scl.reff_notes, scl.gramasi, hdl.nama_handling, rc.nama as nama_route, scl.delivery_date_items as delivery_date, jlb.status_resep,scl.lebar_greige,scl.uom_lebar_greige");
         }
     
         $this->db->from("sales_color_line scl");

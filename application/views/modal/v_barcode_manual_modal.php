@@ -209,7 +209,9 @@
 				                id:item.kode_produk,
 				                text:'['+item.kode_produk+'] '+item.nama_produk,
 								uom : item.uom,
-								uom2 : item.uom_2
+								uom2 : item.uom_2,
+                                lebar_jadi : item.lebar_jadi,
+                                uom_lebar_jadi : item.uom_lebar_jadi
 				        });
 				    });
 				    return {
@@ -226,11 +228,18 @@
 		var uom = $("#kode_produk :selected").data().data.uom;
 		var uom2 = $("#kode_produk :selected").data().data.uom2;
 		var $newOption = $("<option></option>").val(uom).text(uom);
+        var lebar_jadi = $("#kode_produk :selected").data().data.lebar_jadi;
+        var uom_lebar_jadi = $("#kode_produk :selected").data().data.uom_lebar_jadi;
+
         // $("#uom_qty").empty().append($newOption).trigger('change');
 		// var $newOption2 = $("<option></option>").val(uom2).text(uom2);
         // $("#uom_qty2").empty().append($newOption2).trigger('change');
         $("#uom_qty").val(uom);
         $("#uom_qty2").val(uom2);
+        $('#lebar_jadi').val(lebar_jadi);
+
+        var $newOptionuom = $("<option></option>").val(uom_lebar_jadi).text(uom_lebar_jadi);
+        $("#uom_lebar_jadi").empty().append($newOptionuom).trigger('change');
     });
 
     $("#kode_produk").on('select2:unselect', function (e) {

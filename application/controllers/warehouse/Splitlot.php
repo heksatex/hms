@@ -273,7 +273,7 @@ class Splitlot extends MY_Controller
                         $lokasi_stock    = $cek_lc['stock_location'];
 
                         // ADJ OUT
-                        $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
+                        $kode_adjustment   = substr("00000" . $get_kode_adjustment,-5);                  
                         $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
 
                         $note_adj_in  = 'ADJ | Dibuat dari Fitur Split. No.'.$kode_split;
@@ -364,8 +364,11 @@ class Splitlot extends MY_Controller
                             $lokasi_adj      = $cek_lc['adjustment_location'];
                             $lokasi_stock    = $cek_lc['stock_location'];
 
-                            // ADJ OUT
-                            $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
+                            // ADJ OUT + ADJ IN 
+                            $kode_adjustment       = substr($get_kode_adjustment, -5) + 1;
+                            $kode_adjustment_tmp   = substr($get_kode_adjustment, -5);
+                            $kode_adjustment   = substr("00000" . $kode_adjustment,-5);   
+                            $kode_adjustment_tmp2 = $kode_adjustment;
                             $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
 
                             $note_adj_in  = 'ADJ | Dibuat dari Fitur Split. No.'.$kode_split;
@@ -598,7 +601,7 @@ class Splitlot extends MY_Controller
                                 $this->_module->gen_history($sub_menu, $kode_split, $jenis_log, $note_log, $username);
 
                                 //create log history adjustment 
-                                $note_log_adj_in = $kode_adjustment." ini dibuat dari Fitur Split Lot";
+                                $note_log_adj_in = $kode_adjustment." ini dibuat dari Fitur Split Lot <br> No. ".$kode_adjustment_tmp." => ".$kode_adjustment_tmp2;
                                 $date_log        = date('Y-m-d H:i:s');
                                 $sql_log_history_batch .= "('".$date_log."','mms72','".$kode_adjustment."','create','".addslashes($note_log_adj_in)."','".$nama_user['nama']."'), ";
 

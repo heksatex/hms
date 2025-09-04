@@ -137,7 +137,7 @@ class M_reproses extends CI_Model
 
 	function dept_reproses()
 	{
-		$dept = array("DYE/Stock","FIN/Stock","INS2/Stock","GJD/Stock");
+		$dept = array("DYE/Stock","FIN/Stock","INS2/Stock","GJD/Stock",'DYE-R/Stock','FIN-R/Stock','INS2-R/Stock');
 		return $dept;
 	}
 

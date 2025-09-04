@@ -350,6 +350,7 @@
                               <th  class='style bb ws text-right'>Qty1 HPH</th>
                               <th  class='style bb ws text-right'>Qty2 HPH</th>
                               <th  class='style bb ws'>Grade</th>
+                              <th  class='style bb ws'>Grade Produksi</th>
                               <th  class='style bb ws'>L.Jadi</th>
                               <th  class='style bb ws'>Jenis Kain</th>
                               <th  class='style bb ws'>Gramasi</th>
@@ -415,7 +416,7 @@
 
   // set date tgldari
   $('#tgldari').datetimepicker({
-      defaultDate : new Date(year, month, day, 00, 00, 00),
+      defaultDate : new Date(year, month, day, 0o0, 0o0, 0o0),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       maxDate: new Date(),
@@ -597,6 +598,7 @@
                                  $("<td align='right'>").text(value.qty1_hph+' '+value.uom_hph),
                                  $("<td align='right'>").text(value.qty2_hph+' '+value.uom2_hph),
                                  $("<td>").text(value.grade),
+                                 $("<td>").text(value.grade_produksi),
                                  $("<td>").text(value.lbr_jadi+' '+value.uom_lbr_jadi),
                                  $("<td>").text(value.jenis_kain),
                                  $("<td>").text(value.gramasi),

@@ -245,6 +245,7 @@
                       <th>Gramasi</th>
                       <th>Finishing</th>
                       <th>Route</th>
+                      <th>L.Greige</th>
                       <th>L.Jadi</th>
                       <th>DTI</th>
                       <th>Status Resep</th>
@@ -324,11 +325,11 @@
             "autoWidth": false,
             "columnDefs": [
                 { 
-                  "targets": [20], 
+                  "targets": [21], 
                   "orderable": false, 
                 },
                 { 
-                  "targets": [21], 
+                  "targets": [22], 
                   "visible": false, 
                 },
               ]
@@ -383,7 +384,7 @@
                   "orderable": false, 
                 },
                 { 
-                  "targets": [19], 
+                  "targets": [20], 
                   "orderable": false, 
                 },
                 { 
@@ -391,7 +392,7 @@
                   "orderable": false, 
                 },
                 { 
-                  "targets": [21], 
+                  "targets": [22], 
                   "visible": false, 
                 },
                 { 
@@ -410,11 +411,11 @@
              
             ],
             "createdRow": function( row, data, dataIndex ) {
-              if (data[21] == 'f' ){          
+              if (data[22] == 'f' ){          
                 $(row).css("color","red");
-              }else if(data[21]=='ng'){
+              }else if(data[22]=='ng'){
                 $(row).css("color","blue");
-              }else if(data[21]=='r'){
+              }else if(data[22]=='r'){
                 $(row).css("color","purple");
               }
             },

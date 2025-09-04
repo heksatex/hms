@@ -83,8 +83,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Greigereproses() {
+        $data['id_dept'] = 'GRG-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
     public function Dyeing() {
         $data['id_dept'] = 'DYE';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
+    public function Dyeingreproses() {
+        $data['id_dept'] = 'DYE-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -93,8 +103,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Finishingreproses() {
+        $data['id_dept'] = 'FIN-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+  
     public function Brushing() {
         $data['id_dept'] = 'BRS';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
+    public function Brushingreproses() {
+        $data['id_dept'] = 'BRS-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -103,8 +123,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Finbrushingreproses() {
+        $data['id_dept'] = 'FBR-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
     public function Padding() {
         $data['id_dept'] = 'PAD';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+    
+    public function Paddingreproses() {
+        $data['id_dept'] = 'PAD-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -113,8 +143,18 @@ class Pengirimanbarang extends MY_Controller {
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
+    public function Settingreproses() {
+        $data['id_dept'] = 'SET-R';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
     public function Inspecting2() {
         $data['id_dept'] = 'INS2';
+        $this->load->view('warehouse/v_pengiriman_barang', $data);
+    }
+
+    public function Inspecting2reproses() {
+        $data['id_dept'] = 'INS2-R';
         $this->load->view('warehouse/v_pengiriman_barang', $data);
     }
 
@@ -337,7 +377,7 @@ class Pengirimanbarang extends MY_Controller {
         $data['akses_menu'] = $this->_module->cek_priv_menu_by_user($username, $kode['kode'])->num_rows();
 
         // get warna untuk greige out()
-        if ($list->dept_id == 'GRG' AND $list->origin != '') {
+        if (($list->dept_id == 'GRG' OR $list->dept_id == 'GRG-R') AND $list->origin != '') {
             $origin = $list->origin;
             $origin_ex = explode("|", $origin);
             $kode_co = $origin_ex[1];
@@ -727,7 +767,7 @@ class Pengirimanbarang extends MY_Controller {
                     $where .= "'" . $quantid . "',";
 
                     $get_jml_qty = $get_jml_qty + $qty;
-                    if (round($get_jml_qty, 2) > round($qty_produk, 2) AND $deptid == 'GRG') {
+                    if (round($get_jml_qty, 2) > round($qty_produk, 2) AND ($deptid == 'GRG' || $deptid == 'GRG-R')) {
                         $qty_quant_lebih = true;
                         break;
                     }
@@ -772,7 +812,7 @@ class Pengirimanbarang extends MY_Controller {
                 $note_log = "Tambah Data Details -> <br>" . $list_product;
                 $this->_module->gen_history_deptid($sub_menu, $kode, $jenis_log, addslashes($note_log), $username, $deptid);
                 $callback = array('status' => 'success', 'message' => 'Detail Product Berhasil Ditambahkan !', 'icon' => 'fa fa-check', 'type' => 'success');
-            } else if ($qty_quant_lebih == true AND $deptid == 'GRG') {
+            } else if ($qty_quant_lebih == true AND ($deptid == 'GRG' || $deptid == 'GRG-R')) {
                 $callback = array('status' => 'failed', 'message' => 'Maaf, Qty Melebih target !', 'icon' => 'fa fa-check', 'type' => 'danger');
             } else {
                 $callback = array('status' => 'kosong', 'message' => 'Maaf, Product Sudah ada yang terpakai !', 'icon' => 'fa fa-check', 'type' => 'danger');
@@ -1141,7 +1181,7 @@ class Pengirimanbarang extends MY_Controller {
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak bisa Dikirim, Data Sudah dibatalkan !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else if ($cek_tmp == 0 AND $mode == 'scan') {
                     $callback = array('status' => 'failed', 'message' => 'Barcode belum di Scan, Silahkan Scan Barcode terlebih dahulu !', 'icon' => 'fa fa-warning', 'type' => 'danger');
-                } else if ($count_all_lot != $count_lot_scan AND $mode == 'scan' AND $method == 'GRG|OUT') {
+                } else if ($count_all_lot != $count_lot_scan AND $mode == 'scan' AND ($method == 'GRG|OUT' || $method == 'GRG-R|OUT')) {
                     $callback = array('status' => 'failed', 'message' => 'Barcode Harus di Scan Semua  !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                 } else if ($cek_qc_dept > 0 AND $qc_out == 'false') {
                     $callback = array('status' => 'failed', 'message' => 'Maaf, Data tidak bisa Dikirim, sebelum dilakukan Quality Control (QC) " ' . $nama_qc . ' " !', 'icon' => 'fa fa-warning', 'type' => 'danger');
@@ -1382,7 +1422,7 @@ class Pengirimanbarang extends MY_Controller {
 
                     if (!empty($where7)) {
                         $where7 = rtrim($where7, ','); // update reserve origin di hapus
-                        if ($method == 'GRG|OUT') {
+                        if ($method == 'GRG|OUT' OR $method == 'GRG-R|OUT') {
                             $reserve_origin = " reserve_origin =(case " . $case7 . " end), ";
                         } else {
                             $reserve_origin = "";
@@ -1666,7 +1706,7 @@ class Pengirimanbarang extends MY_Controller {
                         $callback = array('status' => 'success', 'message' => 'Data Berhasil Terkirim !', 'icon' => 'fa fa-check', 'type' => 'success');
                     }
 
-                    if ($deptid == 'GRG' AND $origin != '') {
+                    if (($deptid == 'GRG' OR $deptid == 'GRG-R') AND $origin != '') {
 
                         // insert to  tabel print greige out
                         $arr_insert = [];
@@ -2509,7 +2549,7 @@ class Pengirimanbarang extends MY_Controller {
             $dept_id = $this->input->get('departemen');
             $kode = $this->input->get('kode');
 
-            if ($dept_id == 'GRG') {
+            if ($dept_id == 'GRG' || $dept_id == 'GRG-R') {
                 $jenis_log = "print";
                 $note_log = "Print Pengiriman Barang Greige (GREIGE OUT)";
                 $sub_menu = $this->uri->segment(2);
@@ -2572,13 +2612,13 @@ class Pengirimanbarang extends MY_Controller {
 
             $tgl_now = date('d-m-Y H:i:s');
             $buff = $printer->getPrintConnector();
-            
+            $buff->write("\x1bC".chr(34));
             $buff->write("\x1bM");
             $printer->text("Tanggal Cetak : {$tgl_now}");
 //            $printer->feed();
             $printer->selectPrintMode();
             
-           
+            
             $printer->setJustification(Printer::JUSTIFY_RIGHT);
             $buff->write("\x1bE"); 
             $buff->write("\x1bX".chr(14));
@@ -2606,6 +2646,7 @@ class Pengirimanbarang extends MY_Controller {
             $printer->feed();
          
             $printer->text(str_pad("Marketing :{$nama_sales_group}",35));
+            $loop = false;
             foreach ($splitNotes as $key => $value) {
                 if ($key === 0) {
                     continue;
@@ -2613,19 +2654,28 @@ class Pengirimanbarang extends MY_Controller {
                 $cttn = "         ";
                 $printer->text(str_pad($cttn . $value, 40, " ", STR_PAD_RIGHT));
                 $printer->feed();
-                $printer->text(str_pad("",35));
+                $printer->text(str_pad(" ",35));
+                $loop = true;
+            }
+
+            if($loop == true){
+                $printer->text(str_pad("",61));
+            } 
+            if(strlen($reff_note) <= 45  AND $loop == false){
+                $printer->text(str_pad("",61));
             }
             $printer->selectPrintMode();
-            $buff->write("\x1b@\x1bX" . chr(15));
+            $buff->write("\x1bX" . chr(15));
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
             $printer->text(str_pad("No", 3));
-            $printer->text(str_pad("Corak", 40, " ", STR_PAD_BOTH));
-            $printer->text(str_pad("L.Jadi", 15, " ", STR_PAD_BOTH));
-            $printer->text(str_pad("L.Greige", 15, " ", STR_PAD_BOTH));
-            $printer->text(str_pad("KP/LOTS", 25, " ", STR_PAD_BOTH));
+            $printer->text(str_pad("Corak", 35, " ", STR_PAD_BOTH));
+            $printer->text(str_pad("L.Jadi", 13, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("L.Greige", 13, " ", STR_PAD_RIGHT));
+            $printer->text(str_pad("KP/LOTS", 25, " ", STR_PAD_RIGHT));
             $printer->text(str_pad("Grade", 5, " ", STR_PAD_BOTH));
             $printer->text(str_pad("Panjang", 15, " ", STR_PAD_BOTH));
             $printer->text(str_pad("Berat", 15, " ", STR_PAD_BOTH));
+            $printer->text(str_pad("Gramasi", 10, " ", STR_PAD_LEFT));
             $printer->feed();
             $printer->setUnderline(Printer::UNDERLINE_NONE);
 
@@ -2636,16 +2686,17 @@ class Pengirimanbarang extends MY_Controller {
             $tot_qty1 = 0;
             $tot_qty2 = 0;
             foreach ($smi as $row) {
-                $nm_produk = str_split(trim(preg_replace('/\s+/', ' ', $row->nama_produk)), 40);
+                $nm_produk = str_split(trim(preg_replace('/\s+/', ' ', $row->nama_produk)), 35);
                 $line = "";
                 $line .= str_pad($no, 3);
-                $line .= str_pad($nm_produk[0], 40, " ", STR_PAD_RIGHT);
-                $line .= str_pad(" {$row->lebar_jadi} $row->uom_lebar_jadi ", 15, " ", STR_PAD_RIGHT);
-                $line .= str_pad(" {$row->lebar_greige} {$row->uom_lebar_greige} ", 15, " ", STR_PAD_RIGHT);
+                $line .= str_pad($nm_produk[0], 35, " ", STR_PAD_RIGHT);
+                $line .= str_pad(" {$row->lebar_jadi} $row->uom_lebar_jadi ", 13, " ", STR_PAD_RIGHT);
+                $line .= str_pad(" {$row->lebar_greige} {$row->uom_lebar_greige} ", 13, " ", STR_PAD_RIGHT);
                 $line .= str_pad($row->lot,25," ",STR_PAD_RIGHT);
                 $line .= str_pad($row->nama_grade, 5, " ", STR_PAD_BOTH);
                 $line .= str_pad($row->qty . ' ' . $row->uom, 15, " ", STR_PAD_LEFT);
                 $line .= str_pad($row->qty2 . ' ' . $row->uom2, 15, " ", STR_PAD_LEFT);
+                $line .= str_pad($row->gramasi, 10, " ", STR_PAD_LEFT);
                 $printer->text($line . "\n");
 
                 $no++;
@@ -2654,8 +2705,8 @@ class Pengirimanbarang extends MY_Controller {
                 $tot_qty2 = $tot_qty2 + $row->qty2;
             }
             $printer->setUnderline(Printer::UNDERLINE_SINGLE);
-            $printer->text(str_pad("", 3) . str_pad("", 40) . str_pad("", 15) . str_pad("", 15) . str_pad("{$gulung} Gulung", 25, " ", STR_PAD_BOTH)
-                    . str_pad(number_format($tot_qty1,2). " Mtr", 20, " ", STR_PAD_LEFT) . str_pad(number_format($tot_qty2,2)." Kg", 15, " ", STR_PAD_LEFT));
+            $printer->text(str_pad("", 3) . str_pad("", 35) . str_pad("", 13) . str_pad("", 13) . str_pad("{$gulung} Gulung", 25, " ", STR_PAD_BOTH)
+                    . str_pad(number_format($tot_qty1,2). " Mtr", 20, " ", STR_PAD_LEFT) . str_pad(number_format($tot_qty2,2)." Kg", 15, " ", STR_PAD_LEFT) . str_pad("", 10));
             $printer->selectPrintMode();
             $printer->feed();
 
@@ -2728,7 +2779,7 @@ class Pengirimanbarang extends MY_Controller {
                 }
             }
             
-            $printer->feed();
+            $buff->write("\x0c");
             $datas = $connector->getData();
             $printer->close();
             $client = new GuzzleHttp\Client();
@@ -2818,8 +2869,8 @@ class Pengirimanbarang extends MY_Controller {
 
         // info no Greige Out
         $pdf->SetFont('Arial', 'B', 20, 'C');
-        $pdf->setXY(130, 13);
-        $pdf->Multicell(75, 5, $kode, 0, 'R');
+        $pdf->setXY(115, 13);
+        $pdf->Multicell(90, 5, $kode, 0, 'R');
 
         // get warna by origin
         $get_w = $this->m_pengirimanBarang->get_nama_warna_by_origin($kode_co, $row_co)->row_array();
@@ -2884,13 +2935,14 @@ class Pengirimanbarang extends MY_Controller {
 
         $pdf->setXY(5, $y + 5);
         $pdf->Cell(7, 7, 'No.', 1, 0, 'L');
-        $pdf->Cell(65, 7, 'Nama Produk', 1, 0, 'C');
+        $pdf->Cell(55, 7, 'Nama Produk', 1, 0, 'C');
         $pdf->Cell(38, 7, 'KP/Lot', 1, 0, 'C');
         $pdf->Cell(10, 7, 'Grade', 1, 0, 'C');
         $pdf->Cell(20, 7, 'Qty', 1, 0, 'R');
         $pdf->Cell(18, 7, 'Qty2', 1, 0, 'R');
         $pdf->Cell(18, 7, 'Lbr.Greige', 1, 0, 'R');
-        $pdf->Cell(23, 7, 'Lbr.Jadi', 1, 1, 'R');
+        $pdf->Cell(23, 7, 'Lbr.Jadi', 1, 0, 'R');
+        $pdf->Cell(15, 7, 'Gramasi', 1, 1, 'R');
 
         // details
         $smi = $this->m_pengirimanBarang->get_stock_move_items_by_kode_print($kode, $dept_id);
@@ -2905,7 +2957,7 @@ class Pengirimanbarang extends MY_Controller {
             // set font tbody 
             $pdf->SetFont('Arial', 'B', 9, 'C');
 
-            $cellWidth = 65; //lebar sel
+            $cellWidth = 55; //lebar sel
             $cellHeight = 7; //tinggi sel satu baris normal
             $nama_produk = $row->nama_produk;
 
@@ -2974,8 +3026,11 @@ class Pengirimanbarang extends MY_Controller {
             $pdf->Multicell(18, ($line * $cellHeight), $row->lebar_greige . ' ' . $row->uom_lebar_greige, 'B', 'R');
 
             $pdf->SetXY($xPos + 104 + $cellWidth, $yPos);
-            $pdf->Multicell(23, ($line * $cellHeight), $row->lebar_jadi . ' ' . $row->uom_lebar_jadi, 'B,R', 'R');
+            $pdf->Multicell(23, ($line * $cellHeight), $row->lebar_jadi . ' ' . $row->uom_lebar_jadi, 'B', 'R');
             //$pdf->Multicell(23,($line * $cellHeight),'250X130 Inch','B,R','R');
+
+            $pdf->SetXY($xPos + 119 + $cellWidth, $yPos);
+            $pdf->Multicell(23, ($line * $cellHeight), $row->gramasi, 'B,R', 'R');
 
             $no++;
             $gulung++;
@@ -3063,13 +3118,14 @@ class Pengirimanbarang extends MY_Controller {
                 $pdf->SetFont('Arial', 'B', 9, 'C');
                 $pdf->setXY(5, $y - 5);
                 $pdf->Cell(7, 7, 'No.', 1, 0, 'L');
-                $pdf->Cell(65, 7, 'Nama Produk', 1, 0, 'C');
+                $pdf->Cell(55, 7, 'Nama Produk', 1, 0, 'C');
                 $pdf->Cell(38, 7, 'KP/Lot', 1, 0, 'C');
                 $pdf->Cell(10, 7, 'Grade', 1, 0, 'C');
                 $pdf->Cell(20, 7, 'Qty', 1, 0, 'R');
                 $pdf->Cell(18, 7, 'Qty2', 1, 0, 'R');
                 $pdf->Cell(18, 7, 'Lbr.Greige', 1, 0, 'R');
-                $pdf->Cell(23, 7, 'Lbr.Jadi', 1, 1, 'R');
+                $pdf->Cell(23, 7, 'Lbr.Jadi', 1, 0, 'R');
+                 $pdf->Cell(15, 7, 'Gramasi', 1, 1, 'R');
 
                 $y = 25;
                 $y = $y + 5;
@@ -3083,46 +3139,46 @@ class Pengirimanbarang extends MY_Controller {
         $xPos = $pdf->GetX();
         $yPos = $pdf->GetY();
         $pdf->SetXY($xPos + 5, $yPos);
-        $pdf->Multicell(72, $cellHeight, $pdf->GetY() > 100, 1, 'C');
+        $pdf->Multicell(62, $cellHeight, $pdf->GetY() > 100, 1, 'C');
 
         // isi gulung
-        $pdf->SetXY($xPos + 77, $yPos);
+        $pdf->SetXY($xPos + 67, $yPos);
         $pdf->Multicell(48, $cellHeight, ' ', 1, 'C');
 
-        $pdf->SetXY($xPos + 77, $yPos);
+        $pdf->SetXY($xPos + 67, $yPos);
         $pdf->Multicell(10, $cellHeight, $no - 1, 0, 'R');
 
         $pdf->SetFont('Arial', 'B', 9, 'C');
-        $pdf->SetXY($xPos + 87, $yPos);
+        $pdf->SetXY($xPos + 77, $yPos);
         $pdf->Multicell(15, $cellHeight, 'Gulung ', 0, 'L');
 
         // isi qty1
-        $pdf->SetXY($xPos + 125, $yPos);
+        $pdf->SetXY($xPos + 115, $yPos);
         $pdf->Multicell(20, $cellHeight, ' ', 1, 'C');
 
         $pdf->SetFont('Arial', 'B', 9, 'C');
-        $pdf->SetXY($xPos + 125, $yPos);
+        $pdf->SetXY($xPos + 115, $yPos);
         $pdf->Multicell(15, $cellHeight, number_format($tot_qty1, 2), 0, 'R');
 
         $pdf->SetFont('Arial', 'B', 9, 'C');
-        $pdf->SetXY($xPos + 139, $yPos);
+        $pdf->SetXY($xPos + 129, $yPos);
         $pdf->Multicell(8, $cellHeight, 'Mtr', 0, 'L');
 
         // isi qty2
-        $pdf->SetXY($xPos + 145, $yPos);
+        $pdf->SetXY($xPos + 135, $yPos);
         $pdf->Multicell(18, $cellHeight, ' ', 1, 'C');
 
         $pdf->SetFont('Arial', 'B', 9, 'C');
-        $pdf->SetXY($xPos + 144, $yPos);
+        $pdf->SetXY($xPos + 134, $yPos);
         $pdf->Multicell(15, $cellHeight, number_format($tot_qty2, 2), 0, 'R');
 
         $pdf->SetFont('Arial', 'B', 9, 'C');
-        $pdf->SetXY($xPos + 158, $yPos);
+        $pdf->SetXY($xPos + 148, $yPos);
         $pdf->Multicell(8, $cellHeight, 'Kg', 0, 'L');
 
         // empty lbr
-        $pdf->SetXY($xPos + 163, $yPos);
-        $pdf->Multicell(41, $cellHeight, ' ', 1, 'C');
+        $pdf->SetXY($xPos + 153, $yPos);
+        $pdf->Multicell(56, $cellHeight, ' ', 1, 'C');
 
         $pdf->SetFont('Arial', 'B', 10, 'C');
 
@@ -3131,7 +3187,7 @@ class Pengirimanbarang extends MY_Controller {
         $pdf->SetXY($xPos + 5, $yPos);
         $pdf->Multicell(72, $cellHeight, 'Route Color Order : ', 0, 'L');
 
-        $pdf->SetFont('Arial', 'B', 9, 'C');
+        $pdf->SetFont('Arial', 'B', 8, 'C');
 
         $xx = 5;
         $var_yPost = true;

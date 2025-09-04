@@ -20,7 +20,8 @@ class M_HPHgudangjadi extends CI_Model
                                 sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual,
                                 msg.nama_sales_group, mrpin.operator,
                                 fg.lokasi,
-                                fg.nama_user
+                                fg.nama_user,
+                                outs.nama_grade as grade_produksi
                                 FROM mrp_inlet mrpin
                                 INNER JOIN mrp_production_fg_hasil fg ON mrpin.id = fg.id_inlet
                                 INNER JOIN mrp_production mp ON fg.kode = mp.kode
@@ -29,6 +30,10 @@ class M_HPHgudangjadi extends CI_Model
                                 LEFT JOIN mst_sales_group msg on mrpin.sales_group = msg.kode_sales_group
                                 LEFT JOIN mst_quality mq ON mrpin.id_quality = mq.id
                                 LEFT JOIN mesin m ON mrpin.mc_id = m.mc_id
+                                LEFT JOIN (select pb.origin, smi.quant_id, smi.lot, sq.nama_grade  FROM pengiriman_barang pb 
+									        INNER JOIN stock_move_items smi ON pb.move_id = smi.move_id
+											INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id
+											WHERE pb.dept_id = 'GRG' AND pb.status = 'done') as outs ON outs.origin = mp.origin AND mrpin.lot= outs.lot
                                  $where
                                 ORDER BY fg.create_date desc
 								")->result();

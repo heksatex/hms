@@ -989,7 +989,7 @@ class M_mo extends CI_Model
 	{
 		$query =  $this->db->query("SELECT move_id, (select kode FROM pengiriman_barang where move_id = sm.move_id) as kode_out
 								FROM stock_move sm
-								where sm.origin  = '$origin' AND sm.method = 'GRG|OUT' 
+								where sm.origin  = '$origin' AND (sm.method = 'GRG|OUT'  OR sm.method = 'GRG-R|OUT')
 								ORDER BY sm.row_order asc LIMIT 1 ")->row_array();	
 		return 	$query['kode_out'];
 	}

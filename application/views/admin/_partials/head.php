@@ -162,6 +162,28 @@ date_default_timezone_set('Asia/Jakarta'); //default waktu jakarta
         max-width: 400px;
     }
 
+
+    @media (max-width: 575.98px) {
+        .tooltip,
+        .bs-tooltip-top,
+        .bs-tooltip-right,
+        .bs-tooltip-bottom,
+        .bs-tooltip-left {
+            display: none !important;
+        }
+    }
+
+    .navbar-nav > li > a {
+        padding-left: 7px;
+        padding-left: 7px;
+    }
+
+    .sidebar-menu>li.header{color:#4b646f;background:#1a2226; line-height: 10px;}
+
+    .sidebar-menu > li {
+        line-height: 0.9px;
+    }
+
 </style>
 <div id="printed" style="display: none">
 </div>

@@ -36,8 +36,10 @@ class HPHinspecting2 extends MY_Controller
 		$warna     = $this->input->post('warna');
 		$sales_group  = $this->input->post('sales_group');
 		$sales_order  = $this->input->post('sales_order');
+		$reproses  = $this->input->post('reproses');
 		$shift_arr = $this->input->post('shift');// array shift pagi/siang/malam
 		$id_dept   = 'INS2';
+		$id_dept_r   = 'INS2-R';
 		$where_date = '';
 		$loop       = 1;
 		$condition_OR = '';
@@ -123,14 +125,16 @@ class HPHinspecting2 extends MY_Controller
 
 			// get location by jenis (HPH=stock, Waste)
 			$cek = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
+			$cek2 = $this->_module->get_nama_dept_by_kode($id_dept_r)->row_array();
 
 			if($jenis == 'HPH'){
-				$where_jenis = "AND mpfg.lokasi = '".$cek['stock_location']."' ";
+				$where_jenis = "AND (mpfg.lokasi = '".$cek['stock_location']."'  OR mpfg.lokasi = '".$cek2['stock_location']."')";
 			}else if($jenis == 'Waste'){
-				$where_jenis = "AND mpfg.lokasi = '".$cek['waste_location']."' ";
+				$where_jenis = "AND (mpfg.lokasi = '".$cek['waste_location']."' or mpfg.lokasi = '".$cek2['waste_location']."') ";
 			}else{
 				$where_jenis = '';
 			}
+
 
 			if(!empty($mo)){
 				$where_mo  = "AND mpfg.kode LIKE '%".addslashes($mo)."%' ";
@@ -139,7 +143,7 @@ class HPHinspecting2 extends MY_Controller
 			}
 
 			if(!empty($mc)){
-				$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
+				$where_mc  = "AND ms.nama_mesin = '".addslashes($mc)."' ";
 			}else{
 				$where_mc  = '';
 			}
@@ -188,6 +192,12 @@ class HPHinspecting2 extends MY_Controller
 				$where_warna  = '';
 			}
 
+			if($reproses == 'false'){
+				$where_reproses  = "AND  mp.dept_id = '".$id_dept."' ";
+			}else{
+				$where_reproses  = '';
+			}
+
 			$dataRecord= [];
 
 			$lbr_jadi       = '';
@@ -195,7 +205,7 @@ class HPHinspecting2 extends MY_Controller
 	        $stitch         = '';
 	        $rpm            = '';
 
-			$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ".$where_no_go." ".$where_warna;
+			$where     = "WHERE mp.dept_id IN ('".$id_dept."', '".$id_dept_r."') AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ".$where_no_go." ".$where_warna." ".$where_reproses;
 
 
 			$items = $this->m_HPHdf->get_list_HPH_df_by_kode($where);
@@ -203,7 +213,11 @@ class HPHinspecting2 extends MY_Controller
 
 				$mkt = $val->nama_sales_group;
 				$sc  = $val->sales_order;
-
+				if($val->dept_id == $id_dept_r ){
+					$reproses = 'Reproses';
+				}else{
+					$reproses = '';
+				}
 					
 				$dataRecord[] = array('kode' 	   => $val->kode,
 									  'nama_mesin' => $val->nama_mesin,
@@ -227,7 +241,9 @@ class HPHinspecting2 extends MY_Controller
 									  'no_go'  	   => $val->no_go,
 									  'lokasi'     => $val->lokasi,
 									  'gl'		   => 1,
-									  'nama_warna' => $val->nama_warna
+									  'nama_warna' => $val->nama_warna,
+									  'keterangan' => $reproses
+
 									);
 				$lbr_jadi       = '';
 		        $lbr_greige     = '';
@@ -262,8 +278,10 @@ class HPHinspecting2 extends MY_Controller
 		$warna     = $this->input->post('warna');
 		$sales_group  = $this->input->post('sales_group');
 		$sales_order  = $this->input->post('sales_order');
+		$reproses  = $this->input->post('reproses');
 		$shift_arr = $this->input->post('shift');// array shift pagi/siang/malam
 		$id_dept   = 'INS2';
+		$id_dept_r = 'INS2-R';
 		$where_date = '';
 		$loop       = 1;
 		$condition_OR = '';
@@ -340,11 +358,12 @@ class HPHinspecting2 extends MY_Controller
 		
 		// get location by jenis (HPH=stock, Waste)
 		$cek = $this->_module->get_nama_dept_by_kode($id_dept)->row_array();
+		$cek2 = $this->_module->get_nama_dept_by_kode($id_dept_r)->row_array();
 
 		if($jenis == 'HPH'){
-			$where_jenis = "AND mpfg.lokasi = '".$cek['stock_location']."' ";
+			$where_jenis = "AND (mpfg.lokasi = '".$cek['stock_location']."'  OR mpfg.lokasi = '".$cek2['stock_location']."')";
 		}else if($jenis == 'Waste'){
-			$where_jenis = "AND mpfg.lokasi = '".$cek['waste_location']."' ";
+			$where_jenis = "AND (mpfg.lokasi = '".$cek['waste_location']."' or mpfg.lokasi = '".$cek2['waste_location']."') ";
 		}else{
 			$where_jenis = '';
 		}
@@ -390,7 +409,7 @@ class HPHinspecting2 extends MY_Controller
 
 
  		//bold huruf
-		$object->getActiveSheet()->getStyle("A1:V7")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:W7")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -411,7 +430,7 @@ class HPHinspecting2 extends MY_Controller
 
 
 		// header table
-		$table_head_columns  = array('No', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Warna', 'SC', 'MG', 'No Greige Out', 'No Mesin', 'Lot','GL','Qty1', 'Uom1','Qty2','Uom2', 'Grade', 'Lebar', 'Greige','Jadi','Marketing','Reff Note','Lokasi','User');
+		$table_head_columns  = array('No', 'Tgl HPH', 'Kode Produk', 'Nama Produk', 'Warna', 'SC', 'MG', 'No Greige Out', 'No Mesin', 'Lot','GL','Qty1', 'Uom1','Qty2','Uom2', 'Grade', 'Lebar', 'Greige','Jadi','Marketing','Reff Note','Lokasi','User','Keterangan');
 
     	$column = 0;
     	$merge  = TRUE;
@@ -449,7 +468,7 @@ class HPHinspecting2 extends MY_Controller
 
 
     	// set wdith and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
@@ -492,7 +511,7 @@ class HPHinspecting2 extends MY_Controller
 		}
 
 		if(!empty($mc)){
-			$where_mc  = "AND ms.mc_id = '".addslashes($mc)."' ";
+			$where_mc  = "AND ms.nama_mesin = '".addslashes($mc)."' ";
 		}else{
 			$where_mc  = '';
 		}
@@ -540,8 +559,14 @@ class HPHinspecting2 extends MY_Controller
 			$where_warna  = '';
 		}
 
+		if($reproses == 'false'){
+			$where_reproses  = "AND  mp.dept_id = '".$id_dept."' ";
+		}else{
+			$where_reproses  = '';
+		}
+
     	//tbody
-		$where     = "WHERE mp.dept_id = '".$id_dept."' AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ".$where_no_go." ".$where_warna;
+		$where     = "WHERE mp.dept_id IN ('".$id_dept."', '".$id_dept_r."')   AND ".$where_date." ".$where_mc." ".$where_lot." ".$where_corak." ".$where_user." ".$where_jenis." ".$where_mo."  ".$where_sales_order." ".$where_sales_group." ".$where_no_go." ".$where_warna." ".$where_reproses;
     	$items = $this->m_HPHdf->get_list_HPH_df_by_kode($where);
     	$num   = 1;
 		$temp_mg 	= '';
@@ -552,6 +577,12 @@ class HPHinspecting2 extends MY_Controller
 
 			$mkt = $val->nama_sales_group;
 			$sc  = $val->sales_order;
+			if($val->dept_id == $id_dept_r ){
+				$reproses = 'Reproses';
+			}else{
+				$reproses = '';
+			}
+
 
 			if($temp_mg != '' && $temp_mg != $val->kode){
 				$this->total_group($object->getActiveSheet(),$temp_mg,$sum_mg,$sum_qty,$sum_qty2,$rowCount,$styleArray2);
@@ -584,6 +615,7 @@ class HPHinspecting2 extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->reff_note_sq);
 			$object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->lokasi);
 			$object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->nama_user);
+			$object->getActiveSheet()->SetCellValue('W'.$rowCount, $reproses);
 
 			// set align
 			$object->getActiveSheet()->getStyle('B'.$rowCount)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -618,6 +650,7 @@ class HPHinspecting2 extends MY_Controller
 			$object->getActiveSheet()->getStyle('T'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('U'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('V'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('W'.$rowCount)->applyFromArray($styleArray);
 
 		
 			$lbr_jadi       = '';

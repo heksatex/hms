@@ -27,11 +27,12 @@ class Joblistgrgout extends MY_Controller
 	{
 
         $id_dept  = $this->input->post('id_dept');
+        $id_dept_data  = array('GRG','GRG-R');
 	    $sub_menu = 'pengirimanbarang';
         if(isset($_POST['start']) && isset($_POST['draw'])){
 
             $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,$id_dept)->row_array();
-            $list = $this->m_joblistgrgout->get_datatables($id_dept,$kode['kode']);
+            $list = $this->m_joblistgrgout->get_datatables($id_dept_data,$kode['kode']);
             $data = array();
             $no = $_POST['start'];
             foreach ($list as $field) {
@@ -67,8 +68,8 @@ class Joblistgrgout extends MY_Controller
     
             $output = array(
                 "draw" => $_POST['draw'],
-                "recordsTotal" => $this->m_joblistgrgout->count_all($id_dept,$kode['kode']),
-                "recordsFiltered" => $this->m_joblistgrgout->count_filtered($id_dept,$kode['kode']),
+                "recordsTotal" => $this->m_joblistgrgout->count_all($id_dept_data,$kode['kode']),
+                "recordsFiltered" => $this->m_joblistgrgout->count_filtered($id_dept_data,$kode['kode']),
                 "data" => $data,
             );
             //output dalam format JSON

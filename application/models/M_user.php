@@ -137,4 +137,11 @@ class M_user extends CI_Model {
     public function getMasking(string $username,string $table = "user_masking") {
         return $this->db->query("select * from {$table} where username ='{$username}'")->result();
     }
+
+    public function get_list_menu()  {
+        $this->db->order_by('row_order','asc');
+        $query = $this->db->get('main_menu');
+        return $query->result();
+
+    }
 }

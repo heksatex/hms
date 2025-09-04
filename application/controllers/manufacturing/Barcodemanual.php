@@ -909,7 +909,11 @@ class Barcodemanual extends MY_Controller
 
                     // get kode adj
                     $get_kode_adjustment   = $this->_module->get_kode_adj();  
-                    $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
+                    // $kode_adjustment   = substr("00000" . $get_kode_adjustment,-4);   
+                    $kode_adjustment       = substr($get_kode_adjustment, -5) + 1;
+                    $kode_adjustment_tmp   = substr($get_kode_adjustment, -5);
+                    $kode_adjustment   = substr("00000" . $kode_adjustment,-5);                    
+                    $kode_adjustment_tmp2 = $kode_adjustment;
                     $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
 
                     // get kode move id
@@ -1170,7 +1174,7 @@ class Barcodemanual extends MY_Controller
 
                         // History Adjustment
                         $jenis_log = "create";
-                        $note_log  = $kode_adjustment." ini dibuat dari Fitur Barcode Manual";
+                        $note_log  = $kode_adjustment." ini dibuat dari Fitur Barcode Manual <br> No. ".$kode_adjustment_tmp." => ".$kode_adjustment_tmp2;
                         $data_history = array(
                                          'datelog'   => date("Y-m-d H:i:s"),
                                          'kode'      => $kode_adjustment,

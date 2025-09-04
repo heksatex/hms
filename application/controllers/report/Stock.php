@@ -15,6 +15,12 @@ class Stock extends MY_Controller
 
 	}
 
+    protected function lokasi()
+    {
+        $lokasi = "(sq.lokasi IN ( SELECT lokasi FROM (select (stock_location) as lokasi from departemen WHERE stock_location <> '' UNION ALL select DISTINCT(output_location) as lokasi from departemen where output_location <>'') as a)) ";
+        return $lokasi;
+    }
+
 	public function index()
     {
     	$id_dept            = 'RSTOK';
@@ -142,7 +148,7 @@ class Stock extends MY_Controller
     	$data_group  = json_decode($this->input->post('arr_group'),true);
     	// $transit_location = $this->input->post('transit');
 
-        $where_lokasi = " (sq.lokasi LIKE '%Stock%' OR sq.lokasi  LIKE '%Transit Location%') ";
+        $where_lokasi = $this->lokasi();
         // if($transit_location == 'true'){
         // }else{
         //     $where_lokasi = " sq.lokasi LIKE '%Stock%'  ";
@@ -170,6 +176,7 @@ class Stock extends MY_Controller
             if(!empty($order_by_in_group)){
                 $order_by_in_group = rtrim($order_by_in_group, ', ');
                 $order_by_in_group = "ORDER BY ".$order_by_in_group;
+                
             }
         }else{
             $order_by = "ORDER BY sq.quant_id desc";
@@ -290,7 +297,7 @@ class Stock extends MY_Controller
         $root        = $this->input->post('root');
         $post_tmp_group  = json_decode($this->input->post('tmp_arr_group'),true);
         // $transit_location = $this->input->post('transit');
-        $where_lokasi = " (sq.lokasi LIKE '%Stock%' OR sq.lokasi  LIKE '%Transit Location%') ";
+        $where_lokasi = $this->lokasi();
 
         // if($transit_location == 'true'){
         // }else{
@@ -673,7 +680,7 @@ class Stock extends MY_Controller
 
        
         //$order_by = "ORDER BY quant_id desc";
-        $where_lokasi = " (lokasi LIKE '%Stock%' OR lokasi  LIKE '%Transit Location%') ";
+        $where_lokasi = $this->lokasi();
 
         // $transit_location = $this->input->post('transit[]');
 
