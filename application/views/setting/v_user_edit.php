@@ -41,6 +41,10 @@
             background-color: rgba(86, 61, 124, .1);
         }
 
+        .child-container {
+            padding-left: 10px;
+        }
+
         @media (min-width: 768px) {
             .bs-glyphicons li {
                 width: 50%;
@@ -253,22 +257,22 @@
                                                             $nama = $val->nama;
                                                         ?>
                                                             <div class="col-md-12 col-xs-12">
-                                                            <?php 
+                                                                <?php
                                                                 $margin_ = '';
                                                                 $col_xs_ = 'col-xs-4';
                                                                 $padding_ = '';
-                                                                if($val->is_menu_sub != ''){
+                                                                if ($val->is_menu_sub != '') {
                                                                     $margin_ = 'style=margin-left:10px;';
                                                                     $col_xs_ = 'col-xs-3';
                                                                     $padding_ = 'style="padding-left:5px;"';
                                                                 }
                                                                 $checked = '';
-                                                                if (strpos($priv, $kode) == true){
+                                                                if (strpos($priv, $kode) == true) {
                                                                     $checked = 'checked';
                                                                 }
-                                                            ?>
-                                                            
-                                                                <div class="col-xs-8" <?php echo $margin_; ?> ><?php echo $nama; ?></div>
+                                                                ?>
+
+                                                                <div class="col-xs-8" <?php echo $margin_; ?>><?php echo $nama; ?></div>
                                                                 <div class="<?php echo $col_xs_; ?>" <?php echo $padding_; ?>>
                                                                     <!-- <?php if (strpos($priv, $kode) == true) { ?>
                                                                         <input type="checkbox" name="chk[]" value="<?php echo $val->kode; ?>" checked="checked">
@@ -277,23 +281,51 @@
                                                                     <?php } ?> -->
 
                                                                     <?php
-                                                                        if ($val->parent == true) {
+                                                                    if ($val->parent == true) {
                                                                     ?>
-                                                                            <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>" disabled="disabled" data-toggle="tooltip" title=" akan ter Ceklis Setelah Pilih List lain /  Child"  <?php echo $checked; ?> >
+                                                                        <input type="checkbox" name="chk[]" class="parentMenu" value="<?php echo $val->kode; ?>" data-toggle="tooltip" title=" akan ter Ceklis Setelah Pilih List lain /  Child" <?php echo $checked; ?>>
+                                                                         <button type="button" class="btn btn-xs btn-default toggle-child"
+                                                                                data-toggle="tooltip" title="Tampilkan/Sembunyikan Child"
+                                                                                data-target="#child-<?= $val->kode; ?>">
+                                                                        <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                        </button>
                                                                     <?php
-                                                                        } else if ($val->is_menu_sub != ''){
+
+                                                                    } else if ($val->is_menu_sub != '') {
                                                                     ?>
-                                                                            <input type="checkbox" name="chk[]" class='childSubMenu' parent="<?php echo $val->is_menu_sub;?>" value="<?php echo $val->kode; ?>" <?php echo $checked; ?> >
-                                                                    <?php 
-                                                                        } else {
+                                                                        <!-- <input type="checkbox" name="chk[]" class='childSubMenu' parent="<?php echo $val->is_menu_sub; ?>" value="<?php echo $val->kode; ?>" <?php echo $checked; ?> > -->
+                                                                    <?php
+                                                                    } else {
                                                                     ?>
-                                                                            <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>" <?php echo $checked; ?>>
-                                                                    <?php      
-                                                                        }
+                                                                        <input type="checkbox" name="chk[]" value="<?php echo $val->kode; ?>" <?php echo $checked; ?>>
+                                                                    <?php
+                                                                    }
                                                                     ?>
                                                                 </div>
                                                             </div>
+                                                            <?php
+
+                                                            if ($val->parent == 'true') { ?>
+                                                                <div id="child-<?= $val->kode; ?>" class="child-container" style="margin-left: 20px; margin-top: 5px;">
+                                                            <?php
+                                                                $same = false;
+                                                                $get_child = $this->m_user->get_child_by_parent($lm->inisial_class, $val->kode);
+                                                                foreach ($get_child as $gc) {
+
+                                                                    $checked2 = '';
+                                                                    if (strpos($priv, $gc->kode) == true) {
+                                                                        $checked2 = 'checked';
+                                                                    }
+                                                            ?>
+                                                                    <div class="col-xs-8" style=margin-left:30px;><?php echo $gc->nama; ?></div>
+                                                                    <div class="col-xs-3" style="padding-left:5px;">
+                                                                        <input type="checkbox" name="chk[]" class='childSubMenu' parent="<?php echo $gc->is_menu_sub; ?>" value="<?php echo $gc->kode; ?>" <?php echo $checked2; ?>>
+                                                                    </div>
                                                         <?php
+                                                                }
+                                                                echo '</div>';
+                                                            }
+
                                                             if ($count == $jml_baris) {
                                                                 echo '</div>';
                                                                 echo '</div>';
@@ -352,60 +384,50 @@
             $('#btn-print').hide();
         }
 
-        //set tgl buat
-        /*
-         var datenow=new Date();  
-         datenow.setMonth(datenow.getMonth());
-         $('#tanggal').datetimepicker({
-         defaultDate: datenow,
-         format : 'YYYY-MM-DD HH:mm:ss',
-         ignoreReadonly: true,
-         });
-         */
+        $(document).ready(function() {
 
-        // // checkbox Joblist
-        // $('.joblist').change(function() {
+            // Sembunyikan semua child di awal
+            $('.child-container').hide();
 
-        //     var joblist_check = false
-        //     $.map($('.joblist'), function(e, i) {
-        //         checked = $('input[class="joblist"]').is(':checked');
-        //         if (checked) {
-        //             //value = $('input[class="joblist"]:checked').val();
-        //             //alert(value);
-        //             joblist_check = true;
-        //         }
-        //     });
+            // Toggle child container
+            $('.toggle-child').on('click', function () {
+                const target = $(this).data('target');
+                const $icon = $(this).find('.glyphicon');
 
-        //     if (joblist_check == true) {
-        //         $('input[value="mms89"]').prop('checked', true);
-        //     } else {
-        //         $('input[value="mms89"]').prop('checked', false);
-        //     }
+                $(target).slideToggle(150);
 
-        // });
-
-
-        $('.childSubMenu').change(function() {
-
-            var childSubMenu_check = false
-            $.map($('.childSubMenu'), function(e, i) {
-                checked = $('input[class="childSubMenu"]').is(':checked');
-                if (checked) {
-                    //value = $('input[class="joblist"]:checked').val();
-                    //alert(value);
-                    childSubMenu_check = true;
+                // Ganti ikon
+                if ($icon.hasClass('glyphicon-chevron-down')) {
+                $icon.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-right');
+                } else {
+                $icon.removeClass('glyphicon-chevron-right').addClass('glyphicon-chevron-down');
                 }
             });
 
-            check = $(this).attr('parent');
 
-            if (childSubMenu_check == true) {
-                $('input[value="'+check+'"]').prop('checked', true);
-            } else {
-                $('input[value="'+check+'"]').prop('checked', false);
-            }
+            // Saat childSubMenu berubah
+            $('.childSubMenu').on('change', function() {
+                const parentId = $(this).attr('parent');
+                const $parent = $('input.parentMenu[value="' + parentId + '"]');
+                const $allChild = $('input.childSubMenu[parent="' + parentId + '"]');
 
+                // Cek apakah masih ada minimal satu child yang dicentang
+                const anyChecked = $allChild.filter(':checked').length > 0;
+
+                // Kalau tidak ada satupun yang dicentang, uncheck parent
+                // Kalau ada minimal satu, centang parent
+                $parent.prop('checked', anyChecked);
+            });
+
+
+            // (Opsional) Saat parent dicentang/uncheck, semua child ikut
+            $('.parentMenu').on('change', function() {
+                const parentId = $(this).val();
+                const checked = $(this).is(':checked');
+                $('input.childSubMenu[parent="' + parentId + '"]').prop('checked', checked);
+            });
         });
+
 
 
         //generate chk yg checked apa saja
