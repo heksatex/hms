@@ -117,7 +117,7 @@ class Stockquants extends MY_Controller
         
                         $jenis_log   = "edit";        
                         $note_log    = $note_before.'<br> <b> -> </b>'. $sq->kode_produk.' '.$nama_produk.'  '.$corak_remark.'  '.$warna_remark.'  '.$lot.'  '.$nama_grade.' '.$qty_jual.' '.$uom_jual.' '.$qty2_jual.' '.$uom2_jual.' | '.$lebar_greige.' '.$uom_lebar_greige.' | '.$lebar_jadi.' '.$uom_lebar_jadi.' | '.$lokasi.' '.$reff_note;
-                        $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, $note_log, $username);
+                        $this->_module->gen_history($sub_menu, $quant_id, $jenis_log, addslashes($note_log), $username);
         
                         $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan ! ', 'icon' =>'fa fa-check', 'type' => 'success');
                     }
@@ -965,16 +965,16 @@ class Stockquants extends MY_Controller
 
 
             $pdf->SetFont('Arial','B',20,'C');
-            $pdf->setXY(0,8);
-            $pdf->Multicell(82,48,$barcode,0,'R');// Nama LOT 1
+            $pdf->setXY(3,8);
+            $pdf->Multicell(95,48,$barcode,0,'C');// Nama LOT 1
             //$pdf->Cell(100,5,$barcode,0,0,'R');// Nama LOT 1
 
             $pdf->SetFont('Arial','B',30);
-            $pdf->setXY(82,6);
+            $pdf->setXY(95,6);
             $pdf->Multicell(20,48,$nama_grade,0,'L'); // grade
             //$pdf->Cell(0,3,$nama_grade,0,1);//grade
             
-            $pdf->Code128(5,40,$barcode,90,15,'C');//barcode 1
+            $pdf->Code128(5,40,$barcode,92,15,'C');//barcode 1
 
             $pdf->Output();
 

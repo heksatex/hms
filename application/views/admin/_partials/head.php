@@ -162,6 +162,30 @@ date_default_timezone_set('Asia/Jakarta'); //default waktu jakarta
         max-width: 400px;
     }
 
+
+
+    .tgl-format-def::-webkit-datetime-edit, .tgl-format-def::-webkit-inner-spin-button, .tgl-format-def::-webkit-clear-button {
+        display: none;
+    }
+
+    .tgl-format-def::-webkit-calendar-picker-indicator {
+        position: absolute;
+        top: 3px;
+        right: 0;
+        color: black;
+        opacity: 1;
+    }
+
+    @media (max-width: 575.98px) {
+        .tooltip,
+        .bs-tooltip-top,
+        .bs-tooltip-right,
+        .bs-tooltip-bottom,
+        .bs-tooltip-left {
+            display: none !important;
+        }
+    }
+
 </style>
 <div id="printed" style="display: none">
 </div>

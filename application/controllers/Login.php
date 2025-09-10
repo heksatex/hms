@@ -44,17 +44,27 @@ class Login extends CI_Controller {
                 }
                 $row = $this->m_login->cek_nama($username)->row_array();
                 $modelMenu = new $this->m_global;
-                $menu = $modelMenu->setTables("user_priv")->setJoins("main_menu_sub", "kode = main_menu_sub_kode")
-                                ->setWheres(["username" => $username])->setSelects(["inisial_class"])
-                                ->setOrder(["row_order" => "asc"])->getData();
+//                $menu = $modelMenu->setTables("user_priv")->setJoins("main_menu_sub", "kode = main_menu_sub_kode")
+//                                ->setWheres(["username" => $username])->setSelects(["inisial_class,kode,link_menu"])
+//                                ->setOrder(["row_order" => "asc"])->getData();
+                $menu = $modelMenu->setTables("main_menu_sub")->setJoins("(select username,main_menu_sub_kode from user_priv where user_priv.username = '{$username}') as aa ", "on kode = aa.main_menu_sub_kode", "left")
+                                ->setSelects(["inisial_class,kode,link_menu,username,dept_id"])->setOrder(["row_order" => "asc"])->getData();
+                $mainMenu = $modelMenu->setTables("main_menu mm")->setJoins("user_priv up","up.main_menu_kode=mm.kode")
+                        ->setSelects(["DISTINCT(mm.nama), mm.kode, mm.inisial_class"])->setWheres(["up.username"=>$username])->setOrder(["mm.row_order"=>"asc"])->getData();
+                $textMainMenu = serialize($mainMenu);
                 $text = serialize($menu);
                 $data_session = array(
                     'username' => $username,
                     'nama' => $row,
                     'status' => "login",
-                    'menu' => encrypt_url($text)
+                    'menu' => encrypt_url($text),
+                    'mainmenu' => encrypt_url($textMainMenu)
                 );
                 $this->session->set_userdata($data_session);
+                $printer = $modelMenu->setTables("share_printer_user")->setWheres(["username" => $username])->getDetail();
+                if ($printer) {
+                    $this->session->set_userdata(["printer" => $printer->printer]);
+                }
                 $this->output->set_status_header(200)
                         ->set_content_type('application/json', 'utf-8')
                         ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -73,20 +83,29 @@ class Login extends CI_Controller {
             //login berhasil
             $row = $this->m_login->cek_nama($username)->row_array(); //mengambil data nama 
             $modelMenu = new $this->m_global;
-            $menu = $modelMenu->setTables("user_priv")->setJoins("main_menu_sub", "kode = main_menu_sub_kode")
-                            ->setWheres(["username" => $username])->setSelects(["inisial_class"])
-                            ->setOrder(["row_order" => "asc"])->getData();
+//            $menu = $modelMenu->setTables("user_priv")->setJoins("main_menu_sub", "kode = main_menu_sub_kode")
+//                            ->setWheres(["username" => $username])->setSelects(["inisial_class,kode,link_menu"])
+//                            ->setOrder(["row_order" => "asc"])->getData();
+            $menu = $modelMenu->setTables("main_menu_sub")->setJoins("(select username,main_menu_sub_kode from user_priv where user_priv.username = '{$username}') as aa ", "on kode = aa.main_menu_sub_kode", "left")
+                            ->setSelects(["inisial_class,kode,link_menu,username,dept_id"])->setOrder(["row_order" => "asc"])->getData();
+            $mainMenu = $modelMenu->setTables("main_menu mm")->setJoins("user_priv up","up.main_menu_kode=mm.kode")
+                        ->setSelects(["DISTINCT(mm.nama), mm.kode, mm.inisial_class"])->setWheres(["up.username"=>$username])->setOrder(["mm.row_order"=>"asc"])->getData();
+                $textMainMenu = serialize($mainMenu);
             $text = serialize($menu);
             $data_session = array(
                 'username' => $username,
                 'nama' => $row,
                 'status' => "login",
-                'menu' => encrypt_url($text)
+                'menu' => encrypt_url($text),
+                'mainmenu' => encrypt_url($textMainMenu)
             );
             $row = $this->m_login->cek_menu_default($username)->row_array(); //mengambil data menu default
 
             $this->session->set_userdata($data_session);
-
+            $printer = $modelMenu->setTables("share_printer_user")->setWheres(["username" => $username])->getDetail();
+            if ($printer) {
+                $this->session->set_userdata(["printer" => $printer->printer]);
+            }
             redirect(base_url($row['inisial_class']));
         } else {
             //login gagal;

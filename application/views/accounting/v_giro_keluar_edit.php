@@ -299,6 +299,7 @@
                     $this->load->view("admin/_partials/footer_new.php");
                 }
                 ?>
+
                     </footer>
             </div>
             <template class="girokeluar-tmplt">

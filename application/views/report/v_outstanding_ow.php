@@ -100,6 +100,35 @@
                                 <input type="text" class="form-control input-sm" name="warna" id="warna"  onkeydown="event_input(event)">
                             </div>
                         </div>
+                        <div class="form-group">
+                            <div class="col-md-5">
+                              <label>Status OW </label>
+                            </div>
+                            <div class="col-md-7">
+                                  <select class="form-control input-sm" id="status_ow" name="status_ow" >
+                                    <?php $arr_stat = array('','t','ng');
+                                          foreach($arr_stat as $stats){
+                                            if($stats == 't'){
+                                              $status = 'Aktif';
+                                            }else if($stats == 'ng'){
+                                              $status = 'Not Good';
+                                            }else if($stats == 'r'){
+                                              $status = 'Reproses';
+                                            }else if($stats == 'f'){
+                                              $status = 'Tidak Aktif';
+                                            }else{
+                                              $status = 'All';
+                                            }
+                                            if($stats == 't'){
+                                              echo '<option value="'.$stats.'" selected>'.$status.'</option>';
+                                            }else{
+                                              echo '<option value="'.$stats.'">'.$status.'</option>';
+                                            }
+                                          }
+                                    ?>
+                                  </select>
+                            </div>
+                          </div>
                     </div>
                   </div>
                 </div>
@@ -164,7 +193,7 @@
     });
     
  
-    function fetch_data(sc,ow,produk,warna,sales_group){
+    function fetch_data(sc,ow,produk,warna,sales_group,status_ow){
         //datatables
         $('#example1').DataTable({ 
             "dom": "<'row'<'col-sm-4'l><'col-sm-5'i><'col-sm-3'f>>" +
@@ -192,6 +221,7 @@
                     data.produk = produk;
                     data.warna  = warna;
                     data.sales_group  = sales_group;
+                    data.status_ow = status_ow;
                 },beforeSend: function () {
                   //please_wait(function(){});
                   $('#btn-filter').button('loading');
@@ -238,8 +268,9 @@
         var produk      = $('#produk').val();
         var warna       = $('#warna').val();
         var sales_group = $('#sales_group').val();
+        var status_ow   = $('#status_ow').val();
        
-        fetch_data(sc,ow,produk,warna,sales_group);
+        fetch_data(sc,ow,produk,warna,sales_group,status_ow);
           //table.ajax.reload( function(){
         $('#btn-filter').button('reset');
           //});  //just reload table
@@ -261,10 +292,12 @@
       var produk      = $('#produk').val();
       var warna       = $('#warna').val();
       var sales_group = $('#sales_group').val();
+      var status_ow   = $('#status_ow').val();
+
       $.ajax({
             "type":'POST',
             "url": "<?php echo site_url('report/outstandingow/export_excel')?>",
-            "data": {sc:sc, ow:ow, produk:produk,warna:warna, sales_group:sales_group},
+            "data": {sc:sc, ow:ow, produk:produk,warna:warna, sales_group:sales_group,status_ow:status_ow},
             "dataType":'json',
             beforeSend: function() {
               $('#btn-excel').button('loading');

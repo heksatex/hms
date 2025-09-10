@@ -145,6 +145,14 @@
                             </div>
                             <div class="form-group">
                               <div class="col-md-5">
+                                <label>Lokasi </label>
+                              </div>
+                              <div class="col-xs-4 col-sm-3 col-md-3">
+                                  <label><input type="checkbox" name="lokasi[]" value="POS" > POS </label>
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <div class="col-md-5">
                                 <label>Status </label>
                               </div>
                               <div class="col-xs-4 col-sm-3 col-md-3">
@@ -243,7 +251,7 @@
   // set date tgldari
   $('#tgldari').datetimepicker({
       
-      defaultDate : new Date(year, month, day, 00, 00, 00),
+      defaultDate : new Date(year, month, day, 0o0, 0o0, 0o0),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       //maxDate: new Date(),
@@ -343,6 +351,7 @@
     corak      = $('#corak').val();
     tgldari_2     = $('#tgldari').data("DateTimePicker").date();
     tglsampai_2   = $('#tglsampai').data("DateTimePicker").date();
+    lokasi    = $('input[name="lokasi[]"]').prop('checked');
   
     var check_status   = false;
     var checkboxes_arr = new Array(); 
@@ -385,7 +394,7 @@
       $.ajax({
           "type":'POST',
           "url" : "<?php echo site_url('report/penerimaanharian/export_excel_in')?>",
-          "data": {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr },
+          "data": {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr, lokasi_pos:lokasi },
           "dataType":'json',
           beforeSend: function() {
             $('#btn-excel').button('loading');
@@ -421,6 +430,7 @@
       corak      = $('#corak').val();
       tgldari_2     = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2   = $('#tglsampai').data("DateTimePicker").date();
+      lokasi    = $('input[name="lokasi[]"]').prop('checked');
 
       var check_status   = false;
       var checkboxes_arr = new Array(); 
@@ -477,7 +487,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/penerimaanharian/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr},
+                data: {tgldari:tgldari, tglsampai:tglsampai, departemen:departemen, dept_dari:dept_dari,status_arr:checkboxes_arr,  kode:kode, corak:corak, view_arr:radio_arr, lokasi_pos:lokasi},
                 success: function(data){
 
                   if(data.status == 'failed'){

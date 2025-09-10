@@ -263,7 +263,7 @@
   // set date tgldari
   $('#tgldari').datetimepicker({
       
-      defaultDate : new Date(year, month, day_1, 00, 00, 00),
+      defaultDate : new Date(year, month, day_1, 0o0, 0o0, 0o0),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       //maxDate: new Date(),

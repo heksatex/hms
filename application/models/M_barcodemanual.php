@@ -6,7 +6,7 @@
 class m_barcodemanual extends CI_Model
 {   
     var $column_order = array(null, 'mrp.kode', 'mrp.tanggal_buat', 'mrp.tanggal_transaksi', 'msg.nama_sales_group', 'mta.name_type', 'mrp.tot_batch','mrp.kode_adjustment',  'mrp.notes', 'mrp.nama_user', 'nama_status');
-	var $column_search= array('mrp.kode', 'mrp.tanggal_buat','mrp.tanggal_transaksi', 'msg.nama_sales_group', 'mta.name_type','mrp.tot_batch', 'mrp.kode_adjustment', 'mrp.notes', 'mrp.nama_user', 'nama_status', 'mmbi.lot');
+	var $column_search= array('mrp.kode', 'mrp.tanggal_buat','mrp.tanggal_transaksi', 'msg.nama_sales_group', 'mta.name_type','mrp.tot_batch', 'mrp.kode_adjustment', 'mrp.notes', 'mrp.nama_user', 'nama_status');
 	var $order  	  = array('mrp.tanggal_buat' => 'desc');
 
     // protected $db_debug;
@@ -28,12 +28,12 @@ class m_barcodemanual extends CI_Model
     		$this->db->where('mrp.status',$this->input->post('status'));
         }
 		if($this->input->post('lot')){
-    		$this->db->like('mmbi.lot',$this->input->post('lot'));
+			$this->db->where('mrp.kode in (SELECT kode FROM mrp_manual_batch_items mmbi WHERE lot LIKE "'.$this->input->post('lot').'" )');
         }
 
-		$this->db->SELECT("mrp.kode, mrp.tanggal_buat, mrp.tanggal_transaksi, mrp.sales_group, msg.nama_sales_group, mrp.kode_adjustment, mrp.tot_batch, mrp.notes, mrp.nama_user, mrp.status, ms.nama_status, mrp.id_type_adjustment, mta.name_type, mmbi.lot");
+		$this->db->SELECT("mrp.kode, mrp.tanggal_buat, mrp.tanggal_transaksi, mrp.sales_group, msg.nama_sales_group, mrp.kode_adjustment, mrp.tot_batch, mrp.notes, mrp.nama_user, mrp.status, ms.nama_status, mrp.id_type_adjustment, mta.name_type");
 		$this->db->FROM("mrp_manual mrp");
-		$this->db->JOIN("mrp_manual_batch_items mmbi","mrp.kode = mmbi.kode", "LEFT");
+		// $this->db->JOIN("mrp_manual_batch_items mmbi","mrp.kode = mmbi.kode", "LEFT");
 		$this->db->JOIN("mst_status ms","ms.kode = mrp.status", "LEFT");
 		$this->db->JOIN("mst_sales_group msg","msg.kode_sales_group = mrp.sales_group", "LEFT");
 		$this->db->JOIN("mst_type_adjustment mta","mta.id = mrp.id_type_adjustment", "LEFT");

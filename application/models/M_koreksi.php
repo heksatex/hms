@@ -197,7 +197,7 @@ class M_koreksi extends CI_Model
 				smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, sq.nama_grade, sq.reff_note, sq.quant_id, smi.move_id');
 			$this->db->from('pengiriman_barang a');
 			$this->db->join('pengiriman_barang_items as pbi ', "a.kode = pbi.kode", "inner");
-			$this->db->join('stock_move_items as smi', "a.move_id = smi.move_id","inner");
+			$this->db->join('stock_move_items as smi', "a.move_id = smi.move_id and pbi.origin_prod = smi.origin_prod","inner");
 			$this->db->join('stock_quant as sq', "smi.quant_id = sq.quant_id", "inner");
 			$this->db->where('a.status','done');
 		}else{
@@ -206,7 +206,7 @@ class M_koreksi extends CI_Model
 				smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, sq.nama_grade, sq.reff_note, sq.quant_id, smi.move_id');
 			$this->db->from('penerimaan_barang a');
 			$this->db->join('penerimaan_barang_items as pbi ', "a.kode = pbi.kode", "inner");
-			$this->db->join('stock_move_items as smi', "a.move_id = smi.move_id","inner");
+			$this->db->join('stock_move_items as smi', "a.move_id = smi.move_id and pbi.origin_prod = smi.origin_prod","inner");
 			$this->db->join('stock_quant as sq', "smi.quant_id = sq.quant_id", "inner");
 			$this->db->where('a.status','done');
 

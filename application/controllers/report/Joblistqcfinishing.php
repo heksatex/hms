@@ -31,7 +31,7 @@ class Joblistqcfinishing extends MY_Controller
 	    $sub_menu = 'mO';
         $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,$id_dept)->row_array();
 
-        $id_dept_all = "('SET','PAD','BRS','FIN','FBR')";
+        $id_dept_all = "('SET','PAD','BRS','FIN','FBR','SET-R','PAD-R','FIN-R','FBR-R')";
         $list = $this->m_joblistqcfinishing->get_datatables($id_dept_all,$kode['kode']);
         $data = array();
         $no = $_POST['start'];
@@ -41,6 +41,8 @@ class Joblistqcfinishing extends MY_Controller
             $nama_produk  = $field->nama_produk;
             $pb_dept      = $field->pb_dept;
             $mrp_dept     = $field->pb_dept;
+            $kode_out_mg     = "";
+            $status_out      = "";
 
             if($field->status == 'draft' || $field->status == 'cancel'){
                 $nama_status ="<font color='red' >".$field->nama_status."</font>";
@@ -68,8 +70,7 @@ class Joblistqcfinishing extends MY_Controller
             // $kode_out_mg     = "";
             // $status_out      = "";
 
-            $kode_out_mg     = "";
-            $status_out      = "";
+       
 
             // bandingin kode Out asli dan dari out_mg
             if($kode_out_mg != $field->pb_kode){

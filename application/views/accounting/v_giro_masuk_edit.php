@@ -278,6 +278,7 @@
                     $this->load->view("admin/_partials/footer_new.php");
                 }
                 ?>
+
             </footer>
         </div>
         <template class="giromasuk-tmplt">
@@ -492,7 +493,8 @@ if ($datas->status == 'confirm') {
                                 }
                             }
                     ).finally(() => {
-                        unblockUI();
+
+                        unblockUI(function () {});
                     });
                     event.preventDefault();
                 },

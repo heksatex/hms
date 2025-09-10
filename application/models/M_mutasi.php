@@ -55,7 +55,7 @@ class M_mutasi extends CI_Model
 
     public function acc_mutasi_detail_by_kode($table,$tahun,$bulan,$where,$record,$recordPerPage)
     {
-        return $this->db->query("SELECT m.posisi_mutasi, m.dept_id_mutasi, m.dept_id_dari, m.dept_id_tujuan, m.type, m.kode_transaksi, m.tanggal_transaksi, m.kode_produk, m.nama_produk, m.id_category, m.lot, m.qty, m.uom, m.qty2, m.uom2, m.qty_opname, m.uom_opname, m.origin, m.source_move, m.method, m.reff_picking, m.sc, m.sales_group, m.mo, cat.nama_category,  IF(ISNULL(m.sales_group) or m.sales_group = '', m.sales_group, msg.nama_sales_group) AS nama_sales_group, m.reff_note
+        return $this->db->query("SELECT m.*, cat.nama_category,  IF(ISNULL(m.sales_group) or m.sales_group = '', m.sales_group, msg.nama_sales_group) AS nama_sales_group, m.reff_note
                                 FROM $table as m
                                 LEFT JOIN mst_category as cat ON m.id_category = cat.id
                                 LEFT JOIN mst_sales_group as msg ON msg.kode_sales_group = m.sales_group
@@ -66,7 +66,7 @@ class M_mutasi extends CI_Model
 
     public function acc_mutasi_detail_by_kode_no_limit($table,$tahun,$bulan,$where)
     {
-        return $this->db->query("SELECT m.posisi_mutasi, m.dept_id_mutasi, m.dept_id_dari, m.dept_id_tujuan, m.type, m.kode_transaksi, m.tanggal_transaksi, m.kode_produk, m.nama_produk, m.id_category, m.lot, m.qty, m.uom, m.qty2, m.uom2, m.qty_opname, m.uom_opname, m.origin, m.source_move, m.method, m.reff_picking, m.sc, m.sales_group, m.mo, cat.nama_category,  IF(ISNULL(m.sales_group) or m.sales_group = '', m.sales_group, msg.nama_sales_group) AS nama_sales_group, m.reff_note
+        return $this->db->query("SELECT m.*, cat.nama_category,  IF(ISNULL(m.sales_group) or m.sales_group = '', m.sales_group, msg.nama_sales_group) AS nama_sales_group, m.reff_note
                                 FROM $table as m
                                 LEFT JOIN mst_category as cat ON m.id_category = cat.id
                                 LEFT JOIN mst_sales_group as msg ON msg.kode_sales_group = m.sales_group

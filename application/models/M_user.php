@@ -110,13 +110,17 @@ class M_user extends CI_Model {
     }
 
     public function get_list_menu_by_link_menu($link_menu) {
-        return $this->db->query("SELECT * FROM main_menu_sub WHERE link_menu LIKE '$link_menu%' ORDER BY row_order asc ")->result();
+        return $this->db->query("SELECT * FROM main_menu_sub WHERE link_menu LIKE '$link_menu%' AND is_menu_sub = '' ORDER BY row_order asc ")->result();
     }
 
     public function get_jml_list_menu_by_link_menu($link_menu) {
-        $query = $this->db->query("SELECT count(kode) as jml FROM main_menu_sub WHERE link_menu LIKE '$link_menu%'  ");
+        $query = $this->db->query("SELECT count(kode) as jml FROM main_menu_sub WHERE link_menu  LIKE '$link_menu%' AND is_menu_sub = '' ");
         $result = $query->row();
         return $result->jml;
+    }
+
+    public function get_child_by_parent($link_menu,$kode) {
+        return $this->db->query("SELECT * FROM main_menu_sub WHERE link_menu LIKE '$link_menu%' AND is_menu_sub = '$kode' ORDER BY row_order asc ")->result();
     }
 
     public function get_nama_departemen_all_by_kode($kode) {
@@ -136,5 +140,12 @@ class M_user extends CI_Model {
 
     public function getMasking(string $username,string $table = "user_masking") {
         return $this->db->query("select * from {$table} where username ='{$username}'")->result();
+    }
+
+    public function get_list_menu()  {
+        $this->db->order_by('row_order','asc');
+        $query = $this->db->get('main_menu');
+        return $query->result();
+
     }
 }

@@ -73,6 +73,7 @@ class Outstandingow extends MY_Controller
 		$ow             = $this->input->post('ow');
 		$produk         = $this->input->post('produk');
 		$warna          = $this->input->post('warna');
+		$status_ow      = $this->input->post('status_ow');
 
         $this->load->library('excel');
 		ob_start();
@@ -97,7 +98,7 @@ class Outstandingow extends MY_Controller
 
         $num   = 1;
         $rowCount = 4;
-        $list = $this->m_outstandingOW->get_list_ow_by_kode($sc,$sales_group,$ow,$produk,$warna);
+        $list = $this->m_outstandingOW->get_list_ow_by_kode($sc,$sales_group,$ow,$produk,$warna,$status_ow);
         foreach($list as $val){
 
             if($val->status_scl == 't'){

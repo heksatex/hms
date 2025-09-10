@@ -313,11 +313,13 @@
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
+
                 <?php
                 if (in_array($user->level, ["Super Administrator", "Administrator"])) {
                     $this->load->view("admin/_partials/footer_new.php");
                 }
                 ?>
+
             </footer>
         </div>
         <template class="bankkeluar-tmplt">
@@ -498,8 +500,10 @@ if ($datas->status == 'confirm') {
                         $(".bank" + nourut).val(texts?.[1]);
                         $(".norek" + nourut).val(texts?.[2]);
 
+
                     }
                 });
+
 
                 lainInput(document.getElementById("lain_lain"), function () {
                     if ($("#partner_name").val() !== "") {
@@ -507,7 +511,9 @@ if ($datas->status == 'confirm') {
                         $("#partner").val(null).trigger("change");
                     }
 
+                    
                 });
+                
 
                 const updateStatus = ((statuss) => {
                     $.ajax({
@@ -549,8 +555,9 @@ if ($datas->status == 'confirm') {
                         updateStatus(statuss);
                     }));
 
+                    
                 });
-
+                
                 $("#btn-draft").unbind("click").off("click").on("click", function (e) {
                     e.preventDefault();
                     confirmRequest("Bank Keluar", "Simpan Kembali Sebagai Draft ? ", (() => {
@@ -587,8 +594,6 @@ if ($datas->status == 'confirm') {
                     });
                 });
 
-
-
                 $(".btn-add-item-bg").on("click", function (e) {
                     e.preventDefault();
                     $("#tambah_data").modal({
@@ -604,7 +609,6 @@ if ($datas->status == 'confirm') {
                         }, 1000);
                     });
                 });
-
 
                 const formdo = document.forms.namedItem("form-acc-bankkeluar");
                 formdo.addEventListener(
@@ -636,6 +640,7 @@ if ($datas->status == 'confirm') {
 
                         );
                 $(".select2").select2();
+
 
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
@@ -714,9 +719,11 @@ if ($datas->status == 'confirm') {
                     calculateTotal();
                 });
 
+
                 const calculateTotal = (() => {
                     var total = 0;
                     const elements = document.querySelectorAll('.nominal');
+
 
                     $.each(elements, function (idx, nomina) {
                         let ttl = $(nomina).val();
@@ -771,13 +778,14 @@ if ($datas->status == 'confirm') {
                     $("#lain_lain").val("");
                 });
 
-
                 $(".no_acc").select2({
                     disabled: true
                 });
                 $(".no_acc").prop("disabled", true);
 
+
             });
+
 
             $(document).ready(function () {
                 $(window).keydown(function (event) {
@@ -844,7 +852,6 @@ if ($datas->status == 'confirm') {
                     });
                 }
             });
-
 
         </script>
     </body>

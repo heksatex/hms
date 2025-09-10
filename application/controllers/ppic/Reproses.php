@@ -478,11 +478,20 @@ class Reproses extends MY_Controller
           $note_adj_in  = 'ADJ | Mengadakan. Dibuat dari Fitur Reproses. No.'.$kode_reproses.' Jenis '.$jenis_reproses;
 
           // get dept id GRG
-          $dept_grg        = $this->_module->get_nama_dept_by_kode('GRG')->row_array();
+          if($head->id_jenis == 3){ // ex setting
+            $dept_id = 'GRG';
+          }else {
+            $dept_id         = 'GRG-R';
+          }
+          $dept_grg        = $this->_module->get_nama_dept_by_kode($dept_id)->row_array();
           $nama_dept_grg   = $dept_grg['nama'];
           $stock_location_greige   = $dept_grg['stock_location'];
 
-          $kode_adjustment_in   = substr("0000" . $get_kode_adjustment,-4);     
+          // $kode_adjustment_in   = substr("0000" . $get_kode_adjustment,-4);  
+          $kode_adjustment      = substr($get_kode_adjustment, -5) + 1;
+          $kode_adjustment_tmp  = substr($get_kode_adjustment, -5);
+          $kode_adjustment_in   = substr("00000" . $kode_adjustment,-5);   
+          $kode_adjustment_tmp2 = $kode_adjustment_in;  
           $kode_adjustment_in   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment_in;
 
           // insert into adj 
@@ -490,11 +499,12 @@ class Reproses extends MY_Controller
           $sql_adjustment .= "('".$kode_adjustment_in."', '".$tanggal."','".$nama_dept_grg."','".$stock_location_greige."','".$note_adj_in."','".$status_done."','".$nama_user['nama']."', '".$type_adjustement."'), ";
 
           //create log history adjustment in 
-          $note_log_adj_in = $kode_adjustment_in." ini dibuat dari Fitur Reproses";
+          $note_log_adj_in = $kode_adjustment_in." ini dibuat dari Fitur Reproses <br> No. ".$kode_adjustment_tmp." => ".$kode_adjustment_tmp2;
           $date_log = date('Y-m-d H:i:s');
           $sql_log_history_batch .= "('".$date_log."','mms72','".$kode_adjustment_in."','create','".addslashes($note_log_adj_in)."','".$nama_user['nama']."'), ";
 
-          $get_kode_adjustment++;
+          // $get_kode_adjustment++;
+       
           
           $jumlah_adj_in = 0;
           
@@ -561,8 +571,14 @@ class Reproses extends MY_Controller
                       $nama_departemen = $nm_dept['nama'];
                       $lokasi_adj      = $nm_dept['adjustment_location'];
 
-                      $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
+                      $kode_adjustment       = substr($kode_adjustment_tmp2, -5) + 1;
+                      $kode_adjustment_tmp   = substr($kode_adjustment_tmp2, -5);
+
+                      // $kode_adjustment   = substr("0000" . $get_kode_adjustment,-4);                  
+                      $kode_adjustment   = substr("00000" . $kode_adjustment,-5);                 
+                      $kode_adjustment_tmp2 = $kode_adjustment;  
                       $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
+
 
                       $lot_new           = $row->lot."".$head->inisial;
 
@@ -580,7 +596,7 @@ class Reproses extends MY_Controller
                       $sql_adjustment_items .= "('".$kode_adjustment."','".$row->quant_id."','".$row->kode_produk."','".$row->lot."','".$row->uom."','".$row->qty."',0,'".$row->uom2."','".$row->qty2."',0,'".$move_id."','".$qty1_move."','".$qty2_move."',$row_order_adj), ";
 
                       // log history ADJ OUT
-                      $note_log_adj_out = $kode_adjustment." ini dibuat dari Fitur Reproses";
+                      $note_log_adj_out = $kode_adjustment." ini dibuat dari Fitur Reproses <br> No. ".$kode_adjustment_tmp." => ".$kode_adjustment_tmp2;
                       $sql_log_history_batch .= "('".$date_log."','mms72','".$kode_adjustment."','create','".addslashes($note_log_adj_out)."','".$nama_user['nama']."'), ";
 
                       // log history ADJ OUT
@@ -618,7 +634,7 @@ class Reproses extends MY_Controller
                       // insert stock_quant
                       $sql_stock_quant_batch .= "('".$start."','".$tanggal."','".addslashes($cek_prod['kode_produk'])."','".addslashes($cek_prod['nama_produk'])."','".addslashes(trim($lot_new))."','".addslashes($sq['nama_grade'])."','".$row->qty."','".$row->uom."','".$row->qty2."','".$row->uom2."','".$stock_location_greige."','".addslashes($sq['reff_note'])."','','','".$tanggal."','".addslashes($sq['lebar_greige'])."','".addslashes($sq['uom_lebar_greige'])."','".addslashes($sq['lebar_jadi'])."','".addslashes($sq['uom_lebar_jadi'])."','".addslashes($sq['sales_order'])."','".addslashes($sq['sales_group'])."'), ";
 
-                      $method         = 'GRG|ADJ';
+                      $method         = $dept_id.'|ADJ';
                       $lokasi_dari    = $dept_grg['adjustment_location'];
                       $lokasi_tujuan  = $stock_location_greige;
                       $origin_in      = $kode_adjustment_in.'|'.$row_order_adj_in;

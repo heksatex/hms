@@ -4,7 +4,7 @@
     background-color: white !important;
     opacity: 1 !important;
     cursor:pointer;
-    width:5px !important;
+    width:10px !important;
     /* visibility: hidden; */
   }
   .sidebar:hover,

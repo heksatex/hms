@@ -46,12 +46,31 @@
 //            $('#form-login').submit(false);
         }
         if (xhr.status === 403) {
-            alert_modal_warning("Akses Tidak diijinkan.")
+            alert_modal_warning("Akses Tidak diijinkan.");
         }
 
     });</script>
 <script type="text/javascript">
+    const setTglFormatDef = ((clss) => {
+        $(clss).datetimepicker({
+            format: 'YYYY-MM-DD'
+        }).on('dp.show', function () {
+            $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function () {
+            $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+        });
+    });
+
     $(function () {
+
+        $(".tgl-def-format").datetimepicker({
+            format: 'YYYY-MM-DD'
+        }).on('dp.show', function () {
+            $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function () {
+            $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+        });
+
         $('#datetimepicker1').datetimepicker({
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
@@ -159,14 +178,39 @@
             textarea.style.height = calcHeight(textarea.value) + "px";
         });
     }
-    
-    $(".np").on("click",function(){
+
+    $(".np").on("click", function () {
         var url = $(this).data("url");
-        if(url === "") {
+        if (url === "") {
             return;
         }
         location.href = url;
     });
+
+  $(document).ready(function () {
+    
+    // Buka semua treeview di awal
+    $('.sidebar-menu .treeview').addClass('menu-open active');
+    $('.sidebar-menu .treeview-menu').css('display', 'block');
+
+    // Matikan behavior default AdminLTE yang close menu lainnya
+    $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
+        e.preventDefault();
+        var parent = $(this).parent();
+        var submenu = parent.children('.treeview-menu');
+
+        // Toggle menu yang diklik saja
+        if (parent.hasClass('menu-open')) {
+        submenu.slideUp(200, function () {
+            parent.removeClass('menu-open active');
+        });
+        } else {
+        submenu.slideDown(200, function () {
+            parent.addClass('menu-open active');
+        });
+        }
+    });
+  });
 
 </script>
 

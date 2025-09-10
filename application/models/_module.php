@@ -56,6 +56,39 @@ class _module extends CI_Model {
         $this->db->query("UNLOCK TABLES");
     }
 
+    public function gen_history2($sub_menu, $kode_co, $jenis_log, $note_log, $username) {
+
+        
+        try {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $tgl = date('y-m-d H:i:s');
+            $nama_user = $this->_module->get_nama_user($username)->row_array();
+            $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+            $ip         = addslashes($this->input->ip_address());
+        
+            $data = array(
+                    'datelog'=>$tgl,
+                    'main_menu_sub_kode'=>$kode['kode'],
+                    'kode'=> $kode_co,
+                    'jenis_log'=>$jenis_log,
+                    'note'=>$note_log,
+                    'nama_user'=>$nama_user['nama'],
+                    'ip_address'=>$ip
+            );
+            $this->db->insert('log_history', $data);
+            $db_error = $this->db->error();
+            if ($db_error['code'] > 0) {
+                throw new Exception($db_error['message']);
+            }
+            return "";
+        }catch (Exception $ex) {
+            return $ex->getMessage();
+        }finally{
+            $this->db->db_debug = $db_debug;
+        }
+    }
+
     public function gen_history($sub_menu, $kode_co, $jenis_log, $note_log, $username) {
         $tgl = date('y-m-d H:i:s');
 //        $nama_user = $this->_module->get_nama_user($username)->row_array();
@@ -159,10 +192,11 @@ class _module extends CI_Model {
     }
 
     public function get_kode_adj() {
-        $result = $this->db->query("SELECT kode_adjustment FROM adjustment WHERE month(create_date)='" . date("m") . "' AND year(create_date)='" . date("Y") . "' ORDER BY RIGHT(kode_adjustment,4) DESC LIMIT 1");
+        $result = $this->db->query("SELECT kode_adjustment FROM adjustment WHERE month(create_date)='" . date("m") . "' AND year(create_date)='" . date("Y") . "' ORDER BY RIGHT(kode_adjustment,5) DESC LIMIT 1");
         if ($result->num_rows() > 0) {
             $row = $result->row();
-            $dgt = substr($row->kode_adjustment, -4) + 1;
+            $dgt = $row->kode_adjustment;
+            // $dgt = substr($row->kode_adjustment, -5) + 1;
         } else {
             $dgt = "1";
         }

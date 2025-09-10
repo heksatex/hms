@@ -136,15 +136,18 @@ class Adjustment extends MY_Controller
         }else{
           //insert/add adjustment
           //cek auto generate kode adjustment
-          $kode_adjustment   = $this->_module->get_kode_adj();      
-          $kode_adjustment   = substr("00000" . $kode_adjustment,-4);                  
+          $get_kode_adjustment   = $this->_module->get_kode_adj();  
+          $kode_adjustment   = substr($get_kode_adjustment, -5) + 1;
+          $kode_adjustment_tmp   = substr($get_kode_adjustment, -5);
+          $kode_adjustment   = substr("00000" . $kode_adjustment,-5);                  
+          $kode_adjustment_tmp2  = $kode_adjustment;
           $kode_adjustment   = "ADJ/".date("y") . '/' .  date("m") . '/' . $kode_adjustment;
 
 
           $this->m_adjustment->save_header_adjustment($kode_adjustment,$create_date,$lokasi_adjustment['nama'],$kode_lokasi,$note,$status,$nama_user['nama'],$type_adjustment);
           $kode_adjustment_encr = encrypt_url($kode_adjustment);
           $jenis_log   = "create";
-          $note_log    = $kode_adjustment." | ".$lokasi_adjustment['nama']." | ".$kode_lokasi.' | '.$nama_type_adjustment;
+          $note_log    = $kode_adjustment." | ".$lokasi_adjustment['nama']." | ".$kode_lokasi.' | '.$nama_type_adjustment. " <br> No. ".$kode_adjustment_tmp.' => '.$kode_adjustment_tmp2;
           $this->_module->gen_history($sub_menu, $kode_adjustment, $jenis_log, $note_log, $username);
           $callback = array('status' => 'success', 'message' => 'Data Berhasil Disimpan !', 'isi' => $kode_adjustment_encr, 'icon' =>'fa fa-check', 'type' => 'success');
         }

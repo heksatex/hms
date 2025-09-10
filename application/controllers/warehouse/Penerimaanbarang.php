@@ -100,7 +100,7 @@ class Penerimaanbarang extends MY_Controller {
         $data['id_dept'] = 'FIN';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
     }
-
+    
     public function Finishingreproses() {
         $data['id_dept'] = 'FIN-R';
         $this->load->view('warehouse/v_penerimaan_barang', $data);
@@ -1162,6 +1162,7 @@ class Penerimaanbarang extends MY_Controller {
             } //else session
 
             if ($deptid === 'RCV') {
+
                 $models = new $this->m_global;
                 $checkInv = $models->setTables("invoice")->setWheres(["status <>" => "cancel", "origin" => $kode])->getDetail();
                 if (!$checkInv) {
