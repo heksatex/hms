@@ -168,6 +168,31 @@
         location.href = url;
     });
 
+  $(document).ready(function () {
+    
+    // Buka semua treeview di awal
+    $('.sidebar-menu .treeview').addClass('menu-open active');
+    $('.sidebar-menu .treeview-menu').css('display', 'block');
+
+    // Matikan behavior default AdminLTE yang close menu lainnya
+    $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
+        e.preventDefault();
+        var parent = $(this).parent();
+        var submenu = parent.children('.treeview-menu');
+
+        // Toggle menu yang diklik saja
+        if (parent.hasClass('menu-open')) {
+        submenu.slideUp(200, function () {
+            parent.removeClass('menu-open active');
+        });
+        } else {
+        submenu.slideDown(200, function () {
+            parent.addClass('menu-open active');
+        });
+        }
+    });
+  });
+
 </script>
 
 <div class="modal fade" id="modal_printer" role="dialog">
