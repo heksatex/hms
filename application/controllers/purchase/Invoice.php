@@ -346,7 +346,7 @@ class Invoice extends MY_Controller {
                 $pajakLain = [];
                 $checkDpp = $dataItems[0]->dpp_lain > 0;
                 foreach ($dataItems as $key => $value) {
-                    if ($value->account === null) {
+                    if ($value->account === null || $value->account === "") {
                         throw new \Exception("Jurnal Account Belum diisi", 500);
                     }
                     $nominal = ($value->harga_satuan * $value->qty_beli) - $value->diskon;
