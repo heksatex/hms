@@ -316,7 +316,7 @@ class Salescontract extends MY_Controller
     {
 	    $kode_produk = addslashes($this->input->post('kode_produk'));
    		$result      = $this->m_sales->get_produk_byid($kode_produk)->row_array();
-      $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'], 'lebar_jadi'=>$result['lebar_jadi'], 'uom_lebar_jadi'=>$result['uom_lebar_jadi'] );
+      $callback    = array('kode_produk'=>$result['kode_produk'],'nama_produk'=>$result['nama_produk'],'uom'=>$result['uom'], 'lebar_jadi'=>$result['lebar_jadi'], 'uom_lebar_jadi'=>$result['uom_lebar_jadi'], 'lebar_greige'=>$result['lebar_greige'], 'uom_lebar_greige'=>$result['uom_lebar_greige'] );
         echo json_encode($callback);
     }
 
@@ -708,6 +708,8 @@ class Salescontract extends MY_Controller
           $handling     = $this->input->post('handling');
           $route_co     = $this->input->post('route_co');
           $gramasi      = $this->input->post('gramasi');
+          $lebar_greige   = $this->input->post('lebar_greige');
+          $uom_lebar_greige   = $this->input->post('uom_lebar_greige');
           $lebar_jadi   = $this->input->post('lebar_jadi');
           $uom_lebar_jadi   = $this->input->post('uom_lebar_jadi');
           $reff_note    = addslashes($this->input->post('reff_note'));
@@ -786,18 +788,18 @@ class Salescontract extends MY_Controller
 
                 $qty_now = $cek_item['qty'];
                 // qty by produk setelah dikurang 
-                $tot_qty_color_line_new = ($cq_color_lines - $qty_now ) + $qty;
+                $tot_qty_color_line_new = (round($cq_color_lines,2) - round($qty_now,2) ) + $qty;
                 
-                if($tot_qty_color_line_new <= $cq_contract_lines OR $cek_uom > 0){
+                if(round($tot_qty_color_line_new,2) <= round($cq_contract_lines,2) OR $cek_uom > 0){
                   
-                  $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date);
+                  $this->m_sales->update_color_lines_detail($kode,$desc,$color, $color_name,$qty,$piece_info,$row,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$lebar_greige,$uom_lebar_greige);
                   $jenis_log   = "edit";
-                  $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling."| ".$nama_route." | ".$gramasi." | ".$qty." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date;
+                  $note_log    = "Edit data Details Color Lines | ".$kode." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling."| ".$nama_route." | ".$gramasi." | ".$qty." | ".$lebar_greige." ".$uom_lebar_greige." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date;
                   $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                   $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
                 }else{
                   
-                  $sisa_qty_insert_color_lines = $cq_contract_lines - $tot_qty_color_line_new;// cek sisa qty yang bisa insert ke color lines
+                  $sisa_qty_insert_color_lines = round($cq_contract_lines,2) - round($tot_qty_color_line_new,2);// cek sisa qty yang bisa insert ke color lines
                   $uom     = $cek_item['uom'];
                   
                   if($sisa_qty_insert_color_lines < 0 ){
@@ -816,15 +818,15 @@ class Salescontract extends MY_Controller
               if($status_ow == 't' or $status_ow == 'ng'){
 
                 
-                if($cq_color_lines <= $cq_contract_lines OR $cek_uom > 0 ){
+                if(round($cq_color_lines,2) <= round($cq_contract_lines,2) OR $cek_uom > 0 ){
 
-                  $tot_qty_color_line_new = $cq_color_lines + $qty;
+                  $tot_qty_color_line_new = round($cq_color_lines,2) + round($qty,2);
 
-                  if($tot_qty_color_line_new <= $cq_contract_lines OR $cek_uom > 0){
+                  if(round($tot_qty_color_line_new,2) <= round($cq_contract_lines,2) OR $cek_uom > 0){
 
                     $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
                     $row_order = $ro['row_order']+1;
-                    $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date, $status_ow);
+                    $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date, $status_ow,$lebar_greige,$uom_lebar_greige);
 
                     // cek status sales_contract
                     $is_approve_null = $this->m_sales->cek_color_lines_is_approve_null($kode);
@@ -834,13 +836,13 @@ class Salescontract extends MY_Controller
                     }
 
                     $jenis_log   = "edit";
-                    $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date." | ".$status_ow_;
+                    $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_greige." ".$uom_lebar_greige." | ".$lebar_jadi." ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date." | ".$status_ow_;
                     $this->_module->gen_history($sub_menu, $kode, $jenis_log, addslashes($note_log), $username);
                     $callback = array('status' => 'success','message' => 'Data Berhasil Disimpan !', 'icon' =>'fa fa-check', 'type' => 'success');
 
                   }else{
 
-                    $sisa_qty_insert_color_lines = $cq_contract_lines - $tot_qty_color_line_new;// cek sisa qty yang bisa insert ke color lines
+                    $sisa_qty_insert_color_lines = round($cq_contract_lines,2) - round($tot_qty_color_line_new,2);// cek sisa qty yang bisa insert ke color lines
                     if($sisa_qty_insert_color_lines < 0 ){
                       $message = "Qty Color Line melebihi dari target Contract Lines, Qty yang diinputkan ke Color Line lebih ".-1*$sisa_qty_insert_color_lines." ".$uom." ";
                     }else{
@@ -866,7 +868,7 @@ class Salescontract extends MY_Controller
 
                 $ro        = $this->m_sales->get_row_order_sales_color_lines($kode)->row_array();
                 $row_order = $ro['row_order']+1;
-                $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$status_ow);
+                $this->m_sales->save_color_lines($date,$kode_prod,$prod,$kode,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$status_ow,$lebar_greige,$uom_lebar_greige);
 
                 $jenis_log   = "edit";
                 $note_log    = "Tambah data Details Color Lines | ".$kode." | ".$prod." | ".$desc."| ".$nama_warna."| ".$color_name."| ".$nama_handling." | ".$nama_route." | ".$gramasi." | ".$qty." | ".$uom." | ".$lebar_jadi." | ".$uom_lebar_jadi." | ".$piece_info." | ".$reff_note." | ".$delivery_date." | ".$status_ow_;
@@ -1135,7 +1137,7 @@ class Salescontract extends MY_Controller
             // start transaction
             $this->_module->startTransaction();
 
-            $this->_module->lock_tabel("sales_contract_items WRITE, sales_contract WRITE, sales_color_line WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group WRITE, mst_sales_group as mst WRITE, wa_template WRITE, wa_group as  a WRITE, wa_group_departemen as b WRITE, wa_send_message WRITE, color_order as co WRITE, color_order_detail as cod WRITE");
+            $this->_module->lock_tabel("sales_contract_items WRITE, sales_contract WRITE, sales_color_line WRITE, sales_color_line as scl WRITE, mst_status as mst_stat WRITE, log_history WRITE, user WRITE, main_menu_sub WRITE, sales_contract as sc WRITE, mst_sales_group WRITE, mst_sales_group as mst WRITE, wa_template WRITE, wa_group as  a WRITE, wa_group_departemen as b WRITE, wa_send_message WRITE, color_order as co WRITE, color_order_detail as cod WRITE, pengiriman_barang WRITE");
 
             $items = $this->m_sales->cek_item_color_lines_by_kode($sales_order,$row_order)->row_array();
 
@@ -1169,11 +1171,28 @@ class Salescontract extends MY_Controller
 
               if($value == 'f' and $approve == 'no' and !empty($ow) ) {
                 // cek ow sudah terbentuk color order atau belum
-                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow);
+                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow)->num_rows();
                 if($cek_cod > 0){
                   throw new \Exception('Sales Contract OW ini sudah terbentuk Color Order !', 200);
                 }
               }
+
+              // cek GO jika approve = Yes
+              if($value == 'f' and $approve == 'yes' and !empty($ow) ) {
+                $cek_cod = $this->m_sales->cek_color_order_by_ow($sales_order,$ow)->result();
+                if($cek_cod){
+                    foreach($cek_cod as $cods){
+                        if($cods->status == 'generated'){
+                            $origin_go    = $sales_order.'|'.$cods->kode_co.'|'.$cods->row_order.'|'.$ow;
+                            $cek_go_aktif = $this->m_sales->cek_color_order_go_by_ow($origin_go)->num_rows();
+                            if($cek_go_aktif > 0){
+                              throw new \Exception('Sales Contract '.$ow.' ini sudah terdapat GO, Harap Koordinasi dengan PPIC DF !', 200);
+                            }
+                        }
+                    }
+                }
+              }
+              
 
               $lebih_target = false;
               if($value == 't' or $value =='ng' ){
@@ -1190,7 +1209,7 @@ class Salescontract extends MY_Controller
 
                 // tambah qty yg akan di aktifkan
                 $tot_qty_color_line_new = $cq_color_lines + $qty;
-                if($tot_qty_color_line_new > $cq_contract_lines ){ 
+                if(round($tot_qty_color_line_new,2) > round($cq_contract_lines,2) ){ 
                   $lebih_target = true;  
                   $callback = array('status' => 'failed','message' => 'OW tidak bisa di aktifkan, Karena Qty Color Line Sudah Melebihi dari Target Contract Lines', 'icon' =>'fa fa-warning', 'type' => 'danger');
                 }

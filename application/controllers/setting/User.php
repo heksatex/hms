@@ -5,9 +5,11 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
 /**
  * 
  */
-class User extends MY_Controller {
+class User extends MY_Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         $this->is_loggedin(); //cek apakah user sudah login
         $this->load->model("m_user"); //load model m_user
@@ -15,12 +17,14 @@ class User extends MY_Controller {
         $this->load->model("_module");
     }
 
-    public function index() {
+    public function index()
+    {
         $data['id_dept'] = 'MUSR';
         $this->load->view('setting/v_user', $data);
     }
 
-    function get_data() {
+    function get_data()
+    {
         $sub_menu = $this->uri->segment(2);
         $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
         $list = $this->m_user->get_datatables();
@@ -50,7 +54,8 @@ class User extends MY_Controller {
         echo json_encode($output);
     }
 
-    public function add() {
+    public function add()
+    {
         $data['id_dept'] = 'MUSR';
         $data['mst_sales_group'] = $this->_module->get_list_sales_group();
         $data['level_akses'] = $this->_module->get_list_level_akses();
@@ -86,7 +91,8 @@ class User extends MY_Controller {
         return $this->load->view('setting/v_user_add', $data);
     }
 
-    public function simpan() {
+    public function simpan()
+    {
         $sub_menu = $this->uri->segment(2);
         $username = $this->session->userdata('username');
 
@@ -240,7 +246,8 @@ class User extends MY_Controller {
         echo json_encode($callback);
     }
 
-    public function edit($id = null) {
+    public function edit($id = null)
+    {
         if (!isset($id))
             show_404();
         $kode_decrypt = decrypt_url($id);
@@ -305,7 +312,8 @@ class User extends MY_Controller {
         return $this->load->view('setting/v_user_edit', $data);
     }
 
-    public function set_aktif() {
+    public function set_aktif()
+    {
         try {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
@@ -325,12 +333,12 @@ class User extends MY_Controller {
             $note_log .= $val ? 'Set Aktif' : 'Set Non Aktif';
             $this->_module->gen_history($sub_menu, end($users), $jenis_log, $note_log, $username);
             $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->output->set_status_header(500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
 

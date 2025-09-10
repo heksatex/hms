@@ -65,6 +65,7 @@ class ListOW extends MY_Controller
                 $row[] = $field->gramasi;
                 $row[] = $field->nama_handling;
                 $row[] = $field->nama_route;
+                $row[] = $field->lebar_greige.' '.$field->uom_lebar_greige;
                 $row[] = $field->lebar_jadi.' '.$field->uom_lebar_jadi;
                 $row[] = $field->nama_status;
                 $row[] = ucfirst($field->status_resep);
@@ -186,7 +187,7 @@ class ListOW extends MY_Controller
 		);	
 
         // header table
-    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'Gramasi','Finishing', 'Route', 'L.Jadi','DTI','Status Resep','Piece Info','Reff Notes','Delivery Date','CO');
+    	$table_head_columns  = array('No', 'No.SC', 'Kode MKT', 'No.OW', 'Tgl OW', 'Status OW', 'Nama Produk', 'Warna', 'Qty', 'Uom','Stock GRG[Qty1]', 'Gramasi','Finishing', 'Route', 'L.Greige','L.Jadi','DTI','Status Resep','Piece Info','Reff Notes','Delivery Date','CO');
         $column = 0;
         foreach ($table_head_columns as $field) {
             $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $field);  
@@ -231,13 +232,14 @@ class ListOW extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->gramasi);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->nama_handling);
 			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->nama_route);
-			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_jadi.' '.$val->uom_lebar_jadi);
-			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->nama_status);
-			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, ucfirst($val->status_resep));
-			$object->getActiveSheet()->SetCellValue('R'.$rowCount, $val->piece_info);
-			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->reff_notes);
-			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->delivery_date);
-			$object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->kode_co);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->lebar_greige.' '.$val->uom_lebar_greige);
+			$object->getActiveSheet()->SetCellValue('P'.$rowCount, $val->lebar_jadi.' '.$val->uom_lebar_jadi);
+			$object->getActiveSheet()->SetCellValue('Q'.$rowCount, $val->nama_status);
+			$object->getActiveSheet()->SetCellValue('R'.$rowCount, ucfirst($val->status_resep));
+			$object->getActiveSheet()->SetCellValue('S'.$rowCount, $val->piece_info);
+			$object->getActiveSheet()->SetCellValue('T'.$rowCount, $val->reff_notes);
+			$object->getActiveSheet()->SetCellValue('U'.$rowCount, $val->delivery_date);
+			$object->getActiveSheet()->SetCellValue('V'.$rowCount, $val->kode_co);
             $rowCount++;
         }
 

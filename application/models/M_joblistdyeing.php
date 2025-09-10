@@ -39,9 +39,11 @@ class M_joblistdyeing extends CI_Model
             $this->db->like('mrp.nama_produk', $this->input->post('produk'));
         }
 
+		$dept = $this->arr_to_string($id_dept);
+
 		$this->db->select(" mrp.kode, mrp.dept_id, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.status, mmss.nama_status ");
 		$this->db->from('mrp_production mrp');		
-		$this->db->join("(SELECT * FROM mrp_production where dept_id = '".$id_dept."' AND status IN ('draft', 'ready') )as mrp2","mrp2.kode = mrp.kode AND mrp2.dept_id = mrp.dept_id AND mrp2.status = mrp.status","inner");
+		$this->db->join("(SELECT * FROM mrp_production where dept_id IN ('".$dept."') AND status IN ('draft', 'ready') )as mrp2","mrp2.kode = mrp.kode AND mrp2.dept_id = mrp.dept_id AND mrp2.status = mrp.status","inner");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
 		//$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
 		//$this->db->join("stock_move sm", "fg.move_id = sm.source_move","inner");
@@ -107,9 +109,12 @@ class M_joblistdyeing extends CI_Model
 
 	public function count_all($id_dept,$mmss)
 	{	
+
+		$dept = $this->arr_to_string($id_dept);
+
 		$this->db->select(" mrp.kode, mrp.dept_id, mrp.tanggal, mrp.origin, mrp.kode_produk, mrp.nama_produk, mrp.qty, mrp.uom, mrp.qty1_std, mrp.qty2_std, mrp.lot_prefix, mrp.lot_prefix_waste, mrp.status, mmss.nama_status ");
 		$this->db->from('mrp_production mrp');		
-		$this->db->join("(SELECT * FROM mrp_production where dept_id = '".$id_dept."' AND status IN ('draft', 'ready') ) as mrp2","mrp2.kode = mrp.kode AND mrp2.dept_id = mrp.dept_id AND mrp2.status = mrp.status","inner");	
+		$this->db->join("(SELECT * FROM mrp_production where dept_id IN ('".$dept."') AND status IN ('draft', 'ready') ) as mrp2","mrp2.kode = mrp.kode AND mrp2.dept_id = mrp.dept_id AND mrp2.status = mrp.status","inner");	
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=mrp.status", "inner");
 		//$this->db->join("mrp_production_fg_target fg", "fg.kode = mrp.kode","inner");
 		//$this->db->join("pengiriman_barang pb", "pb.origin = mrp.origin AND pb.dept_id = '".$id_dept."'","inner");
@@ -118,6 +123,11 @@ class M_joblistdyeing extends CI_Model
 		//$where = "pb.status IN ('ready','draft')";
 		//$this->db->where($where);
 		return $this->db->count_all_results();
+	}
+
+	function arr_to_string($id_dept)
+	{
+		return implode("','",$id_dept);
 	}
 
 

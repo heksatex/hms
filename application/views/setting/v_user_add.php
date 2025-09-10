@@ -160,24 +160,31 @@
                                                 <div class="col-md-12">
                                                     <form class="form-horizontal">
 
-                                                        <!-- sales -->
+                                                      <?php
+
+                                                    foreach ($list_menu as $lm) {
+                                                    ?>
                                                         <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>Sales</strong></p>
+                                                            <p class="text-light-blue"><strong><?= $lm->nama; ?></strong></p>
                                                         </div>
 
                                                         <?php
+
+                                                        $list_sub_menu = $this->m_user->get_list_menu_by_link_menu($lm->inisial_class);
+                                                        $count_total_sub_menu = $this->m_user->get_jml_list_menu_by_link_menu($lm->inisial_class);
+
                                                         // set jml baris
-                                                        $jml_kolom = $count_sales / 2;
+                                                        $jml_kolom = $count_total_sub_menu / 2;
                                                         $jml_baris = intval($jml_kolom);
                                                         $count = 1;
                                                         $tambah_kolom = TRUE;
-                                                        foreach ($sales as $val) {
+                                                        foreach ($list_sub_menu as $val) {
 
                                                             if ($count == 1) {
 
                                                                 echo '<div class="col-md-6">';
                                                                 echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
+                                                            } else if ($count > $jml_baris and $tambah_kolom == TRUE) {
                                                                 echo '<div class="col-md-6">';
                                                                 echo '<div class="form-group">';
                                                                 $tambah_kolom = FALSE;
@@ -185,364 +192,46 @@
 
                                                             $kode = $val->kode . ',';
                                                             $nama = $val->nama;
-                                                            ?>
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <div class="col-xs-8"><?php echo $nama; ?></div>
-                                                                <div class="col-xs-4">                                                                
-                                                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-                                                                </div>               
-                                                            </div>
-                                                            <?php
-                                                            if ($count == $jml_baris) {
-                                                                echo '</div>';
-                                                                echo '</div>';
-                                                            }
-
-                                                            $count++;
-                                                        }
-                                                        // penutup div col-md-6, dan form-group
-                                                        echo '</div>';
-                                                        echo '</div>';
                                                         ?>
-                                                        
-                                                        <!-- sales -->
-                                                        <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>Purchases</strong></p>
-                                                        </div>
-
-                                                        <?php
-                                                        // set jml baris
-                                                        $jml_kolom = $count_purchases / 2;
-                                                        $jml_baris = intval($jml_kolom);
-                                                        $count = 1;
-                                                        $tambah_kolom = TRUE;
-                                                        foreach ($purchases as $val) {
-
-                                                            if ($count == 1) {
-
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                                $tambah_kolom = FALSE;
-                                                            }
-
-                                                            $kode = $val->kode . ',';
-                                                            $nama = $val->nama;
-                                                            ?>
                                                             <div class="col-md-12 col-xs-12">
-                                                                <div class="col-xs-8"><?php echo $nama; ?></div>
-                                                                <div class="col-xs-4">                                                                
-                                                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-                                                                </div>               
-                                                            </div>
-                                                            <?php
-                                                            if ($count == $jml_baris) {
-                                                                echo '</div>';
-                                                                echo '</div>';
-                                                            }
-
-                                                            $count++;
-                                                        }
-                                                        // penutup div col-md-6, dan form-group
-                                                        echo '</div>';
-                                                        echo '</div>';
-                                                        ?>
-
-
-                                                        <!-- ppic -->
-                                                        <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>PPIC</strong></p>
-                                                        </div>
-
-                                                        <?php
-                                                        // set jml baris
-                                                        $jml_kolom = $count_ppic / 2;
-                                                        $jml_baris = intval($jml_kolom);
-                                                        $count = 1;
-                                                        $tambah_kolom = TRUE;
-                                                        foreach ($ppic as $val) {
-
-                                                            if ($count == 1) {
-
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                                $tambah_kolom = FALSE;
-                                                            }
-
-                                                            $kode = $val->kode . ',';
-                                                            $nama = $val->nama;
-                                                            ?>
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <div class="col-xs-8"><?php echo $nama; ?></div>
-                                                                <div class="col-xs-4">                                                                
-                                                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-                                                                </div>               
-                                                            </div>
-                                                            <?php
-                                                            if ($count == $jml_baris) {
-                                                                echo '</div>';
-                                                                echo '</div>';
-                                                            }
-
-                                                            $count++;
-                                                        }
-                                                        // penutup div col-md-6, dan form-group
-                                                        echo '</div>';
-                                                        echo '</div>';
-                                                        ?>
-
-
-                                                        <!-- manufacturing -->
-                                                        <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>Manufacturing</strong></p>
-                                                        </div>
-
-                                                        <?php
-// set jml baris
-                                                        $jml_kolom = $count_mo / 2;
-                                                        $jml_baris = intval($jml_kolom);
-                                                        $count = 1;
-                                                        $tambah_kolom = TRUE;
-                                                        foreach ($mo as $val) {
-
-                                                            if ($count == 1) {
-
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                                $tambah_kolom = FALSE;
-                                                            }
-
-                                                            $kode = $val->kode . ',';
-                                                            $nama = $val->nama;
-                                                            ?>
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <div class="col-xs-8"><?php echo $nama; ?></div>
-                                                                <div class="col-xs-4">                                                                
-                                                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-                                                                </div>               
-                                                            </div>
-                                                            <?php
-                                                            if ($count == $jml_baris) {
-                                                                echo '</div>';
-                                                                echo '</div>';
-                                                            }
-
-                                                            $count++;
-                                                        }
-// penutup div col-md-6, dan form-group
-                                                        echo '</div>';
-                                                        echo '</div>';
-                                                        ?>
-
-                                                        <!-- warehouse -->
-                                                        <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>Warehouse</strong></p>
-                                                        </div>
-
-                                                        <?php
-// set jml baris
-                                                        $jml_kolom = $count_warehouse / 2;
-                                                        $jml_baris = intval($jml_kolom);
-                                                        $count = 1;
-                                                        $tambah_kolom = TRUE;
-                                                        foreach ($warehouse as $val) {
-
-                                                            if ($count == 1) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                                $tambah_kolom = FALSE;
-                                                            }
-
-                                                            $kode = $val->kode . ',';
-                                                            $nama = $val->nama;
-                                                            ?>
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <div class="col-xs-8"><?php echo $nama; ?></div>
-                                                                <div class="col-xs-4">                                                                
-                                                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-                                                                </div>               
-                                                            </div>
-                                                            <?php
-                                                            if ($count == $jml_baris) {
-                                                                echo '</div>';
-                                                                echo '</div>';
-                                                            }
-
-                                                            $count++;
-                                                        }
-// penutup div col-md-6, dan form-group
-                                                        echo '</div>';
-                                                        echo '</div>';
-                                                        ?>
-
-                                                        <!-- lab -->
-                                                        <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>Lab</strong></p>
-                                                        </div>
-
-                                                        <?php
-// set jml baris
-                                                        $jml_kolom = $count_lab / 2;
-                                                        $jml_baris = intval($jml_kolom);
-                                                        $count = 1;
-                                                        $tambah_kolom = TRUE;
-                                                        foreach ($lab as $val) {
-
-                                                            if ($count == 1) {
-
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                                $tambah_kolom = FALSE;
-                                                            }
-
-                                                            $kode = $val->kode . ',';
-                                                            $nama = $val->nama;
-                                                            ?>
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <div class="col-xs-8"><?php echo $nama; ?></div>
-                                                                <div class="col-xs-4">                                                                
-
-                                                                    <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-
-                                                                </div>               
-                                                            </div>
-                                                            <?php
-                                                            if ($count == $jml_baris) {
-                                                                echo '</div>';
-                                                                echo '</div>';
-                                                            }
-
-                                                            $count++;
-                                                        }
-// penutup div col-md-6, dan form-group
-                                                        echo '</div>';
-                                                        echo '</div>';
-                                                        ?>
-
-
-                                                        <!-- report -->
-                                                        <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>Report</strong></p>
-                                                        </div>
-
-                                                        <?php
-// set jml baris
-                                                        $jml_kolom = $count_report / 2;
-                                                        $jml_baris = intval($jml_kolom);
-                                                        $count = 1;
-                                                        $tambah_kolom = TRUE;
-                                                        foreach ($report as $val) {
-
-                                                            if ($count == 1) {
-
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                                $tambah_kolom = FALSE;
-                                                            }
-
-                                                            $kode = $val->kode . ',';
-                                                            $nama = $val->nama;
-                                                            ?>
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <?php
+                                                            <?php 
                                                                 $margin_ = '';
                                                                 $col_xs_ = 'col-xs-4';
                                                                 $padding_ = '';
-                                                                if ($val->is_menu_sub == 'mms89') {
+                                                                if($val->is_menu_sub != ''){
                                                                     $margin_ = 'style=margin-left:10px;';
                                                                     $col_xs_ = 'col-xs-3';
                                                                     $padding_ = 'style="padding-left:5px;"';
                                                                 }
-                                                                ?>
-                                                                <div class="col-xs-8" <?php echo $margin_; ?> ><?php echo $nama; ?></div>
-                                                                <div class="<?php echo $col_xs_; ?>" <?php echo $padding_; ?> >        
-                                                                    <?php
-                                                                    if ($val->kode == 'mms89') {
-                                                                        ?>
-                                                                        <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>" disabled="disabled" data-toggle="tooltip" title="Job List akan ter Ceklis Setelah Pilih Job List lain /  Child" >
-                                                                    <?php } else if ($val->is_menu_sub == 'mms89') {
-                                                                        ?>
-                                                                        <input type="checkbox" name="chk[]" class='joblist' value="<?php echo $val->kode; ?>" >
-                                                                    <?php } else {
-                                                                        ?>
-                                                                        <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-                                                                        <?php
-                                                                    }
-                                                                    ?>
-                                                                </div>               
-                                                            </div>
-                                                            <?php
-                                                            if ($count == $jml_baris) {
-                                                                echo '</div>';
-                                                                echo '</div>';
-                                                            }
-
-                                                            $count++;
-                                                        }
-                                                        // penutup div col-md-6, dan form-group
-                                                        echo '</div>';
-                                                        echo '</div>';
-                                                        ?>
-
-
-                                                        <!-- setting -->
-                                                        <div class="col-md-12">
-                                                            <p class="text-light-blue"><strong>Setting</strong></p>
-                                                        </div>
-                                                        <?php
-// set jml baris
-                                                        $jml_kolom = $count_setting / 2;
-                                                        $jml_baris = intval($jml_kolom);
-                                                        $count = 1;
-                                                        $tambah_kolom = TRUE;
-                                                        foreach ($setting as $val) {
-
-                                                            if ($count == 1) {
-
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                            } else if ($count > $jml_baris AND $tambah_kolom == TRUE) {
-                                                                echo '<div class="col-md-6">';
-                                                                echo '<div class="form-group">';
-                                                                $tambah_kolom = FALSE;
-                                                            }
-
-                                                            $kode = $val->kode . ',';
-                                                            $nama = $val->nama;
+                                                                $checked = '';
                                                             ?>
-                                                            <div class="col-md-12 col-xs-12">
-                                                                <div class="col-xs-8"><?php echo $nama; ?></div>
-                                                                <div class="col-xs-4">         
+                                                            
+                                                                <div class="col-xs-8" <?php echo $margin_; ?> ><?php echo $nama; ?></div>
+                                                                <div class="<?php echo $col_xs_; ?>" <?php echo $padding_; ?>>
+                                                                    <!-- <?php if (strpos($priv, $kode) == true) { ?>
+                                                                        <input type="checkbox" name="chk[]" value="<?php echo $val->kode; ?>" checked="checked">
+                                                                    <?php } else { ?>
+                                                                        <input type="checkbox" name="chk[]" value="<?php echo $val->kode; ?>">
+                                                                    <?php } ?> -->
+
                                                                     <?php
-                                                                    if ($val->kode == 'mms91') { // default add user(open ganti password)
-                                                                        ?>
-                                                                        <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>" checked="checked">
-                                                                    <?php } else {
-                                                                        ?>
-                                                                        <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>">
-                                                                        <?php
-                                                                    }
+                                                                        if ($val->parent == true) {
                                                                     ?>
-                                                                </div>               
+                                                                            <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>" disabled="disabled" data-toggle="tooltip" title=" akan ter Ceklis Setelah Pilih List lain /  Child"  <?php echo $checked; ?> >
+                                                                    <?php
+                                                                        } else if ($val->is_menu_sub != ''){
+                                                                    ?>
+                                                                            <input type="checkbox" name="chk[]" class='childSubMenu' parent="<?php echo $val->is_menu_sub;?>" value="<?php echo $val->kode; ?>" <?php echo $checked; ?> >
+                                                                    <?php 
+                                                                        } else {
+                                                                    ?>
+                                                                            <input type="checkbox" name="chk[]"  value="<?php echo $val->kode; ?>" <?php echo $checked; ?>>
+                                                                    <?php      
+                                                                        }
+                                                                    ?>
+                                                                </div>
                                                             </div>
-                                                            <?php
+                                                        <?php
                                                             if ($count == $jml_baris) {
                                                                 echo '</div>';
                                                                 echo '</div>';
@@ -554,7 +243,13 @@
                                                         echo '</div>';
                                                         echo '</div>';
                                                         ?>
+                                                    <?php
+                                                    }
+                                                    // end foreach listmenu
 
+                                                    ?>
+
+                                                       
                                                     </form>
 
                                                 </div>
@@ -610,23 +305,45 @@
             }
 
 
-            // checkbox Joblist
-            $('.joblist').change(function () {
+            // // checkbox Joblist
+            // $('.joblist').change(function () {
 
-                var joblist_check = false
-                $.map($('.joblist'), function (e, i) {
-                    checked = $('input[class="joblist"]').is(':checked');
+            //     var joblist_check = false
+            //     $.map($('.joblist'), function (e, i) {
+            //         checked = $('input[class="joblist"]').is(':checked');
+            //         if (checked) {
+            //             //value = $('input[class="joblist"]:checked').val();
+            //             //alert(value);
+            //             joblist_check = true;
+            //         }
+            //     });
+
+            //     if (joblist_check == true) {
+            //         $('input[value="mms89"]').prop('checked', true);
+            //     } else {
+            //         $('input[value="mms89"]').prop('checked', false);
+            //     }
+
+            // });
+
+            $('.childSubMenu').change(function() {
+
+                var childSubMenu_check = false
+                $.map($('.childSubMenu'), function(e, i) {
+                    checked = $('input[class="childSubMenu"]').is(':checked');
                     if (checked) {
                         //value = $('input[class="joblist"]:checked').val();
                         //alert(value);
-                        joblist_check = true;
+                        childSubMenu_check = true;
                     }
                 });
 
-                if (joblist_check == true) {
-                    $('input[value="mms89"]').prop('checked', true);
+                check = $(this).attr('parent');
+
+                if (childSubMenu_check == true) {
+                    $('input[value="'+check+'"]').prop('checked', true);
                 } else {
-                    $('input[value="mms89"]').prop('checked', false);
+                    $('input[value="'+check+'"]').prop('checked', false);
                 }
 
             });

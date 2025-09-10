@@ -74,7 +74,7 @@ class M_produksiTricot extends CI_Model
 									LEFT JOIN mesin ms ON  ms.mc_id = IFNULL(mrp.mc_id, sc.mc_id)
 									$where
 									ORDER BY ms.row_order asc, mrp.tanggal asc, cast(mid(sc.sales_order,3,(length(sc.sales_order))-2) as unsigned) asc ")->result();
-	}
+	} 
 
 	public function get_record_count_tricot($where)
 	{
@@ -115,7 +115,8 @@ class M_produksiTricot extends CI_Model
 								FROM mrp_production_rm_target rm 
 								INNER JOIN mst_produk mp ON mp.kode_produk = rm.kode_produk 
 								INNER JOIN mrp_production mrp ON mrp.kode = rm.kode
-								WHERE rm.kode = '$kode' AND mp.id_category NOT IN ('11','12') AND mp.type = 'stockable' ORDER BY  rm.row_order" )->result();
+								WHERE rm.kode = '$kode' AND mp.id_category NOT IN ('11','12') AND mp.type = 'stockable' 
+								ORDER BY  rm.additional desc, rm.row_order" )->result();
 	}
 
 

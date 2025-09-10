@@ -738,5 +738,12 @@ class M_colorOrder extends CI_Model
 		
 	}
 
+	public function update_pengiriman_barang($kode,$data)
+	{
+		$this->db->where('kode', $kode);
+		$this->db->update('pengiriman_barang', $data);
+	}
+
+
 
 }

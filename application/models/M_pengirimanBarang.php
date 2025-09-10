@@ -6,9 +6,9 @@ class M_pengirimanBarang extends CI_Model
 {
 	
 	//var $table 		  = 'pengiriman_barang';
-	var $column_order = array(null, 'kode', 'tanggal', 'tanggal_transaksi', 'origin','lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
-	var $column_search= array( 'kode', 'tanggal', 'tanggal_transaksi', 'origin', 'lokasi_tujuan', 'reff_picking','reff_note', 'nama_status');
-	var $order  	  = array('kode' => 'desc');
+	var $column_order = array(null, 'pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin','pb.lokasi_tujuan', 'pb.reff_picking','pb.reff_note', 'mmss.nama_status');
+	var $column_search= array( 'pb.kode', 'pb.tanggal', 'pb.tanggal_transaksi', 'pb.origin','pb.lokasi_tujuan', 'pb.reff_picking','pb.reff_note', 'mmss.nama_status');
+	var $order  	  = array('pb.kode' => 'desc');
 
 	var $table2  	    = 'stock_kain_greige';
 	var $column_order2  = array(null, 'corak', 'barcode_id', 'panjang', 'berat');
@@ -33,25 +33,31 @@ class M_pengirimanBarang extends CI_Model
 		  //add custom filter here
         if($this->input->post('kode'))
         {
-            $this->db->like('kode', $this->input->post('kode'));
+            $this->db->like('pb.kode', $this->input->post('kode'));
         }
         if($this->input->post('status'))
         {
-            $this->db->like('status', $this->input->post('status'));
+            $this->db->like('pb.status', $this->input->post('status'));
         }
         if($this->input->post('reff'))
         {
-            $this->db->like('reff_note', $this->input->post('reff'));
+            $this->db->like('pb.reff_note', $this->input->post('reff'));
         }
-        if($this->input->post('reff_picking'))
-        {
-            $this->db->like('reff_picking', $this->input->post('reff_picking'));
-        }
+       	if ($this->input->post('nama_produk')) {
+			$this->db->group_start();
+			$this->db->like('pbi.nama_produk', $this->input->post('nama_produk'));
+			$this->db->or_like('pbi.kode_produk', $this->input->post('nama_produk'));
+			$this->db->group_end(); 
+		}
 
 		//$this->db->from($this->table);
 		$this->db->select("pb.kode, pb.tanggal, pb.tanggal_transaksi, pb.tanggal_jt, pb.lokasi_tujuan, pb.reff_picking, pb.status, pb.reff_note, mmss.nama_status, pb.origin");
 		$this->db->from("pengiriman_barang pb");
 		$this->db->join("main_menu_sub_status mmss", "mmss.jenis_status=pb.status", "inner");
+		
+		if ($this->input->post('nama_produk')) {
+			$this->db->join('pengiriman_barang_items as pbi', "pb.kode = pbi.kode", "LEFT");
+		}
 
 		$i = 0;
 	
@@ -358,7 +364,7 @@ class M_pengirimanBarang extends CI_Model
 
 	public function get_stock_move_items_by_kode_print($kode,$dept_id)
 	{
-		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lebar_greige, smi.uom_lebar_greige, sq.nama_grade
+		return $this->db->query("SELECT smi.quant_id, smi.move_id, smi.kode_produk, smi.nama_produk, smi.lot, smi.qty, smi.uom, smi.qty2, smi.uom2, smi.status, smi.row_order,smi.origin_prod, sq.reff_note, smi.lebar_jadi, smi.uom_lebar_jadi, smi.lebar_greige, smi.uom_lebar_greige, sq.nama_grade, pb.gramasi
 								 FROM stock_move_items smi 
 								 INNER JOIN pengiriman_barang pb ON smi.move_id = pb.move_id
 								 INNER JOIN stock_quant sq ON smi.quant_id = sq.quant_id

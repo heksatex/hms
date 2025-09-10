@@ -107,7 +107,7 @@
       <div class="box">
         <div class="box-header with-border">
           <h3 class="box-title"><b><?php echo $list->kode;?></b></h3>
-          <?php if($list->dept_id=='DYE' AND $akses_menu >0){
+          <?php if(($list->dept_id=='DYE' or $list->dept_id == 'DYE-R') AND $akses_menu >0){
               if(!empty($menu)){  ?>
           <div class=" pull-right text-right">
             <button class="btn btn-primary btn-sm" id="btn-request" data-loading-text="<i class='fa fa-spinner fa-spin '></i> processing...">Request</button>
@@ -631,7 +631,7 @@
 
                             <div  class="row">
                             <?php 
-                            if($type_mo['type_mo']=='knitting') {//cek type_mo 
+                            if($type_mo['type_mo']=='knitting' || $list->dept_id == 'GJD') {//cek type_mo 
                             ?>
                               <!-- Tabel Kiri -->
                               <div class="col-md-6 table-responsive">
@@ -2765,7 +2765,7 @@
     //modal mode print
     $(document).on('click','#btn-print',function(e){
       var dept_id = '<?php echo $list->dept_id?>';
-      if(dept_id == 'DYE'){
+      if(dept_id == 'DYE' || dept_id == 'DYE-R'){
 
         e.preventDefault();
         $(".print_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');

@@ -471,8 +471,11 @@ class Colororder extends MY_Controller
                       $reff_picking_out = "";
                       $move_id_rm       = "";
                       $move_id_fg       = "";
+                      $dept_empty_val   = "";
+                      $dept_empty       = FALSE;
                       $sm_row           = 1;
                       $nama_prod_rm     = $nama_produk;
+                      $kode_tmp_out     = "";
 
                       //generate produk + color
                       $produk_exp      = explode('"',$nama_produk);
@@ -494,6 +497,12 @@ class Colororder extends MY_Controller
                         $method_action = trim($mthd[1]);
 
                         $nama_dept        = $this->m_colorOrder->get_nama_dept_by_kode($method_dept)->row_array();
+                        if(!isset($nama_dept)){
+                          $dept_empty_val .= $method_dept.' <br> ';
+                          $dept_empty = TRUE;
+                          break;
+                        }
+                        
                         if($method_dept == 'GJD'){
                           $product_fullname = $product_warna;
                         }else{
@@ -702,6 +711,10 @@ class Colororder extends MY_Controller
                           }
                           $dgt=substr("00000" . $arr_kode[$rp->method],-5);            
                           $kode_out = $method_dept."/".$method_action."/".date("y").  date("m").$dgt;
+
+                          if(in_array($method_dept, ['GRG','GRG-R'])){
+                            $kode_tmp_out = $kode_out;
+                          }
                             
                           $sql_out_batch  .= "('".$kode_out."','".$tgl."','".$tgl."','".$tgl."','".addslashes($reff_notes)."','draft','".$method_dept."','".$origin."','".$move_id."','".$rp->lokasi_dari."','".$rp->lokasi_tujuan."'), ";
                           $sql_out_items_batch .= "('".$kode_out."','".addslashes($kode_prod_rm)."','".addslashes($nama_prod_rm)."','".$qty."','".addslashes($uom)."','draft','1',''), ";
@@ -852,7 +865,7 @@ class Colororder extends MY_Controller
 
                     } //end foreach color order details / COD
                     
-                    if($id_parent_empty == FALSE AND $id_sub_parent_empty == FALSE AND $id_jenis_kain_empty == FALSE AND $produk_aktif == TRUE AND $jenis_kain_same == TRUE AND $parent_produk_same == TRUE AND $parent_produk_same == TRUE AND $satuan_produk_new_empty == FALSE AND $satuan_produk_empty == FALSE){
+                    if($id_parent_empty == FALSE AND $id_sub_parent_empty == FALSE AND $id_jenis_kain_empty == FALSE AND $produk_aktif == TRUE AND $jenis_kain_same == TRUE AND $parent_produk_same == TRUE AND $parent_produk_same == TRUE AND $satuan_produk_new_empty == FALSE AND $satuan_produk_empty == FALSE AND $dept_empty == FALSE){
 
                       if(!empty($sql_insert_batch)){
                         $sql_insert_batch = rtrim($sql_insert_batch, ', ');
@@ -890,6 +903,11 @@ class Colororder extends MY_Controller
     
                         // $sql_log_history_out = rtrim($sql_log_history_out, ', ');
                         // $this->_module->simpan_log_history_batch($sql_log_history_out);
+
+                        if(!empty($kode_tmp_out)){
+                          $data_update = array('gramasi' => $gramasi);
+                          $this->m_colorOrder->update_pengiriman_barang($kode_tmp_out,$data_update);
+                        }
                       }
 
                       if(!empty($sql_in_batch)){
@@ -1006,13 +1024,16 @@ class Colororder extends MY_Controller
                         $nama_jenis_kain_not_same = rtrim($nama_jenis_kain_not_same,', ');
                         $callback = array('status' => 'failed','message' => 'Maaf, Jenis Kain Tidak Sama ! <b>'.$nama_jenis_kain_not_same.'</b> </br>  Harap samakan terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
 
+                      }else if($dept_empty == TRUE){
+                        $callback = array('status' => 'failed','message' => 'Maaf, Departemen tidak ada  ! </br>  <b>' .$dept_empty_val, 'icon' =>'fa fa-check', 'type' => 'danger');
+
                       }else if( $satuan_produk_new_empty == TRUE){
                         $satuan_produk_new_empty_departemen = rtrim($satuan_produk_new_empty_departemen,', ');
                         $callback = array('status' => 'failed','message' => 'Maaf, Master Uom atau Uom 2 di departemen tersebut Kosong ! <b>'.$satuan_produk_new_empty_departemen.'</b> </br>  Harap isi terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
+
                       }else if( $satuan_produk_empty == TRUE){
                         $nama_satuan_produk_empty = rtrim($nama_satuan_produk_empty,', ');
                         $callback = array('status' => 'failed','message' => 'Maaf, Uom atau Uom2 kosong ! <b>'.$nama_satuan_produk_empty.'</b> </br>  Harap isi terlebih dahulu !', 'icon' =>'fa fa-check', 'type' => 'danger');
-                        
                       }else{
                         $callback = array('status' => 'failed','message' => 'Maaf, Generate Data Gagal !', 'icon' =>'fa fa-check', 'type' => 'danger');
                       }
@@ -1614,10 +1635,10 @@ class Colororder extends MY_Controller
 
                 $cek_details = $this->m_colorOrder->cek_status_color_order_items($kode_co,'')->num_rows();
 
-                $where_status       = "AND status NOT IN ('generated','ng')";
+                $where_status       = "AND status NOT IN ('generated','ng','f')";
                 $cek_details_status = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status)->num_rows();
       
-                $where_status2       = "AND status NOT IN ('draft','generated','ng')";
+                $where_status2       = "AND status NOT IN ('draft','generated','ng','f')";
                 $cek_details_status2 = $this->m_colorOrder->cek_status_color_order_items($kode_co,$where_status2)->num_rows();
       
                 if($cek_details == 0  ){

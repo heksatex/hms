@@ -20,7 +20,7 @@
 
 
  <!-- Modal Edit data -->
-  <div class="modal fade lebar " id="edit_data" role="dialog" tabindex="-1"  >
+  <div class="modal fade lebar " id="edit_data" role="dialog"  >
     <div class="modal-dialog">
       <div class="modal-content" >
         <div class="modal-header">

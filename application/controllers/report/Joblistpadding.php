@@ -31,8 +31,8 @@ class Joblistpadding extends MY_Controller
         $id_dept  = $this->input->post('id_dept');
 	    $sub_menu = 'mO';
         $kode     = $this->_module->get_kode_sub_menu_deptid($sub_menu,$id_dept)->row_array();
-
-        $list = $this->m_joblistfinishing->get_datatables($id_dept,$kode['kode']);
+        $id_dept_data = array('PAD','PAD-R');
+        $list = $this->m_joblistfinishing->get_datatables($id_dept_data,$kode['kode']);
         $data = array();
         $no = $_POST['start'];
         foreach ($list as $field) {
@@ -50,7 +50,7 @@ class Joblistpadding extends MY_Controller
 
             // get Link and status Kain
 
-            $method         = $id_dept.'|IN';
+            $method         = $field->dept_id.'|IN';
             $kain           = $this->get_kode_in_kain($field->origin,$method);
             $kode_in_kain   = $kain[0];
             $status_kain    = $kain[1];
@@ -82,7 +82,7 @@ class Joblistpadding extends MY_Controller
 
             $status_mg     = '<a href="'.base_url('manufacturing/mO/edit/'.$kode_encrypt).'" target="_blank" data-toggle="tooltip" title="MG PAD '.$kode_mrp.'" '.$color3.'>'.$nama_status.'</a>';
 
-            $method          = $id_dept.'|OUT';
+            $method          = $field->dept_id.'|OUT';
             $out_mg          = $this->get_kode_out_mg($field->origin,$method);
             $status_out      = $out_mg['1'];
 
@@ -109,8 +109,8 @@ class Joblistpadding extends MY_Controller
  
         $output = array(
             "draw" => $_POST['draw'],
-            "recordsTotal" => $this->m_joblistfinishing->count_all($id_dept,$kode['kode']),
-            "recordsFiltered" => $this->m_joblistfinishing->count_filtered($id_dept,$kode['kode']),
+            "recordsTotal" => $this->m_joblistfinishing->count_all($id_dept_data,$kode['kode']),
+            "recordsFiltered" => $this->m_joblistfinishing->count_filtered($id_dept_data,$kode['kode']),
             "data" => $data,
         );
         //output dalam format JSON

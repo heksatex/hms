@@ -118,9 +118,18 @@ class Marketing extends MY_Controller
             $data = array();
             $no = $_POST['start'];
             foreach ($list as $field) {
+                $image = "/upload/product/" . $field->kode_produk . ".jpg";
+                if (is_file(FCPATH . $image)) {
+                    // $link  = is_file(FCPATH . $imageThumb) ? base_url($imageThumb) : base_url($image);
+                    $link  = base_url($image);
+                }else{
+                    $link  = base_url("/upload/product/default.jpg");
+                }
                 $no++;
                 $row = array();
                 $row[] = $no;
+                $row[] = $link;
+                $row[] = $field->kode_produk;
                 $row[] = $field->lot;
                 $row[] = $field->corak_remark;
                 $row[] = $field->warna_remark;

@@ -178,7 +178,7 @@
                                 <option value="">-- Pilih No Mesin --</option>
                                 <?php 
                                   foreach ($mesin as $val) {
-                                      echo "<option value='".$val->mc_id."'>".$val->nama_mesin."</option>";
+                                      echo "<option value='".$val->nama_mesin."'>".$val->nama_mesin."</option>";
                                   }
                                 ?>
                                 </select>
@@ -229,6 +229,14 @@
                                 </select>
                             </div>
                           </div>
+                          <div class="form-group">
+                              <div class="col-md-5">
+                                <label>Reproses </label>
+                              </div>
+                              <div class="col-xs-4 col-sm-3 col-md-3">
+                                  <label><input type="checkbox" name="reproses[]" value="reproses" checked>  </label>
+                              </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -266,11 +274,12 @@
                               <th  class='style bb ws'>Reff Note </th>
                               <th  class='style bb ws'>Lokasi </th>
                               <th  class='style bb ws' style="min-width: 100px" >Nama User</th>
+                              <th  class='style bb ws'>Keterangan </th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td colspan="21" >Tidak ada Data</td>
+                              <td colspan="22" >Tidak ada Data</td>
                             </tr>
                           </tbody>
                       </table>
@@ -316,7 +325,7 @@
 
   // set date tgldari
   $('#tgldari').datetimepicker({
-      defaultDate : new Date(year, month, day, 00, 00, 00),
+      defaultDate : new Date(year, month, day, 0o0, 0o0, 0o0),
       format : 'D-MMMM-YYYY HH:mm:ss',
       ignoreReadonly: true,
       maxDate: new Date(),
@@ -355,6 +364,7 @@
     warna           = $('#warna').val();
     tgldari_2 = $('#tgldari').data("DateTimePicker").date();
     tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+    reproses    = $('input[name="reproses[]"]').prop('checked');
 
     var check_shif    = false;
     var checkboxes_arr =  new Array(); 
@@ -384,7 +394,7 @@
       $.ajax({
           "type":'POST',
           "url": "<?php echo site_url('report/HPHfinishing/export_excel_hph')?>",
-          "data": {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group,  no_go:no_go, warna:warna, user:user, jenis:jenis, shift :checkboxes_arr},
+          "data": {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group,  no_go:no_go, warna:warna, user:user, jenis:jenis, shift :checkboxes_arr,reproses:reproses},
           "dataType":'json',
           beforeSend: function() {
             $('#btn-excel').button('loading');
@@ -427,6 +437,8 @@
       warna           = $('#warna').val();
       tgldari_2 = $('#tgldari').data("DateTimePicker").date();
       tglsampai_2 = $('#tglsampai').data("DateTimePicker").date();
+      reproses    = $('input[name="reproses[]"]').prop('checked');
+
       var check_shif  = false;
 
       checkboxes_arr =  new Array(); 
@@ -464,7 +476,7 @@
                 type: "POST",
                 dataType : "JSON",
                 url : "<?php echo site_url('report/HPHfinishing/loadData')?>",
-                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group,no_go:no_go, warna:warna,  user:user, jenis:jenis, shift :checkboxes_arr },
+                data: {tgldari:tgldari, tglsampai:tglsampai, mo:mo, corak:corak, mc:mc, lot:lot, sales_order:sales_order, sales_group:sales_group,no_go:no_go, warna:warna,  user:user, jenis:jenis, shift :checkboxes_arr,reproses:reproses },
                 success: function(data){
 
                   if(data.status == 'failed'){
@@ -518,6 +530,7 @@
                                  $("<td>").text(value.reff_note),
                                  $("<td>").text(value.lokasi),
                                  $("<td>").text(value.nama_user),
+                                 $("<td>").text(value.keterangan),
                         );
                         tbody.append(tr);
                         temp_mg = value.kode;
@@ -526,7 +539,7 @@
                         sum_qty2 = sum_qty2 + parseFloat(value.qty2);
                     });
                     if(empty == true){
-                      var tr = $("<tr>").append($("<td colspan='21' >").text('Tidak ada Data'));
+                      var tr = $("<tr>").append($("<td colspan='22' >").text('Tidak ada Data'));
                       tbody.append(tr);
                     }else{
                       result =  total_group(temp_mg,sum_mg,sum_qty,sum_qty2);
@@ -559,7 +572,7 @@
           row += "<td class='style_total' align='right'>"+formatNumber(sum_qty)+"</td>";
           row += "<td class='style_total' ></td>";
           row += "<td class='style_total' align='right'>"+formatNumber(sum_qty2)+"</td>";
-          row += "<td class='style_total' colspan='8'></td>";
+          row += "<td class='style_total' colspan='9'></td>";
           row += "</tr>";
       return row;
   }

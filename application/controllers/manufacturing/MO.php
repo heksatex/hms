@@ -80,9 +80,21 @@ class MO extends MY_Controller
         $this->load->view('manufacturing/v_mo', $data);
     }
 
+    public function Dyeingreproses()
+    {
+        $data['id_dept']='DYE-R';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
     public function Finishing()
     {
         $data['id_dept']='FIN';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
+    public function Finishingreproses()
+    {
+        $data['id_dept']='FIN-R';
         $this->load->view('manufacturing/v_mo', $data);
     }
 
@@ -92,9 +104,21 @@ class MO extends MY_Controller
         $this->load->view('manufacturing/v_mo', $data);
     }
 
+    public function Brushingreproses()
+    {
+        $data['id_dept']='BRS-R';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
     public function Finbrushing()
     {
         $data['id_dept']='FBR';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
+    public function Finbrushingreproses()
+    {
+        $data['id_dept']='FBR-R';
         $this->load->view('manufacturing/v_mo', $data);
     }
 
@@ -104,15 +128,33 @@ class MO extends MY_Controller
         $this->load->view('manufacturing/v_mo', $data);
     }
 
+    public function Paddingreproses()
+    {
+        $data['id_dept']='PAD-R';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
     public function Setting()
     {
         $data['id_dept']='SET';
         $this->load->view('manufacturing/v_mo', $data);
     }
 
+    public function Settingreproses()
+    {
+        $data['id_dept']='SET-R';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
     public function Inspecting2()
     {
         $data['id_dept']='INS2';
+        $this->load->view('manufacturing/v_mo', $data);
+    }
+
+    public function Inspecting2reproses()
+    {
+        $data['id_dept']='INS2-R';
         $this->load->view('manufacturing/v_mo', $data);
     }
 
@@ -597,7 +639,7 @@ class MO extends MY_Controller
                     $this->_module->unlock_tabel();
                 }else{
 
-                    if($tp['type_mo'] == 'knitting'){
+                    if($tp['type_mo'] == 'knitting' || $deptid == 'GJD'){
                         $orgn_set   = $origin_mo."|".$kode."|ADD"; // ex ORIGIN MO|MO|ADD
 
                         $last_move   = $this->_module->get_kode_stock_move();
@@ -679,7 +721,7 @@ class MO extends MY_Controller
                         
                         }
                         
-                    }else if($deptid == 'DYE'){
+                    }else if($deptid == 'DYE' || $deptid == 'DYE-R'){
 
                         $orgn_set   = $origin_mo."|".$kode."|ADD|OBAT"; // ex SO18|CO7|2|OW210300001|MG210300004|ADD|OBAT
 
@@ -708,7 +750,11 @@ class MO extends MY_Controller
                         $sql_log_history_in         = "";
                         $sql_log_history_out        = "";
 
-                        $route  = $this->m_mo->get_route_warna('obat_dyeing');
+                        if($deptid == 'DYE-R'){
+                            $route  = $this->m_mo->get_route_warna('obat_dyeing_reproses');
+                        } else {
+                            $route  = $this->m_mo->get_route_warna('obat_dyeing');
+                        }
                         $sm_row = 1;///stock move row_order
                         $empty_item = TRUE;
 
@@ -1718,6 +1764,7 @@ class MO extends MY_Controller
                 $case11     = "";
                 $where11    = "";
                 $consume    = "yes";              
+                
 
                 // start transaction
                 // $this->_module->startTransaction();
@@ -1732,12 +1779,20 @@ class MO extends MY_Controller
                 //cek status mrp_production = hold
                 $cek3  = $this->m_mo->cek_status_mrp_production($kode,'hold')->row_array();
         
+                $sl    = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get ,copy_bahanbaku true/false
+                $copy_bahan_baku = $sl['copy_bahan_baku'] ?? '';
+
+                $get_type_mo    = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
+                $type_mo = $get_type_mo['type_mo'] ?? '';
+
                 if(!empty($cek1['status'])){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else if(!empty($cek2['status'])){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else if(!empty($cek3['status'])){
                     $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
+                }else if($copy_bahan_baku == 'true' AND $type_mo == 'colouring' AND  !empty($array_fg) AND empty($array_rm)){
+                    $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Bahan Baku Kosong !', 'icon' => 'fa fa-warning', 'type'=>'danger');
                 }else{
 
                     //get last quant id
@@ -1767,6 +1822,7 @@ class MO extends MY_Controller
                     $list_lot_fg    = '';
                     $list_lot_waste = '';
                     $tmp_lot_fg     = '';
+                    $list_lot_cons  = '';
 
                     if(!empty($array_fg) ){
 
@@ -2045,10 +2101,13 @@ class MO extends MY_Controller
                         //lokasi tujuan rm
                         $lokasi_rm = $this->_module->get_location_by_move_id($move_id_rm)->row_array();
 
-                        $dept  = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get dept stock
+                        $dept  = $this->_module->get_nama_dept_by_kode($deptid)->row_array();// get dept stock 
                         
                         $get_ro      = $this->m_mo->get_row_order_rm_hasil($kode)->row_array();
                         $row_order_rm= $get_ro['row']+1;
+                        $row_rm_cons = 1;
+                        $cek_qty_konsum = 0;
+                        $tmp_qty_smi    = 0;
                         foreach ($array_rm as $row) {
 
                             $get_sq = $this->_module->get_stock_quant_by_id($row['quant_id'])->row_array();
@@ -2056,8 +2115,10 @@ class MO extends MY_Controller
                             if($get_sq['lokasi'] == $dept['stock_location']){// cek lokasi rm
 
                                 if($get_sq['qty'] == $row['qty_smi'] AND $get_sq['qty2'] == $row['qty2']){
-
-                                    if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){                     
+                                    
+                                    $tmp_qty_smi = $tmp_qty_smi + $row['qty_smi'];
+                                    if($row['qty_konsum'] > 0 AND $row['qty_konsum'] != ''){        
+                                        
                                         
                                         if($row['qty_konsum']<$row['qty_smi']){//jika qty_konsum kurang dari qty stock_move_items
 
@@ -2113,8 +2174,12 @@ class MO extends MY_Controller
                                             $sql_mrp_production_rm_hasil .= "('".$row['kode']."','".$row['move_id']."','".addslashes($row['kode_produk'])."','".addslashes($row['nama_produk'])."','".addslashes($row['lot'])."','".round($row['qty_konsum'],2)."','".addslashes($row['uom'])."','".addslashes($row['origin_prod'])."','".$row_order_rm."','".$row['quant_id']."','".$row['additional']."'), ";
 
                                         }
+                                        $list_lot_cons .= '('.$row_rm_cons.') '.$row['nama_produk'].' '.$row['lot']." <br>";
+                                        $row_rm_cons++;
                                         $row_order_rm++;
-                                    }
+
+                                    } 
+                                    $cek_qty_konsum = $cek_qty_konsum + $row['qty_konsum'];
 
                                 }else{
                                     $rm_not_valid = true;
@@ -2125,6 +2190,11 @@ class MO extends MY_Controller
                             }
                         
                         }//foreach array_rm
+
+                        if(!empty($tmp_qty_smi) AND ((double)$cek_qty_konsum <= 0 || empty($cek_qty_konsum))){
+                            throw new \Exception('Qty Konsumsi Bahan Baku harus terisi !', 200);
+                        }
+                        
                     }
 
                     if($rm_not_valid == false){
@@ -2297,7 +2367,7 @@ class MO extends MY_Controller
 
                         if(!empty($array_fg) ){ 
                             // jika dept id nya DYE, FIN
-                            if($deptid == 'DYE' OR $deptid == 'FIN'){
+                            if($deptid == 'DYE' OR $deptid == 'FIN' OR $deptid == 'FIN-R' OR $deptid == 'DYE-R'){
                                 // update mrp_production, stock_move_produk, stock_move, stock_move_items = done
                                 //$move_rm_obat = $this->m_mo->get_move_id_rm_target_obat_by_kode($kode)->row_array();s
                                 //$move_rm_obat = $move_rm_obat['move_id'];
@@ -2401,13 +2471,19 @@ class MO extends MY_Controller
                             if(!empty($list_lot_waste)){
                                 $lot_waste = "<br> List Waste : <br> ".$list_lot_waste;
                             }else{
-                                $lost_waste = '';
+                                $lot_waste = '';
+                            }
+
+                            if(!empty($list_lot_cons)){
+                                $list_cons = " <br> List Lot Bahan Baku : <br> ".$list_lot_cons;
+                            }else{
+                                $list_cons = "";
                             }
 
                             if(!empty($array_fg) AND !empty($array_waste)){
-                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' & Jumlah Waste :'.$jml_lot_waste.' '.$lot_fg.' '.$lot_waste;
+                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' & Jumlah Waste :'.$jml_lot_waste.' '.$lot_fg.' '.$lot_waste. ' ' . $list_cons;
                             }else if(!empty($array_fg)){
-                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' '.$lot_fg;
+                                $note_log    = "Produksi Batch ". $kode.' | Jumlah LOT : '.$jml_lot_fg.' '.$lot_fg . ' ' . $list_cons;
                             }else{
                                 $note_log    = "Produksi Batch ". $kode.' | Jumlah Waste : '.$jml_lot_waste.' '.$lot_waste;;
                             }
@@ -4442,7 +4518,7 @@ class MO extends MY_Controller
             //cek status mrp_production = hold
             $cek3  = $this->m_mo->cek_status_mrp_production($kode,'hold')->row_array();
 
-            if(!empty($cek1['status'])){
+            if(!empty($cek1['status']) AND $deptid != 'GJD'){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Sudah Done !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else if(!empty($cek2['status'])){
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Disimpan, Status MO Batal !', 'icon' => 'fa fa-warning', 'type'=>'danger');
@@ -4641,7 +4717,11 @@ class MO extends MY_Controller
                             $sql_log_history_in         = "";
                             $sql_log_history_out        = "";
 
-                            $route = $this->m_mo->get_route_warna('obat_dyeing');
+                            if($deptid == 'DYE-R'){
+                                $route = $this->m_mo->get_route_warna('obat_dyeing_reproses');
+                            } else {
+                                $route = $this->m_mo->get_route_warna('obat_dyeing');
+                            }
                             $kode_warna  = $this->m_mo->get_warna_items_by_warna($warna,$varian);
                             $get_row = $this->m_mo->get_row_order_rm_target($kode)->row_array();//get last_order di mrp rm target
                             //$rm_row  = $get_row['row']+1;
@@ -4650,6 +4730,7 @@ class MO extends MY_Controller
                             $sm_row  = 1;///stock move row_order
                             $empty_item       = TRUE;
                             $produk_aktif     = TRUE;
+                            $route_request    = FALSE;
 
                             // cek produk dti aktif/tidak 
                             foreach($kode_warna as $row){
@@ -4660,11 +4741,11 @@ class MO extends MY_Controller
                                     break;
                                 }
                             }
-
-                            if($produk_aktif == TRUE AND $empty_item == FALSE){
-
-                                foreach($route as $val){
                             
+                            if($produk_aktif == TRUE AND $empty_item == FALSE){
+                                
+                                foreach($route as $val){
+                                    $route_request = TRUE;
                                     $mthd          = explode("|",$val->method);
                                     $method_dept   = trim($mthd[0]);
                                     $method_action = trim($mthd[1]);
@@ -4812,7 +4893,10 @@ class MO extends MY_Controller
                                 } // end foreach route
                             }
 
-                            if($produk_aktif == FALSE){
+                            if($route_request == FALSE){
+                                //action sql query
+                                $callback = array('message' => 'Maaf, Route Request Obat Dyeing tidak ditemukan   ! ',  'status' => 'failed' );
+                            }else if($produk_aktif == FALSE){
                                 //action sql query
                                 $callback = array('message' => 'Maaf, Obat Dyeing Stuff atau Auxiliary tidak atkif  ! ',  'status' => 'failed' );
                             }else if($empty_item == TRUE){
@@ -4993,13 +5077,13 @@ class MO extends MY_Controller
                 $callback = array('status' => 'failed', 'message'=>'Maaf, Data Tidak Bisa Diubah, Status MO di Hold !', 'icon' => 'fa fa-warning', 'type'=>'danger');
             }else{
 
-                if(($air == '0' OR empty($air))  AND $type_mo == 'colouring' AND ($deptid == 'FIN' OR $deptid =='DYE')){
+                if(($air == '0' OR empty($air))  AND $type_mo == 'colouring' AND ($deptid == 'FIN' OR $deptid =='DYE' OR $deptid == 'FIN-R' OR $deptid == 'DYE-R')){
                     if($air == '0'){
                         $callback = array('status' => 'failed', 'field' => 'air', 'message' => 'Air Harus Lebih dari 0 !', 'icon' =>'fa fa-warning',   'type' => 'danger' );    
                     }else{
                         $callback = array('status' => 'failed', 'field' => 'air', 'message' => 'Air Harus Diisi !', 'icon' =>'fa fa-warning',    'type' => 'danger' );    
                     }
-                }else if(($berat == '0' OR empty($berat)) AND $type_mo == 'colouring' AND ($deptid == 'FIN' OR $deptid =='DYE')){
+                }else if(($berat == '0' OR empty($berat)) AND $type_mo == 'colouring' AND ($deptid == 'FIN' OR $deptid =='DYE' OR $deptid == 'FIN-R' OR $deptid == 'DYE-R')){
                     if($berat == '0'){
                         $callback = array('status' => 'failed', 'field' => 'berat', 'message' => 'Berat Harus Lebih dari 0 !', 'icon'=>'fa fa-warning','type' => 'danger' );    
                     }else{
@@ -5482,7 +5566,7 @@ class MO extends MY_Controller
                     }
 
                    
-                    if($type_mo == 'colouring' AND $deptid != 'DYE'){
+                    if($type_mo == 'colouring' AND $deptid != 'DYE' AND $deptid != 'DYE-R'){
                         //cek apa ada product yang statusnya ready atau done ?
                         $all_produk_rm = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready','done')->row_array();
                         //jika tidak ada maka update status  mrp_production = ready
@@ -5745,7 +5829,7 @@ class MO extends MY_Controller
                         }
 
                         // jika mo Dyeing maka update field berat
-                        if($deptid == 'DYE'){
+                        if($deptid == 'DYE' || $deptid =='DYE-R'){
                             $qty2   = $this->m_mo->get_qty2_smi_kain_by_kode($move_id)->row_array();
                             
                             //update berat di mrp production
@@ -5864,7 +5948,7 @@ class MO extends MY_Controller
                     }
 
                     // jika mo Dyeing maka update field berat
-                    if($deptid == 'DYE'){
+                    if($deptid == 'DYE' || $deptid == 'DYE-R'){
                         $qty2   = $this->m_mo->get_qty2_smi_kain_by_kode($move_id)->row_array();
                         
                         //update berat di mrp production
@@ -6472,7 +6556,7 @@ class MO extends MY_Controller
                     $this->_module->simpan_stock_move_items_batch($sql_stock_move_items_batch);
 
                     // jika mo Dyeing maka update field berat
-                    if($deptid == 'DYE'){
+                    if($deptid == 'DYE' || $deptid == 'DYE-R'){
                         $qty2   = $this->m_mo->get_qty2_smi_kain_by_kode($move_id)->row_array();
                         
                         //update berat di mrp production
@@ -6490,7 +6574,7 @@ class MO extends MY_Controller
                     $this->m_mo->update_status_mrp_production_rm_target($kode,addslashes($origin_prod),$status_brg,$move_id);  
                     // cek type mo
                     $to    = $this->m_mo->cek_type_mo_by_dept_id($deptid)->row_array();
-                    if($to['type_mo'] != 'colouring' AND $deptid != 'DYE') {
+                    if($to['type_mo'] != 'colouring' AND $deptid != 'DYE' AND $deptid != 'DYE-R') {
 
                             //cek apa produk yang status nya ready atau done ?
                             $cek_status = $this->m_mo->cek_status_barang_mrp_production_rm_target($kode,'ready', 'done')->row_array();

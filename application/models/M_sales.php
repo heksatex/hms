@@ -309,7 +309,7 @@ class M_sales extends CI_Model
 
 	public function get_produk_byid($kode_produk)
 	{
-		return $this->db->query("SELECT kode_produk, nama_produk, uom, lebar_jadi, uom_lebar_jadi
+		return $this->db->query("SELECT kode_produk, nama_produk, uom, lebar_jadi, uom_lebar_jadi, lebar_greige, uom_lebar_greige
 								FROM  mst_produk 
 								WHERE kode_produk = '$kode_produk'");
 	}
@@ -440,7 +440,7 @@ class M_sales extends CI_Model
 	public function get_data_color_line_by_kode($sales_order)
 	{
 		return $this->db->query("SELECT a.kode_produk, a.nama_produk, a.sales_order, a.description, a.id_warna, a.color_alias_name, a.qty, 
-		a.uom, a.piece_info, a.row_order, a.is_approve,a.ow,b.nama_warna,a.id_handling,c.nama_handling,a.lebar_jadi, a.uom_lebar_jadi, a.gramasi, a.status, a.route_co, a.reff_notes, rc.nama as nama_route_co, a.delivery_date_items
+		a.uom, a.piece_info, a.row_order, a.is_approve,a.ow,b.nama_warna,a.id_handling,c.nama_handling,a.lebar_jadi, a.uom_lebar_jadi, a.gramasi, a.status, a.route_co, a.reff_notes, rc.nama as nama_route_co, a.delivery_date_items, a.lebar_greige, a.uom_lebar_greige
 							FROM sales_color_line a
 							LEFT JOIN warna b ON a.id_warna = b.id
 							LEFT JOIN mst_handling c ON a.id_handling = c.id
@@ -466,10 +466,10 @@ class M_sales extends CI_Model
 		return $this->db->query("SELECT row_order  FROM sales_color_line WHERE sales_order = '$sales_order' order by row_order desc LIMIT 1");
 	}
 
-    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$status_ow)
+    public function save_color_lines($date,$kode_produk,$prod,$sales_order,$desc,$color,$color_name,$qty,$uom,$piece_info,$row_order,$gramasi,$handling,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$status_ow,$lebar_greige,$uom_lebar_greige)
 	{
-		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi,route_co,reff_notes,tanggal_ow,delivery_date_items,status)
-			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi','$route_co','$reff_note','$date','$delivery_date','$status_ow')");
+		return $this->db->query("INSERT INTO sales_color_line (create_date,kode_produk,nama_produk,description,sales_order,id_warna,color_alias_name,qty,uom,piece_info,row_order,id_handling,gramasi,lebar_jadi,uom_lebar_jadi,route_co,reff_notes,tanggal_ow,delivery_date_items,status,lebar_greige,uom_lebar_greige)
+			values ('$date','$kode_produk','$prod','$desc','$sales_order','$color','$color_name','$qty','$uom','$piece_info','$row_order','$handling','$gramasi','$lebar_jadi','$uom_lebar_jadi','$route_co','$reff_note','$date','$delivery_date','$status_ow','$lebar_greige','$uom_lebar_greige')");
 	}
 
 	public function delete_color_lines_detail($sales_order,$row_order)
@@ -482,10 +482,10 @@ class M_sales extends CI_Model
 		return $this->db->query("SELECT is_approve FROM sales_color_line WHERE sales_order = '$sales_order' AND row_order = '$row_order' ");
 	}
 
-    public function update_color_lines_detail($kode,$desc,$color,$color_name,$qty,$piece_info,$row_order,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date)
+    public function update_color_lines_detail($kode,$desc,$color,$color_name,$qty,$piece_info,$row_order,$handling,$gramasi,$lebar_jadi,$uom_lebar_jadi,$route_co,$reff_note,$delivery_date,$lebar_greige,$uom_lebar_greige)
 	{
 		return $this->db->query("UPDATE sales_color_line SET description = '$desc', id_warna = '$color', color_alias_name = '$color_name', 
-																qty = '$qty', piece_info = '$piece_info', id_handling = '$handling', lebar_jadi = '$lebar_jadi', gramasi = '$gramasi',uom_lebar_jadi = '$uom_lebar_jadi', route_co = '$route_co', reff_notes = '$reff_note', delivery_date_items = '$delivery_date'
+																qty = '$qty', piece_info = '$piece_info', id_handling = '$handling', lebar_jadi = '$lebar_jadi', gramasi = '$gramasi',uom_lebar_jadi = '$uom_lebar_jadi', route_co = '$route_co', reff_notes = '$reff_note', delivery_date_items = '$delivery_date', lebar_greige = '$lebar_greige', uom_lebar_greige = '$uom_lebar_greige'
 								WHERE sales_order = '$kode' AND row_order = '$row_order' ");
 	}
 
@@ -569,12 +569,22 @@ class M_sales extends CI_Model
 	{
 		$this->db->where('co.kode_sc',$sales_order);
 		$this->db->where('cod.ow',$ow);
-		$this->db->select('*');
+		$this->db->select('cod.*');
 		$this->db->from('color_order co');
 		$this->db->join('color_order_detail cod','co.kode_co = cod.kode_co','inner');
 		$query = $this->db->get();
-		return $query->num_rows();
-		
+		return $query;		
+	}
+
+	public function cek_color_order_go_by_ow($origin)
+	{
+		$this->db->where('origin',$origin);
+		$this->db->where_in('dept_id',array('GRG','GRG-R'));
+		$this->db->where_in('status',array('done'));
+		$this->db->select('*');
+		$this->db->from('pengiriman_barang');
+		$query = $this->db->get();
+		return $query;
 	}
 
 	/* COLOR LINES << */

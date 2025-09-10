@@ -36,6 +36,7 @@ class Penerimaanharian extends MY_Controller
 		$dept_dari   = addslashes($this->input->post('dept_dari'));
 		$kode        = addslashes($this->input->post('kode'));
 		$corak  	 = addslashes($this->input->post('corak'));
+		$lokasi_pos  = addslashes($this->input->post('lokasi_pos'));
 		$status_arr  = $this->input->post('status_arr');
 		$view_arr  	 = $this->input->post('view_arr');
 		$dataRecord = [];
