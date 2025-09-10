@@ -173,16 +173,6 @@ date_default_timezone_set('Asia/Jakarta'); //default waktu jakarta
         }
     }
 
-    .navbar-nav > li > a {
-        padding-left: 7px;
-        padding-left: 7px;
-    }
-
-    .sidebar-menu>li.header{color:#4b646f;background:#1a2226; line-height: 10px;}
-
-    .sidebar-menu > li {
-        line-height: 0.9px;
-    }
 
 </style>
 <div id="printed" style="display: none">
