@@ -55,6 +55,7 @@ class User extends MY_Controller {
         $data['mst_sales_group'] = $this->_module->get_list_sales_group();
         $data['level_akses'] = $this->_module->get_list_level_akses();
         $data['departemen'] = $this->_module->get_list_departemen_all();
+        $data['list_menu'] = $this->m_user->get_list_menu();
 
         $data['sales'] = $this->m_user->get_list_menu_by_link_menu('sales');
         $data['count_sales'] = $this->m_user->get_jml_list_menu_by_link_menu('sales');
@@ -78,7 +79,7 @@ class User extends MY_Controller {
         $data['count_setting'] = $this->m_user->get_jml_list_menu_by_link_menu('setting');
 
         $data['category'] = $this->m_produk->get_list_category();
-        
+
         $data['purchases'] = $this->m_user->get_list_menu_by_link_menu('purchase');
         $data['count_purchases'] = $this->m_user->get_jml_list_menu_by_link_menu('purchase');
 
@@ -89,7 +90,7 @@ class User extends MY_Controller {
         $sub_menu = $this->uri->segment(2);
         $username = $this->session->userdata('username');
 
-        if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+        if (empty($this->session->userdata('status'))) { //cek apakah session masih ada
             // session habis
             $callback = array('message' => 'Waktu Anda Telah Habis', 'sesi' => 'habis');
         } else {
@@ -127,9 +128,14 @@ class User extends MY_Controller {
                 $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sales_group);
                 $nama_departemen = $this->m_user->get_nama_departemen_all_by_kode($departemen);
 
-                if (!empty($cek['username']) AND $status == 'tambah') {
-                    $callback = array('status' => 'failed', 'field' => 'note', 'message' => 'Login Name sudah dipakai !', 'icon' => 'fa fa-warning',
-                        'type' => 'danger');
+                if (!empty($cek['username']) and $status == 'tambah') {
+                    $callback = array(
+                        'status' => 'failed',
+                        'field' => 'note',
+                        'message' => 'Login Name sudah dipakai !',
+                        'icon' => 'fa fa-warning',
+                        'type' => 'danger'
+                    );
                 } else if (!empty($cek['username'])) {
                     //update/edit user
                     $this->m_user->update_user($login, $namauser, $departemen, $level, $sales_group, $telepon_wa);
@@ -145,8 +151,8 @@ class User extends MY_Controller {
                     }
                     $userMasking = [];
                     $propurMasking = [];
-                    
-                    if(is_string($masking))
+
+                    if (is_string($masking))
                         $masking = [];
                     foreach ($masking as $key => $value) {
                         $userMasking[] = array(
@@ -158,18 +164,18 @@ class User extends MY_Controller {
                     if (count($userMasking) > 0) {
                         $this->m_user->save_masking($userMasking);
                     }
-                    
-                    if(is_string($masking_propur))
+
+                    if (is_string($masking_propur))
                         $masking_propur = [];
                     foreach ($masking_propur as $key => $value) {
-                        $propurMasking [] = array(
-                            "username"=>$login,
-                            "departemen"=>$value
+                        $propurMasking[] = array(
+                            "username" => $login,
+                            "departemen" => $value
                         );
                     }
-                    $this->m_user->delete_masking($login,"user_masking_procurement_purchase");
+                    $this->m_user->delete_masking($login, "user_masking_procurement_purchase");
                     if (count($propurMasking) > 0) {
-                        $this->m_user->save_masking($propurMasking,"user_masking_procurement_purchase");
+                        $this->m_user->save_masking($propurMasking, "user_masking_procurement_purchase");
                     }
 
                     $nama_sales_group = $this->_module->get_nama_sales_Group_by_kode($sales_group);
@@ -193,27 +199,32 @@ class User extends MY_Controller {
                     }
                     $userMasking = [];
                     $propurMasking = [];
+                    if (is_string($masking))
+                        $masking = [];
                     foreach ($masking as $key => $value) {
                         $userMasking[] = array(
                             'username' => $login,
                             'mst_category_id' => $value
                         );
                     }
+
                     if (count($userMasking) > 0) {
                         $this->m_user->save_masking($userMasking);
                     }
-                    
+
+                    if (is_string($masking_propur))
+                        $masking_propur = [];
                     foreach ($masking_propur as $key => $value) {
-                        $propurMasking [] = array(
-                            "username"=>$login,
-                            "departemen"=>$value
+                        $propurMasking[] = array(
+                            "username" => $login,
+                            "departemen" => $value
                         );
                     }
-                    
-                     if (count($propurMasking) > 0) {
-                        $this->m_user->save_masking($propurMasking,"user_masking_procurement_purchase");
+
+                    if (count($propurMasking) > 0) {
+                        $this->m_user->save_masking($propurMasking, "user_masking_procurement_purchase");
                     }
-                    
+
                     $login_encr = encrypt_url($login);
                     $jenis_log = "create";
                     $note_log = $namauser . " | " . $departemen . " | " . $level . " | " . $nama_sales_group;
@@ -257,8 +268,8 @@ class User extends MY_Controller {
             $masking[] = $value->mst_category_id;
         }
         $data["masking"] = $masking;
-        
-        foreach ($this->m_user->getMasking($kode_decrypt,"user_masking_procurement_purchase") as $value) {
+
+        foreach ($this->m_user->getMasking($kode_decrypt, "user_masking_procurement_purchase") as $value) {
             $masking_propur[] = $value->departemen;
         }
         $data["masking_propur"] = $masking_propur;
@@ -285,9 +296,11 @@ class User extends MY_Controller {
         $data['count_setting'] = $this->m_user->get_jml_list_menu_by_link_menu('setting');
 
         $data['category'] = $this->m_produk->get_list_category();
-        
+
         $data['purchases'] = $this->m_user->get_list_menu_by_link_menu('purchase');
         $data['count_purchases'] = $this->m_user->get_jml_list_menu_by_link_menu('purchase');
+
+        $data['list_menu'] = $this->m_user->get_list_menu();
 
         return $this->load->view('setting/v_user_edit', $data);
     }
@@ -297,7 +310,7 @@ class User extends MY_Controller {
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
 
-            if (empty($this->session->userdata('status'))) {//cek apakah session masih ada
+            if (empty($this->session->userdata('status'))) { //cek apakah session masih ada
                 // session habis
                 throw new Exception("Waktu Anda Telah Habis");
             }
@@ -311,6 +324,24 @@ class User extends MY_Controller {
             $note_log = end($users) . "| ";
             $note_log .= $val ? 'Set Aktif' : 'Set Non Aktif';
             $this->_module->gen_history($sub_menu, end($users), $jenis_log, $note_log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function check_pin() {
+        try {
+            $pin = $this->input->post("pin");
+            $users = (object) $this->session->userdata('nama');
+            if ($pin !== $users->pin) {
+                throw new \Exception("PIN tidak sesuai");
+            }
+            $this->session->set_userdata('pin', true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));

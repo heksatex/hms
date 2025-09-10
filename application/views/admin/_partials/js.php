@@ -46,12 +46,31 @@
 //            $('#form-login').submit(false);
         }
         if (xhr.status === 403) {
-            alert_modal_warning("Akses Tidak diijinkan.")
+            alert_modal_warning("Akses Tidak diijinkan.");
         }
 
     });</script>
 <script type="text/javascript">
+    const setTglFormatDef = ((clss) => {
+        $(clss).datetimepicker({
+            format: 'YYYY-MM-DD'
+        }).on('dp.show', function () {
+            $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function () {
+            $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+        });
+    });
+
     $(function () {
+
+        $(".tgl-def-format").datetimepicker({
+            format: 'YYYY-MM-DD'
+        }).on('dp.show', function () {
+            $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function () {
+            $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+        });
+
         $('#datetimepicker1').datetimepicker({
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
@@ -159,10 +178,10 @@
             textarea.style.height = calcHeight(textarea.value) + "px";
         });
     }
-    
-    $(".np").on("click",function(){
+
+    $(".np").on("click", function () {
         var url = $(this).data("url");
-        if(url === "") {
+        if (url === "") {
             return;
         }
         location.href = url;
