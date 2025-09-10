@@ -91,11 +91,14 @@ class _module extends CI_Model {
 
     public function gen_history($sub_menu, $kode_co, $jenis_log, $note_log, $username) {
         $tgl = date('y-m-d H:i:s');
-        $nama_user = $this->_module->get_nama_user($username)->row_array();
+//        $nama_user = $this->_module->get_nama_user($username)->row_array();
         $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+        $users = $this->session->userdata('nama');
+//        $text = $this->session->userdata('menu');
+//        $rst = (array)searchOnArray(unserialize(decrypt_url($text)),'inisial_class',$sub_menu);
         $ip         = addslashes($this->input->ip_address());
         $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user,ip_address) 
-								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]','$ip')");
+								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$users[nama]','$ip')");
     }
 
     public function gen_history_deptid($sub_menu, $kode_co, $jenis_log, $note_log, $username, $deptid) {

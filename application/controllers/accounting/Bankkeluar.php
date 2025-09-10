@@ -371,6 +371,8 @@ class Bankkeluar extends MY_Controller {
 
     public function edit($id) {
         try {
+
+            $data['user'] = (object) $this->session->userdata('nama'); 
             $data["id"] = $id;
             $data["jenis_transaksi"] = $this->jenisTransaksi;
             $kode = decrypt_url($id);

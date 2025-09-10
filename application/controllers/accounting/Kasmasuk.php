@@ -255,6 +255,7 @@ class Kasmasuk extends MY_Controller {
 
     public function edit($id) {
         try {
+            $data['user'] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
             $kode = decrypt_url($id);
             $model = new $this->m_global;
