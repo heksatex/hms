@@ -1,5 +1,5 @@
 import {login} from './module/user.js';
-import {requests, requestDelete, ConfirmRequest} from './module/request.js';
+import {requests, requestDelete, ConfirmRequest,inputPin} from './module/request.js';
 import {searchArray, changeCondition, checkScannerInput} from './module/helper.js';
 window.loginFunc = login;
 window.request = requests;
@@ -8,3 +8,4 @@ window.searchArray = searchArray;
 window.changeCondition = changeCondition;
 window.confirmRequest = ConfirmRequest;
 window.checkInput = checkScannerInput;
+window.inputPin = inputPin;
