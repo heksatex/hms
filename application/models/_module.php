@@ -58,23 +58,23 @@ class _module extends CI_Model {
 
     public function gen_history2($sub_menu, $kode_co, $jenis_log, $note_log, $username) {
 
-        
+
         try {
             $db_debug = $this->db->db_debug;
             $this->db->db_debug = FALSE;
             $tgl = date('y-m-d H:i:s');
             $nama_user = $this->_module->get_nama_user($username)->row_array();
             $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
-            $ip         = addslashes($this->input->ip_address());
-        
+            $ip = addslashes($this->input->ip_address());
+
             $data = array(
-                    'datelog'=>$tgl,
-                    'main_menu_sub_kode'=>$kode['kode'],
-                    'kode'=> $kode_co,
-                    'jenis_log'=>$jenis_log,
-                    'note'=>$note_log,
-                    'nama_user'=>$nama_user['nama'],
-                    'ip_address'=>$ip
+                'datelog' => $tgl,
+                'main_menu_sub_kode' => $kode['kode'],
+                'kode' => $kode_co,
+                'jenis_log' => $jenis_log,
+                'note' => $note_log,
+                'nama_user' => $nama_user['nama'],
+                'ip_address' => $ip
             );
             $this->db->insert('log_history', $data);
             $db_error = $this->db->error();
@@ -82,18 +82,27 @@ class _module extends CI_Model {
                 throw new Exception($db_error['message']);
             }
             return "";
-        }catch (Exception $ex) {
+        } catch (Exception $ex) {
             return $ex->getMessage();
-        }finally{
+        } finally {
             $this->db->db_debug = $db_debug;
         }
+    }
+
+    public function gen_history_new($sub_menu, $kode_co, $jenis_log, $note_log, $username = "") {
+        $tgl = date('y-m-d H:i:s');
+        $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+        $users = $this->session->userdata('nama');
+        $ip = addslashes($this->input->ip_address());
+        $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user,ip_address) 
+								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$users[nama]','$ip')");
     }
 
     public function gen_history($sub_menu, $kode_co, $jenis_log, $note_log, $username) {
         $tgl = date('y-m-d H:i:s');
         $nama_user = $this->_module->get_nama_user($username)->row_array();
         $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
-        $ip         = addslashes($this->input->ip_address());
+        $ip = addslashes($this->input->ip_address());
         $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user,ip_address) 
 								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]','$ip')");
     }
@@ -102,34 +111,34 @@ class _module extends CI_Model {
         $tgl = date('y-m-d H:i:s');
         $nama_user = $this->_module->get_nama_user($username)->row_array();
         $kode = $this->_module->get_kode_sub_menu_deptid($sub_menu, $deptid)->row_array();
-        $ip         = addslashes($this->input->ip_address());
+        $ip = addslashes($this->input->ip_address());
         $query = $this->db->query("INSERT log_history (datelog, main_menu_sub_kode, kode, jenis_log, note, nama_user,ip_address) 
 								   values ('$tgl','$kode[kode]','$kode_co','$jenis_log','$note_log','$nama_user[nama]','$ip')");
     }
 
-    public function gen_history_ip_deptid($sub_menu, $username, $data_history, $deptid){
+    public function gen_history_ip_deptid($sub_menu, $username, $data_history, $deptid) {
 
         $nama_user = $this->_module->get_nama_user($username)->row_array();
-        $kode       = $this->_module->get_kode_sub_menu_deptid($sub_menu, $deptid)->row_array();
-        $ip         = $this->input->ip_address();
+        $kode = $this->_module->get_kode_sub_menu_deptid($sub_menu, $deptid)->row_array();
+        $ip = $this->input->ip_address();
 
-        $add_data_history = array('nama_user'=> $nama_user['nama'],'main_menu_sub_kode' => $kode['kode'], 'ip_address'=> $ip);
-        $data_history_all = array_merge($data_history,$add_data_history);
+        $add_data_history = array('nama_user' => $nama_user['nama'], 'main_menu_sub_kode' => $kode['kode'], 'ip_address' => $ip);
+        $data_history_all = array_merge($data_history, $add_data_history);
 
-        $this->db->insert('log_history',$data_history_all);
+        $this->db->insert('log_history', $data_history_all);
         return is_array($this->db->error());
     }
 
-    public function gen_history_ip($sub_menu, $username, $data_history){
+    public function gen_history_ip($sub_menu, $username, $data_history) {
 
-        $nama_user  = $this->_module->get_nama_user($username)->row_array();
-        $kode       = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
-        $ip         = $this->input->ip_address();
+        $nama_user = $this->_module->get_nama_user($username)->row_array();
+        $kode = $this->_module->get_kode_sub_menu($sub_menu)->row_array();
+        $ip = $this->input->ip_address();
 
-        $add_data_history = array('nama_user'=> $nama_user['nama'],'main_menu_sub_kode' => $kode['kode'], 'ip_address'=> $ip);
-        $data_history_all = array_merge($data_history,$add_data_history);
+        $add_data_history = array('nama_user' => $nama_user['nama'], 'main_menu_sub_kode' => $kode['kode'], 'ip_address' => $ip);
+        $data_history_all = array_merge($data_history, $add_data_history);
 
-        $this->db->insert('log_history',$data_history_all);
+        $this->db->insert('log_history', $data_history_all);
         return is_array($this->db->error());
     }
 
@@ -511,7 +520,7 @@ class _module extends CI_Model {
         $this->db->insert_batch('log_history', $sql);
         return is_array($this->db->error());
     }
-    
+
     public function get_location_by_move_id($move_id) {
         return $this->db->query("SELECT lokasi_dari, lokasi_tujuan From stock_move where move_id = '$move_id'");
     }
@@ -537,10 +546,10 @@ class _module extends CI_Model {
     }
 
     public function get_stock_move_items_by_move_id($move_id, $status = null) {
-        if($status){
-            $this->db->where('status',$status);
+        if ($status) {
+            $this->db->where('status', $status);
         }
-        $this->db->where('move_id',$move_id);
+        $this->db->where('move_id', $move_id);
         $result = $this->db->get('stock_move_items');
         return $result->result();
         // return $this->db->query("SELECT * FROM stock_move_items WHERE move_id = '$move_id' order by row_order ")->result();
@@ -781,8 +790,8 @@ class _module extends CI_Model {
     }
 
     public function get_list_sales_group_by_view($view = null) {
-        if(isset($view)){
-            $this->db->where('view',$view);
+        if (isset($view)) {
+            $this->db->where('view', $view);
         }
         $result = $this->db->get('mst_sales_group');
         return $result->result();
@@ -872,7 +881,7 @@ class _module extends CI_Model {
     public function startTransaction() {
         $this->db->trans_start();
     }
-  
+
     public function rollbackTransaction() {
         $this->db->trans_rollback();
         $this->db->trans_complete();
@@ -889,63 +898,61 @@ class _module extends CI_Model {
         }
     }
 
-    public function finishRollBack(){
+    public function finishRollBack() {
         $this->db->trans_rollback();
         return false;
     }
 
-    public function finishCommit(){
+    public function finishCommit() {
         $this->db->trans_commit();
         return true;
     }
 
-    public function get_list_number_user_by_dept($dept){
-        $this->db->where_in('dept',$dept);
+    public function get_list_number_user_by_dept($dept) {
+        $this->db->where_in('dept', $dept);
         $this->db->SELECT('telepon_wa');
         $result = $this->db->get('user');
         return $result->result();
     }
 
     public function cek_telepon_wa_by_user($username) {
-        $this->db->where('username',$username);
+        $this->db->where('username', $username);
         $this->db->SELECT('telepon_wa');
         $result = $this->db->get('user');
         return $result->result();
     }
 
-    public function get_list_jenis_kain(){
-        $this->db->order_by("id",'asc');
+    public function get_list_jenis_kain() {
+        $this->db->order_by("id", 'asc');
         $result = $this->db->get('mst_jenis_kain');
         return $result->result();
     }
-    
-    public function get_list_quality($nama=null){
-        if($nama){
+
+    public function get_list_quality($nama = null) {
+        if ($nama) {
             $this->db->like('nama', $nama);
         }
-        $this->db->order_by('nama','asc');
+        $this->db->order_by('nama', 'asc');
         $result = $this->db->get('mst_quality');
         return $result->result();
     }
 
-    public function get_list_kode_k3l(){
+    public function get_list_kode_k3l() {
         $result = $this->db->get('mst_kode_k3l');
         return $result->result();
     }
 
-    public function get_list_desain_barcode_by_type($type){
-        if($type){
-            $this->db->where('type',$type);
+    public function get_list_desain_barcode_by_type($type) {
+        if ($type) {
+            $this->db->where('type', $type);
         }
-        $this->db->order_by('kode_desain','asc');
+        $this->db->order_by('kode_desain', 'asc');
         $result = $this->db->get('mst_desain_barcode');
         return $result->result();
     }
 
-    public function get_mst_quality_by_id($id){
-        $this->db->where("id",$id);
+    public function get_mst_quality_by_id($id) {
+        $this->db->where("id", $id);
         return $this->db->get('mst_quality');
     }
-
 }
-

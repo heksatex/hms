@@ -190,7 +190,7 @@
                                                                 <input type="text" name="bank[]" class="form-control bank edited-read input-sm" value="<?= $value->bank ?>" required readonly/>
                                                             </td>
                                                             <td>
-                                                                <input type="text" name="norek[]" class="form-control norek edited-read input-sm" value="<?= $value->no_rek ?>" required readonly/>
+                                                                <input type="text" name="norek[]" class="form-control norek edited-read input-sm" value="<?= $value->no_rek ?>" readonly/>
                                                             </td>
                                                             <td>
                                                                 <input type="text" name="nobg[]" class="form-control nobg edited-read input-sm" value="<?= $value->no_bg ?>" readonly/>
@@ -294,7 +294,11 @@
                     <footer class="main-footer">
                         <?php $this->load->view("admin/_partials/modal.php") ?>
                         <?php $this->load->view("admin/_partials/js.php") ?>
-                        <?php $this->load->view("admin/_partials/footer_new.php"); ?>
+                        <?php
+                        if (in_array($user->level, ["Super Administrator"])) {
+                            $this->load->view("admin/_partials/footer_new.php");
+                        }
+                        ?>
                     </footer>
             </div>
             <template class="girokeluar-tmplt">

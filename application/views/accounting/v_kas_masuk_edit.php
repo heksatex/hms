@@ -271,7 +271,11 @@
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
-                <?php $this->load->view("admin/_partials/footer_new.php"); ?>
+                <?php
+                if (in_array($user->level, ["Super Administrator"])) {
+                    $this->load->view("admin/_partials/footer_new.php");
+                }
+                ?>
             </footer>
             <template class="kasmasuk-tmplt">
                 <tr class="add-tunai-tr list-new">

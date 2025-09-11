@@ -313,7 +313,11 @@
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
-                <?php $this->load->view("admin/_partials/footer_new.php"); ?>
+                <?php
+                if (in_array($user->level, ["Super Administrator"])) {
+                    $this->load->view("admin/_partials/footer_new.php");
+                }
+                ?>
             </footer>
         </div>
         <template class="bankkeluar-tmplt">
@@ -442,7 +446,7 @@ if ($datas->status == 'confirm') {
     <?php
 }
 ?>
-            
+
             var no = <?= count($data_detail) ?>;
             var edit = false;
             const setCurr = (() => {
@@ -493,26 +497,27 @@ if ($datas->status == 'confirm') {
                         const texts = acc.split(" - ");
                         $(".bank" + nourut).val(texts?.[1]);
                         $(".norek" + nourut).val(texts?.[2]);
-                        
+
                     }
                 });
-                
+
                 lainInput(document.getElementById("lain_lain"), function () {
                     if ($("#partner_name").val() !== "") {
                         $("#partner_name").val("");
                         $("#partner").val(null).trigger("change");
                     }
-                    
+
                 });
-                
+
                 const updateStatus = ((statuss) => {
                     $.ajax({
                         url: "<?= base_url("accounting/bankkeluar/update_status/{$id}") ?>",
                         data: {status: statuss.trim()},
                         type: "POST",
                         beforeSend: function (xhr) {
+                            xhr.setRequestHeader("_request", "json");
                             please_wait(function () {
-                                
+
                             });
                         },
                         success: function (data) {
@@ -529,14 +534,14 @@ if ($datas->status == 'confirm') {
                         },
                         complete: function (jqXHR, textStatus) {
                             unblockUI(function () {});
-                            
+
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             alert_notify("fa fa-warning", jqXHR?.responseJSON?.message, "danger", function () {}, 500);
                         }
                     });
                 });
-                
+
                 $("#btn-confirm").unbind("click").off("click").on("click", function (e) {
                     e.preventDefault();
                     var text = $(this).html();
@@ -544,21 +549,21 @@ if ($datas->status == 'confirm') {
                     confirmRequest("Bank Masuk", statuss + " Data ? ", (() => {
                         updateStatus(statuss);
                     }));
-                    
+
                 });
-                
+
                 $("#btn-draft").unbind("click").off("click").on("click", function (e) {
                     e.preventDefault();
                     confirmRequest("Bank Keluar", "Simpan Kembali Sebagai Draft ? ", (() => {
                         updateStatus("draft");
                     }));
                 });
-                
+
                 $("#btn-simpan").on("click", function (e) {
                     e.preventDefault();
                     $(".btn-save").trigger("click");
                 });
-                
+
                 $("#btn-print").on("click", function (e) {
                     e.preventDefault();
                     $.ajax({
@@ -575,16 +580,16 @@ if ($datas->status == 'confirm') {
                         },
                         complete: function (jqXHR, textStatus) {
                             unblockUI(function () {});
-                            
+
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
                             alert_notify("fa fa-warning", jqXHR?.responseJSON?.message, "danger", function () {}, 500);
                         }
                     });
                 });
-                
-                
-                
+
+
+
                 $(".btn-add-item-bg").on("click", function (e) {
                     e.preventDefault();
                     $("#tambah_data").modal({
@@ -600,8 +605,8 @@ if ($datas->status == 'confirm') {
                         }, 1000);
                     });
                 });
-                
-                
+
+
                 const formdo = document.forms.namedItem("form-acc-bankkeluar");
                 formdo.addEventListener(
                         "submit",
@@ -629,10 +634,10 @@ if ($datas->status == 'confirm') {
                     event.preventDefault();
                 },
                         false
-                        
+
                         );
                 $(".select2").select2();
-                
+
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
@@ -649,7 +654,7 @@ if ($datas->status == 'confirm') {
                     $(".tglcair" + no).val(tglHeader);
                     $(".tgljt" + no).val(tglHeader);
                     setTglFormatDef(".tgl-def-format");
-                    
+
                     $(".nominal").keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
@@ -658,7 +663,7 @@ if ($datas->status == 'confirm') {
                     $(".uraian" + no).focus();
                     $(".nourut" + no).html(no);
                 });
-                
+
                 $("#btn-edit").on("click", function (e) {
                     e.preventDefault();
                     $(".edited-read").removeAttr("readonly");
@@ -681,7 +686,7 @@ if ($datas->status == 'confirm') {
                     $("#btn-confirm").hide();
                     edit = true;
                 });
-                
+
                 $("#btn-cancel").on("click", function (e) {
                     e.preventDefault();
                     $('#form-acc-bankkeluar').trigger("reset");
@@ -704,16 +709,16 @@ if ($datas->status == 'confirm') {
                     $("#btn-confirm").show();
                     edit = false;
                 });
-                
+
                 $("#bankkeluar-detail").on("click", ".btn-rmv-item", function () {
                     $(this).closest("tr").remove();
                     calculateTotal();
                 });
-                
+
                 const calculateTotal = (() => {
                     var total = 0;
                     const elements = document.querySelectorAll('.nominal');
-                    
+
                     $.each(elements, function (idx, nomina) {
                         let ttl = $(nomina).val();
                         total += parseInt(ttl);
@@ -722,7 +727,7 @@ if ($datas->status == 'confirm') {
                         $(".total_nominal").val();
                         return;
                     }
-                    
+
                     $(".total_nominal").val(total);
                 });
                 $(".total-nominal").on("click", function () {
@@ -760,21 +765,21 @@ if ($datas->status == 'confirm') {
                         }
                     }
                 });
-                
+
                 $(".partner").on("change", function () {
                     var ttt = $(".partner").find(":selected");
                     $("#partner_name").val(ttt.text());
                     $("#lain_lain").val("");
                 });
-                
-                
+
+
                 $(".no_acc").select2({
                     disabled: true
                 });
                 $(".no_acc").prop("disabled", true);
-                
+
             });
-            
+
             $(document).ready(function () {
                 $(window).keydown(function (event) {
                     if (event.keyCode === 13) {
@@ -783,7 +788,7 @@ if ($datas->status == 'confirm') {
                     }
                 });
             });
-            
+
             const addToTable = ((data, url) => {
                 $.ajax({
                     url: "<?= base_url('accounting/bankkeluar/') ?>" + url,
@@ -804,7 +809,7 @@ if ($datas->status == 'confirm') {
                             $("#bankkeluar-detail tbody").append(isi_tmplt);
                             $(".coa_" + no).val(row.kode_coa).trigger("change");
                             $(".bank" + no).val(row.bank);
-                            $(".nore" + no).val(row.no_rek);
+                            $(".norek" + no).val(row.no_rek);
                             $(".nobg" + no).val(row.no_bg);
                             $(".tgljt" + no).val(row.tgl_jt);
                             $(".tglcair" + no).val(row.tgl_cair);
@@ -814,34 +819,34 @@ if ($datas->status == 'confirm') {
                             $(".nourut" + no).html(no);
                         });
                         setTglFormatDef(".tgl-def-format");
-                        
+
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
                         }, 100);
-                        
+
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         alert_notify("fa fa-warning", jqXHR?.responseJSON?.message, "danger", function () {}, 500);
                     }
                 });
             });
-            
+
             $(document).on('focus', '.select2', function (e) {
                 if (e.originalEvent) {
                     var s2element = $(this).siblings('select');
                     s2element.select2('open');
-                    
+
                     // Set focus back to select2 element on closing.
                     s2element.on('select2:closing', function (e) {
                         s2element.select2('focus');
                     });
                 }
             });
-            
-            
+
+
         </script>
     </body>
 </html>

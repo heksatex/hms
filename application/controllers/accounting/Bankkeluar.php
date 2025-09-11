@@ -334,7 +334,7 @@ class Bankkeluar extends MY_Controller {
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
-            $this->_module->gen_history($sub_menu, $nobk, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
+            $this->_module->gen_history_new($sub_menu, $nobk, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
             $url = site_url("accounting/bankkeluar/edit/" . encrypt_url($nobk));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -371,6 +371,7 @@ class Bankkeluar extends MY_Controller {
 
     public function edit($id) {
         try {
+            $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
             $data["jenis_transaksi"] = $this->jenisTransaksi;
             $kode = decrypt_url($id);
@@ -481,7 +482,7 @@ class Bankkeluar extends MY_Controller {
             if ($blnform != $blnDok) {
                 throw new \Exception("Edit Tidak bisa dilakukan karena berbeda Bulan", 500);
             }
-            $this->validasiPin($pin, "Edit Data Hanya bisa dilakukan Oleh Supervisor", $dt->tanggal);
+//            $this->validasiPin($pin, "Edit Data Hanya bisa dilakukan Oleh Supervisor", $dt->tanggal);
 
             $ids = $this->input->post("ids");
             $header = [
@@ -546,7 +547,7 @@ class Bankkeluar extends MY_Controller {
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
 
-            $this->_module->gen_history($sub_menu, $kode, "edit", $log, $username);
+            $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
             $url = site_url("accounting/bankkeluar/edit/{$id}");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -702,7 +703,7 @@ class Bankkeluar extends MY_Controller {
                 ]
             ]);
 
-            $this->_module->gen_history($sub_menu, $kode, "edit", "Melakukan Print Dokumen.", $username);
+            $this->_module->gen_history_new($sub_menu, $kode, "edit", "Melakukan Print Dokumen.", $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -718,7 +719,9 @@ class Bankkeluar extends MY_Controller {
 
     public function update_status($id) {
         $pin = false;
+        $this->is_loggedin();
         try {
+            $this->is_loggedin();
             $kode = decrypt_url($id);
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
@@ -737,8 +740,8 @@ class Bankkeluar extends MY_Controller {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("token_increment WRITE,acc_bank_keluar WRITE,acc_bank_keluar_detail WRITE,log_history WRITE"
-                    . ",main_menu_sub READ,acc_jurnal_entries_items WRITE,acc_jurnal_entries WRITE,currency_kurs READ,acc_giro_keluar_detail WRITE");
+            $this->_module->lock_tabel("token_increment WRITE,acc_bank_keluar WRITE,acc_bank_keluar_detail WRITE,log_history WRITE,acc_kas_keluar_detail READ"
+                    . ",main_menu_sub READ,acc_jurnal_entries_items WRITE,acc_jurnal_entries WRITE,currency_kurs READ,acc_giro_keluar_detail WRITE,setting READ");
             $model->update(["status" => $status]);
             switch ($status) {
                 case "confirm":
@@ -815,13 +818,13 @@ class Bankkeluar extends MY_Controller {
                     } else {
                         $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
                         $model->setTables("acc_bank_keluar")->setWheres(["id" => $head->id])->update(["jurnal" => $jurnal]);
-                        $this->_module->gen_history($sub_menu, $kode, 'edit', "No Jurnal : {$jurnal}", $username);
+                        $this->_module->gen_history_new($sub_menu, $kode, 'edit', "No Jurnal : {$jurnal}", $username);
                     }
                     $model->setTables("acc_giro_keluar_detail")->setWhereIn("id", $giro)->update(["cair" => 1]);
                     $jurnalDB->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
                     $log = "Header -> " . logArrayToString("; ", $jurnalData);
                     $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
-                    $this->_module->gen_history("jurnal_entries", $jurnal, "{$stt}", $log, $username);
+                    $this->_module->gen_history_new("jurnal_entries", $jurnal, "{$stt}", $log, $username);
 
                     //update giro keluar cair
                     $model->setTables("acc_giro_keluar_detail")->setWhereRaw("id in (select giro_keluar_detail_id from acc_bank_keluar_detail where bank_keluar_id = '{$head->id}')")
@@ -843,17 +846,21 @@ class Bankkeluar extends MY_Controller {
                     $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id])
                                     ->setSelects(["GROUP_CONCAT(giro_keluar_detail_id) as gids"])->getDetail();
                     if ($item->gids !== null) {
+                        $cekKas = $model->setTables("acc_kas_keluar_detail")->setWhereRaw("giro_keluar_detail_id in ({$item->gids}))")->getDetail();
+                        if ($cekKas) {
+                            throw new \exception("Data Giro Sudah ada Pada Kas Masuk {$cekKas->no_km}", 500);
+                        }
                         $model->setTables("acc_giro_keluar_detail")->setWheres(["cair" => 1])->setWhereRaw("id in ({$item->gids})")
                                 ->update(["cair" => 0]);
                     }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $head->jurnal])->update(["status" => "unposted"]);
-                    $this->_module->gen_history("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Kas Bank Keluar", $username);
+                    $this->_module->gen_history_new("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Kas Bank Keluar", $username);
                     break;
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
-            $this->_module->gen_history($sub_menu, $kode, 'edit', "status menjadi {$status}", $username);
+            $this->_module->gen_history_new($sub_menu, $kode, 'edit', "status menjadi {$status}", $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -873,8 +880,9 @@ class Bankkeluar extends MY_Controller {
         $blnskrg = date("n");
         $bbln = $blnskrg - $blnDok;
         if ($bbln === 1) {
-            if (date("j") >= 10) {
-
+            $model = new $this->m_global();
+            $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
+            if (date("j") >= (int) $pinDate->value) {
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);
                 }

@@ -49,7 +49,12 @@
             alert_modal_warning("Akses Tidak diijinkan.");
         }
 
-    });</script>
+    }).ajaxSetup({
+        headers: {
+            "_request": "json"
+        }
+    });
+</script>
 <script type="text/javascript">
     const setTglFormatDef = ((clss) => {
         $(clss).datetimepicker({
@@ -187,30 +192,30 @@
         location.href = url;
     });
 
-  $(document).ready(function () {
-    
-    // Buka semua treeview di awal
-    $('.sidebar-menu .treeview').addClass('menu-open active');
-    $('.sidebar-menu .treeview-menu').css('display', 'block');
+    $(document).ready(function () {
 
-    // Matikan behavior default AdminLTE yang close menu lainnya
-    $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
-        e.preventDefault();
-        var parent = $(this).parent();
-        var submenu = parent.children('.treeview-menu');
+        // Buka semua treeview di awal
+        $('.sidebar-menu .treeview').addClass('menu-open active');
+        $('.sidebar-menu .treeview-menu').css('display', 'block');
 
-        // Toggle menu yang diklik saja
-        if (parent.hasClass('menu-open')) {
-        submenu.slideUp(200, function () {
-            parent.removeClass('menu-open active');
+        // Matikan behavior default AdminLTE yang close menu lainnya
+        $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
+            e.preventDefault();
+            var parent = $(this).parent();
+            var submenu = parent.children('.treeview-menu');
+
+            // Toggle menu yang diklik saja
+            if (parent.hasClass('menu-open')) {
+                submenu.slideUp(200, function () {
+                    parent.removeClass('menu-open active');
+                });
+            } else {
+                submenu.slideDown(200, function () {
+                    parent.addClass('menu-open active');
+                });
+            }
         });
-        } else {
-        submenu.slideDown(200, function () {
-            parent.addClass('menu-open active');
-        });
-        }
     });
-  });
 
 </script>
 
