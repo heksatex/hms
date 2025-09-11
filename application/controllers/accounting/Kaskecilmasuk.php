@@ -118,6 +118,7 @@ class Kaskecilmasuk extends MY_Controller {
         $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
                         ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setWheres(["nama" => "Kas Kecil"])->getData();
+        $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_kecil_masuk_add', $data);
     }
 
@@ -271,6 +272,7 @@ class Kaskecilmasuk extends MY_Controller {
             $data['id_dept'] = 'ACCKKM';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $this->load->view('accounting/v_kas_kecil_masuk_edit', $data);
+            $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         } catch (Exception $ex) {
             show_404();
         }

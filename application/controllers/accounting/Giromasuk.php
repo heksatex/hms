@@ -134,6 +134,7 @@ class Giromasuk extends MY_Controller {
         $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
                         ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setWheres(["jenis_transaksi" => "giro"])->getData();
+        $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_giro_masuk_add', $data);
     }
 
@@ -326,6 +327,7 @@ class Giromasuk extends MY_Controller {
             $data["coa"] = $model->setWheres(["jenis_transaksi" => "giro"])->getData();
             $data['id_dept'] = 'ACCGM';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
+            $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $this->load->view('accounting/v_giro_masuk_edit', $data);
         } catch (Exception $ex) {
             
