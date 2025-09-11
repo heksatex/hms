@@ -492,6 +492,7 @@ if ($datas->status == 'confirm') {
                                 }
                             }
                     ).finally(() => {
+
                         unblockUI(function () {});
                     });
                     event.preventDefault();

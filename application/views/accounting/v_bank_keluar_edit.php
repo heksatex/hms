@@ -318,6 +318,7 @@
                     $this->load->view("admin/_partials/footer_new.php");
                 }
                 ?>
+
             </footer>
         </div>
         <template class="bankkeluar-tmplt">
@@ -501,14 +502,16 @@ if ($datas->status == 'confirm') {
                     }
                 });
 
+
                 lainInput(document.getElementById("lain_lain"), function () {
                     if ($("#partner_name").val() !== "") {
                         $("#partner_name").val("");
                         $("#partner").val(null).trigger("change");
                     }
 
+                    
                 });
-
+                
                 const updateStatus = ((statuss) => {
                     $.ajax({
                         url: "<?= base_url("accounting/bankkeluar/update_status/{$id}") ?>",
@@ -588,8 +591,6 @@ if ($datas->status == 'confirm') {
                     });
                 });
 
-
-
                 $(".btn-add-item-bg").on("click", function (e) {
                     e.preventDefault();
                     $("#tambah_data").modal({
@@ -605,7 +606,6 @@ if ($datas->status == 'confirm') {
                         }, 1000);
                     });
                 });
-
 
                 const formdo = document.forms.namedItem("form-acc-bankkeluar");
                 formdo.addEventListener(
@@ -772,7 +772,6 @@ if ($datas->status == 'confirm') {
                     $("#lain_lain").val("");
                 });
 
-
                 $(".no_acc").select2({
                     disabled: true
                 });
@@ -845,7 +844,6 @@ if ($datas->status == 'confirm') {
                     });
                 }
             });
-
 
         </script>
     </body>
