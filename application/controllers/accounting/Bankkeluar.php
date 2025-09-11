@@ -740,7 +740,7 @@ class Bankkeluar extends MY_Controller {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("token_increment WRITE,acc_bank_keluar WRITE,acc_bank_keluar_detail WRITE,log_history WRITE,acc_kas_keluar_detail READ"
+            $this->_module->lock_tabel("token_increment WRITE,acc_bank_keluar WRITE,acc_bank_keluar_detail WRITE,log_history WRITE,acc_kas_masuk_detail READ"
                     . ",main_menu_sub READ,acc_jurnal_entries_items WRITE,acc_jurnal_entries WRITE,currency_kurs READ,acc_giro_keluar_detail WRITE,setting READ");
             $model->update(["status" => $status]);
             switch ($status) {
@@ -846,7 +846,7 @@ class Bankkeluar extends MY_Controller {
                     $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id])
                                     ->setSelects(["GROUP_CONCAT(giro_keluar_detail_id) as gids"])->getDetail();
                     if ($item->gids !== null) {
-                        $cekKas = $model->setTables("acc_kas_keluar_detail")->setWhereRaw("giro_keluar_detail_id in ({$item->gids})")->getDetail();
+                        $cekKas = $model->setTables("acc_kas_masuk_detail")->setWhereRaw("giro_keluar_detail_id in ({$item->gids})")->getDetail();
                         if ($cekKas) {
                             throw new \exception("Data Giro Sudah ada Pada Kas Masuk {$cekKas->no_km}", 500);
                         }
