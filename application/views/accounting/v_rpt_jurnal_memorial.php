@@ -73,13 +73,13 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-jm" id="form-jm" action="<?= base_url('accounting/jurnalmemorial/export') ?>">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
-                                    <div class="form-group tanggal_posting" style="display: none;">
+                                    <div class="form-group tanggal_dibuat" style="display: none;">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label required">Tanggal Posting</label>
+                                                <label class="form-label required">Tanggal Dibuat</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
-                                                <input type="text" name="tanggal_posting" id="tanggal_posting" value="<?= $date ?>" class="form-control"/>
+                                                <input type="text" name="tanggal_dibuat" id="tanggal_dibuat" value="<?= $date ?>" class="form-control"/>
                                             </div>
                                         </div>
                                     </div>
@@ -112,7 +112,7 @@
                                                     <input type="radio" value="0" class="filter" name="filter" checked/> Dengan Periode
                                                 </label> 
                                                 <label class="btn btn-default">
-                                                    <input type="radio" class="filter" name="filter" value="1" /> Dengan Tanggal Posting
+                                                    <input type="radio" class="filter" name="filter" value="1" /> Dengan Tanggal Dibuat
                                                 </label> 
                                             </div>
                                         </div>
@@ -159,7 +159,7 @@
                                             <tr>
                                                 <th class="style bb ws no" >No</th>
                                                 <th class="style bb ws" >Periode</th>
-                                                <th class="style bb ws" >Tanggal Posting</th>
+                                                <th class="style bb ws" >Tanggal Dibuat</th>
                                                 <th class="style bb ws" >No Bukti</th>
                                                 <th class="style bb ws" >Origin</th>
                                                 <th class="style bb ws" >Kode ACC</th>
@@ -190,14 +190,14 @@
                 $(".filter").on("click", function () {
                     if ($(this).val() === "1") {
                         $(".periode").hide();
-                        $(".tanggal_posting").show();
+                        $(".tanggal_dibuat").show();
                         return;
                     }
                     $(".periode").show();
-                    $(".tanggal_posting").hide();
+                    $(".tanggal_dibuat").hide();
                 });
                 var cek = 0;
-                $('input[name="tanggal_posting"]').daterangepicker({
+                $('input[name="tanggal_dibuat"]').daterangepicker({
                     endDate: moment().endOf('month'),
                     startDate: moment().startOf('month'),
                     locale: {
@@ -228,7 +228,7 @@
                         type: "POST",
                         data: {
                             periode: $("#periode").val(),
-                            tanggal_posting: $("#tanggal_posting").val(),
+                            tanggal_dibuat: $("#tanggal_dibuat").val(),
                             jurnal: $("#jurnal").val(),
                             detail: $("#detail").is(":checked") ? 1 : 0,
                             jurnal_nm: $("#jurnal :selected").text(),

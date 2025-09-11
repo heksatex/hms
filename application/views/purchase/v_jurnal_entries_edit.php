@@ -97,16 +97,16 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
+<!--                                        <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">Tanggal Posting</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $jurnal->tanggal_posting ?></span>
+                                                    <span><?= $jurnal->tanggal_posting ?? "" ?></span>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div>-->
                                     </div>
                                     <div class="col-md-6 col-xs-12">
                                         

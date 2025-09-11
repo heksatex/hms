@@ -38,7 +38,7 @@ class Jurnalmemorial extends MY_Controller {
         $periode = $this->input->post("periode");
         $jurnal = $this->input->post("jurnal");
         $filter = $this->input->post("filter");
-        $tanggal_postings = $this->input->post("tanggal_posting");
+        $tanggal_postings = $this->input->post("tanggal_dibuat");
         if ($filter === "1") {
             $tanggal_posting = explode(" - ", $tanggal_postings);
             if (count($tanggal_posting) < 2) {
@@ -46,7 +46,7 @@ class Jurnalmemorial extends MY_Controller {
             }
             $tanggalAwal = date("Y-m-d H:i:s", strtotime($tanggal_posting[0] . " 00:00:00"));
             $tanggalAkhir = date("Y-m-d H:i:s", strtotime($tanggal_posting[1] . " 23:59:59"));
-            $where = ["tanggal_posting >=" => $tanggalAwal, "tanggal_posting <=" => $tanggalAkhir];
+            $where = ["tanggal_dibuat >=" => $tanggalAwal, "tanggal_dibuat <=" => $tanggalAkhir];
         } else {
             $where = ["je.periode" => $periode];
         }
@@ -59,7 +59,7 @@ class Jurnalmemorial extends MY_Controller {
                 ->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
                 ->setWheres(array_merge(["je.status" => "posted", "je.tipe" => $jurnal], $where))
                 ->setSelects(["mj.nama as nama_jurnal", "acc_coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
-                    "origin,tanggal_posting"]);
+                    "origin,date(tanggal_dibuat) as tanggal_dibuat"]);
 //        } catch (Exception $ex) {
 //            
 //        }
@@ -67,7 +67,7 @@ class Jurnalmemorial extends MY_Controller {
 
     public function check_berdasarkan($str, $periode): bool {
         if (empty($str) && empty($this->input->post($periode))) {
-            $this->form_validation->set_message('check_berdasarkan', 'Pilih Salah satu Tanggal Posting / Periode');
+            $this->form_validation->set_message('check_berdasarkan', 'Pilih Salah satu Tanggal dibuat / Periode');
             return false;
         }
         return true;
@@ -96,7 +96,7 @@ class Jurnalmemorial extends MY_Controller {
             [
                 'field' => 'periode',
                 'label' => 'periode',
-                'rules' => ['callback_check_berdasarkan[tanggal_posting]'],
+                'rules' => ['callback_check_berdasarkan[tanggal_dibuat]'],
             ]
         ];
         try {
@@ -135,7 +135,7 @@ class Jurnalmemorial extends MY_Controller {
                 [
                     'field' => 'periode',
                     'label' => 'periode',
-                    'rules' => ['callback_check_berdasarkan[tanggal_posting]'],
+                    'rules' => ['callback_check_berdasarkan[tanggal_dibuat]'],
                 ]
             ];
 
@@ -150,7 +150,7 @@ class Jurnalmemorial extends MY_Controller {
             $detail = $this->input->post("detail") ?? "0";
             $jurnal_nm = $this->input->post("jurnal_nm");
             $periodes = $this->input->post("periode");
-            $tanggal = $this->input->post("tanggal_posting");
+            $tanggal = $this->input->post("tanggal_dibuat");
             $filter = $this->input->post("filter");
 
             $this->getData();
@@ -204,7 +204,7 @@ class Jurnalmemorial extends MY_Controller {
 
                 $sheet->setCellValue("A{$row}", $no);
                 $sheet->setCellValue("B{$row}", $value->periode);
-                $sheet->setCellValue("C{$row}", $value->tanggal_posting);
+                $sheet->setCellValue("C{$row}", $value->tanggal_dibuat);
                 $sheet->setCellValue("D{$row}", $value->kode);
                 $sheet->setCellValue("E{$row}", $value->origin);
                 $sheet->setCellValue("F{$row}", $value->kode_coa);

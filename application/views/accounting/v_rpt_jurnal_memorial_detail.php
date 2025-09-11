@@ -17,13 +17,13 @@ foreach ($data as $key => $value) {
     <tr>
         <td><?= $no ?></td>
         <td><?= $value->periode ?></td>
-        <td><?= $value->tanggal_posting ?></td>
+        <td><?= $value->tanggal_dibuat ?></td>
         <td><?= $value->kode ?></td>
         <td><?= $value->origin ?></td>
         <td><?= $value->kode_coa ?></td>
         <td><?= $value->nama_coa ?></td>
-        <td><?= $value->nama ?></td>
-        <td><?= $value->reff_note ?></td>
+        <td title="<?= $value->nama?>"><?= substr($value->nama, 0,50) ?></td>
+        <td title="<?= $value->reff_note?>"><?= substr($value->reff_note, 0,50) ?></td>
         <td><?= $value->nama_partner ?></td>
         <td class="text-right"><?= number_format($debet,2) ?></td>
         <td class="text-right"><?= number_format($kredit,2) ?></td>

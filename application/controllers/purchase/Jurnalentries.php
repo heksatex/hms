@@ -37,8 +37,8 @@ class Jurnalentries extends MY_Controller {
                      ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_jurnal_entries.status", "left")
                     ->setSearch(["acc_jurnal_entries.kode", "periode", "origin", "reff_note","mst_jurnal.nama"])
-                    ->setOrders([null, "acc_jurnal_entries.kode","mst_jurnal.nama", "tanggal_dibuat", "tanggal_posting", "periode", "origin", "reff_note", "status"])
-                    ->setSelects(["acc_jurnal_entries.*", "nama_status","mst_jurnal.nama as nama_jurnal"]);
+                    ->setOrders([null, "acc_jurnal_entries.kode","mst_jurnal.nama", "tanggal_dibuat", "periode", "origin", "reff_note", "status"])
+                    ->setSelects(["acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat", "nama_status","mst_jurnal.nama as nama_jurnal"]);
             foreach ($list->getData() as $key => $field) {
                 $kode_encrypt = encrypt_url($field->kode);
                 $no++;
@@ -47,7 +47,7 @@ class Jurnalentries extends MY_Controller {
                     '<a href="' . base_url('purchase/jurnalentries/edit/' . $kode_encrypt) . '">' . $field->kode . '</a>',
                     $field->nama_jurnal,
                     $field->tanggal_dibuat,
-                    $field->tanggal_posting,
+//                    $field->tanggal_posting,
                     $field->periode,
                     $field->origin,
                     $field->reff_note,
