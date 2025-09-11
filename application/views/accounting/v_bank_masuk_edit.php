@@ -230,6 +230,11 @@
                                                                 <td>
                                                                     <select class="form-control input-sm select2 select2-curr edited" style="width:100%" name="curr[]" required disabled>
                                                                         <option value="<?= $value->currency_id ?>" selected><?= $value->curr ?></option>
+                                                                        <?php foreach ($curr as $key => $values) {
+                                                                            ?>
+                                                                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                                                                        <?php }
+                                                                        ?>
                                                                     </select>
                                                                 </td>
                                                                 <td>
@@ -308,7 +313,6 @@
                 <?php $this->load->view("admin/_partials/modal.php") ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
                 <?php
-
                 if (in_array($user->level, ["Super Administrator"])) {
                     $this->load->view("admin/_partials/footer_new.php");
                 }
@@ -359,6 +363,11 @@
                 <td>
                     <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
+                        <?php foreach ($curr as $key => $values) {
+                                ?>
+                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                            <?php }
+                            ?>
                     </select>
                 </td>
                 <td>
@@ -412,6 +421,11 @@
                 <td>
                     <select class="form-control input-sm select2 select2-curr curr_:nourut" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
+                        <?php foreach ($curr as $key => $values) {
+                                ?>
+                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                            <?php }
+                            ?>
                     </select>
                 </td>
                 <td>
@@ -435,31 +449,31 @@ if ($datas->status == 'confirm') {
                 $(".select2-curr").select2({
                     placeholder: "Pilih",
                     allowClear: true,
-                    ajax: {
-                        dataType: 'JSON',
-                        type: "GET",
-                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
-                        delay: 250,
-                        data: function (params) {
-                            return{
-                                search: params.term
-                            };
-                        },
-                        processResults: function (data) {
-                            var results = [];
-                            $.each(data.data, function (index, item) {
-                                results.push({
-                                    id: item.id,
-                                    text: item.currency
-                                });
-                            });
-                            return {
-                                results: results
-                            };
-                        },
-                        error: function (xhr, ajaxOptions, thrownError) {
-                        }
-                    }
+//                    ajax: {
+//                        dataType: 'JSON',
+//                        type: "GET",
+//                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
+//                        delay: 250,
+//                        data: function (params) {
+//                            return{
+//                                search: params.term
+//                            };
+//                        },
+//                        processResults: function (data) {
+//                            var results = [];
+//                            $.each(data.data, function (index, item) {
+//                                results.push({
+//                                    id: item.id,
+//                                    text: item.currency
+//                                });
+//                            });
+//                            return {
+//                                results: results
+//                            };
+//                        },
+//                        error: function (xhr, ajaxOptions, thrownError) {
+//                        }
+//                    }
                 });
             });
             var pindahDana = [];
@@ -638,11 +652,7 @@ if ($datas->status == 'confirm') {
                     var tglHeader = $("#tanggal").val();
                     $(".tglcair" + no).val(tglHeader);
                     setTglFormatDef(".tgl-def-format");
-                    $(".nominal").keyup(function (ev) {
-                        if (ev.keyCode === 13) {
-                            $(".btn-add-item").trigger("click");
-                        }
-                    });
+
                     $(".uraian" + no).focus();
                     $(".nominal").keyup(function (ev) {
                         if (ev.keyCode === 13) {
@@ -651,7 +661,11 @@ if ($datas->status == 'confirm') {
                     });
                     $(".nourut" + no).html(no);
                 });
-
+                $(".nominal").keyup(function (ev) {
+                    if (ev.keyCode === 13) {
+                        $(".btn-add-item").trigger("click");
+                    }
+                });
                 const setBank = ((no) => {
                     var ttt = $(".no_acc").find(":selected");
                     if (edit) {

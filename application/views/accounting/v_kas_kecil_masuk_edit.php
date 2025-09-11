@@ -186,6 +186,11 @@
                                                             <td>
                                                                 <select class="form-control input-sm select2 select2-curr edited" style="width:100%" name="curr[]" required disabled>
                                                                     <option value="<?= $value->currency_id ?>" selected><?= $value->curr ?></option>
+                                                                    <?php foreach ($curr as $key => $values) {
+                                                                        ?>
+                                                                        <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                                                                    <?php }
+                                                                    ?>
                                                                 </select>
                                                             </td>
                                                             <td>
@@ -297,6 +302,11 @@
                     <td>
                         <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                             <option value="1" selected>IDR</option>
+                            <?php foreach ($curr as $key => $values) {
+                                ?>
+                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                            <?php }
+                            ?>
                         </select>
                     </td>
                     <td>
@@ -317,31 +327,31 @@ if ($datas->status == 'confirm') {
                     $(".select2-curr").select2({
                         placeholder: "Pilih",
                         allowClear: true,
-                        ajax: {
-                            dataType: 'JSON',
-                            type: "GET",
-                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
-                            delay: 250,
-                            data: function (params) {
-                                return{
-                                    search: params.term
-                                };
-                            },
-                            processResults: function (data) {
-                                var results = [];
-                                $.each(data.data, function (index, item) {
-                                    results.push({
-                                        id: item.id,
-                                        text: item.currency
-                                    });
-                                });
-                                return {
-                                    results: results
-                                };
-                            },
-                            error: function (xhr, ajaxOptions, thrownError) {
-                            }
-                        }
+//                        ajax: {
+//                            dataType: 'JSON',
+//                            type: "GET",
+//                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_currency",
+//                            delay: 250,
+//                            data: function (params) {
+//                                return{
+//                                    search: params.term
+//                                };
+//                            },
+//                            processResults: function (data) {
+//                                var results = [];
+//                                $.each(data.data, function (index, item) {
+//                                    results.push({
+//                                        id: item.id,
+//                                        text: item.currency
+//                                    });
+//                                });
+//                                return {
+//                                    results: results
+//                                };
+//                            },
+//                            error: function (xhr, ajaxOptions, thrownError) {
+//                            }
+//                        }
                     });
                 });
                 var transaksi = [];
