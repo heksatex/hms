@@ -659,7 +659,7 @@ class Requestforquotation extends MY_Controller {
                     }
                     $totals = $this->input->post("totals");
                     //tambahan
-                    if ($totals < 1) {
+                    if ($totals === 0) {
                         throw new \Exception('Harga belum ditentukan', 500);
                     }
                     $getSetting = new m_global;
