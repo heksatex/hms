@@ -846,7 +846,7 @@ class Bankkeluar extends MY_Controller {
                     $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id])
                                     ->setSelects(["GROUP_CONCAT(giro_keluar_detail_id) as gids"])->getDetail();
                     if ($item->gids !== null) {
-                        $cekKas = $model->setTables("acc_kas_keluar_detail")->setWhereRaw("giro_keluar_detail_id in ({$item->gids}))")->getDetail();
+                        $cekKas = $model->setTables("acc_kas_keluar_detail")->setWhereRaw("giro_keluar_detail_id in ({$item->gids})")->getDetail();
                         if ($cekKas) {
                             throw new \exception("Data Giro Sudah ada Pada Kas Masuk {$cekKas->no_km}", 500);
                         }
