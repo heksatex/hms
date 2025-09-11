@@ -263,11 +263,10 @@
                 <?php $this->load->view("admin/_partials/modal.php") ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
                 <?php
-                if (in_array($user->level, ["Super Administrator", "Administrator"])) {
+                if (in_array($user->level, ["Super Administrator"])) {
                     $this->load->view("admin/_partials/footer_new.php");
                 }
                 ?>
-
             </footer>
             <template class="kaskeluar-tmplt">
                 <tr class="add-fpt-tr list-new">

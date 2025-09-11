@@ -313,9 +313,8 @@
             <footer class="main-footer">
                 <?php $this->load->view("admin/_partials/modal.php") ?>
                 <?php $this->load->view("admin/_partials/js.php") ?>
-
                 <?php
-                if (in_array($user->level, ["Super Administrator", "Administrator"])) {
+                if (in_array($user->level, ["Super Administrator"])) {
                     $this->load->view("admin/_partials/footer_new.php");
                 }
                 ?>
@@ -500,7 +499,6 @@ if ($datas->status == 'confirm') {
                         $(".bank" + nourut).val(texts?.[1]);
                         $(".norek" + nourut).val(texts?.[2]);
 
-
                     }
                 });
 
@@ -514,13 +512,13 @@ if ($datas->status == 'confirm') {
                     
                 });
                 
-
                 const updateStatus = ((statuss) => {
                     $.ajax({
                         url: "<?= base_url("accounting/bankkeluar/update_status/{$id}") ?>",
                         data: {status: statuss.trim()},
                         type: "POST",
                         beforeSend: function (xhr) {
+                            xhr.setRequestHeader("_request", "json");
                             please_wait(function () {
 
                             });
@@ -555,9 +553,8 @@ if ($datas->status == 'confirm') {
                         updateStatus(statuss);
                     }));
 
-                    
                 });
-                
+
                 $("#btn-draft").unbind("click").off("click").on("click", function (e) {
                     e.preventDefault();
                     confirmRequest("Bank Keluar", "Simpan Kembali Sebagai Draft ? ", (() => {
@@ -641,7 +638,6 @@ if ($datas->status == 'confirm') {
                         );
                 $(".select2").select2();
 
-
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
@@ -719,11 +715,9 @@ if ($datas->status == 'confirm') {
                     calculateTotal();
                 });
 
-
                 const calculateTotal = (() => {
                     var total = 0;
                     const elements = document.querySelectorAll('.nominal');
-
 
                     $.each(elements, function (idx, nomina) {
                         let ttl = $(nomina).val();
@@ -783,9 +777,7 @@ if ($datas->status == 'confirm') {
                 });
                 $(".no_acc").prop("disabled", true);
 
-
             });
-
 
             $(document).ready(function () {
                 $(window).keydown(function (event) {
@@ -816,7 +808,7 @@ if ($datas->status == 'confirm') {
                             $("#bankkeluar-detail tbody").append(isi_tmplt);
                             $(".coa_" + no).val(row.kode_coa).trigger("change");
                             $(".bank" + no).val(row.bank);
-                            $(".nore" + no).val(row.no_rek);
+                            $(".norek" + no).val(row.no_rek);
                             $(".nobg" + no).val(row.no_bg);
                             $(".tgljt" + no).val(row.tgl_jt);
                             $(".tglcair" + no).val(row.tgl_cair);

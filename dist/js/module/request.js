@@ -64,6 +64,7 @@ const inputPin = ((uri, callback = function() {}) => {
     return new Promise((resolve, reject) => {
         bootbox.prompt({
             title: 'Masukan Pin.',
+            inputType:"password",
             centerVertical: true,
             callback: function (result) {
                 if (!result)

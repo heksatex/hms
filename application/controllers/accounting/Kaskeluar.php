@@ -123,7 +123,7 @@ class Kaskeluar extends MY_Controller {
 
     public function edit($id) {
         try {
-            $data['user'] = (object) $this->session->userdata('nama');
+            $data["user"] = (object) $this->session->userdata('nama');
             $data["id"] = $id;
             $kode = decrypt_url($id);
             $model = new $this->m_global;
@@ -230,7 +230,7 @@ class Kaskeluar extends MY_Controller {
             if ($blnform != $blnDok) {
                 throw new \Exception("Edit Tidak bisa dilakukan karena berbeda Bulan", 500);
             }
-            $this->validasiPin($pin, "Edit Data Hanya bisa dilakukan Oleh Supervisor", $dt->tanggal);
+//            $this->validasiPin($pin, "Edit Data Hanya bisa dilakukan Oleh Supervisor", $dt->tanggal);
 
             $header = [
                 "tanggal" => $tanggal,
@@ -282,7 +282,7 @@ class Kaskeluar extends MY_Controller {
             $log .= "Perubahan : DATA -> " . logArrayToString("; ", $header);
             $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
 
-            $this->_module->gen_history($sub_menu, $kode, "edit", $log, $username);
+            $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
             $url = site_url("accounting/kaskeluar/edit/{$id}");
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -407,7 +407,7 @@ class Kaskeluar extends MY_Controller {
                 throw new \Exception('Gagal Menyimpan Data', 500);
             }
 
-            $this->_module->gen_history($sub_menu, $nokk, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
+            $this->_module->gen_history_new($sub_menu, $nokk, 'create', "DATA -> " . logArrayToString("; ", $header) . "\n Detail -> " . logArrayToString("; ", $detail), $username);
             $url = site_url("accounting/kaskeluar/edit/" . encrypt_url($nokk));
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -696,7 +696,7 @@ class Kaskeluar extends MY_Controller {
 //            $printer->text(str_pad("LAIN-LAIN : ", 23, " ", STR_PAD_RIGHT));
 
 
-            $this->_module->gen_history($sub_menu, $kode, "edit", "Melakukan Print Dokumen.", $username);
+            $this->_module->gen_history_new($sub_menu, $kode, "edit", "Melakukan Print Dokumen.", $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -730,7 +730,7 @@ class Kaskeluar extends MY_Controller {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
             $this->_module->startTransaction();
-            $this->_module->lock_tabel("token_increment WRITE,acc_kas_keluar WRITE,acc_kas_keluar_detail WRITE,log_history WRITE"
+            $this->_module->lock_tabel("token_increment WRITE,acc_kas_keluar WRITE,acc_kas_keluar_detail WRITE,log_history WRITE,setting READ"
                     . ",main_menu_sub READ,acc_jurnal_entries_items WRITE,acc_jurnal_entries WRITE,currency_kurs READ,purchase_order_detail WRITE, purchase_order WRITE");
             $model->update(["status" => $status]);
             switch ($status) {
@@ -821,7 +821,7 @@ class Kaskeluar extends MY_Controller {
                     } else {
                         $jurnalDB->setTables("acc_jurnal_entries")->save($jurnalData);
                         $model->setTables("acc_kas_keluar")->setWheres(["id" => $head->id])->update(["jurnal" => $jurnal]);
-                        $this->_module->gen_history($sub_menu, $kode, 'edit', "No Jurnal : {$jurnal}", $username);
+                        $this->_module->gen_history_new($sub_menu, $kode, 'edit', "No Jurnal : {$jurnal}", $username);
                     }
                     $po = implode("','", $poid);
                     $model->setTables("purchase_order")->setWhereRaw("id in (select po_id from purchase_order_detail where id in ('{$po}'))")->update(["payment" => 1]);
@@ -829,7 +829,7 @@ class Kaskeluar extends MY_Controller {
                     $jurnalDB->setTables("acc_jurnal_entries_items")->saveBatch($jurnalItems);
                     $log = "Header -> " . logArrayToString("; ", $jurnalData);
                     $log .= "\nDETAIL -> " . logArrayToString("; ", $jurnalItems);
-                    $this->_module->gen_history("jurnal_entries", $jurnal, $stt, $log, $username);
+                    $this->_module->gen_history_new("jurnal_entries", $jurnal, $stt, $log, $username);
                     break;
 
                 case "draft":
@@ -847,14 +847,14 @@ class Kaskeluar extends MY_Controller {
                         $model->setTables("purchase_order")->setWhereRaw("id in (select po_id from purchase_order_detail where id in ({$poId->gids}))")->update(["payment" => 0]);
                     }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $head->jurnal])->update(["status" => "unposted"]);
-                    $this->_module->gen_history("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Kas Keluar", $username);
+                    $this->_module->gen_history_new("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Kas Keluar", $username);
 
                     break;
             }
             if (!$this->_module->finishTransaction()) {
                 throw new \Exception('Gagal update status', 500);
             }
-            $this->_module->gen_history($sub_menu, $kode, 'edit', "status menjadi {$status}", $username);
+            $this->_module->gen_history_new($sub_menu, $kode, 'edit', "status menjadi {$status}", $username);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
@@ -874,7 +874,9 @@ class Kaskeluar extends MY_Controller {
         $blnskrg = date("n");
         $bbln = $blnskrg - $blnDok;
         if ($bbln === 1) {
-            if (date("j") >= 10) {
+            $model = new $this->m_global();
+            $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
+            if (date("j") >= (int)$pinDate->value) {
 
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);
