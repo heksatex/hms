@@ -124,10 +124,11 @@
                                         </div>
                                     </div>
                                     <div class="col-md-12">
-                                        <div class="col-md-4">
-                                            <p><strong>Periode : <?php echo $tgl_dari . ' - ' . $tgl_sampai; ?></strong></p>
+                                        <div class="col-md-6">
+                                            <p style="margin-bottom:1px;"><strong>Periode : </p>
+                                            <p> <?php echo $tgl_dari . ' - ' . $tgl_sampai; ?></strong> </p>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-6">
                                             <p><strong>Saldo Normal : <?php echo $coa->saldo_normal; ?></strong></p>
                                         </div>
                                     </div>
