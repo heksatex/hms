@@ -71,7 +71,7 @@ class Kaskeluar extends MY_Controller {
             $list->setTables("acc_kas_keluar")->setOrder(["acc_kas_keluar.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_keluar.status", "left")
-                    ->setSearch(["no_kk", "acc_kas_keluar.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_keluar.status"])
+                    ->setSearch(["no_kk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_keluar.status"])
                     ->setOrders([null, "no_kk", "partner_nama", "acc_kas_keluar.tanggal", null, "total_rp", "acc_kas_keluar.status"])
                     ->setSelects(["acc_kas_keluar.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
             $no = $_POST['start'];
