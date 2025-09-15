@@ -61,7 +61,7 @@ class Kasmasuk extends MY_Controller {
             $list->setTables("acc_kas_masuk")->setOrder(["acc_kas_masuk.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_masuk.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_masuk.status", "left")
-                    ->setSearch(["no_km", "acc_kas_masuk.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_masuk.status"])
+                    ->setSearch(["no_km", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_masuk.status"])
                     ->setOrders([null, "no_km", "partner_nama", "acc_kas_masuk.tanggal", null, "total_rp", "acc_kas_masuk.status"])
                     ->setSelects(["acc_kas_masuk.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
             $no = $_POST['start'];

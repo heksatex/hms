@@ -60,7 +60,7 @@ class Kaskecilkeluar extends MY_Controller {
             $list->setTables("acc_kas_kecil_keluar")->setOrder(["acc_kas_kecil_keluar.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_kecil_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_kecil_keluar.status", "left")
-                    ->setSearch(["no_kkk", "acc_giro_masuk.kode_coa", "partner_nama", "lain2", "transinfo"])
+                    ->setSearch(["no_kkk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo"])
                     ->setOrders([null, "no_kkk", "partner_nama", "acc_kas_kecil_keluar.tanggal", null, null, null, "total_rp"])
                     ->setSelects(["acc_kas_kecil_keluar.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
 
