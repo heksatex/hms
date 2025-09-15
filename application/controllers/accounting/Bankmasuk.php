@@ -808,13 +808,13 @@ class Bankmasuk extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_bank_masuk")->setJoins("acc_bank_masuk_detail", "acc_bank_masuk.id = bank_masuk_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_bank_masuk.*", "currency_kurs.currency,currency_kurs.kurs"])
+                            ->setSelects(["acc_bank_masuk.*", "currency_kurs.currency,currency_kurs.kurs","bank_masuk_id"])
                             ->setWheres(["acc_bank_masuk.no_bm" => $kode])->getDetail();
 
             if (!$head) {
                 throw new \exception("Data No Bank Masuk {$kode} tidak ditemukan", 500);
             }
-            if ($head->total_rp < 1) {
+            if (!$head->bank_masuk_id) {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
 

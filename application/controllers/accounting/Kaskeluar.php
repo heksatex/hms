@@ -184,7 +184,7 @@ class Kaskeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -201,10 +201,10 @@ class Kaskeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -327,7 +327,7 @@ class Kaskeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -344,10 +344,10 @@ class Kaskeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -453,6 +453,19 @@ class Kaskeluar extends MY_Controller {
             $model->setTables("partner")->setSelects(["id", "nama"])->setOrder(["nama" => "asc"]);
             if ($this->input->get('search') !== "") {
                 $model->setWheres(["nama LIKE" => "%{$this->input->get('search')}%"]);
+            }
+            if ($jenis = $this->input->get("jenis")) {
+                switch ($jenis) {
+                    case "customer":
+                        $model->setWheres(["customer" => "1"]);
+                        break;
+                    case "supplier" :
+                        $model->setWheres(["supplier" => "1"]);
+                        break;
+                    default :
+                        break;
+                        
+                }
             }
             $_POST['length'] = 50;
             $_POST['start'] = 0;
@@ -727,12 +740,12 @@ class Kaskeluar extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_kas_keluar")->setJoins("acc_kas_keluar_detail", "acc_kas_keluar.id = kas_keluar_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_kas_keluar.*", "currency_kurs.currency,currency_kurs.kurs"])
+                            ->setSelects(["acc_kas_keluar.*", "currency_kurs.currency,currency_kurs.kurs", "kas_keluar_id"])
                             ->setWheres(["acc_kas_keluar.no_kk" => $kode])->getDetail();
             if (!$head) {
                 throw new \exception("Data No Kas Keluar {$kode} tidak ditemukan", 500);
             }
-            if ($head->total_rp < 1) {
+            if (!$head->kas_keluar_id) {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
             $this->_module->startTransaction();
@@ -882,7 +895,7 @@ class Kaskeluar extends MY_Controller {
         if ($bbln === 1) {
             $model = new $this->m_global();
             $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
-            if (date("j") >= (int)$pinDate->value) {
+            if (date("j") >= (int) $pinDate->value) {
 
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);

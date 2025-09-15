@@ -461,6 +461,7 @@ if ($datas->status == 'confirm') {
                         $(".edited-read").removeAttr("readonly");
                         $(".edited").removeAttr("disabled");
                         setCurr();
+                        $(".select2-coa").select2();
                         $(this).hide();
                         $("#btn-cancel").show();
                         $("#btn-simpan").show();

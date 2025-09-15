@@ -166,10 +166,10 @@
                         <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm"/>
                     </td>
                     <td>
-                        <input type="text" name="bank[]" class="form-control input-sm" required/>
+                        <input type="text" name="bank[]" class="form-control bank:nourut input-sm" required/>
                     </td>
                     <td>
-                        <input type="text" name="norek[]" class="form-control input-sm" required/>
+                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm" required/>
                     </td>
                     <td>
                         <input type="text" name="nobg[]" class="form-control input-sm"/>
@@ -441,7 +441,8 @@
                         delay: 250,
                         data: function (params) {
                             return{
-                                search: params.term
+                                search: params.term,
+                                jenis:"customer"
                             };
                         },
                         processResults: function (data) {

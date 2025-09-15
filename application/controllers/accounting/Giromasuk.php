@@ -667,13 +667,13 @@ class Giromasuk extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_giro_masuk")->setJoins("acc_giro_masuk_detail", "acc_giro_masuk.id = giro_masuk_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_giro_masuk.*", "currency_kurs.currency,currency_kurs.kurs"])
+                            ->setSelects(["acc_giro_masuk.*", "currency_kurs.currency,currency_kurs.kurs","giro_masuk_id"])
                             ->setWheres(["acc_giro_masuk.no_gm" => $kode])->getDetail();
 
             if (!$head) {
                 throw new \exception("Data No Giro Masuk {$kode} tidak ditemukan", 500);
             }
-            if ($head->total_rp < 1) {
+            if (!$head->giro_masuk_id) {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
 

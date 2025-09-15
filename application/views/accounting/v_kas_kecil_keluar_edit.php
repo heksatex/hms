@@ -93,7 +93,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">Customer</label></div>
+                                                <div class="col-xs-4"><label class="form-label">Supplier</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="partner_nama" id="partner_nama" class="form-control edited-read input-sm"  value="<?= $datas->partner_nama ?>" readonly/>
 
@@ -479,6 +479,7 @@ if ($datas->status == 'confirm') {
                         $(".edited-read").removeAttr("readonly");
                         $(".edited").removeAttr("disabled");
                         setCurr();
+                        $(".select2-coa").select2();
                         $(this).hide();
                         $("#btn-cancel").show();
                         $("#btn-simpan").show();

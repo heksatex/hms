@@ -675,13 +675,13 @@ class Girokeluar extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_giro_keluar")->setJoins("acc_giro_keluar_detail", "acc_giro_keluar.id = giro_keluar_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_giro_keluar.*", "currency_kurs.currency,currency_kurs.kurs"])
+                            ->setSelects(["acc_giro_keluar.*", "currency_kurs.currency,currency_kurs.kurs","giro_keluar_id"])
                             ->setWheres(["acc_giro_keluar.no_gk" => $kode])->getDetail();
 
             if (!$head) {
                 throw new \exception("Data No Giro Keluar {$kode} tidak ditemukan", 500);
             }
-            if ($head->total_rp < 1) {
+            if (!$head->giro_keluar_id) {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
 

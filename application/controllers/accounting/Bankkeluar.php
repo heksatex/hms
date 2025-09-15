@@ -246,7 +246,7 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -441,7 +441,7 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -735,13 +735,13 @@ class Bankkeluar extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_bank_keluar")->setJoins("acc_bank_keluar_detail", "acc_bank_keluar.id = bank_keluar_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_bank_keluar.*", "currency_kurs.currency,currency_kurs.kurs"])
+                            ->setSelects(["acc_bank_keluar.*", "currency_kurs.currency,currency_kurs.kurs", "bank_keluar_id"])
                             ->setWheres(["acc_bank_keluar.no_bk" => $kode])->getDetail();
 
             if (!$head) {
                 throw new \exception("Data No Bank Keluar {$kode} tidak ditemukan", 500);
             }
-            if ($head->total_rp < 1) {
+            if (!$head->bank_keluar_id) {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
             $this->_module->startTransaction();
@@ -848,7 +848,7 @@ class Bankkeluar extends MY_Controller {
                 default:
                     $this->validasiPin($pin, "Batal / Cancel Data Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
 
-                    $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id,"giro_keluar_detail_id <>"=>'0'])
+                    $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id, "giro_keluar_detail_id <>" => '0'])
                                     ->setSelects(["GROUP_CONCAT(giro_keluar_detail_id) as gids"])->getDetail();
                     if ($item->gids !== null) {
                         $cekKas = $model->setTables("acc_kas_masuk_detail")->setWhereRaw("giro_keluar_detail_id in ({$item->gids})")->getDetail();

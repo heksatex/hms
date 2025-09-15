@@ -93,7 +93,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">Kepada</label></div>
+                                                <div class="col-xs-4"><label class="form-label">Dari</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="hidden" name="partner_name" id="partner_name"  value="<?= $datas->partner_nama ?>"/>
                                                     <select class="form-control input-sm select2 partner edited" name="partner" id="partner" disabled style="width: 100%">
@@ -562,6 +562,7 @@ if ($datas->status == 'confirm') {
                         $(".edited-read").removeAttr("readonly");
                         $(".edited").removeAttr("disabled");
                         setCurr();
+                        $(".select2-coa").select2();
                         $(this).hide();
                         $("#btn-cancel").show();
                         $("#btn-simpan").show();
@@ -641,7 +642,8 @@ if ($datas->status == 'confirm') {
                             delay: 250,
                             data: function (params) {
                                 return{
-                                    search: params.term
+                                    search: params.term,
+                                    jenis:"customer"
                                 };
                             },
                             processResults: function (data) {

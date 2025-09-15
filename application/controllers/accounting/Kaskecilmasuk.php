@@ -589,13 +589,13 @@ class Kaskecilmasuk extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_kas_kecil_masuk")->setJoins("acc_kas_kecil_masuk_detail", "acc_kas_kecil_masuk.id = kas_kecil_masuk_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_kas_kecil_masuk.*", "currency_kurs.currency,currency_kurs.kurs"])
+                            ->setSelects(["acc_kas_kecil_masuk.*", "currency_kurs.currency,currency_kurs.kurs","kas_kecil_masuk_id"])
                             ->setWheres(["acc_kas_kecil_masuk.no_kkm" => $kode])->getDetail();
 
             if (!$head) {
                 throw new \exception("Data No Kas Kecil Masuk {$kode} tidak ditemukan", 500);
             }
-            if ($head->total_rp < 1) {
+            if (!$head->kas_kecil_masuk_id) {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
             $this->_module->startTransaction();
