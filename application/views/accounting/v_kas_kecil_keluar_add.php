@@ -53,7 +53,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">Customer</label></div>
+                                                <div class="col-xs-4"><label class="form-label">Supplier</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="partner_nama" id="partner_nama"  class="form-control"/>
                                                 </div>

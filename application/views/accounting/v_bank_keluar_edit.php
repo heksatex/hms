@@ -761,7 +761,8 @@ if ($datas->status == 'confirm') {
                         delay: 250,
                         data: function (params) {
                             return{
-                                search: params.term
+                                search: params.term,
+                                jenis:"supplier"
                             };
                         },
                         processResults: function (data) {

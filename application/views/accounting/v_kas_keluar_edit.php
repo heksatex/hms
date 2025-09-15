@@ -533,6 +533,7 @@ if ($datas->status == 'confirm') {
                         $(".edited-read").removeAttr("readonly");
                         $(".edited").removeAttr("disabled");
                         setCurr();
+                        $(".select2-coa").select2();
                         $(this).hide();
                         $("#btn-cancel").show();
                         $("#btn-simpan").show();
@@ -608,7 +609,8 @@ if ($datas->status == 'confirm') {
                             delay: 250,
                             data: function (params) {
                                 return{
-                                    search: params.term
+                                    search: params.term,
+                                    jenis:"supplier"
                                 };
                             },
                             processResults: function (data) {
