@@ -49,10 +49,6 @@
             alert_modal_warning("Akses Tidak diijinkan.");
         }
 
-    }).ajaxSetup({
-        headers: {
-            "_request": "json"
-        }
     });
 </script>
 <script type="text/javascript">

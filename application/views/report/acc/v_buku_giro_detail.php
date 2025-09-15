@@ -9,7 +9,7 @@ if (count($data) > 0) {
     ?>
     <tr>
         <td colspan="3"></td>
-        <td> <strong>Saldo Awals</strong></td>
+        <td> <strong>Saldo Awal</strong></td>
         <td></td>
         <td class="text-right"><?= number_format($debets, 2) ?></td>
         <td class="text-right"><?= number_format($kredits, 2) ?></td>

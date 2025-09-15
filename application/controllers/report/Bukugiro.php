@@ -57,7 +57,7 @@ class Bukugiro extends MY_Controller {
 
             $model->setTables("acc_bank_masuk bm")->setJoins("acc_bank_masuk_detail bmd", "bm.id = bank_masuk_id")
                     ->setSelects(["bm.no_bm as no_bukti,date(bm.tanggal) as tanggal,'D' as posisi,nominal,bmd.kode_coa"])
-                    ->setSelects(["if(bmd.uraian = '',transinfo,bmd.uraian) as uraian"])->setWheres(["bmd.no_bg" => ""]);
+                    ->setSelects(["if(bmd.uraian = '',transinfo,bmd.uraian) as uraian"])->setWheres(["bmd.no_bg" => "","status"=>"confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(bm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(bm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }
@@ -68,7 +68,7 @@ class Bukugiro extends MY_Controller {
 
             $model->setTables("acc_bank_keluar bm")->setJoins("acc_bank_keluar_detail bmd", "bm.id = bank_keluar_id")
                     ->setSelects(["bm.no_bk as no_bukti,date(bm.tanggal) as tanggal,'D' as posisi,nominal,bmd.kode_coa"])
-                    ->setSelects(["if(bmd.uraian = '',transinfo,bmd.uraian) as uraian"])->setWheres(["bmd.no_bg" => ""]);
+                    ->setSelects(["if(bmd.uraian = '',transinfo,bmd.uraian) as uraian"])->setWheres(["bmd.no_bg" => "","status"=>"confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(bm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(bm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }
@@ -79,7 +79,7 @@ class Bukugiro extends MY_Controller {
 
             $model->setTables("acc_giro_keluar bm")->setJoins("acc_giro_keluar_detail bmd", "bm.id = giro_keluar_id")
                     ->setSelects(["bm.no_gk as no_bukti,date(bm.tanggal) as tanggal,'D' as posisi,nominal,bmd.kode_coa"])
-                    ->setSelects(["transinfo as as  uraian"])->setWheres(["bmd.no_bg" => ""]);
+                    ->setSelects(["transinfo as as  uraian"])->setWheres(["bmd.no_bg" => "","status"=>"confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(bm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(bm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }

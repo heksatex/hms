@@ -80,7 +80,7 @@ class Jurnalentries extends MY_Controller {
             $data["jurnal"] = $head->setTables("acc_jurnal_entries")
                             ->setJoins("mst_jurnal", "mst_jurnal.kode = acc_jurnal_entries.tipe", "left")
                             ->setWheres(["acc_jurnal_entries.kode" => $kode_decrypt])
-                            ->setSelects(["mst_jurnal.nama as nama_jurnal","acc_jurnal_entries.*"])->getDetail();
+                            ->setSelects(["mst_jurnal.nama as nama_jurnal","acc_jurnal_entries.*,date(tanggal_dibuat) as tanggal_dibuat"])->getDetail();
             if ($data["jurnal"] === null) {
                 throw new \Exception();
             }
