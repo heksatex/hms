@@ -61,7 +61,7 @@ class Kaskecilmasuk extends MY_Controller {
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_kecil_masuk.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_kecil_masuk.status", "left")
                     ->setSearch(["no_kkm", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo"])
-                    ->setOrders([null, "no_kkm", "partner_nama", "acc_kas_kecil_masuk.tanggal", null, null, null, "total_rp"])
+                    ->setOrders([null, "no_kkm", "partner_nama", "acc_kas_kecil_masuk.tanggal", "acc_coa.kode_coa", "total_rp"])
                     ->setSelects(["acc_kas_kecil_masuk.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
 
             $no = $_POST['start'];

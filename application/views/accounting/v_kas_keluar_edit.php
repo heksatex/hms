@@ -722,6 +722,7 @@ if ($datas->status == 'confirm') {
                                 $(".kurs" + no).val(row.nilai_currency);
                                 $(".nourut" + no).html(no);
                                 $(".fpt" + no).val(row.no_po);
+                                 $(".select2-coa").select2();
                                 gentransaksi();
                             });
                         },
@@ -729,6 +730,7 @@ if ($datas->status == 'confirm') {
                             unblockUI(function () {
                                 setCurr();
                                 $(".total-nominal").trigger("click");
+                               
                             }, 100);
 
                         },
