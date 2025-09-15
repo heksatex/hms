@@ -700,13 +700,13 @@ class Kasmasuk extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_kas_masuk")->setJoins("acc_kas_masuk_detail", "acc_kas_masuk.id = kas_masuk_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_kas_masuk.*", "currency_kurs.currency,currency_kurs.kurs"])
+                            ->setSelects(["acc_kas_masuk.*", "currency_kurs.currency,currency_kurs.kurs","kas_masuk_id"])
                             ->setWheres(["acc_kas_masuk.no_km" => $kode])->getDetail();
 
             if (!$head) {
                 throw new \exception("Data No Kas Masuk {$kode} tidak ditemukan", 500);
             }
-            if ($head->total_rp < 1) {
+            if (!$head->kas_masuk_id) {
                 throw new \exception("Data Detail Harus Terisi", 500);
             }
 
