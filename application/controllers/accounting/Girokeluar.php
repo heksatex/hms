@@ -80,7 +80,7 @@ class Girokeluar extends MY_Controller {
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_giro_keluar.status", "left")
                     ->setSearch(["no_gk", "acc_coa.kode_coa", "partner_nama", "lain2", "transinfo", "acc_giro_keluar.status"])
-                    ->setOrders([null, "no_gk", "partner_nama", "acc_giro_keluar.tanggal", null, null, null, "total_rp", "acc_giro_keluar.status"])
+                    ->setOrders([null, "no_gk", "partner_nama", "acc_giro_keluar.tanggal", null, null, "total_rp", "acc_giro_keluar.status"])
                     ->setSelects(["acc_giro_keluar.*", "acc_coa.nama as nama_coa", "nama_status as status"]);
 
             $no = $_POST['start'];

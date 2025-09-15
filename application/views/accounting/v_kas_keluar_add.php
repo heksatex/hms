@@ -172,10 +172,10 @@
                     <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
@@ -198,7 +198,7 @@
                     <input class="fpt fpt:nourut" type="hidden">
                 </td>
                 <td>
-                    <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
+                    <select class="form-control input-sm select2-coa select2-coa:nourut" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
                         <?php
                         foreach ($coas as $key => $value) {
@@ -216,10 +216,10 @@
                     <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
@@ -342,7 +342,7 @@
                         data: function (params) {
                             return{
                                 search: params.term,
-                                jenis:"supplier"
+                                jenis: "supplier"
                             };
                         },
                         processResults: function (data) {
@@ -473,6 +473,7 @@
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
+                            $(".select2-coa").select2();
                         }, 100);
 
                     },
