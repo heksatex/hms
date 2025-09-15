@@ -123,13 +123,13 @@ class M_bukubesar extends CI_Model
             $this->db->group_start();
             $this->db->where("(CASE 
                 WHEN coa.saldo_normal = 'D' THEN 
-                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0)) > 0
+                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0)) <> 0
                 WHEN coa.saldo_normal = 'C' THEN 
-                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0)) > 0
+                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0)) <> 0
                 ELSE 0
               END)", null, false);
-            $this->db->or_where('jr.total_debit > 0');
-            $this->db->or_where('jr.total_credit > 0');
+            $this->db->or_where('jr.total_debit <> 0');
+            $this->db->or_where('jr.total_credit <> 0');
             $this->db->group_end();
         }
         
@@ -223,13 +223,13 @@ class M_bukubesar extends CI_Model
             $this->db->group_start();
             $this->db->where("(CASE 
                 WHEN coa.saldo_normal = 'D' THEN 
-                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0)) > 0
+                    (coa.saldo_awal + COALESCE(debit_sbl.total_debit, 0) - COALESCE(credit_sbl.total_credit, 0)) <> 0
                 WHEN coa.saldo_normal = 'C' THEN 
-                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0)) > 0
+                    (coa.saldo_awal + COALESCE(credit_sbl.total_credit, 0) - COALESCE(debit_sbl.total_debit, 0)) <> 0
                 ELSE 0
               END)", null, false);
-            $this->db->or_where('jr.total_debit > 0');
-            $this->db->or_where('jr.total_credit > 0');
+            $this->db->or_where('jr.total_debit <> 0');
+            $this->db->or_where('jr.total_credit <> 0');
             $this->db->group_end();
         }
         
@@ -290,7 +290,7 @@ class M_bukubesar extends CI_Model
             $this->db->where($where);
         }
 
-        $this->db->where("jei.nominal > 0");
+        $this->db->where("jei.nominal <> 0");
 
         $this->db->select("coa.saldo_normal,je.tanggal_dibuat as tanggal, jei.kode as kode_entries,je.origin, IF(prt.nama is null or  prt.nama = '',  CONCAT('[',je.reff_note,']',' - ',jei.nama), CONCAT('[',prt.nama,']',' ',jei.nama,IF(jei.reff_note IS NOT NULL AND jei.reff_note != '', CONCAT(' - ', jei.reff_note), ''))) as keterangan,
                             jei.kode_coa, coa.nama as nama_coa, jei.posisi,  IFNULL(CASE WHEN jei.posisi = '{$view}' THEN jei.nominal ELSE 0 END,0) AS total");
