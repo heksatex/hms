@@ -63,7 +63,7 @@ class Bukubank extends MY_Controller {
             $model = new $this->m_global;
             $model->setTables("acc_bank_masuk km")->setJoins("acc_bank_masuk_detail kmd", "bank_masuk_id = km.id")
                     ->setSelects(["km.no_bm as no_bukti,date(km.tanggal) as tanggal,'D' as posisi,nominal,kmd.kode_coa"])
-                    ->setSelects(["if(kmd.uraian = '',transinfo,kmd.uraian) as uraian"]);
+                    ->setSelects(["if(kmd.uraian = '',transinfo,kmd.uraian) as uraian"])->setWheres(["status"=>"confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(km.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(km.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }
@@ -74,7 +74,7 @@ class Bukubank extends MY_Controller {
 
             $model->setTables("acc_bank_keluar kk")->setJoins("acc_bank_keluar_detail kkd", "bank_keluar_id = kk.id")
                     ->setSelects(["kk.no_bk as no_bukti,date(kk.tanggal) as tanggal,'K' as posisi,nominal,kkd.kode_coa"])
-                    ->setSelects(["if(kkd.uraian = '',transinfo,kkd.uraian) as uraian"]);
+                    ->setSelects(["if(kkd.uraian = '',transinfo,kkd.uraian) as uraian"])->setWheres(["status"=>"confirm"]);
             if (count($tanggals) > 1) {
                 $model->setWheres(["date(kk.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(kk.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }

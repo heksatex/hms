@@ -17,7 +17,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Bukukas extends MY_Controller {
+class Giromundur extends MY_Controller {
 
     //put your code here
     public function __construct() {
@@ -28,10 +28,10 @@ class Bukukas extends MY_Controller {
     }
 
     public function index() {
-        $data['id_dept'] = 'BACK';
+        $data['id_dept'] = 'ACGM';
         $model = new $this->m_global;
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas"])->getData();
-        $this->load->view('report/acc/v_buku_kas', $data);
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "giro"])->getData();
+        $this->load->view('report/acc/v_giro_mundur', $data);
     }
 
     protected function _query() {
@@ -47,7 +47,7 @@ class Bukukas extends MY_Controller {
                 ],
                 [
                     'field' => 'kode_coa',
-                    'label' => 'Kas',
+                    'label' => 'Laporan',
                     'rules' => ['trim', 'required'],
                     'errors' => [
                         'required' => '{field} Harus dipilih'
@@ -61,31 +61,60 @@ class Bukukas extends MY_Controller {
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
             $model = new $this->m_global;
-            $model->setTables("acc_kas_masuk km")->setJoins("acc_kas_masuk_detail kmd", "kas_masuk_id = km.id")
-                    ->setSelects(["km.no_km as no_bukti,date(km.tanggal) as tanggal,kmd.uraian,'D' as posisi,nominal,kmd.kode_coa"])
+            
+            //giro masuk
+            $model->setTables("acc_giro_masuk gm")->setJoins("acc_giro_masuk_detail gmd", "giro_masuk_id = gm.id")
+                    ->setSelects(["gm.no_gm as no_bukti,date(gm.tanggal) as tanggal,gm.transinfo as uraian,'D' as posisi,nominal,gmd.kode_coa,no_bg"])
                     ->setWheres(["status"=>"confirm"]);
             if (count($tanggals) > 1) {
-                $model->setWheres(["date(km.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(km.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+                $model->setWheres(["date(gm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(gm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }
             if ($coa !== "") {
-                $model->setWheres(["km.kode_coa" => $coa]);
+                $model->setWheres(["gm.kode_coa" => $coa]);
+            }
+            $queryGiroMasuk = $model->getQuery();
+
+            //bank masuk
+            $model->setTables("acc_bank_masuk bm")->setJoins("acc_bank_masuk_detail bmd", "bank_masuk_id = bm.id")
+                    ->setSelects(["bm.no_bm as no_bukti,date(bm.tanggal) as tanggal,bmd.uraian,'D' as posisi,nominal,bmd.kode_coa,no_bg"])
+                    ->setWheres(["status"=>"confirm"]);
+            if (count($tanggals) > 1) {
+                $model->setWheres(["date(bm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(bm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])),
+                    "bmd.no_bg <>"=>""]);
+            }
+            if ($coa !== "") {
+                $model->setWheres(["bm.kode_coa" => $coa]);
+            }
+            $queryBankMasuk = $model->setOrder(["bm.tanggal"=>"asc"])->getQuery();
+            
+            //kas masuk
+            $model->setTables("acc_kas_masuk gm")->setJoins("acc_kas_masuk_detail gmd", "kas_masuk_id = gm.id")
+                    ->setSelects(["gm.no_km as no_bukti,date(gm.tanggal) as tanggal,gmd.uraian,'D' as posisi,nominal,gmd.kode_coa,'' as no_bg"])
+                    ->setWheres(["status"=>"confirm"]);
+            if (count($tanggals) > 1) {
+                $model->setWheres(["date(gm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(gm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+            }
+            if ($coa !== "") {
+                $model->setWheres(["gm.kode_coa" => $coa]);
             }
             $queryKasMasuk = $model->getQuery();
-
-            $model->setTables("acc_kas_keluar kk")->setJoins("acc_kas_keluar_detail kkd", "kas_keluar_id = kk.id")
-                    ->setSelects(["kk.no_kk as no_bukti,date(kk.tanggal) as tanggal,kkd.uraian,'K' as posisi,nominal,kkd.kode_coa"])
+            
+            //giro keluar
+            $model->setTables("acc_giro_keluar gk")->setJoins("acc_giro_keluar_detail gkd", "giro_keluar_id = gk.id")
+                    ->setSelects(["gk.no_gk as no_bukti,date(gk.tanggal) as tanggal,gk.transinfo as uraian,'K' as posisi,nominal,gkd.kode_coa,no_bg"])
                     ->setWheres(["status"=>"confirm"]);
             if (count($tanggals) > 1) {
-                $model->setWheres(["date(kk.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(kk.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
+                $model->setWheres(["date(gk.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(gk.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
             }
             if ($coa !== "") {
-                $model->setWheres(["kk.kode_coa" => $coa]);
+                $model->setWheres(["gk.kode_coa" => $coa]);
             }
-            $queryKasKeluar = $model->getQuery();
+            $queryGiroKeluar = $model->getQuery();
 
-            $table = "({$queryKasMasuk} union all {$queryKasKeluar}) as kas";
-            $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = kas.kode_coa", "left")
-                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(kas.kode_coa,'-',acc_coa.nama) as coa"]);
+            $table = "(({$queryGiroMasuk}) union all ({$queryBankMasuk})  union all ({$queryKasMasuk}) union all ($queryGiroKeluar)) as giromundur";
+            $model->setTables($table)->setJoins("acc_coa", "acc_coa.kode_coa = giromundur.kode_coa", "left")
+                    ->setOrder(["uraian"=>"asc","no_bg"=>"asc","tanggal"=>"asc"])
+                    ->setSelects(["no_bukti,tanggal,uraian,posisi,nominal,concat(giromundur.kode_coa,'-',acc_coa.nama) as coa,no_bg"]);
             return $model;
         } catch (Exception $ex) {
             throw $ex;
@@ -96,7 +125,7 @@ class Bukukas extends MY_Controller {
         try {
             $model = $this->_query();
             $data["data"] = $model->getData();
-            $html = $this->load->view('report/acc/v_buku_kas_detail', $data, true);
+            $html = $this->load->view('report/acc/v_giro_mundur_detail', $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
@@ -120,9 +149,9 @@ class Bukukas extends MY_Controller {
             $sheet->setCellValue("B{$row}", 'Tanggal');
             $sheet->setCellValue("C{$row}", 'No Bukti');
             $sheet->setCellValue("D{$row}", 'Uraian');
-            $sheet->setCellValue("E{$row}", 'No Acc');
-            $sheet->setCellValue("F{$row}", 'Debit');
-            $sheet->setCellValue("G{$row}", 'Kredit');
+            $sheet->setCellValue("E{$row}", 'No Cek / BG');
+            $sheet->setCellValue("F{$row}", 'Baru');
+            $sheet->setCellValue("G{$row}", 'Cair');
             $sheet->setCellValue("H{$row}", 'Saldo');
 
             if (count($data) > 0) {
@@ -165,8 +194,8 @@ class Bukukas extends MY_Controller {
                 $sheet->setCellValue("C{$row}", $no_bukti);
                 $sheet->setCellValue("D{$row}", $value->uraian);
                 $sheet->setCellValue("E{$row}", $value->coa);
-                $sheet->setCellValue("F{$row}", $debet);
-                $sheet->setCellValue("G{$row}", $kredit);
+                $sheet->setCellValue("F{$row}", $kredit);
+                $sheet->setCellValue("G{$row}", $debet);
                 $sheet->setCellValue("H{$row}", $saldo);
 
                 $temp = $value->no_bukti;
@@ -174,14 +203,14 @@ class Bukukas extends MY_Controller {
             if (count($data) > 0) {
                 $row += 1;
                 $sheet->setCellValue("D{$row}", "Saldo Akhir");
-                $sheet->setCellValue("F{$row}", $debets);
-                $sheet->setCellValue("G{$row}", $kredits);
+                $sheet->setCellValue("F{$row}", $kredits);
+                $sheet->setCellValue("G{$row}", $debets);
                 $sheet->setCellValue("H{$row}", $saldos);
             }
 
             $tanggal = $this->input->post("tanggal");
             $writer = new Xlsx($spreadsheet);
-            $filename = "Buku Kas {$tanggal}";
+            $filename = "Giro Mundur {$tanggal}";
             $url = "dist/storages/report/acc";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);

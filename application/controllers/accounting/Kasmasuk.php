@@ -58,7 +58,7 @@ class Kasmasuk extends MY_Controller {
         try {
             $data = array();
             $list = new $this->m_global;
-            $list->setTables("acc_kas_masuk")->setOrder(["acc_kas_masuk.create_date" => "desc"])
+            $list->setTables("acc_kas_masuk")->setOrder(["acc_kas_masuk.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_kas_masuk.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_kas_masuk.status", "left")
                     ->setSearch(["no_km", "acc_kas_masuk.kode_coa", "partner_nama", "lain2", "transinfo", "acc_kas_masuk.status"])
@@ -152,9 +152,10 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
                     [
@@ -168,9 +169,10 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                             "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -395,9 +397,10 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
                     [
@@ -411,9 +414,10 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                             "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);

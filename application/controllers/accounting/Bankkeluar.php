@@ -79,7 +79,7 @@ class Bankkeluar extends MY_Controller {
         try {
             $data = array();
             $list = new $this->m_global;
-            $list->setTables("acc_bank_keluar")->setOrder(["acc_bank_keluar.create_date" => "desc"])
+            $list->setTables("acc_bank_keluar")->setOrder(["acc_bank_keluar.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_bank_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_bank_keluar.status", "left")
                     ->setSearch(["no_bk", "kode_coa", "partner_nama", "lain2", "transinfo"])
@@ -246,9 +246,10 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
                     [
@@ -262,9 +263,10 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -439,9 +441,10 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
                     [
@@ -455,11 +458,13 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
-                ]]);
+                    ]
+                ]);
             }
             $this->form_validation->set_rules($this->valForm);
             if ($this->form_validation->run() == FALSE) {
@@ -721,9 +726,7 @@ class Bankkeluar extends MY_Controller {
 
     public function update_status($id) {
         $pin = false;
-        $this->is_loggedin();
         try {
-            $this->is_loggedin();
             $kode = decrypt_url($id);
             $sub_menu = $this->uri->segment(2);
             $username = $this->session->userdata('username');
@@ -845,7 +848,7 @@ class Bankkeluar extends MY_Controller {
                 default:
                     $this->validasiPin($pin, "Batal / Cancel Data Hanya bisa dilakukan Oleh Supervisor", $head->tanggal);
 
-                    $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id])
+                    $item = $model->setTables("acc_bank_keluar_detail")->setWheres(["bank_keluar_id" => $head->id,"giro_keluar_detail_id <>"=>'0'])
                                     ->setSelects(["GROUP_CONCAT(giro_keluar_detail_id) as gids"])->getDetail();
                     if ($item->gids !== null) {
                         $cekKas = $model->setTables("acc_kas_masuk_detail")->setWhereRaw("giro_keluar_detail_id in ({$item->gids})")->getDetail();
@@ -868,7 +871,7 @@ class Bankkeluar extends MY_Controller {
                     ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
             $this->_module->rollbackTransaction();
-            $this->output->set_status_header($ex->getCode() ?? 500)
+            $this->output->set_status_header($ex->getCode())
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "pin" => $pin)));
         } finally {

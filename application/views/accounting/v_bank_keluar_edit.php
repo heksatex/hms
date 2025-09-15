@@ -533,7 +533,7 @@ if ($datas->status == 'confirm') {
                         data: {status: statuss.trim()},
                         type: "POST",
                         beforeSend: function (xhr) {
-                            xhr.setRequestHeader("_request", "json");
+//                            xhr.setRequestHeader("_request", "json");
                             please_wait(function () {
 
                             });

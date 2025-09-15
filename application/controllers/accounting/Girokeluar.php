@@ -76,7 +76,7 @@ class Girokeluar extends MY_Controller {
         try {
             $data = array();
             $list = new $this->m_global;
-            $list->setTables("acc_giro_keluar")->setOrder(["acc_giro_keluar.create_date" => "desc"])
+            $list->setTables("acc_giro_keluar")->setOrder(["acc_giro_keluar.tanggal" => "desc"])
                     ->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_keluar.kode_coa", "left")
                     ->setJoins("mst_status", "mst_status.kode = acc_giro_keluar.status", "left")
                     ->setSearch(["no_gk", "acc_giro_keluar.kode_coa", "partner_nama", "lain2", "transinfo", "acc_giro_keluar.status"])
@@ -198,9 +198,10 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
                     [
@@ -214,11 +215,13 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
-                ]]);
+                    ]
+                ]);
             }
             $this->form_validation->set_rules($val);
             if ($this->form_validation->run() == FALSE) {
@@ -385,9 +388,10 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ],
                     [
@@ -401,11 +405,13 @@ class Girokeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
+                            'required' => '{field} Pada Item harus diisi',
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
-                ]]);
+                    ]
+                ]);
             }
             $this->form_validation->set_rules($this->valForm);
             if ($this->form_validation->run() == FALSE) {
@@ -816,7 +822,7 @@ class Girokeluar extends MY_Controller {
         if ($bbln === 1) {
             $model = new $this->m_global();
             $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
-            if (date("j") >= (int)$pinDate->value) {
+            if (date("j") >= (int) $pinDate->value) {
 
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);
@@ -841,4 +847,3 @@ class Girokeluar extends MY_Controller {
         }
     }
 }
-

@@ -41,11 +41,12 @@ foreach ($data as $key => $value) {
         <td><?= ($shw) ? $value->tanggal : "" ?></td>
         <td><?= ($shw) ? $value->no_bukti : "" ?></td>
         <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0,65) ?></td>
-        <td><?= $value->coa ?></td>
-        <td class="text-right"><?= number_format($debet, 2) ?></td>
+        <td><?= $value->no_bg ?></td>
         <td class="text-right"><?= number_format($kredit, 2) ?></td>
+        <td class="text-right"><?= number_format($debet, 2) ?></td>
         <td class="text-right"><?= number_format($saldo, 2) ?></td>
     </tr>
+
     <?php
     $temp = $value->no_bukti;
 }
@@ -55,8 +56,8 @@ if (count($data) > 0) {
         <td colspan="3"></td>
         <td> <strong>Saldo Akhir</strong></td>
         <td></td>
-        <td class="text-right"><?= number_format($debets, 2) ?></td>
         <td class="text-right"><?= number_format($kredits, 2) ?></td>
+        <td class="text-right"><?= number_format($debets, 2) ?></td>
         <td class="text-right"><?= number_format($saldos, 2) ?></td>
     </tr>
     <?php
