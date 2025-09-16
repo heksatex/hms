@@ -194,10 +194,10 @@
                                                                 <select class="form-control input-sm select2 select2-curr edited" style="width:100%" name="curr[]" required disabled>
                                                                     <option value="<?= $value->currency_id ?>" selected><?= $value->curr ?></option>
                                                                     <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
-                            ?>
+                                                                        ?>
+                                                                        <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                                                                    <?php }
+                                                                    ?>
                                                                 </select>
                                                             </td>
                                                             <td>
@@ -409,6 +409,16 @@ if ($datas->status == 'confirm') {
                 var transaksi = [];
                 const gentransaksi = (() => {
                     transaksi = [];
+                    if ($("#transaksi").val() !== "") {
+                        var ttrx = $("#transaksi").val().split(",");
+
+                        if (ttrx.length > 0) {
+                            ttrx.forEach(function (item, idx) {
+                                if (!item.includes("FPT"))
+                                    transaksi.push(item);
+                            });
+                        }
+                    }
                     $('.fpt').each(function () {
                         if (!transaksi.includes(this.value))
                             transaksi.push(this.value);
@@ -610,7 +620,7 @@ if ($datas->status == 'confirm') {
                             data: function (params) {
                                 return{
                                     search: params.term,
-                                    jenis:"supplier"
+                                    jenis: "supplier"
                                 };
                             },
                             processResults: function (data) {
@@ -722,7 +732,7 @@ if ($datas->status == 'confirm') {
                                 $(".kurs" + no).val(row.nilai_currency);
                                 $(".nourut" + no).html(no);
                                 $(".fpt" + no).val(row.no_po);
-                                 $(".select2-coa").select2();
+                                $(".select2-coa").select2();
                                 gentransaksi();
                             });
                         },
@@ -730,7 +740,7 @@ if ($datas->status == 'confirm') {
                             unblockUI(function () {
                                 setCurr();
                                 $(".total-nominal").trigger("click");
-                               
+
                             }, 100);
 
                         },
