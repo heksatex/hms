@@ -435,6 +435,16 @@
             var transaksi = [];
             const gentransaksi = (() => {
                 transaksi = [];
+                if ($("#transaksi").val() !== "") {
+                    var ttrx = $("#transaksi").val().split(",");
+
+                    if (ttrx.length > 0) {
+                        ttrx.forEach(function (item, idx) {
+                            if (!item.includes("FPT"))
+                                transaksi.push(item);
+                        });
+                    }
+                }
                 $('.fpt').each(function () {
                     if (!transaksi.includes(this.value))
                         transaksi.push(this.value);
