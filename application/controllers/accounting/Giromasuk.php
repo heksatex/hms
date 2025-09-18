@@ -544,7 +544,7 @@ class Giromasuk extends MY_Controller {
             $buff = $printer->getPrintConnector();
             $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bM");
-            $tanggal = date("Y-m-d", strtotime($head->tanggal));
+            $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
 
             $printer->text(str_pad("No : {$head->no_gm}", 21));
@@ -601,7 +601,7 @@ class Giromasuk extends MY_Controller {
                 $line .= str_pad($values->bank, 15);
                 $line .= str_pad($values->no_rek, 20);
                 $line .= str_pad($values->no_bg, 20);
-                $line .= str_pad(date("Y-m-d", strtotime($values->tgl_jt)), 15);
+                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_jt)), 15);
                 $line .= str_pad($values->kode_coa, 20, " ", STR_PAD_BOTH);
                 $line .= str_pad(number_format($values->kurs, 2), 10, " ", STR_PAD_BOTH);
                 $line .= str_pad($values->curr, 10, " ", STR_PAD_BOTH);

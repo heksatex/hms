@@ -34,7 +34,7 @@ class Rekapkas extends MY_Controller {
     public function index() {
         $data['id_dept'] = 'RACK';
         $model = new $this->m_global;
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas"])->setOrder(["kode_coa"])->getData();
         $this->load->view('report/acc/v_rekap_kas', $data);
     }
 

@@ -38,7 +38,7 @@
             <aside class="main-sidebar">
                 <?php
                 $this->load->view("admin/_partials/sidebar.php");
-                $listJurnal = ["PB"=>"Pembelian"];
+                $listJurnal = ["PB" => "Pembelian"];
                 ?>
             </aside>
             <div class="content-wrapper">
@@ -97,26 +97,26 @@
                                                 </div>
                                             </div>
                                         </div>
-<!--                                        <div class="form-group">
-                                            <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4">
-                                                    <label class="form-label">Tanggal Posting</label>
-                                                </div>
-                                                <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $jurnal->tanggal_posting ?? "" ?></span>
-                                                </div>
-                                            </div>
-                                        </div>-->
+                                        <!--                                        <div class="form-group">
+                                                                                    <div class="col-md-12 col-xs-12">
+                                                                                        <div class="col-xs-4">
+                                                                                            <label class="form-label">Tanggal Posting</label>
+                                                                                        </div>
+                                                                                        <div class="col-xs-8 col-md-8 text-uppercase">
+                                                                                            <span><?= $jurnal->tanggal_posting ?? "" ?></span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>-->
                                     </div>
                                     <div class="col-md-6 col-xs-12">
-                                        
+
                                         <div class="form-group">
                                             <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4">
                                                     <label class="form-label">Origin</label>
                                                 </div>
                                                 <div class="col-xs-8 col-md-8 text-uppercase">
-                                                    <span><?= $jurnal->origin?></span>
+                                                    <span><?= $jurnal->origin ?></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -134,94 +134,125 @@
                                 </div>
                             </div>
                             <div class="box-footer">
-                                    <div class="colxs-12">
-                                        <ul class="nav nav-tabs">
-                                            <li class="active"><a href="#tab_1" data-toggle="tab">Item</a></li>
-                                            <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
-                                        </ul>
-                                        <div class="tab-content"><br>
-                                            <div class="tab-pane active" id="tab_1">
-                                                <div class="table-responsive over">
-                                                    <table id="tbl-jurnal" class="table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="no">#</th>
-                                                                <th>Name</th>
-                                                                <th>Reff Note</th>
-                                                                <th>Partner</th>
-                                                                <th>Account</th>
-                                                                <th>Debit</th>
-                                                                <th>Credit</th>
-                                                                <th>Kurs</th>
-                                                                <th>#</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php
-                                                            $totalDebit = 0;
-                                                            $totalKredit = 0;
-                                                            foreach ($detail as $key => $value) {
-                                                                ?>
-                                                                <tr>
-                                                                    <td><?= $key + 1 ?></td>
-                                                                    <td><?= $value->nama ?></td>
-                                                                    <td><?= $value->reff_note ?></td>
-                                                                    <td><?= $value->supplier ?></td>
-                                                                    <td style="width: 15%">
-                                                                        <?= $value->kode_coa . " " . $value->account ?>
-                                                                        <!--                                                                        <div class="form-group">
-                                                                                                                                                    <select class="form-control kode_coa input-xs kode_coa_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
-                                                                                                                                                            name="kode_coa[<?= $value->id ?>]"  required <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>>
-                                                                                                                                                        <option></option>
-                                                                        <?php
-                                                                        if (!is_null($value->kode_coa)) {
-                                                                            ?>
-                                                                                                                                                                        <option value="<?= $value->kode_coa ?>"selected><?= $value->account ?></option>   
-                                                                            <?php
-                                                                        }
-                                                                        ?>
-                                                                                                                                                    </select>
-                                                                        
-                                                                                                                                                </div>-->
-                                                                    </td>
-                                                                    <td><?php
-                                                                        if (strtolower($value->posisi) === "d") {
-                                                                            $totalDebit += $value->nominal;
-                                                                            echo number_format($value->nominal, 2);
-                                                                        }
-                                                                        ?></td>
-                                                                    <td><?php
-                                                                        if (strtolower($value->posisi) === "c") {
-                                                                            $totalKredit += $value->nominal;
-                                                                            echo number_format($value->nominal, 2);
-                                                                        }
-                                                                        ?></td>
-                                                                    <td><?= number_format($value->kurs, 2) ?></td>
-                                                                    <td><?= $value->kode_mua ?></td>
-                                                                </tr>
-                                                                <?php
-                                                            }
-                                                            if (count($detail) > 0) {
-                                                                ?>
-                                                                <tr>
-                                                                    <td></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td colspan="3" class="text-center"><strong>Balance</strong></td>
-                                                                    <td></td>
-                                                                    <td></td>
-                                                                    <td><strong><?= number_format($totalDebit,2) ?></strong></td>
-                                                                    <td><strong><?= number_format($totalKredit,2) ?></strong></td>
-                                                                </tr>
-                                                                <?php
-                                                            }
+                                <div class="colxs-12">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active"><a href="#tab_1" data-toggle="tab">Item</a></li>
+                                        <!--<li><a href="#tab_2" data-toggle="tab">RFQ & BID</a></li>-->
+                                    </ul>
+                                    <div class="tab-content"><br>
+                                        <div class="tab-pane active" id="tab_1">
+                                            <div class="table-responsive over">
+                                                <table id="tbl-jurnal" class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="no">#</th>
+                                                            <th>Name</th>
+                                                            <th>Reff Note</th>
+                                                            <th>Partner</th>
+                                                            <th>Account</th>
+                                                            <th>Debit</th>
+                                                            <th>Credit</th>
+                                                            <th>Kurs</th>
+                                                            <th>#</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $totalDebit = 0;
+                                                        $totalKredit = 0;
+                                                        foreach ($detail as $key => $value) {
                                                             ?>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                            <tr>
+                                                                <td><?= $key + 1 ?></td>
+                                                                <td><input type="text" class="form-control input-sm nama" value="<?= $value->nama ?>" name="nama[]" <?= ($jurnal->status === 'unposted') ? '' : 'readonly' ?>></td>
+                                                                <td><input type="text" class="form-control input-sm reffnote_item" value="<?= $value->reff_note ?>" name="reffnote_item[]" <?= ($jurnal->status === 'unposted') ? '' : 'readonly' ?>></td>
+                                                                <td><?php
+                                                                    if ($jurnal->status === 'unposted') {
+                                                                        ?>
+                                                                        <div class="form-group">
+                                                                            <select class="form-control input-sm partner" style="width: 100%" name="partner[]">
+                                                                                <option value="<?= $value->supplier_id ?? '' ?>"><?= $value->supplier ?? '' ?></option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <?php
+                                                                    } else {
+                                                                        print_r($value->supplier);
+                                                                    }
+                                                                    ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?php if ($jurnal->status === 'unposted') {
+                                                                        ?>
+                                                                        <div class="form-group">
+                                                                            <select class="form-control input-sm select22" style="width:100%" name="kode_coa[]" required>
+                                                                                <option value="<?= $value->kode_coa ?? "" ?>"><?= $value->kode_coa ?? "" ?></option>
+                                                                                <?php
+                                                                                foreach ($coas as $key => $values) {
+                                                                                    ?>
+                                                                                    <option value="<?= $values->kode_coa ?>"><?= "{$values->kode_coa}" ?></option>
+                                                                                    <?php
+                                                                                }
+                                                                                ?>
+                                                                            </select>
+                                                                        </div>
+                                                                        <?php
+                                                                    } else {
+                                                                        print_r($value->kode_coa . " " . $value->account);
+                                                                    }
+                                                                    ?>
+                                                                    <!--                                                                        <div class="form-group">
+                                                                                                                                                <select class="form-control kode_coa input-xs kode_coa_data_<?= $key ?>" style="width: 70%" data-row="<?= $key ?>"
+                                                                                                                                                        name="kode_coa[<?= $value->id ?>]"  required <?= ($jurnal->status === 'unposted') ? '' : 'disabled' ?>>
+                                                                                                                                                    <option></option>
+                                                                    <?php
+                                                                    if (!is_null($value->kode_coa)) {
+                                                                        ?>
+                                                                                                                                                                                                        <option value="<?= $value->kode_coa ?>"selected><?= $value->account ?></option>   
+                                                                        <?php
+                                                                    }
+                                                                    ?>
+                                                                                                                                                </select>
+                                                                    
+                                                                                                                                            </div>-->
+                                                                </td>
+                                                                <td><?php
+                                                                    if (strtolower($value->posisi) === "d") {
+                                                                        $totalDebit += $value->nominal;
+                                                                        echo number_format($value->nominal, 2);
+                                                                    }
+                                                                    ?></td>
+                                                                <td><?php
+                                                                    if (strtolower($value->posisi) === "c") {
+                                                                        $totalKredit += $value->nominal;
+                                                                        echo number_format($value->nominal, 2);
+                                                                    }
+                                                                    ?></td>
+                                                                <td><?= number_format($value->kurs, 2) ?></td>
+                                                                <td><?= $value->kode_mua ?></td>
+                                                            </tr>
+                                                            <?php
+                                                        }
+                                                        if (count($detail) > 0) {
+                                                            ?>
+                                                            <tr>
+                                                                <td></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="3" class="text-center"><strong>Balance</strong></td>
+                                                                <td></td>
+                                                                <td></td>
+                                                                <td><strong><?= number_format($totalDebit, 2) ?></strong></td>
+                                                                <td><strong><?= number_format($totalKredit, 2) ?></strong></td>
+                                                            </tr>
+                                                            <?php
+                                                        }
+                                                        ?>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -329,7 +360,43 @@
                         }
                     });
                 });
-
+                $(".select22").select2({
+                    placeholde: "Pilih",
+                    allowClear: true
+                });
+                const setPartner = (() => {
+                    $(".partner").select2({
+                        placeholder: "Pilih",
+                        allowClear: true,
+                        ajax: {
+                            dataType: 'JSON',
+                            type: "GET",
+                            url: "<?php echo base_url(); ?>accounting/kaskeluar/get_partner",
+                            delay: 250,
+                            data: function (params) {
+                                return{
+                                    search: params.term
+                                };
+                            },
+                            processResults: function (data) {
+                                var results = [];
+                                $.each(data.data, function (index, item) {
+                                    results.push({
+                                        id: item.id,
+                                        text: item.nama
+                                    });
+                                });
+                                return {
+                                    results: results
+                                };
+                            },
+                            error: function (xhr, ajaxOptions, thrownError) {
+                            }
+                        }
+                    });
+                });
+                setPartner();
+                
             });
         </script>
     </body>

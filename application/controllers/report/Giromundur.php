@@ -30,7 +30,7 @@ class Giromundur extends MY_Controller {
     public function index() {
         $data['id_dept'] = 'ACGM';
         $model = new $this->m_global;
-        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "giro"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "giro"])->setOrder(["kode_coa"])->getData();
         $this->load->view('report/acc/v_giro_mundur', $data);
     }
 

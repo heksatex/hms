@@ -206,7 +206,7 @@
                                                                     <?php
                                                                     foreach ($coas as $key => $values) {
                                                                         ?>
-                                                                        <option value="<?= $values->kode_coa ?>" <?= ($values->kode_coa === $value->kode_coa) ? 'selected' : '' ?>><?= "{$values->kode_coa}" ?></option>
+                                                                        <option value="<?= $values->kode_coa ?>" <?= ($values->kode_coa === $value->kode_coa) ? 'selected' : '' ?>><?= "{$values->kode_coa} - {$values->nama}" ?></option>
                                                                         <?php
                                                                     }
                                                                     ?>
@@ -335,7 +335,7 @@
                             <?php
                             foreach ($coas as $key => $value) {
                                 ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
+                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
                                 <?php
                             }
                             ?>

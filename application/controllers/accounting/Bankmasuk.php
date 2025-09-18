@@ -69,7 +69,7 @@ class Bankmasuk extends MY_Controller {
         $model = new $this->m_global;
         $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
                         ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setWheres(["jenis_transaksi" => "bank"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama"=>"asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_bank_masuk_add', $data);
     }
@@ -457,7 +457,7 @@ class Bankmasuk extends MY_Controller {
                     ->getData();
             $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
                             ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setWheres(["jenis_transaksi" => "bank"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama"=>"asc"])->getData();
             $data['id_dept'] = 'ACCBM';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -670,7 +670,7 @@ class Bankmasuk extends MY_Controller {
             $buff = $printer->getPrintConnector();
             $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bM");
-            $tanggal = date("Y-m-d", strtotime($head->tanggal));
+            $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
 
             $printer->text(str_pad("No : {$head->no_bm}", 21));
@@ -740,7 +740,7 @@ class Bankmasuk extends MY_Controller {
                 $line .= str_pad($values->bank, 15);
                 $line .= str_pad($values->no_rek, 20);
                 $line .= str_pad($values->no_bg, 20);
-                $line .= str_pad(date("Y-m-d", strtotime($values->tgl_cair)), 15);
+                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_cair)), 15);
                 $line .= str_pad($values->kode_coa, 20, " ", STR_PAD_BOTH);
                 $line .= str_pad(number_format($values->kurs, 2), 10, " ", STR_PAD_BOTH);
                 $line .= str_pad($values->curr, 10, " ", STR_PAD_BOTH);

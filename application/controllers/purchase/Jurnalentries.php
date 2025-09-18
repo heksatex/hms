@@ -26,6 +26,33 @@ class Jurnalentries extends MY_Controller {
         $data['id_dept'] = 'JNE';
         $this->load->view('purchase/v_jurnal_entries', $data);
     }
+    
+    public function get_periode() {
+        try {
+            $model = new $this->m_global;
+            $model->setTables("acc_periode")->setSelects(["periode"]);
+            if ($this->input->get('search') !== "") {
+                $model->setWheres(["periode LIKE" => "%{$this->input->get('search')}%"]);
+            }
+            $_POST['length'] = 50;
+            $_POST['start'] = 0;
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("data" => $model->getData())));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("message" => $ex->getMessage())));
+        }
+    }
+    
+    public function add() {
+        $data['id_dept'] = 'JNE';
+        $model = new $this->m_global;
+        
+        $data["jurnal"] = $model->setTables("mst_jurnal")->setOrder(["kode"])->setSelects(["nama,kode"])->getData();
+        $this->load->view('purchase/v_jurnal_entries_add', $data);
+    }
 
     public function data() {
         try {
@@ -88,8 +115,10 @@ class Jurnalentries extends MY_Controller {
                             ->setJoins("partner", "partner.id = jei.partner", "left")
                             ->setJoins("acc_coa", "acc_coa.kode_coa = jei.kode_coa", "left")
                             ->setJoins("acc_jurnal_entries je", "je.kode = jei.kode")
-                            ->setSelects(["jei.*", "partner.nama as supplier", "acc_coa.nama as account", "je.tipe"])
+                            ->setSelects(["jei.*", "partner.nama as supplier,partner.id as supplier_id", "acc_coa.nama as account", "je.tipe"])
                             ->setWheres(["je.kode" => $kode_decrypt])->getData();
+            $data["coas"] = $detail->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
             $this->load->view('purchase/v_jurnal_entries_edit', $data);
         } catch (Exception $ex) {
             return show_404();

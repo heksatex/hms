@@ -150,7 +150,7 @@
                         <?php
                         foreach ($coas as $key => $value) {
                             ?>
-                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
+                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
                             <?php
                         }
                         ?>

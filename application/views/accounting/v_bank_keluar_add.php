@@ -53,7 +53,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">Dari</label></div>
+                                                <div class="col-xs-4"><label class="form-label">Kepada</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="hidden" name="partner_name" id="partner_name"  class="form-control"/>
                                                     <select class="form-control input-sm select2 partner" name="partner" id="partner" style="width: 100%">
@@ -190,7 +190,7 @@
                             <?php
                             foreach ($coas as $key => $value) {
                                 ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
+                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
                                 <?php
                             }
                             ?>
@@ -254,7 +254,7 @@
                             <?php
                             foreach ($coas as $key => $value) {
                                 ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
+                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
                                 <?php
                             }
                             ?>
@@ -514,7 +514,7 @@
                             $("#bankkeluar-detail tbody").append(isi_tmplt);
                             $(".coa_" + no).val(row.kode_coa).trigger("change");
                             $(".bank" + no).val(row.bank);
-                            $(".nore" + no).val(row.no_rek);
+                            $(".norek" + no).val(row.no_rek);
                             $(".nobg" + no).val(row.no_bg);
                             $(".tgljt" + no).val(row.tgl_jt);
                             $(".tglcair" + no).val(row.tgl_cair);
@@ -530,6 +530,7 @@
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
+                            $(".select2-coa").select2();
                         }, 100);
 
                     },

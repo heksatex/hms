@@ -183,13 +183,6 @@
                     <td>
                         <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                             <option value=""></option>
-                            <?php
-                            foreach ($coas as $key => $value) {
-                                ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                                <?php
-                            }
-                            ?>
                         </select>
                     </td>
                     <td>
@@ -240,14 +233,7 @@
                     </td>
                     <td>
                         <select class="form-control input-sm select2-coa coa_:nourut" style="width:100%" name="kode_coa[]" required>
-                            <option value=""></option>
-                            <?php
-                            foreach ($coas as $key => $value) {
-                                ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                                <?php
-                            }
-                            ?>
+
                         </select>
                     </td>
                     <td>
@@ -284,6 +270,40 @@
                     }
                 });
             });
+            const setCoaItem = ((klas = "select2-coa", setVal = "") => {
+                $("." + klas).select2({
+                    placeholder: "Pilih Coa",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_coa",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                let selected = setVal === item.kode_coa ? true : false;
+                                results.push({
+                                    text: item.nama,
+                                    children: [{
+                                            id: item.kode_coa,
+                                            text: item.kode_coa,
+                                            selected: selected
+                                        }]
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        }
+                    }
+                });
+            });
             var no = 0;
             const calculateTotal = (() => {
                 var total = 0;
@@ -299,6 +319,7 @@
 
                 $("#total_nominal").val(total);
             });
+
             const setCurr = (() => {
                 $(".select2-curr").select2({
                     placeholder: "Pilih",
@@ -399,13 +420,14 @@
                     allowClear: true,
                     placeholder: "Pilih"
                 });
+
                 $(".btn-add-item").on("click", function (e) {
                     no += 1;
                     e.preventDefault();
                     var tmplt = $("template.bankmasuk-tmplt");
                     var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                     $("#bankmasuk-detail tbody").append(isi_tmplt);
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     setCurr();
                     setTglFormatDef(".tgl-def-format");
                     $(".nominal").on("blur", function () {
@@ -442,7 +464,7 @@
                         data: function (params) {
                             return{
                                 search: params.term,
-                                jenis:"customer"
+                                jenis: "customer"
                             };
                         },
                         processResults: function (data) {
@@ -529,7 +551,6 @@
                                 $("#bankmasuk-detail tbody").append(isi_tmplt);
                                 var tglHeader = $("#tanggal").val();
                                 $(".tglcair" + no).val(tglHeader);
-                                $(".coa_" + no).val(row.kode_coa).trigger("change");
                                 $(".bank" + no).val(row.bank);
                                 $(".norek" + no).val(row.no_rek);
                                 $(".nobg" + no).val(row.no_bg);

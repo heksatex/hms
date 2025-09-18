@@ -428,6 +428,33 @@ class Kaskeluar extends MY_Controller {
         }
     }
 
+    public function get_coa() {
+        try {
+            $model = new $this->m_global;
+            $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])->setSearch(["kode_coa", "nama"])->setOrder(["kode_coa" => "asc"]);
+            $_POST['length'] = 50;
+            $_POST['start'] = 0;
+            if ($this->input->get('search') !== "") {
+                $_POST['search']['value'] = $this->input->get('search');
+            }
+            $data = [];
+            foreach ($model->getData() as $key => $value) {
+                $data [] = [
+                    "text" => $value->nama,
+                    "children" => [
+                        "id" => $value->kode_coa,
+                        "text" => $value->kode_coa
+                    ]
+                ];
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("data" => $model->getData())));
+        } catch (Exception $ex) {
+            
+        }
+    }
+
     public function get_currency() {
         try {
             $model = new $this->m_global;
@@ -464,7 +491,6 @@ class Kaskeluar extends MY_Controller {
                         break;
                     default :
                         break;
-                        
                 }
             }
             $_POST['length'] = 50;
@@ -583,7 +609,7 @@ class Kaskeluar extends MY_Controller {
             $buff = $printer->getPrintConnector();
             $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bM");
-            $tanggal = date("Y-m-d", strtotime($head->tanggal));
+            $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
 
             $printer->text(str_pad("No : {$head->no_kk}", 21));
