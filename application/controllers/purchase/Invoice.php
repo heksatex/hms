@@ -273,7 +273,7 @@ class Invoice extends MY_Controller {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
             $users = $this->session->userdata('nama');
-            
+
             $kodeJurnal = $this->input->post("jurnal");
             $status = $this->input->post("status");
             $id = $this->input->post("id");
@@ -607,8 +607,8 @@ class Invoice extends MY_Controller {
                 throw new Exception('Data Tidak ditemukan', 500);
             }
             $hasilKurang = $getDetail->qty_beli - $qty;
-            if ($hasilKurang < 1) {
-                throw new Exception('Hasil Split QTY Kurang dari 1', 500);
+            if ($hasilKurang <= 0) {
+                throw new Exception('Hasil Split QTY Kurang dari 0', 500);
             }
             $model->update(["qty_beli" => $hasilKurang]);
             unset($getDetail->id);
