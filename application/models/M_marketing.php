@@ -251,8 +251,8 @@ class m_marketing extends CI_Model
 	} 
 
 
-	var $column_order3 = array(null, 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order','pl.no_pl');
-	var $column_search3= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order','pl.no_pl');
+	var $column_order3 = array(null, 'sq.lot','sq.corak_remark','sq.warna_remark','sq.lebar_jadi','sq.qty_jual','sq.qty2_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order','msg.nama_sales_group','pl.no_pl');
+	var $column_search3= array('sq.lot','sq.warna_remark','sq.corak_remark','sq.lebar_jadi','sq.qty_jual','sq.lokasi_fisik','kp_lot.lot', 'sq.sales_order','msg.nama_sales_group','pl.no_pl');
 	var $order3  	  = array('sq.lot' => 'asc');
 
 	function get_query_items3()
@@ -261,8 +261,12 @@ class m_marketing extends CI_Model
     		$this->db->where('sq.lokasi_fisik',$this->input->post('lokasi'));
         }
 
+		if($this->input->post('cmbMarketing') != 'All'){
+    		$this->db->where('sq.sales_group',$this->input->post('cmbMarketing'));
+        }
+
 		$this->db->SELECT("sq.lot, sq.warna_remark, sq.corak_remark, sq.lebar_jadi, sq.uom_lebar_jadi, sq.qty_jual, sq.uom_jual, sq.qty2_jual, sq.uom2_jual, sq.lokasi_fisik, sq.sales_order,
-							kp_lot.lot as lot_asal, pl.no_pl ");
+							kp_lot.lot as lot_asal, pl.no_pl,nama_sales_group");
 		$this->db->FROM("stock_quant sq");
 		$this->db->JOIN("
 						(SELECT spl.lot, spli.quant_id_baru as quant_id FROM split spl INNER JOIN split_items spli ON spl.kode_split = spli.kode_split
@@ -271,6 +275,7 @@ class m_marketing extends CI_Model
 						UNION SELECT mrpin.lot, fg.quant_id FROM mrp_production_fg_hasil fg INNER JOIN mrp_inlet mrpin ON fg.id_inlet = mrpin.id
 						UNION SELECT lot, quant_id FROM stock_kain_jadi_migrasi )  kp_lot", "kp_lot.quant_id = sq.quant_id","LEFT" );
 		$this->db->JOIN("(SELECT no_pl, quant_id FROM picklist_detail where valid NOT IN ('cancel') )  pl", "pl.quant_id = sq.quant_id", "LEFT");
+		$this->db->JOIN("mst_sales_group msg","msg.kode_sales_group = sq.sales_group","LEFT");
         $this->db->WHERE("sq.lokasi",$this->lokasi);
 		$this->db->WHERE_NOT_IN('sq.lokasi_fisik',$this->lokasi_fisik);
 
