@@ -60,6 +60,17 @@
                             <label>Scan Kode Lokasi</label>
                             <input type="text" class="form-control" name="lokasi" id="lokasi" placeholder="Scan Lokasi"/>
                         </div>
+                        <div class="form-group">
+                            <label>Marketing</label>
+                            <select class="form-control" name="cmbMarketing" id="cmbMarketing">
+                                    <?php 
+                                        echo '<option value="All">All</option>';
+                                        foreach($mst_sales_group as $mkt){
+                                            echo '<option value="'.$mkt->kode_sales_group.'">'.$mkt->nama_sales_group.'</option>';
+                                        }
+                                    ?>
+                            </select>     
+                        </div>
                         <div class="box-footer">
                             <button type="submit" name="submit" id="btn-proses" class="btn btn-primary btn-sm">Proses</button>                        
                         </div>

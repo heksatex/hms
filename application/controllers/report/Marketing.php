@@ -298,6 +298,7 @@ class Marketing extends MY_Controller
     {
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
+        $data['mst_sales_group'] = $this->_module->get_list_sales_group();
         $this->load->view('report/v_marketing_view_by_lokasi', $data);
     }
 
@@ -306,6 +307,8 @@ class Marketing extends MY_Controller
         $id_dept        = 'RMKT';
         $data['id_dept']= $id_dept;
         $data['lokasi']= $this->input->get('lokasi');
+        $data['cmbMarketing']= $this->input->get('cmbMarketing');
+        $data['nama_mkt']   = $this->_module->get_nama_sales_Group_by_kode($this->input->get('cmbMarketing')) ?? 'All';
         $this->load->view('report/v_marketing_view_by_lokasi_items', $data);
         
     }
@@ -331,6 +334,7 @@ class Marketing extends MY_Controller
                 $row[] = $field->lokasi_fisik;
                 $row[] = $field->lot_asal;
                 $row[] = $field->sales_order;
+                $row[] = $field->nama_sales_group;
                 $row[] = $field->no_pl;
                 $data[] = $row;
             }
@@ -356,7 +360,10 @@ class Marketing extends MY_Controller
 		ob_start();
         $get_data = $this->m_marketing->get_datatables3_excel();
 
-        $lokasi    = $this->input->post('lokasi');
+        $lokasi          = $this->input->post('lokasi');
+        $cmbMarketing    = $this->input->post('cmbMarketing');
+
+        $nama_mkt        = $this->_module->get_nama_sales_Group_by_kode($cmbMarketing) ?? 'All';
 
 
         $object = new PHPExcel();
@@ -372,8 +379,12 @@ class Marketing extends MY_Controller
  		$object->getActiveSheet()->SetCellValue('B3', ': '.$lokasi);
 		$object->getActiveSheet()->mergeCells('B3:D3');
 
+        $object->getActiveSheet()->SetCellValue('A4', 'Marketing');
+ 		$object->getActiveSheet()->SetCellValue('B4', ': '.$nama_mkt);
+		$object->getActiveSheet()->mergeCells('B4:D4');
+
        //bold huruf
-		$object->getActiveSheet()->getStyle("A1:N5")->getFont()->setBold(true);
+		$object->getActiveSheet()->getStyle("A1:O6")->getFont()->setBold(true);
 
 		// Border 
 		$styleArray = array(
@@ -385,24 +396,24 @@ class Marketing extends MY_Controller
 		);	
 
          // header table
-        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC','Picklist (PL)');
+        $table_head_columns  = array('No', 'Lot', 'Corak' , 'Warna', 'Lebar Jadi', 'Uom lebar', 'Qty1 [Jual]', 'Uom1 [JUAL]', 'Qty2 [JUAL]', 'Uom2 [JUAL]', 'Lokasi Fisik / Rak ', 'Lok / KP', 'SO / SC','Marketing','Picklist (PL)');
 
         $column = 0;
         foreach ($table_head_columns as $judul) {
             # code...
-            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 5, $judul);  
+            $object->getActiveSheet()->setCellValueByColumnAndRow($column, 6, $judul);  
             $column++;
         }
 
         // set with and border
-    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N');
+    	$index_header = array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O');
     	$loop = 0;
     	foreach ($index_header as $val) {
     		
-            $object->getActiveSheet()->getStyle($val.'5')->applyFromArray($styleArray);
+            $object->getActiveSheet()->getStyle($val.'6')->applyFromArray($styleArray);
         }
 
-        $rowCount  = 6;
+        $rowCount  = 7;
         $num       = 1;
         foreach ($get_data as $val) {
 
@@ -419,7 +430,8 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->SetCellValue('K'.$rowCount, $val->lokasi_fisik);
 			$object->getActiveSheet()->SetCellValue('L'.$rowCount, $val->lot_asal);
 			$object->getActiveSheet()->SetCellValue('M'.$rowCount, $val->sales_order);
-			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->no_pl);
+			$object->getActiveSheet()->SetCellValue('N'.$rowCount, $val->nama_sales_group);
+			$object->getActiveSheet()->SetCellValue('O'.$rowCount, $val->no_pl);
 
             //set border true
 			$object->getActiveSheet()->getStyle('A'.$rowCount)->applyFromArray($styleArray);
@@ -437,6 +449,7 @@ class Marketing extends MY_Controller
 			$object->getActiveSheet()->getStyle('L'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('M'.$rowCount)->applyFromArray($styleArray);
 			$object->getActiveSheet()->getStyle('N'.$rowCount)->applyFromArray($styleArray);
+			$object->getActiveSheet()->getStyle('O'.$rowCount)->applyFromArray($styleArray);
 		
 	        $rowCount++;
 		}
