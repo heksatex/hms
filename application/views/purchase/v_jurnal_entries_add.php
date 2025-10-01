@@ -3,6 +3,11 @@
 <html lang="en">
     <head>
         <?php $this->load->view("admin/_partials/head.php") ?>
+        <style>
+            #btn-cancel {
+                display: none;
+            }
+        </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
         <div class="wrapper">
@@ -26,7 +31,7 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">Form Tambah</h3>
                         </div>
-                            <!--<form  class="form-horizontal" method="POST" name="form-jurnal" id="form-jurnal" action="<?= base_url('purchase/jurnalentries/simpan/') ?>">-->
+                            <form  class="form-horizontal" method="POST" name="form-jurnal" id="form-jurnal" action="<?= base_url('purchase/jurnalentries/simpan/') ?>">
                         <div class="box-body">
                             <button type="submit" style="display: none;" id="form-jurnal-submit"></button>
                             <div class="col-md-6 col-xs-12">
@@ -62,10 +67,10 @@
                                         </div>
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-                                                <label class="form-label required">Periode</label>
+                                                <label class="form-label">Periode</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
-                                                <select class="form-control input-sm periode" name="periode" style="width: 100%" required>
+                                                <select class="form-control input-sm periode" name="periode" style="width: 100%">
                                                 </select>
                                             </div>
                                         </div>
@@ -95,7 +100,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!--</form>-->
+                        </form>
                     </div>
                 </section>
             </div>
@@ -149,7 +154,32 @@
                         }
                     }
                 });
+                
+                const form = document.forms.namedItem("form-jurnal");
+                form.addEventListener(
+                        "submit",
+                        (event) => {
+                    please_wait(function () {});
+                    request("form-jurnal").then(
+                            response => {
+                                unblockUI(function () {
+                                    alert_notify(response.data.icon, response.data.message, response.data.type, function () {});
+                                }, 100);
+                                if (response.status === 200)
+                                    window.location.replace(response.data.url);
+                            }
+                    ).catch(err => {
+                        unblockUI(function () {});
+                        alert_modal_warning("Hubungi Dept IT");
+                    });
+                    event.preventDefault();
+                },
+                        false
+                        );
 
+                $("#btn-simpan").off("click").unbind("click").on("click", function () {
+                        $("#form-jurnal-submit").trigger("click");
+                });
                 
             });
         </script>

@@ -147,30 +147,23 @@
                 <td>
                     <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
-                        <?php
-                        foreach ($coas as $key => $value) {
-                            ?>
-                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
-                            <?php
-                        }
-                        ?>
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="kurs[]" value="1.00" class="form-control input-sm" required/>
+                    <input type="text" name="kurs[]" value="1.00" class="form-control input-sm text-right" required/>
                 </td>
                 <td>
                     <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" class="form-control nominal text-right input-sm" value="0" required/>
+                    <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                 </td>
             </tr>
         </template>
@@ -184,6 +177,55 @@
                 });
             });
         });
+
+        const setNominalCurrency = (() => {
+            $("input[data-type='currency']").on({
+                keyup: function () {
+                    formatCurrency($(this));
+                },
+                drop: function () {
+                    formatCurrency($(this));
+                },
+                blur: function () {
+                    formatCurrency($(this), "blur");
+                }
+            });
+        });
+
+        const setCoaItem = ((klas = "select2-coa") => {
+            $("." + klas).select2({
+                placeholder: "Pilih Coa",
+                allowClear: true,
+                ajax: {
+                    dataType: 'JSON',
+                    type: "GET",
+                    url: "<?php echo base_url(); ?>accounting/kaskeluar/get_coa",
+                    delay: 250,
+                    data: function (params) {
+                        return{
+                            search: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        var results = [];
+                        $.each(data.data, function (index, item) {
+                            results.push({
+                                text: item.nama,
+                                children: [{
+                                        id: item.kode_coa,
+                                        text: item.kode_coa
+                                    }]
+                            });
+                        });
+                        return {
+                            results: results
+                        };
+                    }
+                }
+            });
+        });
+
+
         var no = 0;
         const setCurr = (() => {
             $(".select2-curr").select2({
@@ -269,18 +311,19 @@
                 var tmplt = $("template.kaskeluar-tmplt");
                 var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                 $("#kaskeluar-detail tbody").append(isi_tmplt);
-                $(".select2-coa").select2();
+                setCoaItem();
                 setCurr();
-                $(".nominal").on("blur", function () {
+                $(".nominal" + no).on("blur", function () {
                     calculateTotal();
                 });
-                $(".nominal").keyup(function (ev) {
+                $(".nominal" + no).keyup(function (ev) {
                     if (ev.keyCode === 13) {
                         $(".btn-add-item").trigger("click");
                     }
                 });
                 $(".uraian" + no).focus();
                 $(".nourut" + no).html(no);
+                setNominalCurrency();
 
             });
             $("#kaskeluar-detail").on("click", ".btn-rmv-item", function () {
@@ -292,20 +335,19 @@
             });
 
             const calculateTotal = (() => {
-                var total = 0;
-                const elements = document.querySelectorAll('.nominal');
+                    var total = 0;
+                    const elements = document.querySelectorAll('.nominal');
+                    $.each(elements, function (idx, nomina) {
+                        let ttl = $(nomina).val();
+                        total += parseInt(ttl.replace(/,/g, ""));
+                    });
+                    if (total === NaN) {
+                        $("#total_nominal").val();
+                        return;
+                    }
 
-                $.each(elements, function (idx, nomina) {
-                    let ttl = $(nomina).val();
-                    total += parseInt(ttl);
+                    $("#total_nominal").val(total);
                 });
-                if (total === NaN) {
-                    $("#total_nominal").val();
-                    return;
-                }
-
-                $("#total_nominal").val(total);
-            });
 
             $(document).on('focus', '.select2', function (e) {
                 if (e.originalEvent) {

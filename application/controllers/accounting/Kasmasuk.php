@@ -116,9 +116,9 @@ class Kasmasuk extends MY_Controller {
     public function add() {
         $data['id_dept'] = 'ACCKM';
         $model = new $this->m_global;
-        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setWheres(["jenis_transaksi" => "kas"])->getData();
+//        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas"])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_masuk_add', $data);
     }
@@ -169,7 +169,7 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                              "regex_match" => "{field} harus berupa number / desimal"
@@ -218,7 +218,8 @@ class Kasmasuk extends MY_Controller {
                 $giro = $this->input->post("giro_keluar_detail");
                 $totalRp = 0;
                 foreach ($this->input->post("uraian") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "kas_masuk_id" => $headID,
                         "tanggal" => $this->input->post("tanggal"),
@@ -227,8 +228,8 @@ class Kasmasuk extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
-                        "giro_keluar_detail_id" => $giro[$key],
+                        "nominal" => $nom,
+                        "giro_keluar_detail_id" => $giro[$key] ?? 0,
                         "row_order" => ($key + 1)
                     ];
                 }
@@ -275,9 +276,9 @@ class Kasmasuk extends MY_Controller {
                     ->setSelects(["akmd.no_km,akmd.tanggal,akmd.kode_coa,akmd.uraian,akmd.kurs,akmd.currency_id,akmd.nominal,giro_keluar_detail_id"])
                     ->setSelects(["acc_coa.nama as nama_coa", "currency_kurs.currency as curr"])
                     ->getData();
-            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setWheres(["jenis_transaksi" => "kas"])->getData();
+//            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas"])->setOrder(["kode_coa" => "asc"])->getData();
             $data['id_dept'] = 'ACCKM';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -414,7 +415,7 @@ class Kasmasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                              "regex_match" => "{field} harus berupa number / desimal"
@@ -474,7 +475,8 @@ class Kasmasuk extends MY_Controller {
                 $totalRp = 0;
 
                 foreach ($this->input->post("uraian") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "kas_masuk_id" => $ids,
                         "tanggal" => $this->input->post("tanggal"),
@@ -483,8 +485,8 @@ class Kasmasuk extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
-                        "giro_keluar_detail_id" => $giro[$key],
+                        "nominal" => $nom,
+                        "giro_keluar_detail_id" => $giro[$key] ?? 0,
                         "row_order" => ($key + 1)
                     ];
                 }

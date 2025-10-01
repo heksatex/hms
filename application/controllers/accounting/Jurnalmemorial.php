@@ -11,58 +11,68 @@ defined('BASEPATH') or exit('No Direct Script Acces Allowed');
  *
  * @author RONI
  */
-require_once APPPATH . '/third_party/vendor/autoload.php';
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Settings;
-use Cache\Adapter\Apcu\ApcuCachePool;
-use Cache\Bridge\SimpleCache\SimpleCacheBridge;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-
 class Jurnalmemorial extends MY_Controller {
 
     //put your code here
-    protected $data;
+    protected $data, $tanggals, $filter, $jurnal;
+    protected $jm = [
+        "pen_kb" => "Penerimaan Kas Besar", //0
+        "peng_kb" => "Pengeluaran Kas Besar", //1
+        "pen_b" => "Penerimaan Bank", //2
+        "peng_b" => "Pengeluaran Bank", //3
+        "pen_g" => "Penerimaan Giro", //4
+        "peng_g" => "Pengeluaran Giro", //5
+        "pen_kv" => "Penerimaan Kas Valas", //6
+        "peng_kv" => "Pengeluaran Kas Valas", //7
+        "pel_p" => "Pelunasan Piutang", //8
+        "pel_h" => "Pelunasan Hutang", //9
+    ];
 
     public function __construct() {
         parent:: __construct();
         $this->is_loggedin();
         $this->load->model("m_global");
         $this->load->model('_module');
-        $this->data = new $this->m_global;
+        $this->load->library('excelexp/Memorialpenkasbesar', null, 'penkasbesar');
+        $this->load->library('excelexp/Memorialpengkasbesar', null, 'pengkasbesar');
+        $this->load->library('excelexp/Memorialpenbank', null, 'penbank');
+        $this->load->library('excelexp/Memorialpengbank', null, 'pengbank');
+        $this->load->library('excelexp/Memorialpengiro', null, 'pengiro');
+        $this->load->library('excelexp/Memorialpenggiro', null, 'penggiro');
+        $this->load->library('excelexp/Memorialpenkasvalas', null, 'penkasvalas');
+        $this->load->library('excelexp/Memorialpengkasvalas', null, 'pengkasvalas');
+        $this->load->library('excelexp/Memorialpelpiutang', null, 'pelpiutang');
+        $this->load->library('excelexp/Memorialpelhutang', null, 'pelhutang');
+//        $this->data = new $this->m_global;
     }
 
     protected function getData() {
-//        try {
-        $periode = $this->input->post("periode");
-        $jurnal = $this->input->post("jurnal");
-        $filter = $this->input->post("filter");
-        $tanggal_postings = $this->input->post("tanggal_dibuat");
-        if ($filter === "1") {
-            $tanggal_posting = explode(" - ", $tanggal_postings);
-            if (count($tanggal_posting) < 2) {
-                throw new \Exception("Tentukan dahulu periodenya", 500);
-            }
-            $tanggalAwal = date("Y-m-d H:i:s", strtotime($tanggal_posting[0] . " 00:00:00"));
-            $tanggalAkhir = date("Y-m-d H:i:s", strtotime($tanggal_posting[1] . " 23:59:59"));
-            $where = ["tanggal_dibuat >=" => $tanggalAwal, "tanggal_dibuat <=" => $tanggalAkhir];
-        } else {
-            $where = ["je.periode" => $periode];
-        }
+        try {
+            $periode = $this->input->post("periode");
+            $jurnal = $this->input->post("jurnal");
+            $filter = $this->input->post("filter");
+            switch ($jurnal) {
+                case 1:
 
-        $this->data->setTables("acc_jurnal_entries je")
-                ->setJoins("acc_jurnal_entries_items jei", "je.kode = jei.kode")
-                ->setJoins("mst_jurnal mj", "mj.kode = je.tipe", "left")
-                ->setJoins("acc_coa", "jei.kode_coa = acc_coa.kode_coa", "left")
-                ->setJoins("partner", "partner.id = jei.partner", "left")
-                ->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
-                ->setWheres(array_merge(["je.status" => "posted", "je.tipe" => $jurnal], $where))
-                ->setSelects(["mj.nama as nama_jurnal", "acc_coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
-                    "origin,date(tanggal_dibuat) as tanggal_dibuat"]);
-//        } catch (Exception $ex) {
-//            
-//        }
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            $this->data->setTables("acc_jurnal_entries je")
+                    ->setJoins("acc_jurnal_entries_items jei", "je.kode = jei.kode")
+                    ->setJoins("mst_jurnal mj", "mj.kode = je.tipe", "left")
+                    ->setJoins("acc_coa", "jei.kode_coa = acc_coa.kode_coa", "left")
+                    ->setJoins("partner", "partner.id = jei.partner", "left")
+                    ->setOrder(["jei.posisi" => "desc", "jei.kode_coa" => "asc"])
+                    ->setWheres(array_merge(["je.status" => "posted", "je.tipe" => $jurnal], $where))
+                    ->setSelects(["mj.nama as nama_jurnal", "acc_coa.nama as nama_coa", "je.periode,je.reff_note,je.tipe", "jei.*", "partner.nama as nama_partner",
+                        "origin,date(tanggal_dibuat) as tanggal_dibuat"]);
+        } catch (Exception $ex) {
+            throw $ex;
+        }
     }
 
     public function check_berdasarkan($str, $periode): bool {
@@ -73,13 +83,26 @@ class Jurnalmemorial extends MY_Controller {
         return true;
     }
 
+    public function jm() {
+        try {
+            $data["jm"] = $this->input->get("jm");
+            $data["filter"] = $this->input->get("filter");
+            $data["header"] = "{$data['jm']}_{$data['filter']}";
+
+            $html = $this->load->view('accounting/jm/v_header', $data, true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => "")));
+        }
+    }
+
     public function index() {
-        $data['id_dept'] = 'ACCJM';
-        $data['date'] = date('Y-m-d', strtotime("-1 month", strtotime(date("Y-m-d")))) . ' - ' . date('Y-m-d');
-        $model = new $this->m_global;
-        $model2 = clone $model;
-        $data['jurnal'] = $model->setTables("mst_jurnal")->setOrder(["nama" => "asc"])->getData();
-        $data["periode"] = $model2->setTables("acc_periode")->setOrder(["tahun_fiskal" => "desc", "periode" => "asc"])->getData();
+        $data['id_dept'] = '';
+        $data['jurnal'] = $this->jm;
         $this->load->view('accounting/v_rpt_jurnal_memorial', $data);
     }
 
@@ -96,7 +119,10 @@ class Jurnalmemorial extends MY_Controller {
             [
                 'field' => 'periode',
                 'label' => 'periode',
-                'rules' => ['callback_check_berdasarkan[tanggal_dibuat]'],
+                'rules' => ['required'],
+                'errors' => [
+                    'required' => '{field} Harus dipilih',
+                ]
             ]
         ];
         try {
@@ -104,16 +130,100 @@ class Jurnalmemorial extends MY_Controller {
             if ($this->form_validation->run() == FALSE) {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
-            $detail = $this->input->post("detail");
-            $this->getData();
-            if ($detail === "0") {
-                $this->data->setGroups(["jei.kode_coa", "jei.posisi"])->setSelects(["sum(jei.nominal) as nominal"]);
+            $tanggal = $this->input->post("periode");
+            $this->tanggals = explode(" - ", $tanggal);
+            $this->filter = $this->input->post("filter");
+            $this->jurnal = $this->input->post("jurnal");
+            $view = "";
+            $model = new $this->m_global;
+            switch ($this->jurnal) {
+                case "pen_kb":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->penkasbesar->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_kas_besar_{$this->filter}", $data, true);
+                    break;
+                case "peng_kb":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->pengkasbesar->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_kas_besar_keluar_{$this->filter}", $data, true);
+                    break;
+                case "pen_b":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->penbank->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_penerimaan_bank_{$this->filter}", $data, true);
+                    break;
+                case "peng_b":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->pengbank->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_pengeluaran_bank_{$this->filter}", $data, true);
+                    break;
+                case "pen_g":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->pengiro->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_penerimaan_giro_{$this->filter}", $data, true);
+                    break;
+                case "peng_g":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->penggiro->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_pengiriman_giro_{$this->filter}", $data, true);
+                    break;
+
+                case "pen_kv":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->penkasvalas->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_penerimaan_kasvalas_{$this->filter}", $data, true);
+                    break;
+                case "peng_kv":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->pengkasvalas->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_pengeluaran_kasvalas_{$this->filter}", $data, true);
+                    break;
+                case "pel_p":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->pelpiutang->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_pelunasan_piutang_{$this->filter}", $data, true);
+                    break;
+                case "pel_h":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->pelhutang->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_pelunasan_hutang_{$this->filter}", $data, true);
+                    break;
+                default://
+                    break;
             }
-            $data["data"] = $this->data->getData();
-            $html = $this->load->view('accounting/v_rpt_jurnal_memorial_detail', $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $view)));
         } catch (Exception $ex) {
             $this->output->set_status_header(($ex->getCode()) ?? 500)
                     ->set_content_type('application/json', 'utf-8')
@@ -144,104 +254,142 @@ class Jurnalmemorial extends MY_Controller {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
 
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
+            $tanggal = $this->input->post("periode");
+            $this->tanggals = explode(" - ", $tanggal);
+            $this->filter = $this->input->post("filter");
+            $this->jurnal = $this->input->post("jurnal");
+            $view = "";
+            $filename = "";
+            $model = new $this->m_global;
+            switch ($this->jurnal) {
+                case "pen_kb":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->penkasbesar->_data($model, $data);
+                    $data["kredit"] = $datas["kredit"];
+                    $data["debit"] = $datas["debit"];
+                    if ($this->filter === "global")
+                        $view = $this->penkasbesar->_global($data, $filename);
+                    else
+                        $view = $this->penkasbesar->_detail($data, $filename);
+                    break;
+                case "peng_kb":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->pengkasbesar->_data($model, $data);
+                    $data["kredit"] = $datas["kredit"];
+                    $data["debit"] = $datas["debit"];
+                    if ($this->filter === "global")
+                        $view = $this->pengkasbesar->_global($data, $filename);
+                    else
+                        $view = $this->pengkasbesar->_detail($data, $filename);
+                    break;
+                case "peng_b":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->pengbank->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->pengbank->_global($data, $filename);
+                    else if ($this->filter === "detail")
+                        $view = $this->pengbank->_detail($data, $filename);
+                    else
+                        $view = $this->pengbank->_detail_2($data, $filename);
+                    break;
 
-            $detail = $this->input->post("detail") ?? "0";
-            $jurnal_nm = $this->input->post("jurnal_nm");
-            $periodes = $this->input->post("periode");
-            $tanggal = $this->input->post("tanggal_dibuat");
-            $filter = $this->input->post("filter");
+                case "pen_g":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->pengiro->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->pengiro->_global($data, $filename);
+                    else if ($this->filter === "detail")
+                        $view = $this->pengiro->_detail($data, $filename);
+                    else
+                        $view = $this->pengiro->_detail_2($data, $filename);
+                    break;
+                case "peng_g":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->penggiro->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->penggiro->_global($data, $filename);
+                    else if ($this->filter === "detail")
+                        $view = $this->penggiro->_detail($data, $filename);
+                    else
+                        $view = $this->penggiro->_detail_2($data, $filename);
+                    break;
+                case "pen_kv":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->penkasvalas->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->penkasvalas->_global($data, $filename);
+                    else
+                        $view = $this->penkasvalas->_detail($data, $filename);
+                    break;
+                    case "peng_kv":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->pengkasvalas->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->pengkasvalas->_global($data, $filename);
+                    else
+                        $view = $this->pengkasvalas->_detail($data, $filename);
+                    break;
+                    case "pel_p":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->pelpiutang->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->pelpiutang->_global($data, $filename);
+                    else if($this->filter === "detail")
+                        $view = $this->pelpiutang->_detail($data, $filename);
+                    else
+                        $view = $this->pelpiutang->_detail_2($data, $filename);
+                    break;
+                    case "pel_h":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->pelhutang->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->pelhutang->_global($data, $filename);
+                    else if($this->filter === "detail")
+                        $view = $this->pelhutang->_detail($data, $filename);
+                    else
+                        $view = $this->pelhutang->_detail_2($data, $filename);
+                    break;
+                default:
+                    break;
+            }
 
-            $this->getData();
-            if ($detail === "0") {
-                $this->data->setGroups(["jei.kode_coa", "jei.posisi"])->setSelects(["sum(jei.nominal) as nominal"]);
-//                  $reloadedSheet = $spreadsheet->getActiveSheet();
-//                  $reloadedSheet->removeColumnByIndex(4, 7);
-//                $spreadsheet->getActiveSheet()->removeColumn('D');
-//                $spreadsheet->getActiveSheet()->removeColumn('E');
-//                $spreadsheet->getActiveSheet()->removeColumn('F');
-//                $spreadsheet->getActiveSheet()->removeColumn('G');
-            }
-            $data = $this->data->getData();
-            $sheet->setCellValue("A1", "Jurnal Memorial {$jurnal_nm}");
-            if ($filter === "1") {
-                $sheet->setCellValue("A2", "Tanggal Posting {$tanggal}");
-            }
-            else {
-                $sheet->setCellValue("A2", "Periode {$periodes}");
-            }
-            $row = 4;
-
-            $sheet->setCellValue("A{$row}", 'No');
-            $sheet->setCellValue("B{$row}", 'Periode');
-            $sheet->setCellValue("C{$row}", 'Tanggal Posting');
-            $sheet->setCellValue("D{$row}", 'No Bukti');
-            $sheet->setCellValue("E{$row}", 'Origin');
-            $sheet->setCellValue("F{$row}", 'Kode ACC');
-            $sheet->setCellValue("G{$row}", 'Nama ACC');
-            $sheet->setCellValue("H{$row}", 'Keterangan');
-            $sheet->setCellValue("I{$row}", 'Reff Note');
-            $sheet->setCellValue("J{$row}", 'Partner');
-            $sheet->setCellValue("K{$row}", 'Debit');
-            $sheet->setCellValue("L{$row}", 'Credit');
-
-            $no = 0;
-            $kredits = 0;
-            $debets = 0;
-            foreach ($data as $key => $value) {
-                $no++;
-                $row++;
-                $debet = 0;
-                $kredit = 0;
-                if ($value->posisi === "D") {
-                    $debet = $value->nominal;
-                    $debets += $debet;
-                } else {
-                    $kredit = $value->nominal;
-                    $kredits += $kredit;
-                }
-
-                $sheet->setCellValue("A{$row}", $no);
-                $sheet->setCellValue("B{$row}", $value->periode);
-                $sheet->setCellValue("C{$row}", $value->tanggal_dibuat);
-                $sheet->setCellValue("D{$row}", $value->kode);
-                $sheet->setCellValue("E{$row}", $value->origin);
-                $sheet->setCellValue("F{$row}", $value->kode_coa);
-                $sheet->setCellValue("G{$row}", $value->nama_coa);
-                $sheet->setCellValue("H{$row}", $value->nama);
-                $sheet->setCellValue("I{$row}", $value->reff_note);
-                $sheet->setCellValue("J{$row}", $value->nama_partner);
-                $sheet->setCellValue("K{$row}", $debet);
-                $sheet->setCellValue("L{$row}", $kredit);
-            }
-
-            if ($no > 0) {
-                $row += 2;
-                $sheet->setCellValue("K{$row}", $debets);
-                $sheet->setCellValue("L{$row}", $kredits);
-            }
-//            $periodes = $this->input->post("periode");
-
-            if ($detail === "0") {
-                $reloadedSheet = $spreadsheet->getActiveSheet();
-                $reloadedSheet->removeColumnByIndex(3, 3);
-                $reloadedSheet->removeColumnByIndex(4, 3);
-            }
-            $nm = $periodes ?? $tanggal;
-            $nm = str_replace("/", "_", $nm);
-            $writer = new Xlsx($spreadsheet);
-            $filename = "jurnal_memorial_{$nm}";
-            $url = "dist/storages/report/jurnal_memorial";
-            if (!is_dir(FCPATH . $url)) {
-                mkdir(FCPATH . $url, 0775, TRUE);
-            }
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-            $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'text_name' => $filename,
-                        'type' => 'success', "data" => base_url($url . '/' . $filename . '.xlsx'))));
+                    ->set_output(json_encode(array('message' => 'Berhasil Export', 'icon' => 'fa fa-check', 'type' => 'success', 'text_name' => $filename, "data" => $view)));
         } catch (Exception $ex) {
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')

@@ -181,13 +181,7 @@
                                                             </td>
                                                             <td>
                                                                 <select class="form-control input-sm select2-coa edited" style="width:100%" name="kode_coa[]" required disabled>
-                                                                    <?php
-                                                                    foreach ($coas as $key => $values) {
-                                                                        ?>
-                                                                        <option value="<?= $values->kode_coa ?>" <?= ($values->kode_coa === $value->kode_coa) ? 'selected' : '' ?>><?= "{$values->kode_coa} - {$values->nama}" ?></option>
-                                                                        <?php
-                                                                    }
-                                                                    ?>
+                                                                    <option value="<?= $value->kode_coa ?>" selected><?= $value->kode_coa ?></option>
                                                                 </select>
 
                                                             </td>
@@ -208,7 +202,8 @@
                                                             </td>
                                                             <td>
                                                                 <input type="text" class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2) ?>" disabled>
-                                                                <input type="text" name="nominal[]" value="<?= $value->nominal ?>" style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
+                                                                <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
+                                                                       style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
                                                             </td>
                                                         </tr>
                                                     <?php } ?>
@@ -223,7 +218,7 @@
                                                         </td>
                                                         <td class="text-bold">
                                                             <input type="text" class="form-control input-sm text-right ftotal_nominal" value="<?= number_format($datas->total_rp, 2) ?>" readonly/>
-                                                            <input type="text" name="total_nominal" class="form-control input-sm text-right total_nominal" style="display : none" value="<?= $datas->total_rp ?>" readonly/>
+                                                            <input type="text" name="total_nominal" id="total_nominal" class="form-control input-sm text-right total_nominal" style="display : none" value="<?= $datas->total_rp ?>" readonly/>
                                                         </td>
                                                     </tr>
                                                 </tfoot>
@@ -311,30 +306,24 @@
                 <td>
                     <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
-                        <?php
-                        foreach ($coas as $key => $value) {
-                            ?>
-                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
-                            <?php
-                        }
-                        ?>
+
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="kurs[]" value="1.00" class="form-control input-sm" required/>
+                    <input type="text" name="kurs[]" value="1.00" class="form-control input-sm text-right" required/>
                 </td>
                 <td>
                     <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" class="form-control nominal input-sm text-right" value="0"  required/>
+                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                 </td>
             </tr>
         </template>
@@ -346,6 +335,40 @@ if ($datas->status == 'confirm') {
     <?php
 }
 ?>
+
+            const setCoaItem = ((klas = "select2-coa") => {
+                $("." + klas).select2({
+                    placeholder: "Pilih Coa",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_coa",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    text: item.nama,
+                                    children: [{
+                                            id: item.kode_coa,
+                                            text: item.kode_coa
+                                        }]
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        }
+                    }
+                });
+            });
+
             var no = <?= count($data_detail) ?>;
             var edit = false;
             const setCurr = (() => {
@@ -388,6 +411,34 @@ if ($datas->status == 'confirm') {
                     });
                 });
             });
+            const setNominalCurrency = (() => {
+                $("input[data-type='currency']").on({
+                    keyup: function () {
+                        formatCurrency($(this));
+                    },
+                    drop: function () {
+                        formatCurrency($(this));
+                    },
+                    blur: function () {
+                        formatCurrency($(this), "blur");
+                    }
+                });
+            });
+            const calculateTotal = (() => {
+                var total = 0;
+                const elements = document.querySelectorAll('.nominal');
+                $.each(elements, function (idx, nomina) {
+                    let ttl = $(nomina).val();
+                    total += parseInt(ttl.replace(/,/g, ""));
+                });
+                if (total === NaN) {
+                    $("#total_nominal").val();
+                    return;
+                }
+
+                $("#total_nominal").val(total);
+            });
+
             $(function () {
                 lainInput(document.getElementById("lain_lain"), function () {
                     if ($("#partner_name").val() !== "") {
@@ -517,23 +568,24 @@ if ($datas->status == 'confirm') {
                     var tmplt = $("template.giromasuk-tmplt");
                     var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                     $("#giromasuk-detail tbody").append(isi_tmplt);
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     setCurr();
                     setTglFormatDef(".tgl-def-format");
-                    $(".nominal").on("blur", function () {
+                    $(".nominal"+no).on("blur", function () {
                         calculateTotal();
                     });
 
 //                    setBank(no);
                     var tglHeader = $("#tanggal").val();
                     $(".tgljt" + no).val(tglHeader);
-                    $(".nominal").keyup(function (ev) {
+                    $(".nominal" + no).keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
                         }
                     });
                     $(".bank" + no).focus();
                     $(".nourut" + no).html(no);
+                    setNominalCurrency();
                 });
 
                 $("#btn-simpan").on("click", function (e) {
@@ -558,7 +610,7 @@ if ($datas->status == 'confirm') {
                     $(".ftotal_nominal").hide();
                     $(".total_nominal").show();
                     $("#btn-simpan").show();
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     $("#btn-confirm").hide();
                     edit = true;
                 });
@@ -590,22 +642,6 @@ if ($datas->status == 'confirm') {
                     $(this).closest("tr").remove();
                     calculateTotal();
                 });
-
-                const calculateTotal = (() => {
-                    var total = 0;
-                    const elements = document.querySelectorAll('.nominal');
-
-                    $.each(elements, function (idx, nomina) {
-                        let ttl = $(nomina).val();
-                        total += parseInt(ttl);
-                    });
-                    if (total === NaN) {
-                        $(".total_nominal").val();
-                        return;
-                    }
-
-                    $(".total_nominal").val(total);
-                });
                 $(".total-nominal").on("click", function () {
                     calculateTotal();
                 });
@@ -620,7 +656,7 @@ if ($datas->status == 'confirm') {
                         data: function (params) {
                             return{
                                 search: params.term,
-                                jenis:"customer"
+                                jenis: "customer"
                             };
                         },
                         processResults: function (data) {

@@ -19,7 +19,7 @@ if (count($data) > 0) {
     <?php
 }
 foreach ($data as $key => $value) {
-     $partner = ($value->partner_nama === "") ? "({$value->lain2}) " : "({$value->partner_nama}) " ; 
+     $partner = ($value->partner_nama === "") ? "[{$value->lain2}] " : "[{$value->partner_nama}] " ; 
     $showUrut = "";
     $shw = false;
     if ($value->no_bukti !== $temp) {

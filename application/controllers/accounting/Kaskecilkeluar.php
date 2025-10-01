@@ -115,9 +115,9 @@ class Kaskecilkeluar extends MY_Controller {
     public function add() {
         $data['id_dept'] = 'ACCKKK';
         $model = new $this->m_global;
-        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setWheres(["nama" => "Kas Kecil"])->getData();
+//        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["nama" => "Kas Kecil"])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_kecil_keluar_add', $data);
     }
@@ -175,7 +175,7 @@ class Kaskecilkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                              "regex_match" => "{field} harus berupa number / desimal"
@@ -215,7 +215,8 @@ class Kaskecilkeluar extends MY_Controller {
                 $nominal = $this->input->post("nominal");
                 $totalRp = 0;
                 foreach ($this->input->post("uraian") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "kas_kecil_keluar_id" => $headID,
                         "tanggal" => $tanggal,
@@ -224,7 +225,7 @@ class Kaskecilkeluar extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
+                        "nominal" => $nom,
                         "row_order" => ($key + 1)
                     ];
                 }
@@ -269,9 +270,9 @@ class Kaskecilkeluar extends MY_Controller {
                     ->setSelects(["acc_coa.nama as nama_coa", "currency_kurs.currency as curr"])
                     ->getData();
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
-            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setWheres(["nama" => "Kas Kecil"])->getData();
+//            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["nama" => "Kas Kecil"])->setOrder(["kode_coa" => "asc"])->getData();
             $data['id_dept'] = 'ACCKKK';
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
             $this->load->view('accounting/v_kas_kecil_keluar_edit', $data);
@@ -327,7 +328,7 @@ class Kaskecilkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                              "regex_match" => "{field} harus berupa number / desimal"
@@ -377,7 +378,8 @@ class Kaskecilkeluar extends MY_Controller {
                 $nominal = $this->input->post("nominal");
                 $totalRp = 0;
                 foreach ($this->input->post("uraian") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "kas_kecil_keluar_id" => $ids,
                         "tanggal" => $this->input->post("tanggal"),
@@ -386,7 +388,7 @@ class Kaskecilkeluar extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
+                        "nominal" => $nom,
                         "row_order" => ($key + 1)
                     ];
                 }
@@ -625,7 +627,7 @@ class Kaskecilkeluar extends MY_Controller {
                         $jurnal = $head->jurnal;
                         $stt = "edit";
                     } else {
-                        if (!$jurnal = $this->token->noUrut("jurnal_kkk", date('y', strtotime($head->tanggal)) . '/' . date('m', strtotime($head->tanggal)), true)
+                        if (!$jurnal = $this->token->noUrut("jurnal_acc_kkk", date('y', strtotime($head->tanggal)) . '/' . date('m', strtotime($head->tanggal)), true)
                                         ->generate("KKK/", '/%05d')->get()) {
                             throw new \Exception("No jurnal tidak terbuat", 500);
                         }

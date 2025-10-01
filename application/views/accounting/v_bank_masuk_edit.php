@@ -179,9 +179,9 @@
                                                     <th class="style" style="width: 120px">No.Cek/BG</th>
                                                     <th class="style" style="width: 140px">Tgl Cair</th>
                                                     <th class="style" style="width: 100px">No.Acc(Kredit)</th>
-                                                    <th class="style" style="width: 80px;text-align: right;" >Kurs</th>
-                                                    <th class="style" style="">Curr</th>
-                                                    <th class="style text-right" style="max-width: 150px">Nominal</th>
+                                                    <th class="style" style="width: 100px;text-align: right;" >Kurs</th>
+                                                    <th class="style" style="width: 100px">Curr</th>
+                                                    <th class="style text-right" style="width: 150px">Nominal</th>
                                                     </thead>
                                                     <tbody>
                                                         <?php foreach ($data_detail as $key => $value) {
@@ -213,13 +213,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control input-sm select2-coa edited" style="width:100%" name="kode_coa[]" required disabled>
-                                                                        <?php
-                                                                        foreach ($coas as $key => $values) {
-                                                                            ?>
-                                                                            <option value="<?= $values->kode_coa ?>" <?= ($values->kode_coa === $value->kode_coa) ? 'selected' : '' ?>><?= "{$values->kode_coa} - {$values->nama}" ?></option>
-                                                                            <?php
-                                                                        }
-                                                                        ?>
+                                                                        <option value="<?= $value->kode_coa ?>" selected><?= $value->kode_coa ?></option>
                                                                     </select>
 
                                                                 </td>
@@ -238,8 +232,9 @@
                                                                     </select>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2) ?>" disabled>
-                                                                    <input type="text" name="nominal[]" value="<?= $value->nominal ?>" style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
+                                                                    <input type="text"  class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2, ".", ",") ?>" disabled>
+                                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" 
+                                                                           style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
                                                                     <input type="hidden" class="form-control" name="giro_masuk_detail[]" value="<?= $value->giro_masuk_detail_id ?>">
                                                                 </td>
                                                             </tr>
@@ -255,7 +250,7 @@
                                                             </td>
                                                             <td class="text-bold">
                                                                 <input type="text" class="form-control input-sm text-right ftotal_nominal" value="<?= number_format($datas->total_rp, 2) ?>" readonly/>
-                                                                <input type="text" name="total_nominal" class="form-control input-sm text-right total_nominal" style="display : none" value="<?= $datas->total_rp ?>" readonly/>
+                                                                <input type="text" name="total_nominal" id="total_nominal" class="form-control input-sm text-right total_nominal" style="display : none" value="<?= $datas->total_rp ?>" readonly/>
                                                             </td>
                                                         </tr>
                                                     </tfoot>
@@ -348,13 +343,7 @@
                 <td>
                     <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
-                        <?php
-                        foreach ($coas as $key => $value) {
-                            ?>
-                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
-                            <?php
-                        }
-                        ?>
+
                     </select>
                 </td>
                 <td>
@@ -364,14 +353,14 @@
                     <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" class="form-control input-sm nominal text-right" value="0" required/>
+                    <input type="text"  pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" class="form-control input-sm nominal nominal:nourut text-right" value="0" required/>
                     <input type="hidden" name="giro_masuk_detail[]" class="form-control"/>
                 </td>
             </tr>
@@ -404,15 +393,9 @@
                     </div>
                 </td>
                 <td>
-                    <select class="form-control input-sm select2-coa coa_:nourut" style="width:100%" name="kode_coa[]" required>
+                    <select class="form-control input-sm coa_:nourut" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
-                        <?php
-                        foreach ($coas as $key => $value) {
-                            ?>
-                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa} - {$value->nama}" ?></option>
-                            <?php
-                        }
-                        ?>
+
                     </select>
                 </td>
                 <td>
@@ -422,14 +405,14 @@
                     <select class="form-control input-sm select2 select2-curr curr_:nourut" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" class="form-control input-sm text-right nominal:nourut" value="" required/>
+                    <input type="text"  pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="nominal[]" class="form-control input-sm text-right nominal nominal:nourut" value="0" required/>
                     <input type="hidden" name="giro_masuk_detail[]" class="form-control gmd:nourut" value="0"/>
                 </td>
             </tr>
@@ -476,6 +459,40 @@ if ($datas->status == 'confirm') {
 //                    }
                 });
             });
+
+            const setCoaItem = ((klas = "select2-coa") => {
+                $("." + klas).select2({
+                    placeholder: "Pilih Coa",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_coa",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    text: item.nama,
+                                    children: [{
+                                            id: item.kode_coa,
+                                            text: item.kode_coa
+                                        }]
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        }
+                    }
+                });
+            });
+
             var pindahDana = [];
             var buktigiro = [];
 
@@ -487,8 +504,38 @@ if ($datas->status == 'confirm') {
                     });
                 });
             });
+            
+            const calculateTotal = (() => {
+                    var total = 0;
+                    const elements = document.querySelectorAll('.nominal');
+                    $.each(elements, function (idx, nomina) {
+                        let ttl = $(nomina).val();
+                        total += parseInt(ttl.replace(/,/g, ""));
+                    });
+                    if (total === NaN) {
+                        $("#total_nominal").val();
+                        return;
+                    }
+
+                    $("#total_nominal").val(total);
+                });
+
+            const setNominalCurrency = (() => {
+                $("input[data-type='currency']").on({
+                    keyup: function () {
+                        formatCurrency($(this));
+                    },
+                    drop: function () {
+                        formatCurrency($(this));
+                    },
+                    blur: function () {
+                        formatCurrency($(this), "blur");
+                    }
+                });
+            });
 
             $(function () {
+                setNominalCurrency();
                 lainInput(document.getElementById("lain_lain"), function () {
                     if ($("#partner_name").val() !== "") {
                         $("#partner_name").val("");
@@ -568,21 +615,21 @@ if ($datas->status == 'confirm') {
                     });
                 });
 
-                $(".btn-add-item-tf").on("click", function (e) {
-                    e.preventDefault();
-                    $("#tambah_data").modal({
-                        show: true,
-                        backdrop: 'static'
-                    });
-                    $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-                    $('.modal-title').text("Pindah Dana");
-                    $.post("<?= base_url('accounting/bankmasuk/get_view_pindah_dana') ?>", {no: pindahDana}, function (data) {
-                        setTimeout(function () {
-                            $(".tambah_data").html(data.data);
-                            $("#btn-tambah").html("Tambahkan");
-                        }, 1000);
-                    });
-                });
+//                $(".btn-add-item-tf").on("click", function (e) {
+//                    e.preventDefault();
+//                    $("#tambah_data").modal({
+//                        show: true,
+//                        backdrop: 'static'
+//                    });
+//                    $(".tambah_data").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
+//                    $('.modal-title').text("Pindah Dana");
+//                    $.post("<?= base_url('accounting/bankmasuk/get_view_pindah_dana') ?>", {no: pindahDana}, function (data) {
+//                        setTimeout(function () {
+//                            $(".tambah_data").html(data.data);
+//                            $("#btn-tambah").html("Tambahkan");
+//                        }, 1000);
+//                    });
+//                });
 
                 $(".btn-add-item-bg").on("click", function (e) {
                     e.preventDefault();
@@ -636,31 +683,33 @@ if ($datas->status == 'confirm') {
                     e.preventDefault();
                     $(".btn-save").trigger("click");
                 });
-
+                setCoaItem();
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
                     var tmplt = $("template.bankmasuk-tmplt");
                     var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                     $("#bankmasuk-detail tbody").append(isi_tmplt);
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     setCurr();
-                    $(".nominal").on("blur", function () {
-                        calculateTotal();
-                    });
                     setBank(no);
                     var tglHeader = $("#tanggal").val();
                     $(".tglcair" + no).val(tglHeader);
                     setTglFormatDef(".tgl-def-format");
 
                     $(".uraian" + no).focus();
-                    $(".nominal").keyup(function (ev) {
+                    $(".nominal" + no).keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
                         }
                     });
+                    $(".nominal" + no).on("keyup", function () {
+                        calculateTotal();
+                    });
                     $(".nourut" + no).html(no);
+                    setNominalCurrency();
                 });
+                
                 $(".nominal").keyup(function (ev) {
                     if (ev.keyCode === 13) {
                         $(".btn-add-item").trigger("click");
@@ -696,7 +745,7 @@ if ($datas->status == 'confirm') {
                     $(".kurs").show();
                     $(".ftotal_nominal").hide();
                     $(".total_nominal").show();
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     $("#btn-confirm").hide();
                     edit = true;
                 });
@@ -730,21 +779,6 @@ if ($datas->status == 'confirm') {
                     calculateTotal();
                 });
 
-                const calculateTotal = (() => {
-                    var total = 0;
-                    const elements = document.querySelectorAll('.nominal');
-
-                    $.each(elements, function (idx, nomina) {
-                        let ttl = $(nomina).val();
-                        total += parseInt(ttl);
-                    });
-                    if (total === NaN) {
-                        $(".total_nominal").val();
-                        return;
-                    }
-
-                    $(".total_nominal").val(total);
-                });
                 $(".total-nominal").on("click", function () {
                     calculateTotal();
                 });
@@ -759,7 +793,7 @@ if ($datas->status == 'confirm') {
                         data: function (params) {
                             return{
                                 search: params.term,
-                                jenis:"customer"
+                                jenis: "customer"
                             };
                         },
                         processResults: function (data) {
@@ -846,15 +880,24 @@ if ($datas->status == 'confirm') {
                                 $("#bankmasuk-detail tbody").append(isi_tmplt);
                                 var tglHeader = $("#tanggal").val();
                                 $(".tglcair" + no).val(tglHeader);
-
-                                $(".coa_" + no).val(row.kode_coa).trigger("change");
                                 $(".bank" + no).val(row.bank);
                                 $(".norek" + no).val(row.no_rek);
                                 $(".nobg" + no).val(row.no_bg);
                                 $(".kurs" + no).val(row.kurs);
-                                $(".nominal" + no).val(row.nominal);
+                                $(".nominal" + no).val(Intl.NumberFormat("en-US",{minimumFractionDigits: 2,maximumFractionDigits: 2}).format(row.nominal));
                                 $(".gmd" + no).val(row.id);
                                 $(".nourut" + no).html(no);
+                                setCoaItem("coa_" + no);
+                                $(".coa_" + no).select2("trigger", "select", {
+                                    data: {id: row.kode_coa, text: row.kode_coa}
+                                });
+
+                                $(".nominal" + no).keyup(function (ev) {
+                                    if (ev.keyCode === 13) {
+                                        $(".btn-add-item").trigger("click");
+                                    }
+                                });
+
                             });
                         }
                     },
@@ -863,7 +906,7 @@ if ($datas->status == 'confirm') {
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
-                            $(".select2-coa").select2();
+                            setNominalCurrency();
                         }, 100);
 
                     },

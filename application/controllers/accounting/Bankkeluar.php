@@ -138,8 +138,8 @@ class Bankkeluar extends MY_Controller {
     public function add() {
         $data['id_dept'] = 'ACCBK';
         $model = new $this->m_global;
-        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+//        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
         $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama"=>"asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_bank_keluar_add', $data);
@@ -263,7 +263,7 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -311,7 +311,8 @@ class Bankkeluar extends MY_Controller {
                 $totalRp = 0;
 
                 foreach ($this->input->post("tgljt") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "no_bk" => $nobk,
                         "uraian" => $uraian[$key],
@@ -321,7 +322,7 @@ class Bankkeluar extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
+                        "nominal" => $nom,
                         "no_bg" => $nobg[$key],
                         "bank" => $bank[$key],
                         "no_rek" => $norek[$key],
@@ -391,8 +392,8 @@ class Bankkeluar extends MY_Controller {
                     ->setSelects(["akmd.no_bk,akmd.tanggal,akmd.kode_coa,akmd.bank,akmd.no_rek,akmd.no_bg,akmd.kurs,akmd.currency_id,akmd.nominal,tgl_cair,tgl_jt,uraian"])
                     ->setSelects(["acc_coa.nama as nama_coa", "currency_kurs.currency as curr", "giro_keluar_detail_id"])
                     ->getData();
-            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+//            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
             $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama"=>"asc"])->getData();
             $data['id_dept'] = 'ACCBK';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
@@ -458,7 +459,7 @@ class Bankkeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -520,7 +521,8 @@ class Bankkeluar extends MY_Controller {
                 $giroID = $this->input->post("giro_keluar_detail");
                 $totalRp = 0;
                 foreach ($this->input->post("tglcair") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "no_bk" => $kode,
                         "bank_keluar_id" => $ids,
@@ -530,7 +532,7 @@ class Bankkeluar extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
+                        "nominal" => $nom,
                         "no_bg" => $nobg[$key],
                         "bank" => $bank[$key],
                         "no_rek" => $norek[$key],
