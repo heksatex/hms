@@ -212,7 +212,7 @@ function getRomawi($bln) {
 }
 
 function getIpPubic(string $param) {
-    return "http://202.150.151.163:8880/" . $param;
+    return "http://157.20.244.218:8880/" . $param;
 }
 
 function searchOnArray(array $data, string $keySearch, string $valueSearch) {
