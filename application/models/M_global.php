@@ -59,7 +59,10 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setOrder(array $order) {
+    public function setOrder(array $order, $clearBefore = false) {
+        if ($clearBefore) {
+            $this->order = [];
+        }
         $this->order = $order;
         return $this;
     }
@@ -93,7 +96,10 @@ class M_global extends CI_Model {
         return $this;
     }
 
-    public function setGroups(array $groups) {
+    public function setGroups(array $groups, $clearBefore = false) {
+        if ($clearBefore) {
+            $this->group = [];
+        }
         $this->group = array_merge($this->group, $groups);
         return $this;
     }
@@ -341,7 +347,7 @@ class M_global extends CI_Model {
         }
         return null;
     }
-    
+
     public function excQueryWResult(string $query) {
         return $this->db->query($query);
     }

@@ -67,9 +67,9 @@ class Bankmasuk extends MY_Controller {
         $data['id_dept'] = 'ACCBM';
         $data["jenis_transaksi"] = $this->jenisTransaksi;
         $model = new $this->m_global;
-        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setWheres(["jenis_transaksi" => "bank"])->getData();
+//        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_bank_masuk_add', $data);
     }
@@ -140,55 +140,54 @@ class Bankmasuk extends MY_Controller {
         }
     }
 
-    public function get_view_pindah_dana() {
-        $no = $this->input->post("no");
-        $view = $this->load->view('accounting/modal/v_pindah_dana', ["no" => json_encode($no, true)], true);
-        $this->output->set_status_header(200)
-                ->set_content_type('application/json', 'utf-8')
-                ->set_output(json_encode(['data' => $view]));
-    }
-
-    public function list_pindah_dana() {
-        try {
-            $nos = $this->input->post("no");
-            $data = array();
-            $list = new $this->m_global;
-            $list->setTables("acc_giro_keluar")->setOrder(["acc_giro_keluar.create_date" => "desc"])
-                    ->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_keluar.kode_coa")
-                    ->setSearch(["no_gk", "kode_coa", "partner_nama", "lain2", "transinfo"])
-                    ->setOrders([null, "no_gk", "partner_nama", "tanggal", null, null, null, "total_rp"])
-                    ->setSelects(["acc_giro_keluar.*", "acc_coa.nama as nama_coa"]);
-
-            $no = $_POST['start'];
-            if ($nos !== "null") {
-                $nos = json_decode($nos, true);
-                $nos = implode("','", $nos);
-                $list->setWhereRaw("no_gk not in('{$nos}')");
-            }
-            foreach ($list->getData() as $field) {
-                $no++;
-                $data [] = [
-                    $field->no_gk,
-                    $field->no_gk,
-                    $field->partner_nama,
-                    date("Y-m-d", strtotime($field->tanggal)),
-                    number_format($field->total_rp, 2)
-                ];
-            }
-            echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => $list->getDataCountAll(),
-                "recordsFiltered" => $list->getDataCountFiltered(),
-                "data" => $data,
-            ));
-            exit();
-        } catch (Exception $ex) {
-            echo json_encode(array("draw" => $_POST['draw'],
-                "recordsTotal" => 0,
-                "recordsFiltered" => 0,
-                "data" => [],
-            ));
-        }
-    }
+//    public function get_view_pindah_dana() {
+//        $no = $this->input->post("no");
+//        $view = $this->load->view('accounting/modal/v_pindah_dana', ["no" => json_encode($no, true)], true);
+//        $this->output->set_status_header(200)
+//                ->set_content_type('application/json', 'utf-8')
+//                ->set_output(json_encode(['data' => $view]));
+//    }
+//    public function list_pindah_dana() {
+//        try {
+//            $nos = $this->input->post("no");
+//            $data = array();
+//            $list = new $this->m_global;
+//            $list->setTables("acc_giro_keluar")->setOrder(["acc_giro_keluar.create_date" => "desc"])
+//                    ->setJoins("acc_coa", "acc_coa.kode_coa = acc_giro_keluar.kode_coa")
+//                    ->setSearch(["no_gk", "kode_coa", "partner_nama", "lain2", "transinfo"])
+//                    ->setOrders([null, "no_gk", "partner_nama", "tanggal", null, null, null, "total_rp"])
+//                    ->setSelects(["acc_giro_keluar.*", "acc_coa.nama as nama_coa"]);
+//
+//            $no = $_POST['start'];
+//            if ($nos !== "null") {
+//                $nos = json_decode($nos, true);
+//                $nos = implode("','", $nos);
+//                $list->setWhereRaw("no_gk not in('{$nos}')");
+//            }
+//            foreach ($list->getData() as $field) {
+//                $no++;
+//                $data [] = [
+//                    $field->no_gk,
+//                    $field->no_gk,
+//                    $field->partner_nama,
+//                    date("Y-m-d", strtotime($field->tanggal)),
+//                    number_format($field->total_rp, 2)
+//                ];
+//            }
+//            echo json_encode(array("draw" => $_POST['draw'],
+//                "recordsTotal" => $list->getDataCountAll(),
+//                "recordsFiltered" => $list->getDataCountFiltered(),
+//                "data" => $data,
+//            ));
+//            exit();
+//        } catch (Exception $ex) {
+//            echo json_encode(array("draw" => $_POST['draw'],
+//                "recordsTotal" => 0,
+//                "recordsFiltered" => 0,
+//                "data" => [],
+//            ));
+//        }
+//    }
 
     public function get_view_bukti_giro() {
         $no = $this->input->post("no");
@@ -267,25 +266,25 @@ class Bankmasuk extends MY_Controller {
         }
     }
 
-    public function pd() {
-        try {
-            $no = $this->input->post("no");
-            $model = new $this->m_global;
-
-            $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
-                            ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
-                            ->setSelects(["agkd.*"])
-                            ->setSelects(["currency_kurs.currency as curr"])
-                            ->setWhereIn("agkd.no_gk", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
-            $this->output->set_status_header(200)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data)));
-        } catch (Exception $ex) {
-            $this->output->set_status_header($ex->getCode() ?? 500)
-                    ->set_content_type('application/json', 'utf-8')
-                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
-        }
-    }
+//    public function pd() {
+//        try {
+//            $no = $this->input->post("no");
+//            $model = new $this->m_global;
+//
+//            $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
+//                            ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
+//                            ->setSelects(["agkd.*"])
+//                            ->setSelects(["currency_kurs.currency as curr"])
+//                            ->setWhereIn("agkd.no_gk", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
+//            $this->output->set_status_header(200)
+//                    ->set_content_type('application/json', 'utf-8')
+//                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', 'data' => $data)));
+//        } catch (Exception $ex) {
+//            $this->output->set_status_header($ex->getCode() ?? 500)
+//                    ->set_content_type('application/json', 'utf-8')
+//                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+//        }
+//    }
 
     public function simpan() {
         try {
@@ -331,7 +330,7 @@ class Bankmasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -348,10 +347,10 @@ class Bankmasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
                 ]);
@@ -397,7 +396,8 @@ class Bankmasuk extends MY_Controller {
                 $giroID = $this->input->post("giro_masuk_detail");
                 $totalRp = 0;
                 foreach ($this->input->post("tglcair") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "no_bm" => $nobm,
                         "uraian" => $uraian[$key],
@@ -406,7 +406,7 @@ class Bankmasuk extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
+                        "nominal" => $nom,
                         "no_bg" => $nobg[$key],
                         "bank" => $bank[$key],
                         "no_rek" => $norek[$key],
@@ -455,9 +455,9 @@ class Bankmasuk extends MY_Controller {
                     ->setSelects(["akmd.no_bm,akmd.tanggal,akmd.kode_coa,akmd.bank,akmd.no_rek,akmd.no_bg,akmd.kurs,akmd.currency_id,akmd.nominal,tgl_cair,uraian"])
                     ->setSelects(["acc_coa.nama as nama_coa", "currency_kurs.currency as curr", "giro_masuk_detail_id"])
                     ->getData();
-            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setWheres(["jenis_transaksi" => "bank"])->getData();
+//            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "bank"])->setOrder(["nama" => "asc"])->getData();
             $data['id_dept'] = 'ACCBM';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
             $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
@@ -505,7 +505,7 @@ class Bankmasuk extends MY_Controller {
                     [
                         'field' => 'kurs[]',
                         'label' => 'Kurs',
-                        'rules' => ['trim', 'required','regex_match[/^\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^\d*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -522,13 +522,13 @@ class Bankmasuk extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required','regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'],
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
-                             "regex_match" => "{field} harus berupa number / desimal"
+                            "regex_match" => "{field} harus berupa number / desimal"
                         ]
                     ]
-                    ]);
+                ]);
             }
 
             $this->form_validation->set_rules($this->valForm);
@@ -595,7 +595,8 @@ class Bankmasuk extends MY_Controller {
                 $giroID = $this->input->post("giro_masuk_detail");
                 $totalRp = 0;
                 foreach ($this->input->post("tglcair") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "no_bm" => $kode,
                         "uraian" => $uraian[$key],
@@ -604,7 +605,7 @@ class Bankmasuk extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
+                        "nominal" => $nom,
                         "no_bg" => $nobg[$key],
                         "bank" => $bank[$key],
                         "no_rek" => $norek[$key],
@@ -670,7 +671,7 @@ class Bankmasuk extends MY_Controller {
             $buff = $printer->getPrintConnector();
             $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bM");
-            $tanggal = date("Y-m-d", strtotime($head->tanggal));
+            $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
 
             $printer->text(str_pad("No : {$head->no_bm}", 21));
@@ -740,7 +741,7 @@ class Bankmasuk extends MY_Controller {
                 $line .= str_pad($values->bank, 15);
                 $line .= str_pad($values->no_rek, 20);
                 $line .= str_pad($values->no_bg, 20);
-                $line .= str_pad(date("Y-m-d", strtotime($values->tgl_cair)), 15);
+                $line .= str_pad(date("d-m-Y", strtotime($values->tgl_cair)), 15);
                 $line .= str_pad($values->kode_coa, 20, " ", STR_PAD_BOTH);
                 $line .= str_pad(number_format($values->kurs, 2), 10, " ", STR_PAD_BOTH);
                 $line .= str_pad($values->curr, 10, " ", STR_PAD_BOTH);
@@ -808,7 +809,7 @@ class Bankmasuk extends MY_Controller {
             $model = new $this->m_global;
             $head = $model->setTables("acc_bank_masuk")->setJoins("acc_bank_masuk_detail", "acc_bank_masuk.id = bank_masuk_id", "left")
                             ->setJoins("currency_kurs", "currency_kurs.id = currency_id", "left")
-                            ->setSelects(["acc_bank_masuk.*", "currency_kurs.currency,currency_kurs.kurs","bank_masuk_id"])
+                            ->setSelects(["acc_bank_masuk.*", "currency_kurs.currency,currency_kurs.kurs", "bank_masuk_id"])
                             ->setWheres(["acc_bank_masuk.no_bm" => $kode])->getDetail();
 
             if (!$head) {
@@ -832,7 +833,7 @@ class Bankmasuk extends MY_Controller {
                     $jurnalDB = new $this->m_global;
                     $model = clone $jurnalDB;
                     $getGiroId = $model->setTables("acc_bank_masuk_detail")->setSelects(["GROUP_CONCAT(giro_masuk_detail_id) as gids"])->setWheres(["bank_masuk_id" => $head->id])
-                                    ->getDetail();
+                            ->getDetail();
                     if ($getGiroId->gids !== null) {
                         $checkGiroCair = $model->setTables("acc_giro_masuk_detail")->setWhereRaw("id in ({$getGiroId->gids})")
                                         ->setWheres(["cair" => 1])->getDetail();
@@ -921,9 +922,9 @@ class Bankmasuk extends MY_Controller {
 
                     $item = $model->setTables("acc_bank_masuk_detail")->setWheres(["bank_masuk_id" => $head->id])
                                     ->setSelects(['GROUP_CONCAT(giro_masuk_detail_id) as gids'])->getDetail();
-                    if($item->gids !== null){
-                    $model->setTables("acc_giro_masuk_detail")->setWheres(["cair" => 1])->setWhereRaw("id in ({$item->gids})")
-                            ->update(["cair" => 0]);
+                    if ($item->gids !== null) {
+                        $model->setTables("acc_giro_masuk_detail")->setWheres(["cair" => 1])->setWhereRaw("id in ({$item->gids})")
+                                ->update(["cair" => 0]);
                     }
                     $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $head->jurnal])->update(["status" => "unposted"]);
                     $this->_module->gen_history_new("jurnal_entries", $head->jurnal, 'edit', "Merubah Status Ke unposted dari Kas Bank Masuk", $username);
@@ -955,7 +956,7 @@ class Bankmasuk extends MY_Controller {
         if ($bbln === 1) {
             $model = new $this->m_global();
             $pinDate = $model->setTables("setting")->setWheres(["setting_name" => "pin_date_acc", "status" => "1"])->setSelects(["value"])->getDetail();
-            if (date("j") >= (int)$pinDate->value) {
+            if (date("j") >= (int) $pinDate->value) {
 
                 if (!in_array($users->level, ["Super Administrator", "Supervisor"])) {
                     throw new \Exception("{$pesanError}", 500);

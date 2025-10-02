@@ -120,16 +120,16 @@
                                 <div class="col-md-12 table-responsive over">
                                     <table class="table table-condesed table-hover rlstable" width="100%" id="bankmasuk-detail" style="min-width: 105%">
                                         <thead>
-                                        <th class="style" style="width: 2%">No.</th>
-                                        <th class="style" style="width: 15%">Uraian</th>
-                                        <th class="style" style="width: 10%">Bank</th>
-                                        <th class="style" style="width: 10%">No Rek</th>
-                                        <th class="style" style="width: 10%">No.Cek/BG</th>
-                                        <th class="style" style="width: 13%">Tgl Cair</th>
-                                        <th class="style" style="width: 10%">No.Acc(Kredit)</th>
-                                        <th class="style" style="width:8%; text-align: right;" >Kurs</th>
-                                        <th class="style" style="width: 8%">Curr</th>
-                                        <th class="style text-right" style="width: 25%">Nominal</th>
+                                        <th class="style" style="width: 5px">No.</th>
+                                        <th class="style" style="width: 150px">Uraian</th>
+                                        <th class="style" style="width: 130px">Bank</th>
+                                        <th class="style" style="width: 120px">No Rek</th>
+                                        <th class="style" style="width: 120px">No.Cek/BG</th>
+                                        <th class="style" style="width: 140px">Tgl Cair</th>
+                                        <th class="style" style="width: 100px">No.Acc(Kredit)</th>
+                                        <th class="style" style="width: 100px;text-align: right;" >Kurs</th>
+                                        <th class="style" style="width: 100px">Curr</th>
+                                        <th class="style text-right" style="width: 150px">Nominal</th>
                                         </thead>
                                         <tbody>
 
@@ -143,7 +143,7 @@
 
                                                 </td>
                                                 <td class="text-bold">
-                                                    <input type="text" name="total_nominal" id="total_nominal" class="form-control input-sm text-right" readonly/>
+                                                    <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' name="total_nominal" id="total_nominal" class="form-control input-sm text-right" readonly/>
                                                 </td>
                                             </tr>
                                         </tfoot>
@@ -183,13 +183,6 @@
                     <td>
                         <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                             <option value=""></option>
-                            <?php
-                            foreach ($coas as $key => $value) {
-                                ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                                <?php
-                            }
-                            ?>
                         </select>
                     </td>
                     <td>
@@ -206,7 +199,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" class="form-control input-sm nominal text-right" value="0" required/>
+                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm nominal nominal:nourut text-right" value="0" required/>
                         <input type="hidden" name="giro_masuk_detail[]" class="form-control" value=":gmdid"/>
                     </td>
                 </tr>
@@ -239,15 +232,8 @@
                         </div>
                     </td>
                     <td>
-                        <select class="form-control input-sm select2-coa coa_:nourut" style="width:100%" name="kode_coa[]" required>
-                            <option value=""></option>
-                            <?php
-                            foreach ($coas as $key => $value) {
-                                ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                                <?php
-                            }
-                            ?>
+                        <select class="form-control input-sm coa_:nourut" style="width:100%" name="kode_coa[]" required>
+
                         </select>
                     </td>
                     <td>
@@ -264,7 +250,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" class="form-control input-sm text-right nominal:nourut" value="" required/>
+                        <input type="text" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" name="nominal[]" data-type='currency' class="form-control input-sm text-right nominal nominal:nourut" value="" required/>
                         <input type="hidden" name="giro_masuk_detail[]" class="form-control gmd:nourut" value="0"/>
                     </td>
                 </tr>
@@ -284,13 +270,45 @@
                     }
                 });
             });
+            const setCoaItem = ((klas = "select2-coa") => {
+                $("." + klas).select2({
+                    placeholder: "Pilih Coa",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_coa",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    text: item.nama,
+                                    children: [{
+                                            id: item.kode_coa,
+                                            text: item.kode_coa,
+                                        }]
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        }
+                    }
+                });
+            });
             var no = 0;
             const calculateTotal = (() => {
                 var total = 0;
                 const elements = document.querySelectorAll('.nominal');
                 $.each(elements, function (idx, nomina) {
                     let ttl = $(nomina).val();
-                    total += parseInt(ttl);
+                    total += parseInt(ttl.replace(/,/g, ""));
                 });
                 if (total === NaN) {
                     $("#total_nominal").val();
@@ -299,6 +317,7 @@
 
                 $("#total_nominal").val(total);
             });
+
             const setCurr = (() => {
                 $(".select2-curr").select2({
                     placeholder: "Pilih",
@@ -340,8 +359,20 @@
                     });
                 });
             });
+            const setNominalCurrency = (() => {
+                $("input[data-type='currency']").on({
+                    keyup: function () {
+                        formatCurrency($(this));
+                    },
+                    drop: function () {
+                        formatCurrency($(this));
+                    },
+                    blur: function () {
+                        formatCurrency($(this), "blur");
+                    }
+                });
+            });
             $(function () {
-
                 const setBank = ((no) => {
                     var ttt = $(".no_acc").find(":selected");
                     var acc = ttt.text();
@@ -352,7 +383,7 @@
 
                     }
                 });
-
+                setNominalCurrency();
                 lainInput(document.getElementById("lain_lain"), function () {
                     if ($("#partner_name").val() !== "") {
                         $("#partner_name").val("");
@@ -399,28 +430,29 @@
                     allowClear: true,
                     placeholder: "Pilih"
                 });
+
                 $(".btn-add-item").on("click", function (e) {
                     no += 1;
                     e.preventDefault();
                     var tmplt = $("template.bankmasuk-tmplt");
                     var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                     $("#bankmasuk-detail tbody").append(isi_tmplt);
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     setCurr();
                     setTglFormatDef(".tgl-def-format");
                     $(".nominal").on("blur", function () {
                         calculateTotal();
                     });
-                    setBank(no);
-                    var tglHeader = $("#tanggal").val();
-                    $(".tglcair" + no).val(tglHeader);
-                    $(".nominal").keyup(function (ev) {
+                    $(".nominal"+no).keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
                         }
                     });
+                    setBank(no);
+                    var tglHeader = $("#tanggal").val();
                     $(".uraian" + no).focus();
                     $(".nourut" + no).html(no);
+                    setNominalCurrency();
                 });
                 $("#bankmasuk-detail").on("click", ".btn-rmv-item", function () {
                     $(this).closest("tr").remove();
@@ -442,7 +474,7 @@
                         data: function (params) {
                             return{
                                 search: params.term,
-                                jenis:"customer"
+                                jenis: "customer"
                             };
                         },
                         processResults: function (data) {
@@ -529,14 +561,26 @@
                                 $("#bankmasuk-detail tbody").append(isi_tmplt);
                                 var tglHeader = $("#tanggal").val();
                                 $(".tglcair" + no).val(tglHeader);
-                                $(".coa_" + no).val(row.kode_coa).trigger("change");
                                 $(".bank" + no).val(row.bank);
                                 $(".norek" + no).val(row.no_rek);
                                 $(".nobg" + no).val(row.no_bg);
                                 $(".kurs" + no).val(row.kurs);
-                                $(".nominal" + no).val(row.nominal);
+                                $(".nominal" + no).val(Intl.NumberFormat("en-US",{minimumFractionDigits: 2,maximumFractionDigits: 2}).format(row.nominal));
                                 $(".gmd" + no).val(row.id);
                                 $(".nourut" + no).html(no);
+                                setCoaItem("coa_" + no);
+                                $(".coa_" + no).select2("trigger", "select", {
+                                    data: {id: row.kode_coa, text: row.kode_coa}
+                                });
+                                $(".nominal" + no).on("blur", function () {
+                                    calculateTotal();
+                                });
+                                $(".nominal" + no).keyup(function (ev) {
+                                    if (ev.keyCode === 13) {
+                                        $(".btn-add-item").trigger("click");
+                                    }
+                                });
+                                setNominalCurrency();
                             });
                         }
                         setTglFormatDef(".tgl-def-format");

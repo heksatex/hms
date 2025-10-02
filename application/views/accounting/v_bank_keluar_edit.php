@@ -179,7 +179,7 @@
                                                     <th class="style" style="width: 100px">No.Acc(Debet)</th>
                                                     <th class="style" style="width: 100px;text-align: right;" >Kurs</th>
                                                     <th class="style" style="width: 100px">Curr</th>
-                                                    <th class="style text-right" style="max-width: 150px">Nominal</th>
+                                                    <th class="style text-right" style="width: 150px">Nominal</th>
                                                     </thead>
                                                     <tbody>
                                                         <?php foreach ($data_detail as $key => $value) {
@@ -219,13 +219,7 @@
                                                                 <td>
                                                                     <!--<input type="hidden" name="kode_coa[]" value="<?= $value->kode_coa ?>" required readonly/>-->
                                                                     <select class="form-control input-sm select2-coa edited" style="width:100%" name="kode_coa[]" required disabled>
-                                                                        <?php
-                                                                        foreach ($coas as $key => $values) {
-                                                                            ?>
-                                                                            <option value="<?= $values->kode_coa ?>" <?= ($values->kode_coa === $value->kode_coa) ? 'selected' : '' ?>><?= "{$values->kode_coa}" ?></option>
-                                                                            <?php
-                                                                        }
-                                                                        ?>
+                                                                        <option value="<?= $value->kode_coa ?>" selected><?= $value->kode_coa ?></option>
                                                                     </select>
 
                                                                 </td>
@@ -245,7 +239,8 @@
                                                                 </td>
                                                                 <td>
                                                                     <input type="text" class="form-control fnominal input-sm text-right" value="<?= number_format($value->nominal, 2) ?>" disabled>
-                                                                    <input type="text" name="nominal[]" value="<?= $value->nominal ?>" style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
+                                                                    <input type="text" name="nominal[]" value="<?= number_format($value->nominal, 2, ".", ",") ?>" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency'
+                                                                           style="display: none;" class="form-control input-sm text-right nominal edited-read" required readonly/>
                                                                     <input type="hidden" class="form-control" name="giro_keluar_detail[]" value="<?= $value->giro_keluar_detail_id ?>">
                                                                 </td>
                                                             </tr>
@@ -261,7 +256,7 @@
                                                             </td>
                                                             <td class="text-bold">
                                                                 <input type="text" class="form-control input-sm text-right ftotal_nominal" value="<?= number_format($datas->total_rp, 2) ?>" readonly/>
-                                                                <input type="text" name="total_nominal" class="form-control input-sm text-right total_nominal" style="display : none" value="<?= $datas->total_rp ?>" readonly/>
+                                                                <input type="text" name="total_nominal" id="total_nominal" class="form-control input-sm text-right total_nominal" style="display : none" value="<?= $datas->total_rp ?>" readonly/>
                                                             </td>
                                                         </tr>
                                                     </tfoot>
@@ -278,7 +273,7 @@
                                                                 <label class="form-label">No Jurnal</label>
                                                             </div>
                                                             <div class="col-xs-8 col-md-8">
-                                                                <strong>:&nbsp;<a href="<?= base_url("purchase/jurnalentries/edit/" . encrypt_url(($jurnal->kode ?? ""))) ?>" target="_blank"><?= $jurnal->kode ?? "" ?></a></strong>
+                                                                <strong>:&nbsp;<a href="<?= base_url("accounting/jurnalentries/edit/" . encrypt_url(($jurnal->kode ?? ""))) ?>" target="_blank"><?= $jurnal->kode ?? "" ?></a></strong>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-xs-12">
@@ -361,13 +356,7 @@
                 <td>
                     <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
-                        <?php
-                        foreach ($coas as $key => $value) {
-                            ?>
-                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                            <?php
-                        }
-                        ?>
+
                     </select>
                 </td>
                 <td>
@@ -377,14 +366,14 @@
                     <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" class="form-control input-sm nominal text-right" value="0" required/>
+                    <input type="text" name="nominal[]" class="form-control input-sm nominal nominal:norut text-right" value="0" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' required/>
                     <input type="hidden" name="giro_keluar_detail[]" class="form-control"/>
                 </td>
             </tr>
@@ -423,15 +412,9 @@
                     </div>
                 </td>
                 <td>
-                    <select class="form-control input-sm select2-coa coa_:nourut" style="width:100%" name="kode_coa[]" required>
+                    <select class="form-control input-sm coa_:nourut" style="width:100%" name="kode_coa[]" required>
                         <option value=""></option>
-                        <?php
-                        foreach ($coas as $key => $value) {
-                            ?>
-                            <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                            <?php
-                        }
-                        ?>
+
                     </select>
                 </td>
                 <td>
@@ -441,14 +424,14 @@
                     <select class="form-control input-sm select2 select2-curr curr_:nourut" style="width:100%" name="curr[]" required>
                         <option value="1" selected>IDR</option>
                         <?php foreach ($curr as $key => $values) {
-                                ?>
-                                <option value="<?= $values->id ?>"><?= $values->currency ?></option>
-                            <?php }
                             ?>
+                            <option value="<?= $values->id ?>"><?= $values->currency ?></option>
+                        <?php }
+                        ?>
                     </select>
                 </td>
                 <td>
-                    <input type="text" name="nominal[]" class="form-control input-sm text-right nominal nominal:nourut" value="0" required/>
+                    <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control input-sm text-right nominal nominal:nourut" value="0" required/>
                     <input type="hidden" name="giro_keluar_detail[]" class="form-control gkd:nourut" value="0"/>
                 </td>
             </tr>
@@ -496,6 +479,56 @@ if ($datas->status == 'confirm') {
 //                    }
                 });
             });
+
+            const calculateTotal = (() => {
+                var total = 0;
+                const elements = document.querySelectorAll('.nominal');
+                $.each(elements, function (idx, nomina) {
+                    let ttl = $(nomina).val();
+                    total += parseInt(ttl.replace(/,/g, ""));
+                });
+                if (total === NaN) {
+                    $("#total_nominal").val();
+                    return;
+                }
+
+                $("#total_nominal").val(total);
+            });
+
+            const setCoaItem = ((klas = "select2-coa") => {
+                $("." + klas).select2({
+                    placeholder: "Pilih Coa",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_coa",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    text: item.nama,
+                                    children: [{
+                                            id: item.kode_coa,
+                                            text: item.kode_coa,
+                                        }]
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        }
+                    }
+                });
+            });
+
+
             var buktigiro = [];
             const lainInput = ((textbox, callback = function() {}) => {
                 ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop", "focusout"].forEach(function (event) {
@@ -505,7 +538,21 @@ if ($datas->status == 'confirm') {
                     });
                 });
             });
+            const setNominalCurrency = (() => {
+                $("input[data-type='currency']").on({
+                    keyup: function () {
+                        formatCurrency($(this));
+                    },
+                    drop: function () {
+                        formatCurrency($(this));
+                    },
+                    blur: function () {
+                        formatCurrency($(this), "blur");
+                    }
+                });
+            });
             $(function () {
+                setNominalCurrency();
                 const setBank = ((nourut) => {
                     var ttt = $(".no_acc").find(":selected");
                     if (edit) {
@@ -652,16 +699,18 @@ if ($datas->status == 'confirm') {
 
                         );
                 $(".select2").select2();
-
+                $(".nominal").on("blur", function () {
+                    calculateTotal();
+                });
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
                     var tmplt = $("template.bankkeluar-tmplt");
                     var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                     $("#bankkeluar-detail tbody").append(isi_tmplt);
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     setCurr();
-                    $(".nominal").on("blur", function () {
+                    $(".nominal" + no).on("blur", function () {
                         calculateTotal();
                     });
                     setBank(no);
@@ -670,13 +719,14 @@ if ($datas->status == 'confirm') {
                     $(".tgljt" + no).val(tglHeader);
                     setTglFormatDef(".tgl-def-format");
 
-                    $(".nominal").keyup(function (ev) {
+                    $(".nominal" + no).keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
                         }
                     });
                     $(".uraian" + no).focus();
                     $(".nourut" + no).html(no);
+                    setNominalCurrency();
                 });
 
                 $("#btn-edit").on("click", function (e) {
@@ -697,7 +747,7 @@ if ($datas->status == 'confirm') {
                     $(".kurs").show();
                     $(".ftotal_nominal").hide();
                     $(".total_nominal").show();
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     $("#btn-confirm").hide();
                     edit = true;
                 });
@@ -729,25 +779,6 @@ if ($datas->status == 'confirm') {
                     $(this).closest("tr").remove();
                     calculateTotal();
                 });
-
-                const calculateTotal = (() => {
-                    var total = 0;
-                    const elements = document.querySelectorAll('.nominal');
-
-                    $.each(elements, function (idx, nomina) {
-                        let ttl = $(nomina).val();
-                        total += parseInt(ttl);
-                    });
-                    if (total === NaN) {
-                        $(".total_nominal").val();
-                        return;
-                    }
-
-                    $(".total_nominal").val(total);
-                });
-                $(".total-nominal").on("click", function () {
-                    calculateTotal();
-                });
 //                $(".no_acc").on("change", function () {
 //                    setBank();
 //                });
@@ -762,7 +793,7 @@ if ($datas->status == 'confirm') {
                         data: function (params) {
                             return{
                                 search: params.term,
-                                jenis:"supplier"
+                                jenis: "supplier"
                             };
                         },
                         processResults: function (data) {
@@ -792,6 +823,9 @@ if ($datas->status == 'confirm') {
                     disabled: true
                 });
                 $(".no_acc").prop("disabled", true);
+                $(".total-nominal").on("click", function () {
+                    calculateTotal();
+                });
 
             });
 
@@ -822,16 +856,28 @@ if ($datas->status == 'confirm') {
                             var tmplt = $("template.bankkeluar-tmplt-add");
                             var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                             $("#bankkeluar-detail tbody").append(isi_tmplt);
-                            $(".coa_" + no).val(row.kode_coa).trigger("change");
                             $(".bank" + no).val(row.bank);
                             $(".norek" + no).val(row.no_rek);
                             $(".nobg" + no).val(row.no_bg);
                             $(".tgljt" + no).val(row.tgl_jt);
                             $(".tglcair" + no).val(row.tgl_cair);
                             $(".kurs" + no).val(row.kurs);
-                            $(".nominal" + no).val(row.nominal);
+                            $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.nominal));
                             $(".gkd" + no).val(row.id);
                             $(".nourut" + no).html(no);
+                            setCoaItem("coa_" + no);
+                            $(".coa_" + no).select2("trigger", "select", {
+                                data: {id: row.kode_coa, text: row.kode_coa}
+                            });
+                            $(".nominal" + no).keyup(function (ev) {
+                                if (ev.keyCode === 13) {
+                                    $(".btn-add-item").trigger("click");
+                                }
+                            });
+                            $(".nominal" + no).on("blur", function () {
+                                calculateTotal();
+                            });
+                            setNominalCurrency();
                         });
                         setTglFormatDef(".tgl-def-format");
 
@@ -840,6 +886,7 @@ if ($datas->status == 'confirm') {
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
+                            $(".select2-coa").select2();
                         }, 100);
 
                     },

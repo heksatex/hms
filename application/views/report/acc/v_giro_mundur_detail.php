@@ -13,7 +13,7 @@ if (count($data) > 0) {
         <td></td>
         <td class="text-right"><?= number_format($debets, 2) ?></td>
         <td class="text-right"><?= number_format($kredits, 2) ?></td>
-        <td class="text-right"><?= number_format(0, 2) ?></td>
+        <td class="text-right"><?= number_format($saldo, 2) ?></td>
     </tr>
     <?php
 }
@@ -25,22 +25,23 @@ foreach ($data as $key => $value) {
         $showUrut = $noUrut;
         $shw = true;
     }
-    $saldo = 0;
     $debet = 0;
     $kredit = 0;
     if ($value->posisi === "D") {
         $debet = $value->nominal;
         $debets += $debet;
+        $saldo -= $debet;
     } else {
         $kredit = $value->nominal;
         $kredits += $kredit;
+        $saldo += $kredit;
     }
     ?>
     <tr>
         <td><?= $showUrut ?></td>
         <td><?= ($shw) ? $value->tanggal : "" ?></td>
         <td><?= ($shw) ? $value->no_bukti : "" ?></td>
-        <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0,65) ?></td>
+        <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0, 65) ?></td>
         <td><?= $value->no_bg ?></td>
         <td class="text-right"><?= number_format($kredit, 2) ?></td>
         <td class="text-right"><?= number_format($debet, 2) ?></td>
@@ -58,7 +59,7 @@ if (count($data) > 0) {
         <td></td>
         <td class="text-right"><?= number_format($kredits, 2) ?></td>
         <td class="text-right"><?= number_format($debets, 2) ?></td>
-        <td class="text-right"><?= number_format($saldos, 2) ?></td>
+        <td class="text-right"><?= number_format($saldo, 2) ?></td>
     </tr>
     <?php
 }

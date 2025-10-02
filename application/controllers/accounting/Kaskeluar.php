@@ -57,9 +57,9 @@ class Kaskeluar extends MY_Controller {
     public function add() {
         $data['id_dept'] = 'ACCKK';
         $model = new $this->m_global;
-        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-        $data["coa"] = $model->setWheres(["jenis_transaksi" => "kas"])->getData();
+//        $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                        ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+        $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas"])->setOrder(["kode_coa" => "asc"])->getData();
         $data["curr"] = $model->setTables("currency_kurs")->setSelects(["id", "currency"])->getData();
         $this->load->view('accounting/v_kas_keluar_add', $data);
     }
@@ -142,9 +142,9 @@ class Kaskeluar extends MY_Controller {
                     ->setSelects(["acd.no_kk,acd.tanggal,acd.kode_coa,acd.uraian,acd.kurs,acd.currency_id,acd.nominal"])
                     ->setSelects(["acc_coa.nama as nama_coa", "currency_kurs.currency as curr", "po_no_po"])
                     ->getData();
-            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
-                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
-            $data["coa"] = $model->setWheres(["jenis_transaksi" => "kas"])->getData();
+//            $data["coas"] = $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])
+//                            ->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"])->getData();
+            $data["coa"] = $model->setTables("acc_coa")->setWheres(["jenis_transaksi" => "kas"])->setOrder(["kode_coa" => "asc"])->getData();
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["origin" => $kode])->getDetail();
             $data['id_dept'] = 'ACCKK';
             $data["jurnal"] = $model->setTables("acc_jurnal_entries")->setWheres(["kode" => $data['datas']->jurnal])->getDetail();
@@ -201,7 +201,7 @@ class Kaskeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -257,7 +257,8 @@ class Kaskeluar extends MY_Controller {
                 $po = $this->input->post("po_detail");
                 $totalRp = 0;
                 foreach ($this->input->post("uraian") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "kas_keluar_id" => $this->input->post("ids"),
                         "tanggal" => $this->input->post("tanggal"),
@@ -266,8 +267,8 @@ class Kaskeluar extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
-                        "po_detail_id" => $po[$key],
+                        "nominal" => $nom,
+                        "po_detail_id" => $po[$key] ?? 0,
                         "row_order" => ($key + 1)
                     ];
                 }
@@ -344,7 +345,7 @@ class Kaskeluar extends MY_Controller {
                     [
                         'field' => 'nominal[]',
                         'label' => 'Nominal',
-                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*\.?\d*$/]'],
+                        'rules' => ['trim', 'required', 'regex_match[/^-?\d*(,\d{3})*\.?\d*$/]'], ///^-?\d*\.?\d*$/
                         'errors' => [
                             'required' => '{field} Pada Item harus diisi',
                             "regex_match" => "{field} harus berupa number / desimal"
@@ -392,7 +393,8 @@ class Kaskeluar extends MY_Controller {
                 $po = $this->input->post("po_detail");
                 $totalRp = 0;
                 foreach ($this->input->post("uraian") as $key => $value) {
-                    $totalRp += $nominal[$key];
+                    $nom = str_replace(",", "", $nominal[$key]);
+                    $totalRp += $nom;
                     $detail [] = [
                         "kas_keluar_id" => $headID,
                         "tanggal" => $tanggal,
@@ -401,8 +403,8 @@ class Kaskeluar extends MY_Controller {
                         "kode_coa" => $kodeCoa[$key],
                         "kurs" => $kurs[$key],
                         "currency_id" => $curr[$key],
-                        "nominal" => $nominal[$key],
-                        "po_detail_id" => $po[$key],
+                        "nominal" => $nom,
+                        "po_detail_id" => $po[$key] ?? 0,
                         "row_order" => ($key + 1)
                     ];
                 }
@@ -425,6 +427,33 @@ class Kaskeluar extends MY_Controller {
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         } finally {
             $this->_module->unlock_tabel();
+        }
+    }
+
+    public function get_coa() {
+        try {
+            $model = new $this->m_global;
+            $model->setTables("acc_coa")->setSelects(["kode_coa", "nama"])->setSearch(["kode_coa", "nama"])->setWheres(["level" => 5])->setOrder(["kode_coa" => "asc"]);
+            $_POST['length'] = 50;
+            $_POST['start'] = 0;
+            if ($this->input->get('search') !== "") {
+                $_POST['search']['value'] = $this->input->get('search');
+            }
+            $data = [];
+            foreach ($model->getData() as $key => $value) {
+                $data [] = [
+                    "text" => $value->nama,
+                    "children" => [
+                        "id" => $value->kode_coa,
+                        "text" => $value->kode_coa
+                    ]
+                ];
+            }
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array("data" => $model->getData())));
+        } catch (Exception $ex) {
+            
         }
     }
 
@@ -464,7 +493,6 @@ class Kaskeluar extends MY_Controller {
                         break;
                     default :
                         break;
-                        
                 }
             }
             $_POST['length'] = 50;
@@ -583,7 +611,7 @@ class Kaskeluar extends MY_Controller {
             $buff = $printer->getPrintConnector();
             $buff->write("\x1bC" . chr(34));
             $buff->write("\x1bM");
-            $tanggal = date("Y-m-d", strtotime($head->tanggal));
+            $tanggal = date("d-m-Y", strtotime($head->tanggal));
             $printer->text(str_pad("Tanggal : {$tanggal}", 67));
 
             $printer->text(str_pad("No : {$head->no_kk}", 21));

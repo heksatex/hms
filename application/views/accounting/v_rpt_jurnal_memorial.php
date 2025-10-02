@@ -45,11 +45,11 @@
                 background-color: #fff;
                 border: 1px solid #ddd;
             }
-            #tabelMemorial.detail tr > *:nth-child(3),#tabelMemorial.detail tr > *:nth-child(4),
-            #tabelMemorial.detail tr > *:nth-child(5),#tabelMemorial.detail tr > *:nth-child(8),
-            #tabelMemorial.detail tr > *:nth-child(9),#tabelMemorial.detail tr > *:nth-child(10){
-                display: none;
+            table tbody tr td {
+                padding: 0px 5px 0px 5px !important;
             }
+
+
 
 
         </style>
@@ -73,54 +73,19 @@
                         <div class="box-body">
                             <form class="form-horizontal" method="POST" name="form-jm" id="form-jm" action="<?= base_url('accounting/jurnalmemorial/export') ?>">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
-                                    <div class="form-group tanggal_dibuat" style="display: none;">
-                                        <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
-                                                <label class="form-label required">Tanggal Dibuat</label>
-                                            </div>
-                                            <div class="col-xs-8 col-md-8">
-                                                <input type="text" name="tanggal_dibuat" id="tanggal_dibuat" value="<?= $date ?>" class="form-control"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group periode" >
+
+                                    <div class="form-group" >
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="form-label required">Periode</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
-                                                <select class="form-control select2" name="periode" id="periode" style="width: 100%">
-                                                    <?php
-                                                    $periodeNow = date("Y/m");
-                                                    foreach ($periode as $k => $val) {
-                                                        ?>
-                                                        <option value="<?= $val->periode ?>"  <?= ($periodeNow === $val->periode) ? "selected" : "" ?> ><?= $val->periode ?></option>
-                                                        <?php
-                                                    }
-                                                    ?>
-                                                </select>
+                                                <input type="text" name="periode" id="periode" value="<?= date("Y-m-d"); ?>" class="form-control input-sm"/>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="form-group" >
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-
-                                            </div>
-                                            <div class="col-xs-8">
-                                                <label class="btn btn-default">
-                                                    <input type="radio" value="0" class="filter" name="filter" checked/> Dengan Periode
-                                                </label> 
-                                                <label class="btn btn-default">
-                                                    <input type="radio" class="filter" name="filter" value="1" /> Dengan Tanggal Dibuat
-                                                </label> 
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-md-12 col-xs-12">
-                                            <div class="col-xs-4">
-                                                <label class="form-label required">Tipe JU</label>
+                                                <label class="form-label required">Jurnal Memorial</label>
                                             </div>
                                             <div class="col-xs-8 col-md-8">
                                                 <input type="hidden" name="jurnal_nm" id="jurnal_nm"/>
@@ -128,21 +93,27 @@
                                                     <option></option>
                                                     <?php foreach ($jurnal as $key => $value) {
                                                         ?>
-                                                        <option value="<?= $value->kode ?>"><?= $value->nama ?></option>
+                                                        <option value="<?= $key ?>"><?= $value ?></option>
                                                     <?php }
                                                     ?>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="form-group">
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
-
-                                            </div>
-                                            <div class="col-xs-8">
                                                 <label class="checkbox-inline">
-                                                    <input id="detail" name="detail" type="checkbox" value="1"><strong>Detail</strong></label>
+                                                    <input  name="filter" type="radio" value="global" class="form control" checked><strong>Global</strong></label>
+                                            </div>
+                                            <div class="col-xs-4">
+                                                <label class="checkbox-inline">
+                                                    <input  name="filter" type="radio" value="detail" class="form control" ><strong>Rekapitulasi</strong></label>
+                                            </div>
+                                            <div class="col-xs-4">
+                                                <label class="checkbox-inline">
+                                                    <input  name="filter" type="radio" value="detail_2" class="form control" ><strong>Rekapitulasi 2</strong></label>
                                             </div>
                                         </div>
                                     </div>
@@ -156,20 +127,23 @@
                                 <div class="col-md-12 table-responsive example1 divListviewHead">
                                     <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
                                         <table id="tabelMemorial" class="table table-condesed table-hover detail" border="1">
-                                            <tr>
-                                                <th class="style bb ws no" >No</th>
-                                                <th class="style bb ws" >Periode</th>
-                                                <th class="style bb ws" >Tanggal Dibuat</th>
-                                                <th class="style bb ws" >No Bukti</th>
-                                                <th class="style bb ws" >Origin</th>
-                                                <th class="style bb ws" >Kode ACC</th>
-                                                <th class="style bb ws" >Nama ACC</th>
-                                                <th class="style bb ws" >Kerangan</th>
-                                                <th class="style bb ws" >Reff Note</th>
-                                                <th class="style bb ws" >Partner</th>
-                                                <th class="style bb ws text-right" >Debit</th>
-                                                <th class="style bb ws text-right" >Credit</th>
-                                            </tr>
+                                            <thead id="thead">
+                                                <tr>
+                                                    <th class="style bb ws no" >No</th>
+                                                    <th class="style bb ws" >Periode</th>
+                                                    <th class="style bb ws" >Tanggal Dibuat</th>
+                                                    <th class="style bb ws" >No Bukti</th>
+                                                    <th class="style bb ws" >Origin</th>
+                                                    <th class="style bb ws" >Kode ACC</th>
+                                                    <th class="style bb ws" >Nama ACC</th>
+                                                    <th class="style bb ws" >Kerangan</th>
+                                                    <th class="style bb ws" >Reff Note</th>
+                                                    <th class="style bb ws" >Partner</th>
+                                                    <th class="style bb ws text-right" >Debit</th>
+                                                    <th class="style bb ws text-right" >Credit</th>
+                                                </tr>
+                                            </thead>
+
                                             <tbody id="tBody" class="ws">
 
                                             </tbody>
@@ -186,22 +160,18 @@
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script>
             $(function () {
-
-                $(".filter").on("click", function () {
-                    if ($(this).val() === "1") {
-                        $(".periode").hide();
-                        $(".tanggal_dibuat").show();
-                        return;
-                    }
-                    $(".periode").show();
-                    $(".tanggal_dibuat").hide();
-                });
                 var cek = 0;
-                $('input[name="tanggal_dibuat"]').daterangepicker({
+                $('input[name="periode"]').daterangepicker({
                     endDate: moment().endOf('month'),
                     startDate: moment().startOf('month'),
                     locale: {
                         format: 'YYYY-MM-DD'
+                    },
+                    ranges: {
+                        'H': [moment(), moment()],
+                        '1..H': [moment().startOf('month'), moment()],
+                        '1..31': [moment().startOf('month'), moment().endOf('month')],
+                        '1..P': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                     }
                 });
 
@@ -210,18 +180,38 @@
                     placeholder: "Pilih"
                 });
 
-                $("#detail").on("change", function () {
-                    $("#tabelMemorial").toggleClass("detail");
-                    if (cek > 0) {
-                        $("#search").trigger("click");
-                    }
+                $('input[name="filter"]').on("change", function () {
+                    filters();
+                    search();
                 });
+                const filters = (() => {
+                    $.ajax({
+                        url: "<?= base_url('accounting/jurnalmemorial/jm') ?>",
+                        type: "GET",
+                        data: {
+                            jm: $("#jurnal").val(),
+                            filter: $('input[name="filter"]:checked').val()
+                        },
+                        beforeSend: function (xhr) {
+                            please_wait((() => {
+
+                            }));
+                        },
+                        complete: function (sq) {
+                            unblockUI(function () {}, 100);
+                        },
+                        success: ((data) => {
+                            $("#thead").html(data.data);
+                        })
+                    });
+                })
 
                 $("#jurnal").on("select2:select", function () {
-                    $("#jurnal_nm").val($("#jurnal :selected").text());
+                    filters();
+                    search();
                 });
 
-                $("#search").on("click", function () {
+                const search = (() => {
                     cek++;
                     $.ajax({
                         url: "<?= base_url('accounting/jurnalmemorial/search/') ?>",
@@ -247,11 +237,18 @@
                             unblockUI(function () {}, 100);
                         },
                         error: function (sq) {
-                            alert_notify(sq.responseJSON?.icon, sq.responseJSON?.message, sq.responseJSON?.type, function () {
-
+                            var msg = "Tidak Ada Rekapitulasi 2.";
+                            if (sq.responseJSON?.message !== undefined)
+                                msg = sq.responseJSON.message;
+                            alert_notify("fa fa-error", msg, "danger", function () {
+                                $("#tBody").html("");
                             });
                         }
                     });
+                });
+
+                $("#search").on("click", function () {
+                    search();
                 });
 
                 const formrd = document.forms.namedItem("form-jm");
@@ -280,8 +277,6 @@
                 },
                         false
                         );
-
-
             });
         </script>
     </body>

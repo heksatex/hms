@@ -143,9 +143,9 @@
                 <tr>
                     <td>
                         <div class="input-group">
-                        <span class="input-group-addon nourut:nourut" style="border: none;"></span>
-                        <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
-                    </div>
+                            <span class="input-group-addon nourut:nourut" style="border: none;"></span>
+                            <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
+                        </div>
                     </td>
                     <td>
                         <input type="text" name="uraian[]" class="form-control uraian:nourut input-sm" required/>
@@ -153,17 +153,11 @@
                     <td>
                         <select class="form-control input-sm select2-coa" style="width:100%" name="kode_coa[]" required>
                             <option value=""></option>
-                            <?php
-                            foreach ($coas as $key => $value) {
-                                ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                                <?php
-                            }
-                            ?>
+
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="kurs[]" value="1.00" class="form-control input-sm" required/>
+                        <input type="text" name="kurs[]" value="1.00" class="form-control input-sm text-right" required/>
                     </td>
                     <td>
                         <select class="form-control input-sm select2 select2-curr" style="width:100%" name="curr[]" required>
@@ -176,7 +170,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" class="form-control nominal text-right input-sm" value="0"  required/>
+                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control giro_keluar_detail input-sm text-right" value="0" />
                     </td>
                 </tr>
@@ -185,9 +179,9 @@
                 <tr>
                     <td>
                         <div class="input-group">
-                        <span class="input-group-addon nourut:nourut" style="border: none;"></span>
-                        <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
-                    </div>
+                            <span class="input-group-addon nourut:nourut" style="border: none;"></span>
+                            <button type="button" class="btn btn-danger btn-sm btn-rmv-item"><i class="fa fa-close"></i></button>
+                        </div>
                     </td>
                     <td>
                         <input type="text" name="uraian[]" value="" class="form-control uraian:nourut input-sm" required/>
@@ -195,13 +189,7 @@
                     <td>
                         <select class="form-control input-sm select2-coa coa_:nourut" style="width:100%" name="kode_coa[]" required>
                             <option value=""></option>
-                            <?php
-                            foreach ($coas as $key => $value) {
-                                ?>
-                                <option value="<?= $value->kode_coa ?>"><?= "{$value->kode_coa}" ?></option>
-                                <?php
-                            }
-                            ?>
+
                         </select>
                     </td>
                     <td>
@@ -218,7 +206,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="nominal[]" class="form-control nominal:nourut nominal text-right input-sm" value="0" required/>
+                        <input type="text" name="nominal[]" pattern="^\d{1,3}(,\d{3})*(\.\d+)?$" data-type='currency' class="form-control nominal nominal:nourut input-sm text-right" value="0"  required/>
                         <input type="hidden" name="giro_keluar_detail[]" class="form-control giro_keluar_detail:nourut input-sm text-right" value="0" />
 
                     </td>
@@ -233,6 +221,40 @@
             var no = 0;
             var transaksi = [];
             var idgiro = [];
+
+            const setCoaItem = ((klas = "select2-coa") => {
+                $("." + klas).select2({
+                    placeholder: "Pilih Coa",
+                    allowClear: true,
+                    ajax: {
+                        dataType: 'JSON',
+                        type: "GET",
+                        url: "<?php echo base_url(); ?>accounting/kaskeluar/get_coa",
+                        delay: 250,
+                        data: function (params) {
+                            return{
+                                search: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            var results = [];
+                            $.each(data.data, function (index, item) {
+                                results.push({
+                                    text: item.nama,
+                                    children: [{
+                                            id: item.kode_coa,
+                                            text: item.kode_coa
+                                        }]
+                                });
+                            });
+                            return {
+                                results: results
+                            };
+                        }
+                    }
+                });
+            });
+
             const setCurr = (() => {
                 $(".select2-curr").select2({
                     placeholder: "Pilih",
@@ -264,6 +286,20 @@
 //                    }
                 });
             });
+            
+            const setNominalCurrency = (() => {
+                $("input[data-type='currency']").on({
+                    keyup: function () {
+                        formatCurrency($(this));
+                    },
+                    drop: function () {
+                        formatCurrency($(this));
+                    },
+                    blur: function () {
+                        formatCurrency($(this), "blur");
+                    }
+                });
+            });
 
             const addToTable = ((data) => {
                 $.ajax({
@@ -286,18 +322,30 @@
                             var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                             $("#kasmasuk-detail tbody").append(isi_tmplt);
                             $("#transaksi").val(transaksi.join(","));
-                            $(".coa_" + no).val(row.kode_coa).trigger("change");
                             $(".giro_keluar_detail" + no).val(row.id);
                             $(".uraian" + no).val(row.no_gk);
-                            $(".nominal" + no).val(row.nominal);
+                            $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.nominal));
                             $(".kurs" + no).val(row.kurs);
                             $(".nourut" + no).html(no);
+                            setCoaItem("coa_" + no);
+                            $(".coa_" + no).select2("trigger", "select", {
+                                data: {id: row.kode_coa, text: row.kode_coa}
+                            });
+                            $(".nominal" + no).on("blur", function () {
+                                calculateTotal();
+                            });
+                            $(".nominal" + no).keyup(function (ev) {
+                                if (ev.keyCode === 13) {
+                                    $(".btn-add-item").trigger("click");
+                                }
+                            });
                         });
                     },
                     complete: function (jqXHR, textStatus) {
                         unblockUI(function () {
                             setCurr();
                             $(".total-nominal").trigger("click");
+                            setNominalCurrency();
                         }, 100);
 
                     },
@@ -337,26 +385,27 @@
                     var txtt = txt.split(' - ');
                     $("#coa_name").val(txtt.at(-1));
                 });
-                
+
                 $(".btn-add-item").on("click", function (e) {
                     e.preventDefault();
                     no += 1;
                     var tmplt = $("template.kasmasuk-tmplt");
                     var isi_tmplt = tmplt.html().replace(/:nourut/g, no);
                     $("#kasmasuk-detail tbody").append(isi_tmplt);
-                    $(".select2-coa").select2();
+                    setCoaItem();
                     setCurr();
-                    $(".nominal").on("blur", function () {
+                    $(".nominal"+no).on("blur", function () {
                         calculateTotal();
                     });
-                    
-                    $(".nominal").keyup(function (ev) {
+
+                    $(".nominal"+no).keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
                         }
                     });
                     $(".uraian" + no).focus();
                     $(".nourut" + no).html(no);
+                    setNominalCurrency();
                 });
 
                 $(".partner").on("change", function () {
@@ -405,7 +454,7 @@
                         data: function (params) {
                             return{
                                 search: params.term,
-                                jenis:"customer"
+                                jenis: "customer"
                             };
                         },
                         processResults: function (data) {
@@ -428,10 +477,9 @@
                 const calculateTotal = (() => {
                     var total = 0;
                     const elements = document.querySelectorAll('.nominal');
-
                     $.each(elements, function (idx, nomina) {
                         let ttl = $(nomina).val();
-                        total += parseInt(ttl);
+                        total += parseInt(ttl.replace(/,/g, ""));
                     });
                     if (total === NaN) {
                         $("#total_nominal").val();
