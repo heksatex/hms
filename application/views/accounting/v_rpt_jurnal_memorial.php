@@ -112,7 +112,8 @@
                                                     <input  name="filter" type="radio" value="detail" class="form control" ><strong>Rekapitulasi</strong></label>
                                             </div>
                                             <div class="col-xs-4">
-                                                <input  name="filter" type="radio" value="detail_2" class="form control" ><strong>Rekapitulasi 2</strong></label>
+                                                <label class="checkbox-inline">
+                                                    <input  name="filter" type="radio" value="detail_2" class="form control" ><strong>Rekapitulasi 2</strong></label>
                                             </div>
                                         </div>
                                     </div>
@@ -165,6 +166,12 @@
                     startDate: moment().startOf('month'),
                     locale: {
                         format: 'YYYY-MM-DD'
+                    },
+                    ranges: {
+                        'H': [moment(), moment()],
+                        '1..H': [moment().startOf('month'), moment()],
+                        '1..31': [moment().startOf('month'), moment().endOf('month')],
+                        '1..P': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
                     }
                 });
 
@@ -175,7 +182,8 @@
 
                 $('input[name="filter"]').on("change", function () {
                     filters();
-                })
+                    search();
+                });
                 const filters = (() => {
                     $.ajax({
                         url: "<?= base_url('accounting/jurnalmemorial/jm') ?>",
@@ -200,9 +208,10 @@
 
                 $("#jurnal").on("select2:select", function () {
                     filters();
+                    search();
                 });
 
-                $("#search").on("click", function () {
+                const search = (() => {
                     cek++;
                     $.ajax({
                         url: "<?= base_url('accounting/jurnalmemorial/search/') ?>",
@@ -228,14 +237,18 @@
                             unblockUI(function () {}, 100);
                         },
                         error: function (sq) {
-                            var msg = "";
-                            if(sq.responseJSON?.message !==  undefined)
+                            var msg = "Tidak Ada Rekapitulasi 2.";
+                            if (sq.responseJSON?.message !== undefined)
                                 msg = sq.responseJSON.message;
                             alert_notify("fa fa-error", msg, "danger", function () {
-
+                                $("#tBody").html("");
                             });
                         }
                     });
+                });
+
+                $("#search").on("click", function () {
+                    search();
                 });
 
                 const formrd = document.forms.namedItem("form-jm");
@@ -264,8 +277,6 @@
                 },
                         false
                         );
-
-
             });
         </script>
     </body>

@@ -44,7 +44,8 @@ foreach ($data["debit"] as $key => $value) {
 
     <?php
 }
-?>
+if (isset($data["kredit"][0])) {
+    ?>
 <tr>
     <td>
         
@@ -61,6 +62,9 @@ foreach ($data["debit"] as $key => $value) {
         <?= number_format(($data["kredit"][0]->nominals ?? 0), 2) ?>
     </td>
 </tr>
+    <?php
+}
+?>
 <?php
 if ($totalKredit > 0) {
     ?>

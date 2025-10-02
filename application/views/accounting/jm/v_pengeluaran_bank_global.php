@@ -117,6 +117,8 @@ foreach ($data["giro_kredit"] as $key => $value) {
     </tr>
     <?php
 }
+if(($totalDebit + $totalKredit) > 0)
+{
 ?>
 <tr>
     <td>&nbsp;</td>
@@ -134,3 +136,6 @@ foreach ($data["giro_kredit"] as $key => $value) {
     <td class="text-right"><?= number_format($totalDebit, 2) ?></td>
     <td class="text-right"><?= number_format($totalKredit, 2) ?></td>
 </tr>
+<?php 
+}
+?>

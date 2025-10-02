@@ -229,7 +229,7 @@
                                                                 <label class="form-label">No Jurnal</label>
                                                             </div>
                                                             <div class="col-xs-8 col-md-8">
-                                                                <strong>:&nbsp;<a href="<?= base_url("purchase/jurnalentries/edit/" . encrypt_url(($jurnal->kode ?? ""))) ?>" target="_blank"><?= $jurnal->kode ?? "" ?></a></strong>
+                                                                <strong>:&nbsp;<a href="<?= base_url("accounting/jurnalentries/edit/" . encrypt_url(($jurnal->kode ?? ""))) ?>" target="_blank"><?= $jurnal->kode ?? "" ?></a></strong>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-12 col-xs-12">

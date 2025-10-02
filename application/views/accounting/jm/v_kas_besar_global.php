@@ -24,23 +24,29 @@
     <td>
     </td>
 </tr>
+<?php
+if (isset($data["debit"][0])) {
+    ?>
+    <tr>
+        <td>
+            1
+        </td>
+        <td>
+            KAS BESAR
+        </td>
+        <td>
+            <?= $data["debit"][0]->km_kode_coa ?? "" ?>
+        </td>
+        <td class="text-right">
+            <?= number_format(($data["debit"][0]->nominals ?? 0), 2) ?>
+        </td>
+        <td>
+        </td>
+    </tr>
+    <?php
+}
+?>
 
-<tr>
-    <td>
-        1
-    </td>
-    <td>
-        KAS BESAR
-    </td>
-    <td>
-        <?= $data["debit"][0]->km_kode_coa ?? "" ?>
-    </td>
-    <td class="text-right">
-        <?= number_format(($data["debit"][0]->nominals ?? 0), 2) ?>
-    </td>
-    <td>
-    </td>
-</tr>
 
 
 <?php
