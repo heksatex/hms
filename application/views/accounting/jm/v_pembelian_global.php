@@ -9,8 +9,6 @@
     </td>
     <td>
     </td>
-    <td>
-    </td>
 </tr>
 
 <tr>
@@ -19,12 +17,12 @@
         <?= $periode ?>
     </td>
     <td>
+
     </td>
     <td>
-    <td></td>
-</td>
-<td>
-</td>
+    </td>
+    <td>
+    </td>
 </tr>
 <tr>
     <td>&nbsp;</td>
@@ -32,7 +30,6 @@
     </td>
     <td>
     </td>
-    <td></td>
     <td>
     </td>
     <td>
@@ -41,36 +38,41 @@
 <?php
 $totalDebit = 0;
 $totalKredit = 0;
-$kas = $data["kas_debit"] ?? [];
-foreach ($kas as $key => $value) {
+foreach ($data["debit"] as $key => $value) {
     $totalDebit += $value->nominals;
     ?>
     <tr>
         <td><?= ($key === 0) ? "1" : "" ?></td>
-        <td><?= $value->nama_kkd ?></td>
-        <td><?= $value->kode_coa_kkd ?></td>
-        <td class="text-right"><?= number_format($value->valas, 2) ?></td>
+        <td><?= $value->nama_coa ?></td>
+        <td><?= $value->kode_coa ?></td>
         <td class="text-right"><?= number_format($value->nominals, 2) ?></td>
         <td></td>
     </tr>
     <?php
 }
-$kas = $data["kas_kredit"] ?? [];
-foreach ($kas as $key => $value) {
+foreach ($data["kredit"] as $key => $value) {
     $totalKredit += $value->nominals;
     ?>
     <tr>
-        <td></td> 
-        <td>&nbsp;<?= $value->nama ?></td>
+        <td></td>
+        <td>&nbsp;<?= $value->nama_coa ?></td>
         <td><?= $value->kode_coa ?></td>
-        <td class="text-right"><?= number_format($value->valas, 2) ?></td>
         <td></td>
         <td class="text-right"><?= number_format($value->nominals, 2) ?></td>
 
     </tr>
     <?php
 }
-if (($totalDebit + $totalKredit) > 0) {
+?>
+<tr>
+    <td>&nbsp;</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+<?php
+if ($totalDebit > 0) {
     ?>
     <tr>
         <td>&nbsp;</td>
@@ -78,10 +80,8 @@ if (($totalDebit + $totalKredit) > 0) {
         <td></td>
         <td></td>
         <td></td>
-        <td></td>
     </tr>
     <tr>
-        <td></td>
         <td></td>
         <td></td>
         <td></td>

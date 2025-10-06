@@ -15,11 +15,13 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Memorialpenkasbesar {
 
     //put your code here
-    protected $data;
+    protected $data, $format = [];
 
     public function _data($model, $datas) {
         try {
@@ -49,6 +51,9 @@ class Memorialpenkasbesar {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getStyle("C")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -59,7 +64,7 @@ class Memorialpenkasbesar {
             $sheet->setCellValue("B{$row}", "Jurnal {$this->data['jurnal']}");
             $row += 1;
             $sheet->setCellValue("B{$row}", "{$this->data['periode']}");
-            $row += 1;
+            $row += 2;
             $sheet->setCellValue("A{$row}", '1');
             $sheet->setCellValue("B{$row}", 'KAS BESAR');
             $sheet->setCellValue("C{$row}", ($this->data["debit"][0]->km_kode_coa ?? ""));
@@ -68,22 +73,25 @@ class Memorialpenkasbesar {
             foreach ($this->data["kredit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $row += 1;
-                $sheet->setCellValue("B{$row}", " {$value->nama}");
-                $sheet->setCellValue("C{$row}", " {$value->kode_coa}");
-                $sheet->setCellValue("E{$row}", " {$value->nominals}");
+                $sheet->setCellValue("B{$row}", "{$value->nama}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
+                $sheet->setCellValue("E{$row}", "{$value->nominals}");
             }
             if ($totalKredit > 0) {
                 $row += 2;
                 $sheet->setCellValue("D{$row}", ($this->data["debit"][0]->nominals ?? 0));
-                $sheet->setCellValue("E{$row}", " {$totalKredit}");
+                $sheet->setCellValue("E{$row}", "{$totalKredit}");
             }
+            
+            
             $nm = str_replace("/", "_", $this->data["periode"]);
             $filename = "jurnal {$this->data['jurnal']} {$nm} global";
             $url = "dist/storages/report/jurnal_memorial";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
             }
-            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+//            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $writer->save(FCPATH . $url . '/' . $filename . '.xlsx');
             return base_url($url . '/' . $filename . '.xlsx');
         } catch (Exception $ex) {
@@ -95,6 +103,9 @@ class Memorialpenkasbesar {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'Tanggal');
             $sheet->setCellValue("B{$row}", 'No Bukti');

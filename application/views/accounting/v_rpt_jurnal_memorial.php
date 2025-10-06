@@ -48,6 +48,12 @@
             table tbody tr td {
                 padding: 0px 5px 0px 5px !important;
             }
+            .td-nominal {
+                width: 140px;
+            }
+            .td-no-perk {
+                width: 80px;
+            }
 
 
 
@@ -105,15 +111,15 @@
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="checkbox-inline">
-                                                    <input  name="filter" type="radio" value="global" class="form control" checked><strong>Global</strong></label>
+                                                    <input  name="filter" type="radio" value="global" class="form control filter-global" checked><strong>Global</strong></label>
                                             </div>
                                             <div class="col-xs-4">
                                                 <label class="checkbox-inline">
-                                                    <input  name="filter" type="radio" value="detail" class="form control" ><strong>Rekapitulasi</strong></label>
+                                                    <input  name="filter" type="radio" value="detail" class="form control" ><strong>Rekap Kredit</strong></label>
                                             </div>
                                             <div class="col-xs-4">
-                                                <label class="checkbox-inline">
-                                                    <input  name="filter" type="radio" value="detail_2" class="form control" ><strong>Rekapitulasi 2</strong></label>
+                                                <label class="checkbox-inline filter-debet">
+                                                    <input  name="filter" type="radio" value="detail_2" class="form control" ><strong>Rekap Debet</strong></label>
                                             </div>
                                         </div>
                                     </div>
@@ -159,6 +165,7 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script>
+            var NoDetailDebit = ["pen_kb", "peng_kb"];
             $(function () {
                 var cek = 0;
                 $('input[name="periode"]').daterangepicker({
@@ -207,6 +214,13 @@
                 })
 
                 $("#jurnal").on("select2:select", function () {
+                    if (NoDetailDebit.includes($("#jurnal").val())) {
+                        $(".filter-debet").hide();
+                        return;
+                    } else {
+                        $(".filter-debet").show();
+                    }
+
                     filters();
                     search();
                 });

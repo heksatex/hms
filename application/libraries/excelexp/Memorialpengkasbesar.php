@@ -15,7 +15,7 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 class Memorialpengkasbesar {
     //put your code here
     public function _data($model, $datas) {
@@ -44,6 +44,9 @@ class Memorialpengkasbesar {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getStyle("C")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -59,11 +62,11 @@ class Memorialpengkasbesar {
             foreach ($data["debit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $row += 1;
-                $sheet->setCellValue("B{$row}", " {$value->nama}");
-                $sheet->setCellValue("C{$row}", " {$value->kode_coa}");
-                $sheet->setCellValue("D{$row}", " {$value->nominals}");
+                $sheet->setCellValue("B{$row}", "{$value->nama}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
+                $sheet->setCellValue("D{$row}", "{$value->nominals}");
             }
-            $row += 1;
+            $row += 2;
             $sheet->setCellValue("A{$row}", 1);
             $sheet->setCellValue("B{$row}", 'KAS BESAR');
             $sheet->setCellValue("C{$row}", ($data["kredit"][0]->km_kode_coa ?? ""));
@@ -91,6 +94,9 @@ class Memorialpengkasbesar {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'Tanggal');
             $sheet->setCellValue("B{$row}", 'No Bukti');

@@ -15,9 +15,9 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 class Memorialpenkasvalas {
-
+    protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
     public function _data($model, $datas) {
         try {
             $data = [];
@@ -27,7 +27,7 @@ class Memorialpenkasvalas {
                     ->setWheres(["date(km.tanggal) >=" => $datas['tanggals'][0], "date(km.tanggal) <=" => $datas['tanggals'][1]])
                     ->setWheres(["km.kode_coa" => "1112.01", "kmd.kurs <>" => 1, "km.status" => "confirm"])
                     ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,km.no_km,kmd.kurs"])
-                    ->setSelects(["kmd.kode_coa as kode_coa_kmd,sum(kmd.nominal) as valas,sum(kmd.nominal*kmd.kurs) as nominals,ackmd.nama as nama_kmd,km.kode_coa,ackm.nama as nama,date(kmd.tanggal) as tanggal"])
+                    ->setSelects(["kmd.kode_coa as kode_coa_kmd,if(kmd.kurs > 1,sum(kmd.nominal),0) as valas,sum(kmd.nominal*kmd.kurs) as nominals,ackmd.nama as nama_kmd,km.kode_coa,ackm.nama as nama,date(kmd.tanggal) as tanggal"])
                     ->setGroups(["km.kode_coa"])->setOrder(["km.kode_coa"]);
             $data["kas_debit"] = $model->getData();
             switch ($datas["filter"]) {
@@ -51,6 +51,10 @@ class Memorialpenkasvalas {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getStyle("C")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -62,24 +66,25 @@ class Memorialpenkasvalas {
             $sheet->setCellValue("B{$row}", "Jurnal {$data['jurnal']}");
             $row += 1;
             $sheet->setCellValue("B{$row}", "{$data['periode']}");
+            $row += 1;
             $totalDebit = 0;
             foreach ($data["kas_debit"] as $key => $value) {
                 $totalDebit += $value->nominals;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", ($key === 0) ? "1" : "");
-                $sheet->setCellValue("B{$row}", " {$value->nama}");
-                $sheet->setCellValue("C{$row}", " {$value->kode_coa}");
-                $sheet->setCellValue("D{$row}", " {$value->valas}");
-                $sheet->setCellValue("E{$row}", " {$value->nominals}");
+                $sheet->setCellValue("B{$row}", "{$value->nama}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
+                $sheet->setCellValue("D{$row}", "{$value->valas}");
+                $sheet->setCellValue("E{$row}", "{$value->nominals}");
             }
             $totalKredit = 0;
             foreach ($data["kas_kredit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $row += 1;
-                $sheet->setCellValue("B{$row}", " {$value->nama_kmd}");
-                $sheet->setCellValue("C{$row}", " {$value->kode_coa_kmd}");
-                $sheet->setCellValue("D{$row}", " {$value->valas}");
-                $sheet->setCellValue("F{$row}", " {$value->nominals}");
+                $sheet->setCellValue("B{$row}", "{$value->nama_kmd}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa_kmd}");
+                $sheet->setCellValue("D{$row}", "{$value->valas}");
+                $sheet->setCellValue("F{$row}", "{$value->nominals}");
             }
             $row += 2;
             if (($totalDebit + $totalKredit) > 0) {
@@ -104,6 +109,11 @@ class Memorialpenkasvalas {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
+            $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("G")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+            $sheet->getStyle("J")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $row = 1;
             $sheet->setCellValue("A{$row}", 'Tanggal');
             $sheet->setCellValue("B{$row}", 'No Bukti');
@@ -160,7 +170,7 @@ class Memorialpenkasvalas {
                 }
             }
             if ($grandTotal > 0) {
-                $row += 1;
+                $row += 2;
                 $sheet->setCellValue("E{$row}", $grandTotalValas);
                 $sheet->setCellValue("G{$row}", $grandTotal);
                 $sheet->setCellValue("I{$row}", "Grand Total");
@@ -168,7 +178,7 @@ class Memorialpenkasvalas {
             }
 
             $nm = str_replace("/", "_", $data["periode"]);
-            $filename = "jurnal {$data['jurnal']} {$nm} {$data["filter"]}";
+            $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);

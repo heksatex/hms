@@ -1,6 +1,6 @@
 <?php
 $grandTotal = 0;
-$bank = $data["bank_debit"] ?? [];
+$bank = $data["bank_kredit"] ?? [];
 $total = 0;
 foreach ($bank as $key => $value) {
     $grandTotal += $value->nominals;
@@ -12,13 +12,13 @@ foreach ($bank as $key => $value) {
         <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0, 50) ?></td>
         <td><?= $value->partner ?></td>
         <td class="text-right"><?= number_format($value->nominals, 2) ?></td>
-        <td><?= $value->kode_coa_bkd ?></td>
-        <td><?= $value->nama_bkd ?></td>
+        <td><?= $value->kode_coa ?></td>
+        <td><?= $value->nama ?></td>
         <td class="text-right"><?= number_format($value->nominals, 2) ?></td>
     </tr>
     <?php
     if (isset($bank[$key + 1])) {
-        if ($value->kode_coa_bkd !== $bank[$key + 1]->kode_coa_bkd) {
+        if ($value->kode_coa !== $bank[$key + 1]->kode_coa) {
             ?>
             <tr>
                 <td></td>
@@ -27,7 +27,7 @@ foreach ($bank as $key => $value) {
                 <td></td>
                 <td class="text-right"><?= number_format($total, 2) ?></td>
                 <td></td>
-                <td><?= "{$value->nama_bkd} Total" ?></td>
+                <td><?= "{$value->nama} Total" ?></td>
                 <td class="text-right"><?= number_format($total, 2) ?></td>
             </tr>
             <tr>
@@ -52,7 +52,7 @@ foreach ($bank as $key => $value) {
             <td></td>
             <td class="text-right"><?= number_format($total, 2) ?></td>
             <td></td>
-            <td><?= "{$value->nama_bkd} Total" ?></td>
+            <td><?= "{$value->nama} Total" ?></td>
             <td class="text-right"><?= number_format($total, 2) ?></td>
         </tr>
         <?php
@@ -82,13 +82,13 @@ foreach ($giro as $key => $value) {
         <td title="<?= $value->uraian ?>"><?= substr($value->uraian, 0, 50) ?></td>
         <td><?= $value->partner ?></td>
         <td class="text-right"><?= number_format($value->nominals, 2) ?></td>
-        <td><?= $value->kode_coa_gkd ?></td>
-        <td><?= $value->nama_gkd ?></td>
+        <td><?= $value->kode_coa ?></td>
+        <td><?= $value->nama ?></td>
         <td class="text-right"><?= number_format($value->nominals, 2) ?></td>
     </tr>
     <?php
     if (isset($giro[$key + 1])) {
-        if ($value->kode_coa_gkd !== $giro[$key + 1]->kode_coa_gkd) {
+        if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
             ?>
             <tr>
                 <td></td>
@@ -97,7 +97,7 @@ foreach ($giro as $key => $value) {
                 <td></td>
                 <td class="text-right"><?= number_format($total, 2) ?></td>
                 <td></td>
-                <td><?= "{$value->nama_gkd} Total" ?></td>
+                <td><?= "{$value->nama} Total" ?></td>
                 <td class="text-right"><?= number_format($total, 2) ?></td>
             </tr>
             <tr>
@@ -122,7 +122,7 @@ foreach ($giro as $key => $value) {
             <td></td>
             <td class="text-right"><?= number_format($total, 2) ?></td>
             <td></td>
-            <td><?= "{$value->nama_gkd} Total" ?></td>
+            <td><?= "{$value->nama} Total" ?></td>
             <td class="text-right"><?= number_format($total, 2) ?></td>
         </tr>
         <?php
