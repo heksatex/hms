@@ -55,12 +55,13 @@
                                                         <label class="form-label">Laporan</label>
                                                     </div>
                                                     <div class="col-xs-9 col-md-9">
+                                                        <input type="hidden" name="jenis_coa" id="jenis_coa">
                                                         <select class="form-control input-sm select2 no_acc" name="kode_coa" id="kode_coa" required>
                                                             <option value=""></option>
                                                             <?php
                                                             foreach ($coa as $key => $value) {
                                                                 ?>
-                                                                <option value="<?= $value->kode_coa ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
+                                                                <option value="<?= $value->kode_coa ?>" data-jenis="<?= $value->jenis_transaksi ?>"><?= "({$value->kode_coa}) - {$value->nama}" ?></option>
                                                                 <?php
                                                             }
                                                             ?>
@@ -87,7 +88,7 @@
                                 </div>
                                 <br>
                                 <br>
-                                
+
                             </form>
                             <div class="col-md-12 table-responsive divListviewHead">
                                 <div role="region" aria-labelledby="HeadersCol" tabindex="0" class="rowheaders">
@@ -118,10 +119,14 @@
         <script>
             $(function () {
                 $(".select2").select2({
-                    placeholder:"Pilih Coa",
-                    allowClear:true
+                    placeholder: "Pilih Coa",
+                    allowClear: true
                 });
-                
+                $(".no_acc").on("change", function () {
+                    let jenis = $("#kode_coa :selected").data().jenis;
+                    $("#jenis_coa").val(jenis);
+                });
+
                 $('#tanggal').daterangepicker({
 //                    autoUpdateInput: false,
                     endDate: moment().startOf('day'),
@@ -143,7 +148,8 @@
                         type: "POST",
                         data: {
                             tanggal: $("#tanggal").val(),
-                            kode_coa: $("#kode_coa").val()
+                            kode_coa: $("#kode_coa").val(),
+                            jenis_coa: $("#jenis_coa").val()
                         },
                         beforeSend: function (xhr) {
                             please_wait((() => {

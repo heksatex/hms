@@ -33,8 +33,6 @@
     </td>
     <td>
     </td>
-    <td>
-    </td>
 </tr>
 <?php
 $totalDebit = 0;

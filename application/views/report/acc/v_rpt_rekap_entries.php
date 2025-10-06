@@ -75,7 +75,7 @@
                         <div class="box-header with-border">
                         </div>
                         <div class="box-body">
-                            <form class="form-horizontal" method="POST" name="form-jm" id="form-jm" action="<?= base_url('report/rekapentries/export') ?>">
+                            <form class="form-horizontal" method="POST" name="form-jm" id="form-jm" action="<?= base_url('accounting/rekapentries/export') ?>">
                                 <div class="col-md-8" style="padding-right: 0px !important;">
                                     <div class="form-group tanggal_dibuat" style="display: none;">
                                         <div class="col-md-12 col-xs-12">
@@ -228,7 +228,7 @@
                 $("#search").on("click", function () {
                     cek++;
                     $.ajax({
-                        url: "<?= base_url('report/rekapentries/search/') ?>",
+                        url: "<?= base_url('accounting/rekapentries/search/') ?>",
                         type: "POST",
                         data: {
                             periode: $("#periode").val(),

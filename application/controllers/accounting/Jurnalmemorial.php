@@ -25,7 +25,8 @@ class Jurnalmemorial extends MY_Controller {
         "pen_kv" => "Penerimaan Kas Valas", //6
         "peng_kv" => "Pengeluaran Kas Valas", //7
         "pel_p" => "Pelunasan Piutang", //8
-        "pel_h" => "Pelunasan Hutang", //9
+        "pel_h" => "Pelunasan Hutang", //9,
+        "pemb" => "Pembelian",
     ];
 
     public function __construct() {
@@ -43,6 +44,7 @@ class Jurnalmemorial extends MY_Controller {
         $this->load->library('excelexp/Memorialpengkasvalas', null, 'pengkasvalas');
         $this->load->library('excelexp/Memorialpelpiutang', null, 'pelpiutang');
         $this->load->library('excelexp/Memorialpelhutang', null, 'pelhutang');
+        $this->load->library('excelexp/Memorialpembelian', null, 'pemb');
 //        $this->data = new $this->m_global;
     }
 
@@ -218,6 +220,14 @@ class Jurnalmemorial extends MY_Controller {
                     $data["data"] = $this->pelhutang->_data($model, $data);
                     $view = $this->load->view("accounting/jm/v_pelunasan_hutang_{$this->filter}", $data, true);
                     break;
+                case "pemb":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $data["data"] = $this->pemb->_data($model, $data);
+                    $view = $this->load->view("accounting/jm/v_pembelian_{$this->filter}", $data, true);
+                    break;
                 default://
                     break;
             }
@@ -288,6 +298,20 @@ class Jurnalmemorial extends MY_Controller {
                     else
                         $view = $this->pengkasbesar->_detail($data, $filename);
                     break;
+                case "pen_b":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->penbank->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->penbank->_global($data, $filename);
+                    else if ($this->filter === "detail")
+                        $view = $this->penbank->_detail($data, $filename);
+                    else
+                        $view = $this->penbank->_detail_2($data, $filename);
+                    break;
                 case "peng_b":
                     $data["jurnal"] = $this->jm[$this->jurnal];
                     $data["periode"] = $tanggal;
@@ -343,7 +367,7 @@ class Jurnalmemorial extends MY_Controller {
                     else
                         $view = $this->penkasvalas->_detail($data, $filename);
                     break;
-                    case "peng_kv":
+                case "peng_kv":
                     $data["jurnal"] = $this->jm[$this->jurnal];
                     $data["periode"] = $tanggal;
                     $data["tanggals"] = $this->tanggals;
@@ -355,7 +379,7 @@ class Jurnalmemorial extends MY_Controller {
                     else
                         $view = $this->pengkasvalas->_detail($data, $filename);
                     break;
-                    case "pel_p":
+                case "pel_p":
                     $data["jurnal"] = $this->jm[$this->jurnal];
                     $data["periode"] = $tanggal;
                     $data["tanggals"] = $this->tanggals;
@@ -364,12 +388,12 @@ class Jurnalmemorial extends MY_Controller {
                     $data = array_merge($data, $datas);
                     if ($this->filter === "global")
                         $view = $this->pelpiutang->_global($data, $filename);
-                    else if($this->filter === "detail")
+                    else if ($this->filter === "detail")
                         $view = $this->pelpiutang->_detail($data, $filename);
                     else
                         $view = $this->pelpiutang->_detail_2($data, $filename);
                     break;
-                    case "pel_h":
+                case "pel_h":
                     $data["jurnal"] = $this->jm[$this->jurnal];
                     $data["periode"] = $tanggal;
                     $data["tanggals"] = $this->tanggals;
@@ -378,10 +402,24 @@ class Jurnalmemorial extends MY_Controller {
                     $data = array_merge($data, $datas);
                     if ($this->filter === "global")
                         $view = $this->pelhutang->_global($data, $filename);
-                    else if($this->filter === "detail")
+                    else if ($this->filter === "detail")
                         $view = $this->pelhutang->_detail($data, $filename);
                     else
                         $view = $this->pelhutang->_detail_2($data, $filename);
+                    break;
+                    case "pemb":
+                    $data["jurnal"] = $this->jm[$this->jurnal];
+                    $data["periode"] = $tanggal;
+                    $data["tanggals"] = $this->tanggals;
+                    $data["filter"] = $this->filter;
+                    $datas = $this->pemb->_data($model, $data);
+                    $data = array_merge($data, $datas);
+                    if ($this->filter === "global")
+                        $view = $this->pemb->_global($data, $filename);
+                    else if ($this->filter === "detail")
+                        $view = $this->pemb->_detail($data, $filename);
+                    else
+                        $view = $this->pemb->_detail_2($data, $filename);
                     break;
                 default:
                     break;
