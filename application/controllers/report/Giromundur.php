@@ -84,7 +84,7 @@ class Giromundur extends MY_Controller {
             if ($jenis_coa === "utang_giro") {
                 //giro keluar
                 $model->setTables("acc_giro_keluar gm")->setJoins("acc_giro_keluar_detail gmd", "giro_keluar_id = gm.id")
-                        ->setSelects(["gm.no_gk as no_bukti,date(gm.tanggal) as tanggal,gm.transinfo as uraian,'C' as posisi,nominal,gmd.kode_coa,no_bg"])
+                        ->setSelects(["gm.no_gk as no_bukti,date(gm.tanggal) as tanggal,if(partner_nama = '',lain2,partner_nama) as uraian,'C' as posisi,nominal,gmd.kode_coa,no_bg"])
                         ->setWheres(["status" => "confirm"]);
                 if (count($tanggals) > 1) {
                     $model->setWheres(["date(gm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(gm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
@@ -96,7 +96,7 @@ class Giromundur extends MY_Controller {
 
                 //bank keluar
                 $model->setTables("acc_bank_keluar bm")->setJoins("acc_bank_keluar_detail bmd", "bank_keluar_id = bm.id")
-                        ->setSelects(["bm.no_bk as no_bukti,date(bm.tanggal) as tanggal,bmd.uraian,'D' as posisi,nominal,bmd.kode_coa,no_bg"])
+                        ->setSelects(["bm.no_bk as no_bukti,date(bm.tanggal) as tanggal,if(partner_nama = '',lain2,partner_nama) as uraian,'D' as posisi,nominal,bmd.kode_coa,no_bg"])
                         ->setWheres(["status" => "confirm"]);
                 if (count($tanggals) > 1) {
                     $model->setWheres(["date(bm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(bm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])),
@@ -109,7 +109,7 @@ class Giromundur extends MY_Controller {
 
                 //giro masuk
                 $model->setTables("acc_giro_masuk gk")->setJoins("acc_giro_masuk_detail gkd", "giro_masuk_id = gk.id")
-                        ->setSelects(["gk.no_gm as no_bukti,date(gk.tanggal) as tanggal,gk.transinfo as uraian,'D' as posisi,nominal,gkd.kode_coa,no_bg"])
+                        ->setSelects(["gk.no_gm as no_bukti,date(gk.tanggal) as tanggal,if(partner_nama = '',lain2,partner_nama) as uraian,'D' as posisi,nominal,gkd.kode_coa,no_bg"])
                         ->setWheres(["status" => "confirm"]);
                 if (count($tanggals) > 1) {
                     $model->setWheres(["date(gk.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(gk.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
@@ -123,7 +123,7 @@ class Giromundur extends MY_Controller {
             } else {
                 //giro masuk
                 $model->setTables("acc_giro_masuk gm")->setJoins("acc_giro_masuk_detail gmd", "giro_masuk_id = gm.id")
-                        ->setSelects(["gm.no_gm as no_bukti,date(gm.tanggal) as tanggal,gm.transinfo as uraian,'C' as posisi,nominal,gmd.kode_coa,no_bg"])
+                        ->setSelects(["gm.no_gm as no_bukti,date(gm.tanggal) as tanggal,if(partner_nama = '',lain2,partner_nama) as uraian,'C' as posisi,nominal,gmd.kode_coa,no_bg"])
                         ->setWheres(["status" => "confirm"]);
                 if (count($tanggals) > 1) {
                     $model->setWheres(["date(gm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(gm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
@@ -135,7 +135,7 @@ class Giromundur extends MY_Controller {
 
                 //bank masuk
                 $model->setTables("acc_bank_masuk bm")->setJoins("acc_bank_masuk_detail bmd", "bank_masuk_id = bm.id")
-                        ->setSelects(["bm.no_bm as no_bukti,date(bm.tanggal) as tanggal,bmd.uraian,'D' as posisi,nominal,bmd.kode_coa,no_bg"])
+                        ->setSelects(["bm.no_bm as no_bukti,date(bm.tanggal) as tanggal,if(partner_nama = '',lain2,partner_nama) as uraian,'D' as posisi,nominal,bmd.kode_coa,no_bg"])
                         ->setWheres(["status" => "confirm"]);
                 if (count($tanggals) > 1) {
                     $model->setWheres(["date(bm.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(bm.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1])),
@@ -148,7 +148,7 @@ class Giromundur extends MY_Controller {
 
                 //giro keluar
                 $model->setTables("acc_giro_keluar gk")->setJoins("acc_giro_keluar_detail gkd", "giro_keluar_id = gk.id")
-                        ->setSelects(["gk.no_gk as no_bukti,date(gk.tanggal) as tanggal,gk.transinfo as uraian,'D' as posisi,nominal,gkd.kode_coa,no_bg"])
+                        ->setSelects(["gk.no_gk as no_bukti,date(gk.tanggal) as tanggal,if(partner_nama = '',lain2,partner_nama) as uraian,'D' as posisi,nominal,gkd.kode_coa,no_bg"])
                         ->setWheres(["status" => "confirm"]);
                 if (count($tanggals) > 1) {
                     $model->setWheres(["date(gk.tanggal) >=" => date("Y-m-d", strtotime($tanggals[0])), "date(gk.tanggal) <=" => date("Y-m-d", strtotime($tanggals[1]))]);
