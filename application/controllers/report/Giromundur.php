@@ -242,7 +242,7 @@ class Giromundur extends MY_Controller {
                 $sheet->setCellValue("B{$row}", $dt);
                 $sheet->setCellValue("C{$row}", $no_bukti);
                 $sheet->setCellValue("D{$row}", $value->uraian);
-                $sheet->setCellValue("E{$row}", $value->coa);
+                $sheet->setCellValue("E{$row}", $value->no_bg);
                 $sheet->setCellValue("F{$row}", $kredit);
                 $sheet->setCellValue("G{$row}", $debet);
                 $sheet->setCellValue("H{$row}", $saldo);
