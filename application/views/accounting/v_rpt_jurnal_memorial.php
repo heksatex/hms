@@ -55,9 +55,6 @@
                 width: 80px;
             }
 
-
-
-
         </style>
     </head>
     <body class="hold-transition skin-black fixed sidebar-mini">
@@ -111,15 +108,15 @@
                                         <div class="col-md-12 col-xs-12">
                                             <div class="col-xs-4">
                                                 <label class="checkbox-inline">
-                                                    <input  name="filter" type="radio" value="global" class="form control filter-global" checked><strong>Global</strong></label>
+                                                    <input  name="filter" type="radio" value="global" class="form control filter-global" checked>&nbsp;<strong>Global</strong></label>
                                             </div>
                                             <div class="col-xs-4">
                                                 <label class="checkbox-inline">
-                                                    <input  name="filter" type="radio" value="detail" class="form control" ><strong>Rekap Kredit</strong></label>
+                                                    <input  name="filter" type="radio" value="detail" class="form control" >&nbsp;<strong>Rekap Kredit</strong></label>
                                             </div>
                                             <div class="col-xs-4">
                                                 <label class="checkbox-inline filter-debet">
-                                                    <input  name="filter" type="radio" value="detail_2" class="form control" ><strong>Rekap Debet</strong></label>
+                                                    <input  name="filter" type="radio" value="detail_2" class="form control" >&nbsp;<strong>Rekap Debet</strong></label>
                                             </div>
                                         </div>
                                     </div>
@@ -211,7 +208,7 @@
                             $("#thead").html(data.data);
                         })
                     });
-                })
+                });
 
                 $("#jurnal").on("select2:select", function () {
                     if (NoDetailDebit.includes($("#jurnal").val())) {
@@ -262,6 +259,7 @@
                 });
 
                 $("#search").on("click", function () {
+                    filters();
                     search();
                 });
 
