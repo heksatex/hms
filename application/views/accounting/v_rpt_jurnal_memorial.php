@@ -185,7 +185,7 @@
                 });
 
                 $('input[name="filter"]').on("change", function () {
-                    filters();
+//                    filters();
 //                    search();
                 });
                 const filters = (() => {
@@ -218,7 +218,7 @@
                         $(".filter-debet").show();
                     }
 
-                    filters();
+//                    filters();
 //                    search();
                 });
 
