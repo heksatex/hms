@@ -27,6 +27,18 @@
 <?php
 if (isset($data["debit"][0])) {
     ?>
+<tr>
+    <td>&nbsp;</td>
+    <td>
+    </td>
+    <td>
+
+    </td>
+    <td>
+    </td>
+    <td>
+    </td>
+</tr>
     <tr>
         <td>
             1

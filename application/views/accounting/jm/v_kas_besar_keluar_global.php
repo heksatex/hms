@@ -24,7 +24,19 @@
     <td>
     </td>
 </tr>
+<tr>
+    <td></td>
+    <td>
+        &nbsp;
+    </td>
+    <td>
 
+    </td>
+    <td>
+    </td>
+    <td>
+    </td>
+</tr>
 
 <?php
 $no = 1;
@@ -48,7 +60,7 @@ if (isset($data["kredit"][0])) {
     ?>
 <tr>
     <td>
-        
+        1
     </td>
     <td>
         &nbsp;KAS BESAR

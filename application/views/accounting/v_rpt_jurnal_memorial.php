@@ -186,7 +186,7 @@
 
                 $('input[name="filter"]').on("change", function () {
                     filters();
-                    search();
+//                    search();
                 });
                 const filters = (() => {
                     $.ajax({
@@ -219,7 +219,7 @@
                     }
 
                     filters();
-                    search();
+//                    search();
                 });
 
                 const search = (() => {
