@@ -34,15 +34,15 @@ class Giromundur extends MY_Controller {
         $this->load->view('report/acc/v_giro_mundur', $data);
     }
 
-    protected function _saldo() {
+    protected function _saldo($giro = "masuk") {
         try {
             $tanggal = $this->input->post("tanggal");
             $tanggals = explode(" - ", $tanggal);
-
+            $coa = $this->input->post("kode_coa");
             $saldo = 0;
             $model = new $this->m_global;
-            $dt = $model->setTables("acc_giro_masuk gm")->setJoins("acc_giro_masuk_detail gmd", "giro_masuk_id = gm.id")
-                            ->setSelects(["sum(nominal) as total"])->setWheres(["status" => "confirm", "cair" => 0, "date(gm.tanggal) < " => $tanggals[0]])->getDetail();
+            $dt = $model->setTables("acc_giro_{$giro} gm")->setJoins("acc_giro_{$giro}_detail gmd", "giro_{$giro}_id = gm.id")
+                            ->setSelects(["sum(nominal) as total"])->setWheres(["status" => "confirm", "cair" => 0, "date(gm.tanggal) < " => $tanggals[0], "gm.kode_coa" => $coa])->getDetail();
             if ($dt) {
                 $saldo = $dt->total;
             }
@@ -93,7 +93,6 @@ class Giromundur extends MY_Controller {
                     $model->setWheres(["gm.kode_coa" => $coa]);
                 }
                 $queryGiroMasuk = $model->getQuery();
-
                 //bank keluar
                 $model->setTables("acc_bank_keluar bm")->setJoins("acc_bank_keluar_detail bmd", "bank_keluar_id = bm.id")
                         ->setSelects(["bm.no_bk as no_bukti,date(bm.tanggal) as tanggal,if(partner_nama = '',lain2,partner_nama) as uraian,'D' as posisi,nominal,bmd.kode_coa,no_bg"])
@@ -172,8 +171,9 @@ class Giromundur extends MY_Controller {
     public function search() {
         try {
             $model = $this->_query();
+            $jenis_coa = $this->input->post("jenis_coa");
             $data["data"] = $model->getData();
-            $data["saldo"] = $this->_saldo();
+            $data["saldo"] = ($jenis_coa === "utang_giro") ? $this->_saldo("keluar") : $this->_saldo();
             $html = $this->load->view('report/acc/v_giro_mundur_detail', $data, true);
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
@@ -189,6 +189,7 @@ class Giromundur extends MY_Controller {
         try {
             $model = $this->_query();
             $data = $model->getData();
+            $jenis_coa = $this->input->post("jenis_coa");
 
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
@@ -202,7 +203,7 @@ class Giromundur extends MY_Controller {
             $sheet->setCellValue("F{$row}", 'Baru');
             $sheet->setCellValue("G{$row}", 'Cair');
             $sheet->setCellValue("H{$row}", 'Saldo');
-            $saldo = $this->_saldo();
+            $saldo = $data["saldo"] = ($jenis_coa === "utang_giro") ? $this->_saldo("keluar") : $this->_saldo();
             if (count($data) > 0) {
                 $row += 1;
                 $sheet->setCellValue("D{$row}", "Saldo Awal");
@@ -242,7 +243,7 @@ class Giromundur extends MY_Controller {
                 $sheet->setCellValue("B{$row}", $dt);
                 $sheet->setCellValue("C{$row}", $no_bukti);
                 $sheet->setCellValue("D{$row}", $value->uraian);
-                $sheet->setCellValue("E{$row}", $value->coa);
+                $sheet->setCellValue("E{$row}", $value->no_bg);
                 $sheet->setCellValue("F{$row}", $kredit);
                 $sheet->setCellValue("G{$row}", $debet);
                 $sheet->setCellValue("H{$row}", $saldo);
