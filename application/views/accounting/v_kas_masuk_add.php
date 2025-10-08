@@ -339,6 +339,7 @@
                                     $(".btn-add-item").trigger("click");
                                 }
                             });
+                            $("#lain_lain").val(row.lain);
                         });
                     },
                     complete: function (jqXHR, textStatus) {

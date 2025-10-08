@@ -5,7 +5,7 @@
                 <tr>
                     <th class="no">No</th>
                     <th>No GK</th>
-                    <th>Supplier</th>
+                    <th>Kontak</th>
                     <th>Tanggal JT</th>
                     <th>Nominal</th>
                 </tr>

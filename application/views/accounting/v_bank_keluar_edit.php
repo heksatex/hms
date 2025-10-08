@@ -878,6 +878,7 @@ if ($datas->status == 'confirm') {
                                 calculateTotal();
                             });
                             setNominalCurrency();
+                            $("#lain_lain").val(row.lain);
                         });
                         setTglFormatDef(".tgl-def-format");
 

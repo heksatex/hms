@@ -360,7 +360,7 @@ class Bankkeluar extends MY_Controller {
 
             $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
-                            ->setSelects(["agkd.*"])
+                            ->setSelects(["agkd.*","if(partner_nama = '',agk.lain2,partner_nama) as lain"])
                             ->setSelects(["currency_kurs.currency as curr"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
             $this->output->set_status_header(200)
