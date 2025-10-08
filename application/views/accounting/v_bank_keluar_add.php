@@ -562,7 +562,7 @@
                             $(".coa_" + no).select2("trigger", "select", {
                                 data: {id: row.kode_coa, text: row.kode_coa}
                             });
-
+                            $("#lain_lain").val(row.lain);
                             $(".nominal" + no).on("blur", function () {
                                 calculateTotal();
                             });
