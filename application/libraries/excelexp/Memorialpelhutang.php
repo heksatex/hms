@@ -207,12 +207,14 @@ class Memorialpelhutang {
                         $sheet->setCellValue("G{$row}", "{$value->nama_bkd} Total");
                         $sheet->setCellValue("H{$row}", $total);
                         $total = 0;
+                        $row += 1;
                     }
                 } else {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $total);
                     $sheet->setCellValue("G{$row}", "{$value->nama_bkd} Total");
                     $sheet->setCellValue("H{$row}", $total);
+                    $row += 1;
                 }
             }
 
@@ -238,12 +240,14 @@ class Memorialpelhutang {
                         $sheet->setCellValue("G{$row}", "{$value->nama_gkd} Total");
                         $sheet->setCellValue("H{$row}", $total);
                         $total = 0;
+                        $row += 1;
                     }
                 } else {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $total);
                     $sheet->setCellValue("G{$row}", "{$value->nama_gkd} Total");
                     $sheet->setCellValue("H{$row}", $total);
+                    $row += 1;
                 }
             }
 
@@ -307,12 +311,14 @@ class Memorialpelhutang {
                         $sheet->setCellValue("G{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("H{$row}", $total);
                         $total = 0;
+                        $row += 1;
                     }
                 } else {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $total);
                     $sheet->setCellValue("G{$row}", "{$value->nama} Total");
                     $sheet->setCellValue("H{$row}", $total);
+                    $row += 1;
                 }
             }
 
@@ -338,12 +344,14 @@ class Memorialpelhutang {
                         $sheet->setCellValue("G{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("H{$row}", $total);
                         $total = 0;
+                        $row += 1;
                     }
                 } else {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $total);
                     $sheet->setCellValue("G{$row}", "{$value->nama} Total");
                     $sheet->setCellValue("H{$row}", $total);
+                    $row += 1;
                 }
             }
 

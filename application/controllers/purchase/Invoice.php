@@ -273,7 +273,7 @@ class Invoice extends MY_Controller {
             $sub_menu = $this->uri->segment(2);
             $username = addslashes($this->session->userdata('username'));
             $users = $this->session->userdata('nama');
-            
+
             $kodeJurnal = $this->input->post("jurnal");
             $status = $this->input->post("status");
             $id = $this->input->post("id");
@@ -320,7 +320,7 @@ class Invoice extends MY_Controller {
                                 ->setJoins("currency", "currency_kurs.currency = currency.nama", "left")
                                 ->setSelects(["invoice_detail.*", "invoice.id_supplier,invoice.journal as jurnal,dpp_lain,nilai_matauang", "currency_kurs.currency,currency_kurs.kurs,currency.nama as name_curr",
                                     "COALESCE(tax.amount,0) as tax_amount,tax.nama as tax_nama,tax.ket, coalesce(tax.tax_lain_id,0) as tax_lain_id,tax.dpp as dpp_tax",
-                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id", "invoice.created_at as invoice_create"])
+                                    "partner.nama as nama_supp,coalesce(tax_id,'0') as tax_id", "invoice.created_at as invoice_create", "invoice.total as total_invoice"])
                                 ->setOrder(["invoice_id"])->getData();
 
                 $jurnalData = ["kode" => $jurnal, "periode" => $periode,
@@ -345,6 +345,14 @@ class Invoice extends MY_Controller {
                 $totalNominal = 0;
                 $pajakLain = [];
                 $checkDpp = $dataItems[0]->dpp_lain > 0;
+                if (count($dataItems) > 0) {
+                    $updateInv["hutang_rp"] = $dataItems[0]->total_invoice;
+                    if ($dataItems[0]->nilai_matauang > 1) {
+                        $updateInv["total_valas"] = $dataItems[0]->total_invoice;// 
+                         $updateInv["hutang_rp"] = $dataItems[0]->nilai_matauang * $dataItems[0]->total_invoice;
+                        $updateInv["hutang_valas"] = $updateInv["total_valas"];
+                    }
+                }
                 foreach ($dataItems as $key => $value) {
                     if ($value->account === null) {
                         throw new \Exception("Jurnal Account Belum diisi", 500);

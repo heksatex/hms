@@ -16,12 +16,13 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
 class Memorialpengbank {
 
     //put your code here
     protected $notList = ['utang_giro', 'utang', 'um_pembelian'];
     protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
-    
+
     public function _data($model, $datas) {
         $nt = implode("','", $this->notList);
         try {
@@ -30,9 +31,10 @@ class Memorialpengbank {
                     ->setJoins("acc_coa acbk", "acbk.kode_coa = bk.kode_coa", "left")
                     ->setJoins("acc_coa acbkd", "acbkd.kode_coa = bkd.kode_coa", "left")
                     ->setWheres(["date(bk.tanggal) >=" => $datas['tanggals'][0], "date(bk.tanggal) <=" => $datas['tanggals'][1], "bk.status" => "confirm"])
-                    ->setWhereRaw("bkd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")->setGroups(["bkd.kode_coa"])->setOrder(["bkd.kode_coa"])
+                    ->setWhereRaw("bkd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")
                     ->setSelects(["bk.kode_coa,bkd.kode_coa as kode_coa_bkd,if(bkd.kurs > 1,sum(bkd.nominal),0) as valas,sum(bkd.nominal*bkd.kurs) as nominals",
-                        "acbk.nama as nama,acbkd.nama as nama_bkd", "if(partner_nama ='',lain2,partner_nama) as partner"]);
+                        "acbk.nama as nama,acbkd.nama as nama_bkd", "if(partner_nama ='',lain2,partner_nama) as partner"])
+                    ->setGroups(["bkd.kode_coa"])->setOrder(["bkd.kode_coa"]);
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
@@ -80,8 +82,8 @@ class Memorialpengbank {
             throw $ex;
         }
     }
-    
-     public function _global($data, &$filename) {
+
+    public function _global($data, &$filename) {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
@@ -89,7 +91,7 @@ class Memorialpengbank {
             $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            
+
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -107,8 +109,8 @@ class Memorialpengbank {
                 $totalDebit += $value->nominals;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", ($key === 0) ? "1" : "");
-                $sheet->setCellValue("B{$row}", "{$value->nama}");
-                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
+                $sheet->setCellValue("B{$row}", "{$value->nama_bkd}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa_bkd}");
                 $sheet->setCellValue("D{$row}", "{$value->valas}");
                 $sheet->setCellValue("E{$row}", "{$value->nominals}");
             }
@@ -127,8 +129,8 @@ class Memorialpengbank {
                 $totalDebit += $value->nominals;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", ($key === 0) ? "2" : "");
-                $sheet->setCellValue("B{$row}", "{$value->nama}");
-                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
+                $sheet->setCellValue("B{$row}", "{$value->nama_gkd}");
+                $sheet->setCellValue("C{$row}", "{$value->kode_coa_gkd}");
                 $sheet->setCellValue("D{$row}", "{$value->valas}");
                 $sheet->setCellValue("E{$row}", "{$value->nominals}");
             }
@@ -158,7 +160,7 @@ class Memorialpengbank {
             
         }
     }
-    
+
     public function _detail($data, &$filename) {
         try {
             $spreadsheet = new Spreadsheet();
@@ -200,16 +202,16 @@ class Memorialpengbank {
                 $sheet->setCellValue("E{$row}", $value->valas);
                 $sheet->setCellValue("F{$row}", $value->kurs);
                 $sheet->setCellValue("G{$row}", $value->nominals);
-                $sheet->setCellValue("H{$row}", $value->kode_coa_bkd);
-                $sheet->setCellValue("I{$row}", $value->nama_bkd);
+                $sheet->setCellValue("H{$row}", $value->kode_coa);
+                $sheet->setCellValue("I{$row}", $value->nama);
                 $sheet->setCellValue("J{$row}", $value->nominals);
 
                 if (isset($bank[$key + 1])) {
-                    if ($value->kode_coa_bkd !== $bank[$key + 1]->kode_coa_bkd) {
+                    if ($value->kode_coa !== $bank[$key + 1]->kode_coa) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $totalBankValas);
                         $sheet->setCellValue("G{$row}", $totalBankKredit);
-                        $sheet->setCellValue("I{$row}", "{$value->nama_bkd} Total");
+                        $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("J{$row}", $totalBankKredit);
                         $row += 1;
                     }
@@ -217,7 +219,7 @@ class Memorialpengbank {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $totalBankValas);
                     $sheet->setCellValue("G{$row}", $totalBankKredit);
-                    $sheet->setCellValue("I{$row}", "{$value->nama_bkd} Total");
+                    $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                     $sheet->setCellValue("J{$row}", $totalBankKredit);
                 }
             }
@@ -239,16 +241,16 @@ class Memorialpengbank {
                 $sheet->setCellValue("E{$row}", $value->valas);
                 $sheet->setCellValue("F{$row}", $value->kurs);
                 $sheet->setCellValue("G{$row}", $value->nominals);
-                $sheet->setCellValue("H{$row}", $value->kode_coa_gkd);
-                $sheet->setCellValue("I{$row}", $value->nama_gkd);
+                $sheet->setCellValue("H{$row}", $value->kode_coa);
+                $sheet->setCellValue("I{$row}", $value->nama);
                 $sheet->setCellValue("J{$row}", $value->nominals);
 
                 if (isset($giro[$key + 1])) {
-                    if ($value->kode_coa_gkd !== $giro[$key + 1]->kode_coa_gkd) {
+                    if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $totalGiroValas);
                         $sheet->setCellValue("G{$row}", $totalGiroKredit);
-                        $sheet->setCellValue("I{$row}", "{$value->nama_gkd} Total");
+                        $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("J{$row}", $totalGiroKredit);
                         $row += 1;
                         $totalGiroKredit = 0;
@@ -258,7 +260,7 @@ class Memorialpengbank {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $totalGiroValas);
                     $sheet->setCellValue("G{$row}", $totalGiroKredit);
-                    $sheet->setCellValue("I{$row}", "{$value->nama_gkd} Total");
+                    $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                     $sheet->setCellValue("J{$row}", $totalGiroKredit);
                 }
             }
@@ -284,12 +286,12 @@ class Memorialpengbank {
             throw $ex;
         }
     }
-    
+
     public function _detail_2($data, &$filename) {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-             $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            $sheet->getStyle("H")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
             $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $sheet->getStyle("G")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
@@ -326,16 +328,16 @@ class Memorialpengbank {
                 $sheet->setCellValue("E{$row}", $value->valas);
                 $sheet->setCellValue("F{$row}", $value->kurs);
                 $sheet->setCellValue("G{$row}", $value->nominals);
-                $sheet->setCellValue("H{$row}", $value->kode_coa);
-                $sheet->setCellValue("I{$row}", $value->nama);
+                $sheet->setCellValue("H{$row}", $value->kode_coa_bkd);
+                $sheet->setCellValue("I{$row}", $value->nama_bkd);
                 $sheet->setCellValue("J{$row}", $value->nominals);
 
                 if (isset($bank[$key + 1])) {
-                    if ($value->kode_coa !== $bank[$key + 1]->kode_coa) {
+                    if ($value->kode_coa_bkd !== $bank[$key + 1]->kode_coa_bkd) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $totalBankValas);
                         $sheet->setCellValue("G{$row}", $totalBankKredit);
-                        $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                        $sheet->setCellValue("I{$row}", "{$value->nama_bkd} Total");
                         $sheet->setCellValue("J{$row}", $totalBankKredit);
                         $row += 1;
                     }
@@ -343,7 +345,7 @@ class Memorialpengbank {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $totalBankValas);
                     $sheet->setCellValue("G{$row}", $totalBankKredit);
-                    $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                    $sheet->setCellValue("I{$row}", "{$value->nama_bkd} Total");
                     $sheet->setCellValue("J{$row}", $totalBankKredit);
                 }
             }
@@ -365,16 +367,16 @@ class Memorialpengbank {
                 $sheet->setCellValue("E{$row}", $value->valas);
                 $sheet->setCellValue("F{$row}", $value->kurs);
                 $sheet->setCellValue("G{$row}", $value->nominals);
-                $sheet->setCellValue("H{$row}", $value->kode_coa);
-                $sheet->setCellValue("I{$row}", $value->nama);
+                $sheet->setCellValue("H{$row}", $value->kode_coa_gkd);
+                $sheet->setCellValue("I{$row}", $value->nama_gkd);
                 $sheet->setCellValue("J{$row}", $value->nominals);
 
                 if (isset($giro[$key + 1])) {
-                    if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
+                    if ($value->kode_coa_gkd !== $giro[$key + 1]->kode_coa_gkd) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $totalGiroValas);
                         $sheet->setCellValue("G{$row}", $totalGiroKredit);
-                        $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                        $sheet->setCellValue("I{$row}", "{$value->nama_gkd} Total");
                         $sheet->setCellValue("J{$row}", $totalGiroKredit);
                         $row += 1;
                         $totalGiroKredit = 0;
@@ -384,7 +386,7 @@ class Memorialpengbank {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $totalGiroValas);
                     $sheet->setCellValue("G{$row}", $totalGiroKredit);
-                    $sheet->setCellValue("I{$row}", "{$value->nama} Total");
+                    $sheet->setCellValue("I{$row}", "{$value->nama_gkd} Total");
                     $sheet->setCellValue("J{$row}", $totalGiroKredit);
                 }
             }

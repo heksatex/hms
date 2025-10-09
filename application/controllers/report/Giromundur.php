@@ -42,7 +42,9 @@ class Giromundur extends MY_Controller {
             $saldo = 0;
             $model = new $this->m_global;
             $dt = $model->setTables("acc_giro_{$giro} gm")->setJoins("acc_giro_{$giro}_detail gmd", "giro_{$giro}_id = gm.id")
-                            ->setSelects(["sum(nominal) as total"])->setWheres(["status" => "confirm", "cair" => 0, "date(gm.tanggal) < " => $tanggals[0], "gm.kode_coa" => $coa])->getDetail();
+                            ->setJoins("acc_bank_{$giro}_detail bmd", "(gmd.id = bmd.giro_{$giro}_detail_id and bmd.giro_{$giro}_detail_id <> 0)", "left")
+                            ->setSelects(["sum(gmd.nominal) as total"])->setWheres(["status" => "confirm", "date(gm.tanggal) < " => $tanggals[0], "gm.kode_coa" => $coa])
+                            ->setWhereRaw("(cair = 0 or date(bmd.tanggal) >= '{$tanggals[0]}')")->getDetail();
             if ($dt) {
                 $saldo = $dt->total;
             }
@@ -203,13 +205,15 @@ class Giromundur extends MY_Controller {
             $sheet->setCellValue("F{$row}", 'Baru');
             $sheet->setCellValue("G{$row}", 'Cair');
             $sheet->setCellValue("H{$row}", 'Saldo');
-            $saldo = $data["saldo"] = ($jenis_coa === "utang_giro") ? $this->_saldo("keluar") : $this->_saldo();
+            $nm = "";
+            $saldo = ($jenis_coa === "utang_giro") ? $this->_saldo("keluar") : $this->_saldo();
             if (count($data) > 0) {
                 $row += 1;
                 $sheet->setCellValue("D{$row}", "Saldo Awal");
                 $sheet->setCellValue("F{$row}", 0);
                 $sheet->setCellValue("G{$row}", 0);
                 $sheet->setCellValue("H{$row}", $saldo);
+                $nm = $data[0]->coa;
             }
 
             $kredits = 0;
@@ -260,7 +264,8 @@ class Giromundur extends MY_Controller {
 
             $tanggal = $this->input->post("tanggal");
 //            $writer = new Xlsx($spreadsheet);
-            $filename = "Giro Mundur {$tanggal}";
+            $nm = str_replace(".", "-", $nm);
+            $filename = "Giro Mundur {$tanggal} {$nm}";
             $url = "dist/storages/report/acc";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);

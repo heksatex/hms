@@ -54,6 +54,9 @@
             .td-no-perk {
                 width: 80px;
             }
+            .td-perkiraan-global {
+                width :200px;
+            }
 
         </style>
     </head>
@@ -111,8 +114,8 @@
                                                     <input  name="filter" type="radio" value="global" class="form control filter-global" checked>&nbsp;<strong>Global</strong></label>
                                             </div>
                                             <div class="col-xs-4">
-                                                <label class="checkbox-inline">
-                                                    <input  name="filter" type="radio" value="detail" class="form control" >&nbsp;<strong>Rekap Kredit</strong></label>
+                                                <label class="checkbox-inline filter-kredit">
+                                                    <input  name="filter" type="radio" value="detail" class="form control" >&nbsp;<strong class="filter-kredit-text">Rekap Kredit</strong></label>
                                             </div>
                                             <div class="col-xs-4">
                                                 <label class="checkbox-inline filter-debet">
@@ -132,7 +135,7 @@
                                         <table id="tabelMemorial" class="table table-condesed table-hover detail" border="1">
                                             <thead id="thead">
                                                 <tr>
-                                                    <th class="style bb ws no" >No</th>
+<!--                                                    <th class="style bb ws no" >No</th>
                                                     <th class="style bb ws" >Periode</th>
                                                     <th class="style bb ws" >Tanggal Dibuat</th>
                                                     <th class="style bb ws" >No Bukti</th>
@@ -143,7 +146,7 @@
                                                     <th class="style bb ws" >Reff Note</th>
                                                     <th class="style bb ws" >Partner</th>
                                                     <th class="style bb ws text-right" >Debit</th>
-                                                    <th class="style bb ws text-right" >Credit</th>
+                                                    <th class="style bb ws text-right" >Credit</th>-->
                                                 </tr>
                                             </thead>
 
@@ -162,7 +165,8 @@
         <?php $this->load->view("admin/_partials/js.php") ?>
         <script type="text/javascript" src="<?= base_url('plugins/daterangepicker/daterangepicker.js'); ?>"></script>
         <script>
-            var NoDetailDebit = ["pen_kb", "peng_kb"];
+            var NoDetailDebit = ["pen_kb", "peng_kb","pen_kv", "peng_kv"];
+            var NoDetailKredit = ["peng_kb","peng_kv"];
             $(function () {
                 var cek = 0;
                 $('input[name="periode"]').daterangepicker({
@@ -213,9 +217,14 @@
                 $("#jurnal").on("select2:select", function () {
                     if (NoDetailDebit.includes($("#jurnal").val())) {
                         $(".filter-debet").hide();
-                        return;
                     } else {
                         $(".filter-debet").show();
+                    }
+
+                    if (NoDetailKredit.includes($("#jurnal").val())) {
+                        $(".filter-kredit-text").html("Rekap Debet");
+                    } else {
+                        $(".filter-kredit-text").html("Rekap Kredit");
                     }
 
 //                    filters();

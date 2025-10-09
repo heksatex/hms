@@ -169,7 +169,7 @@
                         <input type="text" name="bank[]" class="form-control bank:nourut input-sm" required/>
                     </td>
                     <td>
-                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm" required/>
+                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm"/>
                     </td>
                     <td>
                         <input type="text" name="nobg[]" class="form-control input-sm"/>
@@ -220,7 +220,7 @@
                         <input type="text" name="bank[]" class="form-control bank:nourut input-sm" value="" required/>
                     </td>
                     <td>
-                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm" value="" required/>
+                        <input type="text" name="norek[]" class="form-control norek:nourut input-sm" value=""/>
                     </td>
                     <td>
                         <input type="text" name="nobg[]" class="form-control nobg:nourut input-sm" value=""/>
@@ -443,7 +443,7 @@
                     $(".nominal").on("blur", function () {
                         calculateTotal();
                     });
-                    $(".nominal"+no).keyup(function (ev) {
+                    $(".nominal" + no).keyup(function (ev) {
                         if (ev.keyCode === 13) {
                             $(".btn-add-item").trigger("click");
                         }
@@ -565,7 +565,7 @@
                                 $(".norek" + no).val(row.no_rek);
                                 $(".nobg" + no).val(row.no_bg);
                                 $(".kurs" + no).val(row.kurs);
-                                $(".nominal" + no).val(Intl.NumberFormat("en-US",{minimumFractionDigits: 2,maximumFractionDigits: 2}).format(row.nominal));
+                                $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.nominal));
                                 $(".gmd" + no).val(row.id);
                                 $(".nourut" + no).html(no);
                                 setCoaItem("coa_" + no);
@@ -581,6 +581,16 @@
                                     }
                                 });
                                 setNominalCurrency();
+                                if (row.partner_nama !== "") {
+                                    $("#lain_lain").val("");
+                                    $("#partner").select2("trigger", "select", {
+                                        data: {id: row.partner_id, text: row.partner_nama}
+                                    });
+                                } else {
+                                    $('#partner').val(null).trigger('change');
+                                    $("#lain_lain").val(row.lain);
+                                }
+                                $("#transaksi").val(row.transinfo);
                             });
                         }
                         setTglFormatDef(".tgl-def-format");

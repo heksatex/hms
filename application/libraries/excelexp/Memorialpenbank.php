@@ -16,10 +16,12 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
 class Memorialpenbank {
 
-    protected $notList = ["piutang_giro","piutang","um_penjualan"];
+    protected $notList = ["piutang_giro", "piutang", "um_penjualan"];
     protected $ket = ["detail" => "Rekapan Kredit", "detail_2" => "Rekapan Debet", "global" => "Global"];
+
     //put your code here
 
     public function _data($model, $datas) {
@@ -31,18 +33,17 @@ class Memorialpenbank {
                     ->setJoins("acc_coa acbmd", "acbmd.kode_coa = bmd.kode_coa", "left")
                     ->setWheres(["date(bm.tanggal) >=" => $datas['tanggals'][0], "date(bm.tanggal) <=" => $datas['tanggals'][1], "bm.status" => "confirm"])
                     ->setWhereRaw("bmd.kode_coa not in (select kode_coa from acc_coa where jenis_transaksi in ('{$nt}'))")
-                            ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bm.no_bm,bmd.kurs"])
+                    ->setSelects(["if(partner_nama ='',lain2,partner_nama) as partner,bm.no_bm,bmd.kurs"])
                     ->setSelects(["bm.kode_coa,bmd.kode_coa as kode_coa_bmd,acbm.nama,acbmd.nama as nama_bmd,if(bmd.kurs > 1,sum(bmd.nominal),0) as valas,sum(bmd.nominal*bmd.kurs) as nominals,date(bmd.tanggal) as tanggal"])
+                    ->setSelects(["transinfo as uraian"])
                     ->setGroups(["bm.kode_coa"])->setOrder(["bm.kode_coa"]);
             $data["bank_debit"] = $model->getData();
             switch ($datas["filter"]) {
                 case "detail":
-                    $model->setSelects(["bmd.uraian"]);
                     $model->setGroups(["bmd.kode_coa"], true)->setOrder(["bmd.kode_coa"], true);
                     $data["bank_kredit"] = $model->getData();
                     break;
                 case "detail_2":
-                    $model->setSelects(["transinfo as uraian"]);
                     $model->setGroups(["bm.no_bm"], true)->setOrder(["bm.kode_coa"], true);
                     $data["bank_debit"] = $model->getData();
                     break;
@@ -87,7 +88,7 @@ class Memorialpenbank {
             $sheet->getStyle("D")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $sheet->getStyle("E")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
             $sheet->getStyle("F")->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
-            
+
             $row = 1;
             $sheet->setCellValue("A{$row}", 'No');
             $sheet->setCellValue("B{$row}", 'Nama Perkiraan');
@@ -124,18 +125,18 @@ class Memorialpenbank {
                 $totalDebit += $value->nominals;
                 $row += 1;
                 $sheet->setCellValue("A{$row}", ($key === 0) ? "2" : "");
-                $sheet->setCellValue("B{$row}", "{$value->nama}");
-                $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
-                $sheet->setCellValue("D{$row}", "{$value->valas}");
-                $sheet->setCellValue("E{$row}", "{$value->nominals}");
+                $sheet->setCellValue("B{$row}", $value->nama);
+                $sheet->setCellValue("C{$row}", $value->kode_coa);
+                $sheet->setCellValue("D{$row}", $value->valas);
+                $sheet->setCellValue("E{$row}", $value->nominals);
             }
             foreach ($data["giro_kredit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $row += 1;
-                $sheet->setCellValue("B{$row}", "{$value->nama_gmd}");
-                $sheet->setCellValue("C{$row}", "{$value->kode_coa_gmd}");
-                $sheet->setCellValue("D{$row}", "$value->valas}");
-                $sheet->setCellValue("F{$row}", "{$value->nominals}");
+                $sheet->setCellValue("B{$row}", $value->nama_gmd);
+                $sheet->setCellValue("C{$row}", $value->kode_coa_gmd);
+                $sheet->setCellValue("D{$row}", $value->valas);
+                $sheet->setCellValue("F{$row}", $value->nominals);
             }
             $row += 2;
             if (($totalDebit + $totalKredit) > 0) {
@@ -226,6 +227,7 @@ class Memorialpenbank {
             $giro = $data["giro_kredit"];
 
             foreach ($giro as $key => $value) {
+                 $row += 1;
                 $totalGiroKredit += $value->nominals;
                 $totalGiroValas += $value->valas;
                 $grandTotal += $value->nominals;
@@ -242,7 +244,7 @@ class Memorialpenbank {
                 $sheet->setCellValue("J{$row}", $value->nominals);
 
                 if (isset($giro[$key + 1])) {
-                    if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
+                    if ($value->kode_coa_gmd !== $giro[$key + 1]->kode_coa_gmd) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $totalGiroValas);
                         $sheet->setCellValue("G{$row}", $totalGiroKredit);
@@ -260,6 +262,7 @@ class Memorialpenbank {
                     $sheet->setCellValue("J{$row}", $totalGiroKredit);
                 }
             }
+            $row += 2;
 
             if ($grandTotal > 0) {
                 $sheet->setCellValue("E{$row}", $grandTotalValas);
@@ -395,7 +398,7 @@ class Memorialpenbank {
             }
 
             $nm = str_replace("/", "_", $data["periode"]);
-            $filename = "jurnal {$data['jurnal']} {$nm} {$data["filter"]}";
+            $filename = "jurnal {$data['jurnal']} {$nm} {$this->ket[$data["filter"]]}";
             $url = "dist/storages/report/jurnal_memorial";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);

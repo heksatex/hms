@@ -313,7 +313,7 @@ class Kasmasuk extends MY_Controller {
                         "agkd.nominal >" => 0,
                         "agk.no_bk2" => '',
                         "agk.pindah" => 1,
-//                        "agkd.cair" => 1,
+                        "agkd.cair" => 1,
                         "agkd.tgl_jt >=" => $days90,
                         "agkd.tgl_jt <=" => date("Y-m-d H:i:s"),
                     ])
@@ -358,7 +358,7 @@ class Kasmasuk extends MY_Controller {
             $data = $model->setTables("acc_giro_keluar_detail agkd")->setJoins("acc_giro_keluar agk", "agkd.no_gk = agk.no_gk")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
                             ->setSelects(["agkd.nominal,agkd.no_gk,agkd.kode_coa", "agkd.id,if(partner_nama = '',agk.lain2,partner_nama) as lain"])
-                            ->setSelects(["agkd.currency_id as agk_curr,agkd.kurs", "currency_kurs.currency as curr"])
+                            ->setSelects(["agkd.currency_id as agk_curr,agkd.kurs", "currency_kurs.currency as curr","transinfo"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gk" => "asc"])->getData();
             $this->output->set_status_header(200)
                     ->set_content_type('application/json', 'utf-8')
