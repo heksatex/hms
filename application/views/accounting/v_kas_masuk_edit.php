@@ -774,6 +774,7 @@ if ($datas->status == 'confirm') {
                                     }
                                 });
                                 $("#lain_lain").val(row.lain);
+                                $("#transaksi").val(row.transinfo);
                             });
                         },
                         complete: function (jqXHR, textStatus) {

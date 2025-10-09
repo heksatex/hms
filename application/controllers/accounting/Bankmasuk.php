@@ -253,7 +253,7 @@ class Bankmasuk extends MY_Controller {
 
             $data = $model->setTables("acc_giro_masuk_detail agkd")->setJoins("acc_giro_masuk agk", "agkd.giro_masuk_id = agk.id")
                             ->setJoins("currency_kurs", "currency_kurs.id = agkd.currency_id")
-                            ->setSelects(["agkd.*"])
+                            ->setSelects(["agkd.*","partner_id,partner_nama,agk.lain2 as lain,agk.transinfo"])
                             ->setSelects(["currency_kurs.currency as curr"])
                             ->setWhereIn("agkd.id", $no)->setOrder(["agkd.no_gm" => "asc"])->getData();
             $this->output->set_status_header(200)
@@ -311,14 +311,14 @@ class Bankmasuk extends MY_Controller {
                             'required' => '{field} Pada Item harus diisi'
                         ]
                     ],
-                    [
-                        'field' => 'norek[]',
-                        'label' => 'No Rek',
-                        'rules' => ['trim', 'required'],
-                        'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
-                        ]
-                    ],
+//                    [
+//                        'field' => 'norek[]',
+//                        'label' => 'No Rek',
+//                        'rules' => ['trim', 'required'],
+//                        'errors' => [
+//                            'required' => '{field} Pada Item harus diisi'
+//                        ]
+//                    ],
                     [
                         'field' => 'kode_coa[]',
                         'label' => 'No ACC',
@@ -486,14 +486,14 @@ class Bankmasuk extends MY_Controller {
                             'required' => '{field} Pada Item harus diisi'
                         ]
                     ],
-                    [
-                        'field' => 'norek[]',
-                        'label' => 'No Rek',
-                        'rules' => ['trim', 'required'],
-                        'errors' => [
-                            'required' => '{field} Pada Item harus diisi'
-                        ]
-                    ],
+//                    [
+//                        'field' => 'norek[]',
+//                        'label' => 'No Rek',
+//                        'rules' => ['trim', 'required'],
+//                        'errors' => [
+//                            'required' => '{field} Pada Item harus diisi'
+//                        ]
+//                    ],
                     [
                         'field' => 'kode_coa[]',
                         'label' => 'No ACC',

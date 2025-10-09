@@ -37,12 +37,12 @@ class Memorialpenggiro {
             switch ($datas["filter"]) {
                 case "detail":
                     $model->setSelects(["transinfo as uraian"]);
-                    $model->setGroups(["gkd.kode_coa"], true)->setOrder(["gkd.kode_coa"], true);
+                    $model->setGroups(["gk.kode_coa",], true)->setOrder(["gkd.kode_coa"], true);
                     $data["giro_kredit"] = $model->getData();
                     break;
                 case "detail_2":
                     $model->setSelects(["transinfo as uraian"]);
-                    $model->setGroups(["gk.no_gk"], true)->setOrder(["gk.kode_coa"], true);
+                    $model->setGroups(["gkd.no_gk"], true)->setOrder(["gkd.kode_coa"], true);
                     $data["giro_debit"] = $model->getData();
                     break;
                 default:
@@ -139,23 +139,25 @@ class Memorialpenggiro {
                 $sheet->setCellValue("C{$row}", $value->uraian);
                 $sheet->setCellValue("D{$row}", $value->partner);
                 $sheet->setCellValue("E{$row}", $value->nominals);
-                $sheet->setCellValue("F{$row}", $value->kode_coa);
-                $sheet->setCellValue("G{$row}", $value->nama);
+                $sheet->setCellValue("F{$row}", $value->kode_coa_gkd);
+                $sheet->setCellValue("G{$row}", $value->nama_gkd);
                 $sheet->setCellValue("H{$row}", $value->nominals);
 
                 if (isset($giro[$key + 1])) {
-                    if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
+                    if ($value->kode_coa_gkd !== $giro[$key + 1]->kode_coa_gkd) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $total);
-                        $sheet->setCellValue("G{$row}", "{$value->nama} Total");
+                        $sheet->setCellValue("G{$row}", "{$value->nama_gkd} Total");
                         $sheet->setCellValue("H{$row}", $total);
+                        $row += 1;
                         $total = 0;
                     }
                 } else {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $total);
-                    $sheet->setCellValue("G{$row}", "{$value->nama} Total");
+                    $sheet->setCellValue("G{$row}", "{$value->nama_gkd} Total");
                     $sheet->setCellValue("H{$row}", $total);
+                    $row += 1;
                 }
             }
             if ($grandTotal > 0) {
@@ -208,23 +210,25 @@ class Memorialpenggiro {
                 $sheet->setCellValue("C{$row}", $value->uraian);
                 $sheet->setCellValue("D{$row}", $value->partner);
                 $sheet->setCellValue("E{$row}", $value->nominals);
-                $sheet->setCellValue("F{$row}", $value->kode_coa_gkd);
-                $sheet->setCellValue("G{$row}", $value->nama_gkd);
+                $sheet->setCellValue("F{$row}", $value->kode_coa);
+                $sheet->setCellValue("G{$row}", $value->nama);
                 $sheet->setCellValue("H{$row}", $value->nominals);
                 
                 if (isset($giro[$key + 1])) {
-                    if ($value->kode_coa_gkd !== $giro[$key + 1]->kode_coa_gkd) {
+                    if ($value->kode_coa !== $giro[$key + 1]->kode_coa) {
                         $row += 1;
                         $sheet->setCellValue("E{$row}", $total);
-                        $sheet->setCellValue("G{$row}", "{$value->nama_gkd} Total");
+                        $sheet->setCellValue("G{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("H{$row}", $total);
                         $total = 0;
+                        $row += 1;
                     }
                 } else {
                     $row += 1;
                     $sheet->setCellValue("E{$row}", $total);
-                    $sheet->setCellValue("G{$row}", "{$value->nama_gkd} Total");
+                    $sheet->setCellValue("G{$row}", "{$value->nama} Total");
                     $sheet->setCellValue("H{$row}", $total);
+                    $row += 1;
                 }
             }
             

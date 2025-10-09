@@ -878,7 +878,19 @@ if ($datas->status == 'confirm') {
                                 calculateTotal();
                             });
                             setNominalCurrency();
-                            $("#lain_lain").val(row.lain);
+                            $("#transaksi").val(row.transinfo);
+                            if (row.partner_nama !== "") {
+                                $("#lain_lain").val("");
+                                $("#partner").select2("trigger", "select", {
+                                    data: {id: row.partner_id, text: row.partner_nama}
+                                });
+                            } else {
+                                $('#partner').val(null).trigger('change');
+                                $("#lain_lain").val(row.lain);
+                            }
+
+
+
                         });
                         setTglFormatDef(".tgl-def-format");
 

@@ -6,7 +6,7 @@ switch (true) {
         ?>
         <tr>
             <th class="style bb ws no" >No</th>
-            <th class="style bb ws" >Nama Perkiraan</th>
+            <th class="style bb ws td-perkiraan-global" >Nama Perkiraan</th>
             <th class="style bb ws td-no-perk">No Perk</th>
             <th class="style bb ws text-right td-nominal" >Debet</th>
             <th class="style bb ws text-right td-nominal" >Kredit</th>
@@ -32,7 +32,7 @@ switch (true) {
         break;
 
     case ($header === "pen_g_detail_2" || $header === "peng_g_detail_2" || $header === "peng_kb_detail" || $header === "pel_p_detail_2" || $header === "pel_h_detail_2"
-            || $header === "pemb_detail_2"):
+            || $header === "pemb_detail_2" ):
         ?>
         <tr>
             <th class="style bb ws no">Tanggal</th>
@@ -52,7 +52,7 @@ switch (true) {
         ?>
         <tr>
             <th class="style bb ws no" >No</th>
-            <th class="style bb ws no" >Nama Perkiraan</th>
+            <th class="style bb ws no td-perkiraan-global" >Nama Perkiraan</th>
             <th class="style bb ws" style="width: 80px">No Perk</th>
             <th class="style bb ws text-right td-nominal" >Valas</th>
             <th class="style bb ws text-right td-nominal" >Debet</th>
@@ -61,7 +61,7 @@ switch (true) {
         <?php
 
         break;
-    case ($header === "pen_b_detail" || $header === "peng_b_detail" || $header === "pen_kv_detail" || $header === "peng_kv_detail" ):
+    case ($header === "pen_b_detail" || $header === "peng_b_detail" || $header === "pen_kv_detail" ):
         ?>
         <tr>
             <th class="style bb ws no" >Tanggal</th>

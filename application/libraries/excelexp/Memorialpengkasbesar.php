@@ -16,7 +16,9 @@ require_once APPPATH . '/third_party/vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
 class Memorialpengkasbesar {
+
     //put your code here
     public function _data($model, $datas) {
         try {
@@ -57,17 +59,20 @@ class Memorialpengkasbesar {
             $sheet->setCellValue("B{$row}", "Jurnal {$data['jurnal']}");
             $row += 1;
             $sheet->setCellValue("B{$row}", "{$data['periode']}");
-
+            $row += 1;
             $totalKredit = 0;
             foreach ($data["debit"] as $key => $value) {
                 $totalKredit += $value->nominals;
                 $row += 1;
+                if ($key === 0) {
+                    $sheet->setCellValue("A{$row}", 1);
+                }
                 $sheet->setCellValue("B{$row}", "{$value->nama}");
                 $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
                 $sheet->setCellValue("D{$row}", "{$value->nominals}");
             }
             $row += 2;
-            $sheet->setCellValue("A{$row}", 1);
+
             $sheet->setCellValue("B{$row}", 'KAS BESAR');
             $sheet->setCellValue("C{$row}", ($data["kredit"][0]->km_kode_coa ?? ""));
             $sheet->setCellValue("E{$row}", ($data["kredit"][0]->nominals ?? 0));

@@ -200,7 +200,7 @@
                                                                     <input type="text" name="bank[]" class="form-control bank edited-read input-sm" value="<?= $value->bank ?>" required readonly/>
                                                                 </td>
                                                                 <td>
-                                                                    <input type="text" name="norek[]" class="form-control norek edited-read input-sm" value="<?= $value->no_rek ?>" required readonly/>
+                                                                    <input type="text" name="norek[]" class="form-control norek edited-read input-sm" value="<?= $value->no_rek ?>" readonly/>
                                                                 </td>
                                                                 <td>
                                                                     <input type="text" name="nobg[]" class="form-control nobg edited-read input-sm" value="<?= $value->no_bg ?>" readonly/>
@@ -329,7 +329,7 @@
                     <input type="text" name="bank[]" class="form-control bank bank:nourut input-sm" required/>
                 </td>
                 <td>
-                    <input type="text" name="norek[]" class="form-control norek norek:nourut input-sm" required/>
+                    <input type="text" name="norek[]" class="form-control norek norek:nourut input-sm"/>
                 </td>
                 <td>
                     <input type="text" name="nobg[]" class="form-control input-sm"/>
@@ -381,7 +381,7 @@
                     <input type="text" name="bank[]" class="form-control bank:nourut input-sm" value="" required/>
                 </td>
                 <td>
-                    <input type="text" name="norek[]" class="form-control norek:nourut input-sm" value="" required/>
+                    <input type="text" name="norek[]" class="form-control norek:nourut input-sm" value=""/>
                 </td>
                 <td>
                     <input type="text" name="nobg[]" class="form-control nobg:nourut input-sm" value=""/>
@@ -504,21 +504,21 @@ if ($datas->status == 'confirm') {
                     });
                 });
             });
-            
-            const calculateTotal = (() => {
-                    var total = 0;
-                    const elements = document.querySelectorAll('.nominal');
-                    $.each(elements, function (idx, nomina) {
-                        let ttl = $(nomina).val();
-                        total += parseInt(ttl.replace(/,/g, ""));
-                    });
-                    if (total === NaN) {
-                        $("#total_nominal").val();
-                        return;
-                    }
 
-                    $("#total_nominal").val(total);
+            const calculateTotal = (() => {
+                var total = 0;
+                const elements = document.querySelectorAll('.nominal');
+                $.each(elements, function (idx, nomina) {
+                    let ttl = $(nomina).val();
+                    total += parseInt(ttl.replace(/,/g, ""));
                 });
+                if (total === NaN) {
+                    $("#total_nominal").val();
+                    return;
+                }
+
+                $("#total_nominal").val(total);
+            });
 
             const setNominalCurrency = (() => {
                 $("input[data-type='currency']").on({
@@ -709,7 +709,7 @@ if ($datas->status == 'confirm') {
                     $(".nourut" + no).html(no);
                     setNominalCurrency();
                 });
-                
+
                 $(".nominal").keyup(function (ev) {
                     if (ev.keyCode === 13) {
                         $(".btn-add-item").trigger("click");
@@ -884,7 +884,7 @@ if ($datas->status == 'confirm') {
                                 $(".norek" + no).val(row.no_rek);
                                 $(".nobg" + no).val(row.no_bg);
                                 $(".kurs" + no).val(row.kurs);
-                                $(".nominal" + no).val(Intl.NumberFormat("en-US",{minimumFractionDigits: 2,maximumFractionDigits: 2}).format(row.nominal));
+                                $(".nominal" + no).val(Intl.NumberFormat("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(row.nominal));
                                 $(".gmd" + no).val(row.id);
                                 $(".nourut" + no).html(no);
                                 setCoaItem("coa_" + no);
@@ -897,6 +897,16 @@ if ($datas->status == 'confirm') {
                                         $(".btn-add-item").trigger("click");
                                     }
                                 });
+                                if (row.partner_nama !== "") {
+                                    $("#lain_lain").val("");
+                                    $("#partner").select2("trigger", "select", {
+                                        data: {id: row.partner_id, text: row.partner_nama}
+                                    });
+                                } else {
+                                    $('#partner').val(null).trigger('change');
+                                    $("#lain_lain").val(row.lain);
+                                }
+                                $("#transaksi").val(row.transinfo);
 
                             });
                         }

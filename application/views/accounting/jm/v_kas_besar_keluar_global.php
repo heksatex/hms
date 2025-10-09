@@ -45,7 +45,7 @@ foreach ($data["debit"] as $key => $value) {
     $totalKredit += $value->nominals;
     ?>
     <tr>
-        <td></td>
+        <td><?= ($key === 0) ? "1" : "" ?></td>
         <td><?= $value->nama ?></td>
         <td><?= $value->kode_coa ?></td>
         <td class="text-right">
@@ -58,22 +58,22 @@ foreach ($data["debit"] as $key => $value) {
 }
 if (isset($data["kredit"][0])) {
     ?>
-<tr>
-    <td>
-        1
-    </td>
-    <td>
-        &nbsp;KAS BESAR
-    </td>
-    <td>
-        <?= $data["kredit"][0]->km_kode_coa ?? "" ?>
-    </td>
-    <td>
-    </td>
-    <td class="text-right">
-        <?= number_format(($data["kredit"][0]->nominals ?? 0), 2) ?>
-    </td>
-</tr>
+    <tr>
+        <td>
+
+        </td>
+        <td>
+            &nbsp;KAS BESAR
+        </td>
+        <td>
+            <?= $data["kredit"][0]->km_kode_coa ?? "" ?>
+        </td>
+        <td>
+        </td>
+        <td class="text-right">
+            <?= number_format(($data["kredit"][0]->nominals ?? 0), 2) ?>
+        </td>
+    </tr>
     <?php
 }
 ?>

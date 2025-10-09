@@ -94,7 +94,7 @@ foreach ($data["giro_debit"] as $key => $value) {
     $totalDebit += $value->nominals;
     ?>
     <tr>
-        <td><?= ($key === 0) ? "1" : "" ?></td>
+        <td><?= ($key === 0) ? "2" : "" ?></td>
         <td><?= $value->nama_gkd ?></td>
         <td><?= $value->kode_coa_gkd ?></td>
         <td class="text-right"><?= number_format($value->valas, 2) ?></td>

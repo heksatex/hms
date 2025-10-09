@@ -159,7 +159,7 @@ class Memorialpengiro {
                 }
             }
             if ($grandTotal > 0) {
-                $row = 2;
+                $row += 2;
                 $sheet->setCellValue("E{$row}", $grandTotal);
                 $sheet->setCellValue("G{$row}", "Grand Total");
                 $sheet->setCellValue("H{$row}", $grandTotal);

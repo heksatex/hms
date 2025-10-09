@@ -440,6 +440,7 @@ if ($datas->status == 'confirm') {
             });
 
             $(function () {
+                setNominalCurrency();
                 lainInput(document.getElementById("lain_lain"), function () {
                     if ($("#partner_name").val() !== "") {
                         $("#partner_name").val("");

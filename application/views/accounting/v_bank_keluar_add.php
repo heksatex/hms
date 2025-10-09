@@ -562,7 +562,7 @@
                             $(".coa_" + no).select2("trigger", "select", {
                                 data: {id: row.kode_coa, text: row.kode_coa}
                             });
-                            $("#lain_lain").val(row.lain);
+                            $("#transaksi").val(row.transinfo);
                             $(".nominal" + no).on("blur", function () {
                                 calculateTotal();
                             });
@@ -571,6 +571,15 @@
                                     $(".btn-add-item").trigger("click");
                                 }
                             });
+                            if (row.partner_nama !== "") {
+                                $("#lain_lain").val("");
+                                $("#partner").select2("trigger", "select", {
+                                    data: {id: row.partner_id, text: row.partner_nama}
+                                });
+                            } else {
+                                $('#partner').val(null).trigger('change');
+                                $("#lain_lain").val(row.lain);
+                            }
                         });
                         setTglFormatDef(".tgl-def-format");
                     },
