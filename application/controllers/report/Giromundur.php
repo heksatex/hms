@@ -205,6 +205,7 @@ class Giromundur extends MY_Controller {
             $sheet->setCellValue("F{$row}", 'Baru');
             $sheet->setCellValue("G{$row}", 'Cair');
             $sheet->setCellValue("H{$row}", 'Saldo');
+            $nm = "";
             $saldo = ($jenis_coa === "utang_giro") ? $this->_saldo("keluar") : $this->_saldo();
             if (count($data) > 0) {
                 $row += 1;
@@ -212,6 +213,7 @@ class Giromundur extends MY_Controller {
                 $sheet->setCellValue("F{$row}", 0);
                 $sheet->setCellValue("G{$row}", 0);
                 $sheet->setCellValue("H{$row}", $saldo);
+                $nm = $data[0]->coa;
             }
 
             $kredits = 0;
@@ -262,7 +264,8 @@ class Giromundur extends MY_Controller {
 
             $tanggal = $this->input->post("tanggal");
 //            $writer = new Xlsx($spreadsheet);
-            $filename = "Giro Mundur {$tanggal}";
+            $nm = str_replace(".", "-", $nm);
+            $filename = "Giro Mundur {$tanggal} {$nm}";
             $url = "dist/storages/report/acc";
             if (!is_dir(FCPATH . $url)) {
                 mkdir(FCPATH . $url, 0775, TRUE);
