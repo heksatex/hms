@@ -1027,37 +1027,93 @@ class Marketing extends MY_Controller
         $this->load->view('report/v_marketing_stock_history', $data);
     }
 
-    function get_data_stock_history()
-    {
-        $tgldari   = date("Y-m-d H:i:s", strtotime($this->input->post('tgl_dari')));
-        $tglsampai = date("Y-m-d 23:59:59", strtotime($this->input->post('tgl_sampai')));
+    // function get_data_stock_history()
+    // {
+    //     $tgldari   = date("Y-m-d H:i:s", strtotime($this->input->post('tgl_dari')));
+    //     $tglsampai = date("Y-m-d 23:59:59", strtotime($this->input->post('tgl_sampai')));
 
-        $get_mkt = $this->m_marketing->get_list_mst_sales_group();
-        $data_stock_history = [];
-        $tmp_tgl = "";
-        foreach($get_mkt as $val){
+    //     $get_mkt = $this->m_marketing->get_list_mst_sales_group();
+    //     $data_stock_history = [];
+    //     $tmp_tgl = "";
+    //     foreach($get_mkt as $val){
 
-            $data_stock = $this->m_marketing->get_data_stock_by_mkt($tgldari,$tglsampai,$val->nama_sales_group);
-            $tmp_stock  = "";
-            foreach($data_stock as $st){
-                $tmp_stock .= floatval($st->l_stock).", ";
-                $tmp_tgl   .= date('d F', strtotime($st->tanggal)).", ";
-            }
-            $tmp_stock = rtrim($tmp_stock, ', ');
-            $arr_data  = [];
-            $data_stock_history[] = array(
-                                    "name" => $val->nama_sales_group,
-                                    "data" => ($tmp_stock),
-            );
+    //         $data_stock = $this->m_marketing->get_data_stock_by_mkt($tgldari,$tglsampai,$val->nama_sales_group);
+    //         $tmp_stock  = "";
+    //         foreach($data_stock as $st){
+    //             $tmp_stock .= floatval($st->l_stock).", ";
+    //             $tmp_tgl   .= date('d F Y', strtotime($st->tanggal)).", ";
+    //         }
+    //         $tmp_stock = rtrim($tmp_stock, ', ');
+    //         $arr_data  = [];
+    //         $data_stock_history[] = array(
+    //                                 "name" => $val->nama_sales_group,
+    //                                 "data" => ($tmp_stock),
+    //         );
             
-        }
+    //     }
 
         
-        $callback  = array('status'=>'success', 'result'=>$data_stock_history, 'periode'=>$tmp_tgl);
-        echo json_encode($callback);
+    //     $callback  = array('status'=>'success', 'result'=>$data_stock_history, 'periode'=>$tmp_tgl);
+    //     echo json_encode($callback);
 
 
+    // }
+
+
+    function get_data_stock_history()
+    {
+        try {
+            $tgldari   = date("Y-m-d 00:00:00", strtotime($this->input->post('tgl_dari')));
+            $tglsampai = date("Y-m-d 23:59:59", strtotime($this->input->post('tgl_sampai')));
+
+            $get_mkt = $this->m_marketing->get_list_mst_sales_group();
+
+            $data_stock_history = [];
+            $periode_tanggal = [];
+
+            // Loop untuk setiap marketing group
+            foreach ($get_mkt as $val) {
+                $data_stock = $this->m_marketing->get_data_stock_by_mkt($tgldari, $tglsampai, $val->nama_sales_group);
+
+                $tmp_stock = [];
+                if (empty($periode_tanggal)) {
+                    // Ambil tanggal hanya sekali dari marketing pertama
+                    foreach ($data_stock as $st) {
+                        $periode_tanggal[] = date('d F Y', strtotime($st->tanggal));
+                    }
+                }
+
+                foreach ($data_stock as $st) {
+                    $tmp_stock[] = floatval($st->l_stock);
+                }
+
+                $data_stock_history[] = [
+                    "name" => $val->nama_sales_group,
+                    "data" => $tmp_stock
+                ];
+            }
+
+            $callback = [
+                'status'  => 'success',
+                'result'  => $data_stock_history,
+                'periode' => $periode_tanggal
+            ];
+
+            $this->output
+                ->set_status_header(200)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode($callback));
+        } catch (Exception $e) {
+            $this->output
+                ->set_status_header(500)
+                ->set_content_type('application/json', 'utf-8')
+                ->set_output(json_encode([
+                    'status'  => 'error',
+                    'message' => $e->getMessage()
+                ]));
+        }
     }
+
 
     function get_dataTable_stock_history()
     {

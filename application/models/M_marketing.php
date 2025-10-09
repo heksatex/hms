@@ -933,7 +933,7 @@ class m_marketing extends CI_Model
 
 
 	var $column_order9 = array(null, 'tanggal','hen','mei','ts','vi','al');
-	var $column_search9= array('tanggal','hen','mei','ts','vi','al');
+	var $column_search9= array('tanggal');
 	var $order9  	  = array('tanggal' => 'asc');
 
 	function get_query_items9()
