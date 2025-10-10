@@ -338,6 +338,8 @@ class Memorialpenbank {
                         $sheet->setCellValue("I{$row}", "{$value->nama} Total");
                         $sheet->setCellValue("J{$row}", $totalBankKredit);
                         $row += 1;
+                        $totalBankKredit = 0;
+                        $totalBankValas = 0;
                     }
                 } else {
                     $row += 1;

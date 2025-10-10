@@ -71,7 +71,7 @@ class Memorialpengkasbesar {
                 $sheet->setCellValue("C{$row}", "{$value->kode_coa}");
                 $sheet->setCellValue("D{$row}", "{$value->nominals}");
             }
-            $row += 2;
+            $row += 1;
 
             $sheet->setCellValue("B{$row}", 'KAS BESAR');
             $sheet->setCellValue("C{$row}", ($data["kredit"][0]->km_kode_coa ?? ""));
