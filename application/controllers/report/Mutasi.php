@@ -1581,7 +1581,7 @@ class Mutasi extends MY_Controller
             }
 
             if($departemen == 'INS2'){
-                $kolom_in = 6;
+                $kolom_in = 10;
             } else {
                 $kolom_in = 5;
             }
@@ -1610,6 +1610,10 @@ class Mutasi extends MY_Controller
             $head_in_dept[]   = array('nama'=> 'GRG'.$re,'child' => $child, );
             if($departemen == 'INS2'){
                 $head_in_dept[]   = array('nama'=> 'GRG Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'SET Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'PAD Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'FIN Reproses','child' => $child, );
+                $head_in_dept[]   = array('nama'=> 'FBR Reproses','child' => $child, );
             }
             $head_in_dept[]   = array('nama'=> 'SET'.$re,'child' => $child, );
             $head_in_dept[]   = array('nama'=> 'PAD'.$re,'child' => $child, );
@@ -1637,11 +1641,11 @@ class Mutasi extends MY_Controller
             // $field .= 'out_grg_proses, out_grg_qty1,out_grg_qty1_uom,out_grg_qty2,out_grg_qty2_uom,out_grg_qty_opname,out_grg_qty_opname_uom';
 
             if($departemen == 'INS2'){
-                $dept_dept_in  = array('grg','grg_r','set','pad','fin','fbr');
+                $dept_dept_in  = array('grg','grg_r','set_r','pad_r','fin_r','fbr_r','set','pad','fin','fbr');
                 $dept_dept_out = array('gjd','grg');
                 $mutasi_dept = 'acc_mutasi_ins2_1_';
                 // untuk looping view
-                $field_dept_in[]  = array('grg','grg_r','set','pad','fin','fbr');
+                $field_dept_in[]  = $dept_dept_in;
                 $field_dept_out[] = array('gjd','grg');
             } else { //INS2R
                 $dept_dept_in  = array('grg_r','set_r','pad_r','fin_r','fbr_r');
