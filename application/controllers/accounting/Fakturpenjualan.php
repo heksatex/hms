@@ -438,6 +438,10 @@ class Fakturpenjualan extends MY_Controller {
             if ($this->form_validation->run() == FALSE) {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
+            
+            $header = [
+                "tipe"=>$this->input->post("tipe"),
+            ];
         } catch (Exception $ex) {
              $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
