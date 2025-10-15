@@ -62,16 +62,16 @@ class Delivery extends MY_Controller {
             } else {
                 $condition = array_merge($condition, ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir]);
             }
-            if ($customer !== null || $customer !== "") {
+            if ($customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
-            if ($nodo !== null || $nodo !== "") {
+            if ($nodo !== "") {
                 $condition = array_merge($condition, ['ddo.no LIKE' => '%' . $nodo . '%']);
             }
-            if ($nosj !== null || $nosj !== "") {
+            if ($nosj !== "") {
                 $condition = array_merge($condition, ['ddo.no_sj LIKE' => '%' . $nosj . '%']);
             }
-            if ($corak !== null || $corak !== "") {
+            if ($corak !== "") {
                 $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
             }
             if ($marketing !== "") {
@@ -171,16 +171,16 @@ class Delivery extends MY_Controller {
             } else {
                 $condition = array_merge($condition, ['ddo.tanggal_buat >=' => $tanggalAwal, 'ddo.tanggal_buat <=' => $tanggalAkhir]);
             }
-            if ($customer !== null || $customer !== "") {
+            if ($customer !== "") {
                 $condition = array_merge($condition, ['pr.nama LIKE' => '%' . $customer . '%']);
             }
-            if ($corak !== null || $corak !== "") {
+            if ($corak !== "") {
                 $condition = array_merge($condition, ['pd.corak_remark LIKE' => '%' . $corak . '%']);
             }
-            if ($nodo !== null || $nodo !== "") {
+            if ($nodo !== "") {
                 $condition = array_merge($condition, ['ddo.no LIKE' => '%' . $nodo . '%']);
             }
-            if ($nosj !== null || $nosj !== "") {
+            if ($nosj !== "") {
                 $condition = array_merge($condition, ['ddo.no_sj LIKE' => '%' . $nosj . '%']);
             }
             if ($marketing !== "") {
