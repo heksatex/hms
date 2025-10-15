@@ -128,11 +128,11 @@ class M_deliveryorder extends CI_Model {
         $this->db->from($this->table . ' ddo');
         $this->db->join("delivery_order_detail dod", 'dod.do_id = ddo.id');
         if ($this->retur_batal === "0") {
-//            $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id and pd.no_pl = ddo.no_picklist)");
-            $this->db->join("picklist_detail pd", "(pd.id = dod.picklist_detail_id and pd.no_pl = ddo.no_picklist)");
+            $this->db->join("picklist_detail pd", "(pd.barcode_id = dod.barcode_id and pd.no_pl = ddo.no_picklist)");
+//            $this->db->join("picklist_detail pd", "(pd.id = dod.picklist_detail_id and pd.no_pl = ddo.no_picklist)");
         } else {
-//            $this->db->join("(SELECT * from picklist_detail GROUP BY barcode_id,no_pl) pd", "(pd.barcode_id = dod.barcode_id and pd.no_pl = ddo.no_picklist)");
-             $this->db->join("picklist_detail pd", "(pd.id = dod.picklist_detail_id and pd.no_pl = ddo.no_picklist)");
+            $this->db->join("(SELECT * from picklist_detail GROUP BY barcode_id,no_pl) pd", "(pd.barcode_id = dod.barcode_id and pd.no_pl = ddo.no_picklist)");
+//             $this->db->join("picklist_detail pd", "(pd.id = dod.picklist_detail_id and pd.no_pl = ddo.no_picklist)");
         }
 
 //        $this->db->join("stock_quant sq", "sq.quant_id = pd.quant_id", "left");
