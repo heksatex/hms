@@ -102,7 +102,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
-                                                <div class="col-xs-4"><label class="form-label">No Faktur Internal</label></div>
+                                                <div class="col-xs-4"><label class="form-label required">No Faktur Internal</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="no_faktur" id="no_faktur" class="form-control input-sm no_faktur"/>
                                                 </div>
