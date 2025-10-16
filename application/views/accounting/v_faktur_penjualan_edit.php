@@ -73,7 +73,7 @@
                     <div class="box">
                         <form class="form-horizontal" method="POST" name="form-faktur-penjualan" id="form-faktur-penjualan" action="<?= base_url("accounting/fakturpenjualan/update/{$id}") ?>">
                             <div class="box-header with-border">
-                                <h3 class="box-title">No Faktur <?= $datas->no_faktur ?></h3>
+                                <h3 class="box-title"><?= ($datas->no_faktur === "") ? "" : "No Faktur {$datas->no_faktur}" ?></h3>
                             </div>
                             <div class="box-body">
                                 <div class="col-md-6 col-xs-12">
@@ -146,10 +146,15 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
+                                                <div class="col-xs-4"><label class="form-label">No Faktur</label></div>
+                                                <div class="col-xs-8 col-md-8">
+                                                    <input type="text" name="no_faktur" class="form-control input-sm no_faktur edited-read" value="<?= $datas->no_faktur ?>" readonly/>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12">
                                                 <div class="col-xs-4"><label class="form-label">No Faktur Pajak</label></div>
                                                 <div class="col-xs-8 col-md-8">
                                                     <input type="text" name="no_faktur_pajak" id="no_faktur_pajak" class="form-control input-sm no_faktur_pajak edited-read" <?= $datas->no_faktur_pajak ?> readonly/>
-                                                    <input type="hidden" name="no_faktur" class="form-control input-sm" value="<?= $datas->no_faktur ?>"/>
                                                 </div>
                                             </div>
                                             <div class="col-md-12 col-xs-12">
@@ -181,8 +186,11 @@
                                         <div class="tab-pane active" id="tab_1">
                                             <div class="table-responsive over">
                                                 <table class="table table-condesed table-hover rlstable" id="fpenjualan" style="min-width: 105%; padding: 0 0 0 0 !important;">
+                                                    <caption>
+                                                        <button type="button" class="btn btn-default btn-sm btn-rmv-item btn-split"style="display: none;" >Join Item</button>
+                                                    </caption>
                                                     <thead>
-                                                    <th class="style" style="width: 5px">No.</th>
+                                                    <th class="style" style="width: 15px">No.</th>
                                                     <th class="style" style="width: 150px">Uraian</th>
                                                     <th class="style" style="width: 100px">Warna</th>
                                                     <th class="style" style="width: 100px">No PO</th>
@@ -201,11 +209,14 @@
                                                             $no += 1;
                                                             ?>
                                                             <tr>
-                                                                <td>
-                                                                    <div class="input-group">
-                                                                        <span class="input-group-addon" style="border:none;"><?= $no ?></span>
-                                                                        <button type="button" class="btn btn-danger btn-sm btn-rmv-item" style="display: none;"><i class="fa fa-close"></i></button>
-                                                                    </div>
+                                                                <td style="width: 50px">
+    <!--                                                                        <div class="col-xs-4"><span class="input-group-addon" style="border:none;"><?= $no ?></span></div>
+                                                                        <div class="col-xs-4"><button class="btn btn-warning btn-sm btn-rmv-item" style="display: none;"><i class="fa fa-copy"></i></button></div>
+                                                                        <div class="col-xs-4">&nbsp;<input class="btn join-item btn-rmv-item" style="display: none;" type="checkbox"> </div>-->
+                                                                    <a><?= $no ?>&nbsp;</a>
+                                                                    <a class="btn-rmv-item split-item" style="display: none;" data-toggle="tooltip" style="color: #FFC107;" data-ids="<?= $value->id ?>" data-original-title="Split"><i class="fa fa-copy"></i>&nbsp;</a>
+                                                                    <input type="checkbox" class="btn-rmv-item join-item" style="display: none;" data-toggle="tooltip" data-original-title="Join" value="<?= $value->id ?>">
+                                                                    <input type="hidden" value="<?= $value->id ?>" name="detail_id[]">
                                                                 </td>
                                                                 <td>
                                                                     <input class="form-control input-sm  uraian edited-read uraian_<?= $key ?>" value="<?= $value->uraian ?>" name="uraian[]" readonly>
@@ -232,6 +243,7 @@
                                                                     </select>
                                                                 </td>
                                                                 <td class="text-right">
+                                                                    <input value="<?= $value->qty ?>" type="hidden" name="qty[]">
                                                                     <?= "{$value->qty} {$value->uom}" ?>
                                                                 </td>
                                                                 <td>
@@ -275,7 +287,7 @@
                                                                     <div class="col-xs-4">
                                                                         <select class="form-control input-sm select2 pull-right edited" name="tipediskon" disabled>
                                                                             <option value=""></option>
-                                                                            <option value="%" <?= $datas->tipe_diskon ?? "selected" ?>>%</option>
+                                                                            <option value="%" <?= ($datas->tipe_diskon === "%") ? "selected" : "" ?>>%</option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="col-xs-4">
@@ -291,25 +303,26 @@
                                                             <tr>
                                                                 <td colspan="8"></td>
                                                                 <td class="text-right"><strong>DPP Nilai Lain</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total, 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->dpp_lain, 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <tr>
                                                                 <td colspan="7"></td>
                                                                 <td colspan="2" class="text-right">
 
                                                                     <div class="col-xs-6">
-                                                                        <select class="form-control input-sm select2  pull-right edited" name="tax_id" disabled>
+                                                                        <select class="form-control input-sm select2 pull-right edited" name="tax" id="tax" disabled>
                                                                             <option value=""></option>
                                                                             <?php
                                                                             foreach ($taxs as $k => $tax) {
                                                                                 ?>
-                                                                                <option value="<?= $tax->id ?>" <?= ($tax->id === $datas->tax_id) ? "selected" : "" ?> ><?= $tax->nama ?></option>
+                                                                                <option data-val="<?= $tax->amount ?>" value="<?= $tax->id ?>" <?= ($tax->id === $datas->tax_id) ? "selected" : "" ?> ><?= $tax->nama ?></option>
                                                                                 <?php
                                                                             }
                                                                             ?>
                                                                         </select>
                                                                     </div>
                                                                     <div class="col-xs-6">
+                                                                        <input type="hidden" value="<?= $datas->tax_value ?>" name="tax_value" id="tax_value">
                                                                         <span class=""><strong>Ppn</strong></span>
                                                                     </div>
 
@@ -319,7 +332,7 @@
                                                             <tr>
                                                                 <td colspan="8"></td>
                                                                 <td class="text-right"><strong>Total</strong></td>
-                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format($datas->grand_total, 2, ".", ",") ?>"></td>
+                                                                <td><input readonly class="form-control input-sm text-right" value="<?= number_format(($datas->grand_total - $datas->diskon), 2, ".", ",") ?>"></td>
                                                             </tr>
                                                             <?php
                                                         }
@@ -424,7 +437,21 @@ if ($datas->status == 'confirm') {
             }
         });
     });
+    const setNominalCurrency = (() => {
+        $("input[data-type='currency']").on({
+            keyup: function () {
+                formatCurrency($(this));
+            },
+            drop: function () {
+                formatCurrency($(this));
+            },
+            blur: function () {
+                formatCurrency($(this), "blur");
+            }
+        });
+    });
     $(function () {
+        setNominalCurrency();
         $(".select2").select2();
         $("#btn-edit").on("click", function (e) {
             e.preventDefault();
@@ -473,6 +500,124 @@ if ($datas->status == 'confirm') {
                 false
                 );
 
+        $("#tax").on("select2:select", function () {
+            var selectedSelect2OptionSource = $(this).find(':selected').data('val');
+            $("#tax_value").val(selectedSelect2OptionSource);
+        });
+        $("#tax").on("change", function () {
+            $("#tax_value").val("0.0000");
+        });
+
+
+
+        $(".split-item").unbind("click").off("click").on("click", function () {
+            $(".btn-rmv-item").hide();
+            $("#btn-simpan").hide();
+            $("#btn-cancel").hide();
+            const tt = $(this);
+            var ids = $(this).data("ids");
+            $.ajax({
+                url: "<?= base_url('accounting/fakturpenjualan/split/' . $id) ?>",
+                type: "POST",
+                data: {ids: ids},
+                beforeSend: function (xhr) {
+                    please_wait(function () {});
+                },
+                error: function (req, error) {
+                    unblockUI(function () {
+                        setTimeout(function () {
+                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                        }, 500);
+                    });
+                }, success: function (data) {
+                    var html = data.data;
+                    var newRow = $(html);
+                    var counterSplit = $("#fpenjualan tbody tr").length - 2;
+                    newRow.insertAfter(tt.parents().closest('tr'));
+                    counterSplit++;
+                    $(".split-item").hide();
+                    setCoaItem();
+                },
+                complete: function (jqXHR, textStatus) {
+                    unblockUI(function () {}, 200);
+                }
+            });
+
+        });
+
+        $(".btn-split").unbind("click").off("click").on("click", function () {
+            var val = [];
+            $(".join-item:checked").each(function (i) {
+                val[i] = $(this).val();
+            });
+            if (val.length < 1)
+                return;
+
+            confirmRequest("Faktur Penjualan", "Join Item Dipilih ? ", function () {
+
+                $.ajax({
+                    url: "<?= base_url('accounting/fakturpenjualan/join/' . $id) ?>",
+                    type: "POST",
+                    data: {ids: val.join()},
+                    beforeSend: function (xhr) {
+                        please_wait(function () {});
+                    },
+                    error: function (req, error) {
+                        unblockUI(function () {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                            }, 500);
+                        });
+                    }, success: function (data) {
+                        location.reload();
+                    },
+                    complete: function (jqXHR, textStatus) {
+                        unblockUI(function () {}, 200);
+                    }
+                });
+
+            });
+        });
+
+    });
+    var counterSplit = 0;
+    const cancelSplit = ((e) => {
+        $(".split-item").show();
+        counterSplit--;
+        $(e).closest("tr").remove();
+        $(".btn-rmv-item").show();
+        $("#btn-simpan").show();
+        $("#btn-cancel").show();
+    });
+    const saveSplit = (() => {
+        confirmRequest("Faktur Penjualan", "Simpan Split Item? ", function () {
+            $.ajax({
+                url: "<?= base_url('accounting/fakturpenjualan/save_split/' . $id) ?>",
+                type: "POST",
+                data: {
+                    ids: $("#ids").val(),
+                    qty: $("#qty_split").val(),
+                    qty_lot: $("#qty_lot_split").val(),
+                    no_acc: $("#no_acc_split").val(),
+                    uom_lot: $("#uom_lot_split").val()
+                },
+                beforeSend: function (xhr) {
+                    please_wait(function () {});
+                },
+                error: function (req, error) {
+                    unblockUI(function () {
+                        setTimeout(function () {
+                            alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                        }, 500);
+                    });
+                }, success: function (data) {
+                    location.reload();
+                },
+                complete: function (jqXHR, textStatus) {
+                    unblockUI(function () {});
+                }
+            });
+        })
     });
 </script>
 </body>

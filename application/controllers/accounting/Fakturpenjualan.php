@@ -375,7 +375,7 @@ class Fakturpenjualan extends MY_Controller {
             $users = (object) $this->session->userdata('nama');
             $noAcc = $this->input->post("noacc");
             $nominalDiskon = $this->input->post("nominaldiskon");
-            unset($this->valForm[2]);//unset validation  no faktur
+            unset($this->valForm[2]); //unset validation  no faktur
             if ($nominalDiskon !== "") {
                 $this->valForm = array_merge($this->valForm, [
                     [
@@ -433,20 +433,317 @@ class Fakturpenjualan extends MY_Controller {
                     ]
                 ]);
             }
-            
+
             $this->form_validation->set_rules($this->valForm);
             if ($this->form_validation->run() == FALSE) {
                 throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
             }
-            
+            $taxVal = $this->input->post("tax_value");
+            $nominalDiskon = $this->input->post("nominaldiskon");
+            $tipediskon = $this->input->post("tipediskon");
             $header = [
-                "tipe"=>$this->input->post("tipe"),
+                "tipe" => $this->input->post("tipe"),
+                "no_sj" => $this->input->post("no_sj"),
+                "po_cust" => $this->input->post("po_cust"),
+                "marketing_kode" => $this->input->post("marketing_kode"),
+                "marketing_nama" => $this->input->post("marketing_nama"),
+                "partner_id" => $this->input->post("customer"),
+                "partner_nama" => $this->input->post("customer_nama"),
+                "no_faktur_pajak" => $this->input->post("no_faktur_pajak"),
+                "kurs" => $this->input->post("kurs"),
+                "kurs_nominal" => $this->input->post("kurs_nominal"),
+                "tipe_diskon" => $tipediskon,
+                "nominal_diskon" => $nominalDiskon,
+                "tax_id" => $this->input->post("tax"),
+                "tax_value" => $taxVal,
+                "dpp_lain" => 0
             ];
+            $ppns = 0;
+            $model = new $this->m_global;
+            $detail = [];
+            $this->_module->startTransaction();
+            if (count($noAcc) > 0) {
+                $ppns = 0;
+                $grandTotal = 0;
+                $qty = $this->input->post("qty");
+                $harga = $this->input->post("harga");
+                foreach ($noAcc as $key => $value) {
+                    $hrg = str_replace(",", "", $harga[$key]);
+                    $jumlah = $qty[$key] * $hrg;
+                    $grandTotal += $jumlah;
+                    $ddskon = ($tipediskon === "%") ? ($jumlah * ($nominalDiskon / 100)) : $nominalDiskon;
+                    $pajak = ($jumlah - $ddskon) * $taxVal;
+                    $dpp = (($jumlah - $ddskon) * 11) / 12;
+
+                    $detail[] = [
+                        "uraian" => $this->input->post("uraian")[$key],
+                        "warna" => $this->input->post("warna")[$key],
+                        "no_po" => $this->input->post("nopo")[$key],
+                        "qty_lot" => $this->input->post("qtylot")[$key],
+                        "lot" => $this->input->post("uomlot")[$key],
+                        "harga" => $hrg,
+                        "no_acc" => $value,
+                        "jumlah" => $jumlah,
+                        "pajak" => $pajak,
+                        "total_harga" => ($jumlah - $ddskon + $pajak),
+                        "dpp_lain" => $dpp,
+                        "diskon" => $ddskon,
+                        "id" => $this->input->post("detail_id")[$key]
+                    ];
+                }
+                if ($tipediskon === "%") {
+                    $diskon = $grandTotal * ($nominalDiskon / 100);
+                    $ppns = ($grandTotal - $diskon) * $taxVal;
+                    $header["dpp_lain"] = (($grandTotal - $diskon) * 11) / 12;
+                    $header["diskon"] = $diskon;
+                } else {
+                    $ppns = ($grandTotal - $nominalDiskon) * $taxVal;
+                    $header["dpp_lain"] = (($grandTotal - $nominalDiskon) * 11) / 12;
+                    $header["diskon"] = $nominalDiskon;
+                }
+                $header["grand_total"] = $grandTotal;
+                $header["ppn"] = $ppns;
+                $model->setTables("acc_faktur_penjualan_detail")->updateBatch($detail, "id");
+            }
+            $model->setTables("acc_faktur_penjualan")->setWheres(["no_faktur" => $kode])->update($header);
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal Menyimpan Data', 500);
+            }
+            $log = "DATA -> " . logArrayToString("; ", $header);
+            $log .= "\n";
+            $log .= "\nDETAIL -> " . logArrayToString("; ", $detail);
+            $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
         } catch (Exception $ex) {
-             $this->_module->rollbackTransaction();
+            $this->_module->rollbackTransaction();
             $this->output->set_status_header($ex->getCode() ?? 500)
                     ->set_content_type('application/json', 'utf-8')
                     ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
+
+    public function split($id) {
+        try {
+            $model = new $this->m_global;
+            $ids = $this->input->post("ids");
+            $detail = $model->setTables("acc_faktur_penjualan_detail fjd")
+                            ->setJoins("acc_coa", "kode_coa = no_acc", "left")
+                            ->setSelects(["fjd.*", "acc_coa.nama as coa_nama"])
+                            ->setWheres(["id" => $ids])->getDetail();
+            if (!$detail) {
+                throw new \Exception('Data Item tidak ditemukan', 500);
+            }
+            $html = $this->load->view('accounting/modal/v_split_item_fp', ["data" => $detail, "id" => $id, "uomLot" => $this->uomLot], true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success', "data" => $html)));
+        } catch (Exception $ex) {
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger', "data" => "")));
+        }
+    }
+
+    public function save_split($id) {
+        try {
+            $validation = [
+                [
+                    'field' => 'qty',
+                    'label' => 'Qty',
+                    'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                    'errors' => [
+                        'required' => '{field} Harus diisi',
+                        "regex_match" => "{field} harus berupa number / desimal"
+                    ]
+                ],
+                [
+                    'field' => 'qty_lot',
+                    'label' => 'Qty LOT',
+                    'rules' => ['required', 'regex_match[/^\d*\.?\d*$/]'],
+                    'errors' => [
+                        'required' => '{field} Harus diisi',
+                        "regex_match" => "{field} harus berupa number / desimal"
+                    ]
+                ],
+                [
+                    'field' => 'no_acc',
+                    'label' => 'No ACC',
+                    'rules' => ['required'],
+                    'errors' => [
+                        'required' => '{field} Harus dipilih',
+                    ]
+                ]
+            ];
+
+            $this->form_validation->set_rules($validation);
+            if ($this->form_validation->run() == FALSE) {
+                throw new \Exception(array_values($this->form_validation->error_array())[0], 500);
+            }
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username'));
+
+            $kode = decrypt_url($id);
+            $ids = $this->input->post("ids");
+            $qty = $this->input->post("qty");
+            $qtyLot = $this->input->post("qty_lot");
+            $uomLot = $this->input->post("uom_lot");
+            $noAcc = $this->input->post("no_acc");
+
+            $this->_module->startTransaction();
+            $lock = "acc_faktur_penjualan READ, acc_faktur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE";
+            $this->_module->lock_tabel($lock);
+            $model = new $this->m_global;
+            $getDetail = $model->setTables("acc_faktur_penjualan_detail")->setJoins("acc_faktur_penjualan", "faktur_id = acc_faktur_penjualan.id")
+                            ->setSelects(["acc_faktur_penjualan_detail.*", "nominal_diskon,tipe_diskon,tax_value"])
+                            ->setWheres(["acc_faktur_penjualan_detail.id" => $ids])->getDetail();
+            if ($getDetail === null) {
+                throw new Exception('Data Tidak ditemukan', 500);
+            }
+            $hasilKurang = $getDetail->qty - $qty;
+            if ($hasilKurang < 1) {
+                throw new Exception('Hasil Split QTY Kurang dari 1', 500);
+            }
+            $hasilKurangLot = $getDetail->qty_lot - $qtyLot;
+            if ($hasilKurangLot < 1) {
+                throw new Exception('Hasil Split QTY LOT Kurang dari 1', 500);
+            }
+            $jumlah = $hasilKurang * $getDetail->harga;
+            $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
+            $dpp = (($jumlah - $ddskon) * 11) / 12;
+            $pajak = ($jumlah - $ddskon) * $getDetail->tax_value;
+            $updateSpilit = [
+                "qty_lot" => $hasilKurangLot,
+                "qty" => $hasilKurang,
+                "jumlah" => $jumlah,
+                "pajak" => $pajak,
+                "diskon" => $ddskon,
+                "total_harga" => ($jumlah - $ddskon + $pajak),
+                "dpp_lain" => $dpp,
+            ];
+
+            $jumlah = $qty * $getDetail->harga;
+            $ddskon = ($getDetail->tipe_diskon === "%") ? ($jumlah * ($getDetail->nominal_diskon / 100)) : $getDetail->nominal_diskon;
+            $dpp = (($jumlah - $ddskon) * 11) / 12;
+            $pajak = ($jumlah - $ddskon) * $getDetail->tax_value;
+
+            $split = [
+                "faktur_id" => $getDetail->faktur_id,
+                "faktur_no" => $getDetail->faktur_no,
+                "uraian" => $getDetail->uraian,
+                "warna" => $getDetail->warna,
+                "harga" => $getDetail->harga,
+                "qty_lot" => $qtyLot,
+                "lot" => $uomLot,
+                "qty" => $qty,
+                "uom" => $getDetail->uom,
+                "no_acc" => $noAcc,
+                "jumlah" => $jumlah,
+                "pajak" => $pajak,
+                "diskon" => $ddskon,
+                "total_harga" => ($jumlah - $ddskon + $pajak),
+                "dpp_lain" => $dpp,
+            ];
+            $model->setTables("acc_faktur_penjualan_detail")->save($split);
+            $model->setWheres(["id" => $ids])->update($updateSpilit);
+
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal update status', 500);
+            }
+            $log = "update spilit uraian = {$getDetail->uraian} , warna = {$getDetail->warna} " . logArrayToString("; ", $updateSpilit);
+            $log .= "\nhasil split " . logArrayToString("; ", $split);
+            $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
+        }
+    }
+
+    public function join($id) {
+        try {
+            $sub_menu = $this->uri->segment(2);
+            $username = addslashes($this->session->userdata('username'));
+            $kode = decrypt_url($id);
+            $ids = $this->input->post("ids");
+
+            $dids = explode(",", $ids);
+            $this->_module->startTransaction();
+            $lock = "acc_faktur_penjualan_detail WRITE,user READ, main_menu_sub READ, log_history WRITE";
+            $this->_module->lock_tabel($lock);
+            $model = new $this->m_global;
+            $getData = $model->setTables("acc_faktur_penjualan_detail")
+                            ->setWhereIn("acc_faktur_penjualan_detail.id", $dids)->getData();
+            $data = [];
+            $qtyLots = 0;
+            $qtys = 0;
+            $jumlahs = 0;
+            $pajaks = 0;
+            $dpps = 0;
+            $diskons = 0;
+            $log = "";
+            $datas = [];
+            foreach ($getData as $key => $value) {
+                $datas[] = logArrayToString("; ",(array)$value);
+                $qtys += $value->qty;
+                $qtyLots += $value->qty_lot;
+                $jumlahs += $value->jumlah;
+                $diskons += $value->diskon;
+                $dpps += $value->dpp_lain;
+                $pajaks += $value->pajak;
+
+                $data = [
+                    "faktur_id" => $value->faktur_id,
+                    "faktur_no" => $value->faktur_no,
+                    "uraian" => $value->uraian,
+                    "warna" => $value->warna,
+                    "lot" => $value->lot,
+                    "uom" => $value->uom,
+                    "no_acc" => $value->no_acc,
+                    "harga" => $value->harga
+                ];
+            }
+            if (count($data) > 0) {
+                $data["qty_lot"] = $qtyLots;
+                $data["qty"] = $qtys;
+                $data["jumlah"] = $jumlahs;
+                $data["pajak"] = $pajaks;
+                $data["diskon"] = $diskons;
+                $data["total_harga"] = ($jumlahs - $diskons + $pajaks);
+                $data["dpp_lain"] = $dpps;
+
+                $model->setTables("acc_faktur_penjualan_detail")->setWhereIn("acc_faktur_penjualan_detail.id", $dids)->delete();
+                $model->setTables("acc_faktur_penjualan_detail")->save($data);
+
+                $log .= "Join Item Data : " . logArrayToString("; ", (array)$datas);
+                $log .= "\nhasil split " . logArrayToString("; ", $data);
+            }
+
+            if (!$this->_module->finishTransaction()) {
+                throw new \Exception('Gagal update status', 500);
+            }
+            if ($log !== "")
+                $this->_module->gen_history_new($sub_menu, $kode, "edit", $log, $username);
+
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->_module->rollbackTransaction();
+            log_message("error", json_encode($ex));
+            $this->output->set_status_header($ex->getCode() ?? 500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        } finally {
+            $this->_module->unlock_tabel();
         }
     }
 }
