@@ -168,31 +168,86 @@
         location.href = url;
     });
 
-  $(document).ready(function () {
+    // jika load awa;l treeview terbuka
+//   $(document).ready(function () {
     
-    // Buka semua treeview di awal
-    $('.sidebar-menu .treeview').addClass('menu-open active');
-    $('.sidebar-menu .treeview-menu').css('display', 'block');
+//     // Buka semua treeview di awal
+//     $('.sidebar-menu .treeview').addClass('menu-open active');
+//     $('.sidebar-menu .treeview-menu').css('display', 'block');
 
-    // Matikan behavior default AdminLTE yang close menu lainnya
-    $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
-        e.preventDefault();
-        var parent = $(this).parent();
-        var submenu = parent.children('.treeview-menu');
+//     // Matikan behavior default AdminLTE yang close menu lainnya
+//     $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
+//         e.preventDefault();
+//         var parent = $(this).parent();
+//         var submenu = parent.children('.treeview-menu');
 
-        // Toggle menu yang diklik saja
-        if (parent.hasClass('menu-open')) {
-        submenu.slideUp(200, function () {
-            parent.removeClass('menu-open active');
-        });
-        } else {
-        submenu.slideDown(200, function () {
-            parent.addClass('menu-open active');
-        });
-        }
-    });
+//         // Toggle menu yang diklik saja
+//         if (parent.hasClass('menu-open')) {
+//         submenu.slideUp(200, function () {
+//             parent.removeClass('menu-open active');
+//         });
+//         } else {
+//         submenu.slideDown(200, function () {
+//             parent.addClass('menu-open active');
+//         });
+//         }
+//   });
+//     });
+
+//    $(document).off('click', '.treeview > a');
+//   $('.treeview > a').off('click');
+
+</script>
+
+
+<script>
+$(function () {
+  // Hapus semua event default AdminLTE yang nutup menu lain
+  $('.sidebar-menu').off('click', '.treeview > a');
+  $('.treeview > a').off('click');
+
+  // Sembunyikan semua submenu, kecuali yang sudah active
+  $('.sidebar-menu .treeview').each(function() {
+    var $this = $(this);
+    if ($this.hasClass('active') || $this.hasClass('menu-open')) {
+      $this.children('.treeview-menu').show();
+      $this.addClass('menu-open');
+    } else {
+      $this.children('.treeview-menu').hide();
+    }
   });
 
+  // Tambahkan toggle manual (multi expand + multi active)
+  $('.sidebar-menu').on('click', '.treeview > a', function (e) {
+    var $this = $(this);
+    var href = $this.attr('href');
+    var $parent = $this.parent('.treeview');
+    var $submenu = $parent.children('.treeview-menu');
+
+    // biarkan link valid (yang bukan '#') tetap diarahkan
+    if (href && href !== '#' && href.indexOf('javascript:') !== 0) {
+      return;
+    }
+
+    e.preventDefault();
+
+    // Toggle menu yang diklik tanpa mempengaruhi yang lain
+    if ($parent.hasClass('menu-open')) {
+      // Tutup menu ini
+      $submenu.stop(true, true).slideUp(200, function() {
+        $parent.removeClass('menu-open active');
+      });
+    } else {
+      // Buka menu ini
+      $submenu.stop(true, true).slideDown(200, function() {
+        $parent.addClass('menu-open active');
+      });
+    }
+
+    // ⚡ Penting: jangan hapus .active dari treeview lain!
+    // jadi kita tidak menghapus active dari item lain
+  });
+});
 </script>
 
 <div class="modal fade" id="modal_printer" role="dialog">
