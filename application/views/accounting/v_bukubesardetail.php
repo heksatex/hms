@@ -240,7 +240,7 @@
             ajax: {
                 dataType: 'JSON',
                 type: "POST",
-                url: "<?php echo base_url(); ?>accounting/bukubesardetail/get_list_coa",
+                url: "<?php echo base_url(); ?>report/bukubesardetail/get_list_coa",
                 //delay : 250,
                 data: function(params) {
                     return {
@@ -312,7 +312,7 @@
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('accounting/bukubesardetail/loadData') ?>",
+                url: "<?php echo site_url('report/bukubesardetail/loadData') ?>",
                 data: {
                     tgldari: tgldari,
                     tglsampai: tglsampai,
@@ -442,7 +442,7 @@
 
                 $.ajax({
                     "type": 'POST',
-                    "url": "<?php echo site_url('accounting/bukubesardetail/export_excel') ?>",
+                    "url": "<?php echo site_url('report/bukubesardetail/export_excel') ?>",
                     "data": {
                         arr_filter: arr_filter
                     },
@@ -477,7 +477,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>accounting/bukubesardetail/export_pdf';
+                var url = '<?php echo base_url() ?>report/bukubesardetail/export_pdf';
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 
