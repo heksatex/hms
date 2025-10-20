@@ -262,6 +262,25 @@
         location.href = url;
     });
 
+</script>
+
+<script>
+$(function () {
+  // Hapus semua event default AdminLTE yang nutup menu lain
+  $('.sidebar-menu').off('click', '.treeview > a');
+  $('.treeview > a').off('click');
+
+  // Sembunyikan semua submenu, kecuali yang sudah active
+  $('.sidebar-menu .treeview').each(function() {
+    var $this = $(this);
+    if ($this.hasClass('active') || $this.hasClass('menu-open')) {
+      $this.children('.treeview-menu').show();
+      $this.addClass('menu-open');
+    } else {
+      $this.children('.treeview-menu').hide();
+    }
+  });
+
     $(document).ready(function () {
 
         // Buka semua treeview di awal
@@ -287,6 +306,37 @@
         });
     });
 
+  // Tambahkan toggle manual (multi expand + multi active)
+  $('.sidebar-menu').on('click', '.treeview > a', function (e) {
+    var $this = $(this);
+    var href = $this.attr('href');
+    var $parent = $this.parent('.treeview');
+    var $submenu = $parent.children('.treeview-menu');
+
+    // biarkan link valid (yang bukan '#') tetap diarahkan
+    if (href && href !== '#' && href.indexOf('javascript:') !== 0) {
+      return;
+    }
+
+    e.preventDefault();
+
+    // Toggle menu yang diklik tanpa mempengaruhi yang lain
+    if ($parent.hasClass('menu-open')) {
+      // Tutup menu ini
+      $submenu.stop(true, true).slideUp(200, function() {
+        $parent.removeClass('menu-open active');
+      });
+    } else {
+      // Buka menu ini
+      $submenu.stop(true, true).slideDown(200, function() {
+        $parent.addClass('menu-open active');
+      });
+    }
+
+    // ⚡ Penting: jangan hapus .active dari treeview lain!
+    // jadi kita tidak menghapus active dari item lain
+  });
+});
 </script>
 
 <div class="modal fade" id="modal_printer" role="dialog">
