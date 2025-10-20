@@ -29,7 +29,7 @@
                                             <th>Kode</th>
                                             <th>Jurnal</th>
                                             <th>Tanggal dibuat</th>
-                                            <th>Tanggal Posting</th>
+                                            <!--<th>Tanggal Posting</th>-->
                                             <th>Periode</th>
                                             <th>Origin</th>
                                             <th>Reff Note</th>

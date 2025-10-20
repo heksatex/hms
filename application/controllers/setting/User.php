@@ -341,4 +341,22 @@ class User extends MY_Controller
                 ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
         }
     }
+
+    public function check_pin() {
+        try {
+            $pin = $this->input->post("pin");
+            $users = (object) $this->session->userdata('nama');
+            if ($pin !== $users->pin) {
+                throw new \Exception("PIN tidak sesuai");
+            }
+            $this->session->set_userdata('pin', true);
+            $this->output->set_status_header(200)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => 'Berhasil', 'icon' => 'fa fa-check', 'type' => 'success')));
+        } catch (Exception $ex) {
+            $this->output->set_status_header(500)
+                    ->set_content_type('application/json', 'utf-8')
+                    ->set_output(json_encode(array('message' => $ex->getMessage(), 'icon' => 'fa fa-warning', 'type' => 'danger')));
+        }
+    }
 }

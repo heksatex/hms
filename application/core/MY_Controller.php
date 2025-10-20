@@ -15,13 +15,28 @@ class MY_Controller extends CI_Controller {
     }
 
     public function is_loggedin() {
+
         if (!$this->session->userdata('status')) {
             // user belum login
-            if ($this->input->is_ajax_request() || $this->input->get_request_header('_request')) {
-                $this->output->set_status_header(401)->set_content_type('application/json', 'utf-8');
-            } else {
-                redirect(base_url());
+            switch (true) {
+                case $this->input->is_ajax_request():
+                    $this->output->set_status_header(401)->set_content_type('application/json', 'utf-8');
+                    break;
+                case ($this->input->get_request_header('_request') === "json"):
+                    $this->output->set_status_header(500)->set_content_type('application/json', 'utf-8');
+                    break;
+                case ($this->input->get_request_header('x-requested-with') == 'XMLHttpRequest'):
+                    $this->output->set_status_header(401)->set_content_type('application/json', 'utf-8');
+                    break;
+                default :
+                    redirect(base_url());
+                    break;
             }
+//            if ($this->input->is_ajax_request() || $this->input->get_request_header('_request') || ($this->input->get_request_header('x-requested-with') === 'XMLHttpRequest')) {
+//                $this->output->set_status_header(401)->set_content_type('application/json', 'utf-8');
+//            } else {
+//                redirect(base_url());
+//            }
         } else {
             $level = $this->session->userdata('nama')['level'] ?? "";
             if (!in_array(strtolower($level), ["super administrator"])) {

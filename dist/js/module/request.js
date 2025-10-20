@@ -59,6 +59,45 @@ const requestDelete = function (uri, objectData = {}) {
 
 };
 
+
+const inputPin = ((uri, callback = function() {}) => {
+    return new Promise((resolve, reject) => {
+        bootbox.prompt({
+            title: 'Masukan Pin.',
+            inputType:"password",
+            centerVertical: true,
+            callback: function (result) {
+                if (!result)
+                    return;
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: uri,
+                    data: {
+                        pin: result
+                    },
+                    beforeSend: function (xhr) {
+                        please_wait(function () {});
+                    },
+                    success: function (data) {
+                        callback();
+                        resolve(data);
+                    },
+                    error: function (req, error) {
+                        unblockUI(function () {
+                            setTimeout(function () {
+                                alert_notify('fa fa-close', req?.responseJSON?.message, 'danger', function () {});
+                            }, 500);
+                        });
+                        reject(error);
+                    }
+                });
+            }
+        });
+    });
+
+});
+
 const ConfirmRequest = function (title, message, cb) {
     bootbox.confirm({
         title: title,
@@ -79,4 +118,4 @@ const ConfirmRequest = function (title, message, cb) {
     });
 };
 
-export {requests, requestDelete, ConfirmRequest}
+export {requests, requestDelete, ConfirmRequest, inputPin}

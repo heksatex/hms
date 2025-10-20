@@ -106,6 +106,7 @@ const setInputFilter = function (textbox, inputFilter, errMsg) {
             }
         });
     });
-}
+};
 
-export {searchArray, changeCondition, checkScannerInput,setInputFilter}
+
+export {searchArray, changeCondition, checkScannerInput, setInputFilter}

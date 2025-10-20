@@ -58,39 +58,3 @@ div.table_processing {
 }
 
 /* << SELECT CUSTOM */
-
-
-/* custom menu css >> */
-
-.navbar-nav > li > a {
-    padding-left: 7px;
-    padding-left: 7px;
-}
-
-.sidebar-menu>li.header{color:#4b646f;background:#1a2226; line-height: 10px;}
-
-.sidebar-menu > li {
-    line-height: 0.9px;
-}
-
-/* Ubah warna latar dan teks menu aktif */
-.sidebar-menu > li.active > a {
-    background-color: #fff !important;  /* warna background */
-    color: #222d32 !important;
-    font-weight: bold;
-}
-
-/* Optional: tambahkan border kiri sebagai indikator aktif */
-.sidebar-menu > li.active > a {
-    border-left: 4px solid #ffffff;
-}
-
-/* Jika pakai submenu */
-.treeview-menu > li.active > a {
-    background-color: #fff !important;
-    color: #222d32 !important;
-}
-
-/* << custom menu css
-
-
