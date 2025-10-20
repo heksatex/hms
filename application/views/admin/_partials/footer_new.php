@@ -11,30 +11,39 @@
 <script src="<?= base_url('plugins/jQuery/jquery-2.2.3.min.js') ?>"></script>
 <script>
     j$ = jQuery.noConflict();
-    j$(function () {
-        async function loadLog() {
-            await j$.ajax({
-                url: "<?= base_url('service/get_log') ?>",
-                type: "POST",
-                data: {
-                    kode: "<?= $kode ?? "" ?>",
-                    mms: "<?= $mms ?? "" ?>",
-                    uri_segmen: "<?= $this->uri->segment(4) ?>"
-                },
-                success: function (data) {
-                    j$(".box-comments").append(data.data);
-                },
-                error: function (req, error) {
-                    j$(".box-comments").append("");
-                    alert_notify('fa fa-close', "Failed Load Log History", 'danger', function () {});
-                },
-                complete: function (jqXHR, textStatus) {
-                    document.getElementById("log_load").remove();
+
+    window.loadLog = async function() {
+        // console.log("loadLog terpanggil...");
+
+        await j$.ajax({
+            url: "<?= base_url('service/get_log') ?>",
+            type: "POST",
+            dataType: "json",
+            data: {
+                kode: "<?= $kode ?? '' ?>",
+                mms: "<?= $mms ?? '' ?>",
+                uri_segmen: "<?= $this->uri->segment(4) ?>",
+            },
+            success: function(data) {
+                // console.log('Response:', data);
+                if (data?.data) {
+                    j$(".box-comments").html(data.data);
+                } else {
+                    console.warn('data.data kosong');
+                    j$(".box-comments").html("<div class='text-center text-muted'>Tidak ada log ditemukan</div>");
                 }
+            },
+            error: function(xhr, error) {
+                console.error(xhr.responseText);
+                alert_notify('fa fa-close', "Failed Load Log History", 'danger');
+            },
+            complete: function() {
+                j$("#log_load").remove();
+            }
+        });
+    }
 
-            });
-        }
+    j$(function() {
         loadLog();
-
     });
 </script>
