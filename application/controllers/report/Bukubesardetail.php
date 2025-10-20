@@ -62,6 +62,7 @@ class Bukubesardetail extends MY_Controller
         if(!empty($coa)){
             $where_coa = ['coa.kode_coa'=>$coa];
         }
+        
         $data = $this->m_bukubesar->get_list_bukubesar_detail_coa($tgl_dari,$tgl_sampai,$where_coa,$checkhidden);
         $tmp_data_akun     = array();
         $tmp_data_akun_isi = array();
