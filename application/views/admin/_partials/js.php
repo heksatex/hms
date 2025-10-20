@@ -46,12 +46,106 @@
 //            $('#form-login').submit(false);
         }
         if (xhr.status === 403) {
-            alert_modal_warning("Akses Tidak diijinkan.")
+            alert_modal_warning("Akses Tidak diijinkan.");
         }
 
-    });</script>
+    });
+</script>
 <script type="text/javascript">
+    const setTglFormatDef = ((clss) => {
+        $(clss).datetimepicker({
+            format: 'YYYY-MM-DD'
+        }).on('dp.show', function () {
+            $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function () {
+            $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+        });
+    });
+
+    function formatNumber(n) {
+        // format number 1000000 to 1,234,567
+        return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    const formatCurrency = ((input, blur) => {
+        // appends $ to value, validates decimal side
+        // and puts cursor back in right position.
+
+        // get input value
+        var input_val = input.val();
+
+        // don't validate empty input
+        if (input_val === "") {
+            return;
+        }
+
+        // original length
+        var original_len = input_val.length;
+
+        // initial caret position 
+        var caret_pos = input.prop("selectionStart");
+
+        // check for decimal
+        if (input_val.indexOf(".") >= 0) {
+
+            // get position of first decimal
+            // this prevents multiple decimals from
+            // being entered
+            var decimal_pos = input_val.indexOf(".");
+
+            // split number by decimal point
+            var left_side = input_val.substring(0, decimal_pos);
+            var right_side = input_val.substring(decimal_pos);
+
+            // add commas to left side of number
+            left_side = formatNumber(left_side);
+
+            // validate right side
+            right_side = formatNumber(right_side);
+
+            // On blur make sure 2 numbers after decimal
+            if (blur === "blur") {
+                right_side += "00";
+            }
+
+            // Limit decimal to only 2 digits
+            right_side = right_side.substring(0, 2);
+
+            // join number by .
+            input_val =left_side + "." + right_side;
+
+        } else {
+            // no decimal entered
+            // add commas to number
+            // remove all non-digits
+            input_val = formatNumber(input_val);
+            input_val = input_val;
+
+            // final formatting
+            if (blur === "blur") {
+                input_val += ".00";
+            }
+        }
+
+        // send updated string to input
+        input.val(input_val);
+
+        // put caret back in the right position
+        var updated_len = input_val.length;
+        caret_pos = updated_len - original_len + caret_pos;
+        input[0].setSelectionRange(caret_pos, caret_pos);
+    });
+
     $(function () {
+
+        $(".tgl-def-format").datetimepicker({
+            format: 'YYYY-MM-DD'
+        }).on('dp.show', function () {
+            $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
+        }).on('dp.hide', function () {
+            $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
+        });
+
         $('#datetimepicker1').datetimepicker({
             format: 'YYYY-MM-DD HH:mm:ss',
             ignoreReadonly: true
@@ -159,46 +253,16 @@
             textarea.style.height = calcHeight(textarea.value) + "px";
         });
     }
-    
-    $(".np").on("click",function(){
+
+    $(".np").on("click", function () {
         var url = $(this).data("url");
-        if(url === "") {
+        if (url === "") {
             return;
         }
         location.href = url;
     });
 
-    // jika load awa;l treeview terbuka
-//   $(document).ready(function () {
-    
-//     // Buka semua treeview di awal
-//     $('.sidebar-menu .treeview').addClass('menu-open active');
-//     $('.sidebar-menu .treeview-menu').css('display', 'block');
-
-//     // Matikan behavior default AdminLTE yang close menu lainnya
-//     $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
-//         e.preventDefault();
-//         var parent = $(this).parent();
-//         var submenu = parent.children('.treeview-menu');
-
-//         // Toggle menu yang diklik saja
-//         if (parent.hasClass('menu-open')) {
-//         submenu.slideUp(200, function () {
-//             parent.removeClass('menu-open active');
-//         });
-//         } else {
-//         submenu.slideDown(200, function () {
-//             parent.addClass('menu-open active');
-//         });
-//         }
-//   });
-//     });
-
-//    $(document).off('click', '.treeview > a');
-//   $('.treeview > a').off('click');
-
 </script>
-
 
 <script>
 $(function () {
@@ -216,6 +280,31 @@ $(function () {
       $this.children('.treeview-menu').hide();
     }
   });
+
+    $(document).ready(function () {
+
+        // Buka semua treeview di awal
+        $('.sidebar-menu .treeview').addClass('menu-open active');
+        $('.sidebar-menu .treeview-menu').css('display', 'block');
+
+        // Matikan behavior default AdminLTE yang close menu lainnya
+        $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
+            e.preventDefault();
+            var parent = $(this).parent();
+            var submenu = parent.children('.treeview-menu');
+
+            // Toggle menu yang diklik saja
+            if (parent.hasClass('menu-open')) {
+                submenu.slideUp(200, function () {
+                    parent.removeClass('menu-open active');
+                });
+            } else {
+                submenu.slideDown(200, function () {
+                    parent.addClass('menu-open active');
+                });
+            }
+        });
+    });
 
   // Tambahkan toggle manual (multi expand + multi active)
   $('.sidebar-menu').on('click', '.treeview > a', function (e) {
