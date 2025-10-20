@@ -44,6 +44,7 @@ class Bukubesar extends MY_Controller
                 ]
             ],
         ];
+        
         try {
             $callback  = array();
             $this->form_validation->set_rules($validation);
