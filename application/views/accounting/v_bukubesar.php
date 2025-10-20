@@ -231,7 +231,7 @@
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('accounting/bukubesar/loadData') ?>",
+                url: "<?php echo site_url('report/bukubesar/loadData') ?>",
                 data: {
                     tgldari: tgldari,
                     tglsampai: tglsampai,
@@ -267,7 +267,7 @@
 
                             // func = "view_detail('" + value.kode_acc + "')";
                             func2 = "view_detail2('" + value.kode_acc + "')";
-                            // func2 = "<?php echo base_url() ?>accounting/bukubesar/detail";
+                            // func2 = "<?php echo base_url() ?>report/bukubesar/detail";
                             var tr = $("<tr>").append(
                                 $("<td>").html(no),
                                 // $("<td>").html('<a href="javascript:void(0)" onclick=' + func + '>' + value.kode_acc + '</a>'),
@@ -326,7 +326,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>accounting/bukubesar/detail';
+                var url = '<?php echo base_url() ?>report/bukubesar/detail';
                 window.open(url + '?coa='+ kode_coa +'&&params=' + arrStr, '_blank');
             }
         }
@@ -341,7 +341,7 @@
 
                 $.ajax({
                     "type": 'POST',
-                    "url": "<?php echo site_url('accounting/bukubesar/export_excel') ?>",
+                    "url": "<?php echo site_url('report/bukubesar/export_excel') ?>",
                     "data": {
                         arr_filter: arr_filter
                     },
@@ -376,7 +376,7 @@
             if (arr_filter.length == 0) {
                 alert_modal_warning('Generate Data terlebih dahulu !');
             } else {
-                var url = '<?php echo base_url() ?>accounting/bukubesar/export_pdf';
+                var url = '<?php echo base_url() ?>report/bukubesar/export_pdf';
                 window.open(url + '?params=' + arrStr, '_blank');
             }
 

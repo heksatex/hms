@@ -76,11 +76,11 @@
         }
 
         .warna-hutang {
-            color:red
+            color: red
         }
 
         .warna-pelunasan {
-            color:green
+            color: green
         }
     </style>
 </head>
@@ -170,7 +170,7 @@
                                 <div class="">
                                     <ul class="nav nav-tabs ">
                                         <li class="active"><a href="#tab_1" data-toggle="tab">Detail</a></li>
-                                        <li class=""><a href="#tab_2" data-toggle="tab">Jurnal</a></li> 
+                                        <li class=""><a href="#tab_2" data-toggle="tab">Jurnal</a></li>
                                     </ul>
                                     <div class="tab-content over"><br>
                                         <div class="tab-pane active" id="tab_1">
@@ -218,7 +218,7 @@
                                                     Processing...
                                                 </div>
                                             </div>
-                                            
+
                                             <hr style="border: 1px solid #ccc; margin: 30px 15px 20px 15px;">
 
 
@@ -265,10 +265,10 @@
                                             </div>
                                             <!-- Tabel  -->
 
-                                           <hr style="border: 1px solid #ccc; margin: 30px 15px 20px 15px;">
-                                            
+                                            <hr style="border: 1px solid #ccc; margin: 30px 15px 20px 15px;">
+
                                             <!-- Tabel  -->
-                                            <div class="col-md-12 table-responsive over" >
+                                            <div class="col-md-12 table-responsive over">
                                                 <div class="row" style="margin-bottom:5px;">
                                                     <div class="col-md-12">
                                                         <div class="col-md-2">
@@ -303,6 +303,32 @@
 
                                         </div>
                                         <!-- /.tab-pane -->
+
+                                        <div class="" id="tab_2">
+                                            <div class="col-md-12"><label>Informasi Jurnal</label></div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4"><label>No Jurnal</label></div>
+                                                        <div class="col-xs-8">
+                                                             <?php echo ": ".$list_jurnal->kode; ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4"><label>Periode </label></div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <?php echo ": ".$list_jurnal->periode ; ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4"><label>Tanggal </label></div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <?php echo ($list_jurnal->tanggal_dibuat && strtotime($list_jurnal->tanggal_dibuat !== false) )? ": ".date('Y-m-d',strtotime($list_jurnal->tanggal_dibuat)) : ' :  '; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <!-- /.tab-content -->
                                 </div>
@@ -1398,11 +1424,11 @@
                                     title="Hapus Koreksi">
                                     <i class="fa fa-trash"></i>
                                 </button>`;
-                        } 
-                       $tdButton.html(btnKoreksi);
+                        }
+                        $tdButton.html(btnKoreksi);
 
                     }
-                  
+
                     // console.log(selectedData);
                     // alert(hasCoa)
                     // update small: hanya tampil jika sama dengan default DB
@@ -1472,7 +1498,7 @@
                         `);
                         $coaInfo.show();
                         loadCoaInfo(selectedId, value.id, $coaInfo.find('small'));
-                    } else if(hasCoa =='false'){
+                    } else if (hasCoa == 'false') {
                         $tdButton.html(`                           
                             <button type="button" class="btn btn-xs btn-danger btn-hapus-koreksi"
                                     data-tipe="${koreksiId}" 
@@ -1548,7 +1574,7 @@
                 let jenis_koreksi = $(this).attr("data-tipe");
                 let id_summary = $(this).attr("data-summary");;
                 // let nama_koreksi = $(this).attr('data-nm-koreksi');
-                let no_pelunasan ="<?= $list->no_pelunasan; ?>";
+                let no_pelunasan = "<?= $list->no_pelunasan; ?>";
                 $.ajax({
                     url: "<?php echo site_url('accounting/pelunasanhutang/delete_koreksi') ?>",
                     type: "POST",
@@ -1557,7 +1583,7 @@
                         id_summary: id_summary,
                         jenis_koreksi: jenis_koreksi,
                         no_pelunasan: no_pelunasan,
-                        
+
                     },
                     success: function(res) {
                         // console.log("COA response:", res); // debug
@@ -1575,7 +1601,7 @@
                 let jenis_koreksi = $(this).attr("data-tipe");
                 let id_summary = $(this).attr("data-summary");;
                 // let nama_koreksi = $(this).attr('data-nm-koreksi');
-                let no_pelunasan ="<?= $list->no_pelunasan; ?>";
+                let no_pelunasan = "<?= $list->no_pelunasan; ?>";
                 $.ajax({
                     url: "<?php echo site_url('accounting/pelunasanhutang/save_koreksi2') ?>",
                     type: "POST",
@@ -1584,7 +1610,7 @@
                         id_summary: id_summary,
                         jenis_koreksi: jenis_koreksi,
                         no_pelunasan: no_pelunasan,
-                        
+
                     },
                     success: function(res) {
                         // console.log("COA response:", res); // debug
