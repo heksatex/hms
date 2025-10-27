@@ -40,10 +40,10 @@
 <script type="module" src="<?php echo site_url('dist/js/main_module.js') ?>"></script>
 
 <script>
-    $(document).ajaxError(function (event, xhr, options) {
+    $(document).ajaxError(function(event, xhr, options) {
         if (xhr.status === 401) {
             loginFunc('<?php echo base_url('login/aksi_login'); ?>');
-//            $('#form-login').submit(false);
+            //            $('#form-login').submit(false);
         }
         if (xhr.status === 403) {
             alert_modal_warning("Akses Tidak diijinkan.");
@@ -55,9 +55,9 @@
     const setTglFormatDef = ((clss) => {
         $(clss).datetimepicker({
             format: 'YYYY-MM-DD'
-        }).on('dp.show', function () {
+        }).on('dp.show', function() {
             $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
-        }).on('dp.hide', function () {
+        }).on('dp.hide', function() {
             $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
         });
     });
@@ -112,7 +112,7 @@
             right_side = right_side.substring(0, 2);
 
             // join number by .
-            input_val =left_side + "." + right_side;
+            input_val = left_side + "." + right_side;
 
         } else {
             // no decimal entered
@@ -136,13 +136,13 @@
         input[0].setSelectionRange(caret_pos, caret_pos);
     });
 
-    $(function () {
+    $(function() {
 
         $(".tgl-def-format").datetimepicker({
             format: 'YYYY-MM-DD'
-        }).on('dp.show', function () {
+        }).on('dp.show', function() {
             $(this).closest('.table-responsive').removeClass('table-responsive').addClass('temp');
-        }).on('dp.hide', function () {
+        }).on('dp.hide', function() {
             $(this).closest('.temp').addClass('table-responsive').removeClass('temp')
         });
 
@@ -163,13 +163,13 @@
             ignoreReadonly: true
         });
 
-        $(".show_printer").off("click").unbind("click").on("click", function () {
+        $(".show_printer").off("click").unbind("click").on("click", function() {
             $("#modal_printer").modal({
                 show: true,
                 backdrop: 'static'
             });
             $(".view_body").html('<center><h5><img src="<?php echo base_url('dist/img/ajax-loader.gif') ?> "/><br>Please Wait...</h5></center>');
-            $.post("<?= base_url('setting/printershare/data') ?>", {}, function (data) {
+            $.post("<?= base_url('setting/printershare/data') ?>", {}, function(data) {
                 $(".view_body").html(data.data);
             });
         });
@@ -254,89 +254,83 @@
         });
     }
 
-    $(".np").on("click", function () {
+    $(".np").on("click", function() {
         var url = $(this).data("url");
         if (url === "") {
             return;
         }
         location.href = url;
     });
-
 </script>
 
 <script>
-$(function () {
-  // Hapus semua event default AdminLTE yang nutup menu lain
-  $('.sidebar-menu').off('click', '.treeview > a');
-  $('.treeview > a').off('click');
+    $(function() {
+        // Override fungsi tree bawaan AdminLTE
+        $.AdminLTE.tree = function(menu) {
+            var animationSpeed = $.AdminLTE.options.animationSpeed || 300;
 
-  // Sembunyikan semua submenu, kecuali yang sudah active
-  $('.sidebar-menu .treeview').each(function() {
-    var $this = $(this);
-    if ($this.hasClass('active') || $this.hasClass('menu-open')) {
-      $this.children('.treeview-menu').show();
-      $this.addClass('menu-open');
-    } else {
-      $this.children('.treeview-menu').hide();
-    }
-  });
+            // Hapus event lama
+            $(document).off('click', menu + ' li a');
 
-    $(document).ready(function () {
+            // Tambah event baru (multi expand)
+            $(document).on('click', menu + ' li a', function(e) {
+                var $this = $(this);
+                var checkElement = $this.next();
+                var parentLi = $this.parent('li');
 
-        // Buka semua treeview di awal
-        $('.sidebar-menu .treeview').addClass('menu-open active');
-        $('.sidebar-menu .treeview-menu').css('display', 'block');
+                // Jika submenu sedang terbuka → tutup
+                if (checkElement.is('.treeview-menu') && checkElement.is(':visible')) {
+                    checkElement.slideUp(animationSpeed, function() {
+                        checkElement.removeClass('menu-open');
+                    });
+                    parentLi.removeClass('menu-open');
 
-        // Matikan behavior default AdminLTE yang close menu lainnya
-        $('.sidebar-menu .treeview > a').off('click').on('click', function (e) {
-            e.preventDefault();
-            var parent = $(this).parent();
-            var submenu = parent.children('.treeview-menu');
+                    // Panah kembali ke kiri
+                    $this.find('.fa-angle-left').removeClass('rotate-down');
+                }
 
-            // Toggle menu yang diklik saja
-            if (parent.hasClass('menu-open')) {
-                submenu.slideUp(200, function () {
-                    parent.removeClass('menu-open active');
-                });
-            } else {
-                submenu.slideDown(200, function () {
-                    parent.addClass('menu-open active');
-                });
+                // Jika submenu tertutup → buka
+                else if (checkElement.is('.treeview-menu') && !checkElement.is(':visible')) {
+                    checkElement.slideDown(animationSpeed, function() {
+                        checkElement.addClass('menu-open');
+                    });
+                    parentLi.addClass('menu-open');
+
+                    // Panah mengarah ke bawah
+                    $this.find('.fa-angle-left').addClass('rotate-down');
+                }
+
+                // Cegah aksi link jika itu treeview
+                if (checkElement.is('.treeview-menu')) {
+                    e.preventDefault();
+                }
+            });
+
+            // Tambahkan CSS animasi rotasi (sekali saja)
+            if (!$('#rotate-style').length) {
+                $('<style id="rotate-style">')
+                    .prop('type', 'text/css')
+                    .html(`
+            .fa-angle-left {
+            transition: transform 0.3s ease;
             }
-        });
+            .rotate-down {
+            transform: rotate(-90deg);
+            }
+        `)
+                    .appendTo('head');
+            }
+
+            // 🔹 Atur arah panah hanya untuk yang sedang terbuka (menu-open)
+            $(menu + ' li.menu-open > a .fa-angle-left').addClass('rotate-down');
+            $(menu + ' li:not(.menu-open) > a .fa-angle-left').removeClass('rotate-down');
+        };
+
+        // Jalankan langsung
+        $.AdminLTE.tree('.sidebar');
+
+
     });
-
-  // Tambahkan toggle manual (multi expand + multi active)
-  $('.sidebar-menu').on('click', '.treeview > a', function (e) {
-    var $this = $(this);
-    var href = $this.attr('href');
-    var $parent = $this.parent('.treeview');
-    var $submenu = $parent.children('.treeview-menu');
-
-    // biarkan link valid (yang bukan '#') tetap diarahkan
-    if (href && href !== '#' && href.indexOf('javascript:') !== 0) {
-      return;
-    }
-
-    e.preventDefault();
-
-    // Toggle menu yang diklik tanpa mempengaruhi yang lain
-    if ($parent.hasClass('menu-open')) {
-      // Tutup menu ini
-      $submenu.stop(true, true).slideUp(200, function() {
-        $parent.removeClass('menu-open active');
-      });
-    } else {
-      // Buka menu ini
-      $submenu.stop(true, true).slideDown(200, function() {
-        $parent.addClass('menu-open active');
-      });
-    }
-
-    // ⚡ Penting: jangan hapus .active dari treeview lain!
-    // jadi kita tidak menghapus active dari item lain
-  });
-});
 </script>
 
 <div class="modal fade" id="modal_printer" role="dialog">
