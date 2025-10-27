@@ -908,23 +908,28 @@ class Pelunasanhutang extends MY_Controller
 
                 if ($sisa_hutang_rp > 0 or $sisa_hutang_valas > 0) {
 
-                    if ($sisa_rupiah >= $sisa_hutang_rp) {
-                        $pelunasan_rp_update = $sisa_hutang_rp;
-                        $rupiah  = $sisa_rupiah - $sisa_hutang_rp;
-                        $status_bayar = 'lunas';
-                    } else { // rupiah < $sisa_hutang_rp
-                        $pelunasan_rp_update = $sisa_rupiah;
-                        $rupiah  = 0;
-                        ($pelunasan_rp_update <= 0) ? $status_bayar = 'belum_bayar' : $status_bayar = 'partial';
+                    if($li->total_hutang_rp > 0){
+                        if ($sisa_rupiah >= $sisa_hutang_rp) {
+                            $pelunasan_rp_update = $sisa_hutang_rp;
+                            $rupiah  = $sisa_rupiah - $sisa_hutang_rp;
+                            $status_bayar = 'lunas';
+                        } else { // rupiah < $sisa_hutang_rp
+                            $pelunasan_rp_update = $sisa_rupiah;
+                            $rupiah  = 0;
+                            ($pelunasan_rp_update <= 0) ? $status_bayar = 'belum_bayar' : $status_bayar = 'partial';
+                        }
                     }
 
-                    if ($sisa_valas >= $sisa_hutang_valas) {
-                        $pelunasan_valas_update = $sisa_hutang_valas;
-                        $valas = $sisa_valas - $sisa_hutang_valas;
-                        $status_bayar = 'lunas';
-                    } else { // valas < $sisa_hutang_vlas
-                        $pelunasan_valas_update = $sisa_valas;
-                        $valas = 0;
+                    if($li->total_hutang_valas > 0 ){
+                        if ($sisa_valas >= $sisa_hutang_valas) {
+                            $pelunasan_valas_update = $sisa_hutang_valas;
+                            $valas = $sisa_valas - $sisa_hutang_valas;
+                            $status_bayar = 'lunas';
+                        } else { // valas < $sisa_hutang_vlas
+                            $pelunasan_valas_update = $sisa_valas;
+                            $valas = 0;
+                            // ($pelunasan_valas_update <= 0) ? $status_bayar = 'belum_bayar' : $status_bayar = 'partial';
+                        }
                     }
 
                     $data_update = array(
@@ -2223,10 +2228,10 @@ class Pelunasanhutang extends MY_Controller
                             'partner'       => $cek->partner_id, // partner_id
                             'kode_coa'      => $com['kode_coa'],
                             'posisi'        => $com['posisi'],
-                            'nominal_curr'  => ($mp->currency === 'IDR') ? $mp->total_rp :  $mp->total_valas,
+                            'nominal_curr'  => ($mp->currency === 'IDR') ? abs($mp->total_rp) :  abs($mp->total_valas),
                             'kurs'          => $mp->kurs,
                             'kode_mua'      => $mp->currency,
-                            'nominal'       => ($mp->currency === 'IDR') ? $mp->total_rp * $mp->kurs : $mp->total_valas * $mp->kurs,
+                            'nominal'       => ($mp->currency === 'IDR') ? abs($mp->total_rp) * $mp->kurs : abs($mp->total_valas) * $mp->kurs,
                             'row_order'     => $row_items
                         );
                         $row_items++;
@@ -2301,10 +2306,10 @@ class Pelunasanhutang extends MY_Controller
                                         'partner'       => $cek->partner_id, // partner_id
                                         'kode_coa'      => $cok->kode_coa,
                                         'posisi'        => $cok->posisi,
-                                        'nominal_curr'  => $gs->selisih,
+                                        'nominal_curr'  => abs($gs->selisih),
                                         'kurs'          => $gs->kurs,
                                         'kode_mua'      => $gs->currency,
-                                        'nominal'       => $gs->selisih * $gs->kurs,
+                                        'nominal'       => abs($gs->selisih * $gs->kurs),
                                         'row_order'     => $row_items
                                     );
                                     $row_items++;
