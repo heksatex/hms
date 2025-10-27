@@ -72,7 +72,25 @@
         .bold {
             font-weight: bold;
         }
+
+        .no {
+            width: 5px;
+            text-align: center;
+        }
+        .supplier {
+            width: 120px;
+            word-wrap: break-word;
+        }
+        .angka {
+            width: 80px;
+            text-align: right;
+        }
     </style>
+    <?php
+        function limit_text($text, $max = 20) {
+            return (strlen($text) > $max) ? substr($text, 0, $max) . '...' : $text;
+    }
+    ?>
 
 </head>
 
@@ -90,17 +108,17 @@
                     <?php
                     // Tentukan lebar tiap kolom
                     if ($idx === 0) {
-                        $width = '5px';
+                        $class = 'no';
                     } elseif ($idx === 1) {
-                        $width = '100px';
+                        $class = 'supplier';
                     } else {
-                        $width = '70px';
+                        $class = 'angka';
                     }
 
                     // Tambahkan class text-right untuk kolom angka (misalnya mulai dari index ke-2)
-                    $class = ($idx >= 2) ? 'text-right' : '';
+                    // $class = ($idx >= 2) ? 'text-right' : '';
                     ?>
-                    <th class="<?= $class ?>" style="width: <?= $width ?>;">
+                    <th class="<?= $class ?>">
                         <?= htmlspecialchars($heads) ?>
                     </th>
                 <?php endforeach; ?>
@@ -119,7 +137,7 @@
             ?>
                 <tr>
                     <td><?php echo $no++; ?></td>
-                    <td><?php echo $items['nama_partner']; ?></td>
+                    <td ><?php echo htmlspecialchars(limit_text($items['nama_partner'], 20));  ?></td>
                     <td class='text-right'><?php echo number_format($items['total_hutang'], 2); ?></td>
                     <td class='text-right'><?php echo number_format($items['hutang_bulan_ini'], 2); ?></td>
                     <td class='text-right'><?php echo number_format($items['hutang_bulan_1'], 2); ?></td>
