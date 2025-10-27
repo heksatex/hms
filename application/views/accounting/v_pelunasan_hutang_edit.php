@@ -8,7 +8,7 @@
             border-bottom: 2px solid #ddd !important;
         }
 
-        button[id="btn-simpan"] {
+        button[id="btn-simpan"] , button[id="btn-confirm"], button[id="btn-cancel"], button[id="btn-edit"]{
             display: none;
         }
 
@@ -41,26 +41,39 @@
             color: #000 !important;
         }
 
+        /* Kolom 1 & 7 → 100px */
         #table-resume td:nth-child(1),
+        #table-resume th:nth-child(4),        
+        #table-resume td:nth-child(7) {
+            width: 100px;
+            min-width: 100px;
+            max-width: 100px;
+        }
+
         #table-resume td:nth-child(2),
         #table-resume td:nth-child(3),
-        #table-resume td:nth-child(4),
-        #table-resume td:nth-child(5),
-        #table-resume td:nth-child(7) {
+   
+        #table-resume td:nth-child(5) {
             /* kolom tombol */
-            width: 150px;
-            min-width: 150px;
-            max-width: 150px;
-            white-space: nowrap;
+            width: 120px;
+            min-width: 120px;
+            max-width: 120px;
         }
 
         #table-resume td:nth-child(6) {
-            min-width: 200px;
             /* sesuaikan lebar */
-            max-width: 250px;
-            white-space: nowrap;
+            width: 170px;
+            min-width: 170px;
+            max-width: 170px;
             /* agar select + small tetap sejajar */
         }
+
+        #table-resume td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
 
         .coa-info {
             display: block;
@@ -276,7 +289,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume">
+                                                <table class="table table-condesed table-hover rlstable over" width="100%" id="table-resume" border="0">
                                                     <thead>
                                                         <tr>
                                                             <th class="style bb no"></th>
@@ -304,7 +317,7 @@
                                         </div>
                                         <!-- /.tab-pane -->
 
-                                        <div class="" id="tab_2">
+                                        <div class="tab-pane" id="tab_2">
                                             <div class="col-md-12"><label>Informasi Jurnal</label></div>
                                             <div class="col-md-6">
                                                 <div class="form-group">
@@ -323,7 +336,7 @@
                                                     <div class="col-md-12 col-xs-12">
                                                         <div class="col-xs-4"><label>Tanggal </label></div>
                                                         <div class="col-xs-8 col-md-8">
-                                                            <?php echo ($list_jurnal->tanggal_dibuat && strtotime($list_jurnal->tanggal_dibuat !== false) )? ": ".date('Y-m-d',strtotime($list_jurnal->tanggal_dibuat)) : ' :  '; ?>
+                                                            <?php echo ($list_jurnal->tanggal_dibuat) ? ": ".date('Y-m-d',strtotime($list_jurnal->tanggal_dibuat)) : ' :  '; ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -361,6 +374,19 @@
                 ignoreReadonly: true,
                 defaultDate: new Date()
             });
+
+            var status = `<?php echo $list->status;?>`;
+            if(status == 'cancel'){
+                $("#btn-cancel").hide();
+                $("#btn-edit").hide();
+                $("#btn-confirm").hide();
+            } else if(status == 'done') {
+                $("#btn-cancel").show();
+            } else { // draft
+                $("#btn-cancel").show();
+                $("#btn-edit").show();
+                $("#btn-confirm").show();
+            }
 
 
             $(document).on('click', '#btn-edit', function(e) {
@@ -716,6 +742,9 @@
                                             }, 1000);
                                         });
                                         refresh();
+                                        $("#btn-edit").hide();
+                                        $("#btn-confirm").hide();
+                                        $("#btn-cancel").hide();
                                     }
 
                                 },
@@ -1182,8 +1211,8 @@
                         } else {
                             var trfoot = $("<tr class='style_total'>").append(
                                 $("<td colspan='6' class='text-right'>").text('Total'),
-                                $("<td class='text-right'>").text(formatNumber(total_rp)),
-                                $("<td class='text-right'>").text(formatNumber(total_valas)),
+                                $("<td class='text-right  warna-pelunasan'>").text(formatNumber(total_rp)),
+                                $("<td class='text-right  warna-pelunasan'>").text(formatNumber(total_valas)),
                                 $("<td colspan=''>").html('&nbsp'),
                             );
 
@@ -1280,8 +1309,8 @@
                                 $("<td class='text-right'>").text(formatNumber(sum_total_hutang_valas)),
                                 $("<td class='text-right warna-hutang'>").text(formatNumber(sum_sisa_hutang_rp)),
                                 $("<td class='text-right warna-hutang'>").text(formatNumber(sum_sisa_hutang_valas)),
-                                $("<td class='text-right warna-pelunasan'>").text(formatNumber(sum_pelunasan_rp)),
-                                $("<td class='text-right warna-pelunasan'>").text(formatNumber(sum_pelunasan_valas)),
+                                $("<td class='text-right'>").text(formatNumber(sum_pelunasan_rp)),
+                                $("<td class='text-right'>").text(formatNumber(sum_pelunasan_valas)),
                                 $("<td colspan='2'>").html('&nbsp'),
                             );
 
@@ -1450,6 +1479,7 @@
                 let koreksiId = value.koreksi; // nilai default dari database
                 let koreksiNama = value.koreksi_text;
                 let hasCoa = value.koreksi_get_coa;
+                let keterangan = value.keterangan;
 
                 // bikin select
                 let $select = $('<select>', {
@@ -1467,12 +1497,16 @@
                     $select.append(option);
                 }
 
-                // tempat info COA
-                let $coaInfo = $('<div class="coa-info"><small></small></div>');
-                if (status == 'draft') {
-                    $wrapper = $('<div>').append($select).append($coaInfo);
+                let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"</small></div>');
+                if(keterangan.length === 0 || keterangan === 'Uang Muka'){
+                    $wrapper   = $('<div>').append('').append($coaInfo);
                 } else {
-                    $wrapper = $('<div>').append(koreksiNama).append($coaInfo);
+                    // tempat info COA
+                    if (status == 'draft') {
+                        $wrapper = $('<div>').append($select).append($coaInfo);
+                    } else {
+                        $wrapper = $('<div>').append(koreksiNama).append($coaInfo);
+                    }
                 }
 
                 // tombol aksi

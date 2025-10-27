@@ -9,6 +9,7 @@
         }
 
         button[id="btn-edit"],
+        button[id="btn-confirm"],
         button[id="btn-cancel"] {
             /*untuk hidden button simpan/cancel di top bar MO*/
             display: none;
@@ -109,6 +110,7 @@
                                 <div class="">
                                     <ul class="nav nav-tabs ">
                                         <li class="active"><a href="#tab_1" data-toggle="tab">Detail</a></li>
+                                        <li class=""><a href="#tab_2" data-toggle="tab">Jurnal</a></li>
                                     </ul>
                                     <div class="tab-content over"><br>
                                         <div class="tab-pane active" id="tab_1">
@@ -217,6 +219,31 @@
                                                 </table>
                                             </div>
                                             <!-- Tabel  -->
+                                        </div>
+                                         <div class="tab-pane" id="tab_2">
+                                            <div class="col-md-12"><label>Informasi Jurnal</label></div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4"><label>No Jurnal</label></div>
+                                                        <div class="col-xs-8">
+                                                            <?php echo ": " ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4"><label>Periode </label></div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <?php echo ": " ?>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12 col-xs-12">
+                                                        <div class="col-xs-4"><label>Tanggal </label></div>
+                                                        <div class="col-xs-8 col-md-8">
+                                                            <?php echo ": " ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                         <!-- /.tab-pane -->
                                     </div>

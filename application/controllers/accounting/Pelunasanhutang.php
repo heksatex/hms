@@ -32,6 +32,7 @@ class Pelunasanhutang extends MY_Controller
         $list_inv = $this->m_pelunasanhutang->get_data_invoice_by_code($kode_decrypt);
         $list_mt  = $this->m_pelunasanhutang->get_data_metode_by_code($kode_decrypt);
         $list_sum = $this->m_pelunasanhutang->get_data_summary_by_code($kode_decrypt);
+        $list_jurnal = $this->m_pelunasanhutang->get_data_jurnal_by_code($kode_decrypt);
         if (empty($list)) {
             show_404();
         } else {
@@ -40,6 +41,7 @@ class Pelunasanhutang extends MY_Controller
             $data['list_inv'] = $list_inv;
             $data['list_mt'] = $list_mt;
             $data['list_sum'] = $list_sum;
+            $data['list_jurnal'] = $list_jurnal;
             return $this->load->view('accounting/v_pelunasan_hutang_edit', $data);
         }
     }
@@ -81,15 +83,27 @@ class Pelunasanhutang extends MY_Controller
     private $metodePelunasan2 = array(
         array(
             "id" => 'giro',
-            "text" => '(Giro)'
+            "text" => '(Giro)',
+            'table_detail' => 'acc_giro_keluar_detail',
+            'status' => 'acc_giro_keluar.status',
+            'no_bukti' => 'acc_giro_keluar_detail.no_gk',
+            'id_detail' => 'acc_giro_keluar_detail.id'
         ),
         array(
             "id" => 'kas',
-            "text" => '(Kas)'
+            "text" => '(Kas)',
+            'table_detail' => 'acc_kas_keluar_detail',
+            'status' => 'acc_kas_keluar.status',
+            'no_bukti' => 'acc_kas_keluar_detail.no_kk',
+            'id_detail' => 'acc_kas_keluar_detail.id'
         ),
         array(
             "id" => 'bank',
-            "text" => '(Bank)'
+            "text" => '(Bank)',
+            "table_detail" => 'acc_bank_keluar_detail',
+            'status' => 'acc_bank_keluar.status',
+            'no_bukti' => 'acc_bank_keluar_detail.no_bk',
+            'id_detail' => 'acc_bank_keluar_detail.id'
         ),
     );
 
@@ -439,7 +453,7 @@ class Pelunasanhutang extends MY_Controller
                     $row[] = $no;
                     $row[] = $field->no_invoice;
                     $row[] = $field->origin;
-                    $row[] = $field->created_at;
+                    $row[] = date('Y-m-d', strtotime($field->created_at));
                     $row[] = $field->currency;
                     $row[] = $field->nilai_matauang;
                     $row[] = number_format($field->total_hutang_rp, 4);
@@ -521,7 +535,7 @@ class Pelunasanhutang extends MY_Controller
 
 
                         // get data invoice 
-                        $dt = $this->m_pelunasanhutang->get_data_invoice_by_id($ad);
+                        $dt = $this->m_pelunasanhutang->get_data_invoice_by_id(['a.id' => $ad]);
                         $cek_inv = $this->m_pelunasanhutang->cek_invoice_input_by_kode($no_pelunasan, $dt->no_invoice);
 
                         if (($cek_inv) > 0) {
@@ -629,7 +643,7 @@ class Pelunasanhutang extends MY_Controller
                     $row[] = $field->no_bukti;
                     $row[] = $no;
                     $row[] = $field->no_bukti;
-                    $row[] = $field->tanggal;
+                    $row[] = date('Y-m-d', strtotime($field->tanggal));
                     $row[] = $field->currency;
                     $row[] = $field->kurs;
                     $row[] = number_format($field->total_rp, 4);
@@ -837,7 +851,7 @@ class Pelunasanhutang extends MY_Controller
                     $row[] = $field->no_bukti;
                     $row[] = $no;
                     $row[] = $field->no_bukti;
-                    $row[] = $field->tanggal;
+                    $row[] = date('Y-m-d', strtotime($field->tanggal));
                     $row[] = $field->currency;
                     $row[] = $field->kurs;
                     $row[] = number_format($field->total_rp, 4);
@@ -907,6 +921,7 @@ class Pelunasanhutang extends MY_Controller
                     if ($sisa_valas >= $sisa_hutang_valas) {
                         $pelunasan_valas_update = $sisa_hutang_valas;
                         $valas = $sisa_valas - $sisa_hutang_valas;
+                        $status_bayar = 'lunas';
                     } else { // valas < $sisa_hutang_vlas
                         $pelunasan_valas_update = $sisa_valas;
                         $valas = 0;
@@ -956,6 +971,10 @@ class Pelunasanhutang extends MY_Controller
             $where_valas = ["no_pelunasan" => $no_pelunasan];
             $get_total_valas = $this->m_pelunasanhutang->get_total_pelunasan($where_valas);
 
+            $get_curr   = $this->m_pelunasanhutang->get_currency_by_pelunasan(['no_pelunasan' => $no_pelunasan, 'currency' => 'IDR']);
+
+            $get_curr_valas   = $this->m_pelunasanhutang->get_currency_by_pelunasan(['no_pelunasan' => $no_pelunasan, 'currency <>' => 'IDR']);
+
             $get_hutang_idr   = $this->m_pelunasanhutang->get_total_hutang($where_idr);
             $get_hutang_valas = $this->m_pelunasanhutang->get_total_hutang($where_valas);
 
@@ -988,6 +1007,9 @@ class Pelunasanhutang extends MY_Controller
 
             $insert_summary[] = array(
                 'tipe_currency' => 'Rp',
+                'currency_id'   => $get_curr->currency_id ?? 1,
+                'currency'      => $get_curr->currency ?? 'IDR',
+                'kurs'          => $get_curr->kurs ?? 1,
                 'no_pelunasan'  => $no_pelunasan,
                 'pelunasan_hutang_id' => $cek->id,
                 'total_hutang' => $total_hutang_rp,
@@ -1021,6 +1043,9 @@ class Pelunasanhutang extends MY_Controller
 
             $insert_summary[] = array(
                 'tipe_currency' => 'Valas',
+                'currency_id'   => $get_curr_valas->currency_id ?? 0,
+                'currency'      => $get_curr_valas->currency ?? '',
+                'kurs'          => $get_curr_valas->kurs ?? 0,
                 'no_pelunasan'  => $no_pelunasan,
                 'pelunasan_hutang_id' => $cek->id,
                 'total_hutang' => $total_hutang_valas,
@@ -1162,7 +1187,27 @@ class Pelunasanhutang extends MY_Controller
 
                         array_push($tmp_update, $data_update);
 
-                        $update = $this->m_pelunasanhutang->update_pelunasan_invoice_by_kode($tmp_update, $no_pelunasan);
+                        $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan]);
+                        
+                        $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no($no_pelunasan);
+
+                        if(isset($get_tot->no_pelunasan)){
+                            $rupiah = $get_tot->sum_rp ?? 0;
+                            $valas  = $get_tot->sum_valas ?? 0;
+
+                            if(((float) $get_hutang_inv->total_pelunasan_rp + (float) $pelunasan_rp) > (float) $rupiah){
+                                throw new \Exception('Distribusi Pelunasan (Rp) tidak boleh melebihi Total Pelunasan (Rp) ', 200);
+                            }
+
+                            if(((float) $get_hutang_inv->total_pelunasan_valas + (float) $pelunasan_valas)  > (float)  $valas){
+                                throw new \Exception('Distribusi Pelunasan (Valas) tidak boleh melebihi Total Pelunasan (Valas) ', 200);
+                            }
+                            
+                            $update = $this->m_pelunasanhutang->update_pelunasan_invoice_by_kode($tmp_update, $no_pelunasan);
+                        } else {
+                            throw new \Exception('Metode Pelunasan Masih Kosong !', 200);
+                        }
+                        
 
                         $jenis_log = "edit";
                         $note_log  = "Ubah Data Invoice No. " . $no_invoice;
@@ -1442,7 +1487,7 @@ class Pelunasanhutang extends MY_Controller
             $this->_module->startTransaction();
 
             //lock tabel
-            $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, main_menu_sub READ,log_history WRITE, user READ, acc_pelunasan_hutang_summary_koreksi WRITE');
+            $this->_module->lock_tabel('acc_pelunasan_hutang WRITE, acc_pelunasan_hutang_invoice WRITE, acc_pelunasan_hutang_metode WRITE, acc_pelunasan_hutang_summary WRITE, main_menu_sub READ,log_history WRITE, user READ, acc_pelunasan_hutang_summary_koreksi WRITE, acc_jurnal_entries WRITE, acc_bank_keluar WRITE, acc_bank_keluar_detail WRITE, acc_kas_keluar WRITE, acc_kas_keluar_detail WRITE, acc_giro_keluar WRITE, acc_giro_keluar_detail WRITE, invoice as a WRITE, currency_kurs as c READ, invoice WRITE');
 
             $callback  = array();
             if (empty($this->session->userdata('status'))) { //cek apakah session masih adag
@@ -1466,22 +1511,71 @@ class Pelunasanhutang extends MY_Controller
 
                     if (empty($cek)) {
                         throw new \Exception('Data Pelunasan tidak ditemukan !', 200);
-                    } else if ($cek->status == 'done') {
-                        $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak Bisa dibatalkan, Status Sudah Done !', 'icon' => 'fa fa-warning', 'type' => 'danger');
+                    } else if (!in_array($cek->status, ['done', 'draft', 'cancel'])) {
+                        $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak Bisa dibatalkan, Status tidak valid !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                     } else if ($cek->status == 'cancel') {
                         $callback = array('status' => 'failed', 'message' => 'Maaf, Data Tidak Bisa dibatalkan, Status Cancel !', 'icon' => 'fa fa-warning', 'type' => 'danger');
                     } else {
 
-                        $tmp_update = array();
-                        $data_update = array(
-                            'no_pelunasan'          => $no_pelunasan,
-                            'status'                => 'cancel',
-                        );
-                        array_push($tmp_update, $data_update);
-                        $update = $this->m_pelunasanhutang->update_data_pelunasan_hutang($tmp_update);
+                        if ($cek->status == 'done' || $cek->status == 'draft') {
 
-                        if (!$update['status']) {
-                            throw new \Exception('Gagal Membatalkan data: ' . $update['message'], 500);
+                            $tmp_update = array();
+                            $data_update = array(
+                                'no_pelunasan'          => $no_pelunasan,
+                                'status'                => 'cancel',
+                            );
+                            array_push($tmp_update, $data_update);
+                            $update = $this->m_pelunasanhutang->update_data_pelunasan_hutang($tmp_update);
+
+                            if (!$update['status']) {
+                                throw new \Exception('Gagal Membatalkan data: ' . $update['message'], 500);
+                            }
+                        }
+
+                        if ($cek->status == 'done') {
+
+
+                            //update jurnal entries by 
+                            if (!empty($cek->no_jurnal)) {
+                                $this->m_pelunasanhutang->update_by_kode('acc_jurnal_entries', ['status' => 'cancel'], ['kode' => $cek->no_jurnal]);
+
+                                $log = "Merubah Status ke Batal dari Pelunasan Utang";
+                                $this->_module->gen_history_new("jurnal_entries", $cek->no_jurnal, "cancel", $log, $username);
+                            }
+
+                            $list_inv = $this->m_pelunasanhutang->get_data_invoice_by_code($no_pelunasan);
+                            foreach ($list_inv as $li) {
+                                $pelunasan_rp = $li->pelunasan_rp;
+                                $pelunasan_valas = $li->pelunasan_valas;
+
+                                $dt = $this->m_pelunasanhutang->get_data_invoice_by_id(['a.no_invoice' =>  $li->no_invoice]);
+                                if (isset($dt)) {
+                                    $hutang_inv = (float) $dt->sisa_hutang_rp + (float) $pelunasan_rp;
+                                    $hutang_inv_valas = (float) $dt->sisa_hutang_valas + (float) $pelunasan_valas;
+
+                                    //update to invoice
+                                    $this->m_pelunasanhutang->update_by_kode('invoice', ['lunas' => 0, 'hutang_rp' => $hutang_inv, 'hutang_valas' => $hutang_inv_valas], ['no_invoice' => $li->no_invoice]);
+                                } else {
+                                    throw new \Exception('Data Invoice Tidak ditemukan <br> No. ' . $li->no_invoice, 200);
+                                }
+                            }
+
+                            $list_mt  = $this->m_pelunasanhutang->get_data_metode_by_code($no_pelunasan);
+
+                            foreach ($list_mt as $mt) {
+
+                                foreach ($this->metodePelunasan2 as $metodeItems2) {
+                                    if ($metodeItems2['id'] == $mt->tipe2) {
+                                        $cek_mt = $this->m_pelunasanhutang->cek_data_metode_valid_by_code($mt->tipe2, [$metodeItems2['status'] => 'confirm', $metodeItems2['no_bukti'] => $mt->no_bukti, $metodeItems2['id_detail'] =>  $mt->id_bukti]);
+                                        if (isset($cek_mt)) {
+                                            $this->m_pelunasanhutang->update_by_kode($metodeItems2['table_detail'], ['lunas' => 0], [$metodeItems2['no_bukti'] => $mt->no_bukti, $metodeItems2['id_detail'] => $mt->id_bukti]);
+                                        } else {
+                                            throw new \Exception('Metode Pelunasan ' . $metodeItems2['text'] . '  Tidak Valid / Tidak ditemukan <br> No. ' . $mt->no_bukti, 200);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
                         }
 
                         $jenis_log = "cancel";
@@ -2000,10 +2094,10 @@ class Pelunasanhutang extends MY_Controller
                 throw new \Exception('Data pelunasan tidak ditemukan', 404);
             }
             if ($cek->status == 'done') {
-                throw new \Exception('Data tidak bisa disimpan, status sudah Done', 409);
+                throw new \Exception('Data tidak bisa di Confirm, status sudah Done', 409);
             }
             if ($cek->status == 'cancel') {
-                throw new \Exception('Data tidak bisa disimpan, status Cancel', 409);
+                throw new \Exception('Data tidak bisa di Confirm, status Cancel', 409);
             }
             if (empty($cek->partner_id)) {
                 throw new \Exception('Data Supplier Kosonsg', 409);
@@ -2028,21 +2122,29 @@ class Pelunasanhutang extends MY_Controller
                 throw new \Exception('Metode Pelunasan hanya bisa dipilih salah satu ', 409);
             }
 
+            $getKodeJurnal = $this->m_pelunasanhutang->get_kode_jurnal_by_nama(['nama' => 'Koreksi Pembelian']);
+            $kodeJurnal    = isset($getKodeJurnal) ? $getKodeJurnal->kode : '';
+
+            if ($kodeJurnal === "") {
+                throw new \Exception('Jurnal Tidak Ada', 500);
+            }
+
             $tmp_update =  array();
             $tmp_update2 =  array();
             $tmp_update3 =  array();
+            $head_entries =  array();
+            $items_entries =  array();
             // $data_update3 =  array();
             $metode_pl = $cek_mt->row();
             $jurnal   = '';
+            $data_summary = 'invalid';
 
             if ($metode_pl->tipe == 'um') { // kebentuk jurnal
 
-                $data_summary = 'invalid';
                 // cek selisih rupiah
                 $get_selisih = $this->m_pelunasanhutang->get_data_summary_by_code($no_pelunasan);
                 foreach ($get_selisih as $gs) {
                     if ($gs->total_hutang > 0 && $gs->total_pelunasan > 0) {
-                        $data_summary = 'valid';
                         if ($gs->selisih < 0) { // < 0 atau > 0
                             if (!empty($gs->koreksi)) {
                                 throw new \Exception('Koreksi Untuk Uang Muka tidak harus dipilih !', 422);
@@ -2051,39 +2153,47 @@ class Pelunasanhutang extends MY_Controller
                             throw new \Exception('Nominal tidak Valid !', 200);
                         }
 
-                        // update langsung ke invoice hutang_rp = hutang_rp - pelunasan_rp
-                        // get_list_invoice
-                        $get_inv = $this->m_pelunasanhutang->get_data_invoice_by_code($no_pelunasan);
-                        foreach ($get_inv as $gi) {
-                            $getInv = $this->m_pelunasanhutang->get_invoice_by_kode(['no_invoice' => $gi->no_invoice, 'lunas' => 0])->row();
-                            if ($getInv) {
-                                if ((float) $getInv->sisa_hutang_rp != (float) $gi->sisa_hutang_rp) {
-                                    throw new \Exception('Data Invoice ' . $gi->no_invoice . ' Tidak Valid <br> Sisa Hutang Rp di Pelunasan dan di Invoice Perbeda  !' . $getInv->sisa_hutang_rp . ' ' . $gi->sisa_hutang_rp, 200);
-                                } else {
-                                    $sisa_hutang_rp = (float) $getInv->sisa_hutang_rp -  (float) $gi->pelunasan_rp;
-                                    $data_update = array(
-                                        'no_invoice'  => $gi->no_invoice,
-                                        'hutang_rp'   => $sisa_hutang_rp
-                                    );
-                                    array_push($tmp_update, $data_update);
-                                }
-                            } else {
-                                throw new \Exception('Data Invoice ' . $gi->no_invoice . ' tidak Valid / Sudah Lunas!', 200);
-                            }
-                        }
+                        // // update langsung ke invoice hutang_rp = hutang_rp - pelunasan_rp 
+                        // // get_list_invoice
+                        // $get_inv = $this->m_pelunasanhutang->get_data_invoice_by_code2(['no_pelunasan' => $no_pelunasan, 'currency_id' => $gs->currency_id]);
+                        // foreach ($get_inv as $gi) {
+                        //     $getInv = $this->m_pelunasanhutang->get_invoice_by_kode(['no_invoice' => $gi->no_invoice, 'lunas' => 0])->row();
+                        //     if ($getInv) {
+                        //         if ($gs->currency === 'IDR') {
+                        //             if ((float) $getInv->sisa_hutang_rp != (float) $gi->sisa_hutang_rp) {
+                        //                 throw new \Exception('Data Invoice ' . $gi->no_invoice . ' Tidak Valid <br> Sisa Hutang Rp di Pelunasan dan di Invoice Berbeda  !', 200);
+                        //             } else {
+                        //                 $sisa_hutang_rp = (float) $getInv->sisa_hutang_rp -  (float) $gi->pelunasan_rp;
+                        //                 $data_update = array(
+                        //                     'no_invoice'  => $gi->no_invoice,
+                        //                     'hutang_rp'   => $sisa_hutang_rp
+                        //                 );
+                        //                 array_push($tmp_update, $data_update);
+                        //                 $data_summary = 'valid';
+                        //             }
+                        //         } else {
+                        //             if ((float) $getInv->sisa_hutang_valas != (float) $gi->sisa_hutang_valas) {
+                        //                 throw new \Exception('Data Invoice ' . $gi->no_invoice . ' Tidak Valid <br> Sisa Hutang Valas di Pelunasan dan di Invoice Berbeda  !', 200);
+                        //             } else {
+                        //                 $sisa_hutang_valas = (float) $getInv->sisa_hutang_valas -  (float) $gi->pelunasan_valas;
+                        //                 $data_update = array(
+                        //                     'no_invoice'  => $gi->no_invoice,
+                        //                     'hutang_valas'   => $sisa_hutang_valas
+                        //                 );
+                        //                 array_push($tmp_update, $data_update);
+                        //                 $data_summary = 'valid';
+                        //             }
+                        //         }
+                        //     } else {
+                        //         throw new \Exception('Data Invoice ' . $gi->no_invoice . ' tidak Valid / Sudah Lunas!', 200);
+                        //     }
+                        // }
                     }
                 }
 
-                if ($data_summary == 'invalid') {
-                    throw new \Exception('Data Summary / Info  tidak Valid !', 200);
-                }
-
-                $getKodeJurnal = $this->m_pelunasanhutang->get_kode_jurnal_by_nama(['nama' => 'Koreksi Pembelian']);
-                $kodeJurnal    = isset($getKodeJurnal) ? $getKodeJurnal->kode : '';
-
-                if ($kodeJurnal === "") {
-                    throw new \Exception('Jurnal Tidak Ada', 500);
-                }
+                // if ($data_summary == 'invalid') {
+                //     throw new \Exception('Data Summary / Info  tidak Valid !', 200);
+                // }
 
                 if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl)) . '/' . date('m', strtotime($tgl)), true)
                     ->generate("{$kodeJurnal}/", '/%05d')->get()) {
@@ -2125,75 +2235,17 @@ class Pelunasanhutang extends MY_Controller
             } else { // kas bank, retur
 
                 // cek selisih rupiah
+                $list_coa_koreksi = "";
                 $get_selisih = $this->m_pelunasanhutang->get_data_summary_by_code($no_pelunasan);
                 foreach ($get_selisih as $gs) {
-                    if ($gs->tipe_currency == 'Rp') {
 
-                        if ($gs->selisih != 0) { // < 0 atau > 0
-
-                            if (empty($gs->koreksi)) {
-                                throw new \Exception('Koreksi ' . $gs->tipe_currency . ' belum dipilih', 422);
-                            }
-
-                            $cek_koreksi = $this->m_pelunasanhutang->get_koreksi_by_kode(['kode' => $gs->koreksi]);
-                            if ($cek_koreksi->get_coa == 'true') {
-                                // cek coa koreksi sudah diisi atau belum
-                                $coa_debit  = $this->m_pelunasanhutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'posisi' => 'D', 'koreksi' => $gs->koreksi])->row();
-                                if (empty($coa_debit)) {
-                                    throw new \Exception('CoA Debit belum dipilih', 422);
-                                }
-                                $get_coa_credit  = $this->m_pelunasanhutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'posisi' => 'C',  'koreksi' => $gs->koreksi])->row();
-                                if (empty($get_coa_credit)) {
-                                    throw new \Exception('CoA Credits belum dipilih', 422);
-                                }
-                            }
-                            if ($gs->selisih > 0 || $gs->sesisih < 0) { // rugi / laba
- 
-                                // cek total_hutang  di summary
-                                $result_selisih = (float) $gs->total_pelunasan -  (float) $gs->total_hutang;
-                                if( (float) $result_selisih != (float) $gs->selisih){
-                                    throw new \Exception('perhitungan Selisih '.$gs->tipe_curency.' tidak Valid !', 422);
-                                }
-
-                                if($cek_koreksi->get_coa == 'true'){ // kebentuk jurnal entries berdasarkan coa yang dipilih 
-
-                                }
-
-
-                            } 
-                        } else { // selisih == 0
-                            // update langsung ke invoice hutang_rp = pelunasan_rp, hutang_valas = pelunasan_valas. jika sama maka upadate juga lunas = 1
-                            // get_list_invoice
-                            $get_inv = $this->m_pelunasanhutang->get_data_invoice_by_code($no_pelunasan);
-                            foreach ($get_inv as $gi) {
-                                $getInv = $this->m_pelunasanhutang->get_invoice_by_kode(['no_invoice' => $gi->no_invoice, 'lunas' => 0])->row();
-                                if ($getInv) {
-                                    if ((float) $getInv->sisa_hutang_rp != (float) $gi->sisa_hutang_rp) {
-                                        throw new \Exception('Data Invoice ' . $gi->no_invoice . ' Tidak Valid <br> Sisa Hutang Rp di Pelunasan dan di Invoice Perbeda  !' . $getInv->sisa_hutang_rp . ' ' . $gi->sisa_hutang_rp, 200);
-                                    } else {
-                                        $sisa_hutang_rp = (float) $gi->sisa_hutang_rp - (float) $getInv->sisa_hutang_rp;
-                                        $data_update = array(
-                                            'no_invoice'  => $gi->no_invoice,
-                                            'hutang_rp'   => $sisa_hutang_rp ?? 0
-                                        );
-                                        array_push($tmp_update, $data_update);
-                                    }
-                                } else {
-                                    throw new \Exception('Data Invoice ' . $gi->no_invoice . ' tidak Valid / Sudah Lunas!', 200);
-                                }
-                            }
-                            // update metode pelunasan lunas = 1
-
-
+                    if ($gs->selisih > 0 || $gs->selisih < 0) { // rugi / laba
+                        if (empty($gs->koreksi)) {
+                            throw new \Exception('Koreksi ' . $gs->tipe_currency . ' belum dipilih', 422);
                         }
-                    } else { // valas
-                        // throw new \Exception('Data Valas Kosong ', 409);
-                        if ($gs->selisih != 0) { // < 0 atau > 0
 
-                            if (empty($gs->koreksi)) {
-                                throw new \Exception('Koreksi ' . $gs->tipe_currency . ' belum dipilih', 422);
-                            }
-                            $cek_koreksi = $this->m_pelunasanhutang->get_koreksi_by_kode(['kode' => $gs->koreksi]);
+                        $cek_koreksi = $this->m_pelunasanhutang->get_koreksi_by_kode(['kode' => $gs->koreksi]);
+                        if (isset($cek_koreksi)) {
                             if ($cek_koreksi->get_coa == 'true') {
                                 // cek coa koreksi sudah diisi atau belum
                                 $coa_debit  = $this->m_pelunasanhutang->get_coa_summary_id(['pelunasan_summary_id' => $gs->id, 'posisi' => 'D', 'koreksi' => $gs->koreksi])->row();
@@ -2205,30 +2257,57 @@ class Pelunasanhutang extends MY_Controller
                                     throw new \Exception('CoA Credits belum dipilih', 422);
                                 }
                             }
-                            if ($gs->selisih > 0) { // rugi
+                        }
 
-                            } else if ($gs->selisih < 0) { // laba
+                        // cek total_hutang  di summary
+                        $result_selisih = (float) $gs->total_pelunasan -  (float) $gs->total_hutang;
+                        if (round($result_selisih,2) != round((float) $gs->selisih,2)) {
+                            throw new \Exception('perhitungan Selisih ' . $gs->tipe_currency . ' tidak Valid !', 422);
+                        }
 
-                            }
-                        } else { // selisih == 0
-                            // update langsung ke invoice hutang_rp = pelunasan_rp, hutang_valas = pelunasan_valas.
-                            // get_list_invoice
-                            $get_inv = $this->m_pelunasanhutang->get_data_invoice_by_code($no_pelunasan);
-                            foreach ($get_inv as $gi) {
-                                $getInv = $this->m_pelunasanhutang->get_invoice_by_kode(['no_invoice' => $gi->no_invoice, 'lunas' => 0])->row();
-                                if ($getInv) {
-                                    if ((float) $getInv->sisa_hutang_valas != (float) $gi->sisa_hutang_valas) {
-                                        throw new \Exception('Data Invoice ' . $gi->no_invoice . ' Tidak Valid <br> Sisa Hutang Valas di Pelunasan dan di Invoice Perbeda  !', 200);
-                                    } else {
-                                        $sisa_hutang_valas = (float) $gi->sisa_hutang_valas - (float) $getInv->sisa_hutang_valas;
-                                        $data_update = array(
-                                            'no_invoice'  => $gi->no_invoice,
-                                            'hutang_valas'   => $sisa_hutang_valas ?? 0
-                                        );
-                                        array_push($tmp_update, $data_update);
+                        if (isset($cek_koreksi)) {
+                            if ($cek_koreksi->get_coa == 'true') { // kebentuk jurnal entries berdasarkan coa yang dipilih 
+
+                                if (empty($jurnal)) {
+
+                                    if (!$jurnal = $this->token->noUrut("jurnal_{$kodeJurnal}", date('y', strtotime($tgl)) . '/' . date('m', strtotime($tgl)), true)
+                                        ->generate("{$kodeJurnal}/", '/%05d')->get()) {
+                                        throw new \Exception("No jurnal tidak terbuat", 500);
                                     }
-                                } else {
-                                    throw new \Exception('Data Invoice ' . $gi->no_invoice . ' tidak Valid / Sudah Lunas!', 200);
+                                    // $items_entries = array();
+                                    $row_items     = 1;
+                                    $head_entries = array(
+                                        'kode' => $jurnal,
+                                        'tanggal_dibuat' => $tgl,
+                                        'tanggal_posting' => $tgl,
+                                        'periode'       => date("y/m", strtotime($tgl)),
+                                        'origin'        => $no_pelunasan,
+                                        'status'        => 'posted',
+                                        'tipe'          => $kodeJurnal,
+                                        'reff_note'     => $cek->partner_nama ?? ''
+                                    );
+                                }
+
+                                $data_koreksi_coa =  $this->m_pelunasanhutang->get_coa_summary_id(['aphsk.no_pelunasan' => $no_pelunasan, 'aphsk.pelunasan_summary_id' => $gs->id])->result();
+                                if (empty($data_koreksi_coa)) {
+                                    throw new \Exception('CoA Koreksi ' . $gs->tipe_currency . ' Tidak di temukan !', 422);
+                                }
+                                // looping coa 
+                                foreach ($data_koreksi_coa as $cok) {
+                                    $items_entries[] = array(
+                                        'kode'          => $jurnal,
+                                        'nama'          => 'Koreksi ' . $cek_koreksi->nama_koreksi ?? '',
+                                        'reff_note'     => 'Pelunasan Utang',
+                                        'partner'       => $cek->partner_id, // partner_id
+                                        'kode_coa'      => $cok->kode_coa,
+                                        'posisi'        => $cok->posisi,
+                                        'nominal_curr'  => $gs->selisih,
+                                        'kurs'          => $gs->kurs,
+                                        'kode_mua'      => $gs->currency,
+                                        'nominal'       => $gs->selisih * $gs->kurs,
+                                        'row_order'     => $row_items
+                                    );
+                                    $row_items++;
                                 }
                             }
                         }
@@ -2236,13 +2315,46 @@ class Pelunasanhutang extends MY_Controller
                 }
             }
 
+            // update langsung ke invoice hutang_rp = hutang_rp - pelunasan_rp 
+            // get_list_invoice
+            $get_inv = $this->m_pelunasanhutang->get_data_invoice_by_code2(['no_pelunasan' => $no_pelunasan]);
+            foreach ($get_inv as $gi) {
+                $getInv = $this->m_pelunasanhutang->get_invoice_by_kode(['no_invoice' => $gi->no_invoice, 'lunas' => 0])->row();
+                if ($getInv) {
+
+                    if ((float) $getInv->sisa_hutang_rp != (float) $gi->sisa_hutang_rp) {
+                        throw new \Exception('Data Invoice ' . $gi->no_invoice . ' Tidak Valid <br> Sisa Hutang Rp di Pelunasan dan di Invoice Berbeda  !', 200);
+                    }
+                    if ((float) $getInv->sisa_hutang_valas != (float) $gi->sisa_hutang_valas) {
+                        throw new \Exception('Data Invoice ' . $gi->no_invoice . ' Tidak Valid <br> Sisa Hutang Valas di Pelunasan dan di Invoice Berbeda  !', 200);
+                    }
+
+                    $sisa_hutang_valas = (float) $getInv->sisa_hutang_valas -  (float) $gi->pelunasan_valas;
+                    $sisa_hutang_rp = (float) $getInv->sisa_hutang_rp -  (float) $gi->pelunasan_rp;
+                    $data_update = array(
+                        'no_invoice'  => $gi->no_invoice,
+                        'hutang_rp'   => $sisa_hutang_rp,
+                        'hutang_valas'   => $sisa_hutang_valas
+                    );
+                    array_push($tmp_update, $data_update);
+                    $data_summary = 'valid';
+                } else {
+                    throw new \Exception('Data Invoice ' . $gi->no_invoice . ' tidak Valid / Sudah Lunas!', 200);
+                }
+            }
+
+
+            if ($data_summary == 'invalid') {
+                throw new \Exception('Data Summary / Info  tidak Valid !', 200);
+            }
+
+
             // var_dump($data_update);
             if (!empty($tmp_update)) {
                 $update = $this->m_pelunasanhutang->update_invoice_by_kode($tmp_update);
                 if (!empty($update)) {
                     throw new \Exception('Data Gagal Diupdate !', 200);
                 }
-                $tmp_update =  array();
                 // $data_update =  array();
 
                 $get_inv = $this->m_pelunasanhutang->get_data_invoice_by_code($no_pelunasan);
@@ -2271,7 +2383,7 @@ class Pelunasanhutang extends MY_Controller
                 }
 
                 $update = $this->m_pelunasanhutang->update_invoice_by_kode($tmp_update);
-
+                $tmp_update =  array();
 
                 $list_mt  = $this->m_pelunasanhutang->get_data_metode_by_code($no_pelunasan);
                 $total    = 0;
@@ -2285,8 +2397,8 @@ class Pelunasanhutang extends MY_Controller
                                     'id'  => $mt->id_bukti,
                                     'lunas'   => 1
                                 );
-                                $tmp_update =  array();
                                 array_push($tmp_update, $data_update);
+                                // $tmp_update =  array();
                             } else {
                                 throw new \Exception('Nominal Metode Pelunasan Bank Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                             }
@@ -2301,8 +2413,8 @@ class Pelunasanhutang extends MY_Controller
                                     'id'  => $mt->id_bukti,
                                     'lunas'   => 1
                                 );
-                                $tmp_update2 =  array();
                                 array_push($tmp_update2, $data_update2);
+                                // $tmp_update2 =  array();
                             } else {
                                 throw new \Exception('Nominal Metode Pelunasan Giro  Tidak Valid <br> No. ' . $mt->no_bukti, 200);
                             }
@@ -2334,7 +2446,6 @@ class Pelunasanhutang extends MY_Controller
             }
 
 
-
             if ($head_entries) {
                 $this->m_pelunasanhutang->insert_jurnal_entries($head_entries);
             }
@@ -2353,7 +2464,7 @@ class Pelunasanhutang extends MY_Controller
             }
 
             if ($head_entries && $items_entries) {
-                $log = "Header -> " . logArrayToString("; ", $head_entries) ."<br>";
+                $log = "Header -> " . logArrayToString("; ", $head_entries) . "<br>";
                 $log .= "\nDETAIL -> " . logArrayToString("; ", $items_entries);
                 $this->_module->gen_history_new("jurnal_entries", $jurnal, "create", $log, $username);
             }
