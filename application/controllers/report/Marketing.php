@@ -1895,7 +1895,8 @@ class Marketing extends MY_Controller
         $pdf       = new PDF_Pagegroup('P','mm',array(210,297));// A4
         // $pdf       = new PDF_Code128('P','mm',array(215,330));// F4
 
-        $category  = ['Q9','Q50','Q250','Q500','Q750','Q1000','QX'];
+        // $category  = ['Q9','Q50','Q250','Q500','Q750','Q1000','QX'];
+        $category  = ['Q1','Q2','Q3'];
         $date_last = $this->m_marketing->get_last_date_history();
 
         $cat_id    = "";
