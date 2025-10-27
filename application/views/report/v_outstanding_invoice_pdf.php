@@ -86,16 +86,15 @@
     <table>
         <thead>
             <tr>
-                <th class="style">No. </th>
-                <th class='style' style="min-width: 5px">Supplier</th>
-                <th class='style' style="min-width: 100px">Invoice</th>
-                <th class='style' style="min-width: 100px">PO</th>
-                <th class='style' style="min-width: 100px">Receiving</th>
-                <th class='style' style="min-width: 80px">Tanggal</th>
-
-                <th class='style text-right' style="min-width: 150px">Total Hutang</th>
-                <th class='style text-right' style="min-width: 150px">Sisa Hutang</th>
-                <th class='style text-right' style="min-width: 80px">Umur (Hari)</th>
+                <th class="style" style="width: 5px;">No. </th>
+                <th class='style' style="width: 60px">Supplier</th>
+                <th class='style' style="width: 100px">Invoice</th>
+                <th class='style' style="width: 90px">PO</th>
+                <th class='style' style="width: 100px">Receiving</th>
+                <th class='style' style="width: 60px">Tanggal</th>
+                <th class='style text-right' style="width: 110px">Total Hutang</th>
+                <th class='style text-right' style="width: 110px">Sisa Hutang</th>
+                <th class='style text-right' style="width: 60px">Umur (Hari)</th>
             </tr>
         </thead>
         <tbody>
