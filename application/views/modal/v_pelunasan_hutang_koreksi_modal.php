@@ -3,6 +3,12 @@
         <div class="form-group">
             <div class="col-md-12">
                 <div class="col-md-12 col-xs-12">
+                    <div class="col-12 col-md-12 col-lg-4"><label>Keterangan</label></div>
+                    <div class="col-12 col-md-12 col-lg-8">
+                        <input type="text" class="form-control input-sm" name="keterangan" id="keterangan" value="<?php echo $get_sum->keterangan; ?>" readonly>
+                    </div>
+                </div>
+                <div class="col-md-12 col-xs-12">
                     <div class="col-12 col-md-12 col-lg-4"><label>Selisih</label></div>
                     <div class="col-12 col-md-12 col-lg-8">
                         <input type="text" class="form-control input-sm text-right" name="selisih" id="selisih" value="<?php echo number_format($get_sum->selisih ?? 0, 2); ?>" readonly>
