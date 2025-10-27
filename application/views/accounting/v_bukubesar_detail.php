@@ -311,7 +311,7 @@
             $.ajax({
                 type: "POST",
                 dataType: "JSON",
-                url: "<?php echo site_url('accounting/bukubesar/loadDataDetail') ?>",
+                url: "<?php echo site_url('report/bukubesar/loadDataDetail') ?>",
                 data: {
                     tgldari: tgldari,
                     tglsampai: tglsampai,
