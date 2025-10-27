@@ -1192,7 +1192,7 @@ class Pelunasanhutang extends MY_Controller
 
                         array_push($tmp_update, $data_update);
 
-                        $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan]);
+                        $get_hutang_inv   = $this->m_pelunasanhutang->get_total_hutang(['no_pelunasan' => $no_pelunasan, 'id <>' => $id]);
                         
                         $get_tot = $this->m_pelunasanhutang->get_total_metode_pelunasan_by_no($no_pelunasan);
 
