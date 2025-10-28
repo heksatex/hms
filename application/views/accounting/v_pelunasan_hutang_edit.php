@@ -1497,7 +1497,7 @@
                     $select.append(option);
                 }
 
-                let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"</small></div>');
+                let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
                 if(keterangan.length === 0 || keterangan === 'Uang Muka'){
                     $wrapper   = $('<div>').append('').append($coaInfo);
                 } else {
@@ -1549,6 +1549,11 @@
                 // initial render sesuai data database
                 if (status == 'draft') {
                     updateCoaButton(koreksiId);
+                }
+
+                if (status == 'done') {
+                    $coaInfo.show();
+                    loadCoaInfo(koreksiId, value.id, $coaInfo.find('small'));
                 }
 
                 // event onchange
