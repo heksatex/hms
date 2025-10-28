@@ -8,7 +8,10 @@
             border-bottom: 2px solid #ddd !important;
         }
 
-        button[id="btn-simpan"] , button[id="btn-confirm"], button[id="btn-cancel"], button[id="btn-edit"]{
+        button[id="btn-simpan"],
+        button[id="btn-confirm"],
+        button[id="btn-cancel"],
+        button[id="btn-edit"] {
             display: none;
         }
 
@@ -43,7 +46,7 @@
 
         /* Kolom 1 & 7 → 100px */
         #table-resume td:nth-child(1),
-        #table-resume th:nth-child(4),        
+        #table-resume th:nth-child(4),
         #table-resume td:nth-child(7) {
             width: 100px;
             min-width: 100px;
@@ -52,7 +55,7 @@
 
         #table-resume td:nth-child(2),
         #table-resume td:nth-child(3),
-   
+
         #table-resume td:nth-child(5) {
             /* kolom tombol */
             width: 120px;
@@ -73,7 +76,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
 
         .coa-info {
             display: block;
@@ -324,19 +327,19 @@
                                                     <div class="col-md-12 col-xs-12">
                                                         <div class="col-xs-4"><label>No Jurnal</label></div>
                                                         <div class="col-xs-8">
-                                                             <?php echo ": ".$list_jurnal->kode; ?>
+                                                            <?php echo ": " . $list_jurnal->kode; ?>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-xs-12">
                                                         <div class="col-xs-4"><label>Periode </label></div>
                                                         <div class="col-xs-8 col-md-8">
-                                                            <?php echo ": ".$list_jurnal->periode ; ?>
+                                                            <?php echo ": " . $list_jurnal->periode; ?>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 col-xs-12">
                                                         <div class="col-xs-4"><label>Tanggal </label></div>
                                                         <div class="col-xs-8 col-md-8">
-                                                            <?php echo ($list_jurnal->tanggal_dibuat) ? ": ".date('Y-m-d',strtotime($list_jurnal->tanggal_dibuat)) : ' :  '; ?>
+                                                            <?php echo ($list_jurnal->tanggal_dibuat) ? ": " . date('Y-m-d', strtotime($list_jurnal->tanggal_dibuat)) : ' :  '; ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -375,12 +378,12 @@
                 defaultDate: new Date()
             });
 
-            var status = `<?php echo $list->status;?>`;
-            if(status == 'cancel'){
+            var status = `<?php echo $list->status; ?>`;
+            if (status == 'cancel') {
                 $("#btn-cancel").hide();
                 $("#btn-edit").hide();
                 $("#btn-confirm").hide();
-            } else if(status == 'done') {
+            } else if (status == 'done') {
                 $("#btn-cancel").show();
             } else { // draft
                 $("#btn-cancel").show();
@@ -1274,7 +1277,7 @@
                             var tr = $("<tr>").append(
                                 $("<td style=''>").text(no),
                                 $("<td style=''>").text(value.no_invoice),
-                                $("<td style=''>").text(value.origin),
+                                $("<td style=''>").html('<a href="#" class="detail-origin" data-origin="' + value.origin + '">' + value.origin + '</a>'),
                                 $("<td style=''>").text(value.tanggal_invoice),
                                 $("<td style=''>").text(value.currency),
                                 $("<td class='text-right'>").text(value.kurs),
@@ -1498,8 +1501,8 @@
                 }
 
                 let $coaInfo = $('<div class="coa-info"><small style="white-space:normal;"></small></div>');
-                if(keterangan.length === 0 || keterangan === 'Uang Muka'){
-                    $wrapper   = $('<div>').append('').append($coaInfo);
+                if (keterangan.length === 0 || keterangan === 'Uang Muka') {
+                    $wrapper = $('<div>').append('').append($coaInfo);
                 } else {
                     // tempat info COA
                     if (status == 'draft') {
@@ -1696,6 +1699,57 @@
                     $(".tambah_data").html("");
                 });
 
+            }
+
+            $(document).on("click", ".detail-origin", function(e) {
+                e.preventDefault();
+
+                let data_origin = $(this).data("origin");
+                detail_origin(data_origin);
+            });
+
+            function detail_origin(origin) {
+                // tampilkan modal
+                const $modal = $("#view_data");
+
+                $modal.modal({
+                    show: true,
+                    backdrop: "static",
+                });
+
+                // tampilkan loading
+                $("#view_data .view_body").html(`
+                    <center>
+                        <h5>
+                            <img src="<?= base_url('dist/img/ajax-loader.gif') ?>" /><br>
+                            Please Wait...
+                        </h5>
+                    </center>
+                `);
+
+                $(".modal-title").html(`Origin : <b>${origin}</b>`);
+
+                // ambil data via AJAX POST
+                $.post("<?= base_url('accounting/pelunasanhutang/get_view_origin') ?>", {
+                        no_pelunasan: "<?= $list->no_pelunasan; ?>",
+                        origin: origin,
+                    })
+                    .done(function(data) {
+                        // tampilkan isi modal
+                        setTimeout(function() {
+                            $("#view_data .view_body").html(data.data || "<p>Tidak ada data.</p>");
+                            // kalau kamu punya fungsi format angka:
+                        }, 500);
+                    })
+                    .fail(function(xhr) {
+                        $(".view_data").html("<p style='color:red'>Terjadi kesalahan saat memuat data.</p>");
+                        console.error(xhr.responseText);
+                    });
+
+                // reset isi modal saat ditutup, tapi pastikan tidak mendaftarkan event berkali-kali
+                $modal.off("hidden.bs.modal").on("hidden.bs.modal", function() {
+                    $(".view_data").empty();
+                });
             }
 
 
